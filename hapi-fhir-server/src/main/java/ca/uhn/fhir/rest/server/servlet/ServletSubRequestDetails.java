@@ -28,68 +28,68 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
-    private final ServletRequestDetails myWrap;
-    private Map<String, List<String>> myHeaders = new HashMap<>();
+	private final ServletRequestDetails myWrap;
+	private Map<String, List<String>> myHeaders = new HashMap<>();
 
-    /**
-     * Constructor
-     *
-     * @param theRequestDetails The parent request details
-     */
-    public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
-        super(theRequestDetails.getInterceptorBroadcaster());
+	/**
+	* Constructor
+	*
+	* @param theRequestDetails The parent request details
+	*/
+	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
+		super(theRequestDetails.getInterceptorBroadcaster());
 
-        myWrap = theRequestDetails;
+		myWrap = theRequestDetails;
 
-        if (theRequestDetails != null) {
-            Map<String, List<String>> headers = theRequestDetails.getHeaders();
-            for (Map.Entry<String, List<String>> next : headers.entrySet()) {
-                myHeaders.put(next.getKey().toLowerCase(), next.getValue());
-            }
-        }
-    }
+		if (theRequestDetails != null) {
+				Map<String, List<String>> headers = theRequestDetails.getHeaders();
+				for (Map.Entry<String, List<String>> next : headers.entrySet()) {
+					myHeaders.put(next.getKey().toLowerCase(), next.getValue());
+				}
+		}
+	}
 
-    @Override
-    public HttpServletRequest getServletRequest() {
-        return myWrap.getServletRequest();
-    }
+	@Override
+	public HttpServletRequest getServletRequest() {
+		return myWrap.getServletRequest();
+	}
 
-    @Override
-    public HttpServletResponse getServletResponse() {
-        return myWrap.getServletResponse();
-    }
+	@Override
+	public HttpServletResponse getServletResponse() {
+		return myWrap.getServletResponse();
+	}
 
-    public void addHeader(String theName, String theValue) {
-        String lowerCase = theName.toLowerCase();
-        List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
-        list.add(theValue);
-    }
+	public void addHeader(String theName, String theValue) {
+		String lowerCase = theName.toLowerCase();
+		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());
+		list.add(theValue);
+	}
 
-    @Override
-    public String getHeader(String theName) {
-        List<String> list = myHeaders.get(theName.toLowerCase());
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-        return list.get(0);
-    }
+	@Override
+	public String getHeader(String theName) {
+		List<String> list = myHeaders.get(theName.toLowerCase());
+		if (list == null || list.isEmpty()) {
+				return null;
+		}
+		return list.get(0);
+	}
 
-    @Override
-    public List<String> getHeaders(String theName) {
-        List<String> list = myHeaders.get(theName.toLowerCase());
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
-        return list;
-    }
+	@Override
+	public List<String> getHeaders(String theName) {
+		List<String> list = myHeaders.get(theName.toLowerCase());
+		if (list == null || list.isEmpty()) {
+				return null;
+		}
+		return list;
+	}
 
-    @Override
-    public Map<Object, Object> getUserData() {
-        return myWrap.getUserData();
-    }
+	@Override
+	public Map<Object, Object> getUserData() {
+		return myWrap.getUserData();
+	}
 
-    @Override
-    public boolean isSubRequest() {
-        return true;
-    }
+	@Override
+	public boolean isSubRequest() {
+		return true;
+	}
 }

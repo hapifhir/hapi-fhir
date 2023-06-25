@@ -19,20 +19,20 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.List;
+
 public interface ITransaction {
 
-    /** Use a list of resources as the transaction input */
-    ITransactionTyped<List<IBaseResource>> withResources(
-            List<? extends IBaseResource> theResources);
+	/** Use a list of resources as the transaction input */
+	ITransactionTyped<List<IBaseResource>> withResources(
+				List<? extends IBaseResource> theResources);
 
-    /** Use the given Bundle resource as the transaction input */
-    <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundleResource);
+	/** Use the given Bundle resource as the transaction input */
+	<T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundleResource);
 
-    /** Use the given raw text (should be a Bundle resource) as the transaction input */
-    ITransactionTyped<String> withBundle(String theBundle);
+	/** Use the given raw text (should be a Bundle resource) as the transaction input */
+	ITransactionTyped<String> withBundle(String theBundle);
 }

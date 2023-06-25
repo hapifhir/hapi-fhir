@@ -20,6 +20,13 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,36 +35,28 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
-import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-
 @Configuration
 @Import({SearchParamConfig.class})
 @EnableScheduling
 public class SubscriptionTestConfig {
 
-    @Autowired private FhirContext myFhirContext;
-    @Autowired private IChannelNamer myChannelNamer;
+	@Autowired private FhirContext myFhirContext;
+	@Autowired private IChannelNamer myChannelNamer;
 
-    @Primary
-    @Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
-    public IValidationSupport validationSupportChainR4() {
-        return myFhirContext.getValidationSupport();
-    }
+	@Primary
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChain")
+	public IValidationSupport validationSupportChainR4() {
+		return myFhirContext.getValidationSupport();
+	}
 
-    @Bean
-    public IChannelFactory subscribableChannelFactory() {
-        return new LinkedBlockingChannelFactory(myChannelNamer);
-    }
+	@Bean
+	public IChannelFactory subscribableChannelFactory() {
+		return new LinkedBlockingChannelFactory(myChannelNamer);
+	}
 
-    @Bean
-    public SubscriptionChannelFactory subscriptionChannelFactory(
-            IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
-        return new SubscriptionChannelFactory(theQueueChannelFactory);
-    }
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory(
+				IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
+	}
 }

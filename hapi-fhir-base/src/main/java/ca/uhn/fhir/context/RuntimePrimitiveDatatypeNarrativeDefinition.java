@@ -19,30 +19,29 @@
  */
 package ca.uhn.fhir.context;
 
-import java.util.Map;
-
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import ca.uhn.fhir.model.primitive.XhtmlDt;
+import java.util.Map;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition
-        extends BaseRuntimeElementDefinition<XhtmlDt> {
+		extends BaseRuntimeElementDefinition<XhtmlDt> {
 
-    public RuntimePrimitiveDatatypeNarrativeDefinition(
-            String theName, Class<XhtmlDt> theImplementingClass, boolean theStandardType) {
-        super(theName, theImplementingClass, theStandardType);
-    }
+	public RuntimePrimitiveDatatypeNarrativeDefinition(
+				String theName, Class<XhtmlDt> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
+	}
 
-    @Override
-    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-        return ChildTypeEnum.PRIMITIVE_XHTML;
-    }
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.PRIMITIVE_XHTML;
+	}
 
-    @Override
-    void sealAndInitialize(
-            FhirContext theContext,
-            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
-                    theClassToElementDefinitions) {
-        // nothing
-    }
+	@Override
+	void sealAndInitialize(
+				FhirContext theContext,
+				Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+						theClassToElementDefinitions) {
+		// nothing
+	}
 }

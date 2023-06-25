@@ -27,30 +27,30 @@ import javax.annotation.Nullable;
  * href="https://tools.ietf.org/html/rfc7240#section-4.2">HTTP Prefer header</a>.
  */
 public enum PreferReturnEnum {
-    REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION),
-    MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL),
-    OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+	REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION),
+	MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL),
+	OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
-    private static HashMap<String, PreferReturnEnum> ourValues;
-    private final String myHeaderValue;
+	private static HashMap<String, PreferReturnEnum> ourValues;
+	private final String myHeaderValue;
 
-    PreferReturnEnum(String theHeaderValue) {
-        myHeaderValue = theHeaderValue;
-    }
+	PreferReturnEnum(String theHeaderValue) {
+		myHeaderValue = theHeaderValue;
+	}
 
-    public String getHeaderValue() {
-        return myHeaderValue;
-    }
+	public String getHeaderValue() {
+		return myHeaderValue;
+	}
 
-    @Nullable
-    public static PreferReturnEnum fromHeaderValue(String theHeaderValue) {
-        if (ourValues == null) {
-            HashMap<String, PreferReturnEnum> values = new HashMap<>();
-            for (PreferReturnEnum next : PreferReturnEnum.values()) {
-                values.put(next.getHeaderValue(), next);
-            }
-            ourValues = values;
-        }
-        return ourValues.get(theHeaderValue);
-    }
+	@Nullable
+	public static PreferReturnEnum fromHeaderValue(String theHeaderValue) {
+		if (ourValues == null) {
+				HashMap<String, PreferReturnEnum> values = new HashMap<>();
+				for (PreferReturnEnum next : PreferReturnEnum.values()) {
+					values.put(next.getHeaderValue(), next);
+				}
+				ourValues = values;
+		}
+		return ourValues.get(theHeaderValue);
+	}
 }

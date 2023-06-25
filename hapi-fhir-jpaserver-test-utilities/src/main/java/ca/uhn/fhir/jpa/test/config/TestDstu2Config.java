@@ -19,23 +19,6 @@
  */
 package ca.uhn.fhir.jpa.test.config;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
-
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
@@ -51,158 +34,174 @@ import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
-    JpaDstu2Config.class,
-    HapiJpaConfig.class,
-    TestJPAConfig.class,
-    JpaBatch2Config.class,
-    Batch2JobsConfig.class,
-    TestHSearchAddInConfig.DefaultLuceneHeap.class
+	JpaDstu2Config.class,
+	HapiJpaConfig.class,
+	TestJPAConfig.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class,
+	TestHSearchAddInConfig.DefaultLuceneHeap.class
 })
 public class TestDstu2Config {
-    private static final Logger ourLog = LoggerFactory.getLogger(TestDstu2Config.class);
-    private static int ourMaxThreads;
+	private static final Logger ourLog = LoggerFactory.getLogger(TestDstu2Config.class);
+	private static int ourMaxThreads;
 
-    static {
-        /*
-         * We use a randomized number of maximum threads in order to try
-         * and catch any potential deadlocks caused by database connection
-         * starvation
-         *
-         * A minimum of 2 is required for most transactions.
-         */
-        ourMaxThreads = (int) (Math.random() * 6.0) + 2;
+	static {
+		/*
+			* We use a randomized number of maximum threads in order to try
+			* and catch any potential deadlocks caused by database connection
+			* starvation
+			*
+			* A minimum of 2 is required for most transactions.
+			*/
+		ourMaxThreads = (int) (Math.random() * 6.0) + 2;
 
-        if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
-            ourMaxThreads = 1;
-        }
-    }
+		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
+				ourMaxThreads = 1;
+		}
+	}
 
-    @Autowired TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
-    private Exception myLastStackTrace;
-    private String myLastStackTraceThreadName;
+	@Autowired TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
+	private Exception myLastStackTrace;
+	private String myLastStackTraceThreadName;
 
-    @Bean
-    public CircularQueueCaptureQueriesListener captureQueriesListener() {
-        return new CircularQueueCaptureQueriesListener();
-    }
+	@Bean
+	public CircularQueueCaptureQueriesListener captureQueriesListener() {
+		return new CircularQueueCaptureQueriesListener();
+	}
 
-    @Bean
-    public DataSource dataSource() {
-        BasicDataSource retVal =
-                new BasicDataSource() {
+	@Bean
+	public DataSource dataSource() {
+		BasicDataSource retVal =
+					new BasicDataSource() {
 
-                    @Override
-                    public Connection getConnection() throws SQLException {
-                        ConnectionWrapper retVal;
-                        try {
-                            retVal = new ConnectionWrapper(super.getConnection());
-                        } catch (Exception e) {
-                            ourLog.error("Exceeded maximum wait for connection", e);
-                            logGetConnectionStackTrace();
+						@Override
+						public Connection getConnection() throws SQLException {
+								ConnectionWrapper retVal;
+								try {
+									retVal = new ConnectionWrapper(super.getConnection());
+								} catch (Exception e) {
+									ourLog.error("Exceeded maximum wait for connection", e);
+									logGetConnectionStackTrace();
 
-                            //					if ("true".equals(System.getStringProperty("ci"))) {
-                            fail("Exceeded maximum wait for connection: " + e.toString());
-                            //					}
-                            //					System.exit(1);
-                            retVal = null;
-                        }
+									//					if ("true".equals(System.getStringProperty("ci"))) {
+									fail("Exceeded maximum wait for connection: " + e.toString());
+									//					}
+									//					System.exit(1);
+									retVal = null;
+								}
 
-                        try {
-                            throw new Exception();
-                        } catch (Exception e) {
-                            myLastStackTrace = e;
-                            myLastStackTraceThreadName = Thread.currentThread().getName();
-                        }
+								try {
+									throw new Exception();
+								} catch (Exception e) {
+									myLastStackTrace = e;
+									myLastStackTraceThreadName = Thread.currentThread().getName();
+								}
 
-                        return retVal;
-                    }
+								return retVal;
+						}
 
-                    private void logGetConnectionStackTrace() {
-                        StringBuilder b = new StringBuilder();
-                        b.append("Last connection request stack trace:");
-                        for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
-                            b.append("\n   ");
-                            b.append(next.getClassName());
-                            b.append(".");
-                            b.append(next.getMethodName());
-                            b.append("(");
-                            b.append(next.getFileName());
-                            b.append(":");
-                            b.append(next.getLineNumber());
-                            b.append(")");
-                        }
-                        ourLog.info(b.toString());
-                        ourLog.info("Last connection thread: {}", myLastStackTraceThreadName);
-                    }
-                };
-        retVal.setDriver(new org.h2.Driver());
-        retVal.setUrl("jdbc:h2:mem:testdb_dstu2");
-        retVal.setMaxWaitMillis(10000);
-        retVal.setUsername("");
-        retVal.setPassword("");
+						private void logGetConnectionStackTrace() {
+								StringBuilder b = new StringBuilder();
+								b.append("Last connection request stack trace:");
+								for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
+									b.append("\n   ");
+									b.append(next.getClassName());
+									b.append(".");
+									b.append(next.getMethodName());
+									b.append("(");
+									b.append(next.getFileName());
+									b.append(":");
+									b.append(next.getLineNumber());
+									b.append(")");
+								}
+								ourLog.info(b.toString());
+								ourLog.info("Last connection thread: {}", myLastStackTraceThreadName);
+						}
+					};
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:testdb_dstu2");
+		retVal.setMaxWaitMillis(10000);
+		retVal.setUsername("");
+		retVal.setPassword("");
 
-        retVal.setMaxTotal(ourMaxThreads);
+		retVal.setMaxTotal(ourMaxThreads);
 
-        DataSource dataSource =
-                ProxyDataSourceBuilder.create(retVal)
-                        //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-                        .logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
-                        .afterQuery(captureQueriesListener())
-                        .afterQuery(new CurrentThreadCaptureQueriesListener())
-                        .countQuery(new ThreadQueryCountHolder())
-                        .build();
+		DataSource dataSource =
+					ProxyDataSourceBuilder.create(retVal)
+								//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+								.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+								.afterQuery(captureQueriesListener())
+								.afterQuery(new CurrentThreadCaptureQueriesListener())
+								.countQuery(new ThreadQueryCountHolder())
+								.build();
 
-        return dataSource;
-    }
+		return dataSource;
+	}
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
-            FhirContext theFhirContext) {
-        LocalContainerEntityManagerFactoryBean retVal =
-                HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-                        theConfigurableListableBeanFactory, theFhirContext);
-        retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
-        retVal.setDataSource(dataSource());
-        retVal.setJpaProperties(jpaProperties());
-        return retVal;
-    }
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+				ConfigurableListableBeanFactory theConfigurableListableBeanFactory,
+				FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal =
+					HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+								theConfigurableListableBeanFactory, theFhirContext);
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
+		retVal.setDataSource(dataSource());
+		retVal.setJpaProperties(jpaProperties());
+		return retVal;
+	}
 
-    @Bean(name = "maxDatabaseThreadsForTest")
-    public Integer getMaxThread() {
-        return ourMaxThreads;
-    }
+	@Bean(name = "maxDatabaseThreadsForTest")
+	public Integer getMaxThread() {
+		return ourMaxThreads;
+	}
 
-    private Properties jpaProperties() {
-        Properties extraProperties = new Properties();
-        extraProperties.put("hibernate.format_sql", "true");
-        extraProperties.put("hibernate.show_sql", "false");
-        extraProperties.put("hibernate.hbm2ddl.auto", "update");
-        extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
+	private Properties jpaProperties() {
+		Properties extraProperties = new Properties();
+		extraProperties.put("hibernate.format_sql", "true");
+		extraProperties.put("hibernate.show_sql", "false");
+		extraProperties.put("hibernate.hbm2ddl.auto", "update");
+		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
-        hibernateSearchConfigurer.apply(extraProperties);
+		hibernateSearchConfigurer.apply(extraProperties);
 
-        ourLog.info("jpaProperties: {}", extraProperties);
+		ourLog.info("jpaProperties: {}", extraProperties);
 
-        return extraProperties;
-    }
+		return extraProperties;
+	}
 
-    /** Bean which validates incoming requests */
-    @Bean
-    @Lazy
-    public RequestValidatingInterceptor requestValidatingInterceptor(
-            IInstanceValidatorModule theInstanceValidator) {
-        RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
-        requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
-        requestValidator.setAddResponseHeaderOnSeverity(null);
-        requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-        requestValidator.addValidatorModule(theInstanceValidator);
+	/** Bean which validates incoming requests */
+	@Bean
+	@Lazy
+	public RequestValidatingInterceptor requestValidatingInterceptor(
+				IInstanceValidatorModule theInstanceValidator) {
+		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
+		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
+		requestValidator.setAddResponseHeaderOnSeverity(null);
+		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+		requestValidator.addValidatorModule(theInstanceValidator);
 
-        return requestValidator;
-    }
+		return requestValidator;
+	}
 }

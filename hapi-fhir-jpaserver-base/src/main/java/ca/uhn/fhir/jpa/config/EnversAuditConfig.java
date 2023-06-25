@@ -20,23 +20,23 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
-import javax.persistence.EntityManagerFactory;
-
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.persistence.EntityManagerFactory;
+
 @Configuration
 public class EnversAuditConfig {
-    private final EntityManagerFactory myEntityManagerFactory;
+	private final EntityManagerFactory myEntityManagerFactory;
 
-    public EnversAuditConfig(EntityManagerFactory entityManagerFactory) {
-        this.myEntityManagerFactory = entityManagerFactory;
-    }
+	public EnversAuditConfig(EntityManagerFactory entityManagerFactory) {
+		this.myEntityManagerFactory = entityManagerFactory;
+	}
 
-    @Bean
-    AuditReader auditReader() {
-        return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
-    }
+	@Bean
+	AuditReader auditReader() {
+		return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
+	}
 }

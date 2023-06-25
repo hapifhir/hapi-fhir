@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.StringUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -40,186 +45,180 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.StringUtil;
-
 @Entity()
 @Table(
-        name = "NPM_PACKAGE_VER",
-        uniqueConstraints = {},
-        indexes = {
-            @Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
-        })
+		name = "NPM_PACKAGE_VER",
+		uniqueConstraints = {},
+		indexes = {
+				@Index(name = "IDX_PACKVER", columnList = "PACKAGE_ID,VERSION_ID", unique = true)
+		})
 public class NpmPackageVersionEntity {
 
-    public static final int VERSION_ID_LENGTH = 200;
-    public static final int PACKAGE_DESC_LENGTH = 200;
-    public static final int FHIR_VERSION_LENGTH = 10;
-    public static final int FHIR_VERSION_ID_LENGTH = 20;
+	public static final int VERSION_ID_LENGTH = 200;
+	public static final int PACKAGE_DESC_LENGTH = 200;
+	public static final int FHIR_VERSION_LENGTH = 10;
+	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
-    @SequenceGenerator(name = "SEQ_NPM_PACKVER", sequenceName = "SEQ_NPM_PACKVER")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVER")
-    @Id
-    @Column(name = "PID")
-    private Long myId;
+	@SequenceGenerator(name = "SEQ_NPM_PACKVER", sequenceName = "SEQ_NPM_PACKVER")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVER")
+	@Id
+	@Column(name = "PID")
+	private Long myId;
 
-    @Column(name = "PACKAGE_ID", length = NpmPackageEntity.PACKAGE_ID_LENGTH, nullable = false)
-    private String myPackageId;
+	@Column(name = "PACKAGE_ID", length = NpmPackageEntity.PACKAGE_ID_LENGTH, nullable = false)
+	private String myPackageId;
 
-    @Column(
-            name = "VERSION_ID",
-            length = NpmPackageVersionEntity.VERSION_ID_LENGTH,
-            nullable = false)
-    private String myVersionId;
+	@Column(
+				name = "VERSION_ID",
+				length = NpmPackageVersionEntity.VERSION_ID_LENGTH,
+				nullable = false)
+	private String myVersionId;
 
-    @ManyToOne
-    @JoinColumn(
-            name = "PACKAGE_PID",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
-    private NpmPackageEntity myPackage;
+	@ManyToOne
+	@JoinColumn(
+				name = "PACKAGE_PID",
+				nullable = false,
+				foreignKey = @ForeignKey(name = "FK_NPM_PKV_PKG"))
+	private NpmPackageEntity myPackage;
 
-    @OneToOne
-    @JoinColumn(
-            name = "BINARY_RES_ID",
-            referencedColumnName = "RES_ID",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
-    private ResourceTable myPackageBinary;
+	@OneToOne
+	@JoinColumn(
+				name = "BINARY_RES_ID",
+				referencedColumnName = "RES_ID",
+				nullable = false,
+				foreignKey = @ForeignKey(name = "FK_NPM_PKV_RESID"))
+	private ResourceTable myPackageBinary;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "SAVED_TIME", nullable = false)
-    private Date mySavedTime;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "SAVED_TIME", nullable = false)
+	private Date mySavedTime;
 
-    @Column(name = "PKG_DESC", nullable = true, length = PACKAGE_DESC_LENGTH)
-    private String myDescription;
+	@Column(name = "PKG_DESC", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myDescription;
 
-    @Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
-    private String myDescriptionUpper;
+	@Column(name = "DESC_UPPER", nullable = true, length = PACKAGE_DESC_LENGTH)
+	private String myDescriptionUpper;
 
-    @Column(name = "CURRENT_VERSION", nullable = false)
-    private boolean myCurrentVersion;
+	@Column(name = "CURRENT_VERSION", nullable = false)
+	private boolean myCurrentVersion;
 
-    @Column(
-            name = "FHIR_VERSION_ID",
-            length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH,
-            nullable = false)
-    private String myFhirVersionId;
+	@Column(
+				name = "FHIR_VERSION_ID",
+				length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH,
+				nullable = false)
+	private String myFhirVersionId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(
-            name = "FHIR_VERSION",
-            length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH,
-            nullable = false)
-    private FhirVersionEnum myFhirVersion;
+	@Enumerated(EnumType.STRING)
+	@Column(
+				name = "FHIR_VERSION",
+				length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH,
+				nullable = false)
+	private FhirVersionEnum myFhirVersion;
 
-    @Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
-    private long myPackageSizeBytes;
+	@Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
+	private long myPackageSizeBytes;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Version
-    @Column(name = "UPDATED_TIME", nullable = false)
-    private Date myUpdatedTime;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Version
+	@Column(name = "UPDATED_TIME", nullable = false)
+	private Date myUpdatedTime;
 
-    @OneToMany(mappedBy = "myPackageVersion")
-    private List<NpmPackageVersionResourceEntity> myResources;
+	@OneToMany(mappedBy = "myPackageVersion")
+	private List<NpmPackageVersionResourceEntity> myResources;
 
-    public Date getUpdatedTime() {
-        return myUpdatedTime;
-    }
+	public Date getUpdatedTime() {
+		return myUpdatedTime;
+	}
 
-    public long getPackageSizeBytes() {
-        return myPackageSizeBytes;
-    }
+	public long getPackageSizeBytes() {
+		return myPackageSizeBytes;
+	}
 
-    public void setPackageSizeBytes(long thePackageSizeBytes) {
-        myPackageSizeBytes = thePackageSizeBytes;
-    }
+	public void setPackageSizeBytes(long thePackageSizeBytes) {
+		myPackageSizeBytes = thePackageSizeBytes;
+	}
 
-    public boolean isCurrentVersion() {
-        return myCurrentVersion;
-    }
+	public boolean isCurrentVersion() {
+		return myCurrentVersion;
+	}
 
-    public void setCurrentVersion(boolean theCurrentVersion) {
-        myCurrentVersion = theCurrentVersion;
-    }
+	public void setCurrentVersion(boolean theCurrentVersion) {
+		myCurrentVersion = theCurrentVersion;
+	}
 
-    public String getPackageId() {
-        return myPackageId;
-    }
+	public String getPackageId() {
+		return myPackageId;
+	}
 
-    public void setPackageId(String thePackageId) {
-        myPackageId = thePackageId;
-    }
+	public void setPackageId(String thePackageId) {
+		myPackageId = thePackageId;
+	}
 
-    public String getVersionId() {
-        return myVersionId;
-    }
+	public String getVersionId() {
+		return myVersionId;
+	}
 
-    public void setVersionId(String theVersionId) {
-        myVersionId = theVersionId;
-    }
+	public void setVersionId(String theVersionId) {
+		myVersionId = theVersionId;
+	}
 
-    public String getFhirVersionId() {
-        return myFhirVersionId;
-    }
+	public String getFhirVersionId() {
+		return myFhirVersionId;
+	}
 
-    public void setFhirVersionId(String theFhirVersionId) {
-        myFhirVersionId = theFhirVersionId;
-    }
+	public void setFhirVersionId(String theFhirVersionId) {
+		myFhirVersionId = theFhirVersionId;
+	}
 
-    public FhirVersionEnum getFhirVersion() {
-        return myFhirVersion;
-    }
+	public FhirVersionEnum getFhirVersion() {
+		return myFhirVersion;
+	}
 
-    public void setFhirVersion(FhirVersionEnum theFhirVersion) {
-        myFhirVersion = theFhirVersion;
-    }
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
+	}
 
-    public NpmPackageEntity getPackage() {
-        return myPackage;
-    }
+	public NpmPackageEntity getPackage() {
+		return myPackage;
+	}
 
-    public void setPackage(NpmPackageEntity thePackage) {
-        myPackage = thePackage;
-    }
+	public void setPackage(NpmPackageEntity thePackage) {
+		myPackage = thePackage;
+	}
 
-    public ResourceTable getPackageBinary() {
-        return myPackageBinary;
-    }
+	public ResourceTable getPackageBinary() {
+		return myPackageBinary;
+	}
 
-    public void setPackageBinary(ResourceTable thePackageBinary) {
-        myPackageBinary = thePackageBinary;
-    }
+	public void setPackageBinary(ResourceTable thePackageBinary) {
+		myPackageBinary = thePackageBinary;
+	}
 
-    public void setSavedTime(Date theSavedTime) {
-        mySavedTime = theSavedTime;
-    }
+	public void setSavedTime(Date theSavedTime) {
+		mySavedTime = theSavedTime;
+	}
 
-    public String getDescription() {
-        return myDescription;
-    }
+	public String getDescription() {
+		return myDescription;
+	}
 
-    public void setDescription(String theDescription) {
-        myDescription = theDescription;
-        myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
-    }
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
+		myDescriptionUpper = StringUtil.normalizeStringForSearchIndexing(theDescription);
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("myId", myId)
-                .append("myPackageId", myPackageId)
-                .append("myVersionId", myVersionId)
-                .append("myDescriptionUpper", myDescriptionUpper)
-                .append("myFhirVersionId", myFhirVersionId)
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("myId", myId)
+					.append("myPackageId", myPackageId)
+					.append("myVersionId", myVersionId)
+					.append("myDescriptionUpper", myDescriptionUpper)
+					.append("myFhirVersionId", myFhirVersionId)
+					.toString();
+	}
 
-    public List<NpmPackageVersionResourceEntity> getResources() {
-        return myResources;
-    }
+	public List<NpmPackageVersionResourceEntity> getResources() {
+		return myResources;
+	}
 }

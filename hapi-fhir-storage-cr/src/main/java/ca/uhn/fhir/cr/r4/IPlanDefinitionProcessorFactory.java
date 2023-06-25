@@ -24,5 +24,5 @@ import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
 public interface IPlanDefinitionProcessorFactory {
-    PlanDefinitionProcessor create(Repository theRepository);
+	PlanDefinitionProcessor create(Repository theRepository);
 }

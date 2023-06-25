@@ -19,40 +19,39 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RawParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class RawParamsParmeter implements IParameter {
 
-    public RawParamsParmeter() {
-        super();
-    }
+	public RawParamsParmeter() {
+		super();
+	}
 
-    @Override
-    public void translateClientArgumentIntoQueryArgument(
-            FhirContext theContext,
-            Object theSourceClientArgument,
-            Map<String, List<String>> theTargetQueryArguments,
-            IBaseResource theTargetResource)
-            throws InternalErrorException {
-        // not supported on client for now
-    }
+	@Override
+	public void translateClientArgumentIntoQueryArgument(
+				FhirContext theContext,
+				Object theSourceClientArgument,
+				Map<String, List<String>> theTargetQueryArguments,
+				IBaseResource theTargetResource)
+				throws InternalErrorException {
+		// not supported on client for now
+	}
 
-    @Override
-    public void initializeTypes(
-            Method theMethod,
-            Class<? extends Collection<?>> theOuterCollectionType,
-            Class<? extends Collection<?>> theInnerCollectionType,
-            Class<?> theParameterType) {
-        Validate.isTrue(
-                theParameterType.equals(Map.class),
-                "Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
-    }
+	@Override
+	public void initializeTypes(
+				Method theMethod,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType,
+				Class<?> theParameterType) {
+		Validate.isTrue(
+					theParameterType.equals(Map.class),
+					"Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
+	}
 }

@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
-import java.util.List;
-
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+
+import java.util.List;
 
 public interface IDeleteExpungeSvc<T extends IResourcePersistentId<?>> {
 
-    int deleteExpunge(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds);
+	int deleteExpunge(List<T> thePersistentIds, boolean theCascade, Integer theCascadeMaxRounds);
 
-    boolean isCascadeSupported();
+	boolean isCascadeSupported();
 }

@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public interface ICriterionInternal {
 
-    String getParameterValue(FhirContext theContext);
+	String getParameterValue(FhirContext theContext);
 
-    String getParameterName();
+	String getParameterName();
 }

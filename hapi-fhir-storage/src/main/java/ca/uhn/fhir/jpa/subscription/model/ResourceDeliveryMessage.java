@@ -19,144 +19,142 @@
  */
 package ca.uhn.fhir.jpa.subscription.model;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.IResourceMessage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("WeakerAccess")
 public class ResourceDeliveryMessage extends BaseResourceMessage implements IResourceMessage {
 
-    @JsonProperty("canonicalSubscription")
-    private CanonicalSubscription mySubscription;
+	@JsonProperty("canonicalSubscription")
+	private CanonicalSubscription mySubscription;
 
-    @JsonProperty("partitionId")
-    private RequestPartitionId myPartitionId;
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
 
-    @JsonProperty("payload")
-    private String myPayloadString;
+	@JsonProperty("payload")
+	private String myPayloadString;
 
-    @JsonProperty("payloadId")
-    private String myPayloadId;
+	@JsonProperty("payloadId")
+	private String myPayloadId;
 
-    @JsonIgnore private transient IBaseResource myPayloadDecoded;
+	@JsonIgnore private transient IBaseResource myPayloadDecoded;
 
-    /** Constructor */
-    public ResourceDeliveryMessage() {
-        super();
-        myPartitionId = RequestPartitionId.defaultPartition();
-    }
+	/** Constructor */
+	public ResourceDeliveryMessage() {
+		super();
+		myPartitionId = RequestPartitionId.defaultPartition();
+	}
 
-    public IBaseResource getPayload(FhirContext theCtx) {
-        IBaseResource retVal = myPayloadDecoded;
-        if (retVal == null && isNotBlank(myPayloadString)) {
-            IParser parser = EncodingEnum.detectEncoding(myPayloadString).newParser(theCtx);
-            retVal = parser.parseResource(myPayloadString);
-            myPayloadDecoded = retVal;
-        }
-        return retVal;
-    }
+	public IBaseResource getPayload(FhirContext theCtx) {
+		IBaseResource retVal = myPayloadDecoded;
+		if (retVal == null && isNotBlank(myPayloadString)) {
+				IParser parser = EncodingEnum.detectEncoding(myPayloadString).newParser(theCtx);
+				retVal = parser.parseResource(myPayloadString);
+				myPayloadDecoded = retVal;
+		}
+		return retVal;
+	}
 
-    public String getPayloadString() {
-        if (this.myPayloadString != null) {
-            return this.myPayloadString;
-        }
+	public String getPayloadString() {
+		if (this.myPayloadString != null) {
+				return this.myPayloadString;
+		}
 
-        return "";
-    }
+		return "";
+	}
 
-    public IIdType getPayloadId(FhirContext theCtx) {
-        IIdType retVal = null;
-        if (myPayloadId != null) {
-            retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
-        }
-        return retVal;
-    }
+	public IIdType getPayloadId(FhirContext theCtx) {
+		IIdType retVal = null;
+		if (myPayloadId != null) {
+				retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
+		}
+		return retVal;
+	}
 
-    public CanonicalSubscription getSubscription() {
-        return mySubscription;
-    }
+	public CanonicalSubscription getSubscription() {
+		return mySubscription;
+	}
 
-    public void setSubscription(CanonicalSubscription theSubscription) {
-        mySubscription = theSubscription;
-    }
+	public void setSubscription(CanonicalSubscription theSubscription) {
+		mySubscription = theSubscription;
+	}
 
-    public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
-        /*
-         * Note that we populate the raw string but don't keep the parsed resource around when we set this. This
-         * has two reasons:
-         *  - If we build up a big queue of these on an in-memory queue, we aren't taking up double the memory
-         *  - If use a serializing queue, we aren't behaving differently (and therefore possibly missing things
-         *    in tests)
-         */
-        myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
-        myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
-    }
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
+		/*
+			* Note that we populate the raw string but don't keep the parsed resource around when we set this. This
+			* has two reasons:
+			*  - If we build up a big queue of these on an in-memory queue, we aren't taking up double the memory
+			*  - If use a serializing queue, we aren't behaving differently (and therefore possibly missing things
+			*    in tests)
+			*/
+		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
+		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
+	}
 
-    @Override
-    public String getPayloadId() {
-        return myPayloadId;
-    }
+	@Override
+	public String getPayloadId() {
+		return myPayloadId;
+	}
 
-    public void setPayloadId(IIdType thePayloadId) {
-        myPayloadId = null;
-        if (thePayloadId != null) {
-            myPayloadId = thePayloadId.getValue();
-        }
-    }
+	public void setPayloadId(IIdType thePayloadId) {
+		myPayloadId = null;
+		if (thePayloadId != null) {
+				myPayloadId = thePayloadId.getValue();
+		}
+	}
 
-    public RequestPartitionId getRequestPartitionId() {
-        return myPartitionId;
-    }
+	public RequestPartitionId getRequestPartitionId() {
+		return myPartitionId;
+	}
 
-    public void setPartitionId(RequestPartitionId thePartitionId) {
-        myPartitionId = thePartitionId;
-    }
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append(
-                        "mySubscription",
-                        mySubscription == null ? "null" : mySubscription.getIdElementString())
-                // it isn't safe to log payloads
-                .append("myPayloadString", "[Not Logged]")
-                .append("myPayload", myPayloadDecoded)
-                .append("myPayloadId", myPayloadId)
-                .append("myPartitionId", myPartitionId)
-                .append("myOperationType", getOperationType())
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+					.append(
+								"mySubscription",
+								mySubscription == null ? "null" : mySubscription.getIdElementString())
+					// it isn't safe to log payloads
+					.append("myPayloadString", "[Not Logged]")
+					.append("myPayload", myPayloadDecoded)
+					.append("myPayloadId", myPayloadId)
+					.append("myPartitionId", myPartitionId)
+					.append("myOperationType", getOperationType())
+					.toString();
+	}
 
-    /** Helper method to fetch the subscription ID */
-    public String getSubscriptionId(FhirContext theFhirContext) {
-        String retVal = null;
-        if (getSubscription() != null) {
-            IIdType idElement = getSubscription().getIdElement(theFhirContext);
-            if (idElement != null) {
-                retVal = idElement.getValue();
-            }
-        }
-        return retVal;
-    }
+	/** Helper method to fetch the subscription ID */
+	public String getSubscriptionId(FhirContext theFhirContext) {
+		String retVal = null;
+		if (getSubscription() != null) {
+				IIdType idElement = getSubscription().getIdElement(theFhirContext);
+				if (idElement != null) {
+					retVal = idElement.getValue();
+				}
+		}
+		return retVal;
+	}
 
-    @Nullable
-    @Override
-    public String getMessageKeyOrDefault() {
-        return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
-    }
+	@Nullable
+	@Override
+	public String getMessageKeyOrDefault() {
+		return StringUtils.defaultString(super.getMessageKey(), myPayloadId);
+	}
 }

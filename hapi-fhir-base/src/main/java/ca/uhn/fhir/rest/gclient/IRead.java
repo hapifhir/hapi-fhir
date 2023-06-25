@@ -22,9 +22,9 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IRead {
-    /** Construct a read for the given resource type (e.g. Patient.class) */
-    <T extends IBaseResource> IReadTyped<T> resource(Class<T> theResourceType);
+	/** Construct a read for the given resource type (e.g. Patient.class) */
+	<T extends IBaseResource> IReadTyped<T> resource(Class<T> theResourceType);
 
-    /** Construct a read for the given resource type (e.g. "Patient") */
-    IReadTyped<IBaseResource> resource(String theResourceType);
+	/** Construct a read for the given resource type (e.g. "Patient") */
+	IReadTyped<IBaseResource> resource(String theResourceType);
 }

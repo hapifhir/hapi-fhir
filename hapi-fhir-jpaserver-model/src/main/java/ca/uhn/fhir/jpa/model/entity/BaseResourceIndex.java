@@ -19,37 +19,37 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import java.io.Serializable;
 import javax.persistence.MappedSuperclass;
-
-import org.apache.commons.lang3.ObjectUtils;
 
 @MappedSuperclass
 public abstract class BaseResourceIndex extends BasePartitionable implements Serializable {
 
-    public abstract Long getId();
+	public abstract Long getId();
 
-    public abstract void setId(Long theId);
+	public abstract void setId(Long theId);
 
-    public abstract void calculateHashes();
+	public abstract void calculateHashes();
 
-    public abstract void clearHashes();
+	public abstract void clearHashes();
 
-    @Override
-    public void setPartitionId(PartitionablePartitionId thePartitionId) {
-        if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
-            super.setPartitionId(thePartitionId);
-            clearHashes();
-        }
-    }
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+				super.setPartitionId(thePartitionId);
+				clearHashes();
+		}
+	}
 
-    /** Subclasses must implement */
-    @Override
-    public abstract int hashCode();
+	/** Subclasses must implement */
+	@Override
+	public abstract int hashCode();
 
-    /** Subclasses must implement */
-    @Override
-    public abstract boolean equals(Object obj);
+	/** Subclasses must implement */
+	@Override
+	public abstract boolean equals(Object obj);
 
-    public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
+	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
 }

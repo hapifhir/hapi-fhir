@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
+import ca.uhn.fhir.model.api.IResource;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.IResource;
 
 /**
  * RESTful method annotation to be used for the FHIR <a
@@ -37,21 +37,21 @@ import ca.uhn.fhir.model.api.IResource;
 @Target(value = ElementType.METHOD)
 public @interface Update {
 
-    /**
-     * The return type for this search method. This generally does not need to be populated for a
-     * server implementation, since servers will return only one resource per class, but generally
-     * does need to be populated for client implementations.
-     */
-    // NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
-    Class<? extends IResource> type() default IResource.class;
+	/**
+	* The return type for this search method. This generally does not need to be populated for a
+	* server implementation, since servers will return only one resource per class, but generally
+	* does need to be populated for client implementations.
+	*/
+	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
+	Class<? extends IResource> type() default IResource.class;
 
-    /**
-     * This method allows the return type for this method to be specified in a non-type-specific
-     * way, using the text name of the resource, e.g. "Patient".
-     *
-     * <p>This attribute should be populate, or {@link #type()} should be, but not both.
-     *
-     * @since 5.4.0
-     */
-    String typeName() default "";
+	/**
+	* This method allows the return type for this method to be specified in a non-type-specific
+	* way, using the text name of the resource, e.g. "Patient".
+	*
+	* <p>This attribute should be populate, or {@link #type()} should be, but not both.
+	*
+	* @since 5.4.0
+	*/
+	String typeName() default "";
 }

@@ -21,10 +21,10 @@ package ca.uhn.fhir.mdm.api;
 
 public enum MdmLinkSourceEnum {
 
-    /** Link was created or last modified by an algorithm */
-    AUTO,
+	/** Link was created or last modified by an algorithm */
+	AUTO,
 
-    /** Link was created or last modified manually by a system user */
-    MANUAL
-    // Stored in database as ORDINAL.  Only add new values to bottom!
+	/** Link was created or last modified manually by a system user */
+	MANUAL
+	// Stored in database as ORDINAL.  Only add new values to bottom!
 }

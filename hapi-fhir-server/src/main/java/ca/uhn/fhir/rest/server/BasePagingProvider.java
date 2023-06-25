@@ -23,35 +23,35 @@ import org.apache.commons.lang3.Validate;
 
 public abstract class BasePagingProvider implements IPagingProvider {
 
-    public static final int DEFAULT_DEFAULT_PAGE_SIZE = 10;
-    public static final int DEFAULT_MAX_PAGE_SIZE = 50;
+	public static final int DEFAULT_DEFAULT_PAGE_SIZE = 10;
+	public static final int DEFAULT_MAX_PAGE_SIZE = 50;
 
-    private int myDefaultPageSize = DEFAULT_DEFAULT_PAGE_SIZE;
-    private int myMaximumPageSize = DEFAULT_MAX_PAGE_SIZE;
+	private int myDefaultPageSize = DEFAULT_DEFAULT_PAGE_SIZE;
+	private int myMaximumPageSize = DEFAULT_MAX_PAGE_SIZE;
 
-    public BasePagingProvider() {
-        super();
-    }
+	public BasePagingProvider() {
+		super();
+	}
 
-    @Override
-    public int getDefaultPageSize() {
-        return myDefaultPageSize;
-    }
+	@Override
+	public int getDefaultPageSize() {
+		return myDefaultPageSize;
+	}
 
-    @Override
-    public int getMaximumPageSize() {
-        return myMaximumPageSize;
-    }
+	@Override
+	public int getMaximumPageSize() {
+		return myMaximumPageSize;
+	}
 
-    public BasePagingProvider setDefaultPageSize(int theDefaultPageSize) {
-        Validate.isTrue(theDefaultPageSize > 0, "size must be greater than 0");
-        myDefaultPageSize = theDefaultPageSize;
-        return this;
-    }
+	public BasePagingProvider setDefaultPageSize(int theDefaultPageSize) {
+		Validate.isTrue(theDefaultPageSize > 0, "size must be greater than 0");
+		myDefaultPageSize = theDefaultPageSize;
+		return this;
+	}
 
-    public BasePagingProvider setMaximumPageSize(int theMaximumPageSize) {
-        Validate.isTrue(theMaximumPageSize > 0, "size must be greater than 0");
-        myMaximumPageSize = theMaximumPageSize;
-        return this;
-    }
+	public BasePagingProvider setMaximumPageSize(int theMaximumPageSize) {
+		Validate.isTrue(theMaximumPageSize > 0, "size must be greater than 0");
+		myMaximumPageSize = theMaximumPageSize;
+		return this;
+	}
 }

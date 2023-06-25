@@ -23,26 +23,26 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 public class CompositeAndListParam<A extends IQueryParameterType, B extends IQueryParameterType>
-        extends BaseAndListParam<CompositeOrListParam<A, B>> {
+		extends BaseAndListParam<CompositeOrListParam<A, B>> {
 
-    private Class<A> myLeftType;
-    private Class<B> myRightType;
+	private Class<A> myLeftType;
+	private Class<B> myRightType;
 
-    public CompositeAndListParam(Class<A> theLeftType, Class<B> theRightType) {
-        super();
-        myLeftType = theLeftType;
-        myRightType = theRightType;
-    }
+	public CompositeAndListParam(Class<A> theLeftType, Class<B> theRightType) {
+		super();
+		myLeftType = theLeftType;
+		myRightType = theRightType;
+	}
 
-    @Override
-    CompositeOrListParam<A, B> newInstance() {
-        return new CompositeOrListParam<A, B>(myLeftType, myRightType);
-    }
+	@Override
+	CompositeOrListParam<A, B> newInstance() {
+		return new CompositeOrListParam<A, B>(myLeftType, myRightType);
+	}
 
-    @CoverageIgnore
-    @Override
-    public CompositeAndListParam<A, B> addAnd(CompositeOrListParam<A, B> theValue) {
-        addValue(theValue);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public CompositeAndListParam<A, B> addAnd(CompositeOrListParam<A, B> theValue) {
+		addValue(theValue);
+		return this;
+	}
 }

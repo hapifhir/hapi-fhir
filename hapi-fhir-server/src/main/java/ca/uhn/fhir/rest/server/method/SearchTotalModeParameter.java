@@ -19,41 +19,41 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 class SearchTotalModeParameter implements IParameter {
 
-    @Override
-    public Object translateQueryParametersIntoServerArgument(
-            RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-            throws InternalErrorException, InvalidRequestException {
-        return getTypeForRequestOrThrowInvalidRequestException(theRequest);
-    }
+	@Override
+	public Object translateQueryParametersIntoServerArgument(
+				RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+				throws InternalErrorException, InvalidRequestException {
+		return getTypeForRequestOrThrowInvalidRequestException(theRequest);
+	}
 
-    @Override
-    public void initializeTypes(
-            Method theMethod,
-            Class<? extends Collection<?>> theOuterCollectionType,
-            Class<? extends Collection<?>> theInnerCollectionType,
-            Class<?> theParameterType) {
-        // ignore
-    }
+	@Override
+	public void initializeTypes(
+				Method theMethod,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType,
+				Class<?> theParameterType) {
+		// ignore
+	}
 
-    public static SearchTotalModeEnum getTypeForRequestOrThrowInvalidRequestException(
-            RequestDetails theRequest) {
-        String[] searchTotalModeVal =
-                theRequest.getParameters().get(Constants.PARAM_SEARCH_TOTAL_MODE);
-        if (searchTotalModeVal != null && searchTotalModeVal.length > 0) {
-            return SearchTotalModeEnum.fromCode(searchTotalModeVal[0]);
-        }
+	public static SearchTotalModeEnum getTypeForRequestOrThrowInvalidRequestException(
+				RequestDetails theRequest) {
+		String[] searchTotalModeVal =
+					theRequest.getParameters().get(Constants.PARAM_SEARCH_TOTAL_MODE);
+		if (searchTotalModeVal != null && searchTotalModeVal.length > 0) {
+				return SearchTotalModeEnum.fromCode(searchTotalModeVal[0]);
+		}
 
-        return null;
-    }
+		return null;
+	}
 }

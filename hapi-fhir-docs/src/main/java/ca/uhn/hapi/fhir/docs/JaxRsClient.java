@@ -26,20 +26,20 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 @SuppressWarnings(value = {"serial"})
 public class JaxRsClient {
 
-    public static void main(String[] args) {
-        // START SNIPPET: createClient
+	public static void main(String[] args) {
+		// START SNIPPET: createClient
 
-        // Create a client
-        FhirContext ctx = FhirContext.forDstu2();
+		// Create a client
+		FhirContext ctx = FhirContext.forDstu2();
 
-        // Create an instance of the JAX RS client factory and
-        // set it on the context
-        JaxRsRestfulClientFactory clientFactory = new JaxRsRestfulClientFactory(ctx);
-        ctx.setRestfulClientFactory(clientFactory);
+		// Create an instance of the JAX RS client factory and
+		// set it on the context
+		JaxRsRestfulClientFactory clientFactory = new JaxRsRestfulClientFactory(ctx);
+		ctx.setRestfulClientFactory(clientFactory);
 
-        // This client uses JAX-RS!
-        IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+		// This client uses JAX-RS!
+		IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
 
-        // END SNIPPET: createClient
-    }
+		// END SNIPPET: createClient
+	}
 }

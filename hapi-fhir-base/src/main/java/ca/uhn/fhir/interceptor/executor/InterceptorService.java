@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.interceptor.executor;
 
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import org.apache.commons.lang3.Validate;
-
-import com.google.common.annotations.VisibleForTesting;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -33,61 +26,66 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
+
+import java.lang.reflect.Method;
+import java.util.Optional;
 
 public class InterceptorService extends BaseInterceptorService<Pointcut>
-        implements IInterceptorService, IInterceptorBroadcaster {
+		implements IInterceptorService, IInterceptorBroadcaster {
 
-    /** Constructor which uses a default name of "default" */
-    public InterceptorService() {
-        this("default");
-    }
+	/** Constructor which uses a default name of "default" */
+	public InterceptorService() {
+		this("default");
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theName The name for this registry (useful for troubleshooting)
-     */
-    public InterceptorService(String theName) {
-        super(Pointcut.class, theName);
-    }
+	/**
+	* Constructor
+	*
+	* @param theName The name for this registry (useful for troubleshooting)
+	*/
+	public InterceptorService(String theName) {
+		super(Pointcut.class, theName);
+	}
 
-    @Override
-    protected Optional<HookDescriptor> scanForHook(Method nextMethod) {
-        return findAnnotation(nextMethod, Hook.class)
-                .map(t -> new HookDescriptor(t.value(), t.order()));
-    }
+	@Override
+	protected Optional<HookDescriptor> scanForHook(Method nextMethod) {
+		return findAnnotation(nextMethod, Hook.class)
+					.map(t -> new HookDescriptor(t.value(), t.order()));
+	}
 
-    @Override
-    @VisibleForTesting
-    public void registerAnonymousInterceptor(
-            Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
-        registerAnonymousInterceptor(thePointcut, Interceptor.DEFAULT_ORDER, theInterceptor);
-    }
+	@Override
+	@VisibleForTesting
+	public void registerAnonymousInterceptor(
+				Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
+		registerAnonymousInterceptor(thePointcut, Interceptor.DEFAULT_ORDER, theInterceptor);
+	}
 
-    @Override
-    public void registerAnonymousInterceptor(
-            Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
-        Validate.notNull(thePointcut);
-        Validate.notNull(theInterceptor);
-        BaseInvoker invoker = new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder);
-        registerAnonymousInterceptor(thePointcut, theInterceptor, invoker);
-    }
+	@Override
+	public void registerAnonymousInterceptor(
+				Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
+		Validate.notNull(thePointcut);
+		Validate.notNull(theInterceptor);
+		BaseInvoker invoker = new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder);
+		registerAnonymousInterceptor(thePointcut, theInterceptor, invoker);
+	}
 
-    private static class AnonymousLambdaInvoker extends BaseInvoker {
-        private final IAnonymousInterceptor myHook;
-        private final Pointcut myPointcut;
+	private static class AnonymousLambdaInvoker extends BaseInvoker {
+		private final IAnonymousInterceptor myHook;
+		private final Pointcut myPointcut;
 
-        public AnonymousLambdaInvoker(
-                Pointcut thePointcut, IAnonymousInterceptor theHook, int theOrder) {
-            super(theHook, theOrder);
-            myHook = theHook;
-            myPointcut = thePointcut;
-        }
+		public AnonymousLambdaInvoker(
+					Pointcut thePointcut, IAnonymousInterceptor theHook, int theOrder) {
+				super(theHook, theOrder);
+				myHook = theHook;
+				myPointcut = thePointcut;
+		}
 
-        @Override
-        Object invoke(HookParams theParams) {
-            myHook.invoke(myPointcut, theParams);
-            return true;
-        }
-    }
+		@Override
+		Object invoke(HookParams theParams) {
+				myHook.invoke(myPointcut, theParams);
+				return true;
+		}
+	}
 }

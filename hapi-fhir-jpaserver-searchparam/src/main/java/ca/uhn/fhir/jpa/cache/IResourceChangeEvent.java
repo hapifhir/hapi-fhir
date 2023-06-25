@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
 
 /**
  * Registered IResourceChangeListener instances are called with this event to provide them with a
@@ -29,14 +29,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
  * they were checked.
  */
 public interface IResourceChangeEvent {
-    List<IIdType> getCreatedResourceIds();
+	List<IIdType> getCreatedResourceIds();
 
-    List<IIdType> getUpdatedResourceIds();
+	List<IIdType> getUpdatedResourceIds();
 
-    List<IIdType> getDeletedResourceIds();
+	List<IIdType> getDeletedResourceIds();
 
-    /**
-     * @return true when all three lists are empty
-     */
-    boolean isEmpty();
+	/**
+	* @return true when all three lists are empty
+	*/
+	boolean isEmpty();
 }

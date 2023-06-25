@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.SubscriptionTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-
 public interface ISubscriptionTableDao
-        extends JpaRepository<SubscriptionTable, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<SubscriptionTable, Long>, IHapiFhirJpaRepository {
 
-    @Modifying
-    @Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")
-    void deleteAllForSubscription(@Param("subscription") ResourceTable theSubscription);
+	@Modifying
+	@Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")
+	void deleteAllForSubscription(@Param("subscription") ResourceTable theSubscription);
 
-    @Query("SELECT t FROM SubscriptionTable t WHERE t.myResId = :pid")
-    SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
+	@Query("SELECT t FROM SubscriptionTable t WHERE t.myResId = :pid")
+	SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
 }

@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.transaction.annotation.Transactional;
-
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -33,83 +26,89 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /** This service handles writes to the CodeSystem/Concept tables within the terminology services */
 public interface ITermCodeSystemStorageSvc {
 
-    String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
 
-    /**
-     * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
-     */
-    static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
-        return theRequestDetails == null
-                || (boolean)
-                        theRequestDetails
-                                .getUserData()
-                                .getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
-    }
+	/**
+	* Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
+	*/
+	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
+		return theRequestDetails == null
+					|| (boolean)
+								theRequestDetails
+										.getUserData()
+										.getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+	}
 
-    void storeNewCodeSystemVersion(
-            IResourcePersistentId theCodeSystemResourcePid,
-            String theSystemUri,
-            String theSystemName,
-            String theSystemVersionId,
-            TermCodeSystemVersion theCodeSystemVersion,
-            ResourceTable theCodeSystemResourceTable,
-            RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersion(
+				IResourcePersistentId theCodeSystemResourcePid,
+				String theSystemUri,
+				String theSystemName,
+				String theSystemVersionId,
+				TermCodeSystemVersion theCodeSystemVersion,
+				ResourceTable theCodeSystemResourceTable,
+				RequestDetails theRequestDetails);
 
-    /**
-     * Default implementation supports previous signature of method which was added RequestDetails
-     * parameter
-     */
-    @Transactional
-    default void storeNewCodeSystemVersion(
-            IResourcePersistentId theCodeSystemResourcePid,
-            String theSystemUri,
-            String theSystemName,
-            String theSystemVersionId,
-            TermCodeSystemVersion theCodeSystemVersion,
-            ResourceTable theCodeSystemResourceTable) {
+	/**
+	* Default implementation supports previous signature of method which was added RequestDetails
+	* parameter
+	*/
+	@Transactional
+	default void storeNewCodeSystemVersion(
+				IResourcePersistentId theCodeSystemResourcePid,
+				String theSystemUri,
+				String theSystemName,
+				String theSystemVersionId,
+				TermCodeSystemVersion theCodeSystemVersion,
+				ResourceTable theCodeSystemResourceTable) {
 
-        storeNewCodeSystemVersion(
-                theCodeSystemResourcePid,
-                theSystemUri,
-                theSystemName,
-                theSystemVersionId,
-                theCodeSystemVersion,
-                theCodeSystemResourceTable,
-                null);
-    }
+		storeNewCodeSystemVersion(
+					theCodeSystemResourcePid,
+					theSystemUri,
+					theSystemName,
+					theSystemVersionId,
+					theCodeSystemVersion,
+					theCodeSystemResourceTable,
+					null);
+	}
 
-    /**
-     * @return Returns the ID of the created/updated code system
-     */
-    IIdType storeNewCodeSystemVersion(
-            org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
-            TermCodeSystemVersion theCodeSystemVersion,
-            RequestDetails theRequestDetails,
-            List<ValueSet> theValueSets,
-            List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+	/**
+	* @return Returns the ID of the created/updated code system
+	*/
+	IIdType storeNewCodeSystemVersion(
+				org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+				TermCodeSystemVersion theCodeSystemVersion,
+				RequestDetails theRequestDetails,
+				List<ValueSet> theValueSets,
+				List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-    void storeNewCodeSystemVersionIfNeeded(
-            CodeSystem theCodeSystem,
-            ResourceTable theResourceEntity,
-            RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersionIfNeeded(
+				CodeSystem theCodeSystem,
+				ResourceTable theResourceEntity,
+				RequestDetails theRequestDetails);
 
-    /**
-     * Default implementation supports previous signature of method which was added RequestDetails
-     * parameter
-     */
-    default void storeNewCodeSystemVersionIfNeeded(
-            CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
-        storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
-    }
+	/**
+	* Default implementation supports previous signature of method which was added RequestDetails
+	* parameter
+	*/
+	default void storeNewCodeSystemVersionIfNeeded(
+				CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
+	}
 
-    UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
+	UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
-    UploadStatistics applyDeltaCodeSystemsRemove(
-            String theSystem, CustomTerminologySet theRemovals);
+	UploadStatistics applyDeltaCodeSystemsRemove(
+				String theSystem, CustomTerminologySet theRemovals);
 
-    int saveConcept(TermConcept theNextConcept);
+	int saveConcept(TermConcept theNextConcept);
 }

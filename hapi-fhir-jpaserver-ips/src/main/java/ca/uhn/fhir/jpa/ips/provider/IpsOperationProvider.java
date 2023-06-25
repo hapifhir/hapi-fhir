@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.jpa.ips.provider;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.jpa.ips.generator.IIpsGeneratorSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -31,45 +28,47 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class IpsOperationProvider {
 
-    private final IIpsGeneratorSvc myIpsGeneratorSvc;
+	private final IIpsGeneratorSvc myIpsGeneratorSvc;
 
-    /** Constructor */
-    public IpsOperationProvider(IIpsGeneratorSvc theIpsGeneratorSvc) {
-        myIpsGeneratorSvc = theIpsGeneratorSvc;
-    }
+	/** Constructor */
+	public IpsOperationProvider(IIpsGeneratorSvc theIpsGeneratorSvc) {
+		myIpsGeneratorSvc = theIpsGeneratorSvc;
+	}
 
-    /** Patient/123/$summary */
-    @Operation(
-            name = JpaConstants.OPERATION_SUMMARY,
-            idempotent = true,
-            bundleType = BundleTypeEnum.DOCUMENT,
-            typeName = "Patient",
-            canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
-    public IBaseBundle patientInstanceSummary(
-            @IdParam IIdType thePatientId, RequestDetails theRequestDetails) {
+	/** Patient/123/$summary */
+	@Operation(
+				name = JpaConstants.OPERATION_SUMMARY,
+				idempotent = true,
+				bundleType = BundleTypeEnum.DOCUMENT,
+				typeName = "Patient",
+				canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	public IBaseBundle patientInstanceSummary(
+				@IdParam IIdType thePatientId, RequestDetails theRequestDetails) {
 
-        return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId);
-    }
+		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId);
+	}
 
-    /** /Patient/$summary?identifier=foo|bar */
-    @Operation(
-            name = JpaConstants.OPERATION_SUMMARY,
-            idempotent = true,
-            bundleType = BundleTypeEnum.DOCUMENT,
-            typeName = "Patient",
-            canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
-    public IBaseBundle patientTypeSummary(
-            @Description(
-                            shortDefinition =
-                                    "When the logical id of the patient is not used, servers MAY"
-                                        + " choose to support patient selection based on provided"
-                                        + " identifier")
-                    @OperationParam(name = "identifier", min = 0, max = 1)
-                    TokenParam thePatientIdentifier,
-            RequestDetails theRequestDetails) {
-        return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientIdentifier);
-    }
+	/** /Patient/$summary?identifier=foo|bar */
+	@Operation(
+				name = JpaConstants.OPERATION_SUMMARY,
+				idempotent = true,
+				bundleType = BundleTypeEnum.DOCUMENT,
+				typeName = "Patient",
+				canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	public IBaseBundle patientTypeSummary(
+				@Description(
+									shortDefinition =
+												"When the logical id of the patient is not used, servers MAY"
+													+ " choose to support patient selection based on provided"
+													+ " identifier")
+						@OperationParam(name = "identifier", min = 0, max = 1)
+						TokenParam thePatientIdentifier,
+				RequestDetails theRequestDetails) {
+		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientIdentifier);
+	}
 }

@@ -19,45 +19,45 @@
  */
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class ReindexJobParametersValidator
-        implements IJobParametersValidator<ReindexJobParameters> {
+		implements IJobParametersValidator<ReindexJobParameters> {
 
-    private final UrlListValidator myUrlListValidator;
+	private final UrlListValidator myUrlListValidator;
 
-    public ReindexJobParametersValidator(UrlListValidator theUrlListValidator) {
-        myUrlListValidator = theUrlListValidator;
-    }
+	public ReindexJobParametersValidator(UrlListValidator theUrlListValidator) {
+		myUrlListValidator = theUrlListValidator;
+	}
 
-    @Nullable
-    @Override
-    public List<String> validate(
-            RequestDetails theRequestDetails, @Nonnull ReindexJobParameters theParameters) {
-        List<String> errors =
-                myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
+	@Nullable
+	@Override
+	public List<String> validate(
+				RequestDetails theRequestDetails, @Nonnull ReindexJobParameters theParameters) {
+		List<String> errors =
+					myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 
-        if (errors == null || errors.isEmpty()) {
-            // only check if there's no other errors (new list to fix immutable issues)
-            errors = new ArrayList<>();
-            List<PartitionedUrl> urls = theParameters.getPartitionedUrls();
-            for (PartitionedUrl purl : urls) {
-                String url = purl.getUrl();
+		if (errors == null || errors.isEmpty()) {
+				// only check if there's no other errors (new list to fix immutable issues)
+				errors = new ArrayList<>();
+				List<PartitionedUrl> urls = theParameters.getPartitionedUrls();
+				for (PartitionedUrl purl : urls) {
+					String url = purl.getUrl();
 
-                if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
-                    errors.add("Invalid URL. URL cannot contain spaces : " + url);
-                }
-            }
-        }
+					if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
+						errors.add("Invalid URL. URL cannot contain spaces : " + url);
+					}
+				}
+		}
 
-        return errors;
-    }
+		return errors;
+	}
 }

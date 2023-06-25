@@ -19,62 +19,61 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
+import java.lang.reflect.Method;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
-    public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-        super(theMethod.getReturnType(), theMethod, theContext, theProvider);
+	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
 
-        MethodReturnTypeEnum methodReturnType = getMethodReturnType();
-        Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
-        if (methodReturnType != MethodReturnTypeEnum.RESOURCE
-                || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-            throw new ConfigurationException(
-                    Msg.code(1426)
-                            + "Conformance resource provider method '"
-                            + theMethod.getName()
-                            + "' should return a Conformance resource class, returns: "
-                            + theMethod.getReturnType());
-        }
-    }
+		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
+		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
+		if (methodReturnType != MethodReturnTypeEnum.RESOURCE
+					|| !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
+				throw new ConfigurationException(
+						Msg.code(1426)
+									+ "Conformance resource provider method '"
+									+ theMethod.getName()
+									+ "' should return a Conformance resource class, returns: "
+									+ theMethod.getReturnType());
+		}
+	}
 
-    @Override
-    public ReturnTypeEnum getReturnType() {
-        return ReturnTypeEnum.RESOURCE;
-    }
+	@Override
+	public ReturnTypeEnum getReturnType() {
+		return ReturnTypeEnum.RESOURCE;
+	}
 
-    @Override
-    public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-        HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation(getContext());
+	@Override
+	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		HttpGetClientInvocation retVal = MethodUtil.createConformanceInvocation(getContext());
 
-        if (theArgs != null) {
-            for (int idx = 0; idx < theArgs.length; idx++) {
-                IParameter nextParam = getParameters().get(idx);
-                nextParam.translateClientArgumentIntoQueryArgument(
-                        getContext(), theArgs[idx], null, null);
-            }
-        }
+		if (theArgs != null) {
+				for (int idx = 0; idx < theArgs.length; idx++) {
+					IParameter nextParam = getParameters().get(idx);
+					nextParam.translateClientArgumentIntoQueryArgument(
+								getContext(), theArgs[idx], null, null);
+				}
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    @Override
-    public RestOperationTypeEnum getRestOperationType() {
-        return RestOperationTypeEnum.METADATA;
-    }
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.METADATA;
+	}
 
-    @Override
-    protected BundleTypeEnum getResponseBundleType() {
-        return null;
-    }
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
+	}
 }

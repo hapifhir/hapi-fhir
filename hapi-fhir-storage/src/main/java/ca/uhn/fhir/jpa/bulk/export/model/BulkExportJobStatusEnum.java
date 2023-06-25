@@ -25,9 +25,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum BulkExportJobStatusEnum {
 
-    /** Sorting OK! */
-    SUBMITTED,
-    BUILDING,
-    COMPLETE,
-    ERROR;
+	/** Sorting OK! */
+	SUBMITTED,
+	BUILDING,
+	COMPLETE,
+	ERROR;
 }

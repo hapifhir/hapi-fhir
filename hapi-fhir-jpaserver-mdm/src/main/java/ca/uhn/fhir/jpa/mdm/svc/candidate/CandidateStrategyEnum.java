@@ -20,17 +20,17 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 public enum CandidateStrategyEnum {
-    /** Find Golden Resource candidates based on matching EID */
-    EID,
-    /** Find Golden Resource candidates based on a link already existing for the source resource */
-    LINK,
-    /**
-     * Find Golden Resource candidates based on other sources that match the incoming source using
-     * the MDM Matching rules
-     */
-    SCORE;
+	/** Find Golden Resource candidates based on matching EID */
+	EID,
+	/** Find Golden Resource candidates based on a link already existing for the source resource */
+	LINK,
+	/**
+	* Find Golden Resource candidates based on other sources that match the incoming source using
+	* the MDM Matching rules
+	*/
+	SCORE;
 
-    public boolean isEidMatch() {
-        return this == EID;
-    }
+	public boolean isEidMatch() {
+		return this == EID;
+	}
 }

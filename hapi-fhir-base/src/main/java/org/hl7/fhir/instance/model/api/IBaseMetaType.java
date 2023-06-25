@@ -24,35 +24,35 @@ import java.util.List;
 
 public interface IBaseMetaType extends ICompositeType {
 
-    IBaseMetaType addProfile(String theProfile);
+	IBaseMetaType addProfile(String theProfile);
 
-    IBaseCoding addSecurity();
+	IBaseCoding addSecurity();
 
-    IBaseCoding addTag();
+	IBaseCoding addTag();
 
-    Date getLastUpdated();
+	Date getLastUpdated();
 
-    List<? extends IPrimitiveType<String>> getProfile();
+	List<? extends IPrimitiveType<String>> getProfile();
 
-    List<? extends IBaseCoding> getSecurity();
+	List<? extends IBaseCoding> getSecurity();
 
-    List<? extends IBaseCoding> getTag();
+	List<? extends IBaseCoding> getTag();
 
-    String getVersionId();
+	String getVersionId();
 
-    IBaseMetaType setLastUpdated(Date theHeaderDateValue);
+	IBaseMetaType setLastUpdated(Date theHeaderDateValue);
 
-    IBaseMetaType setVersionId(String theVersionId);
+	IBaseMetaType setVersionId(String theVersionId);
 
-    /**
-     * Returns the first tag (if any) that has the given system and code, or returns <code>null
-     * </code> if none
-     */
-    IBaseCoding getTag(String theSystem, String theCode);
+	/**
+	* Returns the first tag (if any) that has the given system and code, or returns <code>null
+	* </code> if none
+	*/
+	IBaseCoding getTag(String theSystem, String theCode);
 
-    /**
-     * Returns the first security label (if any) that has the given system and code, or returns
-     * <code>null</code> if none
-     */
-    IBaseCoding getSecurity(String theSystem, String theCode);
+	/**
+	* Returns the first security label (if any) that has the given system and code, or returns
+	* <code>null</code> if none
+	*/
+	IBaseCoding getSecurity(String theSystem, String theCode);
 }

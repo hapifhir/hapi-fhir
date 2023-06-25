@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.embedded;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,13 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 /**
  * For testing purposes. <br>
@@ -45,91 +44,91 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
  */
 public abstract class JpaEmbeddedDatabase {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(JpaEmbeddedDatabase.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaEmbeddedDatabase.class);
 
-    private DriverTypeEnum myDriverType;
-    private String myUsername;
-    private String myPassword;
-    private String myUrl;
-    private DriverTypeEnum.ConnectionProperties myConnectionProperties;
-    private JdbcTemplate myJdbcTemplate;
-    private Connection myConnection;
+	private DriverTypeEnum myDriverType;
+	private String myUsername;
+	private String myPassword;
+	private String myUrl;
+	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
+	private JdbcTemplate myJdbcTemplate;
+	private Connection myConnection;
 
-    public abstract void stop();
+	public abstract void stop();
 
-    public abstract void disableConstraints();
+	public abstract void disableConstraints();
 
-    public abstract void enableConstraints();
+	public abstract void enableConstraints();
 
-    public abstract void clearDatabase();
+	public abstract void clearDatabase();
 
-    public void initialize(
-            DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
-        myDriverType = theDriverType;
-        myUsername = theUsername;
-        myPassword = thePassword;
-        myUrl = theUrl;
-        myConnectionProperties =
-                theDriverType.newConnectionProperties(theUrl, theUsername, thePassword);
-        myJdbcTemplate = myConnectionProperties.newJdbcTemplate();
-        try {
-            myConnection = myConnectionProperties.getDataSource().getConnection();
-        } catch (SQLException theE) {
-            throw new RuntimeException(theE);
-        }
-    }
+	public void initialize(
+				DriverTypeEnum theDriverType, String theUrl, String theUsername, String thePassword) {
+		myDriverType = theDriverType;
+		myUsername = theUsername;
+		myPassword = thePassword;
+		myUrl = theUrl;
+		myConnectionProperties =
+					theDriverType.newConnectionProperties(theUrl, theUsername, thePassword);
+		myJdbcTemplate = myConnectionProperties.newJdbcTemplate();
+		try {
+				myConnection = myConnectionProperties.getDataSource().getConnection();
+		} catch (SQLException theE) {
+				throw new RuntimeException(theE);
+		}
+	}
 
-    public DriverTypeEnum getDriverType() {
-        return myDriverType;
-    }
+	public DriverTypeEnum getDriverType() {
+		return myDriverType;
+	}
 
-    public String getUsername() {
-        return myUsername;
-    }
+	public String getUsername() {
+		return myUsername;
+	}
 
-    public String getPassword() {
-        return myPassword;
-    }
+	public String getPassword() {
+		return myPassword;
+	}
 
-    public String getUrl() {
-        return myUrl;
-    }
+	public String getUrl() {
+		return myUrl;
+	}
 
-    public JdbcTemplate getJdbcTemplate() {
-        return myJdbcTemplate;
-    }
+	public JdbcTemplate getJdbcTemplate() {
+		return myJdbcTemplate;
+	}
 
-    public DataSource getDataSource() {
-        return myConnectionProperties.getDataSource();
-    }
+	public DataSource getDataSource() {
+		return myConnectionProperties.getDataSource();
+	}
 
-    public void insertTestData(String theSql) {
-        disableConstraints();
-        executeSqlAsBatch(theSql);
-        enableConstraints();
-    }
+	public void insertTestData(String theSql) {
+		disableConstraints();
+		executeSqlAsBatch(theSql);
+		enableConstraints();
+	}
 
-    public void executeSqlAsBatch(String theSql) {
-        List<String> statements = Arrays.stream(theSql.split(";")).collect(Collectors.toList());
-        executeSqlAsBatch(statements);
-    }
+	public void executeSqlAsBatch(String theSql) {
+		List<String> statements = Arrays.stream(theSql.split(";")).collect(Collectors.toList());
+		executeSqlAsBatch(statements);
+	}
 
-    public void executeSqlAsBatch(List<String> theStatements) {
-        try {
-            Statement statement = myConnection.createStatement();
-            for (String sql : theStatements) {
-                if (!StringUtils.isBlank(sql)) {
-                    statement.addBatch(sql);
-                    ourLog.info("Added to batch: {}", sql);
-                }
-            }
-            statement.executeBatch();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+	public void executeSqlAsBatch(List<String> theStatements) {
+		try {
+				Statement statement = myConnection.createStatement();
+				for (String sql : theStatements) {
+					if (!StringUtils.isBlank(sql)) {
+						statement.addBatch(sql);
+						ourLog.info("Added to batch: {}", sql);
+					}
+				}
+				statement.executeBatch();
+		} catch (Exception e) {
+				throw new RuntimeException(e);
+		}
+	}
 
-    public List<Map<String, Object>> query(String theSql) {
-        return getJdbcTemplate().queryForList(theSql);
-    }
+	public List<Map<String, Object>> query(String theSql) {
+		return getJdbcTemplate().queryForList(theSql);
+	}
 }

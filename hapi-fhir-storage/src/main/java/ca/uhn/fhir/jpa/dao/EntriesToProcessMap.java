@@ -19,38 +19,38 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import static ca.uhn.fhir.jpa.dao.IdSubstitutionMap.toVersionlessValue;
 
 public class EntriesToProcessMap {
 
-    private final IdentityHashMap<IBase, IIdType> myEntriesToProcess = new IdentityHashMap<>();
-    private final Map<String, IIdType> myVersionlessIdToVersionedId = new HashMap<>();
-    private final Map<String, IBase> myVersionlessIdToResponseBundleEntry = new HashMap<>();
+	private final IdentityHashMap<IBase, IIdType> myEntriesToProcess = new IdentityHashMap<>();
+	private final Map<String, IIdType> myVersionlessIdToVersionedId = new HashMap<>();
+	private final Map<String, IBase> myVersionlessIdToResponseBundleEntry = new HashMap<>();
 
-    public void put(IBase theBundleEntry, IIdType theId, IBase theResponseBundleEntry) {
-        myEntriesToProcess.put(theBundleEntry, theId);
-        String key = toVersionlessValue(theId);
-        myVersionlessIdToVersionedId.put(key, theId);
-        myVersionlessIdToResponseBundleEntry.put(key, theResponseBundleEntry);
-    }
+	public void put(IBase theBundleEntry, IIdType theId, IBase theResponseBundleEntry) {
+		myEntriesToProcess.put(theBundleEntry, theId);
+		String key = toVersionlessValue(theId);
+		myVersionlessIdToVersionedId.put(key, theId);
+		myVersionlessIdToResponseBundleEntry.put(key, theResponseBundleEntry);
+	}
 
-    public IIdType getIdWithVersionlessComparison(IIdType theId) {
-        return myVersionlessIdToVersionedId.get(toVersionlessValue(theId));
-    }
+	public IIdType getIdWithVersionlessComparison(IIdType theId) {
+		return myVersionlessIdToVersionedId.get(toVersionlessValue(theId));
+	}
 
-    public IBase getResponseBundleEntryWithVersionlessComparison(IIdType theId) {
-        return myVersionlessIdToResponseBundleEntry.get(toVersionlessValue(theId));
-    }
+	public IBase getResponseBundleEntryWithVersionlessComparison(IIdType theId) {
+		return myVersionlessIdToResponseBundleEntry.get(toVersionlessValue(theId));
+	}
 
-    public Set<Map.Entry<IBase, IIdType>> entrySet() {
-        return myEntriesToProcess.entrySet();
-    }
+	public Set<Map.Entry<IBase, IIdType>> entrySet() {
+		return myEntriesToProcess.entrySet();
+	}
 }

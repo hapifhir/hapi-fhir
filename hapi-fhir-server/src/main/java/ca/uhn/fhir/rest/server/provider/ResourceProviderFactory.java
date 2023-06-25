@@ -28,36 +28,36 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 public class ResourceProviderFactory {
-    private Set<IResourceProviderFactoryObserver> myObservers =
-            Collections.synchronizedSet(new HashSet<>());
-    private List<Supplier<Object>> mySuppliers = new ArrayList<>();
+	private Set<IResourceProviderFactoryObserver> myObservers =
+				Collections.synchronizedSet(new HashSet<>());
+	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
 
-    public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
-        mySuppliers.add(theSupplier);
-        myObservers.forEach(observer -> observer.update(theSupplier));
-    }
+	public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
+		mySuppliers.add(theSupplier);
+		myObservers.forEach(observer -> observer.update(theSupplier));
+	}
 
-    public void removeSupplier(@Nonnull Supplier<Object> theSupplier) {
-        mySuppliers.remove(theSupplier);
-        myObservers.forEach(observer -> observer.remove(theSupplier));
-    }
+	public void removeSupplier(@Nonnull Supplier<Object> theSupplier) {
+		mySuppliers.remove(theSupplier);
+		myObservers.forEach(observer -> observer.remove(theSupplier));
+	}
 
-    public List<Object> createProviders() {
-        List<Object> retVal = new ArrayList<>();
-        for (Supplier<Object> next : mySuppliers) {
-            Object nextRp = next.get();
-            if (nextRp != null) {
-                retVal.add(nextRp);
-            }
-        }
-        return retVal;
-    }
+	public List<Object> createProviders() {
+		List<Object> retVal = new ArrayList<>();
+		for (Supplier<Object> next : mySuppliers) {
+				Object nextRp = next.get();
+				if (nextRp != null) {
+					retVal.add(nextRp);
+				}
+		}
+		return retVal;
+	}
 
-    public void attach(IResourceProviderFactoryObserver theObserver) {
-        myObservers.add(theObserver);
-    }
+	public void attach(IResourceProviderFactoryObserver theObserver) {
+		myObservers.add(theObserver);
+	}
 
-    public void detach(IResourceProviderFactoryObserver theObserver) {
-        myObservers.remove(theObserver);
-    }
+	public void detach(IResourceProviderFactoryObserver theObserver) {
+		myObservers.remove(theObserver);
+	}
 }

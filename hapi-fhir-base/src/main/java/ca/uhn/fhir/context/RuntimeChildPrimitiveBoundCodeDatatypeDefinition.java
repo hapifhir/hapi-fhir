@@ -19,40 +19,39 @@
  */
 package ca.uhn.fhir.context;
 
-import java.lang.reflect.Field;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.lang.reflect.Field;
 
 public class RuntimeChildPrimitiveBoundCodeDatatypeDefinition
-        extends RuntimeChildPrimitiveDatatypeDefinition {
+		extends RuntimeChildPrimitiveDatatypeDefinition {
 
-    private Object myBinder;
-    private Class<? extends Enum<?>> myEnumType;
+	private Object myBinder;
+	private Class<? extends Enum<?>> myEnumType;
 
-    public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(
-            Field theField,
-            String theElementName,
-            Child theChildAnnotation,
-            Description theDescriptionAnnotation,
-            Class<? extends IBase> theDatatype,
-            Object theBinder,
-            Class<? extends Enum<?>> theEnumType) {
-        super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
+	public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(
+				Field theField,
+				String theElementName,
+				Child theChildAnnotation,
+				Description theDescriptionAnnotation,
+				Class<? extends IBase> theDatatype,
+				Object theBinder,
+				Class<? extends Enum<?>> theEnumType) {
+		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
-        myBinder = theBinder;
-        myEnumType = theEnumType;
-    }
+		myBinder = theBinder;
+		myEnumType = theEnumType;
+	}
 
-    @Override
-    public Class<? extends Enum<?>> getBoundEnumType() {
-        return myEnumType;
-    }
+	@Override
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return myEnumType;
+	}
 
-    @Override
-    public Object getInstanceConstructorArguments() {
-        return myBinder;
-    }
+	@Override
+	public Object getInstanceConstructorArguments() {
+		return myBinder;
+	}
 }

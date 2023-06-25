@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
@@ -42,48 +35,54 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 @Import({JpaConfig.class})
 public class HapiJpaConfig {
 
-    @Autowired private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired private ISearchParamRegistry mySearchParamRegistry;
 
-    @Bean
-    public IHSearchSortHelper extendedFulltextSortHelper() {
-        return new HSearchSortHelperImpl(mySearchParamRegistry);
-    }
+	@Bean
+	public IHSearchSortHelper extendedFulltextSortHelper() {
+		return new HSearchSortHelperImpl(mySearchParamRegistry);
+	}
 
-    @Bean
-    public IFulltextSearchSvc fullTextSearchSvc() {
-        return new FulltextSearchSvcImpl();
-    }
+	@Bean
+	public IFulltextSearchSvc fullTextSearchSvc() {
+		return new FulltextSearchSvcImpl();
+	}
 
-    @Bean
-    public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
-        return new StaleSearchDeletingSvcImpl();
-    }
+	@Bean
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
+	}
 
-    @Primary
-    @Bean
-    public CachingValidationSupport validationSupportChain(
-            JpaValidationSupportChain theJpaValidationSupportChain) {
-        return ValidationSupportConfigUtil.newCachingValidationSupport(
-                theJpaValidationSupportChain);
-    }
+	@Primary
+	@Bean
+	public CachingValidationSupport validationSupportChain(
+				JpaValidationSupportChain theJpaValidationSupportChain) {
+		return ValidationSupportConfigUtil.newCachingValidationSupport(
+					theJpaValidationSupportChain);
+	}
 
-    @Bean
-    public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-        return new DatabaseBackedPagingProvider();
-    }
+	@Bean
+	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+		return new DatabaseBackedPagingProvider();
+	}
 
-    @Bean
-    public IResourceSupportedSvc resourceSupportedSvc(IDaoRegistry theDaoRegistry) {
-        return new DaoRegistryResourceSupportedSvc(theDaoRegistry);
-    }
+	@Bean
+	public IResourceSupportedSvc resourceSupportedSvc(IDaoRegistry theDaoRegistry) {
+		return new DaoRegistryResourceSupportedSvc(theDaoRegistry);
+	}
 
-    @Bean(name = "myResourceCountsCache")
-    public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
-        return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
-    }
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
+		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
+	}
 }

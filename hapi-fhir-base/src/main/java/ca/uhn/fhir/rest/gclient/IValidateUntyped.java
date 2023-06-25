@@ -23,6 +23,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public interface IValidateUntyped extends IClientExecutable<IValidateUntyped, MethodOutcome> {
 
-    // nothing for now
+	// nothing for now
 
 }

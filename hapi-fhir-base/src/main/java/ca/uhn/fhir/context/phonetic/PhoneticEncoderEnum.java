@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.context.phonetic;
 
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -29,42 +30,40 @@ import org.apache.commons.codec.language.Nysiis;
 import org.apache.commons.codec.language.RefinedSoundex;
 import org.apache.commons.codec.language.Soundex;
 
-import ca.uhn.fhir.util.PhoneticEncoderUtil;
-
 public enum PhoneticEncoderEnum {
-    CAVERPHONE1(new ApacheEncoder("CAVERPHONE1", new Caverphone1())),
-    CAVERPHONE2(new ApacheEncoder("CAVERPHONE2", new Caverphone2())),
-    COLOGNE(new ApacheEncoder("COLOGNE", new ColognePhonetic())),
-    DOUBLE_METAPHONE(new ApacheEncoder("DOUBLE_METAPHONE", new DoubleMetaphone())),
-    MATCH_RATING_APPROACH(
-            new ApacheEncoder("MATCH_RATING_APPROACH", new MatchRatingApproachEncoder())),
-    METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
-    NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
-    NYSIIS_LONG(new ApacheEncoder("NYSIIS_LONG", new Nysiis(false))),
-    REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
-    SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex())),
-    NUMERIC(new NumericEncoder());
+	CAVERPHONE1(new ApacheEncoder("CAVERPHONE1", new Caverphone1())),
+	CAVERPHONE2(new ApacheEncoder("CAVERPHONE2", new Caverphone2())),
+	COLOGNE(new ApacheEncoder("COLOGNE", new ColognePhonetic())),
+	DOUBLE_METAPHONE(new ApacheEncoder("DOUBLE_METAPHONE", new DoubleMetaphone())),
+	MATCH_RATING_APPROACH(
+				new ApacheEncoder("MATCH_RATING_APPROACH", new MatchRatingApproachEncoder())),
+	METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
+	NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
+	NYSIIS_LONG(new ApacheEncoder("NYSIIS_LONG", new Nysiis(false))),
+	REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
+	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex())),
+	NUMERIC(new NumericEncoder());
 
-    private final IPhoneticEncoder myPhoneticEncoder;
+	private final IPhoneticEncoder myPhoneticEncoder;
 
-    /**
-     * Do not construct this enum via constructor.
-     *
-     * <p>Use {@link PhoneticEncoderUtil} instead.
-     */
-    @Deprecated
-    PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
-        myPhoneticEncoder = thePhoneticEncoder;
-    }
+	/**
+	* Do not construct this enum via constructor.
+	*
+	* <p>Use {@link PhoneticEncoderUtil} instead.
+	*/
+	@Deprecated
+	PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
+		myPhoneticEncoder = thePhoneticEncoder;
+	}
 
-    /**
-     * Use PhoneticEncoderWrapper.getEncoderWrapper(PhoneticEncoderEnum.name())
-     *
-     * <p>This is a deprecated method of getting the encoder (as they are static across the server
-     * and non-configurable).
-     */
-    @Deprecated
-    public IPhoneticEncoder getPhoneticEncoder() {
-        return myPhoneticEncoder;
-    }
+	/**
+	* Use PhoneticEncoderWrapper.getEncoderWrapper(PhoneticEncoderEnum.name())
+	*
+	* <p>This is a deprecated method of getting the encoder (as they are static across the server
+	* and non-configurable).
+	*/
+	@Deprecated
+	public IPhoneticEncoder getPhoneticEncoder() {
+		return myPhoneticEncoder;
+	}
 }

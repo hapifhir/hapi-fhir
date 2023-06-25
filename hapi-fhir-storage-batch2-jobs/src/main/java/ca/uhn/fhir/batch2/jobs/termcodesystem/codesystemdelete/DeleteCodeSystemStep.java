@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -33,48 +31,50 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
+import javax.annotation.Nonnull;
+
 public class DeleteCodeSystemStep
-        implements IReductionStepWorker<
-                TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
+		implements IReductionStepWorker<
+					TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
-    private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
-    public DeleteCodeSystemStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
-        myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
-    }
+	public DeleteCodeSystemStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
-    @Nonnull
-    @Override
-    public RunOutcome run(
-            @Nonnull
-                    StepExecutionDetails<
-                                    TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
-                            theStepExecutionDetails,
-            @Nonnull IJobDataSink<VoidModel> theDataSink)
-            throws JobExecutionFailedException {
-        // final step
-        long codeId = theStepExecutionDetails.getParameters().getTermPid();
-        myITermCodeSystemSvc.deleteCodeSystem(codeId);
+	@Nonnull
+	@Override
+	public RunOutcome run(
+				@Nonnull
+						StepExecutionDetails<
+												TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
+									theStepExecutionDetails,
+				@Nonnull IJobDataSink<VoidModel> theDataSink)
+				throws JobExecutionFailedException {
+		// final step
+		long codeId = theStepExecutionDetails.getParameters().getTermPid();
+		myITermCodeSystemSvc.deleteCodeSystem(codeId);
 
-        theDataSink.accept(new VoidModel()); // nothing required here
+		theDataSink.accept(new VoidModel()); // nothing required here
 
-        return RunOutcome.SUCCESS;
-    }
+		return RunOutcome.SUCCESS;
+	}
 
-    @Nonnull
-    @Override
-    public ChunkOutcome consume(
-            ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
-                    theChunkDetails) {
-        /*
-         * A single code system can have multiple versions.
-         * We don't want to call delete on all these systems
-         * (because if 2 threads do so at the same time, we get exceptions)
-         * so we'll use the reducer step to ensure we only call delete
-         * a single time.
-         *
-         * Thus, we don't need to "consume" anything
-         */
-        return ChunkOutcome.SUCCESS();
-    }
+	@Nonnull
+	@Override
+	public ChunkOutcome consume(
+				ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
+						theChunkDetails) {
+		/*
+			* A single code system can have multiple versions.
+			* We don't want to call delete on all these systems
+			* (because if 2 threads do so at the same time, we get exceptions)
+			* so we'll use the reducer step to ensure we only call delete
+			* a single time.
+			*
+			* Thus, we don't need to "consume" anything
+			*/
+		return ChunkOutcome.SUCCESS();
+	}
 }

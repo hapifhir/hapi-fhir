@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
-import javax.ejb.ApplicationException;
-
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+
+import javax.ejb.ApplicationException;
 
 /**
  * A JEE wrapper exception that will not force a rollback.
@@ -31,14 +31,14 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 @ApplicationException(rollback = false)
 public class JaxRsResponseException extends BaseServerResponseException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Utility constructor
-     *
-     * @param base the base exception
-     */
-    public JaxRsResponseException(BaseServerResponseException base) {
-        super(base.getStatusCode(), base.getMessage(), base.getCause(), base.getOperationOutcome());
-    }
+	/**
+	* Utility constructor
+	*
+	* @param base the base exception
+	*/
+	public JaxRsResponseException(BaseServerResponseException base) {
+		super(base.getStatusCode(), base.getMessage(), base.getCause(), base.getOperationOutcome());
+	}
 }

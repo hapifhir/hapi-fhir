@@ -19,20 +19,19 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,85 +39,85 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class HashMapResourceProviderExtension<T extends IBaseResource>
-        extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
+		extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
-    private final RestfulServerExtension myRestfulServerExtension;
-    private boolean myClearBetweenTests = true;
-    private final List<T> myUpdates = new ArrayList<>();
+	private final RestfulServerExtension myRestfulServerExtension;
+	private boolean myClearBetweenTests = true;
+	private final List<T> myUpdates = new ArrayList<>();
 
-    /**
-     * Constructor
-     *
-     * @param theResourceType The resource type to support
-     */
-    public HashMapResourceProviderExtension(
-            RestfulServerExtension theRestfulServerExtension, Class<T> theResourceType) {
-        super(theRestfulServerExtension.getFhirContext(), theResourceType);
+	/**
+	* Constructor
+	*
+	* @param theResourceType The resource type to support
+	*/
+	public HashMapResourceProviderExtension(
+				RestfulServerExtension theRestfulServerExtension, Class<T> theResourceType) {
+		super(theRestfulServerExtension.getFhirContext(), theResourceType);
 
-        myRestfulServerExtension = theRestfulServerExtension;
-    }
+		myRestfulServerExtension = theRestfulServerExtension;
+	}
 
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        myRestfulServerExtension
-                .getRestfulServer()
-                .unregisterProvider(HashMapResourceProviderExtension.this);
-    }
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		myRestfulServerExtension
+					.getRestfulServer()
+					.unregisterProvider(HashMapResourceProviderExtension.this);
+	}
 
-    @Override
-    @Search(allowUnknownParams = true)
-    public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
-        return super.searchAll(theRequestDetails);
-    }
+	@Override
+	@Search(allowUnknownParams = true)
+	public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
+		return super.searchAll(theRequestDetails);
+	}
 
-    @Override
-    public synchronized void clear() {
-        super.clear();
-        if (myUpdates != null) {
-            myUpdates.clear();
-        }
-    }
+	@Override
+	public synchronized void clear() {
+		super.clear();
+		if (myUpdates != null) {
+				myUpdates.clear();
+		}
+	}
 
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-        if (myClearBetweenTests) {
-            clear();
-            clearCounts();
-        }
-        myRestfulServerExtension
-                .getRestfulServer()
-                .registerProvider(HashMapResourceProviderExtension.this);
-    }
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
+		if (myClearBetweenTests) {
+				clear();
+				clearCounts();
+		}
+		myRestfulServerExtension
+					.getRestfulServer()
+					.registerProvider(HashMapResourceProviderExtension.this);
+	}
 
-    @Override
-    public synchronized MethodOutcome update(
-            T theResource, String theConditional, RequestDetails theRequestDetails) {
-        T resourceClone = getFhirContext().newTerser().clone(theResource);
-        myUpdates.add(resourceClone);
-        return super.update(theResource, theConditional, theRequestDetails);
-    }
+	@Override
+	public synchronized MethodOutcome update(
+				T theResource, String theConditional, RequestDetails theRequestDetails) {
+		T resourceClone = getFhirContext().newTerser().clone(theResource);
+		myUpdates.add(resourceClone);
+		return super.update(theResource, theConditional, theRequestDetails);
+	}
 
-    public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
-        myClearBetweenTests = false;
-        return this;
-    }
+	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
+		myClearBetweenTests = false;
+		return this;
+	}
 
-    public void waitForUpdateCount(long theCount) {
-        assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
-        await().until(this::getCountUpdate, equalTo(theCount));
-    }
+	public void waitForUpdateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
+		await().until(this::getCountUpdate, equalTo(theCount));
+	}
 
-    public void waitForCreateCount(long theCount) {
-        assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
-        await().until(this::getCountCreate, equalTo(theCount));
-    }
+	public void waitForCreateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
+		await().until(this::getCountCreate, equalTo(theCount));
+	}
 
-    public void waitForDeleteCount(long theCount) {
-        assertThat(theCount, greaterThanOrEqualTo(getCountDelete()));
-        await().until(this::getCountDelete, equalTo(theCount));
-    }
+	public void waitForDeleteCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountDelete()));
+		await().until(this::getCountDelete, equalTo(theCount));
+	}
 
-    public List<T> getResourceUpdates() {
-        return Collections.unmodifiableList(myUpdates);
-    }
+	public List<T> getResourceUpdates() {
+		return Collections.unmodifiableList(myUpdates);
+	}
 }

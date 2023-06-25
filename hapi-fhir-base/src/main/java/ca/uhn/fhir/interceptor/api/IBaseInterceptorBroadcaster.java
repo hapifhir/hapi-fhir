@@ -21,29 +21,29 @@ package ca.uhn.fhir.interceptor.api;
 
 public interface IBaseInterceptorBroadcaster<POINTCUT extends IPointcut> {
 
-    /**
-     * Invoke registered interceptor hook methods for the given Pointcut.
-     *
-     * @return Returns <code>false</code> if any of the invoked hook methods returned <code>false
-     *     </code>, and returns <code>true</code> otherwise.
-     */
-    boolean callHooks(POINTCUT thePointcut, HookParams theParams);
+	/**
+	* Invoke registered interceptor hook methods for the given Pointcut.
+	*
+	* @return Returns <code>false</code> if any of the invoked hook methods returned <code>false
+	*     </code>, and returns <code>true</code> otherwise.
+	*/
+	boolean callHooks(POINTCUT thePointcut, HookParams theParams);
 
-    /**
-     * Invoke registered interceptor hook methods for the given Pointcut. This method should only be
-     * called for pointcuts that return a type other than <code>void</code> or <code>boolean</code>
-     *
-     * @return Returns the object returned by the first hook method that did not return <code>null
-     *     </code>
-     */
-    Object callHooksAndReturnObject(POINTCUT thePointcut, HookParams theParams);
+	/**
+	* Invoke registered interceptor hook methods for the given Pointcut. This method should only be
+	* called for pointcuts that return a type other than <code>void</code> or <code>boolean</code>
+	*
+	* @return Returns the object returned by the first hook method that did not return <code>null
+	*     </code>
+	*/
+	Object callHooksAndReturnObject(POINTCUT thePointcut, HookParams theParams);
 
-    /**
-     * Does this broadcaster have any hooks for the given pointcut?
-     *
-     * @param thePointcut The poointcut
-     * @return Does this broadcaster have any hooks for the given pointcut?
-     * @since 4.0.0
-     */
-    boolean hasHooks(POINTCUT thePointcut);
+	/**
+	* Does this broadcaster have any hooks for the given pointcut?
+	*
+	* @param thePointcut The poointcut
+	* @return Does this broadcaster have any hooks for the given pointcut?
+	* @since 4.0.0
+	*/
+	boolean hasHooks(POINTCUT thePointcut);
 }

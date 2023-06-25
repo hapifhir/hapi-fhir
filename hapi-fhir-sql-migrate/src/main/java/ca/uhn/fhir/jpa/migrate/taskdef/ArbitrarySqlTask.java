@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -34,162 +29,166 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.util.VersionEnum;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class ArbitrarySqlTask extends BaseTask {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
-    private final String myDescription;
-    private final String myTableName;
-    private List<BaseTask> myTask = new ArrayList<>();
-    private int myBatchSize = 1000;
-    private String myExecuteOnlyIfTableExists;
-    private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
+	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
+	private final String myDescription;
+	private final String myTableName;
+	private List<BaseTask> myTask = new ArrayList<>();
+	private int myBatchSize = 1000;
+	private String myExecuteOnlyIfTableExists;
+	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
-    public ArbitrarySqlTask(
-            VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
-        super(theRelease.toString(), theVersion);
-        myTableName = theTableName;
-        myDescription = theDescription;
-    }
+	public ArbitrarySqlTask(
+				VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
+		super(theRelease.toString(), theVersion);
+		myTableName = theTableName;
+		myDescription = theDescription;
+	}
 
-    public void addQuery(
-            String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
-        myTask.add(new QueryTask(theSql, theMode, theConsumer));
-    }
+	public void addQuery(
+				String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
+		myTask.add(new QueryTask(theSql, theMode, theConsumer));
+	}
 
-    @Override
-    public void validate() {
-        // nothing
-    }
+	@Override
+	public void validate() {
+		// nothing
+	}
 
-    @Override
-    public void doExecute() throws SQLException {
-        logInfo(ourLog, "Starting: {}", myDescription);
+	@Override
+	public void doExecute() throws SQLException {
+		logInfo(ourLog, "Starting: {}", myDescription);
 
-        if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {
-            Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-            if (!tableNames.contains(myExecuteOnlyIfTableExists.toUpperCase())) {
-                logInfo(
-                        ourLog,
-                        "Table {} does not exist - No action performed",
-                        myExecuteOnlyIfTableExists);
-                return;
-            }
-        }
+		if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {
+				Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+				if (!tableNames.contains(myExecuteOnlyIfTableExists.toUpperCase())) {
+					logInfo(
+								ourLog,
+								"Table {} does not exist - No action performed",
+								myExecuteOnlyIfTableExists);
+					return;
+				}
+		}
 
-        for (TableAndColumn next : myConditionalOnExistenceOf) {
-            JdbcUtils.ColumnType columnType =
-                    JdbcUtils.getColumnType(
-                            getConnectionProperties(), next.getTable(), next.getColumn());
-            if (columnType == null) {
-                logInfo(
-                        ourLog,
-                        "Table {} does not have column {} - No action performed",
-                        next.getTable(),
-                        next.getColumn());
-                return;
-            }
-        }
+		for (TableAndColumn next : myConditionalOnExistenceOf) {
+				JdbcUtils.ColumnType columnType =
+						JdbcUtils.getColumnType(
+									getConnectionProperties(), next.getTable(), next.getColumn());
+				if (columnType == null) {
+					logInfo(
+								ourLog,
+								"Table {} does not have column {} - No action performed",
+								next.getTable(),
+								next.getColumn());
+					return;
+				}
+		}
 
-        for (BaseTask next : myTask) {
-            next.execute();
-        }
-    }
+		for (BaseTask next : myTask) {
+				next.execute();
+		}
+	}
 
-    public void setBatchSize(int theBatchSize) {
-        myBatchSize = theBatchSize;
-    }
+	public void setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
+	}
 
-    public void setExecuteOnlyIfTableExists(String theExecuteOnlyIfTableExists) {
-        myExecuteOnlyIfTableExists = theExecuteOnlyIfTableExists;
-    }
+	public void setExecuteOnlyIfTableExists(String theExecuteOnlyIfTableExists) {
+		myExecuteOnlyIfTableExists = theExecuteOnlyIfTableExists;
+	}
 
-    /** This task will only execute if the following column exists */
-    public void addExecuteOnlyIfColumnExists(String theTableName, String theColumnName) {
-        myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
-    }
+	/** This task will only execute if the following column exists */
+	public void addExecuteOnlyIfColumnExists(String theTableName, String theColumnName) {
+		myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
+	}
 
-    @Override
-    protected void generateEquals(
-            EqualsBuilder theBuilder, ca.uhn.fhir.jpa.migrate.taskdef.BaseTask theOtherObject) {
-        ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
-        theBuilder.append(myTableName, otherObject.myTableName);
-    }
+	@Override
+	protected void generateEquals(
+				EqualsBuilder theBuilder, ca.uhn.fhir.jpa.migrate.taskdef.BaseTask theOtherObject) {
+		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
+		theBuilder.append(myTableName, otherObject.myTableName);
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        theBuilder.append(myTableName);
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myTableName);
+	}
 
-    public enum QueryModeEnum {
-        BATCH_UNTIL_NO_MORE
-    }
+	public enum QueryModeEnum {
+		BATCH_UNTIL_NO_MORE
+	}
 
-    private static class TableAndColumn {
-        private final String myTable;
-        private final String myColumn;
+	private static class TableAndColumn {
+		private final String myTable;
+		private final String myColumn;
 
-        private TableAndColumn(String theTable, String theColumn) {
-            myTable = theTable;
-            myColumn = theColumn;
-        }
+		private TableAndColumn(String theTable, String theColumn) {
+				myTable = theTable;
+				myColumn = theColumn;
+		}
 
-        public String getTable() {
-            return myTable;
-        }
+		public String getTable() {
+				return myTable;
+		}
 
-        public String getColumn() {
-            return myColumn;
-        }
-    }
+		public String getColumn() {
+				return myColumn;
+		}
+	}
 
-    private abstract class BaseTask {
-        public abstract void execute();
-    }
+	private abstract class BaseTask {
+		public abstract void execute();
+	}
 
-    private class QueryTask extends BaseTask {
-        private final String mySql;
-        private final Consumer<Map<String, Object>> myConsumer;
+	private class QueryTask extends BaseTask {
+		private final String mySql;
+		private final Consumer<Map<String, Object>> myConsumer;
 
-        public QueryTask(
-                String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
-            mySql = theSql;
-            myConsumer = theConsumer;
-            setDescription("Execute raw sql");
-        }
+		public QueryTask(
+					String theSql, QueryModeEnum theMode, Consumer<Map<String, Object>> theConsumer) {
+				mySql = theSql;
+				myConsumer = theConsumer;
+				setDescription("Execute raw sql");
+		}
 
-        @Override
-        public void execute() {
-            if (isDryRun()) {
-                return;
-            }
+		@Override
+		public void execute() {
+				if (isDryRun()) {
+					return;
+				}
 
-            List<Map<String, Object>> rows;
-            do {
-                logInfo(ourLog, "Querying for up to {} rows", myBatchSize);
-                rows =
-                        getTxTemplate()
-                                .execute(
-                                        t -> {
-                                            JdbcTemplate jdbcTemplate = newJdbcTemplate();
-                                            jdbcTemplate.setMaxRows(myBatchSize);
-                                            return jdbcTemplate.query(
-                                                    mySql, new ColumnMapRowMapper());
-                                        });
+				List<Map<String, Object>> rows;
+				do {
+					logInfo(ourLog, "Querying for up to {} rows", myBatchSize);
+					rows =
+								getTxTemplate()
+										.execute(
+													t -> {
+														JdbcTemplate jdbcTemplate = newJdbcTemplate();
+														jdbcTemplate.setMaxRows(myBatchSize);
+														return jdbcTemplate.query(
+																	mySql, new ColumnMapRowMapper());
+													});
 
-                logInfo(ourLog, "Processing {} rows", rows.size());
-                List<Map<String, Object>> finalRows = rows;
-                getTxTemplate()
-                        .execute(
-                                t -> {
-                                    for (Map<String, Object> nextRow : finalRows) {
-                                        myConsumer.accept(nextRow);
-                                    }
-                                    return null;
-                                });
-            } while (rows.size() > 0);
-        }
-    }
+					logInfo(ourLog, "Processing {} rows", rows.size());
+					List<Map<String, Object>> finalRows = rows;
+					getTxTemplate()
+								.execute(
+										t -> {
+												for (Map<String, Object> nextRow : finalRows) {
+													myConsumer.accept(nextRow);
+												}
+												return null;
+										});
+				} while (rows.size() > 0);
+		}
+	}
 }

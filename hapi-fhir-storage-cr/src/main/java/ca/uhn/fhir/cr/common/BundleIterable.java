@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This class leverages IBundleProvider Iterable to provide an iterator for processing bundle search
@@ -36,71 +35,71 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 @NotThreadSafe
 public class BundleIterable implements Iterable<IBaseResource> {
 
-    private final IBundleProvider sourceBundleProvider;
-    private final RequestDetails requestDetails;
+	private final IBundleProvider sourceBundleProvider;
+	private final RequestDetails requestDetails;
 
-    public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider) {
-        this.sourceBundleProvider = bundleProvider;
-        this.requestDetails = requestDetails;
-    }
+	public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider) {
+		this.sourceBundleProvider = bundleProvider;
+		this.requestDetails = requestDetails;
+	}
 
-    @Override
-    public Iterator<IBaseResource> iterator() {
-        return new BundleIterator(this.requestDetails, this.sourceBundleProvider);
-    }
+	@Override
+	public Iterator<IBaseResource> iterator() {
+		return new BundleIterator(this.requestDetails, this.sourceBundleProvider);
+	}
 
-    static class BundleIterator implements Iterator<IBaseResource> {
+	static class BundleIterator implements Iterator<IBaseResource> {
 
-        private IBundleProvider bundleProvider;
+		private IBundleProvider bundleProvider;
 
-        private int offset = 0;
-        private int increment = 50;
-        private List<IBaseResource> currentResourceList;
+		private int offset = 0;
+		private int increment = 50;
+		private List<IBaseResource> currentResourceList;
 
-        private final RequestDetails requestDetails;
+		private final RequestDetails requestDetails;
 
-        private int currentResourceListIndex = 0;
+		private int currentResourceListIndex = 0;
 
-        public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider) {
-            this.bundleProvider = bundleProvider;
-            this.requestDetails = requestDetails;
-            initChunk();
-        }
+		public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider) {
+				this.bundleProvider = bundleProvider;
+				this.requestDetails = requestDetails;
+				initChunk();
+		}
 
-        private void initChunk() {
-            this.currentResourceList = this.bundleProvider.getResources(offset, increment + offset);
-            // next offset created
-            offset += increment;
-            // restart counter on new chunk
-            currentResourceListIndex = 0;
-        }
+		private void initChunk() {
+				this.currentResourceList = this.bundleProvider.getResources(offset, increment + offset);
+				// next offset created
+				offset += increment;
+				// restart counter on new chunk
+				currentResourceListIndex = 0;
+		}
 
-        private void loadNextChunk() {
-            initChunk();
-        }
+		private void loadNextChunk() {
+				initChunk();
+		}
 
-        @Override
-        public boolean hasNext() {
-            // We still have things in the current chunk to return
-            if (this.currentResourceListIndex < this.currentResourceList.size()) {
-                return true;
-            } else if (this.currentResourceList.size() == 0) {
-                // no more resources!
-                return false;
-            }
+		@Override
+		public boolean hasNext() {
+				// We still have things in the current chunk to return
+				if (this.currentResourceListIndex < this.currentResourceList.size()) {
+					return true;
+				} else if (this.currentResourceList.size() == 0) {
+					// no more resources!
+					return false;
+				}
 
-            // We need our next chunk
-            this.loadNextChunk();
-            return this.hasNext();
-        }
+				// We need our next chunk
+				this.loadNextChunk();
+				return this.hasNext();
+		}
 
-        @Override
-        public IBaseResource next() {
-            assert this.currentResourceListIndex < this.currentResourceList.size();
+		@Override
+		public IBaseResource next() {
+				assert this.currentResourceListIndex < this.currentResourceList.size();
 
-            var result = this.currentResourceList.get(this.currentResourceListIndex);
-            this.currentResourceListIndex++;
-            return result;
-        }
-    }
+				var result = this.currentResourceList.get(this.currentResourceListIndex);
+				this.currentResourceListIndex++;
+				return result;
+		}
+	}
 }

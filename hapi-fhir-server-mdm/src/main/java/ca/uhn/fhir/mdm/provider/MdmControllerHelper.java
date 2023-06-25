@@ -19,24 +19,6 @@
  */
 package ca.uhn.fhir.mdm.provider;
 
-import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -55,174 +37,191 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.validation.IResourceLoader;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.Nonnull;
 
 @Service
 public class MdmControllerHelper {
 
-    private final FhirContext myFhirContext;
-    private final IResourceLoader myResourceLoader;
-    private final IMdmSettings myMdmSettings;
-    private final MessageHelper myMessageHelper;
-    private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
-    private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final FhirContext myFhirContext;
+	private final IResourceLoader myResourceLoader;
+	private final IMdmSettings myMdmSettings;
+	private final MessageHelper myMessageHelper;
+	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-    @Autowired
-    public MdmControllerHelper(
-            FhirContext theFhirContext,
-            IResourceLoader theResourceLoader,
-            IMdmMatchFinderSvc theMdmMatchFinderSvc,
-            IMdmSettings theMdmSettings,
-            MessageHelper theMessageHelper,
-            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-        myFhirContext = theFhirContext;
-        myResourceLoader = theResourceLoader;
-        myMdmSettings = theMdmSettings;
-        myMdmMatchFinderSvc = theMdmMatchFinderSvc;
-        myMessageHelper = theMessageHelper;
-        myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-    }
+	@Autowired
+	public MdmControllerHelper(
+				FhirContext theFhirContext,
+				IResourceLoader theResourceLoader,
+				IMdmMatchFinderSvc theMdmMatchFinderSvc,
+				IMdmSettings theMdmSettings,
+				MessageHelper theMessageHelper,
+				IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myFhirContext = theFhirContext;
+		myResourceLoader = theResourceLoader;
+		myMdmSettings = theMdmSettings;
+		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
+		myMessageHelper = theMessageHelper;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+	}
 
-    public void validateSameVersion(IAnyResource theResource, String theResourceId) {
-        String storedId = theResource.getIdElement().getValue();
-        if (hasVersionIdPart(theResourceId) && !storedId.equals(theResourceId)) {
-            throw new ResourceVersionConflictException(
-                    Msg.code(1501)
-                            + "Requested resource "
-                            + theResourceId
-                            + " is not the latest version.  Latest version is "
-                            + storedId);
-        }
-    }
+	public void validateSameVersion(IAnyResource theResource, String theResourceId) {
+		String storedId = theResource.getIdElement().getValue();
+		if (hasVersionIdPart(theResourceId) && !storedId.equals(theResourceId)) {
+				throw new ResourceVersionConflictException(
+						Msg.code(1501)
+									+ "Requested resource "
+									+ theResourceId
+									+ " is not the latest version.  Latest version is "
+									+ storedId);
+		}
+	}
 
-    private boolean hasVersionIdPart(String theId) {
-        return new IdDt(theId).hasVersionIdPart();
-    }
+	private boolean hasVersionIdPart(String theId) {
+		return new IdDt(theId).hasVersionIdPart();
+	}
 
-    public IAnyResource getLatestGoldenResourceFromIdOrThrowException(
-            String theParamName, String theGoldenResourceId) {
-        IdDt resourceId =
-                MdmControllerUtil.getGoldenIdDtOrThrowException(theParamName, theGoldenResourceId);
-        IAnyResource iAnyResource = loadResource(resourceId.toUnqualifiedVersionless());
-        if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
-            return iAnyResource;
-        } else {
-            throw new InvalidRequestException(
-                    Msg.code(1502)
-                            + myMessageHelper.getMessageForFailedGoldenResourceLoad(
-                                    theParamName, theGoldenResourceId));
-        }
-    }
+	public IAnyResource getLatestGoldenResourceFromIdOrThrowException(
+				String theParamName, String theGoldenResourceId) {
+		IdDt resourceId =
+					MdmControllerUtil.getGoldenIdDtOrThrowException(theParamName, theGoldenResourceId);
+		IAnyResource iAnyResource = loadResource(resourceId.toUnqualifiedVersionless());
+		if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
+				return iAnyResource;
+		} else {
+				throw new InvalidRequestException(
+						Msg.code(1502)
+									+ myMessageHelper.getMessageForFailedGoldenResourceLoad(
+												theParamName, theGoldenResourceId));
+		}
+	}
 
-    public IAnyResource getLatestSourceFromIdOrThrowException(
-            String theParamName, String theSourceId) {
-        IIdType sourceId =
-                MdmControllerUtil.getSourceIdDtOrThrowException(theParamName, theSourceId);
-        return loadResource(sourceId.toUnqualifiedVersionless());
-    }
+	public IAnyResource getLatestSourceFromIdOrThrowException(
+				String theParamName, String theSourceId) {
+		IIdType sourceId =
+					MdmControllerUtil.getSourceIdDtOrThrowException(theParamName, theSourceId);
+		return loadResource(sourceId.toUnqualifiedVersionless());
+	}
 
-    protected IAnyResource loadResource(IIdType theResourceId) {
-        Class<? extends IBaseResource> resourceClass =
-                myFhirContext
-                        .getResourceDefinition(theResourceId.getResourceType())
-                        .getImplementingClass();
-        return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
-    }
+	protected IAnyResource loadResource(IIdType theResourceId) {
+		Class<? extends IBaseResource> resourceClass =
+					myFhirContext
+								.getResourceDefinition(theResourceId.getResourceType())
+								.getImplementingClass();
+		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
+	}
 
-    public void validateMergeResources(
-            IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource) {
-        validateIsMdmManaged(
-                ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResource);
-        validateIsMdmManaged(
-                ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResource);
-    }
+	public void validateMergeResources(
+				IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource) {
+		validateIsMdmManaged(
+					ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResource);
+		validateIsMdmManaged(
+					ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResource);
+	}
 
-    public String toJson(IAnyResource theAnyResource) {
-        return myFhirContext.newJsonParser().encodeResourceToString(theAnyResource);
-    }
+	public String toJson(IAnyResource theAnyResource) {
+		return myFhirContext.newJsonParser().encodeResourceToString(theAnyResource);
+	}
 
-    public void validateIsMdmManaged(String theName, IAnyResource theResource) {
-        String resourceType = myFhirContext.getResourceType(theResource);
-        if (!myMdmSettings.isSupportedMdmType(resourceType)) {
-            throw new InvalidRequestException(
-                    Msg.code(1503)
-                            + myMessageHelper.getMessageForUnsupportedResource(
-                                    theName, resourceType));
-        }
+	public void validateIsMdmManaged(String theName, IAnyResource theResource) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		if (!myMdmSettings.isSupportedMdmType(resourceType)) {
+				throw new InvalidRequestException(
+						Msg.code(1503)
+									+ myMessageHelper.getMessageForUnsupportedResource(
+												theName, resourceType));
+		}
 
-        if (!MdmResourceUtil.isMdmManaged(theResource)) {
-            throw new InvalidRequestException(
-                    Msg.code(1504) + myMessageHelper.getMessageForUnmanagedResource());
-        }
-    }
+		if (!MdmResourceUtil.isMdmManaged(theResource)) {
+				throw new InvalidRequestException(
+						Msg.code(1504) + myMessageHelper.getMessageForUnmanagedResource());
+		}
+	}
 
-    /** Helper method which will return a bundle of all Matches and Possible Matches. */
-    public IBaseBundle getMatchesAndPossibleMatchesForResource(
-            IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
-        RequestPartitionId requestPartitionId;
-        ReadPartitionIdRequestDetails details =
-                ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
-        if (myMdmSettings.getSearchAllPartitionForMatch()) {
-            requestPartitionId = RequestPartitionId.allPartitions();
-        } else {
-            requestPartitionId =
-                    myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-                            theRequestDetails, details);
-        }
-        List<MatchedTarget> matches =
-                myMdmMatchFinderSvc.getMatchedTargets(
-                        theResourceType, theResource, requestPartitionId);
-        matches.sort(
-                Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
-                        .reversed());
+	/** Helper method which will return a bundle of all Matches and Possible Matches. */
+	public IBaseBundle getMatchesAndPossibleMatchesForResource(
+				IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
+		RequestPartitionId requestPartitionId;
+		ReadPartitionIdRequestDetails details =
+					ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
+		if (myMdmSettings.getSearchAllPartitionForMatch()) {
+				requestPartitionId = RequestPartitionId.allPartitions();
+		} else {
+				requestPartitionId =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+									theRequestDetails, details);
+		}
+		List<MatchedTarget> matches =
+					myMdmMatchFinderSvc.getMatchedTargets(
+								theResourceType, theResource, requestPartitionId);
+		matches.sort(
+					Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
+								.reversed());
 
-        BundleBuilder builder = new BundleBuilder(myFhirContext);
-        builder.setBundleField("type", "searchset");
-        builder.setBundleField("id", UUID.randomUUID().toString());
-        builder.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setBundleField("type", "searchset");
+		builder.setBundleField("id", UUID.randomUUID().toString());
+		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
 
-        IBaseBundle retVal = builder.getBundle();
-        for (MatchedTarget next : matches) {
-            boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
-            if (!shouldKeepThisEntry) {
-                continue;
-            }
+		IBaseBundle retVal = builder.getBundle();
+		for (MatchedTarget next : matches) {
+				boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
+				if (!shouldKeepThisEntry) {
+					continue;
+				}
 
-            IBase entry = builder.addEntry();
-            builder.addToEntry(entry, "resource", next.getTarget());
+				IBase entry = builder.addEntry();
+				builder.addToEntry(entry, "resource", next.getTarget());
 
-            IBaseBackboneElement search = builder.addSearch(entry);
-            toBundleEntrySearchComponent(builder, search, next);
-        }
-        return retVal;
-    }
+				IBaseBackboneElement search = builder.addSearch(entry);
+				toBundleEntrySearchComponent(builder, search, next);
+		}
+		return retVal;
+	}
 
-    public IBaseBackboneElement toBundleEntrySearchComponent(
-            BundleBuilder theBuilder,
-            IBaseBackboneElement theSearch,
-            MatchedTarget theMatchedTarget) {
-        theBuilder.setSearchField(theSearch, "mode", "match");
-        double score = theMatchedTarget.getMatchResult().getNormalizedScore();
-        theBuilder.setSearchField(
-                theSearch, "score", theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
+	public IBaseBackboneElement toBundleEntrySearchComponent(
+				BundleBuilder theBuilder,
+				IBaseBackboneElement theSearch,
+				MatchedTarget theMatchedTarget) {
+		theBuilder.setSearchField(theSearch, "mode", "match");
+		double score = theMatchedTarget.getMatchResult().getNormalizedScore();
+		theBuilder.setSearchField(
+					theSearch, "score", theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
 
-        String matchGrade = getMatchGrade(theMatchedTarget);
-        IBaseDatatype codeType =
-                (IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
-        IBaseExtension searchExtension = theSearch.addExtension();
-        searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-        searchExtension.setValue(codeType);
+		String matchGrade = getMatchGrade(theMatchedTarget);
+		IBaseDatatype codeType =
+					(IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
+		IBaseExtension searchExtension = theSearch.addExtension();
+		searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		searchExtension.setValue(codeType);
 
-        return theSearch;
-    }
+		return theSearch;
+	}
 
-    @Nonnull
-    protected String getMatchGrade(MatchedTarget theTheMatchedTarget) {
-        String retVal = "probable";
-        if (theTheMatchedTarget.isMatch()) {
-            retVal = "certain";
-        } else if (theTheMatchedTarget.isPossibleMatch()) {
-            retVal = "possible";
-        }
-        return retVal;
-    }
+	@Nonnull
+	protected String getMatchGrade(MatchedTarget theTheMatchedTarget) {
+		String retVal = "probable";
+		if (theTheMatchedTarget.isMatch()) {
+				retVal = "certain";
+		} else if (theTheMatchedTarget.isPossibleMatch()) {
+				retVal = "possible";
+		}
+		return retVal;
+	}
 }

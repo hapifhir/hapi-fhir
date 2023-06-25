@@ -25,32 +25,32 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 /** An IBaseResource that has a FHIR version of DSTU3 or higher */
 public interface IAnyResource extends IBaseResource {
 
-    /** Search parameter constant for <b>_id</b> */
-    @SearchParamDefinition(
-            name = "_id",
-            path = "",
-            description = "The ID of the resource",
-            type = "token")
-    String SP_RES_ID = "_id";
+	/** Search parameter constant for <b>_id</b> */
+	@SearchParamDefinition(
+				name = "_id",
+				path = "",
+				description = "The ID of the resource",
+				type = "token")
+	String SP_RES_ID = "_id";
 
-    /**
-     * <b>Fluent Client</b> search parameter constant for <b>_id</b>
-     *
-     * <p>Description: <b>the _id of a resource</b><br>
-     * Type: <b>string</b><br>
-     * Path: <b>Resource._id</b><br>
-     */
-    TokenClientParam RES_ID = new TokenClientParam(IAnyResource.SP_RES_ID);
+	/**
+	* <b>Fluent Client</b> search parameter constant for <b>_id</b>
+	*
+	* <p>Description: <b>the _id of a resource</b><br>
+	* Type: <b>string</b><br>
+	* Path: <b>Resource._id</b><br>
+	*/
+	TokenClientParam RES_ID = new TokenClientParam(IAnyResource.SP_RES_ID);
 
-    String getId();
+	String getId();
 
-    IIdType getIdElement();
+	IIdType getIdElement();
 
-    IPrimitiveType<String> getLanguageElement();
+	IPrimitiveType<String> getLanguageElement();
 
-    Object getUserData(String name);
+	Object getUserData(String name);
 
-    IAnyResource setId(String theId);
+	IAnyResource setId(String theId);
 
-    void setUserData(String name, Object value);
+	void setUserData(String name, Object value);
 }

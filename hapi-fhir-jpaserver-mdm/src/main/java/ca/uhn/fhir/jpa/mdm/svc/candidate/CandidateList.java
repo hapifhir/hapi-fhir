@@ -25,51 +25,51 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class CandidateList {
-    private final CandidateStrategyEnum myStrategy;
-    private final List<MatchedGoldenResourceCandidate> myList = new ArrayList<>();
+	private final CandidateStrategyEnum myStrategy;
+	private final List<MatchedGoldenResourceCandidate> myList = new ArrayList<>();
 
-    public CandidateList(CandidateStrategyEnum theStrategy) {
-        myStrategy = theStrategy;
-    }
+	public CandidateList(CandidateStrategyEnum theStrategy) {
+		myStrategy = theStrategy;
+	}
 
-    public CandidateStrategyEnum getStrategy() {
-        return myStrategy;
-    }
+	public CandidateStrategyEnum getStrategy() {
+		return myStrategy;
+	}
 
-    public boolean isEmpty() {
-        return myList.isEmpty();
-    }
+	public boolean isEmpty() {
+		return myList.isEmpty();
+	}
 
-    public void addAll(List<MatchedGoldenResourceCandidate> theList) {
-        myList.addAll(theList);
-    }
+	public void addAll(List<MatchedGoldenResourceCandidate> theList) {
+		myList.addAll(theList);
+	}
 
-    public MatchedGoldenResourceCandidate getOnlyMatch() {
-        assert myList.size() == 1;
-        return myList.get(0);
-    }
+	public MatchedGoldenResourceCandidate getOnlyMatch() {
+		assert myList.size() == 1;
+		return myList.get(0);
+	}
 
-    public boolean exactlyOneMatch() {
-        return myList.size() == 1;
-    }
+	public boolean exactlyOneMatch() {
+		return myList.size() == 1;
+	}
 
-    public Stream<MatchedGoldenResourceCandidate> stream() {
-        return myList.stream();
-    }
+	public Stream<MatchedGoldenResourceCandidate> stream() {
+		return myList.stream();
+	}
 
-    public List<MatchedGoldenResourceCandidate> getCandidates() {
-        return Collections.unmodifiableList(myList);
-    }
+	public List<MatchedGoldenResourceCandidate> getCandidates() {
+		return Collections.unmodifiableList(myList);
+	}
 
-    public MatchedGoldenResourceCandidate getFirstMatch() {
-        return myList.get(0);
-    }
+	public MatchedGoldenResourceCandidate getFirstMatch() {
+		return myList.get(0);
+	}
 
-    public boolean isEidMatch() {
-        return myStrategy.isEidMatch();
-    }
+	public boolean isEidMatch() {
+		return myStrategy.isEidMatch();
+	}
 
-    public int size() {
-        return myList.size();
-    }
+	public int size() {
+		return myList.size();
+	}
 }

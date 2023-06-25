@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import java.util.Collection;
 
 public interface ITermConceptParentChildLinkDao
-        extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
 
-    @Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
-    Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
+	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
+	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 
-    @Modifying
-    @Query("DELETE FROM TermConceptParentChildLink WHERE myCodeSystemVersionPid = :cs_pid")
-    int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	@Modifying
+	@Query("DELETE FROM TermConceptParentChildLink WHERE myCodeSystemVersionPid = :cs_pid")
+	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 }

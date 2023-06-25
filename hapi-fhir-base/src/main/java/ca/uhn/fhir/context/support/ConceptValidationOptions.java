@@ -24,31 +24,31 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ConceptValidationOptions {
 
-    private boolean myValidateDisplay;
-    private boolean myInferSystem;
+	private boolean myValidateDisplay;
+	private boolean myInferSystem;
 
-    public boolean isInferSystem() {
-        return myInferSystem;
-    }
+	public boolean isInferSystem() {
+		return myInferSystem;
+	}
 
-    public ConceptValidationOptions setInferSystem(boolean theInferSystem) {
-        myInferSystem = theInferSystem;
-        return this;
-    }
+	public ConceptValidationOptions setInferSystem(boolean theInferSystem) {
+		myInferSystem = theInferSystem;
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("inferSystem", myInferSystem)
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("inferSystem", myInferSystem)
+					.toString();
+	}
 
-    public boolean isValidateDisplay() {
-        return myValidateDisplay;
-    }
+	public boolean isValidateDisplay() {
+		return myValidateDisplay;
+	}
 
-    public ConceptValidationOptions setValidateDisplay(boolean theValidateDisplay) {
-        myValidateDisplay = theValidateDisplay;
-        return this;
-    }
+	public ConceptValidationOptions setValidateDisplay(boolean theValidateDisplay) {
+		myValidateDisplay = theValidateDisplay;
+		return this;
+	}
 }

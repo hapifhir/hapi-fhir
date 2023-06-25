@@ -19,32 +19,31 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Schema(description = "Represents an NPM package deletion response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(
-        creatorVisibility = JsonAutoDetect.Visibility.NONE,
-        fieldVisibility = JsonAutoDetect.Visibility.NONE,
-        getterVisibility = JsonAutoDetect.Visibility.NONE,
-        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE)
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageDeleteOutcomeJson {
 
-    @JsonProperty("messages")
-    private List<String> myMessage;
+	@JsonProperty("messages")
+	private List<String> myMessage;
 
-    public List<String> getMessage() {
-        if (myMessage == null) {
-            myMessage = new ArrayList<>();
-        }
-        return myMessage;
-    }
+	public List<String> getMessage() {
+		if (myMessage == null) {
+				myMessage = new ArrayList<>();
+		}
+		return myMessage;
+	}
 }

@@ -24,27 +24,27 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class NopTask extends BaseTask {
 
-    public NopTask(String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	public NopTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    @Override
-    public void validate() {
-        // nothing
-    }
+	@Override
+	public void validate() {
+		// nothing
+	}
 
-    @Override
-    protected void doExecute() {
-        // nothing
-    }
+	@Override
+	protected void doExecute() {
+		// nothing
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        // nothing
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		// nothing
+	}
 
-    @Override
-    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-        // nothing
-    }
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		// nothing
+	}
 }

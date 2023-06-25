@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Represents an <b>HTTP 500 Internal Error</b> response. This status indicates that the server
@@ -39,29 +38,29 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class InternalErrorException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     * @param theOperationOutcome The OperationOutcome resource to return to the client
-     */
-    public InternalErrorException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
-        super(STATUS_CODE, theMessage, theOperationOutcome);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	* @param theOperationOutcome The OperationOutcome resource to return to the client
+	*/
+	public InternalErrorException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
 
-    public InternalErrorException(String theMessage) {
-        super(STATUS_CODE, theMessage);
-    }
+	public InternalErrorException(String theMessage) {
+		super(STATUS_CODE, theMessage);
+	}
 
-    public InternalErrorException(String theMessage, Throwable theCause) {
-        super(STATUS_CODE, theMessage, theCause);
-    }
+	public InternalErrorException(String theMessage, Throwable theCause) {
+		super(STATUS_CODE, theMessage, theCause);
+	}
 
-    public InternalErrorException(Throwable theCause) {
-        super(STATUS_CODE, theCause);
-    }
+	public InternalErrorException(Throwable theCause) {
+		super(STATUS_CODE, theCause);
+	}
 }

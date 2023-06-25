@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.List;
-import java.util.Optional;
-
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,45 +28,45 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import java.util.List;
+import java.util.Optional;
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
 
-    @Query(
-            "SELECT t FROM TermConcept t "
-                    + "LEFT JOIN FETCH t.myDesignations d "
-                    + "WHERE t.myId IN :pids")
-    List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+	@Query(
+				"SELECT t FROM TermConcept t "
+						+ "LEFT JOIN FETCH t.myDesignations d "
+						+ "WHERE t.myId IN :pids")
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
 
-    @Query(
-            "SELECT t FROM TermConcept t "
-                    + "LEFT JOIN FETCH t.myDesignations d "
-                    + "WHERE t.myCodeSystemVersionPid = :pid")
-    List<TermConcept> fetchConceptsAndDesignationsByVersionPid(
-            @Param("pid") Long theCodeSystemVersionPid);
+	@Query(
+				"SELECT t FROM TermConcept t "
+						+ "LEFT JOIN FETCH t.myDesignations d "
+						+ "WHERE t.myCodeSystemVersionPid = :pid")
+	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(
+				@Param("pid") Long theCodeSystemVersionPid);
 
-    @Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
-    Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-    @Query(
-            "SELECT c FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid AND c.myCode ="
-                    + " :code")
-    Optional<TermConcept> findByCodeSystemAndCode(
-            @Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
+	@Query(
+				"SELECT c FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid AND c.myCode ="
+						+ " :code")
+	Optional<TermConcept> findByCodeSystemAndCode(
+				@Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
 
-    @Query("FROM TermConcept WHERE myCodeSystemVersionPid = :csv_pid AND myCode in (:codeList)")
-    List<TermConcept> findByCodeSystemAndCodeList(
-            @Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
+	@Query("FROM TermConcept WHERE myCodeSystemVersionPid = :csv_pid AND myCode in (:codeList)")
+	List<TermConcept> findByCodeSystemAndCodeList(
+				@Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
 
-    @Modifying
-    @Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")
-    int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	@Modifying
+	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")
+	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-    @Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
-    List<TermConcept> findByCodeSystemVersion(
-            @Param("code_system") TermCodeSystemVersion theCodeSystem);
+	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
+	List<TermConcept> findByCodeSystemVersion(
+				@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
-    @Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
-    Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
+	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
+	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
 }

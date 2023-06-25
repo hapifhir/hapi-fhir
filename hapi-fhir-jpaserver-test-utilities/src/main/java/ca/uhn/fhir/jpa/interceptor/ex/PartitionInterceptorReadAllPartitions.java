@@ -28,8 +28,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 @Interceptor
 public class PartitionInterceptorReadAllPartitions {
 
-    @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-    public RequestPartitionId readPartition() {
-        return RequestPartitionId.allPartitions();
-    }
+	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+	public RequestPartitionId readPartition() {
+		return RequestPartitionId.allPartitions();
+	}
 }

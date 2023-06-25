@@ -21,13 +21,13 @@ package ca.uhn.fhir.rest.server.util;
 
 public interface ICachedSearchDetails {
 
-    String getUuid();
+	String getUuid();
 
-    void setUuid(String theUuid);
+	void setUuid(String theUuid);
 
-    /**
-     * Mark the search as being non-reusable by future queries (as in, the search can serve multiple
-     * page requests for pages of the same search, but it won't be reused in the future)
-     */
-    void setCannotBeReused();
+	/**
+	* Mark the search as being non-reusable by future queries (as in, the search can serve multiple
+	* page requests for pages of the same search, but it won't be reused in the future)
+	*/
+	void setCannotBeReused();
 }

@@ -1,5 +1,5 @@
 package test;
 
 public interface ResourceTest {
-    String getResourceName();
+	String getResourceName();
 }

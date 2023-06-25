@@ -19,19 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
@@ -45,215 +32,227 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
-        extends BaseJpaResourceProvider<T> {
+		extends BaseJpaResourceProvider<T> {
 
-    @Autowired private JpaValidationSupportChain myValidationSupportChain;
+	@Autowired private JpaValidationSupportChain myValidationSupportChain;
 
-    /** $lookup operation */
-    @SuppressWarnings("unchecked")
-    @Operation(
-            name = JpaConstants.OPERATION_LOOKUP,
-            idempotent = true,
-            returnParameters = {
-                @OperationParam(name = "name", typeName = "string", min = 1),
-                @OperationParam(name = "version", typeName = "string", min = 0),
-                @OperationParam(name = "display", typeName = "string", min = 1),
-                @OperationParam(name = "abstract", typeName = "boolean", min = 1),
-            })
-    public IBaseParameters lookup(
-            HttpServletRequest theServletRequest,
-            @OperationParam(name = "code", min = 0, max = 1, typeName = "code")
-                    IPrimitiveType<String> theCode,
-            @OperationParam(name = "system", min = 0, max = 1, typeName = "uri")
-                    IPrimitiveType<String> theSystem,
-            @OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding")
-                    IBaseCoding theCoding,
-            @OperationParam(name = "version", min = 0, max = 1, typeName = "string")
-                    IPrimitiveType<String> theVersion,
-            @OperationParam(name = "displayLanguage", min = 0, max = 1, typeName = "code")
-                    IPrimitiveType<String> theDisplayLanguage,
-            @OperationParam(
-                            name = "property",
-                            min = 0,
-                            max = OperationParam.MAX_UNLIMITED,
-                            typeName = "code")
-                    List<IPrimitiveType<String>> theProperties,
-            RequestDetails theRequestDetails) {
+	/** $lookup operation */
+	@SuppressWarnings("unchecked")
+	@Operation(
+				name = JpaConstants.OPERATION_LOOKUP,
+				idempotent = true,
+				returnParameters = {
+					@OperationParam(name = "name", typeName = "string", min = 1),
+					@OperationParam(name = "version", typeName = "string", min = 0),
+					@OperationParam(name = "display", typeName = "string", min = 1),
+					@OperationParam(name = "abstract", typeName = "boolean", min = 1),
+				})
+	public IBaseParameters lookup(
+				HttpServletRequest theServletRequest,
+				@OperationParam(name = "code", min = 0, max = 1, typeName = "code")
+						IPrimitiveType<String> theCode,
+				@OperationParam(name = "system", min = 0, max = 1, typeName = "uri")
+						IPrimitiveType<String> theSystem,
+				@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding")
+						IBaseCoding theCoding,
+				@OperationParam(name = "version", min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theVersion,
+				@OperationParam(name = "displayLanguage", min = 0, max = 1, typeName = "code")
+						IPrimitiveType<String> theDisplayLanguage,
+				@OperationParam(
+									name = "property",
+									min = 0,
+									max = OperationParam.MAX_UNLIMITED,
+									typeName = "code")
+						List<IPrimitiveType<String>> theProperties,
+				RequestDetails theRequestDetails) {
 
-        startRequest(theServletRequest);
-        try {
-            IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
-            IValidationSupport.LookupCodeResult result;
-            applyVersionToSystem(theSystem, theVersion);
-            result =
-                    dao.lookupCode(
-                            theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
-            result.throwNotFoundIfAppropriate();
-            return result.toParameters(theRequestDetails.getFhirContext(), theProperties);
-        } finally {
-            endRequest(theServletRequest);
-        }
-    }
+		startRequest(theServletRequest);
+		try {
+				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
+				IValidationSupport.LookupCodeResult result;
+				applyVersionToSystem(theSystem, theVersion);
+				result =
+						dao.lookupCode(
+									theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
+				result.throwNotFoundIfAppropriate();
+				return result.toParameters(theRequestDetails.getFhirContext(), theProperties);
+		} finally {
+				endRequest(theServletRequest);
+		}
+	}
 
-    /** $subsumes operation */
-    @Operation(
-            name = JpaConstants.OPERATION_SUBSUMES,
-            idempotent = true,
-            returnParameters = {
-                @OperationParam(name = "outcome", typeName = "code", min = 1),
-            })
-    public IBaseParameters subsumes(
-            HttpServletRequest theServletRequest,
-            @OperationParam(name = "codeA", min = 0, max = 1, typeName = "code")
-                    IPrimitiveType<String> theCodeA,
-            @OperationParam(name = "codeB", min = 0, max = 1, typeName = "code")
-                    IPrimitiveType<String> theCodeB,
-            @OperationParam(name = "system", min = 0, max = 1, typeName = "uri")
-                    IPrimitiveType<String> theSystem,
-            @OperationParam(name = "codingA", min = 0, max = 1, typeName = "Coding")
-                    IBaseCoding theCodingA,
-            @OperationParam(name = "codingB", min = 0, max = 1, typeName = "Coding")
-                    IBaseCoding theCodingB,
-            @OperationParam(name = "version", min = 0, max = 1, typeName = "string")
-                    IPrimitiveType<String> theVersion,
-            RequestDetails theRequestDetails) {
+	/** $subsumes operation */
+	@Operation(
+				name = JpaConstants.OPERATION_SUBSUMES,
+				idempotent = true,
+				returnParameters = {
+					@OperationParam(name = "outcome", typeName = "code", min = 1),
+				})
+	public IBaseParameters subsumes(
+				HttpServletRequest theServletRequest,
+				@OperationParam(name = "codeA", min = 0, max = 1, typeName = "code")
+						IPrimitiveType<String> theCodeA,
+				@OperationParam(name = "codeB", min = 0, max = 1, typeName = "code")
+						IPrimitiveType<String> theCodeB,
+				@OperationParam(name = "system", min = 0, max = 1, typeName = "uri")
+						IPrimitiveType<String> theSystem,
+				@OperationParam(name = "codingA", min = 0, max = 1, typeName = "Coding")
+						IBaseCoding theCodingA,
+				@OperationParam(name = "codingB", min = 0, max = 1, typeName = "Coding")
+						IBaseCoding theCodingB,
+				@OperationParam(name = "version", min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theVersion,
+				RequestDetails theRequestDetails) {
 
-        startRequest(theServletRequest);
-        try {
-            IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
-            IFhirResourceDaoCodeSystem.SubsumesResult result;
-            applyVersionToSystem(theSystem, theVersion);
-            result =
-                    dao.subsumes(
-                            theCodeA,
-                            theCodeB,
-                            theSystem,
-                            theCodingA,
-                            theCodingB,
-                            theRequestDetails);
-            return result.toParameters(theRequestDetails.getFhirContext());
-        } finally {
-            endRequest(theServletRequest);
-        }
-    }
+		startRequest(theServletRequest);
+		try {
+				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
+				IFhirResourceDaoCodeSystem.SubsumesResult result;
+				applyVersionToSystem(theSystem, theVersion);
+				result =
+						dao.subsumes(
+									theCodeA,
+									theCodeB,
+									theSystem,
+									theCodingA,
+									theCodingB,
+									theRequestDetails);
+				return result.toParameters(theRequestDetails.getFhirContext());
+		} finally {
+				endRequest(theServletRequest);
+		}
+	}
 
-    static void applyVersionToSystem(
-            IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
-        if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
-            theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
-        }
-    }
+	static void applyVersionToSystem(
+				IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
+		if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
+				theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
+		}
+	}
 
-    /** $validate-code operation */
-    @SuppressWarnings("unchecked")
-    @Operation(
-            name = JpaConstants.OPERATION_VALIDATE_CODE,
-            idempotent = true,
-            returnParameters = {
-                @OperationParam(name = "result", typeName = "boolean", min = 1),
-                @OperationParam(name = "message", typeName = "string"),
-                @OperationParam(name = "display", typeName = "string")
-            })
-    public IBaseParameters validateCode(
-            HttpServletRequest theServletRequest,
-            @IdParam(optional = true) IIdType theId,
-            @OperationParam(name = "url", min = 0, max = 1, typeName = "uri")
-                    IPrimitiveType<String> theCodeSystemUrl,
-            @OperationParam(name = "version", min = 0, max = 1, typeName = "string")
-                    IPrimitiveType<String> theVersion,
-            @OperationParam(name = "code", min = 0, max = 1, typeName = "code")
-                    IPrimitiveType<String> theCode,
-            @OperationParam(name = "display", min = 0, max = 1, typeName = "string")
-                    IPrimitiveType<String> theDisplay,
-            @OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding")
-                    IBaseCoding theCoding,
-            @OperationParam(
-                            name = "codeableConcept",
-                            min = 0,
-                            max = 1,
-                            typeName = "CodeableConcept")
-                    IBaseDatatype theCodeableConcept,
-            RequestDetails theRequestDetails) {
+	/** $validate-code operation */
+	@SuppressWarnings("unchecked")
+	@Operation(
+				name = JpaConstants.OPERATION_VALIDATE_CODE,
+				idempotent = true,
+				returnParameters = {
+					@OperationParam(name = "result", typeName = "boolean", min = 1),
+					@OperationParam(name = "message", typeName = "string"),
+					@OperationParam(name = "display", typeName = "string")
+				})
+	public IBaseParameters validateCode(
+				HttpServletRequest theServletRequest,
+				@IdParam(optional = true) IIdType theId,
+				@OperationParam(name = "url", min = 0, max = 1, typeName = "uri")
+						IPrimitiveType<String> theCodeSystemUrl,
+				@OperationParam(name = "version", min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theVersion,
+				@OperationParam(name = "code", min = 0, max = 1, typeName = "code")
+						IPrimitiveType<String> theCode,
+				@OperationParam(name = "display", min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theDisplay,
+				@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding")
+						IBaseCoding theCoding,
+				@OperationParam(
+									name = "codeableConcept",
+									min = 0,
+									max = 1,
+									typeName = "CodeableConcept")
+						IBaseDatatype theCodeableConcept,
+				RequestDetails theRequestDetails) {
 
-        CodeValidationResult result = null;
-        startRequest(theServletRequest);
-        try {
-            // TODO: JA why not just always just the chain here? and we can then get rid of the
-            // corresponding DAO method entirely
-            // If a Remote Terminology Server has been configured, use it
-            if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-                String codeSystemUrl =
-                        (theCodeSystemUrl != null && theCodeSystemUrl.hasValue())
-                                ? theCodeSystemUrl.getValueAsString()
-                                : null;
+		CodeValidationResult result = null;
+		startRequest(theServletRequest);
+		try {
+				// TODO: JA why not just always just the chain here? and we can then get rid of the
+				// corresponding DAO method entirely
+				// If a Remote Terminology Server has been configured, use it
+				if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+					String codeSystemUrl =
+								(theCodeSystemUrl != null && theCodeSystemUrl.hasValue())
+										? theCodeSystemUrl.getValueAsString()
+										: null;
 
-                if (theCoding != null) {
-                    if (isNotBlank(theCoding.getSystem())) {
-                        if (codeSystemUrl != null
-                                && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
-                            throw new InvalidRequestException(
-                                    Msg.code(1160)
-                                            + "Coding.system '"
-                                            + theCoding.getSystem()
-                                            + "' does not equal param url '"
-                                            + theCodeSystemUrl
-                                            + "'. Unable to validate-code.");
-                        }
-                        codeSystemUrl = theCoding.getSystem();
-                        String code = theCoding.getCode();
-                        String display = theCoding.getDisplay();
+					if (theCoding != null) {
+						if (isNotBlank(theCoding.getSystem())) {
+								if (codeSystemUrl != null
+										&& !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+									throw new InvalidRequestException(
+												Msg.code(1160)
+														+ "Coding.system '"
+														+ theCoding.getSystem()
+														+ "' does not equal param url '"
+														+ theCodeSystemUrl
+														+ "'. Unable to validate-code.");
+								}
+								codeSystemUrl = theCoding.getSystem();
+								String code = theCoding.getCode();
+								String display = theCoding.getDisplay();
 
-                        result =
-                                validateCodeWithTerminologyService(codeSystemUrl, code, display)
-                                        .orElseGet(
-                                                supplyUnableToValidateResult(codeSystemUrl, code));
-                    }
-                }
-            } else {
-                // Otherwise, use the local DAO layer to validate the code
-                IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
-                result =
-                        dao.validateCode(
-                                theId,
-                                theCodeSystemUrl,
-                                theVersion,
-                                theCode,
-                                theDisplay,
-                                theCoding,
-                                theCodeableConcept,
-                                theRequestDetails);
-            }
-            return toValidateCodeResult(getContext(), result);
-        } finally {
-            endRequest(theServletRequest);
-        }
-    }
+								result =
+										validateCodeWithTerminologyService(codeSystemUrl, code, display)
+													.orElseGet(
+																supplyUnableToValidateResult(codeSystemUrl, code));
+						}
+					}
+				} else {
+					// Otherwise, use the local DAO layer to validate the code
+					IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
+					result =
+								dao.validateCode(
+										theId,
+										theCodeSystemUrl,
+										theVersion,
+										theCode,
+										theDisplay,
+										theCoding,
+										theCodeableConcept,
+										theRequestDetails);
+				}
+				return toValidateCodeResult(getContext(), result);
+		} finally {
+				endRequest(theServletRequest);
+		}
+	}
 
-    private Optional<CodeValidationResult> validateCodeWithTerminologyService(
-            String theCodeSystemUrl, String theCode, String theDisplay) {
-        return Optional.ofNullable(
-                myValidationSupportChain.validateCode(
-                        new ValidationSupportContext(myValidationSupportChain),
-                        new ConceptValidationOptions(),
-                        theCodeSystemUrl,
-                        theCode,
-                        theDisplay,
-                        null));
-    }
+	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
+				String theCodeSystemUrl, String theCode, String theDisplay) {
+		return Optional.ofNullable(
+					myValidationSupportChain.validateCode(
+								new ValidationSupportContext(myValidationSupportChain),
+								new ConceptValidationOptions(),
+								theCodeSystemUrl,
+								theCode,
+								theDisplay,
+								null));
+	}
 
-    private Supplier<CodeValidationResult> supplyUnableToValidateResult(
-            String theCodeSystemUrl, String theCode) {
-        return () ->
-                new CodeValidationResult()
-                        .setMessage(
-                                "Terminology service was unable to provide validation for "
-                                        + theCodeSystemUrl
-                                        + "#"
-                                        + theCode);
-    }
+	private Supplier<CodeValidationResult> supplyUnableToValidateResult(
+				String theCodeSystemUrl, String theCode) {
+		return () ->
+					new CodeValidationResult()
+								.setMessage(
+										"Terminology service was unable to provide validation for "
+													+ theCodeSystemUrl
+													+ "#"
+													+ theCode);
+	}
 }

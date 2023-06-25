@@ -19,18 +19,17 @@
  */
 package ca.uhn.fhir.jpa.dao.tx;
 
-import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.TransactionCallback;
-
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.ICallable;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class is used to execute code within the context of a database transaction, just like
@@ -40,63 +39,63 @@ import ca.uhn.fhir.util.ICallable;
  */
 public interface IHapiTransactionService {
 
-    /**
-     * Fluent builder for creating a transactional callback
-     *
-     * <p>Method chain must end with a call to {@link IExecutionBuilder#execute(Runnable)} or one of
-     * the other overloads of <code>task(...)</code>
-     */
-    IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
+	/**
+	* Fluent builder for creating a transactional callback
+	*
+	* <p>Method chain must end with a call to {@link IExecutionBuilder#execute(Runnable)} or one of
+	* the other overloads of <code>task(...)</code>
+	*/
+	IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
 
-    /** Fluent builder for internal system requests with no external requestdetails associated */
-    IExecutionBuilder withSystemRequest();
+	/** Fluent builder for internal system requests with no external requestdetails associated */
+	IExecutionBuilder withSystemRequest();
 
-    /**
-     * Fluent builder for internal system requests with no external {@link RequestDetails}
-     * associated and a pre-specified partition ID. This method is sugar for
-     *
-     * <pre>
-     *    withSystemRequest()
-     * 			.withRequestPartitionId(thePartitionId);
-     * </pre>
-     *
-     * @since 6.6.0
-     */
-    default IExecutionBuilder withSystemRequestOnPartition(
-            RequestPartitionId theRequestPartitionId) {
-        return withSystemRequest().withRequestPartitionId(theRequestPartitionId);
-    }
+	/**
+	* Fluent builder for internal system requests with no external {@link RequestDetails}
+	* associated and a pre-specified partition ID. This method is sugar for
+	*
+	* <pre>
+	*    withSystemRequest()
+	* 			.withRequestPartitionId(thePartitionId);
+	* </pre>
+	*
+	* @since 6.6.0
+	*/
+	default IExecutionBuilder withSystemRequestOnPartition(
+				RequestPartitionId theRequestPartitionId) {
+		return withSystemRequest().withRequestPartitionId(theRequestPartitionId);
+	}
 
-    /**
-     * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of
-     *     this method, for increased visibility.
-     */
-    @Deprecated
-    <T> T withRequest(
-            @Nullable RequestDetails theRequestDetails,
-            @Nullable TransactionDetails theTransactionDetails,
-            @Nonnull Propagation thePropagation,
-            @Nonnull Isolation theIsolation,
-            @Nonnull ICallable<T> theCallback);
+	/**
+	* @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of
+	*     this method, for increased visibility.
+	*/
+	@Deprecated
+	<T> T withRequest(
+				@Nullable RequestDetails theRequestDetails,
+				@Nullable TransactionDetails theTransactionDetails,
+				@Nonnull Propagation thePropagation,
+				@Nonnull Isolation theIsolation,
+				@Nonnull ICallable<T> theCallback);
 
-    interface IExecutionBuilder {
+	interface IExecutionBuilder {
 
-        IExecutionBuilder withIsolation(Isolation theIsolation);
+		IExecutionBuilder withIsolation(Isolation theIsolation);
 
-        IExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails);
+		IExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails);
 
-        IExecutionBuilder withPropagation(Propagation thePropagation);
+		IExecutionBuilder withPropagation(Propagation thePropagation);
 
-        IExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
+		IExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
 
-        IExecutionBuilder readOnly();
+		IExecutionBuilder readOnly();
 
-        IExecutionBuilder onRollback(Runnable theOnRollback);
+		IExecutionBuilder onRollback(Runnable theOnRollback);
 
-        void execute(Runnable theTask);
+		void execute(Runnable theTask);
 
-        <T> T execute(Callable<T> theTask);
+		<T> T execute(Callable<T> theTask);
 
-        <T> T execute(TransactionCallback<T> callback);
-    }
+		<T> T execute(TransactionCallback<T> callback);
+	}
 }

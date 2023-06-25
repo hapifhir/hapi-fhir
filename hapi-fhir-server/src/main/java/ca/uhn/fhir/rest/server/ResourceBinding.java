@@ -19,83 +19,83 @@
  */
 package ca.uhn.fhir.rest.server;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /** Holds all method bindings for an individual resource type */
 public class ResourceBinding {
 
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
-    private String resourceName;
-    private LinkedList<BaseMethodBinding> myMethodBindings = new LinkedList<>();
+	private String resourceName;
+	private LinkedList<BaseMethodBinding> myMethodBindings = new LinkedList<>();
 
-    /** Constructor */
-    public ResourceBinding() {
-        super();
-    }
+	/** Constructor */
+	public ResourceBinding() {
+		super();
+	}
 
-    public BaseMethodBinding getMethod(RequestDetails theRequest) {
-        if (null == myMethodBindings) {
-            ourLog.warn("No methods exist for resource: {}", resourceName);
-            return null;
-        }
+	public BaseMethodBinding getMethod(RequestDetails theRequest) {
+		if (null == myMethodBindings) {
+				ourLog.warn("No methods exist for resource: {}", resourceName);
+				return null;
+		}
 
-        ourLog.debug("Looking for a handler for {}", theRequest);
+		ourLog.debug("Looking for a handler for {}", theRequest);
 
-        /*
-         * Look for the method with the highest match strength
-         */
+		/*
+			* Look for the method with the highest match strength
+			*/
 
-        BaseMethodBinding matchedMethod = null;
-        MethodMatchEnum matchedMethodStrength = null;
+		BaseMethodBinding matchedMethod = null;
+		MethodMatchEnum matchedMethodStrength = null;
 
-        for (BaseMethodBinding rm : myMethodBindings) {
-            MethodMatchEnum nextMethodMatch = rm.incomingServerRequestMatchesMethod(theRequest);
-            if (nextMethodMatch != MethodMatchEnum.NONE) {
-                if (matchedMethodStrength == null
-                        || matchedMethodStrength.ordinal() < nextMethodMatch.ordinal()) {
-                    matchedMethod = rm;
-                    matchedMethodStrength = nextMethodMatch;
-                }
-                if (matchedMethodStrength == MethodMatchEnum.EXACT) {
-                    break;
-                }
-            }
-        }
+		for (BaseMethodBinding rm : myMethodBindings) {
+				MethodMatchEnum nextMethodMatch = rm.incomingServerRequestMatchesMethod(theRequest);
+				if (nextMethodMatch != MethodMatchEnum.NONE) {
+					if (matchedMethodStrength == null
+								|| matchedMethodStrength.ordinal() < nextMethodMatch.ordinal()) {
+						matchedMethod = rm;
+						matchedMethodStrength = nextMethodMatch;
+					}
+					if (matchedMethodStrength == MethodMatchEnum.EXACT) {
+						break;
+					}
+				}
+		}
 
-        return matchedMethod;
-    }
+		return matchedMethod;
+	}
 
-    public String getResourceName() {
-        return resourceName;
-    }
+	public String getResourceName() {
+		return resourceName;
+	}
 
-    public void setResourceName(String resourceName) {
-        this.resourceName = resourceName;
-    }
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
+	}
 
-    public List<BaseMethodBinding> getMethodBindings() {
-        return myMethodBindings;
-    }
+	public List<BaseMethodBinding> getMethodBindings() {
+		return myMethodBindings;
+	}
 
-    public void addMethod(BaseMethodBinding method) {
-        this.myMethodBindings.push(method);
-    }
+	public void addMethod(BaseMethodBinding method) {
+		this.myMethodBindings.push(method);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ResourceBinding)) return false;
-        return resourceName.equals(((ResourceBinding) o).getResourceName());
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof ResourceBinding)) return false;
+		return resourceName.equals(((ResourceBinding) o).getResourceName());
+	}
 
-    @Override
-    public int hashCode() {
-        return 0;
-    }
+	@Override
+	public int hashCode() {
+		return 0;
+	}
 }

@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 403 Forbidden</b> response, which generally indicates one of two
@@ -47,21 +46,21 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class ForbiddenOperationException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_403_FORBIDDEN;
-    private static final long serialVersionUID = 1L;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_403_FORBIDDEN;
+	private static final long serialVersionUID = 1L;
 
-    public ForbiddenOperationException(String theMessage) {
-        super(STATUS_CODE, theMessage);
-    }
+	public ForbiddenOperationException(String theMessage) {
+		super(STATUS_CODE, theMessage);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     * @param theOperationOutcome The OperationOutcome resource to return to the client
-     */
-    public ForbiddenOperationException(
-            String theMessage, IBaseOperationOutcome theOperationOutcome) {
-        super(STATUS_CODE, theMessage, theOperationOutcome);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	* @param theOperationOutcome The OperationOutcome resource to return to the client
+	*/
+	public ForbiddenOperationException(
+				String theMessage, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
 }

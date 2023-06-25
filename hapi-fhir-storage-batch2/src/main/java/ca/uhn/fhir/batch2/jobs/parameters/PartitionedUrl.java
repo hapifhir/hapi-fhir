@@ -19,48 +19,46 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import javax.validation.constraints.Pattern;
-
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.api.IModelJson;
+import javax.validation.constraints.Pattern;
 
 public class PartitionedUrl implements IModelJson {
-    @Override
-    public String toString() {
-        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        b.append("partition", myRequestPartitionId);
-        b.append("myUrl", myUrl);
-        return b.toString();
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partition", myRequestPartitionId);
+		b.append("myUrl", myUrl);
+		return b.toString();
+	}
 
-    @JsonProperty("url")
-    @Pattern(
-            regexp = "^[A-Z][A-Za-z0-9]+\\?.*",
-            message =
-                    "If populated, URL must be a search URL in the form '{resourceType}?[params]'")
-    String myUrl;
+	@JsonProperty("url")
+	@Pattern(
+				regexp = "^[A-Z][A-Za-z0-9]+\\?.*",
+				message =
+						"If populated, URL must be a search URL in the form '{resourceType}?[params]'")
+	String myUrl;
 
-    @JsonProperty("requestPartitionId")
-    RequestPartitionId myRequestPartitionId;
+	@JsonProperty("requestPartitionId")
+	RequestPartitionId myRequestPartitionId;
 
-    public String getUrl() {
-        return myUrl;
-    }
+	public String getUrl() {
+		return myUrl;
+	}
 
-    public void setUrl(String theUrl) {
-        myUrl = theUrl;
-    }
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
+	}
 
-    public RequestPartitionId getRequestPartitionId() {
-        return myRequestPartitionId;
-    }
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
+	}
 
-    public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-        myRequestPartitionId = theRequestPartitionId;
-    }
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
+	}
 }

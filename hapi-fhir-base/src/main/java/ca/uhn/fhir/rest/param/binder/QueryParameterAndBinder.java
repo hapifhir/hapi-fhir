@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -30,36 +28,38 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.util.List;
+
 public final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>>
-        implements IParamBinder<IQueryParameterAnd<?>> {
+		implements IParamBinder<IQueryParameterAnd<?>> {
 
-    public QueryParameterAndBinder(
-            Class<? extends IQueryParameterAnd<?>> theType,
-            List<Class<? extends IQueryParameterType>> theCompositeTypes) {
-        super(theType, theCompositeTypes);
-    }
+	public QueryParameterAndBinder(
+				Class<? extends IQueryParameterAnd<?>> theType,
+				List<Class<? extends IQueryParameterType>> theCompositeTypes) {
+		super(theType, theCompositeTypes);
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<IQueryParameterOr<?>> encode(
-            FhirContext theContext, IQueryParameterAnd<?> theString) throws InternalErrorException {
-        List<IQueryParameterOr<?>> retVal =
-                (List<IQueryParameterOr<?>>)
-                        ((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
-        return retVal;
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IQueryParameterOr<?>> encode(
+				FhirContext theContext, IQueryParameterAnd<?> theString) throws InternalErrorException {
+		List<IQueryParameterOr<?>> retVal =
+					(List<IQueryParameterOr<?>>)
+								((IQueryParameterAnd<?>) theString).getValuesAsQueryTokens();
+		return retVal;
+	}
 
-    @Override
-    public IQueryParameterAnd<?> parse(
-            FhirContext theContext, String theParamName, List<QualifiedParamList> theString)
-            throws InternalErrorException, InvalidRequestException {
-        IQueryParameterAnd<?> dt;
-        try {
-            dt = newInstance();
-            dt.setValuesAsQueryTokens(theContext, theParamName, theString);
-        } catch (SecurityException e) {
-            throw new InternalErrorException(Msg.code(1952) + e);
-        }
-        return dt;
-    }
+	@Override
+	public IQueryParameterAnd<?> parse(
+				FhirContext theContext, String theParamName, List<QualifiedParamList> theString)
+				throws InternalErrorException, InvalidRequestException {
+		IQueryParameterAnd<?> dt;
+		try {
+				dt = newInstance();
+				dt.setValuesAsQueryTokens(theContext, theParamName, theString);
+		} catch (SecurityException e) {
+				throw new InternalErrorException(Msg.code(1952) + e);
+		}
+		return dt;
+	}
 }

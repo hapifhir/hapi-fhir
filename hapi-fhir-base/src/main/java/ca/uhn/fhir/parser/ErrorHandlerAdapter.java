@@ -25,54 +25,54 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 /** Adapter implementation with NOP implementations of all {@link IParserErrorHandler} methods. */
 public class ErrorHandlerAdapter implements IParserErrorHandler {
 
-    @Override
-    public void containedResourceWithNoId(IParseLocation theLocation) {
-        // NOP
-    }
+	@Override
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		// NOP
+	}
 
-    @Override
-    public void incorrectJsonType(
-            IParseLocation theLocation,
-            String theElementName,
-            ValueType theExpected,
-            ScalarType theExpectedScalarType,
-            ValueType theFound,
-            ScalarType theFoundScalarType) {
-        // NOP
-    }
+	@Override
+	public void incorrectJsonType(
+				IParseLocation theLocation,
+				String theElementName,
+				ValueType theExpected,
+				ScalarType theExpectedScalarType,
+				ValueType theFound,
+				ScalarType theFoundScalarType) {
+		// NOP
+	}
 
-    @Override
-    public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
-        // NOP
-    }
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
 
-    @Override
-    public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-        // NOP
-    }
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
 
-    @Override
-    public void unknownAttribute(IParseLocation theLocation, String theElementName) {
-        // NOP
-    }
+	@Override
+	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
 
-    @Override
-    public void unknownElement(IParseLocation theLocation, String theElementName) {
-        // NOP
-    }
+	@Override
+	public void unknownElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
 
-    @Override
-    public void unknownReference(IParseLocation theLocation, String theReference) {
-        // NOP
-    }
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		// NOP
+	}
 
-    @Override
-    public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
-        // NOP
-    }
+	@Override
+	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
+		// NOP
+	}
 
-    @Override
-    public void extensionContainsValueAndNestedExtensions(IParseLocation theLoc) {
-        // NOP
-    }
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLoc) {
+		// NOP
+	}
 }

@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.okhttp.client;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -34,6 +29,11 @@ import okhttp3.Call.Factory;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Adapter for building an OkHttp-specific request.
  *
@@ -41,76 +41,76 @@ import okhttp3.RequestBody;
  */
 public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpRequest {
 
-    private final Request.Builder myRequestBuilder;
-    private Factory myClient;
-    private String myUrl;
-    private RequestTypeEnum myRequestTypeEnum;
-    private RequestBody myRequestBody;
+	private final Request.Builder myRequestBuilder;
+	private Factory myClient;
+	private String myUrl;
+	private RequestTypeEnum myRequestTypeEnum;
+	private RequestBody myRequestBody;
 
-    public OkHttpRestfulRequest(
-            Call.Factory theClient,
-            String theUrl,
-            RequestTypeEnum theRequestTypeEnum,
-            RequestBody theRequestBody) {
-        myClient = theClient;
-        myUrl = theUrl;
-        myRequestTypeEnum = theRequestTypeEnum;
-        myRequestBody = theRequestBody;
+	public OkHttpRestfulRequest(
+				Call.Factory theClient,
+				String theUrl,
+				RequestTypeEnum theRequestTypeEnum,
+				RequestBody theRequestBody) {
+		myClient = theClient;
+		myUrl = theUrl;
+		myRequestTypeEnum = theRequestTypeEnum;
+		myRequestBody = theRequestBody;
 
-        myRequestBuilder = new Request.Builder().url(theUrl);
-    }
+		myRequestBuilder = new Request.Builder().url(theUrl);
+	}
 
-    public Request.Builder getRequest() {
-        return myRequestBuilder;
-    }
+	public Request.Builder getRequest() {
+		return myRequestBuilder;
+	}
 
-    @Override
-    public void addHeader(String theName, String theValue) {
-        myRequestBuilder.addHeader(theName, theValue);
-    }
+	@Override
+	public void addHeader(String theName, String theValue) {
+		myRequestBuilder.addHeader(theName, theValue);
+	}
 
-    @Override
-    public IHttpResponse execute() throws IOException {
-        StopWatch responseStopWatch = new StopWatch();
-        myRequestBuilder.method(getHttpVerbName(), myRequestBody);
-        Call call = myClient.newCall(myRequestBuilder.build());
-        return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
-    }
+	@Override
+	public IHttpResponse execute() throws IOException {
+		StopWatch responseStopWatch = new StopWatch();
+		myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+		Call call = myClient.newCall(myRequestBuilder.build());
+		return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
+	}
 
-    @Override
-    public Map<String, List<String>> getAllHeaders() {
-        return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
-    }
+	@Override
+	public Map<String, List<String>> getAllHeaders() {
+		return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
+	}
 
-    @Override
-    public String getRequestBodyFromStream() {
-        // returning null to indicate this is not supported, as documented in IHttpRequest's
-        // contract
-        return null;
-    }
+	@Override
+	public String getRequestBodyFromStream() {
+		// returning null to indicate this is not supported, as documented in IHttpRequest's
+		// contract
+		return null;
+	}
 
-    @Override
-    public String getUri() {
-        return myUrl;
-    }
+	@Override
+	public String getUri() {
+		return myUrl;
+	}
 
-    @Override
-    public void setUri(String theUrl) {
-        myUrl = theUrl;
-    }
+	@Override
+	public void setUri(String theUrl) {
+		myUrl = theUrl;
+	}
 
-    @Override
-    public String getHttpVerbName() {
-        return myRequestTypeEnum.name();
-    }
+	@Override
+	public String getHttpVerbName() {
+		return myRequestTypeEnum.name();
+	}
 
-    @Override
-    public void removeHeaders(String theHeaderName) {
-        myRequestBuilder.removeHeader(theHeaderName);
-    }
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		myRequestBuilder.removeHeader(theHeaderName);
+	}
 
-    @Override
-    public String toString() {
-        return getHttpVerbName() + " " + getUri();
-    }
+	@Override
+	public String toString() {
+		return getHttpVerbName() + " " + getUri();
+	}
 }

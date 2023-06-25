@@ -19,111 +19,109 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.Validate;
-
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import org.apache.commons.lang3.Validate;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
-    private final DbTable myTable;
-    private final DbColumn myColumnPartitionId;
+	private final DbTable myTable;
+	private final DbColumn myColumnPartitionId;
 
-    BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
-        super(theSearchSqlBuilder);
-        myTable = theTable;
-        myColumnPartitionId = theTable.addColumn("PARTITION_ID");
-    }
+	BaseJoiningPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
+		super(theSearchSqlBuilder);
+		myTable = theTable;
+		myColumnPartitionId = theTable.addColumn("PARTITION_ID");
+	}
 
-    public DbTable getTable() {
-        return myTable;
-    }
+	public DbTable getTable() {
+		return myTable;
+	}
 
-    public abstract DbColumn getResourceIdColumn();
+	public abstract DbColumn getResourceIdColumn();
 
-    DbColumn getPartitionIdColumn() {
-        return myColumnPartitionId;
-    }
+	DbColumn getPartitionIdColumn() {
+		return myColumnPartitionId;
+	}
 
-    public Condition combineWithRequestPartitionIdPredicate(
-            RequestPartitionId theRequestPartitionId, Condition theCondition) {
-        Condition partitionIdPredicate = createPartitionIdPredicate(theRequestPartitionId);
-        if (partitionIdPredicate == null) {
-            return theCondition;
-        }
-        return QueryParameterUtils.toAndPredicate(partitionIdPredicate, theCondition);
-    }
+	public Condition combineWithRequestPartitionIdPredicate(
+				RequestPartitionId theRequestPartitionId, Condition theCondition) {
+		Condition partitionIdPredicate = createPartitionIdPredicate(theRequestPartitionId);
+		if (partitionIdPredicate == null) {
+				return theCondition;
+		}
+		return QueryParameterUtils.toAndPredicate(partitionIdPredicate, theCondition);
+	}
 
-    @Nullable
-    public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
+	@Nullable
+	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
 
-        if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
-            Condition condition;
+		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
+				Condition condition;
 
-            boolean defaultPartitionIsNull = getPartitionSettings().getDefaultPartitionId() == null;
-            if (theRequestPartitionId.isDefaultPartition() && defaultPartitionIsNull) {
-                condition = UnaryCondition.isNull(getPartitionIdColumn());
-            } else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
-                List<String> placeholders =
-                        generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
-                UnaryCondition partitionNullPredicate =
-                        UnaryCondition.isNull(getPartitionIdColumn());
-                Condition partitionIdsPredicate =
-                        QueryParameterUtils.toEqualToOrInPredicate(
-                                getPartitionIdColumn(), placeholders);
-                condition =
-                        QueryParameterUtils.toOrPredicate(
-                                partitionNullPredicate, partitionIdsPredicate);
-            } else {
-                List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
-                partitionIds =
-                        replaceDefaultPartitionIdIfNonNull(getPartitionSettings(), partitionIds);
+				boolean defaultPartitionIsNull = getPartitionSettings().getDefaultPartitionId() == null;
+				if (theRequestPartitionId.isDefaultPartition() && defaultPartitionIsNull) {
+					condition = UnaryCondition.isNull(getPartitionIdColumn());
+				} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
+					List<String> placeholders =
+								generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
+					UnaryCondition partitionNullPredicate =
+								UnaryCondition.isNull(getPartitionIdColumn());
+					Condition partitionIdsPredicate =
+								QueryParameterUtils.toEqualToOrInPredicate(
+										getPartitionIdColumn(), placeholders);
+					condition =
+								QueryParameterUtils.toOrPredicate(
+										partitionNullPredicate, partitionIdsPredicate);
+				} else {
+					List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+					partitionIds =
+								replaceDefaultPartitionIdIfNonNull(getPartitionSettings(), partitionIds);
 
-                List<String> placeholders = generatePlaceholders(partitionIds);
-                condition =
-                        QueryParameterUtils.toEqualToOrInPredicate(
-                                getPartitionIdColumn(), placeholders);
-            }
-            return condition;
-        } else {
-            return null;
-        }
-    }
+					List<String> placeholders = generatePlaceholders(partitionIds);
+					condition =
+								QueryParameterUtils.toEqualToOrInPredicate(
+										getPartitionIdColumn(), placeholders);
+				}
+				return condition;
+		} else {
+				return null;
+		}
+	}
 
-    public Condition createPredicateResourceIds(boolean theInverse, List<Long> theResourceIds) {
-        Validate.notNull(theResourceIds, "theResourceIds must not be null");
+	public Condition createPredicateResourceIds(boolean theInverse, List<Long> theResourceIds) {
+		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
-        // Handle the _id parameter by adding it to the tail
-        Condition inResourceIds =
-                QueryParameterUtils.toEqualToOrInPredicate(
-                        getResourceIdColumn(), generatePlaceholders(theResourceIds));
-        if (theInverse) {
-            inResourceIds = new NotCondition(inResourceIds);
-        }
-        return inResourceIds;
-    }
+		// Handle the _id parameter by adding it to the tail
+		Condition inResourceIds =
+					QueryParameterUtils.toEqualToOrInPredicate(
+								getResourceIdColumn(), generatePlaceholders(theResourceIds));
+		if (theInverse) {
+				inResourceIds = new NotCondition(inResourceIds);
+		}
+		return inResourceIds;
+	}
 
-    public static List<Integer> replaceDefaultPartitionIdIfNonNull(
-            PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
-        List<Integer> partitionIds = thePartitionIds;
-        if (thePartitionSettings.getDefaultPartitionId() != null) {
-            partitionIds =
-                    partitionIds.stream()
-                            .map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
-                            .collect(Collectors.toList());
-        }
-        return partitionIds;
-    }
+	public static List<Integer> replaceDefaultPartitionIdIfNonNull(
+				PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
+		List<Integer> partitionIds = thePartitionIds;
+		if (thePartitionSettings.getDefaultPartitionId() != null) {
+				partitionIds =
+						partitionIds.stream()
+									.map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
+									.collect(Collectors.toList());
+		}
+		return partitionIds;
+	}
 }

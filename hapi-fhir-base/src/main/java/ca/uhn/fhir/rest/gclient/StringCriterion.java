@@ -19,61 +19,60 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInternal {
 
-    private String myValue;
-    private String myName;
-    private ParamPrefixEnum myPrefix;
+	private String myValue;
+	private String myName;
+	private ParamPrefixEnum myPrefix;
 
-    public StringCriterion(String theName, String theValue) {
-        myName = theName;
-        myValue = ParameterUtil.escapeWithDefault(theValue);
-    }
+	public StringCriterion(String theName, String theValue) {
+		myName = theName;
+		myValue = ParameterUtil.escapeWithDefault(theValue);
+	}
 
-    public StringCriterion(String theName, ParamPrefixEnum thePrefix, String theValue) {
-        myName = theName;
-        myPrefix = thePrefix;
-        myValue = ParameterUtil.escapeWithDefault(theValue);
-    }
+	public StringCriterion(String theName, ParamPrefixEnum thePrefix, String theValue) {
+		myName = theName;
+		myPrefix = thePrefix;
+		myValue = ParameterUtil.escapeWithDefault(theValue);
+	}
 
-    public StringCriterion(String theName, Collection<String> theValue) {
-        myName = theName;
-        StringBuilder b = new StringBuilder();
-        for (String next : theValue) {
-            if (StringUtils.isBlank(next)) {
-                continue;
-            }
-            if (b.length() > 0) {
-                b.append(',');
-            }
-            b.append(ParameterUtil.escape(next));
-        }
-        myValue = b.toString();
-    }
+	public StringCriterion(String theName, Collection<String> theValue) {
+		myName = theName;
+		StringBuilder b = new StringBuilder();
+		for (String next : theValue) {
+				if (StringUtils.isBlank(next)) {
+					continue;
+				}
+				if (b.length() > 0) {
+					b.append(',');
+				}
+				b.append(ParameterUtil.escape(next));
+		}
+		myValue = b.toString();
+	}
 
-    @Override
-    public String getParameterName() {
-        return myName;
-    }
+	@Override
+	public String getParameterName() {
+		return myName;
+	}
 
-    @Override
-    public String getParameterValue(FhirContext theContext) {
-        if (isBlank(myValue)) {
-            return "";
-        }
-        if (myPrefix != null) {
-            return myPrefix.getValue() + myValue;
-        }
-        return myValue;
-    }
+	@Override
+	public String getParameterValue(FhirContext theContext) {
+		if (isBlank(myValue)) {
+				return "";
+		}
+		if (myPrefix != null) {
+				return myPrefix.getValue() + myValue;
+		}
+		return myValue;
+	}
 }

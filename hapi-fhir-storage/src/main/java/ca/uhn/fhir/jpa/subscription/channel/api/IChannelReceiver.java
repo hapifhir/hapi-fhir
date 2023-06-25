@@ -24,6 +24,6 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
 public interface IChannelReceiver
-        extends SubscribableChannel, InterceptableChannel, DisposableBean {
-    String getName();
+		extends SubscribableChannel, InterceptableChannel, DisposableBean {
+	String getName();
 }

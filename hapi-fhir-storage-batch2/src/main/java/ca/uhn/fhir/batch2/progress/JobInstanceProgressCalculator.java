@@ -19,91 +19,90 @@
  */
 package ca.uhn.fhir.batch2.progress;
 
-import java.util.Iterator;
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import org.slf4j.Logger;
+
+import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 public class JobInstanceProgressCalculator {
-    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-    private final IJobPersistence myJobPersistence;
-    private final JobChunkProgressAccumulator myProgressAccumulator;
-    private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	private final IJobPersistence myJobPersistence;
+	private final JobChunkProgressAccumulator myProgressAccumulator;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
-    public JobInstanceProgressCalculator(
-            IJobPersistence theJobPersistence,
-            JobChunkProgressAccumulator theProgressAccumulator,
-            JobDefinitionRegistry theJobDefinitionRegistry) {
-        myJobPersistence = theJobPersistence;
-        myProgressAccumulator = theProgressAccumulator;
-        myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
-    }
+	public JobInstanceProgressCalculator(
+				IJobPersistence theJobPersistence,
+				JobChunkProgressAccumulator theProgressAccumulator,
+				JobDefinitionRegistry theJobDefinitionRegistry) {
+		myJobPersistence = theJobPersistence;
+		myProgressAccumulator = theProgressAccumulator;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+	}
 
-    public void calculateAndStoreInstanceProgress(String theInstanceId) {
-        StopWatch stopWatch = new StopWatch();
-        ourLog.trace("calculating progress: {}", theInstanceId);
+	public void calculateAndStoreInstanceProgress(String theInstanceId) {
+		StopWatch stopWatch = new StopWatch();
+		ourLog.trace("calculating progress: {}", theInstanceId);
 
-        InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
+		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-        myJobPersistence.updateInstance(
-                theInstanceId,
-                currentInstance -> {
-                    instanceProgress.updateInstance(currentInstance);
+		myJobPersistence.updateInstance(
+					theInstanceId,
+					currentInstance -> {
+						instanceProgress.updateInstance(currentInstance);
 
-                    if (currentInstance.getCombinedRecordsProcessed() > 0) {
-                        ourLog.info(
-                                "Job {} of type {} has status {} - {} records processed ({}/sec) -"
-                                        + " ETA: {}",
-                                currentInstance.getInstanceId(),
-                                currentInstance.getJobDefinitionId(),
-                                currentInstance.getStatus(),
-                                currentInstance.getCombinedRecordsProcessed(),
-                                currentInstance.getCombinedRecordsProcessedPerSecond(),
-                                currentInstance.getEstimatedTimeRemaining());
-                    } else {
-                        ourLog.info(
-                                "Job {} of type {} has status {} - {} records processed",
-                                currentInstance.getInstanceId(),
-                                currentInstance.getJobDefinitionId(),
-                                currentInstance.getStatus(),
-                                currentInstance.getCombinedRecordsProcessed());
-                    }
-                    ourLog.debug(instanceProgress.toString());
+						if (currentInstance.getCombinedRecordsProcessed() > 0) {
+								ourLog.info(
+										"Job {} of type {} has status {} - {} records processed ({}/sec) -"
+													+ " ETA: {}",
+										currentInstance.getInstanceId(),
+										currentInstance.getJobDefinitionId(),
+										currentInstance.getStatus(),
+										currentInstance.getCombinedRecordsProcessed(),
+										currentInstance.getCombinedRecordsProcessedPerSecond(),
+										currentInstance.getEstimatedTimeRemaining());
+						} else {
+								ourLog.info(
+										"Job {} of type {} has status {} - {} records processed",
+										currentInstance.getInstanceId(),
+										currentInstance.getJobDefinitionId(),
+										currentInstance.getStatus(),
+										currentInstance.getCombinedRecordsProcessed());
+						}
+						ourLog.debug(instanceProgress.toString());
 
-                    if (instanceProgress.hasNewStatus()) {
-                        myJobInstanceStatusUpdater.updateInstanceStatus(
-                                currentInstance, instanceProgress.getNewStatus());
-                    }
+						if (instanceProgress.hasNewStatus()) {
+								myJobInstanceStatusUpdater.updateInstanceStatus(
+										currentInstance, instanceProgress.getNewStatus());
+						}
 
-                    return true;
-                });
-        ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
-    }
+						return true;
+					});
+		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
+	}
 
-    @Nonnull
-    public InstanceProgress calculateInstanceProgress(String instanceId) {
-        InstanceProgress instanceProgress = new InstanceProgress();
-        Iterator<WorkChunk> workChunkIterator =
-                myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
+	@Nonnull
+	public InstanceProgress calculateInstanceProgress(String instanceId) {
+		InstanceProgress instanceProgress = new InstanceProgress();
+		Iterator<WorkChunk> workChunkIterator =
+					myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
-        while (workChunkIterator.hasNext()) {
-            WorkChunk next = workChunkIterator.next();
-            // global stats
-            myProgressAccumulator.addChunk(next);
-            // instance stats
-            instanceProgress.addChunk(next);
-        }
+		while (workChunkIterator.hasNext()) {
+				WorkChunk next = workChunkIterator.next();
+				// global stats
+				myProgressAccumulator.addChunk(next);
+				// instance stats
+				instanceProgress.addChunk(next);
+		}
 
-        // wipmb separate status update from stats collection in 6.8
-        instanceProgress.calculateNewStatus();
+		// wipmb separate status update from stats collection in 6.8
+		instanceProgress.calculateNewStatus();
 
-        return instanceProgress;
-    }
+		return instanceProgress;
+	}
 }

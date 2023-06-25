@@ -21,9 +21,9 @@ package ca.uhn.fhir.model.api;
 
 public interface ICodingEnum {
 
-    String getCode();
+	String getCode();
 
-    String getSystem();
+	String getSystem();
 
-    String getDisplay();
+	String getDisplay();
 }

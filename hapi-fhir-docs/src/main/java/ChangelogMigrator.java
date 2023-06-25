@@ -17,16 +17,10 @@
  * limitations under the License.
  * #L%
  */
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import ca.uhn.fhir.i18n.Msg;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
 import org.jdom2.Content;
 import org.jdom2.Element;
@@ -37,128 +31,132 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-
-import ca.uhn.fhir.i18n.Msg;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /** This is just here to force a javadoc to be built in order to keep Maven Central happy */
 public class ChangelogMigrator {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ChangelogMigrator.class);
-    private static final Namespace NS =
-            Namespace.getNamespace("http://maven.apache.org/changes/1.0.0");
+	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogMigrator.class);
+	private static final Namespace NS =
+				Namespace.getNamespace("http://maven.apache.org/changes/1.0.0");
 
-    public static void main(String[] args)
-            throws ParserConfigurationException, IOException, SAXException {
+	public static void main(String[] args)
+				throws ParserConfigurationException, IOException, SAXException {
 
-        org.jdom2.Document document = null;
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        // If want to make namespace aware.
-        // factory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        org.w3c.dom.Document w3cDocument =
-                documentBuilder.parse(new File("src/changes/changes.xml"));
-        document = new DOMBuilder().build(w3cDocument);
+		org.jdom2.Document document = null;
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		// If want to make namespace aware.
+		// factory.setNamespaceAware(true);
+		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+		org.w3c.dom.Document w3cDocument =
+					documentBuilder.parse(new File("src/changes/changes.xml"));
+		document = new DOMBuilder().build(w3cDocument);
 
-        int actionCount = 0;
-        int releaseCount = 0;
+		int actionCount = 0;
+		int releaseCount = 0;
 
-        Element docElement = document.getRootElement();
-        Element bodyElement = docElement.getChild("body", NS);
-        List<Element> releases = bodyElement.getChildren("release", NS);
-        for (Element nextRelease : releases) {
-            String version = nextRelease.getAttributeValue("version");
-            String date = nextRelease.getAttributeValue("date");
-            String description = nextRelease.getAttributeValue("description");
-            ourLog.info("Found release {} - {} - {}", version, date, description);
-            releaseCount++;
+		Element docElement = document.getRootElement();
+		Element bodyElement = docElement.getChild("body", NS);
+		List<Element> releases = bodyElement.getChildren("release", NS);
+		for (Element nextRelease : releases) {
+				String version = nextRelease.getAttributeValue("version");
+				String date = nextRelease.getAttributeValue("date");
+				String description = nextRelease.getAttributeValue("description");
+				ourLog.info("Found release {} - {} - {}", version, date, description);
+				releaseCount++;
 
-            ArrayList<Object> items = new ArrayList<>();
+				ArrayList<Object> items = new ArrayList<>();
 
-            for (Element nextAction : nextRelease.getChildren("action", NS)) {
+				for (Element nextAction : nextRelease.getChildren("action", NS)) {
 
-                HashMap<String, Object> itemRootMap = new HashMap<>();
-                items.add(itemRootMap);
-                HashMap<Object, Object> itemMap = new HashMap<>();
-                itemRootMap.put("item", itemMap);
+					HashMap<String, Object> itemRootMap = new HashMap<>();
+					items.add(itemRootMap);
+					HashMap<Object, Object> itemMap = new HashMap<>();
+					itemRootMap.put("item", itemMap);
 
-                String type = nextAction.getAttribute("type").getValue();
-                switch (type) {
-                    case "change":
-                        itemMap.put("type", "change");
-                        break;
-                    case "fix":
-                        itemMap.put("type", "fix");
-                        break;
-                    case "remove":
-                        itemMap.put("type", "remove");
-                        break;
-                    case "add":
-                        itemMap.put("type", "add");
-                        break;
-                    default:
-                        throw new Error(Msg.code(630) + "Unknown type: " + type);
-                }
+					String type = nextAction.getAttribute("type").getValue();
+					switch (type) {
+						case "change":
+								itemMap.put("type", "change");
+								break;
+						case "fix":
+								itemMap.put("type", "fix");
+								break;
+						case "remove":
+								itemMap.put("type", "remove");
+								break;
+						case "add":
+								itemMap.put("type", "add");
+								break;
+						default:
+								throw new Error(Msg.code(630) + "Unknown type: " + type);
+					}
 
-                String issue =
-                        nextAction.getAttribute("issue") != null
-                                ? nextAction.getAttribute("issue").getValue()
-                                : null;
-                if (isNotBlank(issue)) {
-                    itemMap.put("issue", issue);
-                }
+					String issue =
+								nextAction.getAttribute("issue") != null
+										? nextAction.getAttribute("issue").getValue()
+										: null;
+					if (isNotBlank(issue)) {
+						itemMap.put("issue", issue);
+					}
 
-                StringBuilder contentBuilder = new StringBuilder();
-                for (Content nextContents : nextAction.getContent()) {
-                    if (nextContents instanceof Text) {
-                        String text = ((Text) nextContents).getTextNormalize();
-                        contentBuilder.append(" ").append(text);
-                    } else {
-                        throw new IllegalStateException(
-                                Msg.code(631) + "Unknown type: " + nextContents.getClass());
-                    }
-                }
+					StringBuilder contentBuilder = new StringBuilder();
+					for (Content nextContents : nextAction.getContent()) {
+						if (nextContents instanceof Text) {
+								String text = ((Text) nextContents).getTextNormalize();
+								contentBuilder.append(" ").append(text);
+						} else {
+								throw new IllegalStateException(
+										Msg.code(631) + "Unknown type: " + nextContents.getClass());
+						}
+					}
 
-                String value = contentBuilder.toString().trim().replaceAll(" {2}", " ");
-                itemMap.put("title", value);
+					String value = contentBuilder.toString().trim().replaceAll(" {2}", " ");
+					itemMap.put("title", value);
 
-                actionCount++;
-            }
+					actionCount++;
+				}
 
-            String releaseDir =
-                    "hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/"
-                            + version.replace(".", "_");
-            File releaseDirFile = new File(releaseDir);
-            FileUtils.forceMkdir(releaseDirFile);
-            File file = new File(releaseDirFile, "changes.yaml");
-            ourLog.info("Writing file: {}", file.getAbsolutePath());
-            try (FileWriter writer = new FileWriter(file, false)) {
+				String releaseDir =
+						"hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/"
+									+ version.replace(".", "_");
+				File releaseDirFile = new File(releaseDir);
+				FileUtils.forceMkdir(releaseDirFile);
+				File file = new File(releaseDirFile, "changes.yaml");
+				ourLog.info("Writing file: {}", file.getAbsolutePath());
+				try (FileWriter writer = new FileWriter(file, false)) {
 
-                YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
+					YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
 
-                ObjectMapper mapper = new ObjectMapper(yf);
-                mapper.writeValue(writer, items);
-            }
+					ObjectMapper mapper = new ObjectMapper(yf);
+					mapper.writeValue(writer, items);
+				}
 
-            file = new File(releaseDirFile, "version.yaml");
-            ourLog.info("Writing file: {}", file.getAbsolutePath());
-            try (FileWriter writer = new FileWriter(file, false)) {
+				file = new File(releaseDirFile, "version.yaml");
+				ourLog.info("Writing file: {}", file.getAbsolutePath());
+				try (FileWriter writer = new FileWriter(file, false)) {
 
-                YAMLFactory yf = new YAMLFactory();
-                ObjectMapper mapper = new ObjectMapper(yf);
-                HashMap<Object, Object> versionMap = new HashMap<>();
-                versionMap.put("release-date", date);
-                if (isNotBlank(description)) {
-                    versionMap.put("codename", description);
-                }
-                mapper.writeValue(writer, versionMap);
-            }
-        }
+					YAMLFactory yf = new YAMLFactory();
+					ObjectMapper mapper = new ObjectMapper(yf);
+					HashMap<Object, Object> versionMap = new HashMap<>();
+					versionMap.put("release-date", date);
+					if (isNotBlank(description)) {
+						versionMap.put("codename", description);
+					}
+					mapper.writeValue(writer, versionMap);
+				}
+		}
 
-        ourLog.info("Found {} releases and {} actions", releaseCount, actionCount);
-    }
+		ourLog.info("Found {} releases and {} actions", releaseCount, actionCount);
+	}
 }

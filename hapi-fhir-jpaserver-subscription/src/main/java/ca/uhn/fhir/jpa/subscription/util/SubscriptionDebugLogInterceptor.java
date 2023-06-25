@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.util;
 
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -35,6 +27,13 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.util.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.function.Function;
 
 /**
  * This interceptor can be used for troubleshooting subscription processing. It provides very
@@ -55,191 +54,191 @@ import ca.uhn.fhir.util.StopWatch;
 @Interceptor
 public class SubscriptionDebugLogInterceptor {
 
-    private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK =
-            "SubscriptionDebugLogInterceptor_precheck";
-    private final Level myLevel;
-    private final EnumMap<EventCodeEnum, Logger> myLoggers;
+	private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK =
+				"SubscriptionDebugLogInterceptor_precheck";
+	private final Level myLevel;
+	private final EnumMap<EventCodeEnum, Logger> myLoggers;
 
-    /**
-     * Constructor that logs at INFO level to the logger <code>
-     * ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor</code>
-     */
-    public SubscriptionDebugLogInterceptor() {
-        this(defaultLogFactory(), Level.INFO);
-    }
+	/**
+	* Constructor that logs at INFO level to the logger <code>
+	* ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor</code>
+	*/
+	public SubscriptionDebugLogInterceptor() {
+		this(defaultLogFactory(), Level.INFO);
+	}
 
-    /** Constructor using a specific logger */
-    public SubscriptionDebugLogInterceptor(
-            Function<EventCodeEnum, Logger> theLogFactory, Level theLevel) {
-        myLevel = theLevel;
-        myLoggers = new EnumMap<>(EventCodeEnum.class);
-        for (EventCodeEnum next : EventCodeEnum.values()) {
-            myLoggers.put(next, theLogFactory.apply(next));
-        }
-    }
+	/** Constructor using a specific logger */
+	public SubscriptionDebugLogInterceptor(
+				Function<EventCodeEnum, Logger> theLogFactory, Level theLevel) {
+		myLevel = theLevel;
+		myLoggers = new EnumMap<>(EventCodeEnum.class);
+		for (EventCodeEnum next : EventCodeEnum.values()) {
+				myLoggers.put(next, theLogFactory.apply(next));
+		}
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)
-    public void step10_resourceModified(ResourceModifiedMessage theMessage) {
-        String value = Long.toString(System.currentTimeMillis());
-        theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
-        String resourceId = theMessage.getPayloadId();
-        if (resourceId == null) {
-            // Delete operations have no payload
-            resourceId = theMessage.getId();
-        }
-        log(
-                EventCodeEnum.SUBS1,
-                "Resource {} was submitted to the processing pipeline (op={})",
-                resourceId,
-                theMessage.getOperationType());
-    }
+	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)
+	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
+		String value = Long.toString(System.currentTimeMillis());
+		theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
+		String resourceId = theMessage.getPayloadId();
+		if (resourceId == null) {
+				// Delete operations have no payload
+				resourceId = theMessage.getId();
+		}
+		log(
+					EventCodeEnum.SUBS1,
+					"Resource {} was submitted to the processing pipeline (op={})",
+					resourceId,
+					theMessage.getOperationType());
+	}
 
-    /*
-     * These methods are numbered in the order that an individual
-     * resource would go through them, for clarity and ease of
-     * tracing when debugging and poring over logs.
-     *
-     * I don't know if this numbering scheme makes sense.. I'm incrementing
-     * by 10 for each step in the normal delivery pipeline, leaving lots of
-     * gaps to add things if we ever need them.
-     */
+	/*
+	* These methods are numbered in the order that an individual
+	* resource would go through them, for clarity and ease of
+	* tracing when debugging and poring over logs.
+	*
+	* I don't know if this numbering scheme makes sense.. I'm incrementing
+	* by 10 for each step in the normal delivery pipeline, leaving lots of
+	* gaps to add things if we ever need them.
+	*/
 
-    @Hook(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED)
-    public void step20_beforeChecked(ResourceModifiedMessage theMessage) {
-        log(
-                EventCodeEnum.SUBS2,
-                "Checking resource {} (op={}) for matching subscriptions",
-                theMessage.getPayloadId(),
-                theMessage.getOperationType());
-    }
+	@Hook(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED)
+	public void step20_beforeChecked(ResourceModifiedMessage theMessage) {
+		log(
+					EventCodeEnum.SUBS2,
+					"Checking resource {} (op={}) for matching subscriptions",
+					theMessage.getPayloadId(),
+					theMessage.getOperationType());
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
-    public void step30_subscriptionMatched(
-            ResourceDeliveryMessage theMessage, InMemoryMatchResult theResult) {
-        log(
-                EventCodeEnum.SUBS3,
-                "Resource {} matched by subscription {} (memory match={})",
-                theMessage.getPayloadId(),
-                theMessage.getSubscription().getIdElementString(),
-                theResult.isInMemory());
-    }
+	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
+	public void step30_subscriptionMatched(
+				ResourceDeliveryMessage theMessage, InMemoryMatchResult theResult) {
+		log(
+					EventCodeEnum.SUBS3,
+					"Resource {} matched by subscription {} (memory match={})",
+					theMessage.getPayloadId(),
+					theMessage.getSubscription().getIdElementString(),
+					theResult.isInMemory());
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
-    public void step35_subscriptionNotMatched(ResourceModifiedMessage theMessage) {
-        log(
-                EventCodeEnum.SUBS4,
-                "Resource {} did not match any subscriptions",
-                theMessage.getPayloadId());
-    }
+	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
+	public void step35_subscriptionNotMatched(ResourceModifiedMessage theMessage) {
+		log(
+					EventCodeEnum.SUBS4,
+					"Resource {} did not match any subscriptions",
+					theMessage.getPayloadId());
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY)
-    public void step40_beforeDelivery(ResourceDeliveryMessage theMessage) {
-        log(
-                EventCodeEnum.SUBS5,
-                "Delivering resource {} for subscription {} to channel of type {} to endpoint {}",
-                theMessage.getPayloadId(),
-                theMessage.getSubscription().getIdElementString(),
-                theMessage.getSubscription().getChannelType(),
-                theMessage.getSubscription().getEndpointUrl());
-    }
+	@Hook(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY)
+	public void step40_beforeDelivery(ResourceDeliveryMessage theMessage) {
+		log(
+					EventCodeEnum.SUBS5,
+					"Delivering resource {} for subscription {} to channel of type {} to endpoint {}",
+					theMessage.getPayloadId(),
+					theMessage.getSubscription().getIdElementString(),
+					theMessage.getSubscription().getChannelType(),
+					theMessage.getSubscription().getEndpointUrl());
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED)
-    public void step45_deliveryFailed(ResourceDeliveryMessage theMessage, Exception theFailure) {
-        String payloadId = null;
-        String subscriptionId = null;
-        CanonicalSubscriptionChannelType channelType = null;
-        String failureString = null;
-        if (theMessage != null) {
-            payloadId = theMessage.getPayloadId();
-            if (theMessage.getSubscription() != null) {
-                subscriptionId = theMessage.getSubscription().getIdElementString();
-                channelType = theMessage.getSubscription().getChannelType();
-            }
-        }
-        if (theFailure != null) {
-            failureString = theFailure.toString();
-        }
-        log(
-                EventCodeEnum.SUBS6,
-                "Delivery of resource {} for subscription {} to channel of type {} - Failure: {}",
-                payloadId,
-                subscriptionId,
-                channelType,
-                failureString);
-    }
+	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED)
+	public void step45_deliveryFailed(ResourceDeliveryMessage theMessage, Exception theFailure) {
+		String payloadId = null;
+		String subscriptionId = null;
+		CanonicalSubscriptionChannelType channelType = null;
+		String failureString = null;
+		if (theMessage != null) {
+				payloadId = theMessage.getPayloadId();
+				if (theMessage.getSubscription() != null) {
+					subscriptionId = theMessage.getSubscription().getIdElementString();
+					channelType = theMessage.getSubscription().getChannelType();
+				}
+		}
+		if (theFailure != null) {
+				failureString = theFailure.toString();
+		}
+		log(
+					EventCodeEnum.SUBS6,
+					"Delivery of resource {} for subscription {} to channel of type {} - Failure: {}",
+					payloadId,
+					subscriptionId,
+					channelType,
+					failureString);
+	}
 
-    @Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
-    public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
-        String processingTime =
-                theMessage
-                        .getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
-                        .map(Long::parseLong)
-                        .map(Date::new)
-                        .map(start -> new StopWatch(start).toString())
-                        .orElse("(unknown)");
+	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
+	public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
+		String processingTime =
+					theMessage
+								.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
+								.map(Long::parseLong)
+								.map(Date::new)
+								.map(start -> new StopWatch(start).toString())
+								.orElse("(unknown)");
 
-        log(
-                EventCodeEnum.SUBS7,
-                "Finished delivery of resource {} for subscription {} to channel of type {} - Total"
-                        + " processing time: {}",
-                theMessage.getPayloadId(),
-                theMessage.getSubscription().getIdElementString(),
-                theMessage.getSubscription().getChannelType(),
-                processingTime);
-    }
+		log(
+					EventCodeEnum.SUBS7,
+					"Finished delivery of resource {} for subscription {} to channel of type {} - Total"
+								+ " processing time: {}",
+					theMessage.getPayloadId(),
+					theMessage.getSubscription().getIdElementString(),
+					theMessage.getSubscription().getChannelType(),
+					processingTime);
+	}
 
-    protected void log(EventCodeEnum theEventCode, String theMessage, Object... theArguments) {
-        Logger logger = myLoggers.get(theEventCode);
-        if (logger != null) {
-            switch (myLevel) {
-                case ERROR:
-                    logger.error(theMessage, theArguments);
-                    break;
-                case WARN:
-                    logger.warn(theMessage, theArguments);
-                    break;
-                case INFO:
-                    logger.info(theMessage, theArguments);
-                    break;
-                case DEBUG:
-                    logger.debug(theMessage, theArguments);
-                    break;
-                case TRACE:
-                    logger.trace(theMessage, theArguments);
-                    break;
-            }
-        }
-    }
+	protected void log(EventCodeEnum theEventCode, String theMessage, Object... theArguments) {
+		Logger logger = myLoggers.get(theEventCode);
+		if (logger != null) {
+				switch (myLevel) {
+					case ERROR:
+						logger.error(theMessage, theArguments);
+						break;
+					case WARN:
+						logger.warn(theMessage, theArguments);
+						break;
+					case INFO:
+						logger.info(theMessage, theArguments);
+						break;
+					case DEBUG:
+						logger.debug(theMessage, theArguments);
+						break;
+					case TRACE:
+						logger.trace(theMessage, theArguments);
+						break;
+				}
+		}
+	}
 
-    public enum EventCodeEnum {
-        /**
-         * A new/updated resource has been submitted to the processing pipeline and is about to be
-         * placed on the matchign queue.
-         */
-        SUBS1,
-        /**
-         * A resources has been dequeued from the matching queue and is about to be checked for any
-         * matching subscriptions.
-         */
-        SUBS2,
-        /**
-         * The resource has matched a subscription (logged once for each matching subscription) and
-         * is about to be queued for delivery.
-         */
-        SUBS3,
-        /** The resource did not match any subscriptions and processing is complete. */
-        SUBS4,
-        /** The resource has been dequeued from the delivery queue and is about to be delivered. */
-        SUBS5,
-        /** Delivery failed */
-        SUBS6,
-        /** Delivery is now complete and processing is finished. */
-        SUBS7
-    }
+	public enum EventCodeEnum {
+		/**
+			* A new/updated resource has been submitted to the processing pipeline and is about to be
+			* placed on the matchign queue.
+			*/
+		SUBS1,
+		/**
+			* A resources has been dequeued from the matching queue and is about to be checked for any
+			* matching subscriptions.
+			*/
+		SUBS2,
+		/**
+			* The resource has matched a subscription (logged once for each matching subscription) and
+			* is about to be queued for delivery.
+			*/
+		SUBS3,
+		/** The resource did not match any subscriptions and processing is complete. */
+		SUBS4,
+		/** The resource has been dequeued from the delivery queue and is about to be delivered. */
+		SUBS5,
+		/** Delivery failed */
+		SUBS6,
+		/** Delivery is now complete and processing is finished. */
+		SUBS7
+	}
 
-    private static Function<EventCodeEnum, Logger> defaultLogFactory() {
-        return code ->
-                LoggerFactory.getLogger(
-                        SubscriptionDebugLogInterceptor.class.getName() + "." + code.name());
-    }
+	private static Function<EventCodeEnum, Logger> defaultLogFactory() {
+		return code ->
+					LoggerFactory.getLogger(
+								SubscriptionDebugLogInterceptor.class.getName() + "." + code.name());
+	}
 }

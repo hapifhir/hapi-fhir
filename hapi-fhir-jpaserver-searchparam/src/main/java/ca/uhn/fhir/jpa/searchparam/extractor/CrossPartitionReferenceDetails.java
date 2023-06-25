@@ -19,56 +19,56 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 
+import javax.annotation.Nonnull;
+
 public class CrossPartitionReferenceDetails {
 
-    @Nonnull private final RequestPartitionId mySourceResourcePartitionId;
-    @Nonnull private final PathAndRef myPathAndRef;
-    @Nonnull private final RequestDetails myRequestDetails;
-    @Nonnull private final TransactionDetails myTransactionDetails;
-    @Nonnull private final String mySourceResourceName;
+	@Nonnull private final RequestPartitionId mySourceResourcePartitionId;
+	@Nonnull private final PathAndRef myPathAndRef;
+	@Nonnull private final RequestDetails myRequestDetails;
+	@Nonnull private final TransactionDetails myTransactionDetails;
+	@Nonnull private final String mySourceResourceName;
 
-    /** Constructor */
-    public CrossPartitionReferenceDetails(
-            @Nonnull RequestPartitionId theSourceResourcePartitionId,
-            @Nonnull String theSourceResourceName,
-            @Nonnull PathAndRef thePathAndRef,
-            @Nonnull RequestDetails theRequestDetails,
-            @Nonnull TransactionDetails theTransactionDetails) {
-        mySourceResourcePartitionId = theSourceResourcePartitionId;
-        mySourceResourceName = theSourceResourceName;
-        myPathAndRef = thePathAndRef;
-        myRequestDetails = theRequestDetails;
-        myTransactionDetails = theTransactionDetails;
-    }
+	/** Constructor */
+	public CrossPartitionReferenceDetails(
+				@Nonnull RequestPartitionId theSourceResourcePartitionId,
+				@Nonnull String theSourceResourceName,
+				@Nonnull PathAndRef thePathAndRef,
+				@Nonnull RequestDetails theRequestDetails,
+				@Nonnull TransactionDetails theTransactionDetails) {
+		mySourceResourcePartitionId = theSourceResourcePartitionId;
+		mySourceResourceName = theSourceResourceName;
+		myPathAndRef = thePathAndRef;
+		myRequestDetails = theRequestDetails;
+		myTransactionDetails = theTransactionDetails;
+	}
 
-    @Nonnull
-    public String getSourceResourceName() {
-        return mySourceResourceName;
-    }
+	@Nonnull
+	public String getSourceResourceName() {
+		return mySourceResourceName;
+	}
 
-    @Nonnull
-    public RequestDetails getRequestDetails() {
-        return myRequestDetails;
-    }
+	@Nonnull
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
+	}
 
-    @Nonnull
-    public TransactionDetails getTransactionDetails() {
-        return myTransactionDetails;
-    }
+	@Nonnull
+	public TransactionDetails getTransactionDetails() {
+		return myTransactionDetails;
+	}
 
-    @Nonnull
-    public RequestPartitionId getSourceResourcePartitionId() {
-        return mySourceResourcePartitionId;
-    }
+	@Nonnull
+	public RequestPartitionId getSourceResourcePartitionId() {
+		return mySourceResourcePartitionId;
+	}
 
-    @Nonnull
-    public PathAndRef getPathAndRef() {
-        return myPathAndRef;
-    }
+	@Nonnull
+	public PathAndRef getPathAndRef() {
+		return myPathAndRef;
+	}
 }

@@ -30,81 +30,81 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 /** Implementation of the _has method parameter */
 public class HasParam extends BaseParam implements IQueryParameterType {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private String myReferenceFieldName;
-    private String myParameterName;
-    private String myParameterValue;
-    private String myTargetResourceType;
+	private String myReferenceFieldName;
+	private String myParameterName;
+	private String myParameterValue;
+	private String myTargetResourceType;
 
-    public HasParam() {
-        super();
-    }
+	public HasParam() {
+		super();
+	}
 
-    public HasParam(
-            String theTargetResourceType,
-            String theReferenceFieldName,
-            String theParameterName,
-            String theParameterValue) {
-        this();
-        myTargetResourceType = theTargetResourceType;
-        myReferenceFieldName = theReferenceFieldName;
-        myParameterName = theParameterName;
-        myParameterValue = theParameterValue;
-    }
+	public HasParam(
+				String theTargetResourceType,
+				String theReferenceFieldName,
+				String theParameterName,
+				String theParameterValue) {
+		this();
+		myTargetResourceType = theTargetResourceType;
+		myReferenceFieldName = theReferenceFieldName;
+		myParameterName = theParameterName;
+		myParameterValue = theParameterValue;
+	}
 
-    @Override
-    String doGetQueryParameterQualifier() {
-        return ':' + myTargetResourceType + ':' + myReferenceFieldName + ':' + myParameterName;
-    }
+	@Override
+	String doGetQueryParameterQualifier() {
+		return ':' + myTargetResourceType + ':' + myReferenceFieldName + ':' + myParameterName;
+	}
 
-    @Override
-    String doGetValueAsQueryToken(FhirContext theContext) {
-        return myParameterValue;
-    }
+	@Override
+	String doGetValueAsQueryToken(FhirContext theContext) {
+		return myParameterValue;
+	}
 
-    @Override
-    void doSetValueAsQueryToken(
-            FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-        String qualifier = defaultString(theQualifier);
-        if (!qualifier.startsWith(":")) {
-            throwInvalidSyntaxException(Constants.PARAM_HAS + qualifier);
-        }
-        int colonIndex0 = qualifier.indexOf(':', 1);
-        validateColon(qualifier, colonIndex0);
-        int colonIndex1 = qualifier.indexOf(':', colonIndex0 + 1);
-        validateColon(qualifier, colonIndex1);
+	@Override
+	void doSetValueAsQueryToken(
+				FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		String qualifier = defaultString(theQualifier);
+		if (!qualifier.startsWith(":")) {
+				throwInvalidSyntaxException(Constants.PARAM_HAS + qualifier);
+		}
+		int colonIndex0 = qualifier.indexOf(':', 1);
+		validateColon(qualifier, colonIndex0);
+		int colonIndex1 = qualifier.indexOf(':', colonIndex0 + 1);
+		validateColon(qualifier, colonIndex1);
 
-        myTargetResourceType = qualifier.substring(1, colonIndex0);
-        myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
-        myParameterName = qualifier.substring(colonIndex1 + 1);
-        myParameterValue = theValue;
-    }
+		myTargetResourceType = qualifier.substring(1, colonIndex0);
+		myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
+		myParameterName = qualifier.substring(colonIndex1 + 1);
+		myParameterValue = theValue;
+	}
 
-    public String getReferenceFieldName() {
-        return myReferenceFieldName;
-    }
+	public String getReferenceFieldName() {
+		return myReferenceFieldName;
+	}
 
-    public String getParameterName() {
-        return myParameterName;
-    }
+	public String getParameterName() {
+		return myParameterName;
+	}
 
-    public String getParameterValue() {
-        return myParameterValue;
-    }
+	public String getParameterValue() {
+		return myParameterValue;
+	}
 
-    public String getTargetResourceType() {
-        return myTargetResourceType;
-    }
+	public String getTargetResourceType() {
+		return myTargetResourceType;
+	}
 
-    private static void validateColon(String theParameterName, int colonIndex) {
-        if (colonIndex == -1) {
-            throwInvalidSyntaxException(theParameterName);
-        }
-    }
+	private static void validateColon(String theParameterName, int colonIndex) {
+		if (colonIndex == -1) {
+				throwInvalidSyntaxException(theParameterName);
+		}
+	}
 
-    private static void throwInvalidSyntaxException(String theParameterName) {
-        throw new InvalidRequestException(
-                Msg.code(1942) + "Invalid _has parameter syntax: " + theParameterName);
-    }
+	private static void throwInvalidSyntaxException(String theParameterName) {
+		throw new InvalidRequestException(
+					Msg.code(1942) + "Invalid _has parameter syntax: " + theParameterName);
+	}
 }

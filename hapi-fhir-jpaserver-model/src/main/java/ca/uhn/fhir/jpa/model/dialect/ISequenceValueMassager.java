@@ -29,25 +29,25 @@ import javax.annotation.Nullable;
  */
 public interface ISequenceValueMassager {
 
-    Long massage(String theGeneratorName, Long theId);
+	Long massage(String theGeneratorName, Long theId);
 
-    /**
-     * If desired, the massager can supply an ID on its own. This method is tried first, and if it
-     * returns null, the normal hi-lo generator is called and then {@link #massage(String, Long)} is
-     * called on the output of that.
-     *
-     * @return Returns an ID or null
-     */
-    @Nullable
-    default Long generate(String theGeneratorName) {
-        return null;
-    }
+	/**
+	* If desired, the massager can supply an ID on its own. This method is tried first, and if it
+	* returns null, the normal hi-lo generator is called and then {@link #massage(String, Long)} is
+	* called on the output of that.
+	*
+	* @return Returns an ID or null
+	*/
+	@Nullable
+	default Long generate(String theGeneratorName) {
+		return null;
+	}
 
-    final class NoopSequenceValueMassager implements ISequenceValueMassager {
+	final class NoopSequenceValueMassager implements ISequenceValueMassager {
 
-        @Override
-        public Long massage(String theGeneratorName, Long theId) {
-            return theId;
-        }
-    }
+		@Override
+		public Long massage(String theGeneratorName, Long theId) {
+				return theId;
+		}
+	}
 }

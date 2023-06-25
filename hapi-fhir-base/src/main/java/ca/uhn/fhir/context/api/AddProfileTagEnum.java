@@ -27,24 +27,24 @@ import ca.uhn.fhir.context.FhirContext;
  * @see FhirContext#setAddProfileTagWhenEncoding(AddProfileTagEnum)
  */
 public enum AddProfileTagEnum {
-    /** Do not add profile tags automatically */
-    NEVER,
+	/** Do not add profile tags automatically */
+	NEVER,
 
-    /**
-     * Add any profile tags that returned resources appear to conform to
-     *
-     * @deprecated This mode causes even FHIR's default profiles to be exported in the resource
-     *     metadata section. This is not generally expected behaviour from other systems and it
-     *     offers no real benefit, so it will be removed at some point. This option was deprecated
-     *     in HAPI 1.5
-     */
-    @Deprecated
-    ALWAYS,
+	/**
+	* Add any profile tags that returned resources appear to conform to
+	*
+	* @deprecated This mode causes even FHIR's default profiles to be exported in the resource
+	*     metadata section. This is not generally expected behaviour from other systems and it
+	*     offers no real benefit, so it will be removed at some point. This option was deprecated
+	*     in HAPI 1.5
+	*/
+	@Deprecated
+	ALWAYS,
 
-    /**
-     * Add any profile tags that returned resources appear to conform to if the resource is a
-     * non-standard class (e.g. it is an instance of a class that extends a built in type, but adds
-     * or constrains it)
-     */
-    ONLY_FOR_CUSTOM
+	/**
+	* Add any profile tags that returned resources appear to conform to if the resource is a
+	* non-standard class (e.g. it is an instance of a class that extends a built in type, but adds
+	* or constrains it)
+	*/
+	ONLY_FOR_CUSTOM
 }

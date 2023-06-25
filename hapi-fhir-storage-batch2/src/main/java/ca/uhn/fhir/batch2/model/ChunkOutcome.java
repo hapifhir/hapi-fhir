@@ -20,22 +20,22 @@
 package ca.uhn.fhir.batch2.model;
 
 public class ChunkOutcome {
-    public enum Status {
-        SUCCESS,
-        FAILED;
-    }
+	public enum Status {
+		SUCCESS,
+		FAILED;
+	}
 
-    private final Status myStatus;
+	private final Status myStatus;
 
-    public ChunkOutcome(Status theStatus) {
-        myStatus = theStatus;
-    }
+	public ChunkOutcome(Status theStatus) {
+		myStatus = theStatus;
+	}
 
-    public Status getStatus() {
-        return myStatus;
-    }
+	public Status getStatus() {
+		return myStatus;
+	}
 
-    public static ChunkOutcome SUCCESS() {
-        return new ChunkOutcome(Status.SUCCESS);
-    }
+	public static ChunkOutcome SUCCESS() {
+		return new ChunkOutcome(Status.SUCCESS);
+	}
 }

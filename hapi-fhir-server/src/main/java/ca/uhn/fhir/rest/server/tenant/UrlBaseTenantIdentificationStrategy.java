@@ -19,16 +19,15 @@
  */
 package ca.uhn.fhir.rest.server.tenant;
 
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlPathTokenizer;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -45,31 +44,31 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  */
 public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificationStrategy {
 
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(UrlBaseTenantIdentificationStrategy.class);
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(UrlBaseTenantIdentificationStrategy.class);
 
-    @Override
-    public void extractTenant(
-            UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
-        String tenantId = null;
-        if (theUrlPathTokenizer.hasMoreTokens()) {
-            tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
-            ourLog.trace("Found tenant ID {} in request string", tenantId);
-            theRequestDetails.setTenantId(tenantId);
-        }
+	@Override
+	public void extractTenant(
+				UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
+		String tenantId = null;
+		if (theUrlPathTokenizer.hasMoreTokens()) {
+				tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
+				ourLog.trace("Found tenant ID {} in request string", tenantId);
+				theRequestDetails.setTenantId(tenantId);
+		}
 
-        if (tenantId == null) {
-            HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
-            throw new InvalidRequestException(
-                    Msg.code(307)
-                            + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
-        }
-    }
+		if (tenantId == null) {
+				HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
+				throw new InvalidRequestException(
+						Msg.code(307)
+									+ localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
+		}
+	}
 
-    @Override
-    public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
-        Validate.notNull(
-                theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
-        return theFhirServerBase + '/' + theRequestDetails.getTenantId();
-    }
+	@Override
+	public String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails) {
+		Validate.notNull(
+					theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
+		return theFhirServerBase + '/' + theRequestDetails.getTenantId();
+	}
 }

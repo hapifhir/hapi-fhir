@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Composition;
-
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -37,55 +32,59 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.Composition;
 
 public abstract class BaseJpaResourceProviderComposition<T extends IBaseResource>
-        extends BaseJpaResourceProvider<T> {
+		extends BaseJpaResourceProvider<T> {
 
-    /** Composition/123/$document */
-    @Operation(
-            name = JpaConstants.OPERATION_DOCUMENT,
-            idempotent = true,
-            bundleType = BundleTypeEnum.DOCUMENT)
-    public IBundleProvider getDocumentForComposition(
-            javax.servlet.http.HttpServletRequest theServletRequest,
-            @IdParam IIdType theId,
-            @Description(
-                            formalDefinition =
-                                    "Results from this method are returned across multiple pages."
-                                            + " This parameter controls the size of those pages.")
-                    @OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
-                    IPrimitiveType<Integer> theCount,
-            @Description(
-                            formalDefinition =
-                                    "Results from this method are returned across multiple pages."
-                                            + " This parameter controls the offset when fetching a"
-                                            + " page.")
-                    @OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
-                    IPrimitiveType<Integer> theOffset,
-            @Description(
-                            shortDefinition =
-                                    "Only return resources which were last updated as specified by"
-                                            + " the given range")
-                    @OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-                    DateRangeParam theLastUpdated,
-            @Sort SortSpec theSortSpec,
-            RequestDetails theRequestDetails) {
+	/** Composition/123/$document */
+	@Operation(
+				name = JpaConstants.OPERATION_DOCUMENT,
+				idempotent = true,
+				bundleType = BundleTypeEnum.DOCUMENT)
+	public IBundleProvider getDocumentForComposition(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam IIdType theId,
+				@Description(
+									formalDefinition =
+												"Results from this method are returned across multiple pages."
+														+ " This parameter controls the size of those pages.")
+						@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+						IPrimitiveType<Integer> theCount,
+				@Description(
+									formalDefinition =
+												"Results from this method are returned across multiple pages."
+														+ " This parameter controls the offset when fetching a"
+														+ " page.")
+						@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+						IPrimitiveType<Integer> theOffset,
+				@Description(
+									shortDefinition =
+												"Only return resources which were last updated as specified by"
+														+ " the given range")
+						@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
+						DateRangeParam theLastUpdated,
+				@Sort SortSpec theSortSpec,
+				RequestDetails theRequestDetails) {
 
-        startRequest(theServletRequest);
-        try {
-            IBundleProvider bundleProvider =
-                    ((IFhirResourceDaoComposition<Composition>) getDao())
-                            .getDocumentForComposition(
-                                    theServletRequest,
-                                    theId,
-                                    theCount,
-                                    theOffset,
-                                    theLastUpdated,
-                                    theSortSpec,
-                                    theRequestDetails);
-            return bundleProvider;
-        } finally {
-            endRequest(theServletRequest);
-        }
-    }
+		startRequest(theServletRequest);
+		try {
+				IBundleProvider bundleProvider =
+						((IFhirResourceDaoComposition<Composition>) getDao())
+									.getDocumentForComposition(
+												theServletRequest,
+												theId,
+												theCount,
+												theOffset,
+												theLastUpdated,
+												theSortSpec,
+												theRequestDetails);
+				return bundleProvider;
+		} finally {
+				endRequest(theServletRequest);
+		}
+	}
 }

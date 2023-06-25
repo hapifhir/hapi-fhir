@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -34,6 +30,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -42,125 +41,125 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * SubscriptionStatusEnum#REQUESTED} state and prevents clients from changing the status.
  */
 public class SubscriptionsRequireManualActivationInterceptorDstu2
-        extends ServerOperationInterceptorAdapter {
+		extends ServerOperationInterceptorAdapter {
 
-    @Autowired
-    @Qualifier("mySubscriptionDaoDstu2")
-    private IFhirResourceDao<Subscription> myDao;
+	@Autowired
+	@Qualifier("mySubscriptionDaoDstu2")
+	private IFhirResourceDao<Subscription> myDao;
 
-    @Override
-    public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-        if (myDao.getContext()
-                .getResourceType(theResource)
-                .equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-            verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
-        }
-    }
+	@Override
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		if (myDao.getContext()
+					.getResourceType(theResource)
+					.equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
+				verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
+		}
+	}
 
-    @Override
-    public void resourceUpdated(
-            RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-        if (myDao.getContext()
-                .getResourceType(theNewResource)
-                .equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-            verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
-        }
-    }
+	@Override
+	public void resourceUpdated(
+				RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (myDao.getContext()
+					.getResourceType(theNewResource)
+					.equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
+				verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
+		}
+	}
 
-    public void setDao(IFhirResourceDao<Subscription> theDao) {
-        myDao = theDao;
-    }
+	public void setDao(IFhirResourceDao<Subscription> theDao) {
+		myDao = theDao;
+	}
 
-    private void verifyStatusOk(
-            RestOperationTypeEnum theOperation,
-            IBaseResource theOldResourceOrNull,
-            IBaseResource theResource) {
-        Subscription subscription = (Subscription) theResource;
-        SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
+	private void verifyStatusOk(
+				RestOperationTypeEnum theOperation,
+				IBaseResource theOldResourceOrNull,
+				IBaseResource theResource) {
+		Subscription subscription = (Subscription) theResource;
+		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
-        if (newStatus == SubscriptionStatusEnum.REQUESTED
-                || newStatus == SubscriptionStatusEnum.OFF) {
-            return;
-        }
+		if (newStatus == SubscriptionStatusEnum.REQUESTED
+					|| newStatus == SubscriptionStatusEnum.OFF) {
+				return;
+		}
 
-        if (newStatus == null) {
-            String actualCode = subscription.getStatusElement().getValueAsString();
-            throw new UnprocessableEntityException(
-                    Msg.code(800)
-                            + "Can not "
-                            + theOperation.getCode()
-                            + " resource: Subscription.status must be populated on this server"
-                            + ((isNotBlank(actualCode))
-                                    ? " (invalid value " + actualCode + ")"
-                                    : ""));
-        }
+		if (newStatus == null) {
+				String actualCode = subscription.getStatusElement().getValueAsString();
+				throw new UnprocessableEntityException(
+						Msg.code(800)
+									+ "Can not "
+									+ theOperation.getCode()
+									+ " resource: Subscription.status must be populated on this server"
+									+ ((isNotBlank(actualCode))
+												? " (invalid value " + actualCode + ")"
+												: ""));
+		}
 
-        if (theOldResourceOrNull != null) {
-            try {
-                Subscription existing = (Subscription) theOldResourceOrNull;
-                SubscriptionStatusEnum existingStatus =
-                        existing.getStatusElement().getValueAsEnum();
-                if (existingStatus != newStatus) {
-                    verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
-                }
-            } catch (ResourceNotFoundException e) {
-                verifyActiveStatus(theOperation, subscription, newStatus, null);
-            }
-        } else {
-            verifyActiveStatus(theOperation, subscription, newStatus, null);
-        }
-    }
+		if (theOldResourceOrNull != null) {
+				try {
+					Subscription existing = (Subscription) theOldResourceOrNull;
+					SubscriptionStatusEnum existingStatus =
+								existing.getStatusElement().getValueAsEnum();
+					if (existingStatus != newStatus) {
+						verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
+					}
+				} catch (ResourceNotFoundException e) {
+					verifyActiveStatus(theOperation, subscription, newStatus, null);
+				}
+		} else {
+				verifyActiveStatus(theOperation, subscription, newStatus, null);
+		}
+	}
 
-    private void verifyActiveStatus(
-            RestOperationTypeEnum theOperation,
-            Subscription theSubscription,
-            SubscriptionStatusEnum newStatus,
-            SubscriptionStatusEnum theExistingStatus) {
-        SubscriptionChannelTypeEnum channelType =
-                theSubscription.getChannel().getTypeElement().getValueAsEnum();
+	private void verifyActiveStatus(
+				RestOperationTypeEnum theOperation,
+				Subscription theSubscription,
+				SubscriptionStatusEnum newStatus,
+				SubscriptionStatusEnum theExistingStatus) {
+		SubscriptionChannelTypeEnum channelType =
+					theSubscription.getChannel().getTypeElement().getValueAsEnum();
 
-        if (channelType == null) {
-            throw new UnprocessableEntityException(
-                    Msg.code(801) + "Subscription.channel.type must be populated");
-        }
+		if (channelType == null) {
+				throw new UnprocessableEntityException(
+						Msg.code(801) + "Subscription.channel.type must be populated");
+		}
 
-        if (channelType == SubscriptionChannelTypeEnum.WEBSOCKET) {
-            return;
-        }
+		if (channelType == SubscriptionChannelTypeEnum.WEBSOCKET) {
+				return;
+		}
 
-        if (theExistingStatus != null) {
-            throw new UnprocessableEntityException(
-                    Msg.code(802)
-                            + "Subscription.status can not be changed from "
-                            + describeStatus(theExistingStatus)
-                            + " to "
-                            + describeStatus(newStatus));
-        }
+		if (theExistingStatus != null) {
+				throw new UnprocessableEntityException(
+						Msg.code(802)
+									+ "Subscription.status can not be changed from "
+									+ describeStatus(theExistingStatus)
+									+ " to "
+									+ describeStatus(newStatus));
+		}
 
-        if (theSubscription.getStatus() == null) {
-            throw new UnprocessableEntityException(
-                    Msg.code(803)
-                            + "Can not "
-                            + theOperation.getCode().toLowerCase()
-                            + " resource: Subscription.status must be populated on this server");
-        }
+		if (theSubscription.getStatus() == null) {
+				throw new UnprocessableEntityException(
+						Msg.code(803)
+									+ "Can not "
+									+ theOperation.getCode().toLowerCase()
+									+ " resource: Subscription.status must be populated on this server");
+		}
 
-        throw new UnprocessableEntityException(
-                Msg.code(804)
-                        + "Subscription.status must be '"
-                        + SubscriptionStatusEnum.OFF.getCode()
-                        + "' or '"
-                        + SubscriptionStatusEnum.REQUESTED.getCode()
-                        + "' on a newly created subscription");
-    }
+		throw new UnprocessableEntityException(
+					Msg.code(804)
+								+ "Subscription.status must be '"
+								+ SubscriptionStatusEnum.OFF.getCode()
+								+ "' or '"
+								+ SubscriptionStatusEnum.REQUESTED.getCode()
+								+ "' on a newly created subscription");
+	}
 
-    private String describeStatus(SubscriptionStatusEnum existingStatus) {
-        String existingStatusString;
-        if (existingStatus != null) {
-            existingStatusString = '\'' + existingStatus.getCode() + '\'';
-        } else {
-            existingStatusString = "null";
-        }
-        return existingStatusString;
-    }
+	private String describeStatus(SubscriptionStatusEnum existingStatus) {
+		String existingStatusString;
+		if (existingStatus != null) {
+				existingStatusString = '\'' + existingStatus.getCode() + '\'';
+		} else {
+				existingStatusString = "null";
+		}
+		return existingStatusString;
+	}
 }

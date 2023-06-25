@@ -19,13 +19,12 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * Represents an <b>HTTP 410 Resource Gone</b> response, which geenerally indicates that the
@@ -34,82 +33,82 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class ResourceGoneException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_410_GONE;
-    private static final long serialVersionUID = 1L;
-    private IIdType myResourceId;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_410_GONE;
+	private static final long serialVersionUID = 1L;
+	private IIdType myResourceId;
 
-    /**
-     * Constructor which creates an error message based on a given resource ID
-     *
-     * @param theResourceId The ID of the resource that could not be found
-     */
-    public ResourceGoneException(IIdType theResourceId) {
-        super(
-                STATUS_CODE,
-                "Resource "
-                        + (theResourceId != null ? theResourceId.getValue() : "")
-                        + " is gone/deleted");
-        myResourceId = theResourceId;
-    }
+	/**
+	* Constructor which creates an error message based on a given resource ID
+	*
+	* @param theResourceId The ID of the resource that could not be found
+	*/
+	public ResourceGoneException(IIdType theResourceId) {
+		super(
+					STATUS_CODE,
+					"Resource "
+								+ (theResourceId != null ? theResourceId.getValue() : "")
+								+ " is gone/deleted");
+		myResourceId = theResourceId;
+	}
 
-    /**
-     * @deprecated This constructor has a dependency on a specific model version and will be
-     *     removed. Deprecated in HAPI 1.6 - 2016-07-02
-     */
-    @Deprecated
-    public ResourceGoneException(
-            Class<? extends IBaseResource> theClass, BaseIdentifierDt thePatientId) {
-        super(
-                STATUS_CODE,
-                "Resource of type "
-                        + theClass.getSimpleName()
-                        + " with ID "
-                        + thePatientId
-                        + " is gone/deleted");
-        myResourceId = null;
-    }
+	/**
+	* @deprecated This constructor has a dependency on a specific model version and will be
+	*     removed. Deprecated in HAPI 1.6 - 2016-07-02
+	*/
+	@Deprecated
+	public ResourceGoneException(
+				Class<? extends IBaseResource> theClass, BaseIdentifierDt thePatientId) {
+		super(
+					STATUS_CODE,
+					"Resource of type "
+								+ theClass.getSimpleName()
+								+ " with ID "
+								+ thePatientId
+								+ " is gone/deleted");
+		myResourceId = null;
+	}
 
-    /**
-     * Constructor which creates an error message based on a given resource ID
-     *
-     * @param theClass The type of resource that could not be found
-     * @param theResourceId The ID of the resource that could not be found
-     */
-    public ResourceGoneException(Class<? extends IBaseResource> theClass, IIdType theResourceId) {
-        super(
-                STATUS_CODE,
-                "Resource of type "
-                        + theClass.getSimpleName()
-                        + " with ID "
-                        + theResourceId
-                        + " is gone/deleted");
-        myResourceId = theResourceId;
-    }
+	/**
+	* Constructor which creates an error message based on a given resource ID
+	*
+	* @param theClass The type of resource that could not be found
+	* @param theResourceId The ID of the resource that could not be found
+	*/
+	public ResourceGoneException(Class<? extends IBaseResource> theClass, IIdType theResourceId) {
+		super(
+					STATUS_CODE,
+					"Resource of type "
+								+ theClass.getSimpleName()
+								+ " with ID "
+								+ theResourceId
+								+ " is gone/deleted");
+		myResourceId = theResourceId;
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     * @param theOperationOutcome The OperationOutcome resource to return to the client
-     */
-    public ResourceGoneException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
-        super(STATUS_CODE, theMessage, theOperationOutcome);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	* @param theOperationOutcome The OperationOutcome resource to return to the client
+	*/
+	public ResourceGoneException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     */
-    public ResourceGoneException(String theMessage) {
-        super(STATUS_CODE, theMessage);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	*/
+	public ResourceGoneException(String theMessage) {
+		super(STATUS_CODE, theMessage);
+	}
 
-    public IIdType getResourceId() {
-        return myResourceId;
-    }
+	public IIdType getResourceId() {
+		return myResourceId;
+	}
 
-    public void setResourceId(IIdType theResourceId) {
-        myResourceId = theResourceId;
-    }
+	public void setResourceId(IIdType theResourceId) {
+		myResourceId = theResourceId;
+	}
 }

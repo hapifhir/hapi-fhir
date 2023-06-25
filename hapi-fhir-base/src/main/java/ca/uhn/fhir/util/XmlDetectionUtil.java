@@ -19,38 +19,38 @@
  */
 package ca.uhn.fhir.util;
 
-import java.io.Reader;
-import java.io.StringReader;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Reader;
+import java.io.StringReader;
+
 public class XmlDetectionUtil {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(XmlDetectionUtil.class);
-    private static Boolean ourStaxPresent;
+	private static final Logger ourLog = LoggerFactory.getLogger(XmlDetectionUtil.class);
+	private static Boolean ourStaxPresent;
 
-    /**
-     * This method will return <code>true</code> if a StAX XML parsing library is present on the
-     * classpath
-     */
-    public static boolean isStaxPresent() {
-        Boolean retVal = ourStaxPresent;
-        if (retVal == null) {
-            try {
-                Class.forName("javax.xml.stream.events.XMLEvent");
-                Class<?> xmlUtilClazz = Class.forName("ca.uhn.fhir.util.XmlUtil");
-                xmlUtilClazz
-                        .getMethod("createXmlReader", Reader.class)
-                        .invoke(xmlUtilClazz, new StringReader(""));
-                ourStaxPresent = Boolean.TRUE;
-                retVal = Boolean.TRUE;
-            } catch (Throwable t) {
-                ourLog.info("StAX not detected on classpath, XML processing will be disabled");
-                ourStaxPresent = Boolean.FALSE;
-                retVal = Boolean.FALSE;
-            }
-        }
-        return retVal;
-    }
+	/**
+	* This method will return <code>true</code> if a StAX XML parsing library is present on the
+	* classpath
+	*/
+	public static boolean isStaxPresent() {
+		Boolean retVal = ourStaxPresent;
+		if (retVal == null) {
+				try {
+					Class.forName("javax.xml.stream.events.XMLEvent");
+					Class<?> xmlUtilClazz = Class.forName("ca.uhn.fhir.util.XmlUtil");
+					xmlUtilClazz
+								.getMethod("createXmlReader", Reader.class)
+								.invoke(xmlUtilClazz, new StringReader(""));
+					ourStaxPresent = Boolean.TRUE;
+					retVal = Boolean.TRUE;
+				} catch (Throwable t) {
+					ourLog.info("StAX not detected on classpath, XML processing will be disabled");
+					ourStaxPresent = Boolean.FALSE;
+					retVal = Boolean.FALSE;
+				}
+		}
+		return retVal;
+	}
 }

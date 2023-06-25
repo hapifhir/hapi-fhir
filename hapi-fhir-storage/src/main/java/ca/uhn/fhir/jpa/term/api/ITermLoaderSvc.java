@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.jpa.term.UploadStatistics;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-
-import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This service handles bulk loading concepts into the terminology service concept tables using any
@@ -32,60 +32,60 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  */
 public interface ITermLoaderSvc {
 
-    String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
-    String LOINC_URI = "http://loinc.org";
-    String SCT_URI = "http://snomed.info/sct";
-    String ICD10_URI = "http://hl7.org/fhir/sid/icd-10";
-    String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
-    String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
+	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
+	String LOINC_URI = "http://loinc.org";
+	String SCT_URI = "http://snomed.info/sct";
+	String ICD10_URI = "http://hl7.org/fhir/sid/icd-10";
+	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
+	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
-    UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    default UploadStatistics loadIcd10(
-            List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-        return null;
-    }
+	default UploadStatistics loadIcd10(
+				List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		return null;
+	}
 
-    UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    UploadStatistics loadCustom(
-            String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadCustom(
+				String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    UploadStatistics loadDeltaAdd(
-            String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadDeltaAdd(
+				String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    UploadStatistics loadDeltaRemove(
-            String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	UploadStatistics loadDeltaRemove(
+				String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-    interface FileDescriptor {
+	interface FileDescriptor {
 
-        String getFilename();
+		String getFilename();
 
-        InputStream getInputStream();
-    }
+		InputStream getInputStream();
+	}
 
-    class ByteArrayFileDescriptor implements FileDescriptor {
+	class ByteArrayFileDescriptor implements FileDescriptor {
 
-        private final String myNextUrl;
-        private final byte[] myNextData;
+		private final String myNextUrl;
+		private final byte[] myNextData;
 
-        public ByteArrayFileDescriptor(String theNextUrl, byte[] theNextData) {
-            myNextUrl = theNextUrl;
-            myNextData = theNextData;
-        }
+		public ByteArrayFileDescriptor(String theNextUrl, byte[] theNextData) {
+				myNextUrl = theNextUrl;
+				myNextData = theNextData;
+		}
 
-        @Override
-        public String getFilename() {
-            return myNextUrl;
-        }
+		@Override
+		public String getFilename() {
+				return myNextUrl;
+		}
 
-        @Override
-        public InputStream getInputStream() {
-            return new ByteArrayInputStream(myNextData);
-        }
-    }
+		@Override
+		public InputStream getInputStream() {
+				return new ByteArrayInputStream(myNextData);
+		}
+	}
 }

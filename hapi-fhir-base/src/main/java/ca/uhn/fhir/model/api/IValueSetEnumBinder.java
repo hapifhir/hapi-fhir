@@ -23,11 +23,11 @@ import java.io.Serializable;
 
 public interface IValueSetEnumBinder<T extends Enum<?>> extends Serializable {
 
-    T fromCodeString(String theCodeString);
+	T fromCodeString(String theCodeString);
 
-    String toCodeString(T theEnum);
+	String toCodeString(T theEnum);
 
-    String toSystemString(T theEnum);
+	String toSystemString(T theEnum);
 
-    T fromCodeString(String theCodeString, String theSystemString);
+	T fromCodeString(String theCodeString, String theSystemString);
 }

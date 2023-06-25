@@ -19,145 +19,144 @@
  */
 package ca.uhn.fhir.mdm.rules.config;
 
-import java.io.IOException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class MdmSettings implements IMdmSettings {
-    public static final int DEFAULT_CANDIDATE_SEARCH_LIMIT = 10000;
-    private final IMdmRuleValidator myMdmRuleValidator;
+	public static final int DEFAULT_CANDIDATE_SEARCH_LIMIT = 10000;
+	private final IMdmRuleValidator myMdmRuleValidator;
 
-    private boolean myEnabled;
-    private final int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
-    private String myScriptText;
-    private String mySurvivorshipRules;
-    private MdmRulesJson myMdmRules;
-    private boolean myPreventEidUpdates;
-    private String myGoldenResourcePartitionName;
-    private boolean mySearchAllPartitionForMatch = false;
+	private boolean myEnabled;
+	private final int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
+	private String myScriptText;
+	private String mySurvivorshipRules;
+	private MdmRulesJson myMdmRules;
+	private boolean myPreventEidUpdates;
+	private String myGoldenResourcePartitionName;
+	private boolean mySearchAllPartitionForMatch = false;
 
-    /**
-     * If disabled, the underlying MDM system will operate under the following assumptions:
-     *
-     * <p>1. Source resource may have more than 1 EID of the same system simultaneously. 2. During
-     * linking, incoming patient EIDs will be merged with existing Golden Resource EIDs.
-     */
-    private boolean myPreventMultipleEids;
+	/**
+	* If disabled, the underlying MDM system will operate under the following assumptions:
+	*
+	* <p>1. Source resource may have more than 1 EID of the same system simultaneously. 2. During
+	* linking, incoming patient EIDs will be merged with existing Golden Resource EIDs.
+	*/
+	private boolean myPreventMultipleEids;
 
-    /**
-     * When searching for matching candidates, this is the maximum number of candidates that will be
-     * retrieved. If the number matched is equal to or higher than this, then an exception will be
-     * thrown and candidate matching will be aborted
-     */
-    private int myCandidateSearchLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
+	/**
+	* When searching for matching candidates, this is the maximum number of candidates that will be
+	* retrieved. If the number matched is equal to or higher than this, then an exception will be
+	* thrown and candidate matching will be aborted
+	*/
+	private int myCandidateSearchLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
 
-    @Autowired
-    public MdmSettings(IMdmRuleValidator theMdmRuleValidator) {
-        myMdmRuleValidator = theMdmRuleValidator;
-    }
+	@Autowired
+	public MdmSettings(IMdmRuleValidator theMdmRuleValidator) {
+		myMdmRuleValidator = theMdmRuleValidator;
+	}
 
-    @Override
-    public boolean isEnabled() {
-        return myEnabled;
-    }
+	@Override
+	public boolean isEnabled() {
+		return myEnabled;
+	}
 
-    public MdmSettings setEnabled(boolean theEnabled) {
-        myEnabled = theEnabled;
-        return this;
-    }
+	public MdmSettings setEnabled(boolean theEnabled) {
+		myEnabled = theEnabled;
+		return this;
+	}
 
-    @Override
-    public int getConcurrentConsumers() {
-        return myConcurrentConsumers;
-    }
+	@Override
+	public int getConcurrentConsumers() {
+		return myConcurrentConsumers;
+	}
 
-    public String getScriptText() {
-        return myScriptText;
-    }
+	public String getScriptText() {
+		return myScriptText;
+	}
 
-    public MdmSettings setScriptText(String theScriptText) throws IOException {
-        myScriptText = theScriptText;
-        setMdmRules(JsonUtil.deserialize(theScriptText, MdmRulesJson.class));
-        return this;
-    }
+	public MdmSettings setScriptText(String theScriptText) throws IOException {
+		myScriptText = theScriptText;
+		setMdmRules(JsonUtil.deserialize(theScriptText, MdmRulesJson.class));
+		return this;
+	}
 
-    @Override
-    public MdmRulesJson getMdmRules() {
-        return myMdmRules;
-    }
+	@Override
+	public MdmRulesJson getMdmRules() {
+		return myMdmRules;
+	}
 
-    @Override
-    public boolean isPreventEidUpdates() {
-        return myPreventEidUpdates;
-    }
+	@Override
+	public boolean isPreventEidUpdates() {
+		return myPreventEidUpdates;
+	}
 
-    public MdmSettings setPreventEidUpdates(boolean thePreventEidUpdates) {
-        myPreventEidUpdates = thePreventEidUpdates;
-        return this;
-    }
+	public MdmSettings setPreventEidUpdates(boolean thePreventEidUpdates) {
+		myPreventEidUpdates = thePreventEidUpdates;
+		return this;
+	}
 
-    public MdmSettings setMdmRules(MdmRulesJson theMdmRules) {
-        myMdmRuleValidator.validate(theMdmRules);
-        myMdmRules = theMdmRules;
-        return this;
-    }
+	public MdmSettings setMdmRules(MdmRulesJson theMdmRules) {
+		myMdmRuleValidator.validate(theMdmRules);
+		myMdmRules = theMdmRules;
+		return this;
+	}
 
-    public boolean isPreventMultipleEids() {
-        return myPreventMultipleEids;
-    }
+	public boolean isPreventMultipleEids() {
+		return myPreventMultipleEids;
+	}
 
-    @Override
-    public String getRuleVersion() {
-        return myMdmRules.getVersion();
-    }
+	@Override
+	public String getRuleVersion() {
+		return myMdmRules.getVersion();
+	}
 
-    public MdmSettings setPreventMultipleEids(boolean thePreventMultipleEids) {
-        myPreventMultipleEids = thePreventMultipleEids;
-        return this;
-    }
+	public MdmSettings setPreventMultipleEids(boolean thePreventMultipleEids) {
+		myPreventMultipleEids = thePreventMultipleEids;
+		return this;
+	}
 
-    @Override
-    public String getSurvivorshipRules() {
-        return mySurvivorshipRules;
-    }
+	@Override
+	public String getSurvivorshipRules() {
+		return mySurvivorshipRules;
+	}
 
-    public void setSurvivorshipRules(String theSurvivorshipRules) {
-        mySurvivorshipRules = theSurvivorshipRules;
-    }
+	public void setSurvivorshipRules(String theSurvivorshipRules) {
+		mySurvivorshipRules = theSurvivorshipRules;
+	}
 
-    @Override
-    public int getCandidateSearchLimit() {
-        return myCandidateSearchLimit;
-    }
+	@Override
+	public int getCandidateSearchLimit() {
+		return myCandidateSearchLimit;
+	}
 
-    public void setCandidateSearchLimit(int theCandidateSearchLimit) {
-        myCandidateSearchLimit = theCandidateSearchLimit;
-    }
+	public void setCandidateSearchLimit(int theCandidateSearchLimit) {
+		myCandidateSearchLimit = theCandidateSearchLimit;
+	}
 
-    @Override
-    public String getGoldenResourcePartitionName() {
-        return myGoldenResourcePartitionName;
-    }
+	@Override
+	public String getGoldenResourcePartitionName() {
+		return myGoldenResourcePartitionName;
+	}
 
-    @Override
-    public void setGoldenResourcePartitionName(String theGoldenResourcePartitionName) {
-        myGoldenResourcePartitionName = theGoldenResourcePartitionName;
-    }
+	@Override
+	public void setGoldenResourcePartitionName(String theGoldenResourcePartitionName) {
+		myGoldenResourcePartitionName = theGoldenResourcePartitionName;
+	}
 
-    @Override
-    public boolean getSearchAllPartitionForMatch() {
-        return mySearchAllPartitionForMatch;
-    }
+	@Override
+	public boolean getSearchAllPartitionForMatch() {
+		return mySearchAllPartitionForMatch;
+	}
 
-    @Override
-    public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
-        mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
-    }
+	@Override
+	public void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch) {
+		mySearchAllPartitionForMatch = theSearchAllPartitionForMatch;
+	}
 }

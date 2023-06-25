@@ -19,47 +19,47 @@
  */
 package ca.uhn.fhir.validation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ObjectUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 abstract class BaseValidationContext<T> implements IValidationContext<T> {
 
-    protected final FhirContext myFhirContext;
+	protected final FhirContext myFhirContext;
 
-    private List<SingleValidationMessage> myMessages;
+	private List<SingleValidationMessage> myMessages;
 
-    /** Constructor */
-    BaseValidationContext(FhirContext theFhirContext) {
-        this(theFhirContext, new ArrayList<>());
-    }
+	/** Constructor */
+	BaseValidationContext(FhirContext theFhirContext) {
+		this(theFhirContext, new ArrayList<>());
+	}
 
-    /** Constructor */
-    BaseValidationContext(FhirContext theFhirContext, List<SingleValidationMessage> theMessages) {
-        myFhirContext = theFhirContext;
-        myMessages = theMessages;
-    }
+	/** Constructor */
+	BaseValidationContext(FhirContext theFhirContext, List<SingleValidationMessage> theMessages) {
+		myFhirContext = theFhirContext;
+		myMessages = theMessages;
+	}
 
-    @Override
-    public void addValidationMessage(SingleValidationMessage theMessage) {
-        ObjectUtil.requireNonNull(theMessage, "theMessage must not be null");
-        myMessages.add(theMessage);
-    }
+	@Override
+	public void addValidationMessage(SingleValidationMessage theMessage) {
+		ObjectUtil.requireNonNull(theMessage, "theMessage must not be null");
+		myMessages.add(theMessage);
+	}
 
-    @Override
-    public FhirContext getFhirContext() {
-        return myFhirContext;
-    }
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
 
-    @Override
-    public List<SingleValidationMessage> getMessages() {
-        return myMessages;
-    }
+	@Override
+	public List<SingleValidationMessage> getMessages() {
+		return myMessages;
+	}
 
-    @Override
-    public ValidationResult toResult() {
-        return new ValidationResult(myFhirContext, myMessages);
-    }
+	@Override
+	public ValidationResult toResult() {
+		return new ValidationResult(myFhirContext, myMessages);
+	}
 }

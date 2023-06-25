@@ -19,51 +19,50 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import java.util.List;
-
+import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Page;
 
-import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import java.util.List;
 
 /**
  * This service supports the MDM operation providers for those services that return multiple MDM
  * links.
  */
 public interface IMdmLinkQuerySvc {
-    @Deprecated
-    Page<MdmLinkJson> queryLinks(
-            IIdType theGoldenResourceId,
-            IIdType theSourceResourceId,
-            MdmMatchResultEnum theMatchResult,
-            MdmLinkSourceEnum theLinkSource,
-            MdmTransactionContext theMdmContext,
-            MdmPageRequest thePageRequest);
+	@Deprecated
+	Page<MdmLinkJson> queryLinks(
+				IIdType theGoldenResourceId,
+				IIdType theSourceResourceId,
+				MdmMatchResultEnum theMatchResult,
+				MdmLinkSourceEnum theLinkSource,
+				MdmTransactionContext theMdmContext,
+				MdmPageRequest thePageRequest);
 
-    @Deprecated
-    Page<MdmLinkJson> queryLinks(
-            IIdType theGoldenResourceId,
-            IIdType theSourceResourceId,
-            MdmMatchResultEnum theMatchResult,
-            MdmLinkSourceEnum theLinkSource,
-            MdmTransactionContext theMdmContext,
-            MdmPageRequest thePageRequest,
-            List<Integer> thePartitionId);
+	@Deprecated
+	Page<MdmLinkJson> queryLinks(
+				IIdType theGoldenResourceId,
+				IIdType theSourceResourceId,
+				MdmMatchResultEnum theMatchResult,
+				MdmLinkSourceEnum theLinkSource,
+				MdmTransactionContext theMdmContext,
+				MdmPageRequest thePageRequest,
+				List<Integer> thePartitionId);
 
-    Page<MdmLinkJson> queryLinks(
-            MdmQuerySearchParameters theMdmQuerySearchParameters,
-            MdmTransactionContext theMdmContext);
+	Page<MdmLinkJson> queryLinks(
+				MdmQuerySearchParameters theMdmQuerySearchParameters,
+				MdmTransactionContext theMdmContext);
 
-    Page<MdmLinkJson> getDuplicateGoldenResources(
-            MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
+	Page<MdmLinkJson> getDuplicateGoldenResources(
+				MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
 
-    Page<MdmLinkJson> getDuplicateGoldenResources(
-            MdmTransactionContext theMdmContext,
-            MdmPageRequest thePageRequest,
-            List<Integer> thePartitionId,
-            String theRequestResourceType);
+	Page<MdmLinkJson> getDuplicateGoldenResources(
+				MdmTransactionContext theMdmContext,
+				MdmPageRequest thePageRequest,
+				List<Integer> thePartitionId,
+				String theRequestResourceType);
 
-    List<MdmLinkWithRevisionJson> queryLinkHistory(
-            MdmHistorySearchParameters theMdmHistorySearchParameters);
+	List<MdmLinkWithRevisionJson> queryLinkHistory(
+				MdmHistorySearchParameters theMdmHistorySearchParameters);
 }

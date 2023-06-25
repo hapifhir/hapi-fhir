@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.job;
 
+import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a Bulk Export job.
@@ -30,8 +29,8 @@ import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 @Configuration
 public class BulkExportJobConfig {
 
-    @Bean
-    public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
-        return new MdmExpansionCacheSvc();
-    }
+	@Bean
+	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
+		return new MdmExpansionCacheSvc();
+	}
 }

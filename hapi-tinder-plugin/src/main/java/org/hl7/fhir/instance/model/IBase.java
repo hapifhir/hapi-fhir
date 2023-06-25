@@ -25,5 +25,5 @@ package org.hl7.fhir.dstu2.model;
  */
 public interface IBase {
 
-    boolean isEmpty();
+	boolean isEmpty();
 }

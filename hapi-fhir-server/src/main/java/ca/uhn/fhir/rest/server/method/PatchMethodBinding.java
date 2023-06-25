@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Set;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -38,91 +28,100 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Set;
+import javax.annotation.Nonnull;
 
 /**
  * Base class for an operation that has a resource type but not a resource body in the request body
  */
 public class PatchMethodBinding
-        extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
+		extends BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody {
 
-    private int myPatchTypeParameterIndex = -1;
-    private int myResourceParamIndex;
+	private int myPatchTypeParameterIndex = -1;
+	private int myResourceParamIndex;
 
-    public PatchMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
-        super(
-                theMethod,
-                theContext,
-                theProvider,
-                Patch.class,
-                theMethod.getAnnotation(Patch.class).type());
+	public PatchMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+		super(
+					theMethod,
+					theContext,
+					theProvider,
+					Patch.class,
+					theMethod.getAnnotation(Patch.class).type());
 
-        for (ListIterator<Class<?>> iter =
-                        Arrays.asList(theMethod.getParameterTypes()).listIterator();
-                iter.hasNext(); ) {
-            int nextIndex = iter.nextIndex();
-            Class<?> next = iter.next();
-            if (next.equals(PatchTypeEnum.class)) {
-                myPatchTypeParameterIndex = nextIndex;
-            }
-            for (Annotation nextAnnotation : theMethod.getParameterAnnotations()[nextIndex]) {
-                if (nextAnnotation instanceof ResourceParam) {
-                    myResourceParamIndex = nextIndex;
-                }
-            }
-        }
+		for (ListIterator<Class<?>> iter =
+								Arrays.asList(theMethod.getParameterTypes()).listIterator();
+					iter.hasNext(); ) {
+				int nextIndex = iter.nextIndex();
+				Class<?> next = iter.next();
+				if (next.equals(PatchTypeEnum.class)) {
+					myPatchTypeParameterIndex = nextIndex;
+				}
+				for (Annotation nextAnnotation : theMethod.getParameterAnnotations()[nextIndex]) {
+					if (nextAnnotation instanceof ResourceParam) {
+						myResourceParamIndex = nextIndex;
+					}
+				}
+		}
 
-        if (myPatchTypeParameterIndex == -1) {
-            throw new ConfigurationException(
-                    Msg.code(370)
-                            + "Method has no parameter of type "
-                            + PatchTypeEnum.class.getName()
-                            + " - "
-                            + theMethod.toString());
-        }
-        if (myResourceParamIndex == -1) {
-            throw new ConfigurationException(
-                    Msg.code(371)
-                            + "Method has no parameter with @"
-                            + ResourceParam.class.getSimpleName()
-                            + " annotation - "
-                            + theMethod.toString());
-        }
-    }
+		if (myPatchTypeParameterIndex == -1) {
+				throw new ConfigurationException(
+						Msg.code(370)
+									+ "Method has no parameter of type "
+									+ PatchTypeEnum.class.getName()
+									+ " - "
+									+ theMethod.toString());
+		}
+		if (myResourceParamIndex == -1) {
+				throw new ConfigurationException(
+						Msg.code(371)
+									+ "Method has no parameter with @"
+									+ ResourceParam.class.getSimpleName()
+									+ " annotation - "
+									+ theMethod.toString());
+		}
+	}
 
-    @Override
-    protected boolean allowVoidReturnType() {
-        return true;
-    }
+	@Override
+	protected boolean allowVoidReturnType() {
+		return true;
+	}
 
-    @Override
-    public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-        MethodMatchEnum retVal = super.incomingServerRequestMatchesMethod(theRequest);
-        if (retVal.ordinal() > MethodMatchEnum.NONE.ordinal()) {
-            PatchTypeParameter.getTypeForRequestOrThrowInvalidRequestException(theRequest);
-        }
-        return retVal;
-    }
+	@Override
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		MethodMatchEnum retVal = super.incomingServerRequestMatchesMethod(theRequest);
+		if (retVal.ordinal() > MethodMatchEnum.NONE.ordinal()) {
+				PatchTypeParameter.getTypeForRequestOrThrowInvalidRequestException(theRequest);
+		}
+		return retVal;
+	}
 
-    @Nonnull
-    @Override
-    public RestOperationTypeEnum getRestOperationType() {
-        return RestOperationTypeEnum.PATCH;
-    }
+	@Nonnull
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.PATCH;
+	}
 
-    @Override
-    protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
-        return Collections.singleton(RequestTypeEnum.PATCH);
-    }
+	@Override
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestTypeEnum.PATCH);
+	}
 
-    @Override
-    protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-        IIdType id = theRequest.getId();
-        id = UpdateMethodBinding.applyETagAsVersion(theRequest, id);
-        theParams[getIdParameterIndex()] = id;
-    }
+	@Override
+	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
+		IIdType id = theRequest.getId();
+		id = UpdateMethodBinding.applyETagAsVersion(theRequest, id);
+		theParams[getIdParameterIndex()] = id;
+	}
 
-    @Override
-    protected String getMatchingOperation() {
-        return null;
-    }
+	@Override
+	protected String getMatchingOperation() {
+		return null;
+	}
 }

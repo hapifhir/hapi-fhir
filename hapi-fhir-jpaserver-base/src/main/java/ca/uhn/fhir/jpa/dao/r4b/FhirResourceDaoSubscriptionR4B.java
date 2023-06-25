@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.jpa.dao.r4b;
 
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4b.model.Subscription;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4b.model.Subscription;
 
 public class FhirResourceDaoSubscriptionR4B extends BaseHapiFhirResourceDao<Subscription>
-        implements IFhirResourceDaoSubscription<Subscription> {
+		implements IFhirResourceDaoSubscription<Subscription> {
 
-    @Override
-    public Long getSubscriptionTablePidForSubscriptionResource(
-            IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-        throw new UnsupportedOperationException(Msg.code(2150));
-    }
+	@Override
+	public Long getSubscriptionTablePidForSubscriptionResource(
+				IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		throw new UnsupportedOperationException(Msg.code(2150));
+	}
 }

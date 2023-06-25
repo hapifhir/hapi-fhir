@@ -19,50 +19,49 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.util.TerserUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 
-    @Autowired private FhirContext myFhirContext;
+	@Autowired private FhirContext myFhirContext;
 
-    /**
-     * Merges two golden resources by overwriting all field values on theGoldenResource param for
-     * CREATE_RESOURCE, UPDATE_RESOURCE, SUBMIT_RESOURCE_TO_MDM, UPDATE_LINK (when setting to MATCH)
-     * and MANUAL_MERGE_GOLDEN_RESOURCES. PID, identifiers and meta values are not affected by this
-     * operation.
-     *
-     * @param theTargetResource Target resource to retrieve fields from
-     * @param theGoldenResource Golden resource to merge fields into
-     * @param theMdmTransactionContext Current transaction context
-     * @param <T>
-     */
-    @Override
-    public <T extends IBase> void applySurvivorshipRulesToGoldenResource(
-            T theTargetResource,
-            T theGoldenResource,
-            MdmTransactionContext theMdmTransactionContext) {
-        switch (theMdmTransactionContext.getRestOperation()) {
-            case MERGE_GOLDEN_RESOURCES:
-                TerserUtil.mergeFields(
-                        myFhirContext,
-                        (IBaseResource) theTargetResource,
-                        (IBaseResource) theGoldenResource,
-                        TerserUtil.EXCLUDE_IDS_AND_META);
-                break;
-            default:
-                TerserUtil.replaceFields(
-                        myFhirContext,
-                        (IBaseResource) theTargetResource,
-                        (IBaseResource) theGoldenResource,
-                        TerserUtil.EXCLUDE_IDS_AND_META);
-                break;
-        }
-    }
+	/**
+	* Merges two golden resources by overwriting all field values on theGoldenResource param for
+	* CREATE_RESOURCE, UPDATE_RESOURCE, SUBMIT_RESOURCE_TO_MDM, UPDATE_LINK (when setting to MATCH)
+	* and MANUAL_MERGE_GOLDEN_RESOURCES. PID, identifiers and meta values are not affected by this
+	* operation.
+	*
+	* @param theTargetResource Target resource to retrieve fields from
+	* @param theGoldenResource Golden resource to merge fields into
+	* @param theMdmTransactionContext Current transaction context
+	* @param <T>
+	*/
+	@Override
+	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(
+				T theTargetResource,
+				T theGoldenResource,
+				MdmTransactionContext theMdmTransactionContext) {
+		switch (theMdmTransactionContext.getRestOperation()) {
+				case MERGE_GOLDEN_RESOURCES:
+					TerserUtil.mergeFields(
+								myFhirContext,
+								(IBaseResource) theTargetResource,
+								(IBaseResource) theGoldenResource,
+								TerserUtil.EXCLUDE_IDS_AND_META);
+					break;
+				default:
+					TerserUtil.replaceFields(
+								myFhirContext,
+								(IBaseResource) theTargetResource,
+								(IBaseResource) theGoldenResource,
+								TerserUtil.EXCLUDE_IDS_AND_META);
+					break;
+		}
+	}
 }

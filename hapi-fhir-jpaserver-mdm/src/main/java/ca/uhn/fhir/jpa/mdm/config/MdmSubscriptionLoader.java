@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Subscription;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -44,116 +34,125 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Subscription;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmSubscriptionLoader {
 
-    public static final String MDM_SUBSCIPRION_ID_PREFIX = "mdm-";
-    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-    @Autowired public FhirContext myFhirContext;
-    @Autowired public DaoRegistry myDaoRegistry;
-    @Autowired IChannelNamer myChannelNamer;
-    @Autowired private SubscriptionLoader mySubscriptionLoader;
-    @Autowired private IMdmSettings myMdmSettings;
+	public static final String MDM_SUBSCIPRION_ID_PREFIX = "mdm-";
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+	@Autowired public FhirContext myFhirContext;
+	@Autowired public DaoRegistry myDaoRegistry;
+	@Autowired IChannelNamer myChannelNamer;
+	@Autowired private SubscriptionLoader mySubscriptionLoader;
+	@Autowired private IMdmSettings myMdmSettings;
 
-    private IFhirResourceDao<IBaseResource> mySubscriptionDao;
+	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
 
-    public synchronized void daoUpdateMdmSubscriptions() {
-        List<IBaseResource> subscriptions;
-        List<String> mdmResourceTypes = myMdmSettings.getMdmRules().getMdmTypes();
-        switch (myFhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                subscriptions =
-                        mdmResourceTypes.stream()
-                                .map(
-                                        resourceType ->
-                                                buildMdmSubscriptionDstu3(
-                                                        MDM_SUBSCIPRION_ID_PREFIX + resourceType,
-                                                        resourceType + "?"))
-                                .collect(Collectors.toList());
-                break;
-            case R4:
-                subscriptions =
-                        mdmResourceTypes.stream()
-                                .map(
-                                        resourceType ->
-                                                buildMdmSubscriptionR4(
-                                                        MDM_SUBSCIPRION_ID_PREFIX + resourceType,
-                                                        resourceType + "?"))
-                                .collect(Collectors.toList());
-                break;
-            default:
-                throw new ConfigurationException(
-                        Msg.code(736)
-                                + "MDM not supported for FHIR version "
-                                + myFhirContext.getVersion().getVersion());
-        }
+	public synchronized void daoUpdateMdmSubscriptions() {
+		List<IBaseResource> subscriptions;
+		List<String> mdmResourceTypes = myMdmSettings.getMdmRules().getMdmTypes();
+		switch (myFhirContext.getVersion().getVersion()) {
+				case DSTU3:
+					subscriptions =
+								mdmResourceTypes.stream()
+										.map(
+													resourceType ->
+																buildMdmSubscriptionDstu3(
+																		MDM_SUBSCIPRION_ID_PREFIX + resourceType,
+																		resourceType + "?"))
+										.collect(Collectors.toList());
+					break;
+				case R4:
+					subscriptions =
+								mdmResourceTypes.stream()
+										.map(
+													resourceType ->
+																buildMdmSubscriptionR4(
+																		MDM_SUBSCIPRION_ID_PREFIX + resourceType,
+																		resourceType + "?"))
+										.collect(Collectors.toList());
+					break;
+				default:
+					throw new ConfigurationException(
+								Msg.code(736)
+										+ "MDM not supported for FHIR version "
+										+ myFhirContext.getVersion().getVersion());
+		}
 
-        mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-        for (IBaseResource subscription : subscriptions) {
-            updateIfNotPresent(subscription);
-        }
-        // After loading all the subscriptions, sync the subscriptions to the registry.
-        if (subscriptions != null && subscriptions.size() > 0) {
-            mySubscriptionLoader.syncDatabaseToCache();
-        }
-    }
+		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		for (IBaseResource subscription : subscriptions) {
+				updateIfNotPresent(subscription);
+		}
+		// After loading all the subscriptions, sync the subscriptions to the registry.
+		if (subscriptions != null && subscriptions.size() > 0) {
+				mySubscriptionLoader.syncDatabaseToCache();
+		}
+	}
 
-    synchronized void updateIfNotPresent(IBaseResource theSubscription) {
-        try {
-            mySubscriptionDao.read(
-                    theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
-        } catch (ResourceNotFoundException | ResourceGoneException e) {
-            ourLog.info("Creating subscription " + theSubscription.getIdElement());
-            mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
-        }
-    }
+	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
+		try {
+				mySubscriptionDao.read(
+						theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
+		} catch (ResourceNotFoundException | ResourceGoneException e) {
+				ourLog.info("Creating subscription " + theSubscription.getIdElement());
+				mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
+		}
+	}
 
-    private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(
-            String theId, String theCriteria) {
-        org.hl7.fhir.dstu3.model.Subscription retval = new org.hl7.fhir.dstu3.model.Subscription();
-        retval.setId(theId);
-        retval.setReason("MDM");
-        retval.setStatus(org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus.REQUESTED);
-        retval.setCriteria(theCriteria);
-        retval.getMeta()
-                .addTag()
-                .setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
-                .setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
-        retval.addExtension()
-                .setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-                .setValue(new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
-        org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel =
-                retval.getChannel();
-        channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
-        channel.setEndpoint(
-                "channel:"
-                        + myChannelNamer.getChannelName(
-                                IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-        channel.setPayload("application/json");
-        return retval;
-    }
+	private org.hl7.fhir.dstu3.model.Subscription buildMdmSubscriptionDstu3(
+				String theId, String theCriteria) {
+		org.hl7.fhir.dstu3.model.Subscription retval = new org.hl7.fhir.dstu3.model.Subscription();
+		retval.setId(theId);
+		retval.setReason("MDM");
+		retval.setStatus(org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus.REQUESTED);
+		retval.setCriteria(theCriteria);
+		retval.getMeta()
+					.addTag()
+					.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
+					.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+		retval.addExtension()
+					.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+					.setValue(new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
+		org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel =
+					retval.getChannel();
+		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
+		channel.setEndpoint(
+					"channel:"
+								+ myChannelNamer.getChannelName(
+										IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+		channel.setPayload("application/json");
+		return retval;
+	}
 
-    private Subscription buildMdmSubscriptionR4(String theId, String theCriteria) {
-        Subscription retval = new Subscription();
-        retval.setId(theId);
-        retval.setReason("MDM");
-        retval.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-        retval.setCriteria(theCriteria);
-        retval.getMeta()
-                .addTag()
-                .setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
-                .setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
-        retval.addExtension()
-                .setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-                .setValue(new BooleanType().setValue(true));
-        Subscription.SubscriptionChannelComponent channel = retval.getChannel();
-        channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-        channel.setEndpoint(
-                "channel:"
-                        + myChannelNamer.getChannelName(
-                                IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
-        channel.setPayload("application/json");
-        return retval;
-    }
+	private Subscription buildMdmSubscriptionR4(String theId, String theCriteria) {
+		Subscription retval = new Subscription();
+		retval.setId(theId);
+		retval.setReason("MDM");
+		retval.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		retval.setCriteria(theCriteria);
+		retval.getMeta()
+					.addTag()
+					.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
+					.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+		retval.addExtension()
+					.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+					.setValue(new BooleanType().setValue(true));
+		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
+		channel.setEndpoint(
+					"channel:"
+								+ myChannelNamer.getChannelName(
+										IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+		channel.setPayload("application/json");
+		return retval;
+	}
 }

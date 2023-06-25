@@ -19,33 +19,33 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import java.util.Arrays;
-
 import ca.uhn.fhir.rest.api.Constants;
 
+import java.util.Arrays;
+
 public enum HistorySearchStyleEnum {
-    AT(Constants.PARAM_AT),
-    SINCE(Constants.PARAM_SINCE),
-    COUNT(Constants.PARAM_COUNT);
+	AT(Constants.PARAM_AT),
+	SINCE(Constants.PARAM_SINCE),
+	COUNT(Constants.PARAM_COUNT);
 
-    public String getValue() {
-        return myValue;
-    }
+	public String getValue() {
+		return myValue;
+	}
 
-    private final String myValue;
+	private final String myValue;
 
-    HistorySearchStyleEnum(String theValue) {
-        this.myValue = theValue;
-    }
+	HistorySearchStyleEnum(String theValue) {
+		this.myValue = theValue;
+	}
 
-    public static HistorySearchStyleEnum parse(String value) {
-        return Arrays.stream(HistorySearchStyleEnum.values())
-                .filter(type -> type.myValue.equals(value))
-                .findAny()
-                .orElse(null);
-    }
+	public static HistorySearchStyleEnum parse(String value) {
+		return Arrays.stream(HistorySearchStyleEnum.values())
+					.filter(type -> type.myValue.equals(value))
+					.findAny()
+					.orElse(null);
+	}
 
-    public boolean isAt() {
-        return this == HistorySearchStyleEnum.AT;
-    }
+	public boolean isAt() {
+		return this == HistorySearchStyleEnum.AT;
+	}
 }

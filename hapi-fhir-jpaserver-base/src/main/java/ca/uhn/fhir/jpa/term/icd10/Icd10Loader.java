@@ -19,104 +19,103 @@
  */
 package ca.uhn.fhir.jpa.term.icd10;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-
 import static ca.uhn.fhir.util.XmlUtil.getChildrenByTagName;
 import static ca.uhn.fhir.util.XmlUtil.parseDocument;
 
 public class Icd10Loader {
 
-    public static final String EXPECTED_ROOT_NODE = "ClaML";
-    private final CodeSystem codeSystem;
-    private final TermCodeSystemVersion codeSystemVersion;
-    private int conceptCount = 0;
+	public static final String EXPECTED_ROOT_NODE = "ClaML";
+	private final CodeSystem codeSystem;
+	private final TermCodeSystemVersion codeSystemVersion;
+	private int conceptCount = 0;
 
-    public Icd10Loader(CodeSystem codeSystem, TermCodeSystemVersion codeSystemVersion) {
-        this.codeSystem = codeSystem;
-        this.codeSystemVersion = codeSystemVersion;
-    }
+	public Icd10Loader(CodeSystem codeSystem, TermCodeSystemVersion codeSystemVersion) {
+		this.codeSystem = codeSystem;
+		this.codeSystemVersion = codeSystemVersion;
+	}
 
-    public void load(Reader reader) throws IOException, SAXException {
-        Document document = parseDocument(reader, false, true);
-        Element documentElement = document.getDocumentElement();
+	public void load(Reader reader) throws IOException, SAXException {
+		Document document = parseDocument(reader, false, true);
+		Element documentElement = document.getDocumentElement();
 
-        String rootNodeName = documentElement.getTagName();
-        if (!EXPECTED_ROOT_NODE.equals(rootNodeName)) {
-            return;
-        }
+		String rootNodeName = documentElement.getTagName();
+		if (!EXPECTED_ROOT_NODE.equals(rootNodeName)) {
+				return;
+		}
 
-        for (Element title : getChildrenByTagName(documentElement, "Title")) {
-            String name = title.getAttribute("name");
-            if (!name.isEmpty()) {
-                codeSystem.setName(name);
-                codeSystem.setTitle(name);
-            }
-            String version = title.getAttribute("version");
-            if (!version.isEmpty()) {
-                codeSystemVersion.setCodeSystemVersionId(version);
-            }
-            codeSystem.setDescription(title.getTextContent());
-        }
+		for (Element title : getChildrenByTagName(documentElement, "Title")) {
+				String name = title.getAttribute("name");
+				if (!name.isEmpty()) {
+					codeSystem.setName(name);
+					codeSystem.setTitle(name);
+				}
+				String version = title.getAttribute("version");
+				if (!version.isEmpty()) {
+					codeSystemVersion.setCodeSystemVersionId(version);
+				}
+				codeSystem.setDescription(title.getTextContent());
+		}
 
-        Map<String, TermConcept> conceptMap = new HashMap<>();
-        for (Element aClass : getChildrenByTagName(documentElement, "Class")) {
-            String code = aClass.getAttribute("code");
-            if (code.isEmpty()) {
-                continue;
-            }
+		Map<String, TermConcept> conceptMap = new HashMap<>();
+		for (Element aClass : getChildrenByTagName(documentElement, "Class")) {
+				String code = aClass.getAttribute("code");
+				if (code.isEmpty()) {
+					continue;
+				}
 
-            boolean rootConcept = getChildrenByTagName(aClass, "SuperClass").isEmpty();
-            TermConcept termConcept =
-                    rootConcept ? codeSystemVersion.addConcept() : new TermConcept();
-            termConcept.setCode(code);
+				boolean rootConcept = getChildrenByTagName(aClass, "SuperClass").isEmpty();
+				TermConcept termConcept =
+						rootConcept ? codeSystemVersion.addConcept() : new TermConcept();
+				termConcept.setCode(code);
 
-            // Preferred label and other properties
-            for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
-                String kind = rubric.getAttribute("kind");
-                Optional<Element> firstLabel =
-                        getChildrenByTagName(rubric, "Label").stream().findFirst();
-                if (firstLabel.isPresent()) {
-                    String textContent = firstLabel.get().getTextContent();
-                    if (textContent != null && !textContent.isEmpty()) {
-                        textContent =
-                                textContent.replace("\n", "").replace("\r", "").replace("\t", "");
-                        if (kind.equals("preferred")) {
-                            termConcept.setDisplay(textContent);
-                        } else {
-                            termConcept.addPropertyString(kind, textContent);
-                        }
-                    }
-                }
-            }
+				// Preferred label and other properties
+				for (Element rubric : getChildrenByTagName(aClass, "Rubric")) {
+					String kind = rubric.getAttribute("kind");
+					Optional<Element> firstLabel =
+								getChildrenByTagName(rubric, "Label").stream().findFirst();
+					if (firstLabel.isPresent()) {
+						String textContent = firstLabel.get().getTextContent();
+						if (textContent != null && !textContent.isEmpty()) {
+								textContent =
+										textContent.replace("\n", "").replace("\r", "").replace("\t", "");
+								if (kind.equals("preferred")) {
+									termConcept.setDisplay(textContent);
+								} else {
+									termConcept.addPropertyString(kind, textContent);
+								}
+						}
+					}
+				}
 
-            for (Element superClass : getChildrenByTagName(aClass, "SuperClass")) {
-                TermConcept parent = conceptMap.get(superClass.getAttribute("code"));
-                if (parent != null) {
-                    parent.addChild(
-                            termConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-                }
-            }
+				for (Element superClass : getChildrenByTagName(aClass, "SuperClass")) {
+					TermConcept parent = conceptMap.get(superClass.getAttribute("code"));
+					if (parent != null) {
+						parent.addChild(
+									termConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+					}
+				}
 
-            conceptMap.put(code, termConcept);
-        }
+				conceptMap.put(code, termConcept);
+		}
 
-        conceptCount = conceptMap.size();
-    }
+		conceptCount = conceptMap.size();
+	}
 
-    public int getConceptCount() {
-        return conceptCount;
-    }
+	public int getConceptCount() {
+		return conceptCount;
+	}
 }

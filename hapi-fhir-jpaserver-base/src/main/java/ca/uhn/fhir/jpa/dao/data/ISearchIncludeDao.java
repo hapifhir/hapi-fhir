@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.SearchInclude;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.SearchInclude;
-
 public interface ISearchIncludeDao
-        extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<SearchInclude, Long>, IHapiFhirJpaRepository {
 
-    @Modifying
-    @Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
-    void deleteForSearch(@Param("search") Long theSearchPid);
+	@Modifying
+	@Query(value = "DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")
+	void deleteForSearch(@Param("search") Long theSearchPid);
 }

@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 413 Payload Too Large</b> response, which means the request body was
@@ -34,20 +33,20 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class PayloadTooLargeException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PAYLOAD_TOO_LARGE;
-    private static final long serialVersionUID = 1L;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PAYLOAD_TOO_LARGE;
+	private static final long serialVersionUID = 1L;
 
-    public PayloadTooLargeException(String theMessage) {
-        this(theMessage, null);
-    }
+	public PayloadTooLargeException(String theMessage) {
+		this(theMessage, null);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     * @param theOperationOutcome The OperationOutcome resource to return to the client
-     */
-    public PayloadTooLargeException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
-        super(STATUS_CODE, theMessage, theOperationOutcome);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	* @param theOperationOutcome The OperationOutcome resource to return to the client
+	*/
+	public PayloadTooLargeException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
 }

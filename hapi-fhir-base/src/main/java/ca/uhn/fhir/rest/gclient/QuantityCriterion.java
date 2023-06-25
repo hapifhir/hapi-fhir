@@ -27,43 +27,43 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionInternal {
 
-    private String myValue;
-    private String myName;
-    private String mySystem;
-    private String myUnits;
-    private ParamPrefixEnum myPrefix;
+	private String myValue;
+	private String myName;
+	private String mySystem;
+	private String myUnits;
+	private ParamPrefixEnum myPrefix;
 
-    public QuantityCriterion(
-            String theParamName,
-            ParamPrefixEnum thePrefix,
-            String theValue,
-            String theSystem,
-            String theUnits) {
-        myValue = theValue;
-        myPrefix = thePrefix;
-        myName = theParamName;
-        mySystem = theSystem;
-        myUnits = theUnits;
-    }
+	public QuantityCriterion(
+				String theParamName,
+				ParamPrefixEnum thePrefix,
+				String theValue,
+				String theSystem,
+				String theUnits) {
+		myValue = theValue;
+		myPrefix = thePrefix;
+		myName = theParamName;
+		mySystem = theSystem;
+		myUnits = theUnits;
+	}
 
-    @Override
-    public String getParameterName() {
-        return myName;
-    }
+	@Override
+	public String getParameterName() {
+		return myName;
+	}
 
-    @Override
-    public String getParameterValue(FhirContext theContext) {
-        StringBuilder b = new StringBuilder();
-        if (isNotBlank(myValue) || isNotBlank(mySystem) || isNotBlank(myUnits)) {
-            if (myPrefix != null) {
-                b.append(ParameterUtil.escapeWithDefault(myPrefix.getValue()));
-            }
-            b.append(ParameterUtil.escapeWithDefault(myValue));
-            b.append('|');
-            b.append(ParameterUtil.escapeWithDefault(mySystem));
-            b.append('|');
-            b.append(ParameterUtil.escapeWithDefault(myUnits));
-        }
-        return b.toString();
-    }
+	@Override
+	public String getParameterValue(FhirContext theContext) {
+		StringBuilder b = new StringBuilder();
+		if (isNotBlank(myValue) || isNotBlank(mySystem) || isNotBlank(myUnits)) {
+				if (myPrefix != null) {
+					b.append(ParameterUtil.escapeWithDefault(myPrefix.getValue()));
+				}
+				b.append(ParameterUtil.escapeWithDefault(myValue));
+				b.append('|');
+				b.append(ParameterUtil.escapeWithDefault(mySystem));
+				b.append('|');
+				b.append(ParameterUtil.escapeWithDefault(myUnits));
+		}
+		return b.toString();
+	}
 }

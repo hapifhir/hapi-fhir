@@ -19,13 +19,12 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
-import java.util.List;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import javax.annotation.Nonnull;
 
 /**
  * This interface is used by the {@literal IResourceChangeListenerCacheRefresher} to read resources
@@ -33,19 +32,19 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
  * the {@literal IResourceChangeListenerRegistry}.
  */
 public interface IResourceVersionSvc {
-    @Nonnull
-    ResourceVersionMap getVersionMap(
-            RequestPartitionId theRequestPartitionId,
-            String theResourceName,
-            SearchParameterMap theSearchParamMap);
+	@Nonnull
+	ResourceVersionMap getVersionMap(
+				RequestPartitionId theRequestPartitionId,
+				String theResourceName,
+				SearchParameterMap theSearchParamMap);
 
-    @Nonnull
-    default ResourceVersionMap getVersionMap(
-            String theResourceName, SearchParameterMap theSearchParamMap) {
-        return getVersionMap(
-                RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
-    }
+	@Nonnull
+	default ResourceVersionMap getVersionMap(
+				String theResourceName, SearchParameterMap theSearchParamMap) {
+		return getVersionMap(
+					RequestPartitionId.allPartitions(), theResourceName, theSearchParamMap);
+	}
 
-    ResourcePersistentIdMap getLatestVersionIdsForResourceIds(
-            RequestPartitionId thePartition, List<IIdType> theIds);
+	ResourcePersistentIdMap getLatestVersionIdsForResourceIds(
+				RequestPartitionId thePartition, List<IIdType> theIds);
 }

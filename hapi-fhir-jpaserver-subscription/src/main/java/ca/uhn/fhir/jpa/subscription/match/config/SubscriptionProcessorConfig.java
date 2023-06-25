@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -52,6 +45,12 @@ import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicPayloadBuilder;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 /**
  * This Spring config should be imported by a system that pulls messages off of the matching queue
@@ -60,130 +59,130 @@ import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
 @Import(SubscriptionModelConfig.class)
 public class SubscriptionProcessorConfig {
 
-    @Bean
-    public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
-        return new SubscriptionMatchingSubscriber();
-    }
+	@Bean
+	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
+		return new SubscriptionMatchingSubscriber();
+	}
 
-    @Bean
-    public SubscriptionActivatingSubscriber subscriptionActivatingSubscriber() {
-        return new SubscriptionActivatingSubscriber();
-    }
+	@Bean
+	public SubscriptionActivatingSubscriber subscriptionActivatingSubscriber() {
+		return new SubscriptionActivatingSubscriber();
+	}
 
-    @Bean
-    public MatchingQueueSubscriberLoader subscriptionMatchingSubscriberLoader() {
-        return new MatchingQueueSubscriberLoader();
-    }
+	@Bean
+	public MatchingQueueSubscriberLoader subscriptionMatchingSubscriberLoader() {
+		return new MatchingQueueSubscriberLoader();
+	}
 
-    @Bean
-    public SubscriptionRegisteringSubscriber subscriptionRegisteringSubscriber() {
-        return new SubscriptionRegisteringSubscriber();
-    }
+	@Bean
+	public SubscriptionRegisteringSubscriber subscriptionRegisteringSubscriber() {
+		return new SubscriptionRegisteringSubscriber();
+	}
 
-    @Bean
-    public SubscriptionRegistry subscriptionRegistry() {
-        return new SubscriptionRegistry();
-    }
+	@Bean
+	public SubscriptionRegistry subscriptionRegistry() {
+		return new SubscriptionRegistry();
+	}
 
-    @Bean
-    public SubscriptionDeliveryChannelNamer subscriptionDeliveryChannelNamer() {
-        return new SubscriptionDeliveryChannelNamer();
-    }
+	@Bean
+	public SubscriptionDeliveryChannelNamer subscriptionDeliveryChannelNamer() {
+		return new SubscriptionDeliveryChannelNamer();
+	}
 
-    @Bean
-    public SubscriptionLoader subscriptionLoader() {
-        return new SubscriptionLoader();
-    }
+	@Bean
+	public SubscriptionLoader subscriptionLoader() {
+		return new SubscriptionLoader();
+	}
 
-    @Bean
-    public SubscriptionChannelRegistry subscriptionChannelRegistry() {
-        return new SubscriptionChannelRegistry();
-    }
+	@Bean
+	public SubscriptionChannelRegistry subscriptionChannelRegistry() {
+		return new SubscriptionChannelRegistry();
+	}
 
-    @Bean
-    public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(
-            ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
-        return new SubscriptionDeliveryHandlerFactory(theApplicationContext, theEmailSender);
-    }
+	@Bean
+	public SubscriptionDeliveryHandlerFactory subscriptionDeliveryHandlerFactory(
+				ApplicationContext theApplicationContext, IEmailSender theEmailSender) {
+		return new SubscriptionDeliveryHandlerFactory(theApplicationContext, theEmailSender);
+	}
 
-    @Bean
-    public SubscriptionMatchDeliverer subscriptionMatchDeliverer(
-            FhirContext theFhirContext,
-            IInterceptorBroadcaster theInterceptorBroadcaster,
-            SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
-        return new SubscriptionMatchDeliverer(
-                theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
-    }
+	@Bean
+	public SubscriptionMatchDeliverer subscriptionMatchDeliverer(
+				FhirContext theFhirContext,
+				IInterceptorBroadcaster theInterceptorBroadcaster,
+				SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+		return new SubscriptionMatchDeliverer(
+					theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
+	}
 
-    @Bean
-    @Scope("prototype")
-    public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
-        return new SubscriptionDeliveringRestHookSubscriber();
-    }
+	@Bean
+	@Scope("prototype")
+	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
+		return new SubscriptionDeliveringRestHookSubscriber();
+	}
 
-    @Bean
-    @Scope("prototype")
-    public SubscriptionDeliveringMessageSubscriber subscriptionDeliveringMessageSubscriber(
-            IChannelFactory theChannelFactory) {
-        return new SubscriptionDeliveringMessageSubscriber(theChannelFactory);
-    }
+	@Bean
+	@Scope("prototype")
+	public SubscriptionDeliveringMessageSubscriber subscriptionDeliveringMessageSubscriber(
+				IChannelFactory theChannelFactory) {
+		return new SubscriptionDeliveringMessageSubscriber(theChannelFactory);
+	}
 
-    @Bean
-    @Scope("prototype")
-    public SubscriptionDeliveringEmailSubscriber subscriptionDeliveringEmailSubscriber(
-            IEmailSender theEmailSender) {
-        return new SubscriptionDeliveringEmailSubscriber(theEmailSender);
-    }
+	@Bean
+	@Scope("prototype")
+	public SubscriptionDeliveringEmailSubscriber subscriptionDeliveringEmailSubscriber(
+				IEmailSender theEmailSender) {
+		return new SubscriptionDeliveringEmailSubscriber(theEmailSender);
+	}
 
-    @Bean
-    public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
-        return new InMemorySubscriptionMatcher();
-    }
+	@Bean
+	public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
+		return new InMemorySubscriptionMatcher();
+	}
 
-    @Bean
-    public DaoSubscriptionMatcher daoSubscriptionMatcher() {
-        return new DaoSubscriptionMatcher();
-    }
+	@Bean
+	public DaoSubscriptionMatcher daoSubscriptionMatcher() {
+		return new DaoSubscriptionMatcher();
+	}
 
-    @Bean
-    @Primary
-    public ISubscriptionMatcher subscriptionMatcher(
-            DaoSubscriptionMatcher theDaoSubscriptionMatcher,
-            InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
-        return new CompositeInMemoryDaoSubscriptionMatcher(
-                theDaoSubscriptionMatcher, theInMemorySubscriptionMatcher);
-    }
+	@Bean
+	@Primary
+	public ISubscriptionMatcher subscriptionMatcher(
+				DaoSubscriptionMatcher theDaoSubscriptionMatcher,
+				InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
+		return new CompositeInMemoryDaoSubscriptionMatcher(
+					theDaoSubscriptionMatcher, theInMemorySubscriptionMatcher);
+	}
 
-    @Lazy
-    @Bean
-    SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
-        switch (theFhirContext.getVersion().getVersion()) {
-            case R4:
-            case R4B:
-            case R5:
-                return new SubscriptionTopicPayloadBuilder(theFhirContext);
-            default:
-                return null;
-        }
-    }
+	@Lazy
+	@Bean
+	SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
+		switch (theFhirContext.getVersion().getVersion()) {
+				case R4:
+				case R4B:
+				case R5:
+					return new SubscriptionTopicPayloadBuilder(theFhirContext);
+				default:
+					return null;
+		}
+	}
 
-    @Lazy
-    @Bean
-    SubscriptionTopicDispatcher subscriptionTopicDispatcher(
-            FhirContext theFhirContext,
-            SubscriptionRegistry theSubscriptionRegistry,
-            SubscriptionMatchDeliverer theSubscriptionMatchDeliverer,
-            SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
-        return new SubscriptionTopicDispatcher(
-                theFhirContext,
-                theSubscriptionRegistry,
-                theSubscriptionMatchDeliverer,
-                theSubscriptionTopicPayloadBuilder);
-    }
+	@Lazy
+	@Bean
+	SubscriptionTopicDispatcher subscriptionTopicDispatcher(
+				FhirContext theFhirContext,
+				SubscriptionRegistry theSubscriptionRegistry,
+				SubscriptionMatchDeliverer theSubscriptionMatchDeliverer,
+				SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+		return new SubscriptionTopicDispatcher(
+					theFhirContext,
+					theSubscriptionRegistry,
+					theSubscriptionMatchDeliverer,
+					theSubscriptionTopicPayloadBuilder);
+	}
 
-    @Bean
-    InMemoryTopicFilterMatcher inMemoryTopicFilterMatcher(
-            SearchParamMatcher theSearchParamMatcher) {
-        return new InMemoryTopicFilterMatcher(theSearchParamMatcher);
-    }
+	@Bean
+	InMemoryTopicFilterMatcher inMemoryTopicFilterMatcher(
+				SearchParamMatcher theSearchParamMatcher) {
+		return new InMemoryTopicFilterMatcher(theSearchParamMatcher);
+	}
 }

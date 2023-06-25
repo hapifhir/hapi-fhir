@@ -19,106 +19,105 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-
 public abstract class BaseRuntimeChildDatatypeDefinition
-        extends BaseRuntimeDeclaredChildDefinition {
-    Logger ourLog = LoggerFactory.getLogger(BaseRuntimeChildDatatypeDefinition.class);
+		extends BaseRuntimeDeclaredChildDefinition {
+	Logger ourLog = LoggerFactory.getLogger(BaseRuntimeChildDatatypeDefinition.class);
 
-    private Class<? extends IBase> myDatatype;
+	private Class<? extends IBase> myDatatype;
 
-    private BaseRuntimeElementDefinition<?> myElementDefinition;
+	private BaseRuntimeElementDefinition<?> myElementDefinition;
 
-    public BaseRuntimeChildDatatypeDefinition(
-            Field theField,
-            String theElementName,
-            Child theChildAnnotation,
-            Description theDescriptionAnnotation,
-            Class<? extends IBase> theDatatype) {
-        super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-        // should use RuntimeChildAny
-        assert Modifier.isInterface(theDatatype.getModifiers()) == false
-                : "Type of " + theDatatype + " shouldn't be here";
-        assert Modifier.isAbstract(theDatatype.getModifiers()) == false
-                : "Type of " + theDatatype + " shouldn't be here";
-        myDatatype = theDatatype;
-    }
+	public BaseRuntimeChildDatatypeDefinition(
+				Field theField,
+				String theElementName,
+				Child theChildAnnotation,
+				Description theDescriptionAnnotation,
+				Class<? extends IBase> theDatatype) {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+		// should use RuntimeChildAny
+		assert Modifier.isInterface(theDatatype.getModifiers()) == false
+					: "Type of " + theDatatype + " shouldn't be here";
+		assert Modifier.isAbstract(theDatatype.getModifiers()) == false
+					: "Type of " + theDatatype + " shouldn't be here";
+		myDatatype = theDatatype;
+	}
 
-    /**
-     * If this child has a bound type, this method will return the Enum type that it is bound to.
-     * Otherwise, will return <code>null</code>.
-     */
-    public Class<? extends Enum<?>> getBoundEnumType() {
-        return null;
-    }
+	/**
+	* If this child has a bound type, this method will return the Enum type that it is bound to.
+	* Otherwise, will return <code>null</code>.
+	*/
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return null;
+	}
 
-    @Override
-    public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-        if (getElementName().equals(theName)) {
-            return myElementDefinition;
-        }
-        return null;
-    }
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
+		if (getElementName().equals(theName)) {
+				return myElementDefinition;
+		}
+		return null;
+	}
 
-    @Override
-    public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
-            Class<? extends IBase> theDatatype) {
-        Class<?> nextType = theDatatype;
-        while (nextType.equals(Object.class) == false) {
-            if (myDatatype.equals(nextType)) {
-                return myElementDefinition;
-            }
-            nextType = nextType.getSuperclass();
-        }
-        return null;
-    }
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
+				Class<? extends IBase> theDatatype) {
+		Class<?> nextType = theDatatype;
+		while (nextType.equals(Object.class) == false) {
+				if (myDatatype.equals(nextType)) {
+					return myElementDefinition;
+				}
+				nextType = nextType.getSuperclass();
+		}
+		return null;
+	}
 
-    @Override
-    public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-        Class<?> nextType = theDatatype;
-        while (nextType.equals(Object.class) == false) {
-            if (myDatatype.equals(nextType)) {
-                return getElementName();
-            }
-            nextType = nextType.getSuperclass();
-        }
-        return null;
-    }
+	@Override
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
+		Class<?> nextType = theDatatype;
+		while (nextType.equals(Object.class) == false) {
+				if (myDatatype.equals(nextType)) {
+					return getElementName();
+				}
+				nextType = nextType.getSuperclass();
+		}
+		return null;
+	}
 
-    public Class<? extends IBase> getDatatype() {
-        return myDatatype;
-    }
+	public Class<? extends IBase> getDatatype() {
+		return myDatatype;
+	}
 
-    @Override
-    public Set<String> getValidChildNames() {
-        return Collections.singleton(getElementName());
-    }
+	@Override
+	public Set<String> getValidChildNames() {
+		return Collections.singleton(getElementName());
+	}
 
-    @Override
-    void sealAndInitialize(
-            FhirContext theContext,
-            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
-                    theClassToElementDefinitions) {
-        myElementDefinition = theClassToElementDefinitions.get(getDatatype());
-        if (myElementDefinition == null) {
-            myElementDefinition = theContext.getElementDefinition(getDatatype());
-        }
-        assert myElementDefinition != null : "Unknown type: " + getDatatype();
-    }
+	@Override
+	void sealAndInitialize(
+				FhirContext theContext,
+				Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+						theClassToElementDefinitions) {
+		myElementDefinition = theClassToElementDefinitions.get(getDatatype());
+		if (myElementDefinition == null) {
+				myElementDefinition = theContext.getElementDefinition(getDatatype());
+		}
+		assert myElementDefinition != null : "Unknown type: " + getDatatype();
+	}
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[" + getElementName() + "]";
-    }
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
 }

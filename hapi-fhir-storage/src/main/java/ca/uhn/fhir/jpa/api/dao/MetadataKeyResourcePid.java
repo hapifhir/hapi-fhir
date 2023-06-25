@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
 public final class MetadataKeyResourcePid extends ResourceMetadataKeyEnum<Long> {
-    private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 2L;
 
-    MetadataKeyResourcePid(String theValue) {
-        super(theValue, Long.class);
-    }
+	MetadataKeyResourcePid(String theValue) {
+		super(theValue, Long.class);
+	}
 }

@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
@@ -33,6 +28,10 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterce
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * This Spring config should be imported by a system that submits resources to the matching queue
@@ -42,31 +41,31 @@ import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 @Import(SubscriptionModelConfig.class)
 public class SubscriptionSubmitterConfig {
 
-    @Bean
-    public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-        return new SubscriptionMatcherInterceptor();
-    }
+	@Bean
+	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
+		return new SubscriptionMatcherInterceptor();
+	}
 
-    @Bean
-    public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
-        return new SubscriptionValidatingInterceptor();
-    }
+	@Bean
+	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
+		return new SubscriptionValidatingInterceptor();
+	}
 
-    @Bean
-    public SubscriptionQueryValidator subscriptionQueryValidator(
-            DaoRegistry theDaoRegistry,
-            SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-        return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
-    }
+	@Bean
+	public SubscriptionQueryValidator subscriptionQueryValidator(
+				DaoRegistry theDaoRegistry,
+				SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
+	}
 
-    @Bean
-    public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
-        return new SubscriptionSubmitInterceptorLoader();
-    }
+	@Bean
+	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
+		return new SubscriptionSubmitInterceptorLoader();
+	}
 
-    @Bean
-    @Lazy
-    public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
-        return new SubscriptionTriggeringSvcImpl();
-    }
+	@Bean
+	@Lazy
+	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
+		return new SubscriptionTriggeringSvcImpl();
+	}
 }

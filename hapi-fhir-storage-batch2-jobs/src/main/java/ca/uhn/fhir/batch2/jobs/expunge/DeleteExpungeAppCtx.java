@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.batch2.jobs.expunge;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
@@ -36,74 +33,76 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DeleteExpungeAppCtx {
 
-    public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
+	public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
 
-    @Bean
-    public JobDefinition<DeleteExpungeJobParameters> expungeJobDefinition(
-            IBatch2DaoSvc theBatch2DaoSvc,
-            HapiTransactionService theHapiTransactionService,
-            IDeleteExpungeSvc theDeleteExpungeSvc,
-            IIdHelperService theIdHelperService,
-            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-        return JobDefinition.newBuilder()
-                .setJobDefinitionId(JOB_DELETE_EXPUNGE)
-                .setJobDescription("Expunge resources")
-                .setJobDefinitionVersion(1)
-                .setParametersType(DeleteExpungeJobParameters.class)
-                .setParametersValidator(
-                        expungeJobParametersValidator(
-                                theBatch2DaoSvc, theDeleteExpungeSvc, theRequestPartitionHelperSvc))
-                .gatedExecution()
-                .addFirstStep(
-                        "generate-ranges",
-                        "Generate data ranges to expunge",
-                        PartitionedUrlChunkRangeJson.class,
-                        expungeGenerateRangeChunksStep())
-                .addIntermediateStep(
-                        "load-ids",
-                        "Load IDs of resources to expunge",
-                        ResourceIdListWorkChunkJson.class,
-                        new LoadIdsStep(theBatch2DaoSvc))
-                .addLastStep(
-                        "expunge",
-                        "Perform the resource expunge",
-                        expungeStep(
-                                theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService))
-                .build();
-    }
+	@Bean
+	public JobDefinition<DeleteExpungeJobParameters> expungeJobDefinition(
+				IBatch2DaoSvc theBatch2DaoSvc,
+				HapiTransactionService theHapiTransactionService,
+				IDeleteExpungeSvc theDeleteExpungeSvc,
+				IIdHelperService theIdHelperService,
+				IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return JobDefinition.newBuilder()
+					.setJobDefinitionId(JOB_DELETE_EXPUNGE)
+					.setJobDescription("Expunge resources")
+					.setJobDefinitionVersion(1)
+					.setParametersType(DeleteExpungeJobParameters.class)
+					.setParametersValidator(
+								expungeJobParametersValidator(
+										theBatch2DaoSvc, theDeleteExpungeSvc, theRequestPartitionHelperSvc))
+					.gatedExecution()
+					.addFirstStep(
+								"generate-ranges",
+								"Generate data ranges to expunge",
+								PartitionedUrlChunkRangeJson.class,
+								expungeGenerateRangeChunksStep())
+					.addIntermediateStep(
+								"load-ids",
+								"Load IDs of resources to expunge",
+								ResourceIdListWorkChunkJson.class,
+								new LoadIdsStep(theBatch2DaoSvc))
+					.addLastStep(
+								"expunge",
+								"Perform the resource expunge",
+								expungeStep(
+										theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService))
+					.build();
+	}
 
-    @Bean
-    public DeleteExpungeJobParametersValidator expungeJobParametersValidator(
-            IBatch2DaoSvc theBatch2DaoSvc,
-            IDeleteExpungeSvc theDeleteExpungeSvc,
-            IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-        return new DeleteExpungeJobParametersValidator(
-                new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc),
-                theDeleteExpungeSvc,
-                theRequestPartitionHelperSvc);
-    }
+	@Bean
+	public DeleteExpungeJobParametersValidator expungeJobParametersValidator(
+				IBatch2DaoSvc theBatch2DaoSvc,
+				IDeleteExpungeSvc theDeleteExpungeSvc,
+				IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new DeleteExpungeJobParametersValidator(
+					new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc),
+					theDeleteExpungeSvc,
+					theRequestPartitionHelperSvc);
+	}
 
-    @Bean
-    public DeleteExpungeStep expungeStep(
-            HapiTransactionService theHapiTransactionService,
-            IDeleteExpungeSvc theDeleteExpungeSvc,
-            IIdHelperService theIdHelperService) {
-        return new DeleteExpungeStep(
-                theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService);
-    }
+	@Bean
+	public DeleteExpungeStep expungeStep(
+				HapiTransactionService theHapiTransactionService,
+				IDeleteExpungeSvc theDeleteExpungeSvc,
+				IIdHelperService theIdHelperService) {
+		return new DeleteExpungeStep(
+					theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService);
+	}
 
-    @Bean
-    public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
-        return new GenerateRangeChunksStep();
-    }
+	@Bean
+	public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep();
+	}
 
-    @Bean
-    public DeleteExpungeProvider deleteExpungeProvider(
-            FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-        return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
-    }
+	@Bean
+	public DeleteExpungeProvider deleteExpungeProvider(
+				FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
+		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
+	}
 }

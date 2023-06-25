@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.api.dao;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoStructureDefinition<T extends IBaseResource>
-        extends IFhirResourceDao<T> {
+		extends IFhirResourceDao<T> {
 
-    T generateSnapshot(T theInput, String theUrl, String theWebUrl, String theName);
+	T generateSnapshot(T theInput, String theUrl, String theWebUrl, String theName);
 }

@@ -1,11 +1,10 @@
 package ca.uhn.fhir.test.utilities;
 
-import java.util.Date;
-import java.util.UUID;
-
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -15,26 +14,26 @@ import static org.hamcrest.Matchers.notNullValue;
 
 class RandomDataHelperTest {
 
-    static class TestClass {
-        String myString;
-        int myInt;
-        Long myBoxedLong;
-        Date myDate;
-        UUID myUUID;
-        TemporalPrecisionEnum myEnum;
-    }
+	static class TestClass {
+		String myString;
+		int myInt;
+		Long myBoxedLong;
+		Date myDate;
+		UUID myUUID;
+		TemporalPrecisionEnum myEnum;
+	}
 
-    @Test
-    void fillFieldsRandomly() {
-        TestClass object = new TestClass();
+	@Test
+	void fillFieldsRandomly() {
+		TestClass object = new TestClass();
 
-        RandomDataHelper.fillFieldsRandomly(object);
+		RandomDataHelper.fillFieldsRandomly(object);
 
-        assertThat(object.myString, not(blankOrNullString()));
-        assertThat(object.myInt, not(equalTo(0)));
-        assertThat(object.myBoxedLong, notNullValue());
-        assertThat(object.myDate, notNullValue());
-        assertThat(object.myUUID, notNullValue());
-        assertThat(object.myEnum, notNullValue());
-    }
+		assertThat(object.myString, not(blankOrNullString()));
+		assertThat(object.myInt, not(equalTo(0)));
+		assertThat(object.myBoxedLong, notNullValue());
+		assertThat(object.myDate, notNullValue());
+		assertThat(object.myUUID, notNullValue());
+		assertThat(object.myEnum, notNullValue());
+	}
 }

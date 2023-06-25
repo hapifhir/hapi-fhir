@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.transaction.PlatformTransactionManager;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -55,111 +47,118 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class SearchConfig {
-    public static final String SEARCH_TASK = "searchTask";
-    public static final String CONTINUE_TASK = "continueTask";
+	public static final String SEARCH_TASK = "searchTask";
+	public static final String CONTINUE_TASK = "continueTask";
 
-    @Autowired private JpaStorageSettings myStorageSettings;
-    @Autowired private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-    @Autowired private SqlObjectFactory mySqlBuilderFactory;
-    @Autowired private HibernatePropertiesProvider myDialectProvider;
-    @Autowired private ISearchParamRegistry mySearchParamRegistry;
-    @Autowired private PartitionSettings myPartitionSettings;
-    @Autowired protected IInterceptorBroadcaster myInterceptorBroadcaster;
-    @Autowired protected IResourceTagDao myResourceTagDao;
-    @Autowired private DaoRegistry myDaoRegistry;
-    @Autowired private IResourceSearchViewDao myResourceSearchViewDao;
-    @Autowired private FhirContext myContext;
-    @Autowired private IIdHelperService myIdHelperService;
-    @Autowired private PlatformTransactionManager myManagedTxManager;
-    @Autowired private SearchStrategyFactory mySearchStrategyFactory;
-    @Autowired private SearchBuilderFactory mySearchBuilderFactory;
-    @Autowired private ISearchResultCacheSvc mySearchResultCacheSvc;
-    @Autowired private ISearchCacheSvc mySearchCacheSvc;
-    @Autowired private IPagingProvider myPagingProvider;
-    @Autowired private BeanFactory myBeanFactory;
-    @Autowired private ISynchronousSearchSvc mySynchronousSearchSvc;
-    @Autowired private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-    @Autowired private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-    @Autowired private HapiTransactionService myHapiTransactionService;
+	@Autowired private JpaStorageSettings myStorageSettings;
+	@Autowired private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	@Autowired private SqlObjectFactory mySqlBuilderFactory;
+	@Autowired private HibernatePropertiesProvider myDialectProvider;
+	@Autowired private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired private PartitionSettings myPartitionSettings;
+	@Autowired protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired protected IResourceTagDao myResourceTagDao;
+	@Autowired private DaoRegistry myDaoRegistry;
+	@Autowired private IResourceSearchViewDao myResourceSearchViewDao;
+	@Autowired private FhirContext myContext;
+	@Autowired private IIdHelperService myIdHelperService;
+	@Autowired private PlatformTransactionManager myManagedTxManager;
+	@Autowired private SearchStrategyFactory mySearchStrategyFactory;
+	@Autowired private SearchBuilderFactory mySearchBuilderFactory;
+	@Autowired private ISearchResultCacheSvc mySearchResultCacheSvc;
+	@Autowired private ISearchCacheSvc mySearchCacheSvc;
+	@Autowired private IPagingProvider myPagingProvider;
+	@Autowired private BeanFactory myBeanFactory;
+	@Autowired private ISynchronousSearchSvc mySynchronousSearchSvc;
+	@Autowired private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired private HapiTransactionService myHapiTransactionService;
 
-    @Bean
-    public ISearchCoordinatorSvc searchCoordinatorSvc() {
-        return new SearchCoordinatorSvcImpl(
-                myContext,
-                myStorageSettings,
-                myInterceptorBroadcaster,
-                myHapiTransactionService,
-                mySearchCacheSvc,
-                mySearchResultCacheSvc,
-                myDaoRegistry,
-                mySearchBuilderFactory,
-                mySynchronousSearchSvc,
-                myPersistedJpaBundleProviderFactory,
-                mySearchParamRegistry,
-                mySearchStrategyFactory,
-                exceptionService(),
-                myBeanFactory);
-    }
+	@Bean
+	public ISearchCoordinatorSvc searchCoordinatorSvc() {
+		return new SearchCoordinatorSvcImpl(
+					myContext,
+					myStorageSettings,
+					myInterceptorBroadcaster,
+					myHapiTransactionService,
+					mySearchCacheSvc,
+					mySearchResultCacheSvc,
+					myDaoRegistry,
+					mySearchBuilderFactory,
+					mySynchronousSearchSvc,
+					myPersistedJpaBundleProviderFactory,
+					mySearchParamRegistry,
+					mySearchStrategyFactory,
+					exceptionService(),
+					myBeanFactory);
+	}
 
-    @Bean
-    public ExceptionService exceptionService() {
-        return new ExceptionService(myContext);
-    }
+	@Bean
+	public ExceptionService exceptionService() {
+		return new ExceptionService(myContext);
+	}
 
-    @Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
-    @Scope("prototype")
-    public ISearchBuilder newSearchBuilder(
-            IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-        return new SearchBuilder(
-                theDao,
-                theResourceName,
-                myStorageSettings,
-                myEntityManagerFactory,
-                mySqlBuilderFactory,
-                myDialectProvider,
-                mySearchParamRegistry,
-                myPartitionSettings,
-                myInterceptorBroadcaster,
-                myResourceTagDao,
-                myDaoRegistry,
-                myResourceSearchViewDao,
-                myContext,
-                myIdHelperService,
-                theResourceType);
-    }
+	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
+	@Scope("prototype")
+	public ISearchBuilder newSearchBuilder(
+				IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return new SearchBuilder(
+					theDao,
+					theResourceName,
+					myStorageSettings,
+					myEntityManagerFactory,
+					mySqlBuilderFactory,
+					myDialectProvider,
+					mySearchParamRegistry,
+					myPartitionSettings,
+					myInterceptorBroadcaster,
+					myResourceTagDao,
+					myDaoRegistry,
+					myResourceSearchViewDao,
+					myContext,
+					myIdHelperService,
+					theResourceType);
+	}
 
-    @Bean(name = SEARCH_TASK)
-    @Scope("prototype")
-    public SearchTask createSearchTask(SearchTaskParameters theParams) {
-        return new SearchTask(
-                theParams,
-                myHapiTransactionService,
-                myContext,
-                myInterceptorBroadcaster,
-                mySearchBuilderFactory,
-                mySearchResultCacheSvc,
-                myStorageSettings,
-                mySearchCacheSvc,
-                myPagingProvider);
-    }
+	@Bean(name = SEARCH_TASK)
+	@Scope("prototype")
+	public SearchTask createSearchTask(SearchTaskParameters theParams) {
+		return new SearchTask(
+					theParams,
+					myHapiTransactionService,
+					myContext,
+					myInterceptorBroadcaster,
+					mySearchBuilderFactory,
+					mySearchResultCacheSvc,
+					myStorageSettings,
+					mySearchCacheSvc,
+					myPagingProvider);
+	}
 
-    @Bean(name = CONTINUE_TASK)
-    @Scope("prototype")
-    public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
-        return new SearchContinuationTask(
-                theParams,
-                myHapiTransactionService,
-                myContext,
-                myInterceptorBroadcaster,
-                mySearchBuilderFactory,
-                mySearchResultCacheSvc,
-                myStorageSettings,
-                mySearchCacheSvc,
-                myPagingProvider,
-                exceptionService() // singleton
-                );
-    }
+	@Bean(name = CONTINUE_TASK)
+	@Scope("prototype")
+	public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
+		return new SearchContinuationTask(
+					theParams,
+					myHapiTransactionService,
+					myContext,
+					myInterceptorBroadcaster,
+					mySearchBuilderFactory,
+					mySearchResultCacheSvc,
+					myStorageSettings,
+					mySearchCacheSvc,
+					myPagingProvider,
+					exceptionService() // singleton
+					);
+	}
 }

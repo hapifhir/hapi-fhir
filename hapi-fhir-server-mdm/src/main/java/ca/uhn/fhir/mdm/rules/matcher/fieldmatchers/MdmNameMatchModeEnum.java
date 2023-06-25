@@ -20,6 +20,6 @@
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
 public enum MdmNameMatchModeEnum {
-    ANY_ORDER,
-    FIRST_AND_LAST
+	ANY_ORDER,
+	FIRST_AND_LAST
 }

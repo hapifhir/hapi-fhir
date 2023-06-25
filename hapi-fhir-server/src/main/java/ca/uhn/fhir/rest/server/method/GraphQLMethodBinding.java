@@ -19,18 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -45,170 +33,181 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class GraphQLMethodBinding extends OperationMethodBinding {
 
-    private final Integer myIdParamIndex;
-    private final Integer myQueryUrlParamIndex;
-    private final Integer myQueryBodyParamIndex;
-    private final RequestTypeEnum myMethodRequestType;
+	private final Integer myIdParamIndex;
+	private final Integer myQueryUrlParamIndex;
+	private final Integer myQueryBodyParamIndex;
+	private final RequestTypeEnum myMethodRequestType;
 
-    public GraphQLMethodBinding(
-            Method theMethod,
-            RequestTypeEnum theMethodRequestType,
-            FhirContext theContext,
-            Object theProvider) {
-        super(
-                null,
-                null,
-                theMethod,
-                theContext,
-                theProvider,
-                true,
-                false,
-                Constants.OPERATION_NAME_GRAPHQL,
-                null,
-                null,
-                null,
-                null,
-                true);
+	public GraphQLMethodBinding(
+				Method theMethod,
+				RequestTypeEnum theMethodRequestType,
+				FhirContext theContext,
+				Object theProvider) {
+		super(
+					null,
+					null,
+					theMethod,
+					theContext,
+					theProvider,
+					true,
+					false,
+					Constants.OPERATION_NAME_GRAPHQL,
+					null,
+					null,
+					null,
+					null,
+					true);
 
-        myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
-        myQueryUrlParamIndex =
-                ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
-        myQueryBodyParamIndex =
-                ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryBody.class);
-        myMethodRequestType = theMethodRequestType;
-    }
+		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
+		myQueryUrlParamIndex =
+					ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
+		myQueryBodyParamIndex =
+					ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryBody.class);
+		myMethodRequestType = theMethodRequestType;
+	}
 
-    @Override
-    public String getResourceName() {
-        return null;
-    }
+	@Override
+	public String getResourceName() {
+		return null;
+	}
 
-    @Nonnull
-    @Override
-    public RestOperationTypeEnum getRestOperationType() {
-        return RestOperationTypeEnum.GRAPHQL_REQUEST;
-    }
+	@Nonnull
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.GRAPHQL_REQUEST;
+	}
 
-    @Override
-    public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
-        return getRestOperationType();
-    }
+	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		return getRestOperationType();
+	}
 
-    @Override
-    protected Set<Class<?>> provideExpectedReturnTypes() {
-        return Collections.singleton(String.class);
-    }
+	@Override
+	protected Set<Class<?>> provideExpectedReturnTypes() {
+		return Collections.singleton(String.class);
+	}
 
-    @Override
-    public boolean isCanOperateAtServerLevel() {
-        return true;
-    }
+	@Override
+	public boolean isCanOperateAtServerLevel() {
+		return true;
+	}
 
-    @Override
-    public boolean isCanOperateAtTypeLevel() {
-        return false;
-    }
+	@Override
+	public boolean isCanOperateAtTypeLevel() {
+		return false;
+	}
 
-    @Override
-    public boolean isCanOperateAtInstanceLevel() {
-        return myIdParamIndex != null;
-    }
+	@Override
+	public boolean isCanOperateAtInstanceLevel() {
+		return myIdParamIndex != null;
+	}
 
-    @Override
-    public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-        if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())
-                && myMethodRequestType.equals(theRequest.getRequestType())) {
-            return MethodMatchEnum.EXACT;
-        }
+	@Override
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())
+					&& myMethodRequestType.equals(theRequest.getRequestType())) {
+				return MethodMatchEnum.EXACT;
+		}
 
-        return MethodMatchEnum.NONE;
-    }
+		return MethodMatchEnum.NONE;
+	}
 
-    private String getQueryValue(Object[] methodParams) {
-        switch (myMethodRequestType) {
-            case POST:
-                Validate.notNull(
-                        myQueryBodyParamIndex,
-                        "GraphQL method does not have @"
-                                + GraphQLQueryBody.class.getSimpleName()
-                                + " parameter");
-                return (String) methodParams[myQueryBodyParamIndex];
-            case GET:
-                Validate.notNull(
-                        myQueryUrlParamIndex,
-                        "GraphQL method does not have @"
-                                + GraphQLQueryUrl.class.getSimpleName()
-                                + " parameter");
-                return (String) methodParams[myQueryUrlParamIndex];
-        }
-        return null;
-    }
+	private String getQueryValue(Object[] methodParams) {
+		switch (myMethodRequestType) {
+				case POST:
+					Validate.notNull(
+								myQueryBodyParamIndex,
+								"GraphQL method does not have @"
+										+ GraphQLQueryBody.class.getSimpleName()
+										+ " parameter");
+					return (String) methodParams[myQueryBodyParamIndex];
+				case GET:
+					Validate.notNull(
+								myQueryUrlParamIndex,
+								"GraphQL method does not have @"
+										+ GraphQLQueryUrl.class.getSimpleName()
+										+ " parameter");
+					return (String) methodParams[myQueryUrlParamIndex];
+		}
+		return null;
+	}
 
-    @Override
-    public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
-            throws BaseServerResponseException, IOException {
-        Object[] methodParams = createMethodParams(theRequest);
-        if (myIdParamIndex != null) {
-            methodParams[myIdParamIndex] = theRequest.getId();
-        }
+	@Override
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+				throws BaseServerResponseException, IOException {
+		Object[] methodParams = createMethodParams(theRequest);
+		if (myIdParamIndex != null) {
+				methodParams[myIdParamIndex] = theRequest.getId();
+		}
 
-        String responseString = (String) invokeServerMethod(theRequest, methodParams);
+		String responseString = (String) invokeServerMethod(theRequest, methodParams);
 
-        int statusCode = Constants.STATUS_HTTP_200_OK;
-        String statusMessage = Constants.HTTP_STATUS_NAMES.get(statusCode);
-        String contentType = Constants.CT_JSON;
-        String charset = Constants.CHARSET_NAME_UTF8;
-        boolean respondGzip = theRequest.isRespondGzip();
+		int statusCode = Constants.STATUS_HTTP_200_OK;
+		String statusMessage = Constants.HTTP_STATUS_NAMES.get(statusCode);
+		String contentType = Constants.CT_JSON;
+		String charset = Constants.CHARSET_NAME_UTF8;
+		boolean respondGzip = theRequest.isRespondGzip();
 
-        HttpServletRequest servletRequest = null;
-        HttpServletResponse servletResponse = null;
-        if (theRequest instanceof ServletRequestDetails) {
-            servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-            servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-        }
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
+		if (theRequest instanceof ServletRequestDetails) {
+				servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+				servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
 
-        String graphQLQuery = getQueryValue(methodParams);
-        // Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
-        HookParams params =
-                new HookParams()
-                        .add(RequestDetails.class, theRequest)
-                        .addIfMatchesType(ServletRequestDetails.class, theRequest)
-                        .add(String.class, graphQLQuery)
-                        .add(String.class, responseString)
-                        .add(HttpServletRequest.class, servletRequest)
-                        .add(HttpServletResponse.class, servletResponse);
-        if (!theRequest
-                .getInterceptorBroadcaster()
-                .callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
-            return null;
-        }
+		String graphQLQuery = getQueryValue(methodParams);
+		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
+		HookParams params =
+					new HookParams()
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest)
+								.add(String.class, graphQLQuery)
+								.add(String.class, responseString)
+								.add(HttpServletRequest.class, servletRequest)
+								.add(HttpServletResponse.class, servletResponse);
+		if (!theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
+				return null;
+		}
 
-        // Interceptor call: SERVER_OUTGOING_RESPONSE
-        params =
-                new HookParams()
-                        .add(RequestDetails.class, theRequest)
-                        .addIfMatchesType(ServletRequestDetails.class, theRequest)
-                        .add(IBaseResource.class, null)
-                        .add(ResponseDetails.class, new ResponseDetails())
-                        .add(HttpServletRequest.class, servletRequest)
-                        .add(HttpServletResponse.class, servletResponse);
-        if (!theRequest
-                .getInterceptorBroadcaster()
-                .callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
-            return null;
-        }
+		// Interceptor call: SERVER_OUTGOING_RESPONSE
+		params =
+					new HookParams()
+								.add(RequestDetails.class, theRequest)
+								.addIfMatchesType(ServletRequestDetails.class, theRequest)
+								.add(IBaseResource.class, null)
+								.add(ResponseDetails.class, new ResponseDetails())
+								.add(HttpServletRequest.class, servletRequest)
+								.add(HttpServletResponse.class, servletResponse);
+		if (!theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
+				return null;
+		}
 
-        // Write the response
-        Writer writer =
-                theRequest
-                        .getResponse()
-                        .getResponseWriter(statusCode, contentType, charset, respondGzip);
-        writer.write(responseString);
-        writer.close();
+		// Write the response
+		Writer writer =
+					theRequest
+								.getResponse()
+								.getResponseWriter(statusCode, contentType, charset, respondGzip);
+		writer.write(responseString);
+		writer.close();
 
-        return null;
-    }
+		return null;
+	}
 }

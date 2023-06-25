@@ -19,28 +19,27 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-
 public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-    private final DbColumn myColumnString;
+	private final DbColumn myColumnString;
 
-    /** Constructor */
-    public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-        super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMP_STRING_UNIQ"));
+	/** Constructor */
+	public ComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMP_STRING_UNIQ"));
 
-        myColumnString = getTable().addColumn("IDX_STRING");
-    }
+		myColumnString = getTable().addColumn("IDX_STRING");
+	}
 
-    public Condition createPredicateIndexString(
-            RequestPartitionId theRequestPartitionId, String theIndexString) {
-        BinaryCondition predicate =
-                BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
-        return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
-    }
+	public Condition createPredicateIndexString(
+				RequestPartitionId theRequestPartitionId, String theIndexString) {
+		BinaryCondition predicate =
+					BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
+		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+	}
 }

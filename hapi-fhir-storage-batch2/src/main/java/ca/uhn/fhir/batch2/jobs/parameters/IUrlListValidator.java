@@ -5,9 +5,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface IUrlListValidator {
-    @Nullable
-    List<String> validateUrls(@Nonnull List<String> theUrls);
+	@Nullable
+	List<String> validateUrls(@Nonnull List<String> theUrls);
 
-    @Nullable
-    List<String> validatePartitionedUrls(@Nonnull List<PartitionedUrl> thePartitionedUrls);
+	@Nullable
+	List<String> validatePartitionedUrls(@Nonnull List<PartitionedUrl> thePartitionedUrls);
 }

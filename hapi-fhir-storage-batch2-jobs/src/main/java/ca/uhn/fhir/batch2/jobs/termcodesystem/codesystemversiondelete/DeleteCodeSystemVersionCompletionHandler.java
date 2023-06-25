@@ -25,18 +25,18 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 
 public class DeleteCodeSystemVersionCompletionHandler
-        implements IJobCompletionHandler<TermCodeSystemDeleteVersionJobParameters> {
+		implements IJobCompletionHandler<TermCodeSystemDeleteVersionJobParameters> {
 
-    private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
-    public DeleteCodeSystemVersionCompletionHandler(
-            ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
-        myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
-    }
+	public DeleteCodeSystemVersionCompletionHandler(
+				ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
-    @Override
-    public void jobComplete(
-            JobCompletionDetails<TermCodeSystemDeleteVersionJobParameters> theDetails) {
-        myTermCodeSystemSvc.notifyJobComplete(theDetails.getInstance().getInstanceId());
-    }
+	@Override
+	public void jobComplete(
+				JobCompletionDetails<TermCodeSystemDeleteVersionJobParameters> theDetails) {
+		myTermCodeSystemSvc.notifyJobComplete(theDetails.getInstance().getInstanceId());
+	}
 }

@@ -19,71 +19,69 @@
  */
 package ca.uhn.fhir.batch2.jobs.models;
 
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
 public class BatchResourceId implements IModelJson {
 
-    @JsonProperty("type")
-    private String myResourceType;
+	@JsonProperty("type")
+	private String myResourceType;
 
-    @JsonProperty("id")
-    private String myId;
+	@JsonProperty("id")
+	private String myId;
 
-    @Override
-    public String toString() {
-        // We put a space in here and not a "/" since this is a PID, not
-        // a resource ID
-        return "[" + myResourceType + " " + myId + "]";
-    }
+	@Override
+	public String toString() {
+		// We put a space in here and not a "/" since this is a PID, not
+		// a resource ID
+		return "[" + myResourceType + " " + myId + "]";
+	}
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public BatchResourceId setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-        return this;
-    }
+	public BatchResourceId setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
 
-    public String getId() {
-        return myId;
-    }
+	public String getId() {
+		return myId;
+	}
 
-    public BatchResourceId setId(String theId) {
-        myId = theId;
-        return this;
-    }
+	public BatchResourceId setId(String theId) {
+		myId = theId;
+		return this;
+	}
 
-    @Override
-    public boolean equals(Object theO) {
-        if (this == theO) return true;
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
 
-        if (theO == null || getClass() != theO.getClass()) return false;
+		if (theO == null || getClass() != theO.getClass()) return false;
 
-        BatchResourceId batchResourceId = (BatchResourceId) theO;
+		BatchResourceId batchResourceId = (BatchResourceId) theO;
 
-        return new EqualsBuilder()
-                .append(myResourceType, batchResourceId.myResourceType)
-                .append(myId, batchResourceId.myId)
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.append(myResourceType, batchResourceId.myResourceType)
+					.append(myId, batchResourceId.myId)
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
+	}
 
-    public static BatchResourceId getIdFromPID(
-            IResourcePersistentId thePID, String theResourceType) {
-        BatchResourceId batchResourceId = new BatchResourceId();
-        batchResourceId.setId(thePID.getId().toString());
-        batchResourceId.setResourceType(theResourceType);
-        return batchResourceId;
-    }
+	public static BatchResourceId getIdFromPID(
+				IResourcePersistentId thePID, String theResourceType) {
+		BatchResourceId batchResourceId = new BatchResourceId();
+		batchResourceId.setId(thePID.getId().toString());
+		batchResourceId.setResourceType(theResourceType);
+		return batchResourceId;
+	}
 }

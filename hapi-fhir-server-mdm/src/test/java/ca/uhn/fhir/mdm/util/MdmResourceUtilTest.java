@@ -9,15 +9,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 class MdmResourceUtilTest {
 
-    // See https://github.com/hapifhir/hapi-fhir/issues/2876
-    @Test
-    public void testNoNpeOnTagWithNoSystem() {
-        // Given
-        Organization organization = new Organization();
-        organization.getMeta().addTag(null, "Some Code", "Some Display");
+	// See https://github.com/hapifhir/hapi-fhir/issues/2876
+	@Test
+	public void testNoNpeOnTagWithNoSystem() {
+		// Given
+		Organization organization = new Organization();
+		organization.getMeta().addTag(null, "Some Code", "Some Display");
 
-        boolean hasGoldenRecordTag = MdmResourceUtil.hasGoldenRecordSystemTag(organization);
+		boolean hasGoldenRecordTag = MdmResourceUtil.hasGoldenRecordSystemTag(organization);
 
-        assertThat(hasGoldenRecordTag, is(equalTo(false)));
-    }
+		assertThat(hasGoldenRecordTag, is(equalTo(false)));
+	}
 }

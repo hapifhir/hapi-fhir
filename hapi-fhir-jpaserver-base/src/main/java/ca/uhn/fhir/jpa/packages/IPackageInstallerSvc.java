@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.packages;
 
 public interface IPackageInstallerSvc {
 
-    PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
+	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
 
-    PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
+	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
 }

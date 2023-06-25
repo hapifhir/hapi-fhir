@@ -19,6 +19,12 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.r4.model.InstantType;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -31,14 +37,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.r4.model.InstantType;
-
-import com.google.common.annotations.VisibleForTesting;
-
-import ca.uhn.fhir.rest.api.Constants;
-
 /**
  * @deprecated use new batch2 reindex job
  */
@@ -46,114 +44,114 @@ import ca.uhn.fhir.rest.api.Constants;
 @Entity
 @Table(name = "HFJ_RES_REINDEX_JOB")
 public class ResourceReindexJobEntity implements Serializable {
-    @Id
-    @SequenceGenerator(name = "SEQ_RES_REINDEX_JOB", sequenceName = "SEQ_RES_REINDEX_JOB")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_REINDEX_JOB")
-    @Column(name = "PID")
-    private Long myId;
+	@Id
+	@SequenceGenerator(name = "SEQ_RES_REINDEX_JOB", sequenceName = "SEQ_RES_REINDEX_JOB")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_REINDEX_JOB")
+	@Column(name = "PID")
+	private Long myId;
 
-    @Column(name = "RES_TYPE", nullable = true, length = Constants.MAX_RESOURCE_NAME_LENGTH)
-    private String myResourceType;
+	@Column(name = "RES_TYPE", nullable = true, length = Constants.MAX_RESOURCE_NAME_LENGTH)
+	private String myResourceType;
 
-    /** Inclusive */
-    @Column(name = "UPDATE_THRESHOLD_HIGH", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myThresholdHigh;
+	/** Inclusive */
+	@Column(name = "UPDATE_THRESHOLD_HIGH", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myThresholdHigh;
 
-    @Column(name = "JOB_DELETED", nullable = false)
-    private boolean myDeleted;
+	@Column(name = "JOB_DELETED", nullable = false)
+	private boolean myDeleted;
 
-    /** Inclusive */
-    @Column(name = "UPDATE_THRESHOLD_LOW", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myThresholdLow;
+	/** Inclusive */
+	@Column(name = "UPDATE_THRESHOLD_LOW", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myThresholdLow;
 
-    @Column(name = "SUSPENDED_UNTIL", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date mySuspendedUntil;
+	@Column(name = "SUSPENDED_UNTIL", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date mySuspendedUntil;
 
-    @Column(name = "REINDEX_COUNT", nullable = true)
-    private Integer myReindexCount;
+	@Column(name = "REINDEX_COUNT", nullable = true)
+	private Integer myReindexCount;
 
-    public Integer getReindexCount() {
-        return myReindexCount;
-    }
+	public Integer getReindexCount() {
+		return myReindexCount;
+	}
 
-    public void setReindexCount(Integer theReindexCount) {
-        myReindexCount = theReindexCount;
-    }
+	public void setReindexCount(Integer theReindexCount) {
+		myReindexCount = theReindexCount;
+	}
 
-    public Date getSuspendedUntil() {
-        return mySuspendedUntil;
-    }
+	public Date getSuspendedUntil() {
+		return mySuspendedUntil;
+	}
 
-    public void setSuspendedUntil(Date theSuspendedUntil) {
-        mySuspendedUntil = theSuspendedUntil;
-    }
+	public void setSuspendedUntil(Date theSuspendedUntil) {
+		mySuspendedUntil = theSuspendedUntil;
+	}
 
-    /** Inclusive */
-    public Date getThresholdLow() {
-        Date retVal = myThresholdLow;
-        if (retVal != null) {
-            retVal = new Date(retVal.getTime());
-        }
-        return retVal;
-    }
+	/** Inclusive */
+	public Date getThresholdLow() {
+		Date retVal = myThresholdLow;
+		if (retVal != null) {
+				retVal = new Date(retVal.getTime());
+		}
+		return retVal;
+	}
 
-    /** Inclusive */
-    public void setThresholdLow(Date theThresholdLow) {
-        myThresholdLow = theThresholdLow;
-    }
+	/** Inclusive */
+	public void setThresholdLow(Date theThresholdLow) {
+		myThresholdLow = theThresholdLow;
+	}
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public void setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-    }
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
 
-    /** Inclusive */
-    public Date getThresholdHigh() {
-        Date retVal = myThresholdHigh;
-        if (retVal != null) {
-            retVal = new Date(retVal.getTime());
-        }
-        return retVal;
-    }
+	/** Inclusive */
+	public Date getThresholdHigh() {
+		Date retVal = myThresholdHigh;
+		if (retVal != null) {
+				retVal = new Date(retVal.getTime());
+		}
+		return retVal;
+	}
 
-    /** Inclusive */
-    public void setThresholdHigh(Date theThresholdHigh) {
-        myThresholdHigh = theThresholdHigh;
-    }
+	/** Inclusive */
+	public void setThresholdHigh(Date theThresholdHigh) {
+		myThresholdHigh = theThresholdHigh;
+	}
 
-    public Long getId() {
-        return myId;
-    }
+	public Long getId() {
+		return myId;
+	}
 
-    @VisibleForTesting
-    public void setIdForUnitTest(long theId) {
-        myId = theId;
-    }
+	@VisibleForTesting
+	public void setIdForUnitTest(long theId) {
+		myId = theId;
+	}
 
-    public void setDeleted(boolean theDeleted) {
-        myDeleted = theDeleted;
-    }
+	public void setDeleted(boolean theDeleted) {
+		myDeleted = theDeleted;
+	}
 
-    @Override
-    public String toString() {
-        ToStringBuilder b =
-                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                        .append("id", myId)
-                        .append("resourceType", myResourceType)
-                        .append("thresholdLow", new InstantType(myThresholdLow))
-                        .append("thresholdHigh", new InstantType(myThresholdHigh));
-        if (myDeleted) {
-            b.append("deleted", myDeleted);
-        }
-        if (mySuspendedUntil != null) {
-            b.append("suspendedUntil", mySuspendedUntil);
-        }
-        return b.toString();
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder b =
+					new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+								.append("id", myId)
+								.append("resourceType", myResourceType)
+								.append("thresholdLow", new InstantType(myThresholdLow))
+								.append("thresholdHigh", new InstantType(myThresholdHigh));
+		if (myDeleted) {
+				b.append("deleted", myDeleted);
+		}
+		if (mySuspendedUntil != null) {
+				b.append("suspendedUntil", mySuspendedUntil);
+		}
+		return b.toString();
+	}
 }

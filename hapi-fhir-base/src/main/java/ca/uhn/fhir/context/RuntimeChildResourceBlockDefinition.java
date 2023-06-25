@@ -19,76 +19,75 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
+
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-
 public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
-    //	private RuntimeResourceBlockDefinition myElementDef;
-    private Class<? extends IBase> myResourceBlockType;
-    private FhirContext myContext;
+	//	private RuntimeResourceBlockDefinition myElementDef;
+	private Class<? extends IBase> myResourceBlockType;
+	private FhirContext myContext;
 
-    public RuntimeChildResourceBlockDefinition(
-            FhirContext theContext,
-            Field theField,
-            Child theChildAnnotation,
-            Description theDescriptionAnnotation,
-            String theElementName,
-            Class<? extends IBase> theResourceBlockType)
-            throws ConfigurationException {
-        super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-        myContext = theContext;
-        myResourceBlockType = theResourceBlockType;
-    }
+	public RuntimeChildResourceBlockDefinition(
+				FhirContext theContext,
+				Field theField,
+				Child theChildAnnotation,
+				Description theDescriptionAnnotation,
+				String theElementName,
+				Class<? extends IBase> theResourceBlockType)
+				throws ConfigurationException {
+		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
+		myContext = theContext;
+		myResourceBlockType = theResourceBlockType;
+	}
 
-    @Override
-    public BaseRuntimeElementCompositeDefinition getChildByName(String theName) {
-        if (getElementName().equals(theName)) {
-            return getDefinition();
-        }
-        return null;
-    }
+	@Override
+	public BaseRuntimeElementCompositeDefinition getChildByName(String theName) {
+		if (getElementName().equals(theName)) {
+				return getDefinition();
+		}
+		return null;
+	}
 
-    private BaseRuntimeElementCompositeDefinition getDefinition() {
-        return (BaseRuntimeElementCompositeDefinition)
-                myContext.getElementDefinition(myResourceBlockType);
-    }
+	private BaseRuntimeElementCompositeDefinition getDefinition() {
+		return (BaseRuntimeElementCompositeDefinition)
+					myContext.getElementDefinition(myResourceBlockType);
+	}
 
-    @Override
-    public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-        if (myResourceBlockType.equals(theDatatype)) {
-            return getElementName();
-        }
-        return null;
-    }
+	@Override
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
+		if (myResourceBlockType.equals(theDatatype)) {
+				return getElementName();
+		}
+		return null;
+	}
 
-    @Override
-    public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
-            Class<? extends IBase> theDatatype) {
-        if (myResourceBlockType.equals(theDatatype)) {
-            return getDefinition();
-        }
-        return null;
-    }
+	@Override
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
+				Class<? extends IBase> theDatatype) {
+		if (myResourceBlockType.equals(theDatatype)) {
+				return getDefinition();
+		}
+		return null;
+	}
 
-    @Override
-    public Set<String> getValidChildNames() {
-        return Collections.singleton(getElementName());
-    }
+	@Override
+	public Set<String> getValidChildNames() {
+		return Collections.singleton(getElementName());
+	}
 
-    @Override
-    void sealAndInitialize(
-            FhirContext theContext,
-            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
-                    theClassToElementDefinitions) {
-        //		myElementDef = (RuntimeResourceBlockDefinition)
-        // theClassToElementDefinitions.get(myResourceBlockType);
-    }
+	@Override
+	void sealAndInitialize(
+				FhirContext theContext,
+				Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+						theClassToElementDefinitions) {
+		//		myElementDef = (RuntimeResourceBlockDefinition)
+		// theClassToElementDefinitions.get(myResourceBlockType);
+	}
 }

@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
@@ -32,100 +36,95 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcR4B extends BaseTermVersionAdapterSvcImpl
-        implements ITermVersionAdapterSvc {
-    private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
-    private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
-    private IFhirResourceDao<ValueSet> myValueSetResourceDao;
+		implements ITermVersionAdapterSvc {
+	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
+	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
+	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 
-    @Autowired private ApplicationContext myAppCtx;
+	@Autowired private ApplicationContext myAppCtx;
 
-    /**
-     * Initialize the beans that are used by this service.
-     *
-     * <p>Note: There is a circular dependency here where the CodeSystem DAO needs terminology
-     * services, and the term services need the CodeSystem DAO. So we look these up in a refresh
-     * event instead of just autowiring them in order to avoid weird circular reference errors.
-     */
-    @SuppressWarnings({"unchecked", "unused"})
-    @EventListener
-    public void start(ContextRefreshedEvent theEvent) {
-        myCodeSystemResourceDao =
-                (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoR4B");
-        myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoR4B");
-        myConceptMapResourceDao =
-                (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoR4B");
-    }
+	/**
+	* Initialize the beans that are used by this service.
+	*
+	* <p>Note: There is a circular dependency here where the CodeSystem DAO needs terminology
+	* services, and the term services need the CodeSystem DAO. So we look these up in a refresh
+	* event instead of just autowiring them in order to avoid weird circular reference errors.
+	*/
+	@SuppressWarnings({"unchecked", "unused"})
+	@EventListener
+	public void start(ContextRefreshedEvent theEvent) {
+		myCodeSystemResourceDao =
+					(IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoR4B");
+		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoR4B");
+		myConceptMapResourceDao =
+					(IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoR4B");
+	}
 
-    @Override
-    public IIdType createOrUpdateCodeSystem(
-            org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
-            RequestDetails theRequestDetails) {
-        validateCodeSystemForStorage(theCodeSystemResource);
+	@Override
+	public IIdType createOrUpdateCodeSystem(
+				org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+				RequestDetails theRequestDetails) {
+		validateCodeSystemForStorage(theCodeSystemResource);
 
-        org.hl7.fhir.r5.model.CodeSystem codeSystemR5 =
-                (org.hl7.fhir.r5.model.CodeSystem)
-                        VersionConvertorFactory_40_50.convertResource(
-                                theCodeSystemResource, new BaseAdvisor_40_50(false));
-        CodeSystem codeSystemR4 =
-                (CodeSystem)
-                        VersionConvertorFactory_43_50.convertResource(
-                                codeSystemR5, new BaseAdvisor_43_50(false));
-        if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
-            String matchUrl =
-                    "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-            return myCodeSystemResourceDao
-                    .update(codeSystemR4, matchUrl, theRequestDetails)
-                    .getId();
-        } else {
-            return myCodeSystemResourceDao.update(codeSystemR4, theRequestDetails).getId();
-        }
-    }
+		org.hl7.fhir.r5.model.CodeSystem codeSystemR5 =
+					(org.hl7.fhir.r5.model.CodeSystem)
+								VersionConvertorFactory_40_50.convertResource(
+										theCodeSystemResource, new BaseAdvisor_40_50(false));
+		CodeSystem codeSystemR4 =
+					(CodeSystem)
+								VersionConvertorFactory_43_50.convertResource(
+										codeSystemR5, new BaseAdvisor_43_50(false));
+		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
+				String matchUrl =
+						"CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
+				return myCodeSystemResourceDao
+						.update(codeSystemR4, matchUrl, theRequestDetails)
+						.getId();
+		} else {
+				return myCodeSystemResourceDao.update(codeSystemR4, theRequestDetails).getId();
+		}
+	}
 
-    @Override
-    public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
+	@Override
+	public void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
 
-        org.hl7.fhir.r5.model.ConceptMap conceptMapR5 =
-                (org.hl7.fhir.r5.model.ConceptMap)
-                        VersionConvertorFactory_40_50.convertResource(
-                                theConceptMap, new BaseAdvisor_40_50(false));
-        ConceptMap conceptMapR4 =
-                (ConceptMap)
-                        VersionConvertorFactory_43_50.convertResource(
-                                conceptMapR5, new BaseAdvisor_43_50(false));
+		org.hl7.fhir.r5.model.ConceptMap conceptMapR5 =
+					(org.hl7.fhir.r5.model.ConceptMap)
+								VersionConvertorFactory_40_50.convertResource(
+										theConceptMap, new BaseAdvisor_40_50(false));
+		ConceptMap conceptMapR4 =
+					(ConceptMap)
+								VersionConvertorFactory_43_50.convertResource(
+										conceptMapR5, new BaseAdvisor_43_50(false));
 
-        if (isBlank(theConceptMap.getIdElement().getIdPart())) {
-            String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-            myConceptMapResourceDao.update(conceptMapR4, matchUrl);
-        } else {
-            myConceptMapResourceDao.update(conceptMapR4);
-        }
-    }
+		if (isBlank(theConceptMap.getIdElement().getIdPart())) {
+				String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
+				myConceptMapResourceDao.update(conceptMapR4, matchUrl);
+		} else {
+				myConceptMapResourceDao.update(conceptMapR4);
+		}
+	}
 
-    @Override
-    public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
+	@Override
+	public void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 
-        org.hl7.fhir.r5.model.ValueSet valueSetR5 =
-                (org.hl7.fhir.r5.model.ValueSet)
-                        VersionConvertorFactory_40_50.convertResource(
-                                theValueSet, new BaseAdvisor_40_50(false));
-        ValueSet valueSetR4 =
-                (ValueSet)
-                        VersionConvertorFactory_43_50.convertResource(
-                                valueSetR5, new BaseAdvisor_43_50(false));
+		org.hl7.fhir.r5.model.ValueSet valueSetR5 =
+					(org.hl7.fhir.r5.model.ValueSet)
+								VersionConvertorFactory_40_50.convertResource(
+										theValueSet, new BaseAdvisor_40_50(false));
+		ValueSet valueSetR4 =
+					(ValueSet)
+								VersionConvertorFactory_43_50.convertResource(
+										valueSetR5, new BaseAdvisor_43_50(false));
 
-        if (isBlank(theValueSet.getIdElement().getIdPart())) {
-            String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-            myValueSetResourceDao.update(valueSetR4, matchUrl);
-        } else {
-            myValueSetResourceDao.update(valueSetR4);
-        }
-    }
+		if (isBlank(theValueSet.getIdElement().getIdPart())) {
+				String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
+				myValueSetResourceDao.update(valueSetR4, matchUrl);
+		} else {
+				myValueSetResourceDao.update(valueSetR4);
+		}
+	}
 }

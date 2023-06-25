@@ -19,17 +19,6 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -40,6 +29,16 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * This JPA interceptor can be configured with a collection of FHIRPath expressions, and will
@@ -56,79 +55,79 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 @Interceptor
 public class OverridePathBasedReferentialIntegrityForDeletesInterceptor {
 
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(
-                    OverridePathBasedReferentialIntegrityForDeletesInterceptor.class);
-    private final Set<String> myPaths = new HashSet<>();
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(
+						OverridePathBasedReferentialIntegrityForDeletesInterceptor.class);
+	private final Set<String> myPaths = new HashSet<>();
 
-    @Autowired private FhirContext myFhirContext;
-    @Autowired private DaoRegistry myDaoRegistry;
+	@Autowired private FhirContext myFhirContext;
+	@Autowired private DaoRegistry myDaoRegistry;
 
-    /** Constructor */
-    public OverridePathBasedReferentialIntegrityForDeletesInterceptor() {
-        super();
-    }
+	/** Constructor */
+	public OverridePathBasedReferentialIntegrityForDeletesInterceptor() {
+		super();
+	}
 
-    /**
-     * Adds a FHIRPath expression indicating a resource path that should be ignored when considering
-     * referential integrity for deletes.
-     *
-     * @param thePath The FHIRPath expression, e.g. <code>AuditEvent.agent.who</code>
-     */
-    public void addPath(String thePath) {
-        getPaths().add(thePath);
-    }
+	/**
+	* Adds a FHIRPath expression indicating a resource path that should be ignored when considering
+	* referential integrity for deletes.
+	*
+	* @param thePath The FHIRPath expression, e.g. <code>AuditEvent.agent.who</code>
+	*/
+	public void addPath(String thePath) {
+		getPaths().add(thePath);
+	}
 
-    /** Remove all paths registered to this interceptor */
-    public void clearPaths() {
-        getPaths().clear();
-    }
+	/** Remove all paths registered to this interceptor */
+	public void clearPaths() {
+		getPaths().clear();
+	}
 
-    /**
-     * Returns the paths that will be considered by this interceptor
-     *
-     * @see #addPath(String)
-     */
-    public Set<String> getPaths() {
-        return myPaths;
-    }
+	/**
+	* Returns the paths that will be considered by this interceptor
+	*
+	* @see #addPath(String)
+	*/
+	public Set<String> getPaths() {
+		return myPaths;
+	}
 
-    /** Interceptor hook method. Do not invoke directly. */
-    @Hook(
-            value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS,
-            order = CascadingDeleteInterceptor.OVERRIDE_PATH_BASED_REF_INTEGRITY_INTERCEPTOR_ORDER)
-    public void handleDeleteConflicts(
-            DeleteConflictList theDeleteConflictList, RequestDetails requestDetails) {
-        for (DeleteConflict nextConflict : theDeleteConflictList) {
-            ourLog.info(
-                    "Ignoring referential integrity deleting {} - Referred to from {} at path {}",
-                    nextConflict.getTargetId(),
-                    nextConflict.getSourceId(),
-                    nextConflict.getSourcePath());
+	/** Interceptor hook method. Do not invoke directly. */
+	@Hook(
+				value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS,
+				order = CascadingDeleteInterceptor.OVERRIDE_PATH_BASED_REF_INTEGRITY_INTERCEPTOR_ORDER)
+	public void handleDeleteConflicts(
+				DeleteConflictList theDeleteConflictList, RequestDetails requestDetails) {
+		for (DeleteConflict nextConflict : theDeleteConflictList) {
+				ourLog.info(
+						"Ignoring referential integrity deleting {} - Referred to from {} at path {}",
+						nextConflict.getTargetId(),
+						nextConflict.getSourceId(),
+						nextConflict.getSourcePath());
 
-            IdDt sourceId = nextConflict.getSourceId();
-            IdDt targetId = nextConflict.getTargetId();
-            String targetIdValue = targetId.toVersionless().getValue();
+				IdDt sourceId = nextConflict.getSourceId();
+				IdDt targetId = nextConflict.getTargetId();
+				String targetIdValue = targetId.toVersionless().getValue();
 
-            IBaseResource sourceResource =
-                    myDaoRegistry
-                            .getResourceDao(sourceId.getResourceType())
-                            .read(sourceId, requestDetails);
+				IBaseResource sourceResource =
+						myDaoRegistry
+									.getResourceDao(sourceId.getResourceType())
+									.read(sourceId, requestDetails);
 
-            IFhirPath fhirPath = myFhirContext.newFhirPath();
-            for (String nextPath : myPaths) {
-                List<IBaseReference> selections =
-                        fhirPath.evaluate(sourceResource, nextPath, IBaseReference.class);
-                for (IBaseReference nextSelection : selections) {
-                    String selectionTargetValue =
-                            nextSelection.getReferenceElement().toVersionless().getValue();
-                    if (Objects.equals(targetIdValue, selectionTargetValue)) {
-                        theDeleteConflictList.setResourceIdToIgnoreConflict(
-                                nextConflict.getTargetId());
-                        break;
-                    }
-                }
-            }
-        }
-    }
+				IFhirPath fhirPath = myFhirContext.newFhirPath();
+				for (String nextPath : myPaths) {
+					List<IBaseReference> selections =
+								fhirPath.evaluate(sourceResource, nextPath, IBaseReference.class);
+					for (IBaseReference nextSelection : selections) {
+						String selectionTargetValue =
+									nextSelection.getReferenceElement().toVersionless().getValue();
+						if (Objects.equals(targetIdValue, selectionTargetValue)) {
+								theDeleteConflictList.setResourceIdToIgnoreConflict(
+										nextConflict.getTargetId());
+								break;
+						}
+					}
+				}
+		}
+	}
 }

@@ -19,47 +19,46 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
-import org.springframework.context.annotation.Bean;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
+import org.springframework.context.annotation.Bean;
 
 public class SubscriptionTopicConfig {
-    @Bean
-    SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
-            FhirContext theFhirContext) {
-        return new SubscriptionTopicMatchingSubscriber(theFhirContext);
-    }
+	@Bean
+	SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(
+				FhirContext theFhirContext) {
+		return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+	}
 
-    @Bean
-    SubscriptionTopicRegistry subscriptionTopicRegistry() {
-        return new SubscriptionTopicRegistry();
-    }
+	@Bean
+	SubscriptionTopicRegistry subscriptionTopicRegistry() {
+		return new SubscriptionTopicRegistry();
+	}
 
-    @Bean
-    SubscriptionTopicSupport subscriptionTopicSupport(
-            FhirContext theFhirContext,
-            DaoRegistry theDaoRegistry,
-            SearchParamMatcher theSearchParamMatcher) {
-        return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
-    }
+	@Bean
+	SubscriptionTopicSupport subscriptionTopicSupport(
+				FhirContext theFhirContext,
+				DaoRegistry theDaoRegistry,
+				SearchParamMatcher theSearchParamMatcher) {
+		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
+	}
 
-    @Bean
-    SubscriptionTopicLoader subscriptionTopicLoader() {
-        return new SubscriptionTopicLoader();
-    }
+	@Bean
+	SubscriptionTopicLoader subscriptionTopicLoader() {
+		return new SubscriptionTopicLoader();
+	}
 
-    @Bean
-    SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
-        return new SubscriptionTopicRegisteringSubscriber();
-    }
+	@Bean
+	SubscriptionTopicRegisteringSubscriber subscriptionTopicRegisteringSubscriber() {
+		return new SubscriptionTopicRegisteringSubscriber();
+	}
 
-    @Bean
-    SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
-            FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
-        return new SubscriptionTopicValidatingInterceptor(
-                theFhirContext, theSubscriptionQueryValidator);
-    }
+	@Bean
+	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
+				FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
+		return new SubscriptionTopicValidatingInterceptor(
+					theFhirContext, theSubscriptionQueryValidator);
+	}
 }

@@ -28,16 +28,16 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 /** Utilities for working with the subscription resource */
 public class SubscriptionUtil {
 
-    public static RequestDetails createRequestDetailForPartitionedRequest(
-            CanonicalSubscription theSubscription) {
-        RequestPartitionId requestPartitionId =
-                new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null)
-                        .toPartitionId();
+	public static RequestDetails createRequestDetailForPartitionedRequest(
+				CanonicalSubscription theSubscription) {
+		RequestPartitionId requestPartitionId =
+					new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null)
+								.toPartitionId();
 
-        if (theSubscription.getCrossPartitionEnabled()) {
-            requestPartitionId = RequestPartitionId.allPartitions();
-        }
+		if (theSubscription.getCrossPartitionEnabled()) {
+				requestPartitionId = RequestPartitionId.allPartitions();
+		}
 
-        return new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
-    }
+		return new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
+	}
 }

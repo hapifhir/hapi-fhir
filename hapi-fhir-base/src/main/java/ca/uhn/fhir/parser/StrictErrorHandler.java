@@ -34,99 +34,99 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 public class StrictErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 
-    @Override
-    public void containedResourceWithNoId(IParseLocation theLocation) {
-        throw new DataFormatException(
-                Msg.code(1819) + "Resource has contained child resource with no ID");
-    }
+	@Override
+	public void containedResourceWithNoId(IParseLocation theLocation) {
+		throw new DataFormatException(
+					Msg.code(1819) + "Resource has contained child resource with no ID");
+	}
 
-    @Override
-    public void incorrectJsonType(
-            IParseLocation theLocation,
-            String theElementName,
-            ValueType theExpected,
-            ScalarType theExpectedScalarType,
-            ValueType theFound,
-            ScalarType theFoundScalarType) {
-        String message =
-                LenientErrorHandler.createIncorrectJsonTypeMessage(
-                        theElementName,
-                        theExpected,
-                        theExpectedScalarType,
-                        theFound,
-                        theFoundScalarType);
-        throw new DataFormatException(Msg.code(1820) + message);
-    }
+	@Override
+	public void incorrectJsonType(
+				IParseLocation theLocation,
+				String theElementName,
+				ValueType theExpected,
+				ScalarType theExpectedScalarType,
+				ValueType theFound,
+				ScalarType theFoundScalarType) {
+		String message =
+					LenientErrorHandler.createIncorrectJsonTypeMessage(
+								theElementName,
+								theExpected,
+								theExpectedScalarType,
+								theFound,
+								theFoundScalarType);
+		throw new DataFormatException(Msg.code(1820) + message);
+	}
 
-    @Override
-    public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
-        throw new DataFormatException(
-                Msg.code(1821)
-                        + describeLocation(theLocation)
-                        + "Invalid attribute value \""
-                        + UrlUtil.sanitizeUrlPart(theValue)
-                        + "\": "
-                        + theError);
-    }
+	@Override
+	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
+		throw new DataFormatException(
+					Msg.code(1821)
+								+ describeLocation(theLocation)
+								+ "Invalid attribute value \""
+								+ UrlUtil.sanitizeUrlPart(theValue)
+								+ "\": "
+								+ theError);
+	}
 
-    @Override
-    public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
-        StringBuilder b = new StringBuilder();
-        b.append("Resource is missing required element '");
-        b.append(theElementName);
-        b.append("'");
-        if (theLocation != null) {
-            b.append(" in parent element '");
-            b.append(theLocation.getParentElementName());
-            b.append("'");
-        }
-        throw new DataFormatException(Msg.code(1822) + b.toString());
-    }
+	@Override
+	public void missingRequiredElement(IParseLocation theLocation, String theElementName) {
+		StringBuilder b = new StringBuilder();
+		b.append("Resource is missing required element '");
+		b.append(theElementName);
+		b.append("'");
+		if (theLocation != null) {
+				b.append(" in parent element '");
+				b.append(theLocation.getParentElementName());
+				b.append("'");
+		}
+		throw new DataFormatException(Msg.code(1822) + b.toString());
+	}
 
-    @Override
-    public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-        throw new DataFormatException(
-                Msg.code(1823)
-                        + describeLocation(theLocation)
-                        + "Multiple repetitions of non-repeatable element '"
-                        + theElementName
-                        + "' found during parse");
-    }
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		throw new DataFormatException(
+					Msg.code(1823)
+								+ describeLocation(theLocation)
+								+ "Multiple repetitions of non-repeatable element '"
+								+ theElementName
+								+ "' found during parse");
+	}
 
-    @Override
-    public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-        throw new DataFormatException(
-                Msg.code(1824)
-                        + describeLocation(theLocation)
-                        + "Unknown attribute '"
-                        + theAttributeName
-                        + "' found during parse");
-    }
+	@Override
+	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
+		throw new DataFormatException(
+					Msg.code(1824)
+								+ describeLocation(theLocation)
+								+ "Unknown attribute '"
+								+ theAttributeName
+								+ "' found during parse");
+	}
 
-    @Override
-    public void unknownElement(IParseLocation theLocation, String theElementName) {
-        throw new DataFormatException(
-                Msg.code(1825)
-                        + describeLocation(theLocation)
-                        + "Unknown element '"
-                        + theElementName
-                        + "' found during parse");
-    }
+	@Override
+	public void unknownElement(IParseLocation theLocation, String theElementName) {
+		throw new DataFormatException(
+					Msg.code(1825)
+								+ describeLocation(theLocation)
+								+ "Unknown element '"
+								+ theElementName
+								+ "' found during parse");
+	}
 
-    @Override
-    public void unknownReference(IParseLocation theLocation, String theReference) {
-        throw new DataFormatException(
-                Msg.code(1826)
-                        + describeLocation(theLocation)
-                        + "Resource has invalid reference: "
-                        + theReference);
-    }
+	@Override
+	public void unknownReference(IParseLocation theLocation, String theReference) {
+		throw new DataFormatException(
+					Msg.code(1826)
+								+ describeLocation(theLocation)
+								+ "Resource has invalid reference: "
+								+ theReference);
+	}
 
-    @Override
-    public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
-        throw new DataFormatException(
-                Msg.code(1827)
-                        + describeLocation(theLocation)
-                        + "Extension contains both a value and nested extensions");
-    }
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
+		throw new DataFormatException(
+					Msg.code(1827)
+								+ describeLocation(theLocation)
+								+ "Extension contains both a value and nested extensions");
+	}
 }

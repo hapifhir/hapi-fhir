@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.nio.charset.Charset;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -35,6 +31,10 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 
+import java.nio.charset.Charset;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -45,83 +45,83 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class RequestValidatingInterceptor extends BaseValidatingInterceptor<String> {
 
-    /** X-HAPI-Request-Validation */
-    public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
+	/** X-HAPI-Request-Validation */
+	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
 
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
-    private boolean myAddValidationResultsToResponseOperationOutcome = true;
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
+	private boolean myAddValidationResultsToResponseOperationOutcome = true;
 
-    @Override
-    ValidationResult doValidate(FhirValidator theValidator, String theRequest) {
-        return theValidator.validateWithResult(theRequest);
-    }
+	@Override
+	ValidationResult doValidate(FhirValidator theValidator, String theRequest) {
+		return theValidator.validateWithResult(theRequest);
+	}
 
-    @Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-    public boolean incomingRequestPostProcessed(
-            RequestDetails theRequestDetails,
-            HttpServletRequest theRequest,
-            HttpServletResponse theResponse)
-            throws AuthenticationException {
-        EncodingEnum encoding =
-                RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails);
-        if (encoding == null) {
-            ourLog.trace("Incoming request does not appear to be FHIR, not going to validate");
-            return true;
-        }
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+	public boolean incomingRequestPostProcessed(
+				RequestDetails theRequestDetails,
+				HttpServletRequest theRequest,
+				HttpServletResponse theResponse)
+				throws AuthenticationException {
+		EncodingEnum encoding =
+					RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails);
+		if (encoding == null) {
+				ourLog.trace("Incoming request does not appear to be FHIR, not going to validate");
+				return true;
+		}
 
-        Charset charset = ResourceParameter.determineRequestCharset(theRequestDetails);
-        String requestText = new String(theRequestDetails.loadRequestContents(), charset);
+		Charset charset = ResourceParameter.determineRequestCharset(theRequestDetails);
+		String requestText = new String(theRequestDetails.loadRequestContents(), charset);
 
-        if (isBlank(requestText)) {
-            ourLog.trace("Incoming request does not have a body");
-            return true;
-        }
+		if (isBlank(requestText)) {
+				ourLog.trace("Incoming request does not have a body");
+				return true;
+		}
 
-        ValidationResult validationResult = validate(requestText, theRequestDetails);
+		ValidationResult validationResult = validate(requestText, theRequestDetails);
 
-        if (myAddValidationResultsToResponseOperationOutcome) {
-            addValidationResultToRequestDetails(theRequestDetails, validationResult);
-        }
+		if (myAddValidationResultsToResponseOperationOutcome) {
+				addValidationResultToRequestDetails(theRequestDetails, validationResult);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * If set to {@literal true} (default is true), the validation results will be added to the
-     * OperationOutcome being returned to the client, unless the response being returned is not an
-     * OperationOutcome to begin with (e.g. if the client has requested <code>
-     * Return: prefer=representation</code>)
-     */
-    public boolean isAddValidationResultsToResponseOperationOutcome() {
-        return myAddValidationResultsToResponseOperationOutcome;
-    }
+	/**
+	* If set to {@literal true} (default is true), the validation results will be added to the
+	* OperationOutcome being returned to the client, unless the response being returned is not an
+	* OperationOutcome to begin with (e.g. if the client has requested <code>
+	* Return: prefer=representation</code>)
+	*/
+	public boolean isAddValidationResultsToResponseOperationOutcome() {
+		return myAddValidationResultsToResponseOperationOutcome;
+	}
 
-    /**
-     * If set to {@literal true} (default is true), the validation results will be added to the
-     * OperationOutcome being returned to the client, unless the response being returned is not an
-     * OperationOutcome to begin with (e.g. if the client has requested <code>
-     * Return: prefer=representation</code>)
-     */
-    public void setAddValidationResultsToResponseOperationOutcome(
-            boolean theAddValidationResultsToResponseOperationOutcome) {
-        myAddValidationResultsToResponseOperationOutcome =
-                theAddValidationResultsToResponseOperationOutcome;
-    }
+	/**
+	* If set to {@literal true} (default is true), the validation results will be added to the
+	* OperationOutcome being returned to the client, unless the response being returned is not an
+	* OperationOutcome to begin with (e.g. if the client has requested <code>
+	* Return: prefer=representation</code>)
+	*/
+	public void setAddValidationResultsToResponseOperationOutcome(
+				boolean theAddValidationResultsToResponseOperationOutcome) {
+		myAddValidationResultsToResponseOperationOutcome =
+					theAddValidationResultsToResponseOperationOutcome;
+	}
 
-    @Override
-    String provideDefaultResponseHeaderName() {
-        return DEFAULT_RESPONSE_HEADER_NAME;
-    }
+	@Override
+	String provideDefaultResponseHeaderName() {
+		return DEFAULT_RESPONSE_HEADER_NAME;
+	}
 
-    /**
-     * Sets the name of the response header to add validation failures to
-     *
-     * @see #DEFAULT_RESPONSE_HEADER_NAME
-     * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
-     */
-    @Override
-    public void setResponseHeaderName(String theResponseHeaderName) {
-        super.setResponseHeaderName(theResponseHeaderName);
-    }
+	/**
+	* Sets the name of the response header to add validation failures to
+	*
+	* @see #DEFAULT_RESPONSE_HEADER_NAME
+	* @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
+	*/
+	@Override
+	public void setResponseHeaderName(String theResponseHeaderName) {
+		super.setResponseHeaderName(theResponseHeaderName);
+	}
 }

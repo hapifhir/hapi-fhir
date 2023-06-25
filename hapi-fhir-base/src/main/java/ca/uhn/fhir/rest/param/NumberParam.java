@@ -19,87 +19,86 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import java.math.BigDecimal;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import java.math.BigDecimal;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
 
-    private static final long serialVersionUID = 1L;
-    private BigDecimal myQuantity;
+	private static final long serialVersionUID = 1L;
+	private BigDecimal myQuantity;
 
-    /** Constructor */
-    public NumberParam() {
-        super();
-    }
+	/** Constructor */
+	public NumberParam() {
+		super();
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theValue A value, e.g. "10"
-     */
-    public NumberParam(int theValue) {
-        setValue(new BigDecimal(theValue));
-    }
+	/**
+	* Constructor
+	*
+	* @param theValue A value, e.g. "10"
+	*/
+	public NumberParam(int theValue) {
+		setValue(new BigDecimal(theValue));
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theValue A string value, e.g. "gt5.0"
-     */
-    public NumberParam(String theValue) {
-        setValueAsQueryToken(null, null, null, theValue);
-    }
+	/**
+	* Constructor
+	*
+	* @param theValue A string value, e.g. "gt5.0"
+	*/
+	public NumberParam(String theValue) {
+		setValueAsQueryToken(null, null, null, theValue);
+	}
 
-    @Override
-    String doGetQueryParameterQualifier() {
-        return null;
-    }
+	@Override
+	String doGetQueryParameterQualifier() {
+		return null;
+	}
 
-    @Override
-    String doGetValueAsQueryToken(FhirContext theContext) {
-        StringBuilder b = new StringBuilder();
-        if (getPrefix() != null) {
-            b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
-        }
-        b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
-        return b.toString();
-    }
+	@Override
+	String doGetValueAsQueryToken(FhirContext theContext) {
+		StringBuilder b = new StringBuilder();
+		if (getPrefix() != null) {
+				b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
+		}
+		b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
+		return b.toString();
+	}
 
-    @Override
-    void doSetValueAsQueryToken(
-            FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-        if (getMissing() != null && isBlank(theValue)) {
-            return;
-        }
-        String value = super.extractPrefixAndReturnRest(theValue);
-        myQuantity = null;
-        if (isNotBlank(value)) {
-            myQuantity = new BigDecimal(value);
-        }
-    }
+	@Override
+	void doSetValueAsQueryToken(
+				FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		if (getMissing() != null && isBlank(theValue)) {
+				return;
+		}
+		String value = super.extractPrefixAndReturnRest(theValue);
+		myQuantity = null;
+		if (isNotBlank(value)) {
+				myQuantity = new BigDecimal(value);
+		}
+	}
 
-    public BigDecimal getValue() {
-        return myQuantity;
-    }
+	public BigDecimal getValue() {
+		return myQuantity;
+	}
 
-    public NumberParam setValue(BigDecimal theValue) {
-        myQuantity = theValue;
-        return this;
-    }
+	public NumberParam setValue(BigDecimal theValue) {
+		myQuantity = theValue;
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
-        b.append("prefix", getPrefix());
-        b.append("value", myQuantity);
-        return b.build();
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
+		b.append("prefix", getPrefix());
+		b.append("value", myQuantity);
+		return b.build();
+	}
 }

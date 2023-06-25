@@ -23,5 +23,5 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 @FunctionalInterface
 public interface ITerminologyProviderFactory {
-    HapiTerminologyProvider create(RequestDetails theRequestDetails);
+	HapiTerminologyProvider create(RequestDetails theRequestDetails);
 }

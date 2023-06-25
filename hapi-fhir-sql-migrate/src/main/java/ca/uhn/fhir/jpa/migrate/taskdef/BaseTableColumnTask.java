@@ -19,74 +19,74 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 public abstract class BaseTableColumnTask extends BaseTableTask {
 
-    protected Map<
-                    String,
-                    Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>>
-            myCalculators = new HashMap<>();
-    protected String myColumnName;
-    // If a concrete class decides to, they can define a custom WHERE clause for the task.
-    protected String myWhereClause;
+	protected Map<
+						String,
+						Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>>
+				myCalculators = new HashMap<>();
+	protected String myColumnName;
+	// If a concrete class decides to, they can define a custom WHERE clause for the task.
+	protected String myWhereClause;
 
-    public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    public String getColumnName() {
-        return myColumnName;
-    }
+	public String getColumnName() {
+		return myColumnName;
+	}
 
-    public BaseTableColumnTask setColumnName(String theColumnName) {
-        myColumnName = theColumnName.toUpperCase();
-        return this;
-    }
+	public BaseTableColumnTask setColumnName(String theColumnName) {
+		myColumnName = theColumnName.toUpperCase();
+		return this;
+	}
 
-    protected String getWhereClause() {
-        if (myWhereClause == null) {
-            return getColumnName() + " IS NULL";
-        } else {
-            return myWhereClause;
-        }
-    }
+	protected String getWhereClause() {
+		if (myWhereClause == null) {
+				return getColumnName() + " IS NULL";
+		} else {
+				return myWhereClause;
+		}
+	}
 
-    protected void setWhereClause(String theWhereClause) {
-        this.myWhereClause = theWhereClause;
-    }
+	protected void setWhereClause(String theWhereClause) {
+		this.myWhereClause = theWhereClause;
+	}
 
-    @Override
-    public void validate() {
-        super.validate();
-        Validate.notBlank(myColumnName, "Column name not specified");
-    }
+	@Override
+	public void validate() {
+		super.validate();
+		Validate.notBlank(myColumnName, "Column name not specified");
+	}
 
-    @Override
-    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-        BaseTableColumnTask otherObject = (BaseTableColumnTask) theOtherObject;
-        super.generateEquals(theBuilder, otherObject);
-        theBuilder.append(myColumnName, otherObject.myColumnName);
-    }
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableColumnTask otherObject = (BaseTableColumnTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myColumnName, otherObject.myColumnName);
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        super.generateHashCode(theBuilder);
-        theBuilder.append(myColumnName);
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myColumnName);
+	}
 
-    public BaseTableColumnTask addCalculator(
-            String theColumnName,
-            Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>
-                    theConsumer) {
-        Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
-        myCalculators.put(theColumnName, theConsumer);
-        return this;
-    }
+	public BaseTableColumnTask addCalculator(
+				String theColumnName,
+				Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>
+						theConsumer) {
+		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
+		myCalculators.put(theColumnName, theConsumer);
+		return this;
+	}
 }

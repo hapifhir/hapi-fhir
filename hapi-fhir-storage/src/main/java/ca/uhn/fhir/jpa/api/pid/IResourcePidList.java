@@ -19,28 +19,28 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
 /** List of IResourcePersistentId along with a resource type each id */
 public interface IResourcePidList {
 
-    RequestPartitionId getRequestPartitionId();
+	RequestPartitionId getRequestPartitionId();
 
-    Date getLastDate();
+	Date getLastDate();
 
-    int size();
+	int size();
 
-    @Nonnull
-    List<TypedResourcePid> getTypedResourcePids();
+	@Nonnull
+	List<TypedResourcePid> getTypedResourcePids();
 
-    String getResourceType(int i);
+	String getResourceType(int i);
 
-    List<IResourcePersistentId> getIds();
+	List<IResourcePersistentId> getIds();
 
-    boolean isEmpty();
+	boolean isEmpty();
 }

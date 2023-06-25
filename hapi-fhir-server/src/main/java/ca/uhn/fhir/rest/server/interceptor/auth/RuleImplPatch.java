@@ -19,52 +19,51 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Set;
 
 class RuleImplPatch extends BaseRule {
-    private boolean myAllRequests;
+	private boolean myAllRequests;
 
-    RuleImplPatch(String theRuleName) {
-        super(theRuleName);
-    }
+	RuleImplPatch(String theRuleName) {
+		super(theRuleName);
+	}
 
-    @Override
-    public AuthorizationInterceptor.Verdict applyRule(
-            RestOperationTypeEnum theOperation,
-            RequestDetails theRequestDetails,
-            IBaseResource theInputResource,
-            IIdType theInputResourceId,
-            IBaseResource theOutputResource,
-            IRuleApplier theRuleApplier,
-            Set<AuthorizationFlagsEnum> theFlags,
-            Pointcut thePointcut) {
+	@Override
+	public AuthorizationInterceptor.Verdict applyRule(
+				RestOperationTypeEnum theOperation,
+				RequestDetails theRequestDetails,
+				IBaseResource theInputResource,
+				IIdType theInputResourceId,
+				IBaseResource theOutputResource,
+				IRuleApplier theRuleApplier,
+				Set<AuthorizationFlagsEnum> theFlags,
+				Pointcut thePointcut) {
 
-        if (myAllRequests) {
-            if (theOperation == RestOperationTypeEnum.PATCH) {
-                if (theInputResource == null && theOutputResource == null) {
-                    return newVerdict(
-                            theOperation,
-                            theRequestDetails,
-                            theInputResource,
-                            theInputResourceId,
-                            theOutputResource,
-                            theRuleApplier);
-                }
-            }
-        }
+		if (myAllRequests) {
+				if (theOperation == RestOperationTypeEnum.PATCH) {
+					if (theInputResource == null && theOutputResource == null) {
+						return newVerdict(
+									theOperation,
+									theRequestDetails,
+									theInputResource,
+									theInputResourceId,
+									theOutputResource,
+									theRuleApplier);
+					}
+				}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    RuleImplPatch setAllRequests(boolean theAllRequests) {
-        myAllRequests = theAllRequests;
-        return this;
-    }
+	RuleImplPatch setAllRequests(boolean theAllRequests) {
+		myAllRequests = theAllRequests;
+		return this;
+	}
 }

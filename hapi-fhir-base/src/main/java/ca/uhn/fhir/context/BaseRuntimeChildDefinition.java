@@ -19,107 +19,106 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.i18n.Msg;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-
-import ca.uhn.fhir.i18n.Msg;
-
 public abstract class BaseRuntimeChildDefinition {
 
-    private BaseRuntimeChildDefinition myReplacedParentDefinition;
+	private BaseRuntimeChildDefinition myReplacedParentDefinition;
 
-    public abstract IAccessor getAccessor();
+	public abstract IAccessor getAccessor();
 
-    public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
+	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
 
-    public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
-            Class<? extends IBase> theType);
+	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(
+				Class<? extends IBase> theType);
 
-    public abstract String getChildNameByDatatype(Class<? extends IBase> theDatatype);
+	public abstract String getChildNameByDatatype(Class<? extends IBase> theDatatype);
 
-    public abstract String getElementName();
+	public abstract String getElementName();
 
-    public String getExtensionUrl() {
-        return null;
-    }
+	public String getExtensionUrl() {
+		return null;
+	}
 
-    public Object getInstanceConstructorArguments() {
-        return null;
-    }
+	public Object getInstanceConstructorArguments() {
+		return null;
+	}
 
-    public abstract int getMax();
+	public abstract int getMax();
 
-    public abstract int getMin();
+	public abstract int getMin();
 
-    public abstract IMutator getMutator();
+	public abstract IMutator getMutator();
 
-    public abstract Set<String> getValidChildNames();
+	public abstract Set<String> getValidChildNames();
 
-    public abstract boolean isSummary();
+	public abstract boolean isSummary();
 
-    abstract void sealAndInitialize(
-            FhirContext theContext,
-            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
-                    theClassToElementDefinitions);
+	abstract void sealAndInitialize(
+				FhirContext theContext,
+				Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+						theClassToElementDefinitions);
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[" + getElementName() + "]";
-    }
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
+	}
 
-    public BaseRuntimeChildDefinition getReplacedParentDefinition() {
-        return myReplacedParentDefinition;
-    }
+	public BaseRuntimeChildDefinition getReplacedParentDefinition() {
+		return myReplacedParentDefinition;
+	}
 
-    public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
-        this.myReplacedParentDefinition = myReplacedParentDefinition;
-    }
+	public void setReplacedParentDefinition(BaseRuntimeChildDefinition myReplacedParentDefinition) {
+		this.myReplacedParentDefinition = myReplacedParentDefinition;
+	}
 
-    public interface IAccessor {
-        List<IBase> getValues(IBase theTarget);
+	public interface IAccessor {
+		List<IBase> getValues(IBase theTarget);
 
-        default <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
-            return (Optional<T>) getValues(theTarget).stream().findFirst();
-        }
-    }
+		default <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
+				return (Optional<T>) getValues(theTarget).stream().findFirst();
+		}
+	}
 
-    public interface IMutator {
-        void addValue(IBase theTarget, IBase theValue);
+	public interface IMutator {
+		void addValue(IBase theTarget, IBase theValue);
 
-        void setValue(IBase theTarget, IBase theValue);
+		void setValue(IBase theTarget, IBase theValue);
 
-        /**
-         * Remove an item from a list of values
-         *
-         * @param theTarget field to remove the item from (e.g. patient.name)
-         * @param theIndex the index of the item to be removed (e.g. 1 for patient.name[1])
-         */
-        default void remove(IBase theTarget, int theIndex) {
-            // implemented in subclasses
-        }
-    }
+		/**
+			* Remove an item from a list of values
+			*
+			* @param theTarget field to remove the item from (e.g. patient.name)
+			* @param theIndex the index of the item to be removed (e.g. 1 for patient.name[1])
+			*/
+		default void remove(IBase theTarget, int theIndex) {
+				// implemented in subclasses
+		}
+	}
 
-    BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(
-            Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
-                    theClassToElementDefinitions) {
-        for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next :
-                theClassToElementDefinitions.entrySet()) {
-            if (IBaseReference.class.isAssignableFrom(next.getKey())) {
-                return next.getValue();
-            }
-        }
+	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(
+				Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>
+						theClassToElementDefinitions) {
+		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> next :
+					theClassToElementDefinitions.entrySet()) {
+				if (IBaseReference.class.isAssignableFrom(next.getKey())) {
+					return next.getValue();
+				}
+		}
 
-        // Shouldn't happen
-        throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
-    }
+		// Shouldn't happen
+		throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
+	}
 
-    // public String getExtensionUrl() {
-    // return null;
-    // }
+	// public String getExtensionUrl() {
+	// return null;
+	// }
 }

@@ -27,34 +27,34 @@ import static org.apache.commons.lang3.StringUtils.left;
 /** Model of the _source parameter */
 public class SourceParam {
 
-    private static final long serialVersionUID = 1L;
-    private final String myParameterValue;
-    private final String mySourceUri;
-    private final String myRequestId;
+	private static final long serialVersionUID = 1L;
+	private final String myParameterValue;
+	private final String mySourceUri;
+	private final String myRequestId;
 
-    public SourceParam(String theParameterValue) {
-        myParameterValue = defaultString(theParameterValue);
-        String requestId;
-        int lastHashValueIndex = myParameterValue.lastIndexOf('#');
-        if (lastHashValueIndex == -1) {
-            mySourceUri = myParameterValue;
-            requestId = null;
-        } else {
-            if (lastHashValueIndex == 0) {
-                mySourceUri = null;
-            } else {
-                mySourceUri = myParameterValue.substring(0, lastHashValueIndex);
-            }
-            requestId = myParameterValue.substring(lastHashValueIndex + 1);
-        }
-        myRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-    }
+	public SourceParam(String theParameterValue) {
+		myParameterValue = defaultString(theParameterValue);
+		String requestId;
+		int lastHashValueIndex = myParameterValue.lastIndexOf('#');
+		if (lastHashValueIndex == -1) {
+				mySourceUri = myParameterValue;
+				requestId = null;
+		} else {
+				if (lastHashValueIndex == 0) {
+					mySourceUri = null;
+				} else {
+					mySourceUri = myParameterValue.substring(0, lastHashValueIndex);
+				}
+				requestId = myParameterValue.substring(lastHashValueIndex + 1);
+		}
+		myRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
+	}
 
-    public String getSourceUri() {
-        return mySourceUri;
-    }
+	public String getSourceUri() {
+		return mySourceUri;
+	}
 
-    public String getRequestId() {
-        return myRequestId;
-    }
+	public String getRequestId() {
+		return myRequestId;
+	}
 }

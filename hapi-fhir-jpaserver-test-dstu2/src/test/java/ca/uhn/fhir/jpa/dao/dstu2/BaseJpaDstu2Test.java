@@ -1,25 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -76,6 +56,25 @@ import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -83,237 +82,237 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
-    @Autowired
-    @Qualifier("myResourceCountsCache")
-    protected ResourceCountCache myResourceCountsCache;
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
 
-    @Autowired protected ISearchParamRegistry mySearchParamRegistry;
-    @Autowired protected ISearchParamRegistryController mySearchParamRegistryController;
-    @Autowired protected ApplicationContext myAppCtx;
-    @Autowired protected IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired protected ISearchParamRegistryController mySearchParamRegistryController;
+	@Autowired protected ApplicationContext myAppCtx;
+	@Autowired protected IResourceReindexingSvc myResourceReindexingSvc;
 
-    @Autowired
-    @Qualifier("myAppointmentDaoDstu2")
-    protected IFhirResourceDao<Appointment> myAppointmentDao;
+	@Autowired
+	@Qualifier("myAppointmentDaoDstu2")
+	protected IFhirResourceDao<Appointment> myAppointmentDao;
 
-    @Autowired
-    @Qualifier("mySearchParameterDaoDstu2")
-    protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
+	@Qualifier("mySearchParameterDaoDstu2")
+	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 
-    @Autowired
-    @Qualifier("myCommunicationDaoDstu2")
-    protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
+	@Qualifier("myCommunicationDaoDstu2")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
 
-    @Autowired
-    @Qualifier("myBundleDaoDstu2")
-    protected IFhirResourceDao<Bundle> myBundleDao;
+	@Autowired
+	@Qualifier("myBundleDaoDstu2")
+	protected IFhirResourceDao<Bundle> myBundleDao;
 
-    @Autowired
-    @Qualifier("myConceptMapDaoDstu2")
-    protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	@Autowired
+	@Qualifier("myConceptMapDaoDstu2")
+	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 
-    @Autowired
-    @Qualifier("myDeviceDaoDstu2")
-    protected IFhirResourceDao<Device> myDeviceDao;
+	@Autowired
+	@Qualifier("myDeviceDaoDstu2")
+	protected IFhirResourceDao<Device> myDeviceDao;
 
-    @Autowired
-    @Qualifier("myDiagnosticOrderDaoDstu2")
-    protected IFhirResourceDao<DiagnosticOrder> myDiagnosticOrderDao;
+	@Autowired
+	@Qualifier("myDiagnosticOrderDaoDstu2")
+	protected IFhirResourceDao<DiagnosticOrder> myDiagnosticOrderDao;
 
-    @Autowired
-    @Qualifier("myDiagnosticReportDaoDstu2")
-    protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+	@Autowired
+	@Qualifier("myDiagnosticReportDaoDstu2")
+	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
 
-    @Autowired
-    @Qualifier("myBinaryDaoDstu2")
-    protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
+	@Qualifier("myBinaryDaoDstu2")
+	protected IFhirResourceDao<Binary> myBinaryDao;
 
-    @Autowired
-    @Qualifier("myEncounterDaoDstu2")
-    protected IFhirResourceDao<Encounter> myEncounterDao;
+	@Autowired
+	@Qualifier("myEncounterDaoDstu2")
+	protected IFhirResourceDao<Encounter> myEncounterDao;
 
-    //	@PersistenceContext()
-    @Autowired protected EntityManager myEntityManager;
-    @Autowired protected FhirContext myFhirContext;
+	//	@PersistenceContext()
+	@Autowired protected EntityManager myEntityManager;
+	@Autowired protected FhirContext myFhirContext;
 
-    @Autowired
-    @Qualifier("myImmunizationDaoDstu2")
-    protected IFhirResourceDao<Immunization> myImmunizationDao;
+	@Autowired
+	@Qualifier("myImmunizationDaoDstu2")
+	protected IFhirResourceDao<Immunization> myImmunizationDao;
 
-    @Autowired
-    @Qualifier("myLocationDaoDstu2")
-    protected IFhirResourceDao<Location> myLocationDao;
+	@Autowired
+	@Qualifier("myLocationDaoDstu2")
+	protected IFhirResourceDao<Location> myLocationDao;
 
-    @Autowired
-    @Qualifier("myMediaDaoDstu2")
-    protected IFhirResourceDao<Media> myMediaDao;
+	@Autowired
+	@Qualifier("myMediaDaoDstu2")
+	protected IFhirResourceDao<Media> myMediaDao;
 
-    @Autowired
-    @Qualifier("myMedicationAdministrationDaoDstu2")
-    protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
+	@Autowired
+	@Qualifier("myMedicationAdministrationDaoDstu2")
+	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 
-    @Autowired
-    @Qualifier("myMedicationDaoDstu2")
-    protected IFhirResourceDao<Medication> myMedicationDao;
+	@Autowired
+	@Qualifier("myMedicationDaoDstu2")
+	protected IFhirResourceDao<Medication> myMedicationDao;
 
-    @Autowired
-    @Qualifier("myMedicationOrderDaoDstu2")
-    protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
+	@Autowired
+	@Qualifier("myMedicationOrderDaoDstu2")
+	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
 
-    @Autowired
-    @Qualifier("myObservationDaoDstu2")
-    protected IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	@Qualifier("myObservationDaoDstu2")
+	protected IFhirResourceDao<Observation> myObservationDao;
 
-    @Autowired
-    @Qualifier("myOrganizationDaoDstu2")
-    protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	@Qualifier("myOrganizationDaoDstu2")
+	protected IFhirResourceDao<Organization> myOrganizationDao;
 
-    @Autowired protected DatabaseBackedPagingProvider myPagingProvider;
+	@Autowired protected DatabaseBackedPagingProvider myPagingProvider;
 
-    @Autowired
-    @Qualifier("myPatientDaoDstu2")
-    protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	@Qualifier("myPatientDaoDstu2")
+	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 
-    @Autowired
-    @Qualifier("myConformanceDaoDstu2")
-    protected IFhirResourceDao<Conformance> myConformanceDao;
+	@Autowired
+	@Qualifier("myConformanceDaoDstu2")
+	protected IFhirResourceDao<Conformance> myConformanceDao;
 
-    @Autowired
-    @Qualifier("myGroupDaoDstu2")
-    protected IFhirResourceDao<Group> myGroupDao;
+	@Autowired
+	@Qualifier("myGroupDaoDstu2")
+	protected IFhirResourceDao<Group> myGroupDao;
 
-    @Autowired
-    @Qualifier("myPractitionerDaoDstu2")
-    protected IFhirResourceDao<Practitioner> myPractitionerDao;
+	@Autowired
+	@Qualifier("myPractitionerDaoDstu2")
+	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 
-    @Autowired
-    @Qualifier("myQuestionnaireDaoDstu2")
-    protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+	@Autowired
+	@Qualifier("myQuestionnaireDaoDstu2")
+	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 
-    @Autowired
-    @Qualifier("myQuestionnaireResponseDaoDstu2")
-    protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
+	@Autowired
+	@Qualifier("myQuestionnaireResponseDaoDstu2")
+	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 
-    @Autowired
-    @Qualifier("myResourceProvidersDstu2")
-    protected ResourceProviderFactory myResourceProviders;
+	@Autowired
+	@Qualifier("myResourceProvidersDstu2")
+	protected ResourceProviderFactory myResourceProviders;
 
-    @Autowired protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
-    @Autowired(required = false)
-    protected IFulltextSearchSvc mySearchDao;
+	@Autowired(required = false)
+	protected IFulltextSearchSvc mySearchDao;
 
-    @Autowired protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+	@Autowired protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 
-    @Autowired
-    @Qualifier("myStructureDefinitionDaoDstu2")
-    protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	@Autowired
+	@Qualifier("myStructureDefinitionDaoDstu2")
+	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 
-    @Autowired
-    @Qualifier("mySubscriptionDaoDstu2")
-    protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+	@Autowired
+	@Qualifier("mySubscriptionDaoDstu2")
+	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
 
-    @Autowired
-    @Qualifier("mySubstanceDaoDstu2")
-    protected IFhirResourceDao<Substance> mySubstanceDao;
+	@Autowired
+	@Qualifier("mySubstanceDaoDstu2")
+	protected IFhirResourceDao<Substance> mySubstanceDao;
 
-    @Autowired protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
-    @Autowired protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
-    @Autowired protected IResourceLinkDao myResourceLinkDao;
-    @Autowired protected IResourceTableDao myResourceTableDao;
+	@Autowired protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired protected IResourceLinkDao myResourceLinkDao;
+	@Autowired protected IResourceTableDao myResourceTableDao;
 
-    @Autowired
-    @Qualifier("mySystemDaoDstu2")
-    protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	@Autowired
+	@Qualifier("mySystemDaoDstu2")
+	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 
-    @Autowired
-    @Qualifier("mySystemProviderDstu2")
-    protected JpaSystemProvider mySystemProvider;
+	@Autowired
+	@Qualifier("mySystemProviderDstu2")
+	protected JpaSystemProvider mySystemProvider;
 
-    @Autowired protected PlatformTransactionManager myTxManager;
+	@Autowired protected PlatformTransactionManager myTxManager;
 
-    @Autowired
-    @Qualifier("myValueSetDaoDstu2")
-    protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	@Autowired
+	@Qualifier("myValueSetDaoDstu2")
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
-    @Autowired protected SubscriptionLoader mySubscriptionLoader;
-    @Autowired private IBulkDataExportJobSchedulingHelper myBulkExportJobSchedulingHelper;
-    @Autowired private ValidationSupportChain myJpaValidationSupportChain;
+	@Autowired protected SubscriptionLoader mySubscriptionLoader;
+	@Autowired private IBulkDataExportJobSchedulingHelper myBulkExportJobSchedulingHelper;
+	@Autowired private ValidationSupportChain myJpaValidationSupportChain;
 
-    @RegisterExtension
-    private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
-            new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
+	@RegisterExtension
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
+				new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
 
-    @BeforeEach
-    public void beforeFlushFT() {
-        purgeHibernateSearch(myEntityManager);
+	@BeforeEach
+	public void beforeFlushFT() {
+		purgeHibernateSearch(myEntityManager);
 
-        myStorageSettings.setSchedulingDisabled(true);
-        myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-    }
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+	}
 
-    @BeforeEach
-    @Transactional()
-    public void beforePurgeDatabase() {
-        purgeDatabase(
-                myStorageSettings,
-                mySystemDao,
-                myResourceReindexingSvc,
-                mySearchCoordinatorSvc,
-                mySearchParamRegistry,
-                myBulkExportJobSchedulingHelper);
-    }
+	@BeforeEach
+	@Transactional()
+	public void beforePurgeDatabase() {
+		purgeDatabase(
+					myStorageSettings,
+					mySystemDao,
+					myResourceReindexingSvc,
+					mySearchCoordinatorSvc,
+					mySearchParamRegistry,
+					myBulkExportJobSchedulingHelper);
+	}
 
-    @BeforeEach
-    public void beforeResetConfig() {
-        myStorageSettings.setAllowExternalReferences(
-                new JpaStorageSettings().isAllowExternalReferences());
-    }
+	@BeforeEach
+	public void beforeResetConfig() {
+		myStorageSettings.setAllowExternalReferences(
+					new JpaStorageSettings().isAllowExternalReferences());
+	}
 
-    @Override
-    public FhirContext getFhirContext() {
-        return myFhirContext;
-    }
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
 
-    @Override
-    protected PlatformTransactionManager getTxManager() {
-        return myTxManager;
-    }
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
 
-    @Override
-    public TransactionTemplate newTxTemplate() {
-        TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-        retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        retVal.afterPropertiesSet();
-        return retVal;
-    }
+	@Override
+	public TransactionTemplate newTxTemplate() {
+		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		retVal.afterPropertiesSet();
+		return retVal;
+	}
 
-    @AfterEach
-    public void afterEachClearCaches() {
-        myJpaValidationSupportChain.invalidateCaches();
-    }
+	@AfterEach
+	public void afterEachClearCaches() {
+		myJpaValidationSupportChain.invalidateCaches();
+	}
 
-    protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-        List<IIdType> retVal = new ArrayList<>();
-        for (Bundle.Entry next : theFound.getEntry()) {
-            retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-        }
-        return retVal;
-    }
+	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<>();
+		for (Bundle.Entry next : theFound.getEntry()) {
+				retVal.add(next.getResource().getId().toUnqualifiedVersionless());
+		}
+		return retVal;
+	}
 
-    public void assertHasErrors(OperationOutcome theOperationOutcome) {
-        assertTrue(
-                hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
-    }
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertTrue(
+					hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+	}
 
-    public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
-        assertFalse(
-                hasValidationErrors(theOperationOutcome),
-                "Expected no validation errors, found some");
-    }
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertFalse(
+					hasValidationErrors(theOperationOutcome),
+					"Expected no validation errors, found some");
+	}
 
-    private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
-        return theOperationOutcome.getIssue().stream()
-                .anyMatch(t -> "error".equals(t.getSeverity()));
-    }
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream()
+					.anyMatch(t -> "error".equals(t.getSeverity()));
+	}
 }

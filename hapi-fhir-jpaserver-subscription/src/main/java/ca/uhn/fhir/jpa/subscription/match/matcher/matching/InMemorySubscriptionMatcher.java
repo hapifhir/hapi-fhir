@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -30,30 +26,33 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
-    private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);
 
-    @Autowired private FhirContext myContext;
-    @Autowired private SearchParamMatcher mySearchParamMatcher;
+	@Autowired private FhirContext myContext;
+	@Autowired private SearchParamMatcher mySearchParamMatcher;
 
-    @Override
-    public InMemoryMatchResult match(
-            CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-        try {
-            return mySearchParamMatcher.match(
-                    theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
-        } catch (Exception e) {
-            ourLog.error("Failure in in-memory matcher", e);
-            throw new InternalErrorException(
-                    Msg.code(1)
-                            + "Failure performing memory-match for resource ID["
-                            + theMsg.getPayloadId(myContext)
-                            + "] for subscription ID["
-                            + theSubscription.getIdElementString()
-                            + "]: "
-                            + e.getMessage(),
-                    e);
-        }
-    }
+	@Override
+	public InMemoryMatchResult match(
+				CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+		try {
+				return mySearchParamMatcher.match(
+						theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
+		} catch (Exception e) {
+				ourLog.error("Failure in in-memory matcher", e);
+				throw new InternalErrorException(
+						Msg.code(1)
+									+ "Failure performing memory-match for resource ID["
+									+ theMsg.getPayloadId(myContext)
+									+ "] for subscription ID["
+									+ theSubscription.getIdElementString()
+									+ "]: "
+									+ e.getMessage(),
+						e);
+		}
+	}
 }

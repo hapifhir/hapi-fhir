@@ -19,30 +19,29 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
-
 public class JpaResourceDaoStructureDefinition<T extends IBaseResource>
-        extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoStructureDefinition<T> {
+		extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoStructureDefinition<T> {
 
-    @Autowired private IValidationSupport myValidationSupport;
+	@Autowired private IValidationSupport myValidationSupport;
 
-    @Override
-    public T generateSnapshot(T theInput, String theUrl, String theWebUrl, String theName) {
-        T output =
-                (T)
-                        myValidationSupport.generateSnapshot(
-                                new ValidationSupportContext(myValidationSupport),
-                                theInput,
-                                theUrl,
-                                theWebUrl,
-                                theName);
-        Validate.notNull(output);
-        return output;
-    }
+	@Override
+	public T generateSnapshot(T theInput, String theUrl, String theWebUrl, String theName) {
+		T output =
+					(T)
+								myValidationSupport.generateSnapshot(
+										new ValidationSupportContext(myValidationSupport),
+										theInput,
+										theUrl,
+										theWebUrl,
+										theName);
+		Validate.notNull(output);
+		return output;
+	}
 }

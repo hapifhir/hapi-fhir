@@ -19,24 +19,23 @@
  */
 package ca.uhn.fhir.jpa.validation;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.validation.IResourceLoader;
-
 @Service
 public class ResourceLoaderImpl implements IResourceLoader {
-    @Autowired DaoRegistry myDaoRegistry;
+	@Autowired DaoRegistry myDaoRegistry;
 
-    @Override
-    public <T extends IBaseResource> T load(Class<T> theType, IIdType theId)
-            throws ResourceNotFoundException {
-        SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
-        return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
-    }
+	@Override
+	public <T extends IBaseResource> T load(Class<T> theType, IIdType theId)
+				throws ResourceNotFoundException {
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
+		return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
+	}
 }

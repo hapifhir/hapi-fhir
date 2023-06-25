@@ -19,74 +19,74 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.rest.api.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import ca.uhn.fhir.rest.api.Constants;
-
 /** Modifiers for {@link TokenParam} */
 public enum TokenParamModifier {
-    /** :above */
-    ABOVE(":above"),
+	/** :above */
+	ABOVE(":above"),
 
-    /** :above */
-    BELOW(":below"),
+	/** :above */
+	BELOW(":below"),
 
-    /** :in */
-    IN(":in"),
+	/** :in */
+	IN(":in"),
 
-    /** :not */
-    NOT(":not"),
+	/** :not */
+	NOT(":not"),
 
-    /** :not-in */
-    NOT_IN(":not-in"),
+	/** :not-in */
+	NOT_IN(":not-in"),
 
-    /** :text */
-    TEXT(Constants.PARAMQUALIFIER_TOKEN_TEXT),
+	/** :text */
+	TEXT(Constants.PARAMQUALIFIER_TOKEN_TEXT),
 
-    /** :of-type */
-    OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+	/** :of-type */
+	OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
 
-    private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
+	private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
 
-    static {
-        Map<String, TokenParamModifier> valueToEnum = new HashMap<String, TokenParamModifier>();
-        for (TokenParamModifier next : values()) {
-            valueToEnum.put(next.getValue(), next);
-        }
-        VALUE_TO_ENUM = valueToEnum;
-    }
+	static {
+		Map<String, TokenParamModifier> valueToEnum = new HashMap<String, TokenParamModifier>();
+		for (TokenParamModifier next : values()) {
+				valueToEnum.put(next.getValue(), next);
+		}
+		VALUE_TO_ENUM = valueToEnum;
+	}
 
-    private final String myValue;
+	private final String myValue;
 
-    private TokenParamModifier(String theValue) {
-        myValue = theValue;
-    }
+	private TokenParamModifier(String theValue) {
+		myValue = theValue;
+	}
 
-    public String getValue() {
-        return myValue;
-    }
+	public String getValue() {
+		return myValue;
+	}
 
-    /**
-     * The modifier without the :
-     *
-     * @return the string after the leading :
-     */
-    public String getBareModifier() {
-        return myValue.substring(1);
-    }
+	/**
+	* The modifier without the :
+	*
+	* @return the string after the leading :
+	*/
+	public String getBareModifier() {
+		return myValue.substring(1);
+	}
 
-    public static TokenParamModifier forValue(String theValue) {
-        return VALUE_TO_ENUM.get(theValue);
-    }
+	public static TokenParamModifier forValue(String theValue) {
+		return VALUE_TO_ENUM.get(theValue);
+	}
 
-    public boolean isNegative() {
-        switch (this) {
-            case NOT:
-            case NOT_IN:
-                return true;
-            default:
-                return false;
-        }
-    }
+	public boolean isNegative() {
+		switch (this) {
+				case NOT:
+				case NOT_IN:
+					return true;
+				default:
+					return false;
+		}
+	}
 }

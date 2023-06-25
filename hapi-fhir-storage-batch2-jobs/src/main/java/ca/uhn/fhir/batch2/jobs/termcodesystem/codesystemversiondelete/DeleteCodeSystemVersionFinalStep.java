@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -31,30 +29,32 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 
+import javax.annotation.Nonnull;
+
 public class DeleteCodeSystemVersionFinalStep
-        implements ILastJobStepWorker<
-                TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
+		implements ILastJobStepWorker<
+					TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
-    private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
-    public DeleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
-        myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
-    }
+	public DeleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
-    @Nonnull
-    @Override
-    public RunOutcome run(
-            @Nonnull
-                    StepExecutionDetails<
-                                    TermCodeSystemDeleteVersionJobParameters,
-                                    CodeSystemVersionPIDResult>
-                            theStepExecutionDetails,
-            @Nonnull IJobDataSink<VoidModel> theDataSink)
-            throws JobExecutionFailedException {
-        long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
+	@Nonnull
+	@Override
+	public RunOutcome run(
+				@Nonnull
+						StepExecutionDetails<
+												TermCodeSystemDeleteVersionJobParameters,
+												CodeSystemVersionPIDResult>
+									theStepExecutionDetails,
+				@Nonnull IJobDataSink<VoidModel> theDataSink)
+				throws JobExecutionFailedException {
+		long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
-        myTermCodeSystemSvc.deleteCodeSystemVersion(versionPid);
+		myTermCodeSystemSvc.deleteCodeSystemVersion(versionPid);
 
-        return RunOutcome.SUCCESS;
-    }
+		return RunOutcome.SUCCESS;
+	}
 }

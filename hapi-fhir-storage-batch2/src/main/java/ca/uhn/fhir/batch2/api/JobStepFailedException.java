@@ -27,8 +27,8 @@ package ca.uhn.fhir.batch2.api;
  */
 public class JobStepFailedException extends RuntimeException {
 
-    /** Constructor */
-    public JobStepFailedException(String theMessage, Throwable theCause) {
-        super(theMessage, theCause);
-    }
+	/** Constructor */
+	public JobStepFailedException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 }

@@ -19,15 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
+import java.util.Map;
 
 import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR;
 
@@ -43,47 +42,47 @@ import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TER
  */
 public class ResponseTerminologyTranslationInterceptor extends BaseResponseTerminologyInterceptor {
 
-    private final ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	private final ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
-    /**
-     * Constructor
-     *
-     * @param theValidationSupport The validation support module
-     */
-    public ResponseTerminologyTranslationInterceptor(
-            IValidationSupport theValidationSupport,
-            ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
-        super(theValidationSupport);
-        myResponseTerminologyTranslationSvc = theResponseTerminologyTranslationSvc;
-    }
+	/**
+	* Constructor
+	*
+	* @param theValidationSupport The validation support module
+	*/
+	public ResponseTerminologyTranslationInterceptor(
+				IValidationSupport theValidationSupport,
+				ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		super(theValidationSupport);
+		myResponseTerminologyTranslationSvc = theResponseTerminologyTranslationSvc;
+	}
 
-    /**
-     * Adds a mapping specification using only a source and target CodeSystem URL. Any mappings
-     * specified using this URL
-     *
-     * @param theSourceCodeSystemUrl The source CodeSystem URL
-     * @param theTargetCodeSystemUrl The target CodeSystem URL
-     */
-    public void addMappingSpecification(
-            String theSourceCodeSystemUrl, String theTargetCodeSystemUrl) {
-        myResponseTerminologyTranslationSvc.addMappingSpecification(
-                theSourceCodeSystemUrl, theTargetCodeSystemUrl);
-    }
+	/**
+	* Adds a mapping specification using only a source and target CodeSystem URL. Any mappings
+	* specified using this URL
+	*
+	* @param theSourceCodeSystemUrl The source CodeSystem URL
+	* @param theTargetCodeSystemUrl The target CodeSystem URL
+	*/
+	public void addMappingSpecification(
+				String theSourceCodeSystemUrl, String theTargetCodeSystemUrl) {
+		myResponseTerminologyTranslationSvc.addMappingSpecification(
+					theSourceCodeSystemUrl, theTargetCodeSystemUrl);
+	}
 
-    /** Clear all mapping specifications */
-    public void clearMappingSpecifications() {
-        myResponseTerminologyTranslationSvc.clearMappingSpecifications();
-    }
+	/** Clear all mapping specifications */
+	public void clearMappingSpecifications() {
+		myResponseTerminologyTranslationSvc.clearMappingSpecifications();
+	}
 
-    public Map<String, String> getMappingSpecifications() {
-        return myResponseTerminologyTranslationSvc.getMappingSpecifications();
-    }
+	public Map<String, String> getMappingSpecifications() {
+		return myResponseTerminologyTranslationSvc.getMappingSpecifications();
+	}
 
-    @Hook(
-            value = Pointcut.SERVER_OUTGOING_RESPONSE,
-            order = RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR)
-    public void handleResource(RequestDetails theRequestDetails, IBaseResource theResource) {
-        List<IBaseResource> resources = toListForProcessing(theRequestDetails, theResource);
-        myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(resources);
-    }
+	@Hook(
+				value = Pointcut.SERVER_OUTGOING_RESPONSE,
+				order = RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR)
+	public void handleResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		List<IBaseResource> resources = toListForProcessing(theRequestDetails, theResource);
+		myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(resources);
+	}
 }

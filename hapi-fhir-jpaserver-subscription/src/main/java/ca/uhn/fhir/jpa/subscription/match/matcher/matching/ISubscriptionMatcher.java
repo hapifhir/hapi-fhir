@@ -24,5 +24,5 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 public interface ISubscriptionMatcher {
-    InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
+	InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
 }

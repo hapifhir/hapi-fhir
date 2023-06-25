@@ -38,30 +38,30 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class AuthenticationException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public AuthenticationException() {
-        super(STATUS_CODE, "Client unauthorized");
-    }
+	public AuthenticationException() {
+		super(STATUS_CODE, "Client unauthorized");
+	}
 
-    public AuthenticationException(String theMessage) {
-        super(STATUS_CODE, theMessage);
-    }
+	public AuthenticationException(String theMessage) {
+		super(STATUS_CODE, theMessage);
+	}
 
-    public AuthenticationException(String theMessage, Throwable theCause) {
-        super(STATUS_CODE, theMessage, theCause);
-    }
+	public AuthenticationException(String theMessage, Throwable theCause) {
+		super(STATUS_CODE, theMessage, theCause);
+	}
 
-    /**
-     * Adds a <code>WWW-Authenticate</code> header to the response, of the form:<br>
-     * <code>WWW-Authenticate: Basic realm="theRealm"</code>
-     *
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public AuthenticationException addAuthenticateHeaderForRealm(String theRealm) {
-        addResponseHeader("WWW-Authenticate", "Basic realm=\"" + theRealm + "\"");
-        return this;
-    }
+	/**
+	* Adds a <code>WWW-Authenticate</code> header to the response, of the form:<br>
+	* <code>WWW-Authenticate: Basic realm="theRealm"</code>
+	*
+	* @return Returns a reference to <code>this</code> for easy method chaining
+	*/
+	public AuthenticationException addAuthenticateHeaderForRealm(String theRealm) {
+		addResponseHeader("WWW-Authenticate", "Basic realm=\"" + theRealm + "\"");
+		return this;
+	}
 }

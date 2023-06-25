@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.util.TaskChunker;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.util.TaskChunker;
 
 /**
  * As always, Oracle can't handle things that other databases don't mind.. In this case it doesn't
@@ -33,7 +33,7 @@ import ca.uhn.fhir.util.TaskChunker;
  */
 public class QueryChunker<T> extends TaskChunker<T> {
 
-    public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
-        chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
-    }
+	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
+		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
+	}
 }

@@ -19,102 +19,102 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.annotation.Nullable;
+
 public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
-    private ColumnTypeEnum myColumnType;
-    private Boolean myNullable;
-    private Long myColumnLength;
+	private ColumnTypeEnum myColumnType;
+	private Boolean myNullable;
+	private Long myColumnLength;
 
-    /** Constructor */
-    public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	/** Constructor */
+	public BaseTableColumnTypeTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    public ColumnTypeEnum getColumnType() {
-        return myColumnType;
-    }
+	public ColumnTypeEnum getColumnType() {
+		return myColumnType;
+	}
 
-    public BaseTableColumnTask setColumnType(ColumnTypeEnum theColumnType) {
-        myColumnType = theColumnType;
-        return this;
-    }
+	public BaseTableColumnTask setColumnType(ColumnTypeEnum theColumnType) {
+		myColumnType = theColumnType;
+		return this;
+	}
 
-    @Override
-    public void validate() {
-        super.validate();
-        Validate.notNull(myColumnType);
-        Validate.notNull(myNullable);
+	@Override
+	public void validate() {
+		super.validate();
+		Validate.notNull(myColumnType);
+		Validate.notNull(myNullable);
 
-        if (myColumnType == ColumnTypeEnum.STRING) {
-            Validate.notNull(
-                    myColumnLength,
-                    "No length specified for "
-                            + ColumnTypeEnum.STRING
-                            + " column "
-                            + getColumnName());
-        } else {
-            Validate.isTrue(myColumnLength == null);
-        }
-    }
+		if (myColumnType == ColumnTypeEnum.STRING) {
+				Validate.notNull(
+						myColumnLength,
+						"No length specified for "
+									+ ColumnTypeEnum.STRING
+									+ " column "
+									+ getColumnName());
+		} else {
+				Validate.isTrue(myColumnLength == null);
+		}
+	}
 
-    protected String getSqlType() {
-        return getSqlType(getColumnLength());
-    }
+	protected String getSqlType() {
+		return getSqlType(getColumnLength());
+	}
 
-    protected String getSqlType(Long theColumnLength) {
-        return getSqlType(myColumnType, theColumnLength);
-    }
+	protected String getSqlType(Long theColumnLength) {
+		return getSqlType(myColumnType, theColumnLength);
+	}
 
-    public boolean isNullable() {
-        return myNullable;
-    }
+	public boolean isNullable() {
+		return myNullable;
+	}
 
-    public BaseTableColumnTask setNullable(boolean theNullable) {
-        myNullable = theNullable;
-        return this;
-    }
+	public BaseTableColumnTask setNullable(boolean theNullable) {
+		myNullable = theNullable;
+		return this;
+	}
 
-    protected String getSqlNotNull() {
-        return isNullable() ? " null " : " not null";
-    }
+	protected String getSqlNotNull() {
+		return isNullable() ? " null " : " not null";
+	}
 
-    public Long getColumnLength() {
-        return myColumnLength;
-    }
+	public Long getColumnLength() {
+		return myColumnLength;
+	}
 
-    public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
-        myColumnLength = theColumnLength;
-        return this;
-    }
+	public BaseTableColumnTypeTask setColumnLength(long theColumnLength) {
+		myColumnLength = theColumnLength;
+		return this;
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        super.generateHashCode(theBuilder);
-        theBuilder.append(getColumnTypeName(myColumnType));
-        theBuilder.append(myNullable);
-        theBuilder.append(myColumnLength);
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(getColumnTypeName(myColumnType));
+		theBuilder.append(myNullable);
+		theBuilder.append(myColumnLength);
+	}
 
-    @Override
-    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-        BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
-        super.generateEquals(theBuilder, otherObject);
-        theBuilder.append(
-                getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));
-        theBuilder.append(myNullable, otherObject.myNullable);
-        theBuilder.append(myColumnLength, otherObject.myColumnLength);
-    }
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableColumnTypeTask otherObject = (BaseTableColumnTypeTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(
+					getColumnTypeName(myColumnType), getColumnTypeName(otherObject.myColumnType));
+		theBuilder.append(myNullable, otherObject.myNullable);
+		theBuilder.append(myColumnLength, otherObject.myColumnLength);
+	}
 
-    @Nullable
-    private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
-        if (theColumnType == null) {
-            return null;
-        }
-        return myColumnType.name();
-    }
+	@Nullable
+	private Object getColumnTypeName(ColumnTypeEnum theColumnType) {
+		if (theColumnType == null) {
+				return null;
+		}
+		return myColumnType.name();
+	}
 }

@@ -19,34 +19,33 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.List;
-
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import java.util.List;
 
 public interface IResourceLinkDao
-        extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
 
-    @Modifying
-    @Query("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
-    void deleteByResourceId(@Param("resId") Long theResourcePid);
+	@Modifying
+	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
+	void deleteByResourceId(@Param("resId") Long theResourcePid);
 
-    @Query("SELECT t FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
-    List<ResourceLink> findAllForSourceResourceId(@Param("resId") Long thePatientId);
+	@Query("SELECT t FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")
+	List<ResourceLink> findAllForSourceResourceId(@Param("resId") Long thePatientId);
 
-    @Query("SELECT t FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
-    List<ResourceLink> findWithTargetPidIn(@Param("resIds") List<Long> thePids);
+	@Query("SELECT t FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
+	List<ResourceLink> findWithTargetPidIn(@Param("resIds") List<Long> thePids);
 
-    /**
-     * Loads a collection of ResourceLink entities by PID, but also eagerly fetches the target
-     * resources and their forced IDs
-     */
-    @Query(
-            "SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr LEFT JOIN FETCH"
-                    + " tr.myForcedId WHERE t.myId in :pids")
-    List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
+	/**
+	* Loads a collection of ResourceLink entities by PID, but also eagerly fetches the target
+	* resources and their forced IDs
+	*/
+	@Query(
+				"SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr LEFT JOIN FETCH"
+						+ " tr.myForcedId WHERE t.myId in :pids")
+	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
 }

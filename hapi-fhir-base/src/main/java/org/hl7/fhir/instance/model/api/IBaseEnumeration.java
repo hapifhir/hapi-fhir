@@ -21,7 +21,7 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseEnumeration<T extends Enum<?>> extends IPrimitiveType<T> {
 
-    default IBaseEnumFactory<T> getEnumFactory() {
-        return null;
-    }
+	default IBaseEnumFactory<T> getEnumFactory() {
+		return null;
+	}
 }

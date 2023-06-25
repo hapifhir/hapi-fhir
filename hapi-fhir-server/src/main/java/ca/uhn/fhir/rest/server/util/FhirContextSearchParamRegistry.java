@@ -19,6 +19,15 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
+import ca.uhn.fhir.context.ComboSearchParamType;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,97 +35,87 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.context.ComboSearchParamType;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.i18n.Msg;
-
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
-    private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
-    private final FhirContext myCtx;
+	private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
+	private final FhirContext myCtx;
 
-    /** Constructor */
-    public FhirContextSearchParamRegistry(@Nonnull FhirContext theCtx) {
-        Validate.notNull(theCtx, "theCtx must not be null");
-        myCtx = theCtx;
-    }
+	/** Constructor */
+	public FhirContextSearchParamRegistry(@Nonnull FhirContext theCtx) {
+		Validate.notNull(theCtx, "theCtx must not be null");
+		myCtx = theCtx;
+	}
 
-    @Override
-    public void forceRefresh() {
-        // nothing
-    }
+	@Override
+	public void forceRefresh() {
+		// nothing
+	}
 
-    @Override
-    public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-        return getActiveSearchParams(theResourceName).get(theParamName);
-    }
+	@Override
+	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+		return getActiveSearchParams(theResourceName).get(theParamName);
+	}
 
-    @Override
-    public ResourceSearchParams getActiveSearchParams(String theResourceName) {
-        ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
-        RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
-        for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-            retval.put(nextSp.getName(), nextSp);
-        }
+	@Override
+	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
+		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
+		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				retval.put(nextSp.getName(), nextSp);
+		}
 
-        for (RuntimeSearchParam next : myExtraSearchParams) {
-            retval.put(next.getName(), next);
-        }
+		for (RuntimeSearchParam next : myExtraSearchParams) {
+				retval.put(next.getName(), next);
+		}
 
-        return retval;
-    }
+		return retval;
+	}
 
-    public void addSearchParam(RuntimeSearchParam theSearchParam) {
-        myExtraSearchParams.add(theSearchParam);
-    }
+	public void addSearchParam(RuntimeSearchParam theSearchParam) {
+		myExtraSearchParams.add(theSearchParam);
+	}
 
-    @Override
-    public List<RuntimeSearchParam> getActiveComboSearchParams(
-            String theResourceName, Set<String> theParamNames) {
-        throw new UnsupportedOperationException(Msg.code(2066));
-    }
+	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+				String theResourceName, Set<String> theParamNames) {
+		throw new UnsupportedOperationException(Msg.code(2066));
+	}
 
-    @Nullable
-    @Override
-    public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-        // simple implementation for test support
-        return myCtx.getResourceTypes().stream()
-                .flatMap(type -> getActiveSearchParams(type).values().stream())
-                .filter(rsp -> theUrl.equals(rsp.getUri()))
-                .findFirst()
-                .orElse(null);
-    }
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		// simple implementation for test support
+		return myCtx.getResourceTypes().stream()
+					.flatMap(type -> getActiveSearchParams(type).values().stream())
+					.filter(rsp -> theUrl.equals(rsp.getUri()))
+					.findFirst()
+					.orElse(null);
+	}
 
-    @Override
-    public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-        throw new UnsupportedOperationException(Msg.code(2068));
-    }
+	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		throw new UnsupportedOperationException(Msg.code(2068));
+	}
 
-    @Override
-    public List<RuntimeSearchParam> getActiveComboSearchParams(
-            String theResourceName, ComboSearchParamType theParamType) {
-        throw new UnsupportedOperationException(Msg.code(2209));
-    }
+	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+				String theResourceName, ComboSearchParamType theParamType) {
+		throw new UnsupportedOperationException(Msg.code(2209));
+	}
 
-    @Override
-    public Optional<RuntimeSearchParam> getActiveComboSearchParamById(
-            String theResourceName, IIdType theId) {
-        throw new UnsupportedOperationException(Msg.code(2211));
-    }
+	@Override
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(
+				String theResourceName, IIdType theId) {
+		throw new UnsupportedOperationException(Msg.code(2211));
+	}
 
-    @Override
-    public void requestRefresh() {
-        // nothing
-    }
+	@Override
+	public void requestRefresh() {
+		// nothing
+	}
 
-    @Override
-    public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
-        // nothing
-    }
+	@Override
+	public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
+		// nothing
+	}
 }

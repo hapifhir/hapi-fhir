@@ -29,65 +29,65 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SubscriptionQueryValidator {
-    private final DaoRegistry myDaoRegistry;
-    private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+	private final DaoRegistry myDaoRegistry;
+	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-    public SubscriptionQueryValidator(
-            DaoRegistry theDaoRegistry,
-            SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-        myDaoRegistry = theDaoRegistry;
-        mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
-    }
+	public SubscriptionQueryValidator(
+				DaoRegistry theDaoRegistry,
+				SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		myDaoRegistry = theDaoRegistry;
+		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+	}
 
-    public void validateCriteria(String theCriteria, String theFieldName) {
-        if (isBlank(theCriteria)) {
-            throw new UnprocessableEntityException(
-                    Msg.code(11) + theFieldName + " must be populated");
-        }
+	public void validateCriteria(String theCriteria, String theFieldName) {
+		if (isBlank(theCriteria)) {
+				throw new UnprocessableEntityException(
+						Msg.code(11) + theFieldName + " must be populated");
+		}
 
-        SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria =
-                SubscriptionCriteriaParser.parse(theCriteria);
-        if (parsedCriteria == null) {
-            throw new UnprocessableEntityException(
-                    Msg.code(12) + theFieldName + " can not be parsed");
-        }
+		SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria =
+					SubscriptionCriteriaParser.parse(theCriteria);
+		if (parsedCriteria == null) {
+				throw new UnprocessableEntityException(
+						Msg.code(12) + theFieldName + " can not be parsed");
+		}
 
-        if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
-            return;
-        }
+		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
+				return;
+		}
 
-        for (String next : parsedCriteria.getApplicableResourceTypes()) {
-            if (!myDaoRegistry.isResourceTypeSupported(next)) {
-                throw new UnprocessableEntityException(
-                        Msg.code(13)
-                                + theFieldName
-                                + " contains invalid/unsupported resource type: "
-                                + next);
-            }
-        }
+		for (String next : parsedCriteria.getApplicableResourceTypes()) {
+				if (!myDaoRegistry.isResourceTypeSupported(next)) {
+					throw new UnprocessableEntityException(
+								Msg.code(13)
+										+ theFieldName
+										+ " contains invalid/unsupported resource type: "
+										+ next);
+				}
+		}
 
-        if (parsedCriteria.getType() != SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-            return;
-        }
+		if (parsedCriteria.getType() != SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
+				return;
+		}
 
-        int sep = theCriteria.indexOf('?');
-        if (sep <= 1) {
-            throw new UnprocessableEntityException(
-                    Msg.code(14)
-                            + theFieldName
-                            + " must be in the form \"{Resource Type}?[params]\"");
-        }
+		int sep = theCriteria.indexOf('?');
+		if (sep <= 1) {
+				throw new UnprocessableEntityException(
+						Msg.code(14)
+									+ theFieldName
+									+ " must be in the form \"{Resource Type}?[params]\"");
+		}
 
-        String resType = theCriteria.substring(0, sep);
-        if (resType.contains("/")) {
-            throw new UnprocessableEntityException(
-                    Msg.code(15)
-                            + theFieldName
-                            + " must be in the form \"{Resource Type}?[params]\"");
-        }
-    }
+		String resType = theCriteria.substring(0, sep);
+		if (resType.contains("/")) {
+				throw new UnprocessableEntityException(
+						Msg.code(15)
+									+ theFieldName
+									+ " must be in the form \"{Resource Type}?[params]\"");
+		}
+	}
 
-    public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {
-        return mySubscriptionStrategyEvaluator.determineStrategy(theCriteriaString);
-    }
+	public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {
+		return mySubscriptionStrategyEvaluator.determineStrategy(theCriteriaString);
+	}
 }

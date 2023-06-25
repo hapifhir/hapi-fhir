@@ -21,6 +21,6 @@ package ca.uhn.fhir.rest.gclient;
 
 public interface IGetPageTyped<T> extends IClientExecutable<IGetPageTyped<T>, T> {
 
-    // nothing for now
+	// nothing for now
 
 }

@@ -19,40 +19,39 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import java.util.function.Function;
-
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import java.util.function.Function;
 
 @Configuration
 @Import(BaseClinicalReasoningConfig.class)
 public class CrDstu3Config {
 
-    @Bean
-    public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(
-            ApplicationContext theApplicationContext) {
-        return r -> {
-            var ms = theApplicationContext.getBean(MeasureService.class);
-            ms.setRequestDetails(r);
-            return ms;
-        };
-    }
+	@Bean
+	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(
+				ApplicationContext theApplicationContext) {
+		return r -> {
+				var ms = theApplicationContext.getBean(MeasureService.class);
+				ms.setRequestDetails(r);
+				return ms;
+		};
+	}
 
-    @Bean
-    @Scope("prototype")
-    public MeasureService dstu3measureService() {
-        return new MeasureService();
-    }
+	@Bean
+	@Scope("prototype")
+	public MeasureService dstu3measureService() {
+		return new MeasureService();
+	}
 
-    @Bean
-    public MeasureOperationsProvider dstu3measureOperationsProvider() {
-        return new MeasureOperationsProvider();
-    }
+	@Bean
+	public MeasureOperationsProvider dstu3measureOperationsProvider() {
+		return new MeasureOperationsProvider();
+	}
 }

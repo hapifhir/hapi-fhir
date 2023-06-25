@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.mail;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
@@ -35,110 +31,114 @@ import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+
 public class MailSvc implements IMailSvc {
-    private static final Logger ourLog = LoggerFactory.getLogger(MailSvc.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MailSvc.class);
 
-    private final MailConfig myMailConfig;
-    private final Mailer myMailer;
+	private final MailConfig myMailConfig;
+	private final Mailer myMailer;
 
-    public MailSvc(@Nonnull MailConfig theMailConfig) {
-        Validate.notNull(theMailConfig);
-        myMailConfig = theMailConfig;
-        myMailer = makeMailer(myMailConfig);
-    }
+	public MailSvc(@Nonnull MailConfig theMailConfig) {
+		Validate.notNull(theMailConfig);
+		myMailConfig = theMailConfig;
+		myMailer = makeMailer(myMailConfig);
+	}
 
-    @Override
-    public void sendMail(@Nonnull List<Email> theEmails) {
-        Validate.notNull(theEmails);
-        theEmails.forEach(
-                theEmail -> send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail)));
-    }
+	@Override
+	public void sendMail(@Nonnull List<Email> theEmails) {
+		Validate.notNull(theEmails);
+		theEmails.forEach(
+					theEmail -> send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail)));
+	}
 
-    @Override
-    public void sendMail(@Nonnull Email theEmail) {
-        send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail));
-    }
+	@Override
+	public void sendMail(@Nonnull Email theEmail) {
+		send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail));
+	}
 
-    @Override
-    public void sendMail(
-            @Nonnull Email theEmail,
-            @Nonnull Runnable theOnSuccess,
-            @Nonnull ExceptionConsumer theErrorHandler) {
-        send(theEmail, theOnSuccess, theErrorHandler);
-    }
+	@Override
+	public void sendMail(
+				@Nonnull Email theEmail,
+				@Nonnull Runnable theOnSuccess,
+				@Nonnull ExceptionConsumer theErrorHandler) {
+		send(theEmail, theOnSuccess, theErrorHandler);
+	}
 
-    private void send(
-            @Nonnull Email theEmail,
-            @Nonnull Runnable theOnSuccess,
-            @Nonnull ExceptionConsumer theErrorHandler) {
-        Validate.notNull(theEmail);
-        Validate.notNull(theOnSuccess);
-        Validate.notNull(theErrorHandler);
-        try {
-            final AsyncResponse asyncResponse = myMailer.sendMail(theEmail, true);
-            if (asyncResponse != null) {
-                asyncResponse.onSuccess(theOnSuccess);
-                asyncResponse.onException(theErrorHandler);
-            }
-        } catch (MailException e) {
-            theErrorHandler.accept(e);
-        }
-    }
+	private void send(
+				@Nonnull Email theEmail,
+				@Nonnull Runnable theOnSuccess,
+				@Nonnull ExceptionConsumer theErrorHandler) {
+		Validate.notNull(theEmail);
+		Validate.notNull(theOnSuccess);
+		Validate.notNull(theErrorHandler);
+		try {
+				final AsyncResponse asyncResponse = myMailer.sendMail(theEmail, true);
+				if (asyncResponse != null) {
+					asyncResponse.onSuccess(theOnSuccess);
+					asyncResponse.onException(theErrorHandler);
+				}
+		} catch (MailException e) {
+				theErrorHandler.accept(e);
+		}
+	}
 
-    @Nonnull
-    private Mailer makeMailer(@Nonnull MailConfig theMailConfig) {
-        ourLog.info(
-                "SMTP Mailer config Hostname:[{}] | Port:[{}] | Username:[{}] | TLS:[{}]",
-                theMailConfig.getSmtpHostname(),
-                theMailConfig.getSmtpPort(),
-                theMailConfig.getSmtpUsername(),
-                theMailConfig.isSmtpUseStartTLS());
-        return MailerBuilder.withSMTPServer(
-                        theMailConfig.getSmtpHostname(),
-                        theMailConfig.getSmtpPort(),
-                        theMailConfig.getSmtpUsername(),
-                        theMailConfig.getSmtpPassword())
-                .withTransportStrategy(
-                        theMailConfig.isSmtpUseStartTLS()
-                                ? TransportStrategy.SMTP_TLS
-                                : TransportStrategy.SMTP)
-                .buildMailer();
-    }
+	@Nonnull
+	private Mailer makeMailer(@Nonnull MailConfig theMailConfig) {
+		ourLog.info(
+					"SMTP Mailer config Hostname:[{}] | Port:[{}] | Username:[{}] | TLS:[{}]",
+					theMailConfig.getSmtpHostname(),
+					theMailConfig.getSmtpPort(),
+					theMailConfig.getSmtpUsername(),
+					theMailConfig.isSmtpUseStartTLS());
+		return MailerBuilder.withSMTPServer(
+								theMailConfig.getSmtpHostname(),
+								theMailConfig.getSmtpPort(),
+								theMailConfig.getSmtpUsername(),
+								theMailConfig.getSmtpPassword())
+					.withTransportStrategy(
+								theMailConfig.isSmtpUseStartTLS()
+										? TransportStrategy.SMTP_TLS
+										: TransportStrategy.SMTP)
+					.buildMailer();
+	}
 
-    @Nonnull
-    private String makeMessage(@Nonnull Email theEmail) {
-        return " with subject ["
-                + theEmail.getSubject()
-                + "] and recipients ["
-                + theEmail.getRecipients().stream()
-                        .map(Recipient::getAddress)
-                        .collect(Collectors.joining(","))
-                + "]";
-    }
+	@Nonnull
+	private String makeMessage(@Nonnull Email theEmail) {
+		return " with subject ["
+					+ theEmail.getSubject()
+					+ "] and recipients ["
+					+ theEmail.getRecipients().stream()
+								.map(Recipient::getAddress)
+								.collect(Collectors.joining(","))
+					+ "]";
+	}
 
-    private class OnSuccess implements Runnable {
-        private final Email myEmail;
+	private class OnSuccess implements Runnable {
+		private final Email myEmail;
 
-        private OnSuccess(@Nonnull Email theEmail) {
-            myEmail = theEmail;
-        }
+		private OnSuccess(@Nonnull Email theEmail) {
+				myEmail = theEmail;
+		}
 
-        @Override
-        public void run() {
-            ourLog.info("Email sent" + makeMessage(myEmail));
-        }
-    }
+		@Override
+		public void run() {
+				ourLog.info("Email sent" + makeMessage(myEmail));
+		}
+	}
 
-    private class ErrorHandler implements ExceptionConsumer {
-        private final Email myEmail;
+	private class ErrorHandler implements ExceptionConsumer {
+		private final Email myEmail;
 
-        private ErrorHandler(@Nonnull Email theEmail) {
-            myEmail = theEmail;
-        }
+		private ErrorHandler(@Nonnull Email theEmail) {
+				myEmail = theEmail;
+		}
 
-        @Override
-        public void accept(Exception t) {
-            ourLog.error("Email not sent" + makeMessage(myEmail), t);
-        }
-    }
+		@Override
+		public void accept(Exception t) {
+				ourLog.error("Email not sent" + makeMessage(myEmail), t);
+		}
+	}
 }

@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.mdm.rules.similarity;
 
-import javax.annotation.Nullable;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import info.debatty.java.stringsimilarity.Cosine;
@@ -30,44 +26,47 @@ import info.debatty.java.stringsimilarity.Jaccard;
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import info.debatty.java.stringsimilarity.SorensenDice;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import javax.annotation.Nullable;
 
 public enum MdmSimilarityEnum {
-    JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
-    COSINE(new HapiStringSimilarity(new Cosine())),
-    JACCARD(new HapiStringSimilarity(new Jaccard())),
-    LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
-    SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice()));
+	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
+	COSINE(new HapiStringSimilarity(new Cosine())),
+	JACCARD(new HapiStringSimilarity(new Jaccard())),
+	LEVENSCHTEIN(new HapiStringSimilarity(new NormalizedLevenshtein())),
+	SORENSEN_DICE(new HapiStringSimilarity(new SorensenDice()));
 
-    private final IMdmFieldSimilarity myMdmFieldSimilarity;
+	private final IMdmFieldSimilarity myMdmFieldSimilarity;
 
-    MdmSimilarityEnum(IMdmFieldSimilarity theMdmFieldSimilarity) {
-        myMdmFieldSimilarity = theMdmFieldSimilarity;
-    }
+	MdmSimilarityEnum(IMdmFieldSimilarity theMdmFieldSimilarity) {
+		myMdmFieldSimilarity = theMdmFieldSimilarity;
+	}
 
-    public MdmMatchEvaluation match(
-            FhirContext theFhirContext,
-            IBase theLeftBase,
-            IBase theRightBase,
-            boolean theExact,
-            @Nullable Double theThreshold) {
-        return matchBySimilarity(
-                myMdmFieldSimilarity,
-                theFhirContext,
-                theLeftBase,
-                theRightBase,
-                theExact,
-                theThreshold);
-    }
+	public MdmMatchEvaluation match(
+				FhirContext theFhirContext,
+				IBase theLeftBase,
+				IBase theRightBase,
+				boolean theExact,
+				@Nullable Double theThreshold) {
+		return matchBySimilarity(
+					myMdmFieldSimilarity,
+					theFhirContext,
+					theLeftBase,
+					theRightBase,
+					theExact,
+					theThreshold);
+	}
 
-    private MdmMatchEvaluation matchBySimilarity(
-            IMdmFieldSimilarity theSimilarity,
-            FhirContext theFhirContext,
-            IBase theLeftBase,
-            IBase theRightBase,
-            boolean theExact,
-            Double theThreshold) {
-        double similarityResult =
-                theSimilarity.similarity(theFhirContext, theLeftBase, theRightBase, theExact);
-        return new MdmMatchEvaluation(similarityResult >= theThreshold, similarityResult);
-    }
+	private MdmMatchEvaluation matchBySimilarity(
+				IMdmFieldSimilarity theSimilarity,
+				FhirContext theFhirContext,
+				IBase theLeftBase,
+				IBase theRightBase,
+				boolean theExact,
+				Double theThreshold) {
+		double similarityResult =
+					theSimilarity.similarity(theFhirContext, theLeftBase, theRightBase, theExact);
+		return new MdmMatchEvaluation(similarityResult >= theThreshold, similarityResult);
+	}
 }

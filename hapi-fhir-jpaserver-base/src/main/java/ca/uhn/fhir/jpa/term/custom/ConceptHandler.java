@@ -19,47 +19,46 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
-import java.util.Map;
-
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ConceptHandler implements IZipContentsHandlerCsv {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ConceptHandler.class);
-    public static final String CODE = "CODE";
-    public static final String DISPLAY = "DISPLAY";
-    private final Map<String, TermConcept> myCode2Concept;
+	private static final Logger ourLog = LoggerFactory.getLogger(ConceptHandler.class);
+	public static final String CODE = "CODE";
+	public static final String DISPLAY = "DISPLAY";
+	private final Map<String, TermConcept> myCode2Concept;
 
-    public ConceptHandler(Map<String, TermConcept> theCode2concept) {
-        myCode2Concept = theCode2concept;
-    }
+	public ConceptHandler(Map<String, TermConcept> theCode2concept) {
+		myCode2Concept = theCode2concept;
+	}
 
-    @Override
-    public void accept(CSVRecord theRecord) {
-        String code = trim(theRecord.get(CODE));
-        if (isNotBlank(code)) {
-            String display = trim(theRecord.get(DISPLAY));
+	@Override
+	public void accept(CSVRecord theRecord) {
+		String code = trim(theRecord.get(CODE));
+		if (isNotBlank(code)) {
+				String display = trim(theRecord.get(DISPLAY));
 
-            Validate.isTrue(
-                    !myCode2Concept.containsKey(code),
-                    "The code %s has appeared more than once",
-                    code);
+				Validate.isTrue(
+						!myCode2Concept.containsKey(code),
+						"The code %s has appeared more than once",
+						code);
 
-            TermConcept concept = TermLoaderSvcImpl.getOrCreateConcept(myCode2Concept, code);
-            concept.setCode(code);
-            concept.setDisplay(display);
+				TermConcept concept = TermLoaderSvcImpl.getOrCreateConcept(myCode2Concept, code);
+				concept.setCode(code);
+				concept.setDisplay(display);
 
-            myCode2Concept.put(code, concept);
-        }
-    }
+				myCode2Concept.put(code, concept);
+		}
+	}
 }

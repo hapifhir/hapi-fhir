@@ -35,13 +35,13 @@
 
 package ca.uhn.fhir.test.utilities;
 
-import java.text.MessageFormat;
-
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.MessageFormat;
 
 /**
  * This JUnit rule generates log messages to delineate the start and finish of a JUnit test case and
@@ -52,19 +52,19 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
-    @Override
-    public void afterEach(ExtensionContext context) {
-        final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-        logger.info(
-                MessageFormat.format(
-                        "Finished test case [{0}]", context.getTestMethod().get().getName()));
-    }
+	@Override
+	public void afterEach(ExtensionContext context) {
+		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
+		logger.info(
+					MessageFormat.format(
+								"Finished test case [{0}]", context.getTestMethod().get().getName()));
+	}
 
-    @Override
-    public void beforeEach(ExtensionContext context) {
-        final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-        logger.info(
-                MessageFormat.format(
-                        "Starting test case [{0}]", context.getTestMethod().get().getName()));
-    }
+	@Override
+	public void beforeEach(ExtensionContext context) {
+		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
+		logger.info(
+					MessageFormat.format(
+								"Starting test case [{0}]", context.getTestMethod().get().getName()));
+	}
 }

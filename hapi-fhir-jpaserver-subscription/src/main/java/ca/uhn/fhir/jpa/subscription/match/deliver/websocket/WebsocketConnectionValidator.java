@@ -19,54 +19,53 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import javax.annotation.Nonnull;
 
 public class WebsocketConnectionValidator {
-    private static Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);
+	private static Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);
 
-    @Autowired SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired SubscriptionRegistry mySubscriptionRegistry;
 
-    /** Constructor */
-    public WebsocketConnectionValidator() {
-        super();
-    }
+	/** Constructor */
+	public WebsocketConnectionValidator() {
+		super();
+	}
 
-    public WebsocketValidationResponse validate(@Nonnull IdType id) {
-        if (!id.hasIdPart() || !id.isIdPartValid()) {
-            return WebsocketValidationResponse.INVALID_RESPONSE(
-                    "Invalid bind request - No ID included: " + id.getValue());
-        }
+	public WebsocketValidationResponse validate(@Nonnull IdType id) {
+		if (!id.hasIdPart() || !id.isIdPartValid()) {
+				return WebsocketValidationResponse.INVALID_RESPONSE(
+						"Invalid bind request - No ID included: " + id.getValue());
+		}
 
-        if (!id.hasResourceType()) {
-            id = id.withResourceType("Subscription");
-        }
+		if (!id.hasResourceType()) {
+				id = id.withResourceType("Subscription");
+		}
 
-        ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
+		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
 
-        if (activeSubscription == null) {
-            return WebsocketValidationResponse.INVALID_RESPONSE(
-                    "Invalid bind request - Unknown subscription: " + id.getValue());
-        }
+		if (activeSubscription == null) {
+				return WebsocketValidationResponse.INVALID_RESPONSE(
+						"Invalid bind request - Unknown subscription: " + id.getValue());
+		}
 
-        if (activeSubscription.getSubscription().getChannelType()
-                != CanonicalSubscriptionChannelType.WEBSOCKET) {
-            return WebsocketValidationResponse.INVALID_RESPONSE(
-                    "Subscription "
-                            + id.getValue()
-                            + " is not a "
-                            + CanonicalSubscriptionChannelType.WEBSOCKET
-                            + " subscription");
-        }
+		if (activeSubscription.getSubscription().getChannelType()
+					!= CanonicalSubscriptionChannelType.WEBSOCKET) {
+				return WebsocketValidationResponse.INVALID_RESPONSE(
+						"Subscription "
+									+ id.getValue()
+									+ " is not a "
+									+ CanonicalSubscriptionChannelType.WEBSOCKET
+									+ " subscription");
+		}
 
-        return WebsocketValidationResponse.VALID_RESPONSE(activeSubscription);
-    }
+		return WebsocketValidationResponse.VALID_RESPONSE(activeSubscription);
+	}
 }

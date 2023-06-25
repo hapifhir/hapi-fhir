@@ -19,19 +19,18 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.opencds.cqf.cql.engine.exception.CqlException;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.opencds.cqf.cql.engine.exception.CqlException;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class represents clinical reasoning interceptor used for cql exception handling and logging
@@ -39,87 +38,87 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 @Interceptor
 public class CqlExceptionHandlingInterceptor {
 
-    @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-    public boolean handleException(
-            RequestDetails theRequestDetails,
-            BaseServerResponseException theException,
-            HttpServletRequest theServletRequest,
-            HttpServletResponse theServletResponse)
-            throws IOException {
+	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+	public boolean handleException(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				HttpServletRequest theServletRequest,
+				HttpServletResponse theServletResponse)
+				throws IOException {
 
-        CqlException cqlException = getCqlException(theException);
-        if (cqlException == null) {
-            return true;
-        }
+		CqlException cqlException = getCqlException(theException);
+		if (cqlException == null) {
+				return true;
+		}
 
-        IBaseOperationOutcome operationOutcome = theException.getOperationOutcome();
-        if (operationOutcome != null) {
-            String cqlMessage = this.getCqlMessage(cqlException);
-            switch (operationOutcome.getStructureFhirVersionEnum()) {
-                case DSTU3:
-                    updateOutcome(
-                            (org.hl7.fhir.dstu3.model.OperationOutcome) operationOutcome,
-                            cqlMessage);
-                    break;
-                case R4:
-                    updateOutcome(
-                            (org.hl7.fhir.r4.model.OperationOutcome) operationOutcome, cqlMessage);
-                    break;
-                case R5:
-                    updateOutcome(
-                            (org.hl7.fhir.r5.model.OperationOutcome) operationOutcome, cqlMessage);
-                    break;
-                default:
-                    break;
-            }
-        }
+		IBaseOperationOutcome operationOutcome = theException.getOperationOutcome();
+		if (operationOutcome != null) {
+				String cqlMessage = this.getCqlMessage(cqlException);
+				switch (operationOutcome.getStructureFhirVersionEnum()) {
+					case DSTU3:
+						updateOutcome(
+									(org.hl7.fhir.dstu3.model.OperationOutcome) operationOutcome,
+									cqlMessage);
+						break;
+					case R4:
+						updateOutcome(
+									(org.hl7.fhir.r4.model.OperationOutcome) operationOutcome, cqlMessage);
+						break;
+					case R5:
+						updateOutcome(
+									(org.hl7.fhir.r5.model.OperationOutcome) operationOutcome, cqlMessage);
+						break;
+					default:
+						break;
+				}
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    private void updateOutcome(
-            org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome, String theCqlCause) {
-        theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
-    }
+	private void updateOutcome(
+				org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
+	}
 
-    private void updateOutcome(
-            org.hl7.fhir.r4.model.OperationOutcome theOperationOutcome, String theCqlCause) {
-        theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
-    }
+	private void updateOutcome(
+				org.hl7.fhir.r4.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
+	}
 
-    private void updateOutcome(
-            org.hl7.fhir.r5.model.OperationOutcome theOperationOutcome, String theCqlCause) {
-        theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
-    }
+	private void updateOutcome(
+				org.hl7.fhir.r5.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
+	}
 
-    private String getCqlMessage(CqlException theCqlException) {
-        String message = theCqlException.getMessage();
+	private String getCqlMessage(CqlException theCqlException) {
+		String message = theCqlException.getMessage();
 
-        if (theCqlException.getSourceLocator() != null) {
-            message += "\nat CQL source location: " + theCqlException.getSourceLocator().toString();
-        }
+		if (theCqlException.getSourceLocator() != null) {
+				message += "\nat CQL source location: " + theCqlException.getSourceLocator().toString();
+		}
 
-        if (theCqlException.getCause() != null) {
-            message += "\ncaused by: " + theCqlException.getCause().getMessage();
-        }
+		if (theCqlException.getCause() != null) {
+				message += "\ncaused by: " + theCqlException.getCause().getMessage();
+		}
 
-        return message;
-    }
+		return message;
+	}
 
-    private CqlException getCqlException(BaseServerResponseException theException) {
-        if (theException.getCause() instanceof CqlException) {
-            return (CqlException) theException.getCause();
-        } else if (theException.getCause() instanceof InvocationTargetException) {
-            InvocationTargetException ite = (InvocationTargetException) theException.getCause();
-            if (ite.getCause() instanceof CqlException) {
-                return (CqlException) ite.getCause();
-            }
+	private CqlException getCqlException(BaseServerResponseException theException) {
+		if (theException.getCause() instanceof CqlException) {
+				return (CqlException) theException.getCause();
+		} else if (theException.getCause() instanceof InvocationTargetException) {
+				InvocationTargetException ite = (InvocationTargetException) theException.getCause();
+				if (ite.getCause() instanceof CqlException) {
+					return (CqlException) ite.getCause();
+				}
 
-            if (ite.getTargetException() instanceof CqlException) {
-                return (CqlException) ite.getTargetException();
-            }
-        }
+				if (ite.getTargetException() instanceof CqlException) {
+					return (CqlException) ite.getTargetException();
+				}
+		}
 
-        return null;
-    }
+		return null;
+	}
 }

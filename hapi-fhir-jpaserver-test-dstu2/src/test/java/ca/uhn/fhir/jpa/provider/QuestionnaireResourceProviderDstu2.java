@@ -5,8 +5,8 @@ import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 
 public class QuestionnaireResourceProviderDstu2 extends BaseJpaResourceProvider<Questionnaire> {
 
-    @Override
-    public Class<? extends IResource> getResourceType() {
-        return Questionnaire.class;
-    }
+	@Override
+	public Class<? extends IResource> getResourceType() {
+		return Questionnaire.class;
+	}
 }

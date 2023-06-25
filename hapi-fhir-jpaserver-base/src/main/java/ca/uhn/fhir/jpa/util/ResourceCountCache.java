@@ -19,102 +19,100 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.annotations.VisibleForTesting;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.time.DateUtils;
+import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ResourceCountCache implements IHasScheduledJobs {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ResourceCountCache.class);
-    private static Long ourNowForUnitTest;
-    private final Callable<Map<String, Long>> myFetcher;
-    private volatile long myCacheMillis;
-    private AtomicReference<Map<String, Long>> myCapabilityStatement = new AtomicReference<>();
-    private long myLastFetched;
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceCountCache.class);
+	private static Long ourNowForUnitTest;
+	private final Callable<Map<String, Long>> myFetcher;
+	private volatile long myCacheMillis;
+	private AtomicReference<Map<String, Long>> myCapabilityStatement = new AtomicReference<>();
+	private long myLastFetched;
 
-    /** Constructor */
-    public ResourceCountCache(Callable<Map<String, Long>> theFetcher) {
-        myFetcher = theFetcher;
-    }
+	/** Constructor */
+	public ResourceCountCache(Callable<Map<String, Long>> theFetcher) {
+		myFetcher = theFetcher;
+	}
 
-    public synchronized void clear() {
-        ourLog.info("Clearing cache");
-        myCapabilityStatement.set(null);
-        myLastFetched = 0;
-    }
+	public synchronized void clear() {
+		ourLog.info("Clearing cache");
+		myCapabilityStatement.set(null);
+		myLastFetched = 0;
+	}
 
-    public synchronized Map<String, Long> get() {
-        return myCapabilityStatement.get();
-    }
+	public synchronized Map<String, Long> get() {
+		return myCapabilityStatement.get();
+	}
 
-    private Map<String, Long> refresh() {
-        Map<String, Long> retVal;
-        try {
-            retVal = myFetcher.call();
-        } catch (Exception e) {
-            throw new InternalErrorException(Msg.code(799) + e);
-        }
+	private Map<String, Long> refresh() {
+		Map<String, Long> retVal;
+		try {
+				retVal = myFetcher.call();
+		} catch (Exception e) {
+				throw new InternalErrorException(Msg.code(799) + e);
+		}
 
-        myCapabilityStatement.set(retVal);
-        myLastFetched = now();
-        return retVal;
-    }
+		myCapabilityStatement.set(retVal);
+		myLastFetched = now();
+		return retVal;
+	}
 
-    public void setCacheMillis(long theCacheMillis) {
-        myCacheMillis = theCacheMillis;
-    }
+	public void setCacheMillis(long theCacheMillis) {
+		myCacheMillis = theCacheMillis;
+	}
 
-    public void update() {
-        if (myCacheMillis > 0) {
-            long now = now();
-            long expiry = now - myCacheMillis;
-            if (myLastFetched < expiry) {
-                refresh();
-            }
-        }
-    }
+	public void update() {
+		if (myCacheMillis > 0) {
+				long now = now();
+				long expiry = now - myCacheMillis;
+				if (myLastFetched < expiry) {
+					refresh();
+				}
+		}
+	}
 
-    @Override
-    public void scheduleJobs(ISchedulerService theSchedulerService) {
-        ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-        jobDetail.setId(getClass().getName());
-        jobDetail.setJobClass(Job.class);
-        theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
-    }
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(getClass().getName());
+		jobDetail.setJobClass(Job.class);
+		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+	}
 
-    public static class Job implements HapiJob {
-        @Autowired private ResourceCountCache myTarget;
+	public static class Job implements HapiJob {
+		@Autowired private ResourceCountCache myTarget;
 
-        @Override
-        public void execute(JobExecutionContext theContext) {
-            myTarget.update();
-        }
-    }
+		@Override
+		public void execute(JobExecutionContext theContext) {
+				myTarget.update();
+		}
+	}
 
-    private static long now() {
-        if (ourNowForUnitTest != null) {
-            return ourNowForUnitTest;
-        }
-        return System.currentTimeMillis();
-    }
+	private static long now() {
+		if (ourNowForUnitTest != null) {
+				return ourNowForUnitTest;
+		}
+		return System.currentTimeMillis();
+	}
 
-    @VisibleForTesting
-    static void setNowForUnitTest(Long theNowForUnitTest) {
-        ourNowForUnitTest = theNowForUnitTest;
-    }
+	@VisibleForTesting
+	static void setNowForUnitTest(Long theNowForUnitTest) {
+		ourNowForUnitTest = theNowForUnitTest;
+	}
 }

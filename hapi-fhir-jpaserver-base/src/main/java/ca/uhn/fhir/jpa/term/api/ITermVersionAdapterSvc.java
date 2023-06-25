@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.jpa.term.api;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
-
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * This interface is used to handle differences in versions of FHIR for the terminology server. It
@@ -32,14 +31,14 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  */
 public interface ITermVersionAdapterSvc {
 
-    default IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
-        return createOrUpdateCodeSystem(theCodeSystemResource, null);
-    }
+	default IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
+		return createOrUpdateCodeSystem(theCodeSystemResource, null);
+	}
 
-    IIdType createOrUpdateCodeSystem(
-            CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+	IIdType createOrUpdateCodeSystem(
+				CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
 
-    void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
+	void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 
-    void createOrUpdateValueSet(ValueSet theValueSet);
+	void createOrUpdateValueSet(ValueSet theValueSet);
 }

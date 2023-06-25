@@ -19,56 +19,56 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nonnull;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
 /** An empty resource pid list */
 public class EmptyResourcePidList implements IResourcePidList {
-    @Override
-    public RequestPartitionId getRequestPartitionId() {
-        return null;
-    }
+	@Override
+	public RequestPartitionId getRequestPartitionId() {
+		return null;
+	}
 
-    @Override
-    public Date getLastDate() {
-        return null;
-    }
+	@Override
+	public Date getLastDate() {
+		return null;
+	}
 
-    @Override
-    public int size() {
-        return 0;
-    }
+	@Override
+	public int size() {
+		return 0;
+	}
 
-    @Nonnull
-    @Override
-    public List<TypedResourcePid> getTypedResourcePids() {
-        return Collections.emptyList();
-    }
+	@Nonnull
+	@Override
+	public List<TypedResourcePid> getTypedResourcePids() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public String getResourceType(int i) {
-        throw new ArrayIndexOutOfBoundsException(
-                Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
-    }
+	@Override
+	public String getResourceType(int i) {
+		throw new ArrayIndexOutOfBoundsException(
+					Msg.code(2095) + "Attempting to get resource type from an empty resource pid list");
+	}
 
-    @Override
-    public List<IResourcePersistentId> getIds() {
-        return Collections.emptyList();
-    }
+	@Override
+	public List<IResourcePersistentId> getIds() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
+	@Override
+	public boolean isEmpty() {
+		return true;
+	}
 
-    @Override
-    public String toString() {
-        return "[empty]";
-    }
+	@Override
+	public String toString() {
+		return "[empty]";
+	}
 }

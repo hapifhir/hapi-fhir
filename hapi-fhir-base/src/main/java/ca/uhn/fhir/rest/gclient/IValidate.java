@@ -23,9 +23,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IValidate {
 
-    /** Use a resource as validate input */
-    IValidateUntyped resource(IBaseResource theResource);
+	/** Use a resource as validate input */
+	IValidateUntyped resource(IBaseResource theResource);
 
-    /** Use a raw resource as validate input */
-    IValidateUntyped resource(String theRawResource);
+	/** Use a raw resource as validate input */
+	IValidateUntyped resource(String theRawResource);
 }

@@ -19,104 +19,103 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import java.util.Map;
-
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincHandler implements IZipContentsHandlerCsv {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
-    private final Map<String, TermConcept> myCode2Concept;
-    private final TermCodeSystemVersion myCodeSystemVersion;
-    private final Map<String, CodeSystem.PropertyType> myPropertyNames;
-    private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
+	private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
+	private final Map<String, TermConcept> myCode2Concept;
+	private final TermCodeSystemVersion myCodeSystemVersion;
+	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
+	private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
 
-    public LoincHandler(
-            TermCodeSystemVersion theCodeSystemVersion,
-            Map<String, TermConcept> theCode2concept,
-            Map<String, CodeSystem.PropertyType> thePropertyNames,
-            Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
-        myCodeSystemVersion = theCodeSystemVersion;
-        myCode2Concept = theCode2concept;
-        myPropertyNames = thePropertyNames;
-        myPartTypeAndPartNameToPartNumber = thePartTypeAndPartNameToPartNumber;
-    }
+	public LoincHandler(
+				TermCodeSystemVersion theCodeSystemVersion,
+				Map<String, TermConcept> theCode2concept,
+				Map<String, CodeSystem.PropertyType> thePropertyNames,
+				Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
+		myCodeSystemVersion = theCodeSystemVersion;
+		myCode2Concept = theCode2concept;
+		myPropertyNames = thePropertyNames;
+		myPartTypeAndPartNameToPartNumber = thePartTypeAndPartNameToPartNumber;
+	}
 
-    @Override
-    public void accept(CSVRecord theRecord) {
-        String code = trim(theRecord.get("LOINC_NUM"));
-        if (isNotBlank(code)) {
-            String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
-            String shortName = trim(theRecord.get("SHORTNAME"));
-            String consumerName = trim(theRecord.get("CONSUMER_NAME"));
-            String display =
-                    TermLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
+	@Override
+	public void accept(CSVRecord theRecord) {
+		String code = trim(theRecord.get("LOINC_NUM"));
+		if (isNotBlank(code)) {
+				String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
+				String shortName = trim(theRecord.get("SHORTNAME"));
+				String consumerName = trim(theRecord.get("CONSUMER_NAME"));
+				String display =
+						TermLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
 
-            TermConcept concept = new TermConcept(myCodeSystemVersion, code);
-            concept.setDisplay(display);
+				TermConcept concept = new TermConcept(myCodeSystemVersion, code);
+				concept.setDisplay(display);
 
-            if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
-                concept.addDesignation().setUseDisplay("ShortName").setValue(shortName);
-            }
+				if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
+					concept.addDesignation().setUseDisplay("ShortName").setValue(shortName);
+				}
 
-            for (String nextPropertyName : myPropertyNames.keySet()) {
-                if (!theRecord.toMap().containsKey(nextPropertyName)) {
-                    continue;
-                }
+				for (String nextPropertyName : myPropertyNames.keySet()) {
+					if (!theRecord.toMap().containsKey(nextPropertyName)) {
+						continue;
+					}
 
-                CodeSystem.PropertyType nextPropertyType = myPropertyNames.get(nextPropertyName);
+					CodeSystem.PropertyType nextPropertyType = myPropertyNames.get(nextPropertyName);
 
-                String nextPropertyValue = theRecord.get(nextPropertyName);
-                if (isNotBlank(nextPropertyValue)) {
-                    nextPropertyValue = trim(nextPropertyValue);
+					String nextPropertyValue = theRecord.get(nextPropertyName);
+					if (isNotBlank(nextPropertyValue)) {
+						nextPropertyValue = trim(nextPropertyValue);
 
-                    switch (nextPropertyType) {
-                        case STRING:
-                            concept.addPropertyString(nextPropertyName, nextPropertyValue);
-                            ourLog.trace(
-                                    "Adding string property: {} to concept.code {}",
-                                    nextPropertyName,
-                                    concept.getCode());
-                            break;
+						switch (nextPropertyType) {
+								case STRING:
+									concept.addPropertyString(nextPropertyName, nextPropertyValue);
+									ourLog.trace(
+												"Adding string property: {} to concept.code {}",
+												nextPropertyName,
+												concept.getCode());
+									break;
 
-                        case CODING:
-                            // "Coding" property types are handled by loincCodingProperties,
-                            // partlink, hierarchy, RsnaPlaybook or DocumentOntology handlers
-                            break;
+								case CODING:
+									// "Coding" property types are handled by loincCodingProperties,
+									// partlink, hierarchy, RsnaPlaybook or DocumentOntology handlers
+									break;
 
-                        case DECIMAL:
-                        case CODE:
-                        case INTEGER:
-                        case BOOLEAN:
-                        case DATETIME:
-                        case NULL:
-                            throw new InternalErrorException(
-                                    Msg.code(915)
-                                            + "Don't know how to handle LOINC property of type: "
-                                            + nextPropertyType);
-                    }
-                }
-            }
+								case DECIMAL:
+								case CODE:
+								case INTEGER:
+								case BOOLEAN:
+								case DATETIME:
+								case NULL:
+									throw new InternalErrorException(
+												Msg.code(915)
+														+ "Don't know how to handle LOINC property of type: "
+														+ nextPropertyType);
+						}
+					}
+				}
 
-            Validate.isTrue(
-                    !myCode2Concept.containsKey(code),
-                    "The code %s has appeared more than once",
-                    code);
-            myCode2Concept.put(code, concept);
-        }
-    }
+				Validate.isTrue(
+						!myCode2Concept.containsKey(code),
+						"The code %s has appeared more than once",
+						code);
+				myCode2Concept.put(code, concept);
+		}
+	}
 }

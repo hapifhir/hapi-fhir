@@ -19,76 +19,75 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
-
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel
-        implements IChannelProducer, IChannelReceiver {
+		implements IChannelProducer, IChannelReceiver {
 
-    private final String myName;
-    private final Supplier<Integer> myQueueSizeSupplier;
+	private final String myName;
+	private final Supplier<Integer> myQueueSizeSupplier;
 
-    public LinkedBlockingChannel(
-            String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
-        super(theExecutor);
-        myName = theName;
-        myQueueSizeSupplier = theQueueSizeSupplier;
-    }
+	public LinkedBlockingChannel(
+				String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
+		super(theExecutor);
+		myName = theName;
+		myQueueSizeSupplier = theQueueSizeSupplier;
+	}
 
-    public int getQueueSizeForUnitTest() {
-        return defaultIfNull(myQueueSizeSupplier.get(), 0);
-    }
+	public int getQueueSizeForUnitTest() {
+		return defaultIfNull(myQueueSizeSupplier.get(), 0);
+	}
 
-    public void clearInterceptorsForUnitTest() {
-        setInterceptors(new ArrayList<>());
-    }
+	public void clearInterceptorsForUnitTest() {
+		setInterceptors(new ArrayList<>());
+	}
 
-    @Override
-    public String getName() {
-        return myName;
-    }
+	@Override
+	public String getName() {
+		return myName;
+	}
 
-    @Override
-    public boolean hasSubscription(@Nonnull MessageHandler handler) {
-        return getSubscribers().stream()
-                .map(t -> (RetryingMessageHandlerWrapper) t)
-                .anyMatch(t -> t.getWrappedHandler() == handler);
-    }
+	@Override
+	public boolean hasSubscription(@Nonnull MessageHandler handler) {
+		return getSubscribers().stream()
+					.map(t -> (RetryingMessageHandlerWrapper) t)
+					.anyMatch(t -> t.getWrappedHandler() == handler);
+	}
 
-    @Override
-    public boolean subscribe(@Nonnull MessageHandler theHandler) {
-        return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName()));
-    }
+	@Override
+	public boolean subscribe(@Nonnull MessageHandler theHandler) {
+		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName()));
+	}
 
-    @Override
-    public boolean unsubscribe(@Nonnull MessageHandler handler) {
-        Optional<RetryingMessageHandlerWrapper> match =
-                getSubscribers().stream()
-                        .map(t -> (RetryingMessageHandlerWrapper) t)
-                        .filter(t -> t.getWrappedHandler() == handler)
-                        .findFirst();
-        match.ifPresent(super::unsubscribe);
-        return match.isPresent();
-    }
+	@Override
+	public boolean unsubscribe(@Nonnull MessageHandler handler) {
+		Optional<RetryingMessageHandlerWrapper> match =
+					getSubscribers().stream()
+								.map(t -> (RetryingMessageHandlerWrapper) t)
+								.filter(t -> t.getWrappedHandler() == handler)
+								.findFirst();
+		match.ifPresent(super::unsubscribe);
+		return match.isPresent();
+	}
 
-    @Override
-    public void destroy() {
-        // nothing
-    }
+	@Override
+	public void destroy() {
+		// nothing
+	}
 
-    /** Creates a synchronous channel, mostly intended for testing */
-    public static LinkedBlockingChannel newSynchronous(String theName) {
-        return new LinkedBlockingChannel(theName, null, () -> 0);
-    }
+	/** Creates a synchronous channel, mostly intended for testing */
+	public static LinkedBlockingChannel newSynchronous(String theName) {
+		return new LinkedBlockingChannel(theName, null, () -> 0);
+	}
 }

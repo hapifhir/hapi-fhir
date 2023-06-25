@@ -19,40 +19,39 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
-    private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderMatcher.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderMatcher.class);
 
-    private final IPhoneticEncoder myStringEncoder;
+	private final IPhoneticEncoder myStringEncoder;
 
-    public PhoneticEncoderMatcher(PhoneticEncoderEnum thePhoneticEnum) {
-        myStringEncoder = PhoneticEncoderUtil.getEncoder(thePhoneticEnum.name());
-    }
+	public PhoneticEncoderMatcher(PhoneticEncoderEnum thePhoneticEnum) {
+		myStringEncoder = PhoneticEncoderUtil.getEncoder(thePhoneticEnum.name());
+	}
 
-    public boolean matches(String theLeftString, String theRightString) {
-        return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
-    }
+	public boolean matches(String theLeftString, String theRightString) {
+		return myStringEncoder.encode(theLeftString).equals(myStringEncoder.encode(theRightString));
+	}
 
-    @Override
-    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-        String leftString =
-                StringMatcherUtils.extractString(
-                        (IPrimitiveType<?>) theLeftBase, theParams.getExact());
-        String rightString =
-                StringMatcherUtils.extractString(
-                        (IPrimitiveType<?>) theRightBase, theParams.getExact());
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+		String leftString =
+					StringMatcherUtils.extractString(
+								(IPrimitiveType<?>) theLeftBase, theParams.getExact());
+		String rightString =
+					StringMatcherUtils.extractString(
+								(IPrimitiveType<?>) theRightBase, theParams.getExact());
 
-        return matches(leftString, rightString);
-    }
+		return matches(leftString, rightString);
+	}
 }

@@ -19,38 +19,37 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import org.hl7.fhir.instance.model.api.IBase;
 
 /** Service that applies survivorship rules on target and golden resources. */
 public interface IMdmSurvivorshipService {
 
-    /**
-     * Applies survivorship rules to merge fields from the specified target resource to the golden
-     * resource. Survivorship rules may include, but not limited to the following data consolidation
-     * methods:
-     *
-     * <ul>
-     *   <li>Length of field - apply the field value containing most or least number of characters -
-     *       e.g. longest name
-     *   <li>Date time - all the field value from the oldest or the newest recrod - e.g. use the
-     *       most recent phone number
-     *   <li>Frequency - use the most or least frequent number of occurrence - e.g. most common
-     *       phone number
-     *   <li>Integer - number functions (largest, sum, avg) - e.g. number of patient encounters
-     *   <li>Quality of data - best quality data - e.g. data coming from a certain system is
-     *       considered trusted and overrides all other values
-     *   <li>A hybrid approach combining all methods listed above as best fits
-     * </ul>
-     *
-     * @param theTargetResource Target resource to merge fields from
-     * @param theGoldenResource Golden resource to merge fields into
-     * @param theMdmTransactionContext Current transaction context
-     * @param <T> Resource type to apply the survivorship rules to
-     */
-    <T extends IBase> void applySurvivorshipRulesToGoldenResource(
-            T theTargetResource,
-            T theGoldenResource,
-            MdmTransactionContext theMdmTransactionContext);
+	/**
+	* Applies survivorship rules to merge fields from the specified target resource to the golden
+	* resource. Survivorship rules may include, but not limited to the following data consolidation
+	* methods:
+	*
+	* <ul>
+	*   <li>Length of field - apply the field value containing most or least number of characters -
+	*       e.g. longest name
+	*   <li>Date time - all the field value from the oldest or the newest recrod - e.g. use the
+	*       most recent phone number
+	*   <li>Frequency - use the most or least frequent number of occurrence - e.g. most common
+	*       phone number
+	*   <li>Integer - number functions (largest, sum, avg) - e.g. number of patient encounters
+	*   <li>Quality of data - best quality data - e.g. data coming from a certain system is
+	*       considered trusted and overrides all other values
+	*   <li>A hybrid approach combining all methods listed above as best fits
+	* </ul>
+	*
+	* @param theTargetResource Target resource to merge fields from
+	* @param theGoldenResource Golden resource to merge fields into
+	* @param theMdmTransactionContext Current transaction context
+	* @param <T> Resource type to apply the survivorship rules to
+	*/
+	<T extends IBase> void applySurvivorshipRulesToGoldenResource(
+				T theTargetResource,
+				T theGoldenResource,
+				MdmTransactionContext theMdmTransactionContext);
 }

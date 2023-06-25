@@ -29,47 +29,47 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 
-    private String myErrorMsg;
+	private String myErrorMsg;
 
-    public WorkChunkErrorEvent(String theChunkId) {
-        super(theChunkId);
-    }
+	public WorkChunkErrorEvent(String theChunkId) {
+		super(theChunkId);
+	}
 
-    public WorkChunkErrorEvent(String theChunkId, String theErrorMessage) {
-        super(theChunkId);
-        myErrorMsg = theErrorMessage;
-    }
+	public WorkChunkErrorEvent(String theChunkId, String theErrorMessage) {
+		super(theChunkId);
+		myErrorMsg = theErrorMessage;
+	}
 
-    public String getErrorMsg() {
-        return myErrorMsg;
-    }
+	public String getErrorMsg() {
+		return myErrorMsg;
+	}
 
-    public WorkChunkErrorEvent setErrorMsg(String theErrorMsg) {
-        myErrorMsg = theErrorMsg;
-        return this;
-    }
+	public WorkChunkErrorEvent setErrorMsg(String theErrorMsg) {
+		myErrorMsg = theErrorMsg;
+		return this;
+	}
 
-    @Override
-    public boolean equals(Object theO) {
-        if (this == theO) return true;
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
 
-        if (theO == null || getClass() != theO.getClass()) return false;
+		if (theO == null || getClass() != theO.getClass()) return false;
 
-        WorkChunkErrorEvent that = (WorkChunkErrorEvent) theO;
+		WorkChunkErrorEvent that = (WorkChunkErrorEvent) theO;
 
-        return new EqualsBuilder()
-                .appendSuper(super.equals(theO))
-                .append(myChunkId, that.myChunkId)
-                .append(myErrorMsg, that.myErrorMsg)
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.appendSuper(super.equals(theO))
+					.append(myChunkId, that.myChunkId)
+					.append(myErrorMsg, that.myErrorMsg)
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .appendSuper(super.hashCode())
-                .append(myChunkId)
-                .append(myErrorMsg)
-                .toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+					.appendSuper(super.hashCode())
+					.append(myChunkId)
+					.append(myErrorMsg)
+					.toHashCode();
+	}
 }

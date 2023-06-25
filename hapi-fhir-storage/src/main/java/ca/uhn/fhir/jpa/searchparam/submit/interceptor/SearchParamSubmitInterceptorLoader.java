@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
+import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,37 +28,34 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
-import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-
 public class SearchParamSubmitInterceptorLoader {
 
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(SearchParamSubmitInterceptorLoader.class);
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(SearchParamSubmitInterceptorLoader.class);
 
-    private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
-    private IInterceptorService myInterceptorRegistry;
+	private IInterceptorService myInterceptorRegistry;
 
-    @EventListener(classes = {ContextRefreshedEvent.class})
-    @Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
-    public void start() {
-        ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
-        myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
-    }
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
+	public void start() {
+		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
+		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
+	}
 
-    @Autowired
-    public void setSearchParamValidatingInterceptor(
-            SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
-        mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
-    }
+	@Autowired
+	public void setSearchParamValidatingInterceptor(
+				SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
+		mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
+	}
 
-    @Autowired
-    public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
-        myInterceptorRegistry = theInterceptorRegistry;
-    }
+	@Autowired
+	public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
+		myInterceptorRegistry = theInterceptorRegistry;
+	}
 
-    protected SearchParamValidatingInterceptor getSearchParamValidatingInterceptor() {
-        return mySearchParamValidatingInterceptor;
-    }
+	protected SearchParamValidatingInterceptor getSearchParamValidatingInterceptor() {
+		return mySearchParamValidatingInterceptor;
+	}
 }

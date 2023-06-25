@@ -24,6 +24,6 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 @DatatypeDef(name = "oid", profileOf = UriDt.class)
 public class OidDt extends UriDt {
 
-    // TODO: implement restrictions
+	// TODO: implement restrictions
 
 }

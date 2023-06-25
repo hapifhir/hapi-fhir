@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.tinder;
 
-import java.io.IOException;
-import java.util.*;
-
-import org.apache.maven.plugin.MojoFailureException;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -31,189 +26,193 @@ import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import org.apache.maven.plugin.MojoFailureException;
+
+import java.io.IOException;
+import java.util.*;
 
 public abstract class AbstractGenerator {
 
-    protected abstract void logDebug(String message);
+	protected abstract void logDebug(String message);
 
-    protected abstract void logInfo(String message);
+	protected abstract void logInfo(String message);
 
-    public void prepare(GeneratorContext context) throws FailureException, MojoFailureException {
+	public void prepare(GeneratorContext context) throws FailureException, MojoFailureException {
 
-        /*
-         * Deal with the FHIR spec version
-         */
-        FhirContext fhirContext;
-        String packageSuffix = "";
-        if ("dstu2".equals(context.getVersion())) {
-            fhirContext = FhirContext.forDstu2();
-        } else if ("dstu3".equals(context.getVersion())) {
-            fhirContext = FhirContext.forDstu3();
-            packageSuffix = ".dstu3";
-        } else if ("r4".equals(context.getVersion())) {
-            fhirContext = FhirContext.forR4();
-            packageSuffix = ".r4";
-        } else if ("r5".equals(context.getVersion())) {
-            fhirContext = FhirContext.forR5();
-            packageSuffix = ".r5";
-        } else {
-            throw new FailureException(
-                    Msg.code(95) + "Unknown version configured: " + context.getVersion());
-        }
-        context.setPackageSuffix(packageSuffix);
+		/*
+			* Deal with the FHIR spec version
+			*/
+		FhirContext fhirContext;
+		String packageSuffix = "";
+		if ("dstu2".equals(context.getVersion())) {
+				fhirContext = FhirContext.forDstu2();
+		} else if ("dstu3".equals(context.getVersion())) {
+				fhirContext = FhirContext.forDstu3();
+				packageSuffix = ".dstu3";
+		} else if ("r4".equals(context.getVersion())) {
+				fhirContext = FhirContext.forR4();
+				packageSuffix = ".r4";
+		} else if ("r5".equals(context.getVersion())) {
+				fhirContext = FhirContext.forR5();
+				packageSuffix = ".r5";
+		} else {
+				throw new FailureException(
+						Msg.code(95) + "Unknown version configured: " + context.getVersion());
+		}
+		context.setPackageSuffix(packageSuffix);
 
-        /*
-         * Deal with which resources to process
-         */
-        List<String> includeResources = context.getIncludeResources();
-        List<String> excludeResources = context.getExcludeResources();
+		/*
+			* Deal with which resources to process
+			*/
+		List<String> includeResources = context.getIncludeResources();
+		List<String> excludeResources = context.getExcludeResources();
 
-        if (includeResources == null || includeResources.isEmpty()) {
-            includeResources = new ArrayList<>();
+		if (includeResources == null || includeResources.isEmpty()) {
+				includeResources = new ArrayList<>();
 
-            logInfo(
-                    "No resource names supplied, going to use all resources from version: "
-                            + fhirContext.getVersion().getVersion());
+				logInfo(
+						"No resource names supplied, going to use all resources from version: "
+									+ fhirContext.getVersion().getVersion());
 
-            Properties p = new Properties();
-            try {
-                p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
-            } catch (IOException e) {
-                throw new FailureException(
-                        Msg.code(96) + "Failed to load version property file", e);
-            }
+				Properties p = new Properties();
+				try {
+					p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
+				} catch (IOException e) {
+					throw new FailureException(
+								Msg.code(96) + "Failed to load version property file", e);
+				}
 
-            logDebug("Property file contains: " + p);
+				logDebug("Property file contains: " + p);
 
-            TreeSet<String> keys = new TreeSet<>();
-            for (Object next : p.keySet()) {
-                keys.add((String) next);
-            }
-            for (String next : keys) {
-                if (next.startsWith("resource.")) {
-                    includeResources.add(next.substring("resource.".length()).toLowerCase());
-                }
-            }
+				TreeSet<String> keys = new TreeSet<>();
+				for (Object next : p.keySet()) {
+					keys.add((String) next);
+				}
+				for (String next : keys) {
+					if (next.startsWith("resource.")) {
+						includeResources.add(next.substring("resource.".length()).toLowerCase());
+					}
+				}
 
-            if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-                includeResources.remove("conformance");
-            }
-        }
+				if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+					includeResources.remove("conformance");
+				}
+		}
 
-        for (int i = 0; i < includeResources.size(); i++) {
-            includeResources.set(i, includeResources.get(i).toLowerCase());
-        }
+		for (int i = 0; i < includeResources.size(); i++) {
+				includeResources.set(i, includeResources.get(i).toLowerCase());
+		}
 
-        if (excludeResources != null) {
-            for (int i = 0; i < excludeResources.size(); i++) {
-                excludeResources.set(i, excludeResources.get(i).toLowerCase());
-            }
-            includeResources.removeAll(excludeResources);
-        }
-        context.setIncludeResources(includeResources);
+		if (excludeResources != null) {
+				for (int i = 0; i < excludeResources.size(); i++) {
+					excludeResources.set(i, excludeResources.get(i).toLowerCase());
+				}
+				includeResources.removeAll(excludeResources);
+		}
+		context.setIncludeResources(includeResources);
 
-        logInfo("Including the following elements: " + includeResources);
+		logInfo("Including the following elements: " + includeResources);
 
-        /*
-         * Fill in ValueSet and DataTypes used by the resources
-         */
-        ValueSetGenerator vsp = null;
-        DatatypeGeneratorUsingSpreadsheet dtp = null;
-        Map<String, String> datatypeLocalImports = new HashMap<>();
+		/*
+			* Fill in ValueSet and DataTypes used by the resources
+			*/
+		ValueSetGenerator vsp = null;
+		DatatypeGeneratorUsingSpreadsheet dtp = null;
+		Map<String, String> datatypeLocalImports = new HashMap<>();
 
-        if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
-            vsp = new ValueSetGenerator(context.getVersion());
-            vsp.setResourceValueSetFiles(context.getValueSetFiles());
-            context.setValueSetGenerator(vsp);
-            try {
-                vsp.parse();
-            } catch (Exception e) {
-                throw new FailureException(Msg.code(97) + "Failed to load valuesets", e);
-            }
+		if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
+				vsp = new ValueSetGenerator(context.getVersion());
+				vsp.setResourceValueSetFiles(context.getValueSetFiles());
+				context.setValueSetGenerator(vsp);
+				try {
+					vsp.parse();
+				} catch (Exception e) {
+					throw new FailureException(Msg.code(97) + "Failed to load valuesets", e);
+				}
 
-            /*
-             * A few enums are not found by default because none of the generated classes
-             * refer to them, but we still want them.
-             */
-            vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
+				/*
+				 * A few enums are not found by default because none of the generated classes
+				 * refer to them, but we still want them.
+				 */
+				vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
 
-            logInfo("Loading Datatypes...");
+				logInfo("Loading Datatypes...");
 
-            dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-            context.setDatatypeGenerator(dtp);
-            try {
-                dtp.parse();
-                dtp.markResourcesForImports();
-            } catch (Exception e) {
-                throw new FailureException(Msg.code(98) + "Failed to load datatypes", e);
-            }
-            dtp.bindValueSets(vsp);
+				dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+				context.setDatatypeGenerator(dtp);
+				try {
+					dtp.parse();
+					dtp.markResourcesForImports();
+				} catch (Exception e) {
+					throw new FailureException(Msg.code(98) + "Failed to load datatypes", e);
+				}
+				dtp.bindValueSets(vsp);
 
-            datatypeLocalImports = dtp.getLocalImports();
-        }
+				datatypeLocalImports = dtp.getLocalImports();
+		}
 
-        /*
-         * Load the requested resources
-         */
+		/*
+			* Load the requested resources
+			*/
 
-        logInfo("Loading Resources...");
-        try {
-            switch (context.getResourceSource()) {
-                case SPREADSHEET:
-                    {
-                        logInfo("... resource definitions from spreadsheets");
-                        ResourceGeneratorUsingSpreadsheet rp =
-                                new ResourceGeneratorUsingSpreadsheet(
-                                        context.getVersion(), context.getBaseDir());
-                        context.setResourceGenerator(rp);
+		logInfo("Loading Resources...");
+		try {
+				switch (context.getResourceSource()) {
+					case SPREADSHEET:
+						{
+								logInfo("... resource definitions from spreadsheets");
+								ResourceGeneratorUsingSpreadsheet rp =
+										new ResourceGeneratorUsingSpreadsheet(
+													context.getVersion(), context.getBaseDir());
+								context.setResourceGenerator(rp);
 
-                        rp.setBaseResourceNames(includeResources);
-                        rp.parse();
+								rp.setBaseResourceNames(includeResources);
+								rp.parse();
 
-                        rp.markResourcesForImports();
-                        rp.bindValueSets(vsp);
+								rp.markResourcesForImports();
+								rp.bindValueSets(vsp);
 
-                        rp.getLocalImports().putAll(datatypeLocalImports);
-                        datatypeLocalImports.putAll(rp.getLocalImports());
+								rp.getLocalImports().putAll(datatypeLocalImports);
+								datatypeLocalImports.putAll(rp.getLocalImports());
 
-                        rp.combineContentMaps(dtp);
-                        dtp.combineContentMaps(rp);
-                        break;
-                    }
-                case MODEL:
-                    {
-                        logInfo("... resource definitions from model structures");
-                        ResourceGeneratorUsingModel rp =
-                                new ResourceGeneratorUsingModel(
-                                        context.getVersion(), context.getBaseDir());
-                        context.setResourceGenerator(rp);
+								rp.combineContentMaps(dtp);
+								dtp.combineContentMaps(rp);
+								break;
+						}
+					case MODEL:
+						{
+								logInfo("... resource definitions from model structures");
+								ResourceGeneratorUsingModel rp =
+										new ResourceGeneratorUsingModel(
+													context.getVersion(), context.getBaseDir());
+								context.setResourceGenerator(rp);
 
-                        rp.setBaseResourceNames(includeResources);
-                        rp.parse();
-                        rp.markResourcesForImports();
-                        break;
-                    }
-            }
-        } catch (Exception e) {
-            throw new FailureException(Msg.code(99) + "Failed to load resources", e);
-        }
-    }
+								rp.setBaseResourceNames(includeResources);
+								rp.parse();
+								rp.markResourcesForImports();
+								break;
+						}
+				}
+		} catch (Exception e) {
+				throw new FailureException(Msg.code(99) + "Failed to load resources", e);
+		}
+	}
 
-    public static class FailureException extends Exception {
+	public static class FailureException extends Exception {
 
-        FailureException(String message, Throwable cause) {
-            super(message, cause);
-        }
+		FailureException(String message, Throwable cause) {
+				super(message, cause);
+		}
 
-        FailureException(String message) {
-            super(message);
-        }
-    }
+		FailureException(String message) {
+				super(message);
+		}
+	}
 
-    public static class ExecutionException extends Exception {
+	public static class ExecutionException extends Exception {
 
-        public ExecutionException(String message) {
-            super(message);
-        }
-    }
+		public ExecutionException(String message) {
+				super(message);
+		}
+	}
 }

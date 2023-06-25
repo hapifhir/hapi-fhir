@@ -19,90 +19,90 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-
 public class VectorMatchResultMap {
-    private final MdmRulesJson myMdmRulesJson;
-    private Map<Long, MdmMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
-    private Set<Long> myMatchVectors = new HashSet<>();
-    private Set<Long> myPossibleMatchVectors = new HashSet<>();
-    private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
+	private final MdmRulesJson myMdmRulesJson;
+	private Map<Long, MdmMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
+	private Set<Long> myMatchVectors = new HashSet<>();
+	private Set<Long> myPossibleMatchVectors = new HashSet<>();
+	private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
 
-    VectorMatchResultMap(MdmRulesJson theMdmRulesJson) {
-        myMdmRulesJson = theMdmRulesJson;
-        // no reason to hold the entire mdmRulesJson here
-        initMap();
-    }
+	VectorMatchResultMap(MdmRulesJson theMdmRulesJson) {
+		myMdmRulesJson = theMdmRulesJson;
+		// no reason to hold the entire mdmRulesJson here
+		initMap();
+	}
 
-    private void initMap() {
-        for (Map.Entry<String, MdmMatchResultEnum> entry :
-                myMdmRulesJson.getMatchResultMap().entrySet()) {
-            put(entry.getKey(), entry.getValue());
-        }
-    }
+	private void initMap() {
+		for (Map.Entry<String, MdmMatchResultEnum> entry :
+					myMdmRulesJson.getMatchResultMap().entrySet()) {
+				put(entry.getKey(), entry.getValue());
+		}
+	}
 
-    @Nonnull
-    public MdmMatchResultEnum get(Long theMatchVector) {
-        return myVectorToMatchResultMap.computeIfAbsent(theMatchVector, this::computeMatchResult);
-    }
+	@Nonnull
+	public MdmMatchResultEnum get(Long theMatchVector) {
+		return myVectorToMatchResultMap.computeIfAbsent(theMatchVector, this::computeMatchResult);
+	}
 
-    private MdmMatchResultEnum computeMatchResult(Long theVector) {
-        if (myMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
-            return MdmMatchResultEnum.MATCH;
-        }
-        if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
-            return MdmMatchResultEnum.POSSIBLE_MATCH;
-        }
-        return MdmMatchResultEnum.NO_MATCH;
-    }
+	private MdmMatchResultEnum computeMatchResult(Long theVector) {
+		if (myMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
+				return MdmMatchResultEnum.MATCH;
+		}
+		if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
+				return MdmMatchResultEnum.POSSIBLE_MATCH;
+		}
+		return MdmMatchResultEnum.NO_MATCH;
+	}
 
-    private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
-        long vector = getVector(theFieldMatchNames);
-        myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
-        myVectorToMatchResultMap.put(vector, theMatchResult);
-        if (theMatchResult == MdmMatchResultEnum.MATCH) {
-            myMatchVectors.add(vector);
-        } else if (theMatchResult == MdmMatchResultEnum.POSSIBLE_MATCH) {
-            myPossibleMatchVectors.add(vector);
-        }
-    }
+	private void put(String theFieldMatchNames, MdmMatchResultEnum theMatchResult) {
+		long vector = getVector(theFieldMatchNames);
+		myVectorToFieldMatchNamesMap.put(vector, theFieldMatchNames);
+		myVectorToMatchResultMap.put(vector, theMatchResult);
+		if (theMatchResult == MdmMatchResultEnum.MATCH) {
+				myMatchVectors.add(vector);
+		} else if (theMatchResult == MdmMatchResultEnum.POSSIBLE_MATCH) {
+				myPossibleMatchVectors.add(vector);
+		}
+	}
 
-    public long getVector(String theFieldMatchNames) {
-        long retval = 0;
-        for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
-            int index = getFieldMatchIndex(fieldMatchName);
-            if (index == -1) {
-                throw new ConfigurationException(
-                        Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
-            }
-            retval |= (1 << index);
-        }
-        return retval;
-    }
+	public long getVector(String theFieldMatchNames) {
+		long retval = 0;
+		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
+				int index = getFieldMatchIndex(fieldMatchName);
+				if (index == -1) {
+					throw new ConfigurationException(
+								Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
+				}
+				retval |= (1 << index);
+		}
+		return retval;
+	}
 
-    @Nonnull
-    static String[] splitFieldMatchNames(String theFieldMatchNames) {
-        return theFieldMatchNames.split(",\\s*");
-    }
+	@Nonnull
+	static String[] splitFieldMatchNames(String theFieldMatchNames) {
+		return theFieldMatchNames.split(",\\s*");
+	}
 
-    private int getFieldMatchIndex(final String theFieldMatchName) {
-        for (int i = 0; i < myMdmRulesJson.size(); ++i) {
-            if (myMdmRulesJson.get(i).getName().equals(theFieldMatchName)) {
-                return i;
-            }
-        }
-        return -1;
-    }
+	private int getFieldMatchIndex(final String theFieldMatchName) {
+		for (int i = 0; i < myMdmRulesJson.size(); ++i) {
+				if (myMdmRulesJson.get(i).getName().equals(theFieldMatchName)) {
+					return i;
+				}
+		}
+		return -1;
+	}
 
-    public String getFieldMatchNames(long theVector) {
-        return myVectorToFieldMatchNamesMap.get(theVector);
-    }
+	public String getFieldMatchNames(long theVector) {
+		return myVectorToFieldMatchNamesMap.get(theVector);
+	}
 }

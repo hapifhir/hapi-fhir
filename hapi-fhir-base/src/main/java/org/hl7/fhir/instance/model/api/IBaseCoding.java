@@ -21,23 +21,23 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseCoding extends IBase {
 
-    String getCode();
+	String getCode();
 
-    String getDisplay();
+	String getDisplay();
 
-    String getSystem();
+	String getSystem();
 
-    boolean getUserSelected();
+	boolean getUserSelected();
 
-    String getVersion();
+	String getVersion();
 
-    IBaseCoding setCode(String theTerm);
+	IBaseCoding setCode(String theTerm);
 
-    IBaseCoding setDisplay(String theLabel);
+	IBaseCoding setDisplay(String theLabel);
 
-    IBaseCoding setSystem(String theScheme);
+	IBaseCoding setSystem(String theScheme);
 
-    IBaseCoding setVersion(String theVersion);
+	IBaseCoding setVersion(String theVersion);
 
-    IBaseCoding setUserSelected(boolean theUserSelected);
+	IBaseCoding setUserSelected(boolean theUserSelected);
 }

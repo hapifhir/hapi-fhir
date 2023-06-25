@@ -21,19 +21,19 @@ package ca.uhn.fhir.rest.param;
 
 public class StringAndListParam extends BaseAndListParam<StringOrListParam> {
 
-    @Override
-    StringOrListParam newInstance() {
-        return new StringOrListParam();
-    }
+	@Override
+	StringOrListParam newInstance() {
+		return new StringOrListParam();
+	}
 
-    @Override
-    public StringAndListParam addAnd(StringOrListParam theValue) {
-        addValue(theValue);
-        return this;
-    }
+	@Override
+	public StringAndListParam addAnd(StringOrListParam theValue) {
+		addValue(theValue);
+		return this;
+	}
 
-    public StringAndListParam addAnd(StringParam theValue) {
-        addValue(new StringOrListParam().addOr(theValue));
-        return this;
-    }
+	public StringAndListParam addAnd(StringParam theValue) {
+		addValue(new StringOrListParam().addOr(theValue));
+		return this;
+	}
 }

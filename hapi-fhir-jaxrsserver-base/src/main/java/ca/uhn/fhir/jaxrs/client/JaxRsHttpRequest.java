@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.jaxrs.client;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,13 +35,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
-
 /**
  * A Http Request based on JaxRs. This is an adapter around the class {@link
  * javax.ws.rs.client.Invocation Invocation}
@@ -43,90 +43,90 @@ import ca.uhn.fhir.util.StopWatch;
  */
 public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
 
-    private final Map<String, List<String>> myHeaders = new HashMap<>();
-    private Invocation.Builder myRequest;
-    private RequestTypeEnum myRequestType;
-    private Entity<?> myEntity;
+	private final Map<String, List<String>> myHeaders = new HashMap<>();
+	private Invocation.Builder myRequest;
+	private RequestTypeEnum myRequestType;
+	private Entity<?> myEntity;
 
-    public JaxRsHttpRequest(
-            Invocation.Builder theRequest, RequestTypeEnum theRequestType, Entity<?> theEntity) {
-        this.myRequest = theRequest;
-        this.myRequestType = theRequestType;
-        this.myEntity = theEntity;
-    }
+	public JaxRsHttpRequest(
+				Invocation.Builder theRequest, RequestTypeEnum theRequestType, Entity<?> theEntity) {
+		this.myRequest = theRequest;
+		this.myRequestType = theRequestType;
+		this.myEntity = theEntity;
+	}
 
-    @Override
-    public void addHeader(String theName, String theValue) {
-        if (!myHeaders.containsKey(theName)) {
-            myHeaders.put(theName, new LinkedList<>());
-        }
-        myHeaders.get(theName).add(theValue);
-        getRequest().header(theName, theValue);
-    }
+	@Override
+	public void addHeader(String theName, String theValue) {
+		if (!myHeaders.containsKey(theName)) {
+				myHeaders.put(theName, new LinkedList<>());
+		}
+		myHeaders.get(theName).add(theValue);
+		getRequest().header(theName, theValue);
+	}
 
-    @Override
-    public IHttpResponse execute() {
-        StopWatch responseStopWatch = new StopWatch();
-        Invocation invocation = getRequest().build(getRequestType().name(), getEntity());
-        Response response = invocation.invoke();
-        return new JaxRsHttpResponse(response, responseStopWatch);
-    }
+	@Override
+	public IHttpResponse execute() {
+		StopWatch responseStopWatch = new StopWatch();
+		Invocation invocation = getRequest().build(getRequestType().name(), getEntity());
+		Response response = invocation.invoke();
+		return new JaxRsHttpResponse(response, responseStopWatch);
+	}
 
-    @Override
-    public Map<String, List<String>> getAllHeaders() {
-        return Collections.unmodifiableMap(this.myHeaders);
-    }
+	@Override
+	public Map<String, List<String>> getAllHeaders() {
+		return Collections.unmodifiableMap(this.myHeaders);
+	}
 
-    /**
-     * Get the Entity
-     *
-     * @return the entity
-     */
-    public Entity<?> getEntity() {
-        return myEntity;
-    }
+	/**
+	* Get the Entity
+	*
+	* @return the entity
+	*/
+	public Entity<?> getEntity() {
+		return myEntity;
+	}
 
-    @Override
-    public String getHttpVerbName() {
-        return myRequestType.name();
-    }
+	@Override
+	public String getHttpVerbName() {
+		return myRequestType.name();
+	}
 
-    @Override
-    public void removeHeaders(String theHeaderName) {
-        myHeaders.remove(theHeaderName);
-    }
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		myHeaders.remove(theHeaderName);
+	}
 
-    /**
-     * Get the Request
-     *
-     * @return the Request
-     */
-    public Invocation.Builder getRequest() {
-        return myRequest;
-    }
+	/**
+	* Get the Request
+	*
+	* @return the Request
+	*/
+	public Invocation.Builder getRequest() {
+		return myRequest;
+	}
 
-    @Override
-    public String getRequestBodyFromStream() {
-        // not supported
-        return null;
-    }
+	@Override
+	public String getRequestBodyFromStream() {
+		// not supported
+		return null;
+	}
 
-    /**
-     * Get the Request Type
-     *
-     * @return the request type
-     */
-    public RequestTypeEnum getRequestType() {
-        return myRequestType == null ? RequestTypeEnum.GET : myRequestType;
-    }
+	/**
+	* Get the Request Type
+	*
+	* @return the request type
+	*/
+	public RequestTypeEnum getRequestType() {
+		return myRequestType == null ? RequestTypeEnum.GET : myRequestType;
+	}
 
-    @Override
-    public String getUri() {
-        return ""; // TODO: can we get this from somewhere?
-    }
+	@Override
+	public String getUri() {
+		return ""; // TODO: can we get this from somewhere?
+	}
 
-    @Override
-    public void setUri(String theUrl) {
-        throw new UnsupportedOperationException(Msg.code(606));
-    }
+	@Override
+	public void setUri(String theUrl) {
+		throw new UnsupportedOperationException(Msg.code(606));
+	}
 }

@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TimeDtTest {
 
-    @Test
-    public void testEncode() {
-        TimeDt dt = new TimeDt("11:33:01.123");
-        assertEquals("11:33:01.123", dt.getValue());
-    }
+	@Test
+	public void testEncode() {
+		TimeDt dt = new TimeDt("11:33:01.123");
+		assertEquals("11:33:01.123", dt.getValue());
+	}
 }

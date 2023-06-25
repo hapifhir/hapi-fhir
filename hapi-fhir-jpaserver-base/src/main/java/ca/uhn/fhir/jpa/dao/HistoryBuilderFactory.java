@@ -19,29 +19,28 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.Date;
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import ca.uhn.fhir.jpa.config.JpaConfig;
+import java.util.Date;
+import javax.annotation.Nullable;
 
 public class HistoryBuilderFactory {
 
-    @Autowired private ApplicationContext myApplicationContext;
+	@Autowired private ApplicationContext myApplicationContext;
 
-    public HistoryBuilder newHistoryBuilder(
-            @Nullable String theResourceType,
-            @Nullable Long theResourceId,
-            @Nullable Date theRangeStartInclusive,
-            @Nullable Date theRangeEndInclusive) {
-        return (HistoryBuilder)
-                myApplicationContext.getBean(
-                        JpaConfig.HISTORY_BUILDER,
-                        theResourceType,
-                        theResourceId,
-                        theRangeStartInclusive,
-                        theRangeEndInclusive);
-    }
+	public HistoryBuilder newHistoryBuilder(
+				@Nullable String theResourceType,
+				@Nullable Long theResourceId,
+				@Nullable Date theRangeStartInclusive,
+				@Nullable Date theRangeEndInclusive) {
+		return (HistoryBuilder)
+					myApplicationContext.getBean(
+								JpaConfig.HISTORY_BUILDER,
+								theResourceType,
+								theResourceId,
+								theRangeStartInclusive,
+								theRangeEndInclusive);
+	}
 }

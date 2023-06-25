@@ -19,26 +19,6 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import java.util.Date;
-import javax.annotation.Nullable;
-
-import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
-
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
@@ -199,715 +179,734 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.Date;
+import javax.annotation.Nullable;
 
 @Configuration
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit
 // testing
 @EnableJpaRepositories(
-        basePackages = "ca.uhn.fhir.jpa.dao.data",
-        repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+		basePackages = "ca.uhn.fhir.jpa.dao.data",
+		repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @Import({
-    BeanPostProcessorConfig.class,
-    TermCodeSystemConfig.class,
-    SearchParamConfig.class,
-    ValidationSupportConfig.class,
-    Batch2SupportConfig.class,
-    JpaBulkExportConfig.class,
-    SearchConfig.class,
-    PackageLoaderConfig.class,
-    EnversAuditConfig.class
+	BeanPostProcessorConfig.class,
+	TermCodeSystemConfig.class,
+	SearchParamConfig.class,
+	ValidationSupportConfig.class,
+	Batch2SupportConfig.class,
+	JpaBulkExportConfig.class,
+	SearchConfig.class,
+	PackageLoaderConfig.class,
+	EnversAuditConfig.class
 })
 public class JpaConfig {
-    public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
-    public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
-    public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
-    public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
-    public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
-    public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH =
-            "PersistedJpaBundleProvider_BySearch";
-    public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
-            "PersistedJpaSearchFirstPageBundleProvider";
-    public static final String SEARCH_BUILDER = "SearchBuilder";
-    public static final String HISTORY_BUILDER = "HistoryBuilder";
-    private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
-
-    @Autowired public JpaStorageSettings myStorageSettings;
-
-    @Bean("myDaoRegistry")
-    public DaoRegistry daoRegistry() {
-        return new DaoRegistry();
-    }
-
-    @Lazy
-    @Bean
-    public CascadingDeleteInterceptor cascadingDeleteInterceptor(
-            FhirContext theFhirContext,
-            DaoRegistry theDaoRegistry,
-            IInterceptorBroadcaster theInterceptorBroadcaster,
-            ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
-        return new CascadingDeleteInterceptor(
-                theFhirContext,
-                theDaoRegistry,
-                theInterceptorBroadcaster,
-                threadSafeResourceDeleterSvc);
-    }
-
-    @Bean
-    public ExternallyStoredResourceServiceRegistry ExternallyStoredResourceServiceRegistry() {
-        return new ExternallyStoredResourceServiceRegistry();
-    }
-
-    @Lazy
-    @Bean
-    public ThreadSafeResourceDeleterSvc safeDeleter(
-            DaoRegistry theDaoRegistry,
-            IInterceptorBroadcaster theInterceptorBroadcaster,
-            HapiTransactionService hapiTransactionService) {
-        return new ThreadSafeResourceDeleterSvc(
-                theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
-    }
-
-    @Lazy
-    @Bean
-    public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(
-            IValidationSupport theValidationSupport,
-            ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
-        return new ResponseTerminologyTranslationInterceptor(
-                theValidationSupport, theResponseTerminologyTranslationSvc);
-    }
-
-    @Bean
-    public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(
-            IValidationSupport theValidationSupport) {
-        return new ResponseTerminologyTranslationSvc(theValidationSupport);
-    }
-
-    @Bean
-    @Lazy
-    public IGraphQLStorageServices graphqlStorageServices() {
-        return new DaoRegistryGraphQLStorageServices();
-    }
-
-    @Bean
-    public ScheduledExecutorFactoryBean scheduledExecutorService() {
-        ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
-        b.setPoolSize(5);
-        b.afterPropertiesSet();
-        return b;
-    }
-
-    @Bean(name = "mySubscriptionTriggeringProvider")
-    @Lazy
-    public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
-        return new SubscriptionTriggeringProvider();
-    }
-
-    @Bean
-    @Lazy
-    public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
-        if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
-            return new ValueSetOperationProviderDstu2();
-        }
-        return new ValueSetOperationProvider();
-    }
-
-    @Bean
-    public IJpaStorageResourceParser jpaStorageResourceParser() {
-        return new JpaStorageResourceParser();
-    }
-
-    @Bean
-    public TransactionProcessor transactionProcessor() {
-        return new TransactionProcessor();
-    }
-
-    @Bean(name = "myAttachmentBinaryAccessProvider")
-    @Lazy
-    public BinaryAccessProvider binaryAccessProvider() {
-        return new BinaryAccessProvider();
-    }
-
-    @Bean(name = "myBinaryStorageInterceptor")
-    @Lazy
-    public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(
-            JpaStorageSettings theStorageSettings, FhirContext theCtx) {
-        BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor =
-                new BinaryStorageInterceptor<>(theCtx);
-        interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
-        interceptor.setAutoInflateBinariesMaximumSize(
-                theStorageSettings.getAutoInflateBinariesMaximumBytes());
-        return interceptor;
-    }
-
-    @Bean
-    public MemoryCacheService memoryCacheService(JpaStorageSettings theStorageSettings) {
-        return new MemoryCacheService(theStorageSettings);
-    }
-
-    @Bean
-    @Primary
-    public IResourceLinkResolver daoResourceLinkResolver() {
-        return new DaoResourceLinkResolver<JpaPid>();
-    }
-
-    @Bean(name = PackageUtils.LOADER_WITH_CACHE)
-    public IHapiPackageCacheManager packageCacheManager() {
-        return new JpaPackageCache();
-    }
-
-    @Bean
-    public NpmJpaValidationSupport npmJpaValidationSupport() {
-        return new NpmJpaValidationSupport();
-    }
-
-    @Bean
-    public ValidationSettings validationSettings() {
-        return new ValidationSettings();
-    }
-
-    @Bean
-    public ISearchCacheSvc searchCacheSvc() {
-        return new DatabaseSearchCacheSvcImpl();
-    }
-
-    @Bean
-    public ISearchResultCacheSvc searchResultCacheSvc() {
-        return new DatabaseSearchResultCacheSvcImpl();
-    }
-
-    @Bean
-    public ITermConceptMappingSvc termConceptMappingSvc() {
-        return new TermConceptMappingSvcImpl();
-    }
-
-    @Bean
-    public TaskScheduler taskScheduler() {
-        ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-        retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-        retVal.setScheduledExecutor(scheduledExecutorService().getObject());
-        return retVal;
-    }
-
-    @Bean(name = TASK_EXECUTOR_NAME)
-    public AsyncTaskExecutor taskExecutor() {
-        ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-        retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-        retVal.setScheduledExecutor(scheduledExecutorService().getObject());
-        return retVal;
-    }
-
-    @Bean
-    public IResourceReindexingSvc resourceReindexingSvc() {
-        return new ResourceReindexingSvcImpl();
-    }
-
-    @Bean
-    @Lazy
-    public IInstanceReindexService instanceReindexService() {
-        return new InstanceReindexServiceImpl();
-    }
-
-    @Bean
-    @Lazy
-    public InstanceReindexProvider instanceReindexProvider(
-            IInstanceReindexService theInstanceReindexService) {
-        return new InstanceReindexProvider(theInstanceReindexService);
-    }
-
-    @Bean
-    public ResourceReindexer resourceReindexer(FhirContext theFhirContext) {
-        return new ResourceReindexer(theFhirContext);
-    }
-
-    @Bean
-    public HapiFhirHibernateJpaDialect hibernateJpaDialect(FhirContext theFhirContext) {
-        return new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer());
-    }
-
-    @Bean
-    @Lazy
-    public OverridePathBasedReferentialIntegrityForDeletesInterceptor
-            overridePathBasedReferentialIntegrityForDeletesInterceptor() {
-        return new OverridePathBasedReferentialIntegrityForDeletesInterceptor();
-    }
-
-    @Bean
-    public IRequestPartitionHelperSvc requestPartitionHelperService() {
-        return new RequestPartitionHelperSvc();
-    }
-
-    @Bean
-    public HapiTransactionService hapiTransactionService() {
-        return new JpaHapiTransactionService();
-    }
-
-    @Bean
-    public IInterceptorService jpaInterceptorService() {
-        return new InterceptorService("JPA");
-    }
-
-    @Bean
-    public IPackageInstallerSvc npmInstallerSvc() {
-        return new PackageInstallerSvcImpl();
-    }
-
-    @Bean
-    public IConsentContextServices consentContextServices() {
-        return new JpaConsentContextServices();
-    }
-
-    @Bean
-    @Lazy
-    public DiffProvider diffProvider() {
-        return new DiffProvider();
-    }
-
-    @Bean
-    @Lazy
-    public IPartitionLookupSvc partitionConfigSvc() {
-        return new PartitionLookupSvcImpl();
-    }
-
-    @Bean
-    @Lazy
-    public PartitionManagementProvider partitionManagementProvider() {
-        return new PartitionManagementProvider();
-    }
-
-    @Bean
-    @Lazy
-    public RequestTenantPartitionInterceptor requestTenantPartitionInterceptor() {
-        return new RequestTenantPartitionInterceptor();
-    }
-
-    @Bean
-    public MdmLinkExpandSvc mdmLinkExpandSvc() {
-        return new MdmLinkExpandSvc();
-    }
-
-    @Bean
-    @Lazy
-    public TerminologyUploaderProvider terminologyUploaderProvider() {
-        return new TerminologyUploaderProvider();
-    }
-
-    @Bean
-    @Lazy
-    public ProcessMessageProvider processMessageProvider() {
-        return new ProcessMessageProvider();
-    }
-
-    @Bean
-    public ISchedulerService schedulerService() {
-        return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
-    }
-
-    @Bean
-    public AutowiringSpringBeanJobFactory schedulerJobFactory() {
-        return new AutowiringSpringBeanJobFactory();
-    }
-
-    @Bean
-    public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(
-            DaoRegistry theDaoRegistry,
-            PlatformTransactionManager theTxManager,
-            JpaStorageSettings theStorageSettings,
-            BulkExportHelperService theBulkExportHelperSvc,
-            IJobPersistence theJpaJobPersistence) {
-        return new BulkDataExportJobSchedulingHelperImpl(
-                theDaoRegistry,
-                theTxManager,
-                theStorageSettings,
-                theBulkExportHelperSvc,
-                theJpaJobPersistence,
-                null);
-    }
-
-    @Bean
-    @Lazy
-    public BulkDataExportProvider bulkDataExportProvider() {
-        return new BulkDataExportProvider();
-    }
-
-    @Bean
-    @Lazy
-    public IDeleteExpungeJobSubmitter deleteExpungeJobSubmitter() {
-        return new DeleteExpungeJobSubmitterImpl();
-    }
-
-    @Bean
-    @Lazy
-    public IBulkDataImportSvc bulkDataImportSvc() {
-        return new BulkDataImportSvcImpl();
-    }
-
-    @Bean
-    public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
-        return new PersistedJpaBundleProviderFactory();
-    }
-
-    @Bean
-    public SearchBuilderFactory searchBuilderFactory() {
-        return new SearchBuilderFactory();
-    }
-
-    @Bean
-    public SqlObjectFactory sqlBuilderFactory() {
-        return new SqlObjectFactory();
-    }
-
-    @Bean
-    public HibernatePropertiesProvider HibernatePropertiesProvider() {
-        return new HibernatePropertiesProvider();
-    }
-
-    @Bean
-    public HistoryBuilderFactory historyBuilderFactory() {
-        return new HistoryBuilderFactory();
-    }
-
-    @Bean
-    public IResourceVersionSvc resourceVersionSvc() {
-        return new ResourceVersionSvcDaoImpl();
-    }
-
-    /* **************************************************************** *
-     * Prototype Beans Below                                            *
-     * **************************************************************** */
-
-    @Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
-    @Scope("prototype")
-    public PersistedJpaBundleProvider newPersistedJpaBundleProvider(
-            RequestDetails theRequest, String theUuid) {
-        return new PersistedJpaBundleProvider(theRequest, theUuid);
-    }
-
-    @Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
-    @Scope("prototype")
-    public PersistedJpaBundleProvider newPersistedJpaBundleProvider(
-            RequestDetails theRequest, Search theSearch) {
-        return new PersistedJpaBundleProvider(theRequest, theSearch);
-    }
-
-    @Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
-    @Scope("prototype")
-    public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
-            RequestDetails theRequest,
-            Search theSearch,
-            SearchTask theSearchTask,
-            ISearchBuilder theSearchBuilder,
-            RequestPartitionId theRequestPartitionId) {
-        return new PersistedJpaSearchFirstPageBundleProvider(
-                theSearch, theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
-    }
-
-    @Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
-    @Scope("prototype")
-    public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder(
-            IValidationSupport theValidationSupport) {
-        return new RepositoryValidatingRuleBuilder(theValidationSupport);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
-            SearchQueryBuilder theSearchSqlBuilder) {
-        return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ComboNonUniqueSearchParameterPredicateBuilder
-            newComboNonUniqueSearchParameterPredicateBuilder(
-                    SearchQueryBuilder theSearchSqlBuilder) {
-        return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public CoordsPredicateBuilder newCoordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new CoordsPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public DatePredicateBuilder newDatePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new DatePredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new ForcedIdPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public NumberPredicateBuilder newNumberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new NumberPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public QuantityPredicateBuilder newQuantityPredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new QuantityPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-            QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
-        return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new ResourceTablePredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new TagPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ResourceIdPredicateBuilder newResourceIdPredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new ResourceIdPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
-            SearchQueryBuilder theSearchBuilder) {
-        return new SearchParamPresentPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public StringPredicateBuilder newStringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new StringPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new TokenPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public SourcePredicateBuilder newSourcePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new SourcePredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public UriPredicateBuilder newUriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
-        return new UriPredicateBuilder(theSearchBuilder);
-    }
-
-    @Bean
-    @Scope("prototype")
-    public SearchQueryExecutor newSearchQueryExecutor(
-            GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
-        return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
-    }
-
-    @Bean(name = HISTORY_BUILDER)
-    @Scope("prototype")
-    public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(
-            @Nullable String theResourceType,
-            @Nullable Long theResourceId,
-            @Nullable Date theRangeStartInclusive,
-            @Nullable Date theRangeEndInclusive) {
-        return new HistoryBuilder(
-                theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
-    }
-
-    @Bean
-    @Primary
-    public ISearchParamProvider searchParamProvider() {
-        return new DaoSearchParamProvider();
-    }
-
-    @Bean
-    public IIdHelperService idHelperService() {
-        return new IdHelperService();
-    }
-
-    @Bean
-    public SearchStrategyFactory searchStrategyFactory(
-            @Autowired(required = false) IFulltextSearchSvc theFulltextSvc) {
-        return new SearchStrategyFactory(myStorageSettings, theFulltextSvc);
-    }
-
-    @Bean
-    public DeleteConflictService deleteConflictService() {
-        return new DeleteConflictService();
-    }
-
-    @Bean
-    public DeleteConflictFinderService deleteConflictFinderService() {
-        return new DeleteConflictFinderService();
-    }
-
-    @Bean
-    public ExpungeService expungeService() {
-        return new ExpungeService();
-    }
-
-    @Bean
-    @Scope("prototype")
-    public ExpungeOperation expungeOperation(
-            String theResourceName,
-            IResourcePersistentId theResourceId,
-            ExpungeOptions theExpungeOptions,
-            RequestDetails theRequestDetails) {
-        return new ExpungeOperation(
-                theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
-    }
-
-    @Bean
-    public IExpungeEverythingService expungeEverythingService() {
-        return new ExpungeEverythingService();
-    }
-
-    @Bean
-    public IResourceExpungeService resourceExpungeService() {
-        return new JpaResourceExpungeService();
-    }
-
-    @Bean
-    public ISearchParamPresenceSvc searchParamPresenceService() {
-        return new SearchParamPresenceSvcImpl();
-    }
-
-    @Bean
-    public SearchParamWithInlineReferencesExtractor searchParamWithInlineReferencesExtractor() {
-        return new SearchParamWithInlineReferencesExtractor();
-    }
-
-    @Bean
-    public MatchResourceUrlService matchResourceUrlService() {
-        return new MatchResourceUrlService();
-    }
-
-    @Bean
-    public DaoSearchParamSynchronizer daoSearchParamSynchronizer() {
-        return new DaoSearchParamSynchronizer();
-    }
-
-    @Bean
-    public ResourceTableFKProvider resourceTableFKProvider() {
-        return new ResourceTableFKProvider();
-    }
-
-    @Bean
-    public ICacheWarmingSvc cacheWarmingSvc() {
-        return new CacheWarmingSvcImpl();
-    }
-
-    @Bean
-    public IndexNamePrefixLayoutStrategy indexLayoutStrategy() {
-        return new IndexNamePrefixLayoutStrategy();
-    }
-
-    @Bean
-    public ResourceLoaderImpl jpaResourceLoader() {
-        return new ResourceLoaderImpl();
-    }
-
-    @Bean
-    public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(
-            FhirContext theFhirContext) {
-        return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
-    }
-
-    @Bean
-    public ISynchronousSearchSvc synchronousSearchSvc() {
-        return new SynchronousSearchSvcImpl();
-    }
-
-    @Bean
-    public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
-        return new VersionCanonicalizer(theFhirContext);
-    }
-
-    @Bean
-    public SearchParameterDaoValidator searchParameterDaoValidator(
-            FhirContext theFhirContext,
-            JpaStorageSettings theStorageSettings,
-            ISearchParamRegistry theSearchParamRegistry) {
-        return new SearchParameterDaoValidator(
-                theFhirContext, theStorageSettings, theSearchParamRegistry);
-    }
-
-    @Bean
-    public ITermReadSvc terminologyService() {
-        return new TermReadSvcImpl();
-    }
-
-    @Bean
-    public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
-        return new TermCodeSystemStorageSvcImpl();
-    }
-
-    @Bean
-    public ITermReindexingSvc termReindexingSvc() {
-        return new TermReindexingSvcImpl();
-    }
-
-    @Bean
-    public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {
-        return new ObservationLastNIndexPersistSvc();
-    }
-
-    @Bean
-    public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
-        return new MdmLinkDaoJpaImpl();
-    }
-
-    @Bean
-    IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
-        return new JpaMdmLinkImplFactory();
-    }
-
-    @Bean
-    @Scope("prototype")
-    public PersistenceContextProvider persistenceContextProvider() {
-        return new PersistenceContextProvider();
-    }
-
-    @Bean
-    public ResourceSearchUrlSvc resourceSearchUrlSvc(
-            PersistenceContextProvider thePersistenceContextProvider,
-            IResourceSearchUrlDao theResourceSearchUrlDao,
-            MatchUrlService theMatchUrlService,
-            FhirContext theFhirContext) {
-        return new ResourceSearchUrlSvc(
-                thePersistenceContextProvider.getEntityManager(),
-                theResourceSearchUrlDao,
-                theMatchUrlService,
-                theFhirContext);
-    }
-
-    @Bean
-    public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(
-            ResourceSearchUrlSvc theResourceSearchUrlSvc) {
-        return new SearchUrlJobMaintenanceSvcImpl(theResourceSearchUrlSvc);
-    }
+	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
+	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
+	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
+	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
+	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
+	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH =
+				"PersistedJpaBundleProvider_BySearch";
+	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
+				"PersistedJpaSearchFirstPageBundleProvider";
+	public static final String SEARCH_BUILDER = "SearchBuilder";
+	public static final String HISTORY_BUILDER = "HistoryBuilder";
+	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
+
+	@Autowired public JpaStorageSettings myStorageSettings;
+
+	@Bean("myDaoRegistry")
+	public DaoRegistry daoRegistry() {
+		return new DaoRegistry();
+	}
+
+	@Lazy
+	@Bean
+	public CascadingDeleteInterceptor cascadingDeleteInterceptor(
+				FhirContext theFhirContext,
+				DaoRegistry theDaoRegistry,
+				IInterceptorBroadcaster theInterceptorBroadcaster,
+				ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
+		return new CascadingDeleteInterceptor(
+					theFhirContext,
+					theDaoRegistry,
+					theInterceptorBroadcaster,
+					threadSafeResourceDeleterSvc);
+	}
+
+	@Bean
+	public ExternallyStoredResourceServiceRegistry ExternallyStoredResourceServiceRegistry() {
+		return new ExternallyStoredResourceServiceRegistry();
+	}
+
+	@Lazy
+	@Bean
+	public ThreadSafeResourceDeleterSvc safeDeleter(
+				DaoRegistry theDaoRegistry,
+				IInterceptorBroadcaster theInterceptorBroadcaster,
+				HapiTransactionService hapiTransactionService) {
+		return new ThreadSafeResourceDeleterSvc(
+					theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	}
+
+	@Lazy
+	@Bean
+	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(
+				IValidationSupport theValidationSupport,
+				ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		return new ResponseTerminologyTranslationInterceptor(
+					theValidationSupport, theResponseTerminologyTranslationSvc);
+	}
+
+	@Bean
+	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(
+				IValidationSupport theValidationSupport) {
+		return new ResponseTerminologyTranslationSvc(theValidationSupport);
+	}
+
+	@Bean
+	@Lazy
+	public IGraphQLStorageServices graphqlStorageServices() {
+		return new DaoRegistryGraphQLStorageServices();
+	}
+
+	@Bean
+	public ScheduledExecutorFactoryBean scheduledExecutorService() {
+		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
+		b.setPoolSize(5);
+		b.afterPropertiesSet();
+		return b;
+	}
+
+	@Bean(name = "mySubscriptionTriggeringProvider")
+	@Lazy
+	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
+		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
+		if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+				return new ValueSetOperationProviderDstu2();
+		}
+		return new ValueSetOperationProvider();
+	}
+
+	@Bean
+	public IJpaStorageResourceParser jpaStorageResourceParser() {
+		return new JpaStorageResourceParser();
+	}
+
+	@Bean
+	public TransactionProcessor transactionProcessor() {
+		return new TransactionProcessor();
+	}
+
+	@Bean(name = "myAttachmentBinaryAccessProvider")
+	@Lazy
+	public BinaryAccessProvider binaryAccessProvider() {
+		return new BinaryAccessProvider();
+	}
+
+	@Bean(name = "myBinaryStorageInterceptor")
+	@Lazy
+	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(
+				JpaStorageSettings theStorageSettings, FhirContext theCtx) {
+		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor =
+					new BinaryStorageInterceptor<>(theCtx);
+		interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(
+					theStorageSettings.getAutoInflateBinariesMaximumBytes());
+		return interceptor;
+	}
+
+	@Bean
+	public MemoryCacheService memoryCacheService(JpaStorageSettings theStorageSettings) {
+		return new MemoryCacheService(theStorageSettings);
+	}
+
+	@Bean
+	@Primary
+	public IResourceLinkResolver daoResourceLinkResolver() {
+		return new DaoResourceLinkResolver<JpaPid>();
+	}
+
+	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
+	public IHapiPackageCacheManager packageCacheManager() {
+		return new JpaPackageCache();
+	}
+
+	@Bean
+	public NpmJpaValidationSupport npmJpaValidationSupport() {
+		return new NpmJpaValidationSupport();
+	}
+
+	@Bean
+	public ValidationSettings validationSettings() {
+		return new ValidationSettings();
+	}
+
+	@Bean
+	public ISearchCacheSvc searchCacheSvc() {
+		return new DatabaseSearchCacheSvcImpl();
+	}
+
+	@Bean
+	public ISearchResultCacheSvc searchResultCacheSvc() {
+		return new DatabaseSearchResultCacheSvcImpl();
+	}
+
+	@Bean
+	public ITermConceptMappingSvc termConceptMappingSvc() {
+		return new TermConceptMappingSvcImpl();
+	}
+
+	@Bean
+	public TaskScheduler taskScheduler() {
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
+		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		return retVal;
+	}
+
+	@Bean(name = TASK_EXECUTOR_NAME)
+	public AsyncTaskExecutor taskExecutor() {
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
+		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		return retVal;
+	}
+
+	@Bean
+	public IResourceReindexingSvc resourceReindexingSvc() {
+		return new ResourceReindexingSvcImpl();
+	}
+
+	@Bean
+	@Lazy
+	public IInstanceReindexService instanceReindexService() {
+		return new InstanceReindexServiceImpl();
+	}
+
+	@Bean
+	@Lazy
+	public InstanceReindexProvider instanceReindexProvider(
+				IInstanceReindexService theInstanceReindexService) {
+		return new InstanceReindexProvider(theInstanceReindexService);
+	}
+
+	@Bean
+	public ResourceReindexer resourceReindexer(FhirContext theFhirContext) {
+		return new ResourceReindexer(theFhirContext);
+	}
+
+	@Bean
+	public HapiFhirHibernateJpaDialect hibernateJpaDialect(FhirContext theFhirContext) {
+		return new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer());
+	}
+
+	@Bean
+	@Lazy
+	public OverridePathBasedReferentialIntegrityForDeletesInterceptor
+				overridePathBasedReferentialIntegrityForDeletesInterceptor() {
+		return new OverridePathBasedReferentialIntegrityForDeletesInterceptor();
+	}
+
+	@Bean
+	public IRequestPartitionHelperSvc requestPartitionHelperService() {
+		return new RequestPartitionHelperSvc();
+	}
+
+	@Bean
+	public HapiTransactionService hapiTransactionService() {
+		return new JpaHapiTransactionService();
+	}
+
+	@Bean
+	public IInterceptorService jpaInterceptorService() {
+		return new InterceptorService("JPA");
+	}
+
+	@Bean
+	public IPackageInstallerSvc npmInstallerSvc() {
+		return new PackageInstallerSvcImpl();
+	}
+
+	@Bean
+	public IConsentContextServices consentContextServices() {
+		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	@Lazy
+	public DiffProvider diffProvider() {
+		return new DiffProvider();
+	}
+
+	@Bean
+	@Lazy
+	public IPartitionLookupSvc partitionConfigSvc() {
+		return new PartitionLookupSvcImpl();
+	}
+
+	@Bean
+	@Lazy
+	public PartitionManagementProvider partitionManagementProvider() {
+		return new PartitionManagementProvider();
+	}
+
+	@Bean
+	@Lazy
+	public RequestTenantPartitionInterceptor requestTenantPartitionInterceptor() {
+		return new RequestTenantPartitionInterceptor();
+	}
+
+	@Bean
+	public MdmLinkExpandSvc mdmLinkExpandSvc() {
+		return new MdmLinkExpandSvc();
+	}
+
+	@Bean
+	@Lazy
+	public TerminologyUploaderProvider terminologyUploaderProvider() {
+		return new TerminologyUploaderProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ProcessMessageProvider processMessageProvider() {
+		return new ProcessMessageProvider();
+	}
+
+	@Bean
+	public ISchedulerService schedulerService() {
+		return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
+	}
+
+	@Bean
+	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
+		return new AutowiringSpringBeanJobFactory();
+	}
+
+	@Bean
+	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(
+				DaoRegistry theDaoRegistry,
+				PlatformTransactionManager theTxManager,
+				JpaStorageSettings theStorageSettings,
+				BulkExportHelperService theBulkExportHelperSvc,
+				IJobPersistence theJpaJobPersistence) {
+		return new BulkDataExportJobSchedulingHelperImpl(
+					theDaoRegistry,
+					theTxManager,
+					theStorageSettings,
+					theBulkExportHelperSvc,
+					theJpaJobPersistence,
+					null);
+	}
+
+	@Bean
+	@Lazy
+	public BulkDataExportProvider bulkDataExportProvider() {
+		return new BulkDataExportProvider();
+	}
+
+	@Bean
+	@Lazy
+	public IDeleteExpungeJobSubmitter deleteExpungeJobSubmitter() {
+		return new DeleteExpungeJobSubmitterImpl();
+	}
+
+	@Bean
+	@Lazy
+	public IBulkDataImportSvc bulkDataImportSvc() {
+		return new BulkDataImportSvcImpl();
+	}
+
+	@Bean
+	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
+		return new PersistedJpaBundleProviderFactory();
+	}
+
+	@Bean
+	public SearchBuilderFactory searchBuilderFactory() {
+		return new SearchBuilderFactory();
+	}
+
+	@Bean
+	public SqlObjectFactory sqlBuilderFactory() {
+		return new SqlObjectFactory();
+	}
+
+	@Bean
+	public HibernatePropertiesProvider HibernatePropertiesProvider() {
+		return new HibernatePropertiesProvider();
+	}
+
+	@Bean
+	public HistoryBuilderFactory historyBuilderFactory() {
+		return new HistoryBuilderFactory();
+	}
+
+	@Bean
+	public IResourceVersionSvc resourceVersionSvc() {
+		return new ResourceVersionSvcDaoImpl();
+	}
+
+	/* **************************************************************** *
+	* Prototype Beans Below                                            *
+	* **************************************************************** */
+
+	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(
+				RequestDetails theRequest, String theUuid) {
+		return new PersistedJpaBundleProvider(theRequest, theUuid);
+	}
+
+	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
+	@Scope("prototype")
+	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(
+				RequestDetails theRequest, Search theSearch) {
+		return new PersistedJpaBundleProvider(theRequest, theSearch);
+	}
+
+	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
+	@Scope("prototype")
+	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
+				RequestDetails theRequest,
+				Search theSearch,
+				SearchTask theSearchTask,
+				ISearchBuilder theSearchBuilder,
+				RequestPartitionId theRequestPartitionId) {
+		return new PersistedJpaSearchFirstPageBundleProvider(
+					theSearch, theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+	}
+
+	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
+	@Scope("prototype")
+	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder(
+				IValidationSupport theValidationSupport) {
+		return new RepositoryValidatingRuleBuilder(theValidationSupport);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
+				SearchQueryBuilder theSearchSqlBuilder) {
+		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ComboNonUniqueSearchParameterPredicateBuilder
+				newComboNonUniqueSearchParameterPredicateBuilder(
+						SearchQueryBuilder theSearchSqlBuilder) {
+		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public CoordsPredicateBuilder newCoordsPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new CoordsPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public DatePredicateBuilder newDatePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new DatePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ForcedIdPredicateBuilder newForcedIdPredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new ForcedIdPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public NumberPredicateBuilder newNumberPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new NumberPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuantityPredicateBuilder newQuantityPredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new QuantityPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
+				QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
+		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder, theReversed);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new ResourceTablePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TagPredicateBuilder newTagPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new TagPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ResourceIdPredicateBuilder newResourceIdPredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new ResourceIdPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
+				SearchQueryBuilder theSearchBuilder) {
+		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public StringPredicateBuilder newStringPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new StringPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public TokenPredicateBuilder newTokenPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new TokenPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SourcePredicateBuilder newSourcePredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new SourcePredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public UriPredicateBuilder newUriPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new UriPredicateBuilder(theSearchBuilder);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SearchQueryExecutor newSearchQueryExecutor(
+				GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
+		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
+	}
+
+	@Bean(name = HISTORY_BUILDER)
+	@Scope("prototype")
+	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(
+				@Nullable String theResourceType,
+				@Nullable Long theResourceId,
+				@Nullable Date theRangeStartInclusive,
+				@Nullable Date theRangeEndInclusive) {
+		return new HistoryBuilder(
+					theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean
+	@Primary
+	public ISearchParamProvider searchParamProvider() {
+		return new DaoSearchParamProvider();
+	}
+
+	@Bean
+	public IIdHelperService idHelperService() {
+		return new IdHelperService();
+	}
+
+	@Bean
+	public SearchStrategyFactory searchStrategyFactory(
+				@Autowired(required = false) IFulltextSearchSvc theFulltextSvc) {
+		return new SearchStrategyFactory(myStorageSettings, theFulltextSvc);
+	}
+
+	@Bean
+	public DeleteConflictService deleteConflictService() {
+		return new DeleteConflictService();
+	}
+
+	@Bean
+	public DeleteConflictFinderService deleteConflictFinderService() {
+		return new DeleteConflictFinderService();
+	}
+
+	@Bean
+	public ExpungeService expungeService() {
+		return new ExpungeService();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ExpungeOperation expungeOperation(
+				String theResourceName,
+				IResourcePersistentId theResourceId,
+				ExpungeOptions theExpungeOptions,
+				RequestDetails theRequestDetails) {
+		return new ExpungeOperation(
+					theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
+	}
+
+	@Bean
+	public IExpungeEverythingService expungeEverythingService() {
+		return new ExpungeEverythingService();
+	}
+
+	@Bean
+	public IResourceExpungeService resourceExpungeService() {
+		return new JpaResourceExpungeService();
+	}
+
+	@Bean
+	public ISearchParamPresenceSvc searchParamPresenceService() {
+		return new SearchParamPresenceSvcImpl();
+	}
+
+	@Bean
+	public SearchParamWithInlineReferencesExtractor searchParamWithInlineReferencesExtractor() {
+		return new SearchParamWithInlineReferencesExtractor();
+	}
+
+	@Bean
+	public MatchResourceUrlService matchResourceUrlService() {
+		return new MatchResourceUrlService();
+	}
+
+	@Bean
+	public DaoSearchParamSynchronizer daoSearchParamSynchronizer() {
+		return new DaoSearchParamSynchronizer();
+	}
+
+	@Bean
+	public ResourceTableFKProvider resourceTableFKProvider() {
+		return new ResourceTableFKProvider();
+	}
+
+	@Bean
+	public ICacheWarmingSvc cacheWarmingSvc() {
+		return new CacheWarmingSvcImpl();
+	}
+
+	@Bean
+	public IndexNamePrefixLayoutStrategy indexLayoutStrategy() {
+		return new IndexNamePrefixLayoutStrategy();
+	}
+
+	@Bean
+	public ResourceLoaderImpl jpaResourceLoader() {
+		return new ResourceLoaderImpl();
+	}
+
+	@Bean
+	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(
+				FhirContext theFhirContext) {
+		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
+	}
+
+	@Bean
+	public ISynchronousSearchSvc synchronousSearchSvc() {
+		return new SynchronousSearchSvcImpl();
+	}
+
+	@Bean
+	public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
+		return new VersionCanonicalizer(theFhirContext);
+	}
+
+	@Bean
+	public SearchParameterDaoValidator searchParameterDaoValidator(
+				FhirContext theFhirContext,
+				JpaStorageSettings theStorageSettings,
+				ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(
+					theFhirContext, theStorageSettings, theSearchParamRegistry);
+	}
+
+	@Bean
+	public ITermReadSvc terminologyService() {
+		return new TermReadSvcImpl();
+	}
+
+	@Bean
+	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
+		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public ITermReindexingSvc termReindexingSvc() {
+		return new TermReindexingSvcImpl();
+	}
+
+	@Bean
+	public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {
+		return new ObservationLastNIndexPersistSvc();
+	}
+
+	@Bean
+	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
+		return new MdmLinkDaoJpaImpl();
+	}
+
+	@Bean
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
+		return new JpaMdmLinkImplFactory();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public PersistenceContextProvider persistenceContextProvider() {
+		return new PersistenceContextProvider();
+	}
+
+	@Bean
+	public ResourceSearchUrlSvc resourceSearchUrlSvc(
+				PersistenceContextProvider thePersistenceContextProvider,
+				IResourceSearchUrlDao theResourceSearchUrlDao,
+				MatchUrlService theMatchUrlService,
+				FhirContext theFhirContext) {
+		return new ResourceSearchUrlSvc(
+					thePersistenceContextProvider.getEntityManager(),
+					theResourceSearchUrlDao,
+					theMatchUrlService,
+					theFhirContext);
+	}
+
+	@Bean
+	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(
+				ResourceSearchUrlSvc theResourceSearchUrlSvc) {
+		return new SearchUrlJobMaintenanceSvcImpl(theResourceSearchUrlSvc);
+	}
 }

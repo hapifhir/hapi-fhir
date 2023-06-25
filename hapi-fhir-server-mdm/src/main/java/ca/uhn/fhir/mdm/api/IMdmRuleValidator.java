@@ -22,5 +22,5 @@ package ca.uhn.fhir.mdm.api;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
 public interface IMdmRuleValidator {
-    void validate(MdmRulesJson theMdmRules);
+	void validate(MdmRulesJson theMdmRules);
 }

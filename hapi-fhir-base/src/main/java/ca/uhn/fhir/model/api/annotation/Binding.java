@@ -29,6 +29,6 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.FIELD})
 public @interface Binding {
 
-    /** The canonical URL of the valueset */
-    String valueSet();
+	/** The canonical URL of the valueset */
+	String valueSet();
 }

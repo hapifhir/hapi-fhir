@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 public interface IResourceProviderFactoryObserver {
-    void update(@Nonnull Supplier<Object> theSupplier);
+	void update(@Nonnull Supplier<Object> theSupplier);
 
-    void remove(@Nonnull Supplier<Object> theSupplier);
+	void remove(@Nonnull Supplier<Object> theSupplier);
 }

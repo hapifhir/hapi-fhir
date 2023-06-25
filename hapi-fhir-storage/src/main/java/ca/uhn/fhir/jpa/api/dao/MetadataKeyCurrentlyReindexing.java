@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
 public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeyEnum<Boolean> {
-    private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 2L;
 
-    MetadataKeyCurrentlyReindexing(String theValue) {
-        super(theValue, Boolean.class);
-    }
+	MetadataKeyCurrentlyReindexing(String theValue) {
+		super(theValue, Boolean.class);
+	}
 }

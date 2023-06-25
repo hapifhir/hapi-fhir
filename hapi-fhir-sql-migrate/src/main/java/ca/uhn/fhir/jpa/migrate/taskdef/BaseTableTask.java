@@ -19,56 +19,56 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import java.util.Objects;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Objects;
+
 public abstract class BaseTableTask extends BaseTask {
-    private String myTableName;
+	private String myTableName;
 
-    public BaseTableTask(String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    public String getTableName() {
-        return myTableName;
-    }
+	public String getTableName() {
+		return myTableName;
+	}
 
-    public BaseTableTask setTableName(String theTableName) {
-        Validate.notBlank(theTableName);
-        myTableName = theTableName;
-        return this;
-    }
+	public BaseTableTask setTableName(String theTableName) {
+		Validate.notBlank(theTableName);
+		myTableName = theTableName;
+		return this;
+	}
 
-    @Override
-    public void validate() {
-        Validate.notBlank(myTableName);
-    }
+	@Override
+	public void validate() {
+		Validate.notBlank(myTableName);
+	}
 
-    @Override
-    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-        BaseTableTask otherObject = (BaseTableTask) theOtherObject;
-        theBuilder.append(myTableName, otherObject.myTableName);
-    }
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		BaseTableTask otherObject = (BaseTableTask) theOtherObject;
+		theBuilder.append(myTableName, otherObject.myTableName);
+	}
 
-    protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
-        String retVal =
-                ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
-                        .get(theColumnType)
-                        .get(getDriverType());
-        Objects.requireNonNull(retVal);
+	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
+		String retVal =
+					ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
+								.get(theColumnType)
+								.get(getDriverType());
+		Objects.requireNonNull(retVal);
 
-        if (theColumnType == ColumnTypeEnum.STRING) {
-            retVal = retVal.replace("?", Long.toString(theColumnLength));
-        }
+		if (theColumnType == ColumnTypeEnum.STRING) {
+				retVal = retVal.replace("?", Long.toString(theColumnLength));
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        theBuilder.append(myTableName);
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		theBuilder.append(myTableName);
+	}
 }

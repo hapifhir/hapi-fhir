@@ -28,6 +28,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface IServerAddressStrategy {
 
-    /** Determine the server base for a given request */
-    String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest);
+	/** Determine the server base for a given request */
+	String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest);
 }

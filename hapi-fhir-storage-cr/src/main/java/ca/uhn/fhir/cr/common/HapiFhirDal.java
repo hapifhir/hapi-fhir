@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 @SuppressWarnings("unchecked")
 /**
@@ -35,62 +34,62 @@ import ca.uhn.fhir.rest.param.UriParam;
  */
 public class HapiFhirDal implements FhirDal {
 
-    protected final DaoRegistry myDaoRegistry;
-    protected final RequestDetails myRequestDetails;
+	protected final DaoRegistry myDaoRegistry;
+	protected final RequestDetails myRequestDetails;
 
-    public HapiFhirDal(DaoRegistry theDaoRegistry) {
-        this(theDaoRegistry, null);
-    }
+	public HapiFhirDal(DaoRegistry theDaoRegistry) {
+		this(theDaoRegistry, null);
+	}
 
-    public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
-        this.myDaoRegistry = theDaoRegistry;
-        this.myRequestDetails = theRequestDetails;
-    }
+	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
+		this.myDaoRegistry = theDaoRegistry;
+		this.myRequestDetails = theRequestDetails;
+	}
 
-    @Override
-    public void create(IBaseResource theResource) {
-        this.myDaoRegistry
-                .getResourceDao(theResource.fhirType())
-                .create(theResource, myRequestDetails);
-    }
+	@Override
+	public void create(IBaseResource theResource) {
+		this.myDaoRegistry
+					.getResourceDao(theResource.fhirType())
+					.create(theResource, myRequestDetails);
+	}
 
-    @Override
-    public IBaseResource read(IIdType theId) {
-        return this.myDaoRegistry
-                .getResourceDao(theId.getResourceType())
-                .read(theId, myRequestDetails);
-    }
+	@Override
+	public IBaseResource read(IIdType theId) {
+		return this.myDaoRegistry
+					.getResourceDao(theId.getResourceType())
+					.read(theId, myRequestDetails);
+	}
 
-    @Override
-    public void update(IBaseResource theResource) {
-        this.myDaoRegistry
-                .getResourceDao(theResource.fhirType())
-                .update(theResource, myRequestDetails);
-    }
+	@Override
+	public void update(IBaseResource theResource) {
+		this.myDaoRegistry
+					.getResourceDao(theResource.fhirType())
+					.update(theResource, myRequestDetails);
+	}
 
-    @Override
-    public void delete(IIdType theId) {
-        this.myDaoRegistry.getResourceDao(theId.getResourceType()).delete(theId, myRequestDetails);
-    }
+	@Override
+	public void delete(IIdType theId) {
+		this.myDaoRegistry.getResourceDao(theId.getResourceType()).delete(theId, myRequestDetails);
+	}
 
-    // TODO: the search interfaces need some work
-    @Override
-    public Iterable<IBaseResource> search(String theResourceType) {
-        var b =
-                this.myDaoRegistry
-                        .getResourceDao(theResourceType)
-                        .search(new SearchParameterMap(), myRequestDetails);
-        return new BundleIterable(myRequestDetails, b);
-    }
+	// TODO: the search interfaces need some work
+	@Override
+	public Iterable<IBaseResource> search(String theResourceType) {
+		var b =
+					this.myDaoRegistry
+								.getResourceDao(theResourceType)
+								.search(new SearchParameterMap(), myRequestDetails);
+		return new BundleIterable(myRequestDetails, b);
+	}
 
-    @Override
-    public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-        var b =
-                this.myDaoRegistry
-                        .getResourceDao(theResourceType)
-                        .search(
-                                new SearchParameterMap().add("url", new UriParam(theUrl)),
-                                myRequestDetails);
-        return new BundleIterable(myRequestDetails, b);
-    }
+	@Override
+	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
+		var b =
+					this.myDaoRegistry
+								.getResourceDao(theResourceType)
+								.search(
+										new SearchParameterMap().add("url", new UriParam(theUrl)),
+										myRequestDetails);
+		return new BundleIterable(myRequestDetails, b);
+	}
 }

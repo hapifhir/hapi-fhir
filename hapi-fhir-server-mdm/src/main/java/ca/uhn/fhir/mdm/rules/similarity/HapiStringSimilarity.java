@@ -19,35 +19,34 @@
  */
 package ca.uhn.fhir.mdm.rules.similarity;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.rules.matcher.util.StringMatcherUtils;
 import info.debatty.java.stringsimilarity.interfaces.NormalizedStringSimilarity;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Similarity measure for two IBase fields whose similarity can be measured by their String
  * representations.
  */
 public class HapiStringSimilarity implements IMdmFieldSimilarity {
-    private final NormalizedStringSimilarity myStringSimilarity;
+	private final NormalizedStringSimilarity myStringSimilarity;
 
-    public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
-        myStringSimilarity = theStringSimilarity;
-    }
+	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
+		myStringSimilarity = theStringSimilarity;
+	}
 
-    @Override
-    public double similarity(
-            FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
-        if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-            String leftString =
-                    StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact);
-            String rightString =
-                    StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact);
+	@Override
+	public double similarity(
+				FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
+		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
+				String leftString =
+						StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact);
+				String rightString =
+						StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact);
 
-            return myStringSimilarity.similarity(leftString, rightString);
-        }
-        return 0.0;
-    }
+				return myStringSimilarity.similarity(leftString, rightString);
+		}
+		return 0.0;
+	}
 }

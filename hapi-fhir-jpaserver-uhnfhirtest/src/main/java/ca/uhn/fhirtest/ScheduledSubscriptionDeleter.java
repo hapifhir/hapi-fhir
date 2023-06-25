@@ -1,9 +1,10 @@
 package ca.uhn.fhirtest;
 
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -13,11 +14,9 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This is just a quick and dirty utility class to purge subscriptions on the public test server
@@ -27,52 +26,52 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
  */
 public class ScheduledSubscriptionDeleter {
 
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(ScheduledSubscriptionDeleter.class);
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(ScheduledSubscriptionDeleter.class);
 
-    @Autowired private DaoRegistry myDaoRegistry;
+	@Autowired private DaoRegistry myDaoRegistry;
 
-    private Timer myTimer;
+	private Timer myTimer;
 
-    @EventListener(ContextRefreshedEvent.class)
-    public void start() {
-        if (myTimer == null) {
-            myTimer = new Timer();
-            myTimer.scheduleAtFixedRate(new MyTimerTask(), 0, DateUtils.MILLIS_PER_HOUR);
-        }
-    }
+	@EventListener(ContextRefreshedEvent.class)
+	public void start() {
+		if (myTimer == null) {
+				myTimer = new Timer();
+				myTimer.scheduleAtFixedRate(new MyTimerTask(), 0, DateUtils.MILLIS_PER_HOUR);
+		}
+	}
 
-    @EventListener(ContextClosedEvent.class)
-    public void stop() {
-        myTimer.cancel();
-        myTimer = null;
-    }
+	@EventListener(ContextClosedEvent.class)
+	public void stop() {
+		myTimer.cancel();
+		myTimer = null;
+	}
 
-    private class MyTimerTask extends TimerTask {
+	private class MyTimerTask extends TimerTask {
 
-        @Override
-        public void run() {
-            deleteOldSubscriptions();
-        }
+		@Override
+		public void run() {
+				deleteOldSubscriptions();
+		}
 
-        private void deleteOldSubscriptions() {
-            if (myDaoRegistry.isResourceTypeSupported("Subscription")) {
-                int count = 10;
-                Date cutoff = DateUtils.addDays(new Date(), -1);
+		private void deleteOldSubscriptions() {
+				if (myDaoRegistry.isResourceTypeSupported("Subscription")) {
+					int count = 10;
+					Date cutoff = DateUtils.addDays(new Date(), -1);
 
-                IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-                SearchParameterMap params = SearchParameterMap.newSynchronous().setCount(count);
-                IBundleProvider subscriptions =
-                        subscriptionDao.search(params, new SystemRequestDetails());
-                for (IBaseResource next : subscriptions.getResources(0, count)) {
-                    if (next.getMeta().getLastUpdated().before(cutoff)) {
-                        ourLog.info("Auto deleting old subscription: {}", next.getIdElement());
-                        subscriptionDao.delete(
-                                next.getIdElement().toUnqualifiedVersionless(),
-                                new SystemRequestDetails());
-                    }
-                }
-            }
-        }
-    }
+					IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+					SearchParameterMap params = SearchParameterMap.newSynchronous().setCount(count);
+					IBundleProvider subscriptions =
+								subscriptionDao.search(params, new SystemRequestDetails());
+					for (IBaseResource next : subscriptions.getResources(0, count)) {
+						if (next.getMeta().getLastUpdated().before(cutoff)) {
+								ourLog.info("Auto deleting old subscription: {}", next.getIdElement());
+								subscriptionDao.delete(
+										next.getIdElement().toUnqualifiedVersionless(),
+										new SystemRequestDetails());
+						}
+					}
+				}
+		}
+	}
 }

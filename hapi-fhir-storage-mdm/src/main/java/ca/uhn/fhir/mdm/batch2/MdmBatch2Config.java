@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAME;
 import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
@@ -37,14 +36,14 @@ import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_
 @Configuration
 @Import({MdmClearAppCtx.class, MdmSubmitAppCtx.class})
 public class MdmBatch2Config {
-    @Bean
-    MdmJobDefinitionLoader mdmJobDefinitionLoader(
-            JobDefinitionRegistry theJobDefinitionRegistry,
-            @Qualifier(MDM_CLEAR_JOB_BEAN_NAME)
-                    JobDefinition<MdmClearJobParameters> theClearJobDefinition,
-            @Qualifier(MDM_SUBMIT_JOB_BEAN_NAME)
-                    JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
-        return new MdmJobDefinitionLoader(
-                theJobDefinitionRegistry, theClearJobDefinition, theSubmitJobDefinition);
-    }
+	@Bean
+	MdmJobDefinitionLoader mdmJobDefinitionLoader(
+				JobDefinitionRegistry theJobDefinitionRegistry,
+				@Qualifier(MDM_CLEAR_JOB_BEAN_NAME)
+						JobDefinition<MdmClearJobParameters> theClearJobDefinition,
+				@Qualifier(MDM_SUBMIT_JOB_BEAN_NAME)
+						JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
+		return new MdmJobDefinitionLoader(
+					theJobDefinitionRegistry, theClearJobDefinition, theSubmitJobDefinition);
+	}
 }

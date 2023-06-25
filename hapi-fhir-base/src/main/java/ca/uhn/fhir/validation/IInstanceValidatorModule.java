@@ -25,6 +25,6 @@ package ca.uhn.fhir.validation;
  */
 public interface IInstanceValidatorModule extends IValidatorModule {
 
-    // nothing extra yet
+	// nothing extra yet
 
 }

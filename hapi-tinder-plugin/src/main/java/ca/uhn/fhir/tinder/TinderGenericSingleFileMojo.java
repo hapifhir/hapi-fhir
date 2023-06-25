@@ -1,15 +1,12 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.parser.BaseStructureParser;
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.TargetType;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -23,13 +20,15 @@ import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
-import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
-import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.parser.BaseStructureParser;
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.TargetType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Generate a single file based on resource or composite type metadata.
@@ -199,291 +198,291 @@ import ca.uhn.fhir.tinder.parser.TargetType;
 @Mojo(name = "generate-single-file", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderGenericSingleFileMojo extends AbstractMojo {
 
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(TinderGenericSingleFileMojo.class);
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(TinderGenericSingleFileMojo.class);
 
-    @Parameter(required = true)
-    private String version;
+	@Parameter(required = true)
+	private String version;
 
-    @Parameter(required = true, defaultValue = "${project.build.directory}/..")
-    private String baseDir;
+	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
+	private String baseDir;
 
-    @Parameter(required = false, defaultValue = "false")
-    private boolean generateResources;
+	@Parameter(required = false, defaultValue = "false")
+	private boolean generateResources;
 
-    @Parameter(required = false, defaultValue = "false")
-    private boolean generateDatatypes;
+	@Parameter(required = false, defaultValue = "false")
+	private boolean generateDatatypes;
 
-    @Parameter(required = false)
-    private File targetSourceDirectory;
+	@Parameter(required = false)
+	private File targetSourceDirectory;
 
-    @Parameter(required = false)
-    private String targetPackage;
+	@Parameter(required = false)
+	private String targetPackage;
 
-    @Parameter(required = false)
-    private String packageBase;
+	@Parameter(required = false)
+	private String packageBase;
 
-    @Parameter(required = false)
-    private File targetResourceDirectory;
+	@Parameter(required = false)
+	private File targetResourceDirectory;
 
-    @Parameter(required = false)
-    private String targetFolder;
+	@Parameter(required = false)
+	private String targetFolder;
 
-    @Parameter(required = false)
-    private String targetFile;
+	@Parameter(required = false)
+	private String targetFile;
 
-    // one of these two is required
-    @Parameter(required = false)
-    private String template;
+	// one of these two is required
+	@Parameter(required = false)
+	private String template;
 
-    @Parameter(required = false)
-    private File templateFile;
+	@Parameter(required = false)
+	private File templateFile;
 
-    @Parameter(required = false)
-    private String velocityPath;
+	@Parameter(required = false)
+	private String velocityPath;
 
-    @Parameter(required = false)
-    private String velocityProperties;
+	@Parameter(required = false)
+	private String velocityProperties;
 
-    @Parameter(required = false)
-    private List<String> includeResources;
+	@Parameter(required = false)
+	private List<String> includeResources;
 
-    @Parameter(required = false)
-    private List<String> excludeResources;
+	@Parameter(required = false)
+	private List<String> excludeResources;
 
-    @Parameter(required = false)
-    private String resourceSource;
+	@Parameter(required = false)
+	private String resourceSource;
 
-    @Parameter(required = false)
-    private List<ValueSetFileDefinition> valueSetFiles;
+	@Parameter(required = false)
+	private List<ValueSetFileDefinition> valueSetFiles;
 
-    @Component private MavenProject myProject;
+	@Component private MavenProject myProject;
 
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+	@Override
+	public void execute() throws MojoExecutionException, MojoFailureException {
 
-        GeneratorContext context = new GeneratorContext();
-        Generator generator = new Generator();
-        try {
-            context.setVersion(version);
-            context.setBaseDir(baseDir);
-            context.setIncludeResources(includeResources);
-            context.setExcludeResources(excludeResources);
-            context.setResourceSource(resourceSource);
-            context.setValueSetFiles(valueSetFiles);
-            if (ResourceSource.MODEL.equals(context.getResourceSource())) {
-                if (generateDatatypes) {
-                    throw new MojoFailureException(
-                            Msg.code(120)
-                                    + "Cannot use \"generateDatatypes\" when resourceSource=model");
-                }
-            }
+		GeneratorContext context = new GeneratorContext();
+		Generator generator = new Generator();
+		try {
+				context.setVersion(version);
+				context.setBaseDir(baseDir);
+				context.setIncludeResources(includeResources);
+				context.setExcludeResources(excludeResources);
+				context.setResourceSource(resourceSource);
+				context.setValueSetFiles(valueSetFiles);
+				if (ResourceSource.MODEL.equals(context.getResourceSource())) {
+					if (generateDatatypes) {
+						throw new MojoFailureException(
+									Msg.code(120)
+												+ "Cannot use \"generateDatatypes\" when resourceSource=model");
+					}
+				}
 
-            generator.prepare(context);
-        } catch (FailureException e) {
-            throw new MojoFailureException(Msg.code(121) + e.getMessage(), e.getCause());
-        }
+				generator.prepare(context);
+		} catch (FailureException e) {
+				throw new MojoFailureException(Msg.code(121) + e.getMessage(), e.getCause());
+		}
 
-        try {
-            /*
-             * Deal with the generation target
-             */
-            TargetType targetType;
-            File targetDirectory = null;
-            if (null == targetFile) {
-                throw new MojoFailureException(
-                        Msg.code(122) + "The [targetFile] parameter is required.");
-            }
-            if (targetSourceDirectory != null) {
-                if (targetResourceDirectory != null) {
-                    throw new MojoFailureException(
-                            Msg.code(123)
-                                    + "Both [targetSourceDirectory] and [targetResourceDirectory]"
-                                    + " are specified. Please choose just one.");
-                }
-                targetType = TargetType.SOURCE;
-                if (null == targetPackage) {
-                    throw new MojoFailureException(
-                            Msg.code(124)
-                                    + "The [targetPackage] property must be specified when"
-                                    + " generating Java source code.");
-                }
-                targetDirectory =
-                        new File(
-                                targetSourceDirectory,
-                                targetPackage.replace('.', File.separatorChar));
-                if (!targetFile.endsWith(".java")) {
-                    targetFile += ".java";
-                }
-            } else if (targetResourceDirectory != null) {
-                if (targetSourceDirectory != null) {
-                    throw new MojoFailureException(
-                            Msg.code(125)
-                                    + "Both [targetSourceDirectory] and [targetResourceDirectory]"
-                                    + " are specified. Please choose just one.");
-                }
-                targetType = TargetType.RESOURCE;
-                if (targetFolder != null) {
-                    targetFolder = targetFolder.replace('\\', '/');
-                    targetFolder = targetFolder.replace('/', File.separatorChar);
-                    targetDirectory = new File(targetResourceDirectory, targetFolder);
-                } else {
-                    targetDirectory = targetResourceDirectory;
-                }
-                if (null == targetPackage) {
-                    targetPackage = "";
-                }
-            } else {
-                throw new MojoFailureException(
-                        Msg.code(126)
-                                + "Either [targetSourceDirectory] or [targetResourceDirectory] must"
-                                + " be specified.");
-            }
-            ourLog.info(
-                    " * Output ["
-                            + targetType.toString()
-                            + "] file ["
-                            + targetFile
-                            + "] in directory: "
-                            + targetDirectory.getAbsolutePath());
-            targetDirectory.mkdirs();
-            File target = new File(targetDirectory, targetFile);
-            OutputStreamWriter targetWriter =
-                    new OutputStreamWriter(
-                            new FileOutputStream(target, false), StandardCharsets.UTF_8);
+		try {
+				/*
+				 * Deal with the generation target
+				 */
+				TargetType targetType;
+				File targetDirectory = null;
+				if (null == targetFile) {
+					throw new MojoFailureException(
+								Msg.code(122) + "The [targetFile] parameter is required.");
+				}
+				if (targetSourceDirectory != null) {
+					if (targetResourceDirectory != null) {
+						throw new MojoFailureException(
+									Msg.code(123)
+												+ "Both [targetSourceDirectory] and [targetResourceDirectory]"
+												+ " are specified. Please choose just one.");
+					}
+					targetType = TargetType.SOURCE;
+					if (null == targetPackage) {
+						throw new MojoFailureException(
+									Msg.code(124)
+												+ "The [targetPackage] property must be specified when"
+												+ " generating Java source code.");
+					}
+					targetDirectory =
+								new File(
+										targetSourceDirectory,
+										targetPackage.replace('.', File.separatorChar));
+					if (!targetFile.endsWith(".java")) {
+						targetFile += ".java";
+					}
+				} else if (targetResourceDirectory != null) {
+					if (targetSourceDirectory != null) {
+						throw new MojoFailureException(
+									Msg.code(125)
+												+ "Both [targetSourceDirectory] and [targetResourceDirectory]"
+												+ " are specified. Please choose just one.");
+					}
+					targetType = TargetType.RESOURCE;
+					if (targetFolder != null) {
+						targetFolder = targetFolder.replace('\\', '/');
+						targetFolder = targetFolder.replace('/', File.separatorChar);
+						targetDirectory = new File(targetResourceDirectory, targetFolder);
+					} else {
+						targetDirectory = targetResourceDirectory;
+					}
+					if (null == targetPackage) {
+						targetPackage = "";
+					}
+				} else {
+					throw new MojoFailureException(
+								Msg.code(126)
+										+ "Either [targetSourceDirectory] or [targetResourceDirectory] must"
+										+ " be specified.");
+				}
+				ourLog.info(
+						" * Output ["
+									+ targetType.toString()
+									+ "] file ["
+									+ targetFile
+									+ "] in directory: "
+									+ targetDirectory.getAbsolutePath());
+				targetDirectory.mkdirs();
+				File target = new File(targetDirectory, targetFile);
+				OutputStreamWriter targetWriter =
+						new OutputStreamWriter(
+									new FileOutputStream(target, false), StandardCharsets.UTF_8);
 
-            /*
-             * Next, deal with the template and initialize velocity
-             */
-            VelocityEngine v =
-                    VelocityHelper.configureVelocityEngine(
-                            templateFile, velocityPath, velocityProperties);
-            InputStream templateIs;
-            if (templateFile != null) {
-                templateIs = new FileInputStream(templateFile);
-            } else {
-                templateIs = this.getClass().getResourceAsStream(template);
-            }
-            InputStreamReader templateReader = new InputStreamReader(templateIs);
+				/*
+				 * Next, deal with the template and initialize velocity
+				 */
+				VelocityEngine v =
+						VelocityHelper.configureVelocityEngine(
+									templateFile, velocityPath, velocityProperties);
+				InputStream templateIs;
+				if (templateFile != null) {
+					templateIs = new FileInputStream(templateFile);
+				} else {
+					templateIs = this.getClass().getResourceAsStream(template);
+				}
+				InputStreamReader templateReader = new InputStreamReader(templateIs);
 
-            /*
-             * build new Velocity Context
-             */
-            VelocityContext ctx = new VelocityContext();
-            if (packageBase != null) {
-                ctx.put("packageBase", packageBase);
-            } else if (targetPackage != null) {
-                int ix = targetPackage.lastIndexOf('.');
-                if (ix > 0) {
-                    ctx.put("packageBase", targetPackage.subSequence(0, ix));
-                } else {
-                    ctx.put("packageBase", targetPackage);
-                }
-            }
-            ctx.put("targetPackage", targetPackage);
-            ctx.put("targetFolder", targetFolder);
-            ctx.put("version", version);
-            ctx.put("isRi", BaseStructureParser.determineVersionEnum(version).isRi());
-            ctx.put("hash", "#");
-            ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
-            if (BaseStructureParser.determineVersionEnum(version).isRi()) {
-                ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
-            } else {
-                ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
-            }
+				/*
+				 * build new Velocity Context
+				 */
+				VelocityContext ctx = new VelocityContext();
+				if (packageBase != null) {
+					ctx.put("packageBase", packageBase);
+				} else if (targetPackage != null) {
+					int ix = targetPackage.lastIndexOf('.');
+					if (ix > 0) {
+						ctx.put("packageBase", targetPackage.subSequence(0, ix));
+					} else {
+						ctx.put("packageBase", targetPackage);
+					}
+				}
+				ctx.put("targetPackage", targetPackage);
+				ctx.put("targetFolder", targetFolder);
+				ctx.put("version", version);
+				ctx.put("isRi", BaseStructureParser.determineVersionEnum(version).isRi());
+				ctx.put("hash", "#");
+				ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
+				if (BaseStructureParser.determineVersionEnum(version).isRi()) {
+					ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
+				} else {
+					ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
+				}
 
-            String capitalize = WordUtils.capitalize(version);
-            if ("R4b".equals(capitalize)) {
-                capitalize = "R4B";
-            }
-            ctx.put("versionCapitalized", capitalize);
+				String capitalize = WordUtils.capitalize(version);
+				if ("R4b".equals(capitalize)) {
+					capitalize = "R4B";
+				}
+				ctx.put("versionCapitalized", capitalize);
 
-            /*
-             * Write resources if selected
-             */
-            BaseStructureParser rp = context.getResourceGenerator();
-            if (generateResources && rp != null) {
-                ourLog.info("Writing Resources...");
-                ctx.put("resources", rp.getResources());
-                v.evaluate(ctx, targetWriter, "", templateReader);
-                targetWriter.close();
-            } else {
-                DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
-                if (generateDatatypes && dtp != null) {
-                    ourLog.info("Writing DataTypes...");
-                    ctx.put("datatypes", dtp.getResources());
-                    v.evaluate(ctx, targetWriter, "", templateReader);
-                    targetWriter.close();
-                }
-            }
+				/*
+				 * Write resources if selected
+				 */
+				BaseStructureParser rp = context.getResourceGenerator();
+				if (generateResources && rp != null) {
+					ourLog.info("Writing Resources...");
+					ctx.put("resources", rp.getResources());
+					v.evaluate(ctx, targetWriter, "", templateReader);
+					targetWriter.close();
+				} else {
+					DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
+					if (generateDatatypes && dtp != null) {
+						ourLog.info("Writing DataTypes...");
+						ctx.put("datatypes", dtp.getResources());
+						v.evaluate(ctx, targetWriter, "", templateReader);
+						targetWriter.close();
+					}
+				}
 
-            switch (targetType) {
-                case SOURCE:
-                    {
-                        myProject.addCompileSourceRoot(targetSourceDirectory.getAbsolutePath());
-                        break;
-                    }
-                case RESOURCE:
-                    {
-                        Resource resource = new Resource();
-                        resource.setDirectory(targetResourceDirectory.getAbsolutePath());
-                        String resName = targetFile;
-                        if (targetFolder != null) {
-                            resName = targetFolder + File.separator + targetFile;
-                        }
-                        resource.addInclude(resName);
-                        myProject.addResource(resource);
-                        break;
-                    }
-                default:
-            }
+				switch (targetType) {
+					case SOURCE:
+						{
+								myProject.addCompileSourceRoot(targetSourceDirectory.getAbsolutePath());
+								break;
+						}
+					case RESOURCE:
+						{
+								Resource resource = new Resource();
+								resource.setDirectory(targetResourceDirectory.getAbsolutePath());
+								String resName = targetFile;
+								if (targetFolder != null) {
+									resName = targetFolder + File.separator + targetFile;
+								}
+								resource.addInclude(resName);
+								myProject.addResource(resource);
+								break;
+						}
+					default:
+				}
 
-        } catch (Exception e) {
-            throw new MojoFailureException(Msg.code(127) + "Failed to generate file", e);
-        }
-    }
+		} catch (Exception e) {
+				throw new MojoFailureException(Msg.code(127) + "Failed to generate file", e);
+		}
+	}
 
-    public static void main(String[] args)
-            throws IOException, MojoFailureException, MojoExecutionException {
+	public static void main(String[] args)
+				throws IOException, MojoFailureException, MojoExecutionException {
 
-        // PoolingHttpClientConnectionManager connectionManager = new
-        // PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-        // HttpClientBuilder builder = HttpClientBuilder.create();
-        // builder.setConnectionManager(connectionManager);
-        // CloseableHttpClient client = builder.build();
-        //
-        // HttpGet get = new HttpGet("http://fhir.healthintersections.com.au/open/metadata");
-        // CloseableHttpResponse response = client.execute(get);
-        //
-        // String metadataString = EntityUtils.toString(response.getEntity());
-        //
-        // ourLog.info("Metadata String: {}", metadataString);
+		// PoolingHttpClientConnectionManager connectionManager = new
+		// PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		// HttpClientBuilder builder = HttpClientBuilder.create();
+		// builder.setConnectionManager(connectionManager);
+		// CloseableHttpClient client = builder.build();
+		//
+		// HttpGet get = new HttpGet("http://fhir.healthintersections.com.au/open/metadata");
+		// CloseableHttpResponse response = client.execute(get);
+		//
+		// String metadataString = EntityUtils.toString(response.getEntity());
+		//
+		// ourLog.info("Metadata String: {}", metadataString);
 
-        // String metadataString = IOUtils.toString(new
-        // FileInputStream("src/test/resources/healthintersections-metadata.xml"));
-        // Conformance conformance = new
-        // FhirContext(Conformance.class).newXmlParser().parseResource(Conformance.class,
-        // metadataString);
+		// String metadataString = IOUtils.toString(new
+		// FileInputStream("src/test/resources/healthintersections-metadata.xml"));
+		// Conformance conformance = new
+		// FhirContext(Conformance.class).newXmlParser().parseResource(Conformance.class,
+		// metadataString);
 
-        TinderGenericSingleFileMojo mojo = new TinderGenericSingleFileMojo();
-        mojo.myProject = new MavenProject();
-        mojo.template = "/vm/jpa_spring_beans.vm";
-        mojo.version = "dstu2";
-        mojo.targetPackage = "ca.uhn.test";
-        mojo.targetSourceDirectory = new File("target/generated/valuesets");
-        mojo.targetFile = "tmp_beans.xml";
-        mojo.execute();
-    }
+		TinderGenericSingleFileMojo mojo = new TinderGenericSingleFileMojo();
+		mojo.myProject = new MavenProject();
+		mojo.template = "/vm/jpa_spring_beans.vm";
+		mojo.version = "dstu2";
+		mojo.targetPackage = "ca.uhn.test";
+		mojo.targetSourceDirectory = new File("target/generated/valuesets");
+		mojo.targetFile = "tmp_beans.xml";
+		mojo.execute();
+	}
 
-    class Generator extends AbstractGenerator {
-        @Override
-        protected void logDebug(String message) {
-            ourLog.debug(message);
-        }
+	class Generator extends AbstractGenerator {
+		@Override
+		protected void logDebug(String message) {
+				ourLog.debug(message);
+		}
 
-        @Override
-        protected void logInfo(String message) {
-            ourLog.info(message);
-        }
-    }
+		@Override
+		protected void logInfo(String message) {
+				ourLog.info(message);
+		}
+	}
 }

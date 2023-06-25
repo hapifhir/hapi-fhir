@@ -37,56 +37,56 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
  */
 public class ThreadLocalCapturingInterceptor implements IClientInterceptor {
 
-    private final ThreadLocal<IHttpRequest> myRequestThreadLocal = new ThreadLocal<>();
-    private final ThreadLocal<IHttpResponse> myResponseThreadLocal = new ThreadLocal<>();
-    private boolean myBufferResponse;
+	private final ThreadLocal<IHttpRequest> myRequestThreadLocal = new ThreadLocal<>();
+	private final ThreadLocal<IHttpResponse> myResponseThreadLocal = new ThreadLocal<>();
+	private boolean myBufferResponse;
 
-    /**
-     * This method should be called at the end of any request process, in order to clear the last
-     * request and response from the current thread.
-     */
-    public void clearThreadLocals() {
-        myRequestThreadLocal.remove();
-        myResponseThreadLocal.remove();
-    }
+	/**
+	* This method should be called at the end of any request process, in order to clear the last
+	* request and response from the current thread.
+	*/
+	public void clearThreadLocals() {
+		myRequestThreadLocal.remove();
+		myResponseThreadLocal.remove();
+	}
 
-    public IHttpRequest getRequestForCurrentThread() {
-        return myRequestThreadLocal.get();
-    }
+	public IHttpRequest getRequestForCurrentThread() {
+		return myRequestThreadLocal.get();
+	}
 
-    public IHttpResponse getResponseForCurrentThread() {
-        return myResponseThreadLocal.get();
-    }
+	public IHttpResponse getResponseForCurrentThread() {
+		return myResponseThreadLocal.get();
+	}
 
-    @Override
-    public void interceptRequest(IHttpRequest theRequest) {
-        myRequestThreadLocal.set(theRequest);
-    }
+	@Override
+	public void interceptRequest(IHttpRequest theRequest) {
+		myRequestThreadLocal.set(theRequest);
+	}
 
-    @Override
-    public void interceptResponse(IHttpResponse theResponse) {
-        if (isBufferResponse()) {
-            CapturingInterceptor.bufferResponse(theResponse);
-        }
-        myResponseThreadLocal.set(theResponse);
-    }
+	@Override
+	public void interceptResponse(IHttpResponse theResponse) {
+		if (isBufferResponse()) {
+				CapturingInterceptor.bufferResponse(theResponse);
+		}
+		myResponseThreadLocal.set(theResponse);
+	}
 
-    /**
-     * Should we buffer (capture) the response body? This defaults to <code>false</code>. Set to
-     * <code>true</code> if you are planning on examining response bodies after the response
-     * processing is complete.
-     */
-    public boolean isBufferResponse() {
-        return myBufferResponse;
-    }
+	/**
+	* Should we buffer (capture) the response body? This defaults to <code>false</code>. Set to
+	* <code>true</code> if you are planning on examining response bodies after the response
+	* processing is complete.
+	*/
+	public boolean isBufferResponse() {
+		return myBufferResponse;
+	}
 
-    /**
-     * Should we buffer (capture) the response body? This defaults to <code>false</code>. Set to
-     * <code>true</code> if you are planning on examining response bodies after the response
-     * processing is complete.
-     */
-    public ThreadLocalCapturingInterceptor setBufferResponse(boolean theBufferResponse) {
-        myBufferResponse = theBufferResponse;
-        return this;
-    }
+	/**
+	* Should we buffer (capture) the response body? This defaults to <code>false</code>. Set to
+	* <code>true</code> if you are planning on examining response bodies after the response
+	* processing is complete.
+	*/
+	public ThreadLocalCapturingInterceptor setBufferResponse(boolean theBufferResponse) {
+		myBufferResponse = theBufferResponse;
+		return this;
+	}
 }

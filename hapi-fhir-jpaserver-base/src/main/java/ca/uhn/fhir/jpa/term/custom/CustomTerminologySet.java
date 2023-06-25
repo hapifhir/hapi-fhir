@@ -19,6 +19,17 @@
  */
 package ca.uhn.fhir.jpa.term.custom;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.csv.QuoteMode;
+import org.apache.commons.lang3.Validate;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,188 +41,176 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.csv.QuoteMode;
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
 public class CustomTerminologySet {
 
-    private final int mySize;
-    private final List<TermConcept> myRootConcepts;
+	private final int mySize;
+	private final List<TermConcept> myRootConcepts;
 
-    /** Constructor for an empty object */
-    public CustomTerminologySet() {
-        this(0, new ArrayList<>());
-    }
+	/** Constructor for an empty object */
+	public CustomTerminologySet() {
+		this(0, new ArrayList<>());
+	}
 
-    /** Constructor */
-    private CustomTerminologySet(int theSize, List<TermConcept> theRootConcepts) {
-        mySize = theSize;
-        myRootConcepts = theRootConcepts;
-    }
+	/** Constructor */
+	private CustomTerminologySet(int theSize, List<TermConcept> theRootConcepts) {
+		mySize = theSize;
+		myRootConcepts = theRootConcepts;
+	}
 
-    public TermConcept addRootConcept(String theCode) {
-        return addRootConcept(theCode, null);
-    }
+	public TermConcept addRootConcept(String theCode) {
+		return addRootConcept(theCode, null);
+	}
 
-    public TermConcept addRootConcept(String theCode, String theDisplay) {
-        Validate.notBlank(theCode, "theCode must not be blank");
-        Validate.isTrue(
-                myRootConcepts.stream().noneMatch(t -> t.getCode().equals(theCode)),
-                "Already have code %s",
-                theCode);
-        TermConcept retVal = new TermConcept();
-        retVal.setCode(theCode);
-        retVal.setDisplay(theDisplay);
-        myRootConcepts.add(retVal);
-        return retVal;
-    }
+	public TermConcept addRootConcept(String theCode, String theDisplay) {
+		Validate.notBlank(theCode, "theCode must not be blank");
+		Validate.isTrue(
+					myRootConcepts.stream().noneMatch(t -> t.getCode().equals(theCode)),
+					"Already have code %s",
+					theCode);
+		TermConcept retVal = new TermConcept();
+		retVal.setCode(theCode);
+		retVal.setDisplay(theDisplay);
+		myRootConcepts.add(retVal);
+		return retVal;
+	}
 
-    public int getSize() {
-        return mySize;
-    }
+	public int getSize() {
+		return mySize;
+	}
 
-    public TermCodeSystemVersion toCodeSystemVersion() {
-        TermCodeSystemVersion csv = new TermCodeSystemVersion();
+	public TermCodeSystemVersion toCodeSystemVersion() {
+		TermCodeSystemVersion csv = new TermCodeSystemVersion();
 
-        for (TermConcept next : myRootConcepts) {
-            csv.getConcepts().add(next);
-        }
+		for (TermConcept next : myRootConcepts) {
+				csv.getConcepts().add(next);
+		}
 
-        populateVersionToChildCodes(csv, myRootConcepts);
+		populateVersionToChildCodes(csv, myRootConcepts);
 
-        return csv;
-    }
+		return csv;
+	}
 
-    private void populateVersionToChildCodes(
-            TermCodeSystemVersion theCsv, List<TermConcept> theConcepts) {
-        for (TermConcept next : theConcepts) {
-            next.setCodeSystemVersion(theCsv);
-            populateVersionToChildCodes(theCsv, next.getChildCodes());
-        }
-    }
+	private void populateVersionToChildCodes(
+				TermCodeSystemVersion theCsv, List<TermConcept> theConcepts) {
+		for (TermConcept next : theConcepts) {
+				next.setCodeSystemVersion(theCsv);
+				populateVersionToChildCodes(theCsv, next.getChildCodes());
+		}
+	}
 
-    public List<TermConcept> getRootConcepts() {
-        return Collections.unmodifiableList(myRootConcepts);
-    }
+	public List<TermConcept> getRootConcepts() {
+		return Collections.unmodifiableList(myRootConcepts);
+	}
 
-    public void validateNoCycleOrThrowInvalidRequest() {
-        Set<String> codes = new HashSet<>();
-        validateNoCycleOrThrowInvalidRequest(codes, getRootConcepts());
-    }
+	public void validateNoCycleOrThrowInvalidRequest() {
+		Set<String> codes = new HashSet<>();
+		validateNoCycleOrThrowInvalidRequest(codes, getRootConcepts());
+	}
 
-    private void validateNoCycleOrThrowInvalidRequest(
-            Set<String> theCodes, List<TermConcept> theRootConcepts) {
-        for (TermConcept next : theRootConcepts) {
-            validateNoCycleOrThrowInvalidRequest(theCodes, next);
-        }
-    }
+	private void validateNoCycleOrThrowInvalidRequest(
+				Set<String> theCodes, List<TermConcept> theRootConcepts) {
+		for (TermConcept next : theRootConcepts) {
+				validateNoCycleOrThrowInvalidRequest(theCodes, next);
+		}
+	}
 
-    private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, TermConcept next) {
-        if (!theCodes.add(next.getCode())) {
-            throw new InvalidRequestException(
-                    Msg.code(926) + "Cycle detected around code " + next.getCode());
-        }
-        validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
-    }
+	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, TermConcept next) {
+		if (!theCodes.add(next.getCode())) {
+				throw new InvalidRequestException(
+						Msg.code(926) + "Cycle detected around code " + next.getCode());
+		}
+		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
+	}
 
-    public Set<String> getRootConceptCodes() {
-        return getRootConcepts().stream().map(TermConcept::getCode).collect(Collectors.toSet());
-    }
+	public Set<String> getRootConceptCodes() {
+		return getRootConcepts().stream().map(TermConcept::getCode).collect(Collectors.toSet());
+	}
 
-    @Nonnull
-    public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
+	@Nonnull
+	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
 
-        final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
-        // Concepts
-        IZipContentsHandlerCsv conceptHandler = new ConceptHandler(code2concept);
+		final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
+		// Concepts
+		IZipContentsHandlerCsv conceptHandler = new ConceptHandler(code2concept);
 
-        TermLoaderSvcImpl.iterateOverZipFileCsv(
-                theDescriptors,
-                TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE,
-                conceptHandler,
-                ',',
-                QuoteMode.NON_NUMERIC,
-                false);
+		TermLoaderSvcImpl.iterateOverZipFileCsv(
+					theDescriptors,
+					TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE,
+					conceptHandler,
+					',',
+					QuoteMode.NON_NUMERIC,
+					false);
 
-        if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE)) {
-            Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
-            IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
-            TermLoaderSvcImpl.iterateOverZipFileCsv(
-                    theDescriptors,
-                    TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE,
-                    propertyHandler,
-                    ',',
-                    QuoteMode.NON_NUMERIC,
-                    false);
-            for (TermConcept termConcept : code2concept.values()) {
-                if (!theCode2property.isEmpty()
-                        && theCode2property.get(termConcept.getCode()) != null) {
-                    theCode2property
-                            .get(termConcept.getCode())
-                            .forEach(
-                                    property -> {
-                                        termConcept.getProperties().add(property);
-                                    });
-                }
-            }
-        }
+		if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE)) {
+				Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
+				IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
+				TermLoaderSvcImpl.iterateOverZipFileCsv(
+						theDescriptors,
+						TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE,
+						propertyHandler,
+						',',
+						QuoteMode.NON_NUMERIC,
+						false);
+				for (TermConcept termConcept : code2concept.values()) {
+					if (!theCode2property.isEmpty()
+								&& theCode2property.get(termConcept.getCode()) != null) {
+						theCode2property
+									.get(termConcept.getCode())
+									.forEach(
+												property -> {
+													termConcept.getProperties().add(property);
+												});
+					}
+				}
+		}
 
-        if (theFlat) {
+		if (theFlat) {
 
-            return new CustomTerminologySet(
-                    code2concept.size(), new ArrayList<>(code2concept.values()));
+				return new CustomTerminologySet(
+						code2concept.size(), new ArrayList<>(code2concept.values()));
 
-        } else {
+		} else {
 
-            // Hierarchy
-            if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
-                IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
-                TermLoaderSvcImpl.iterateOverZipFileCsv(
-                        theDescriptors,
-                        TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE,
-                        hierarchyHandler,
-                        ',',
-                        QuoteMode.NON_NUMERIC,
-                        false);
-            }
+				// Hierarchy
+				if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
+					IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
+					TermLoaderSvcImpl.iterateOverZipFileCsv(
+								theDescriptors,
+								TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE,
+								hierarchyHandler,
+								',',
+								QuoteMode.NON_NUMERIC,
+								false);
+				}
 
-            Map<String, Integer> codesInOrder = new HashMap<>();
-            for (String nextCode : code2concept.keySet()) {
-                codesInOrder.put(nextCode, codesInOrder.size());
-            }
+				Map<String, Integer> codesInOrder = new HashMap<>();
+				for (String nextCode : code2concept.keySet()) {
+					codesInOrder.put(nextCode, codesInOrder.size());
+				}
 
-            List<TermConcept> rootConcepts = new ArrayList<>();
-            for (TermConcept nextConcept : code2concept.values()) {
+				List<TermConcept> rootConcepts = new ArrayList<>();
+				for (TermConcept nextConcept : code2concept.values()) {
 
-                // Find root concepts
-                if (nextConcept.getParents().isEmpty()) {
-                    rootConcepts.add(nextConcept);
-                }
+					// Find root concepts
+					if (nextConcept.getParents().isEmpty()) {
+						rootConcepts.add(nextConcept);
+					}
 
-                // Sort children so they appear in the same order as they did in the concepts.csv
-                // file
-                nextConcept
-                        .getChildren()
-                        .sort(
-                                (o1, o2) -> {
-                                    String code1 = o1.getChild().getCode();
-                                    String code2 = o2.getChild().getCode();
-                                    int order1 = codesInOrder.get(code1);
-                                    int order2 = codesInOrder.get(code2);
-                                    return order1 - order2;
-                                });
-            }
+					// Sort children so they appear in the same order as they did in the concepts.csv
+					// file
+					nextConcept
+								.getChildren()
+								.sort(
+										(o1, o2) -> {
+												String code1 = o1.getChild().getCode();
+												String code2 = o2.getChild().getCode();
+												int order1 = codesInOrder.get(code1);
+												int order2 = codesInOrder.get(code2);
+												return order1 - order2;
+										});
+				}
 
-            return new CustomTerminologySet(code2concept.size(), rootConcepts);
-        }
-    }
+				return new CustomTerminologySet(code2concept.size(), rootConcepts);
+		}
+	}
 }

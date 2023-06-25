@@ -19,84 +19,84 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
-import javax.annotation.Nullable;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+
+import javax.annotation.Nullable;
 
 /**
  * This class contains a runtime in-memory description of a search operation, including details on
  * processing time and other things
  */
 public class SearchRuntimeDetails {
-    private final String mySearchUuid;
-    private final RequestDetails myRequestDetails;
-    private StopWatch myQueryStopwatch;
-    private int myFoundMatchesCount;
-    private boolean myLoadSynchronous;
-    private String myQueryString;
-    private SearchStatusEnum mySearchStatus;
-    private int myFoundIndexMatchesCount;
+	private final String mySearchUuid;
+	private final RequestDetails myRequestDetails;
+	private StopWatch myQueryStopwatch;
+	private int myFoundMatchesCount;
+	private boolean myLoadSynchronous;
+	private String myQueryString;
+	private SearchStatusEnum mySearchStatus;
+	private int myFoundIndexMatchesCount;
 
-    public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
-        myRequestDetails = theRequestDetails;
-        mySearchUuid = theSearchUuid;
-    }
+	public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
+		myRequestDetails = theRequestDetails;
+		mySearchUuid = theSearchUuid;
+	}
 
-    @Nullable
-    public RequestDetails getRequestDetails() {
-        return myRequestDetails;
-    }
+	@Nullable
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
+	}
 
-    public String getSearchUuid() {
-        return mySearchUuid;
-    }
+	public String getSearchUuid() {
+		return mySearchUuid;
+	}
 
-    public StopWatch getQueryStopwatch() {
-        return myQueryStopwatch;
-    }
+	public StopWatch getQueryStopwatch() {
+		return myQueryStopwatch;
+	}
 
-    public void setQueryStopwatch(StopWatch theQueryStopwatch) {
-        myQueryStopwatch = theQueryStopwatch;
-    }
+	public void setQueryStopwatch(StopWatch theQueryStopwatch) {
+		myQueryStopwatch = theQueryStopwatch;
+	}
 
-    public int getFoundMatchesCount() {
-        return myFoundMatchesCount;
-    }
+	public int getFoundMatchesCount() {
+		return myFoundMatchesCount;
+	}
 
-    public void setFoundMatchesCount(int theFoundMatchesCount) {
-        myFoundMatchesCount = theFoundMatchesCount;
-    }
+	public void setFoundMatchesCount(int theFoundMatchesCount) {
+		myFoundMatchesCount = theFoundMatchesCount;
+	}
 
-    public int getFoundIndexMatchesCount() {
-        return myFoundIndexMatchesCount;
-    }
+	public int getFoundIndexMatchesCount() {
+		return myFoundIndexMatchesCount;
+	}
 
-    public void setFoundIndexMatchesCount(int theFoundIndexMatchesCount) {
-        myFoundIndexMatchesCount = theFoundIndexMatchesCount;
-    }
+	public void setFoundIndexMatchesCount(int theFoundIndexMatchesCount) {
+		myFoundIndexMatchesCount = theFoundIndexMatchesCount;
+	}
 
-    public boolean getLoadSynchronous() {
-        return myLoadSynchronous;
-    }
+	public boolean getLoadSynchronous() {
+		return myLoadSynchronous;
+	}
 
-    public void setLoadSynchronous(boolean theLoadSynchronous) {
-        myLoadSynchronous = theLoadSynchronous;
-    }
+	public void setLoadSynchronous(boolean theLoadSynchronous) {
+		myLoadSynchronous = theLoadSynchronous;
+	}
 
-    public String getQueryString() {
-        return myQueryString;
-    }
+	public String getQueryString() {
+		return myQueryString;
+	}
 
-    public void setQueryString(String theQueryString) {
-        myQueryString = theQueryString;
-    }
+	public void setQueryString(String theQueryString) {
+		myQueryString = theQueryString;
+	}
 
-    public SearchStatusEnum getSearchStatus() {
-        return mySearchStatus;
-    }
+	public SearchStatusEnum getSearchStatus() {
+		return mySearchStatus;
+	}
 
-    public void setSearchStatus(SearchStatusEnum theSearchStatus) {
-        mySearchStatus = theSearchStatus;
-    }
+	public void setSearchStatus(SearchStatusEnum theSearchStatus) {
+		mySearchStatus = theSearchStatus;
+	}
 }

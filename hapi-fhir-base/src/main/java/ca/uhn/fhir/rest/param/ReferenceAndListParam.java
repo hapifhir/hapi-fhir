@@ -23,15 +23,15 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class ReferenceAndListParam extends BaseAndListParam<ReferenceOrListParam> {
 
-    @Override
-    ReferenceOrListParam newInstance() {
-        return new ReferenceOrListParam();
-    }
+	@Override
+	ReferenceOrListParam newInstance() {
+		return new ReferenceOrListParam();
+	}
 
-    @CoverageIgnore
-    @Override
-    public ReferenceAndListParam addAnd(ReferenceOrListParam theValue) {
-        addValue(theValue);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public ReferenceAndListParam addAnd(ReferenceOrListParam theValue) {
+		addValue(theValue);
+		return this;
+	}
 }

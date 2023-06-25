@@ -21,22 +21,22 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseBinary extends IBaseResource {
 
-    byte[] getContent();
+	byte[] getContent();
 
-    IPrimitiveType<byte[]> getContentElement();
+	IPrimitiveType<byte[]> getContentElement();
 
-    String getContentAsBase64();
+	String getContentAsBase64();
 
-    String getContentType();
+	String getContentType();
 
-    IBaseBinary setContent(byte[] theContent);
+	IBaseBinary setContent(byte[] theContent);
 
-    IBaseBinary setContentAsBase64(String theContent);
+	IBaseBinary setContentAsBase64(String theContent);
 
-    IBaseBinary setContentType(String theContentType);
+	IBaseBinary setContentType(String theContentType);
 
-    default boolean hasData() {
-        return getContent() != null && getContent().length > 0;
-    }
-    ;
+	default boolean hasData() {
+		return getContent() != null && getContent().length > 0;
+	}
+	;
 }

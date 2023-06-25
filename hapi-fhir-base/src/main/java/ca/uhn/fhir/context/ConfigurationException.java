@@ -25,21 +25,21 @@ package ca.uhn.fhir.context;
  */
 public class ConfigurationException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public ConfigurationException() {
-        super();
-    }
+	public ConfigurationException() {
+		super();
+	}
 
-    public ConfigurationException(String theMessage, Throwable theCause) {
-        super(theMessage, theCause);
-    }
+	public ConfigurationException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 
-    public ConfigurationException(String theMessage) {
-        super(theMessage);
-    }
+	public ConfigurationException(String theMessage) {
+		super(theMessage);
+	}
 
-    public ConfigurationException(Throwable theCause) {
-        super(theCause);
-    }
+	public ConfigurationException(Throwable theCause) {
+		super(theCause);
+	}
 }

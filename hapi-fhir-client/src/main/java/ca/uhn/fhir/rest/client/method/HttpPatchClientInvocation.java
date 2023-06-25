@@ -19,71 +19,70 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 
-    private String myUrlPath;
-    private Map<String, List<String>> myParams;
-    private String myContents;
-    private String myContentType;
+	private String myUrlPath;
+	private Map<String, List<String>> myParams;
+	private String myContents;
+	private String myContentType;
 
-    public HttpPatchClientInvocation(
-            FhirContext theContext, IIdType theId, String theContentType, String theContents) {
-        super(theContext);
-        myUrlPath = theId.toUnqualifiedVersionless().getValue();
-        myContentType = theContentType;
-        myContents = theContents;
-    }
+	public HttpPatchClientInvocation(
+				FhirContext theContext, IIdType theId, String theContentType, String theContents) {
+		super(theContext);
+		myUrlPath = theId.toUnqualifiedVersionless().getValue();
+		myContentType = theContentType;
+		myContents = theContents;
+	}
 
-    public HttpPatchClientInvocation(
-            FhirContext theContext, String theUrlPath, String theContentType, String theContents) {
-        super(theContext);
-        myUrlPath = theUrlPath;
-        myContentType = theContentType;
-        myContents = theContents;
-    }
+	public HttpPatchClientInvocation(
+				FhirContext theContext, String theUrlPath, String theContentType, String theContents) {
+		super(theContext);
+		myUrlPath = theUrlPath;
+		myContentType = theContentType;
+		myContents = theContents;
+	}
 
-    @Override
-    public IHttpRequest asHttpRequest(
-            String theUrlBase,
-            Map<String, List<String>> theExtraParams,
-            EncodingEnum theEncoding,
-            Boolean thePrettyPrint) {
-        StringBuilder b = new StringBuilder();
-        b.append(theUrlBase);
-        if (!theUrlBase.endsWith("/")) {
-            b.append('/');
-        }
-        b.append(myUrlPath);
+	@Override
+	public IHttpRequest asHttpRequest(
+				String theUrlBase,
+				Map<String, List<String>> theExtraParams,
+				EncodingEnum theEncoding,
+				Boolean thePrettyPrint) {
+		StringBuilder b = new StringBuilder();
+		b.append(theUrlBase);
+		if (!theUrlBase.endsWith("/")) {
+				b.append('/');
+		}
+		b.append(myUrlPath);
 
-        appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
-        appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
+		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
+		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
-        return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
-    }
+		return createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.PATCH);
+	}
 
-    @Override
-    protected IHttpRequest createHttpRequest(
-            String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-        IHttpClient httpClient =
-                getRestfulClientFactory()
-                        .getHttpClient(
-                                new StringBuilder(theUrl),
-                                null,
-                                null,
-                                theRequestType,
-                                getHeaders());
-        return httpClient.createByteRequest(getContext(), myContents, myContentType, null);
-    }
+	@Override
+	protected IHttpRequest createHttpRequest(
+				String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
+		IHttpClient httpClient =
+					getRestfulClientFactory()
+								.getHttpClient(
+										new StringBuilder(theUrl),
+										null,
+										null,
+										theRequestType,
+										getHeaders());
+		return httpClient.createByteRequest(getContext(), myContents, myContentType, null);
+	}
 }

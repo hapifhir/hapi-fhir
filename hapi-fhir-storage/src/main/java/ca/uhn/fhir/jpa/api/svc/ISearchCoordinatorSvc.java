@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
-import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
-
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -31,31 +27,35 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nullable;
+
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
-    void cancelAllActiveSearches();
+	void cancelAllActiveSearches();
 
-    List<T> getResources(
-            String theUuid,
-            int theFrom,
-            int theTo,
-            @Nullable RequestDetails theRequestDetails,
-            RequestPartitionId theRequestPartitionId);
+	List<T> getResources(
+				String theUuid,
+				int theFrom,
+				int theTo,
+				@Nullable RequestDetails theRequestDetails,
+				RequestPartitionId theRequestPartitionId);
 
-    IBundleProvider registerSearch(
-            IFhirResourceDao<?> theCallingDao,
-            SearchParameterMap theParams,
-            String theResourceType,
-            CacheControlDirective theCacheControlDirective,
-            @Nullable RequestDetails theRequestDetails,
-            RequestPartitionId theRequestPartitionId);
+	IBundleProvider registerSearch(
+				IFhirResourceDao<?> theCallingDao,
+				SearchParameterMap theParams,
+				String theResourceType,
+				CacheControlDirective theCacheControlDirective,
+				@Nullable RequestDetails theRequestDetails,
+				RequestPartitionId theRequestPartitionId);
 
-    /**
-     * Fetch the total number of search results for the given currently executing search, if one is
-     * currently executing and the total is known. Will return empty otherwise
-     */
-    Optional<Integer> getSearchTotal(
-            String theUuid,
-            @Nullable RequestDetails theRequestDetails,
-            RequestPartitionId theRequestPartitionId);
+	/**
+	* Fetch the total number of search results for the given currently executing search, if one is
+	* currently executing and the total is known. Will return empty otherwise
+	*/
+	Optional<Integer> getSearchTotal(
+				String theUuid,
+				@Nullable RequestDetails theRequestDetails,
+				RequestPartitionId theRequestPartitionId);
 }

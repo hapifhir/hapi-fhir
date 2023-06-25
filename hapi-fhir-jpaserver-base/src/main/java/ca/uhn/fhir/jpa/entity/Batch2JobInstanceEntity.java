@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -35,321 +40,315 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.StatusEnum;
-
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(
-        name = "BT2_JOB_INSTANCE",
-        indexes = {@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")})
+		name = "BT2_JOB_INSTANCE",
+		indexes = {@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")})
 public class Batch2JobInstanceEntity implements Serializable {
 
-    public static final int STATUS_MAX_LENGTH = 20;
-    public static final int TIME_REMAINING_LENGTH = 100;
-    public static final int PARAMS_JSON_MAX_LENGTH = 2000;
-    private static final long serialVersionUID = 8187134261799095422L;
+	public static final int STATUS_MAX_LENGTH = 20;
+	public static final int TIME_REMAINING_LENGTH = 100;
+	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
+	private static final long serialVersionUID = 8187134261799095422L;
 
-    @Id
-    @Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
-    private String myId;
+	@Id
+	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
+	private String myId;
 
-    @Column(name = "CREATE_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myCreateTime;
+	@Column(name = "CREATE_TIME", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myCreateTime;
 
-    @Column(name = "START_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myStartTime;
+	@Column(name = "START_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myStartTime;
 
-    @Column(name = "END_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myEndTime;
+	@Column(name = "END_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myEndTime;
 
-    @Version
-    @Column(name = "UPDATE_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myUpdateTime;
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
 
-    @Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
-    private String myDefinitionId;
+	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
+	private String myDefinitionId;
 
-    @Column(name = "DEFINITION_VER", nullable = false)
-    private int myDefinitionVersion;
+	@Column(name = "DEFINITION_VER", nullable = false)
+	private int myDefinitionVersion;
 
-    @Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusEnum myStatus;
+	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
+	@Enumerated(EnumType.STRING)
+	private StatusEnum myStatus;
 
-    @Column(name = "JOB_CANCELLED", nullable = false)
-    private boolean myCancelled;
+	@Column(name = "JOB_CANCELLED", nullable = false)
+	private boolean myCancelled;
 
-    @Column(name = "FAST_TRACKING", nullable = true)
-    private Boolean myFastTracking;
+	@Column(name = "FAST_TRACKING", nullable = true)
+	private Boolean myFastTracking;
 
-    @Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
-    private String myParamsJson;
+	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
+	private String myParamsJson;
 
-    @Lob
-    @Column(name = "PARAMS_JSON_LOB", nullable = true)
-    private String myParamsJsonLob;
+	@Lob
+	@Column(name = "PARAMS_JSON_LOB", nullable = true)
+	private String myParamsJsonLob;
 
-    @Column(name = "CMB_RECS_PROCESSED", nullable = true)
-    private Integer myCombinedRecordsProcessed;
+	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
+	private Integer myCombinedRecordsProcessed;
 
-    @Column(name = "CMB_RECS_PER_SEC", nullable = true)
-    private Double myCombinedRecordsProcessedPerSecond;
+	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
+	private Double myCombinedRecordsProcessedPerSecond;
 
-    @Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
-    private Integer myTotalElapsedMillis;
+	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
+	private Integer myTotalElapsedMillis;
 
-    @Column(name = "WORK_CHUNKS_PURGED", nullable = false)
-    private boolean myWorkChunksPurged;
+	@Column(name = "WORK_CHUNKS_PURGED", nullable = false)
+	private boolean myWorkChunksPurged;
 
-    @Column(name = "PROGRESS_PCT")
-    private double myProgress;
+	@Column(name = "PROGRESS_PCT")
+	private double myProgress;
 
-    @Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
-    private String myErrorMessage;
+	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
+	private String myErrorMessage;
 
-    @Column(name = "ERROR_COUNT")
-    private int myErrorCount;
+	@Column(name = "ERROR_COUNT")
+	private int myErrorCount;
 
-    @Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
-    private String myEstimatedTimeRemaining;
+	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
+	private String myEstimatedTimeRemaining;
 
-    @Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
-    private String myCurrentGatedStepId;
+	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
+	private String myCurrentGatedStepId;
 
-    @Lob
-    @Column(name = "WARNING_MSG", nullable = true)
-    private String myWarningMessages;
+	@Lob
+	@Column(name = "WARNING_MSG", nullable = true)
+	private String myWarningMessages;
 
-    /** Any output from the job can be held in this column Even serialized json */
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
-    private String myReport;
+	/** Any output from the job can be held in this column Even serialized json */
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
+	private String myReport;
 
-    public String getCurrentGatedStepId() {
-        return myCurrentGatedStepId;
-    }
+	public String getCurrentGatedStepId() {
+		return myCurrentGatedStepId;
+	}
 
-    public void setCurrentGatedStepId(String theCurrentGatedStepId) {
-        myCurrentGatedStepId = theCurrentGatedStepId;
-    }
+	public void setCurrentGatedStepId(String theCurrentGatedStepId) {
+		myCurrentGatedStepId = theCurrentGatedStepId;
+	}
 
-    public boolean isCancelled() {
-        return myCancelled;
-    }
+	public boolean isCancelled() {
+		return myCancelled;
+	}
 
-    public void setCancelled(boolean theCancelled) {
-        myCancelled = theCancelled;
-    }
-
-    public int getErrorCount() {
-        return myErrorCount;
-    }
-
-    public void setErrorCount(int theErrorCount) {
-        myErrorCount = theErrorCount;
-    }
-
-    public Integer getTotalElapsedMillis() {
-        return myTotalElapsedMillis;
-    }
-
-    public void setTotalElapsedMillis(Integer theTotalElapsedMillis) {
-        myTotalElapsedMillis = theTotalElapsedMillis;
-    }
-
-    public Integer getCombinedRecordsProcessed() {
-        return myCombinedRecordsProcessed;
-    }
-
-    public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
-        myCombinedRecordsProcessed = theCombinedRecordsProcessed;
-    }
-
-    public Double getCombinedRecordsProcessedPerSecond() {
-        return myCombinedRecordsProcessedPerSecond;
-    }
-
-    public void setCombinedRecordsProcessedPerSecond(Double theCombinedRecordsProcessedPerSecond) {
-        myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
-    }
-
-    public Date getCreateTime() {
-        return myCreateTime;
-    }
-
-    public void setCreateTime(Date theCreateTime) {
-        myCreateTime = theCreateTime;
-    }
-
-    public Date getStartTime() {
-        return myStartTime;
-    }
-
-    public void setStartTime(Date theStartTime) {
-        myStartTime = theStartTime;
-    }
-
-    public Date getEndTime() {
-        return myEndTime;
-    }
-
-    public void setEndTime(Date theEndTime) {
-        myEndTime = theEndTime;
-    }
-
-    public void setUpdateTime(Date theTime) {
-        myUpdateTime = theTime;
-    }
-
-    public Date getUpdateTime() {
-        return myUpdateTime;
-    }
-
-    public String getId() {
-        return myId;
-    }
-
-    public void setId(String theId) {
-        myId = theId;
-    }
-
-    public String getDefinitionId() {
-        return myDefinitionId;
-    }
-
-    public void setDefinitionId(String theDefinitionId) {
-        myDefinitionId = theDefinitionId;
-    }
-
-    public int getDefinitionVersion() {
-        return myDefinitionVersion;
-    }
-
-    public void setDefinitionVersion(int theDefinitionVersion) {
-        myDefinitionVersion = theDefinitionVersion;
-    }
-
-    public StatusEnum getStatus() {
-        return myStatus;
-    }
-
-    public void setStatus(StatusEnum theStatus) {
-        myStatus = theStatus;
-    }
-
-    public String getParams() {
-        if (myParamsJsonLob != null) {
-            return myParamsJsonLob;
-        }
-        return myParamsJson;
-    }
-
-    public void setParams(String theParams) {
-        myParamsJsonLob = null;
-        myParamsJson = null;
-        if (theParams != null && theParams.length() > PARAMS_JSON_MAX_LENGTH) {
-            myParamsJsonLob = theParams;
-        } else {
-            myParamsJson = theParams;
-        }
-    }
-
-    public boolean getWorkChunksPurged() {
-        return myWorkChunksPurged;
-    }
-
-    public void setWorkChunksPurged(boolean theWorkChunksPurged) {
-        myWorkChunksPurged = theWorkChunksPurged;
-    }
-
-    public double getProgress() {
-        return myProgress;
-    }
-
-    public void setProgress(double theProgress) {
-        myProgress = theProgress;
-    }
-
-    public String getErrorMessage() {
-        return myErrorMessage;
-    }
-
-    public void setErrorMessage(String theErrorMessage) {
-        myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
-    }
-
-    public String getEstimatedTimeRemaining() {
-        return myEstimatedTimeRemaining;
-    }
-
-    public void setEstimatedTimeRemaining(String theEstimatedTimeRemaining) {
-        myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
-    }
-
-    public String getReport() {
-        return myReport;
-    }
-
-    public void setReport(String theReport) {
-        myReport = theReport;
-    }
-
-    public String getWarningMessages() {
-        return myWarningMessages;
-    }
-
-    public void setWarningMessages(String theWarningMessages) {
-        myWarningMessages = theWarningMessages;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", myId)
-                .append("definitionId", myDefinitionId)
-                .append("definitionVersion", myDefinitionVersion)
-                .append("errorCount", myErrorCount)
-                .append("createTime", myCreateTime)
-                .append("startTime", myStartTime)
-                .append("endTime", myEndTime)
-                .append("updateTime", myUpdateTime)
-                .append("status", myStatus)
-                .append("cancelled", myCancelled)
-                .append("combinedRecordsProcessed", myCombinedRecordsProcessed)
-                .append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
-                .append("totalElapsedMillis", myTotalElapsedMillis)
-                .append("workChunksPurged", myWorkChunksPurged)
-                .append("progress", myProgress)
-                .append("errorMessage", myErrorMessage)
-                .append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-                .append("report", myReport)
-                .append("warningMessages", myWarningMessages)
-                .toString();
-    }
-
-    /**
-     * @return true if every step of the job has produced exactly 1 chunk.
-     */
-    public boolean isFastTracking() {
-        if (myFastTracking == null) {
-            myFastTracking = false;
-        }
-        return myFastTracking;
-    }
-
-    public void setFastTracking(boolean theFastTracking) {
-        myFastTracking = theFastTracking;
-    }
+	public void setCancelled(boolean theCancelled) {
+		myCancelled = theCancelled;
+	}
+
+	public int getErrorCount() {
+		return myErrorCount;
+	}
+
+	public void setErrorCount(int theErrorCount) {
+		myErrorCount = theErrorCount;
+	}
+
+	public Integer getTotalElapsedMillis() {
+		return myTotalElapsedMillis;
+	}
+
+	public void setTotalElapsedMillis(Integer theTotalElapsedMillis) {
+		myTotalElapsedMillis = theTotalElapsedMillis;
+	}
+
+	public Integer getCombinedRecordsProcessed() {
+		return myCombinedRecordsProcessed;
+	}
+
+	public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
+		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
+	}
+
+	public Double getCombinedRecordsProcessedPerSecond() {
+		return myCombinedRecordsProcessedPerSecond;
+	}
+
+	public void setCombinedRecordsProcessedPerSecond(Double theCombinedRecordsProcessedPerSecond) {
+		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
+	}
+
+	public Date getCreateTime() {
+		return myCreateTime;
+	}
+
+	public void setCreateTime(Date theCreateTime) {
+		myCreateTime = theCreateTime;
+	}
+
+	public Date getStartTime() {
+		return myStartTime;
+	}
+
+	public void setStartTime(Date theStartTime) {
+		myStartTime = theStartTime;
+	}
+
+	public Date getEndTime() {
+		return myEndTime;
+	}
+
+	public void setEndTime(Date theEndTime) {
+		myEndTime = theEndTime;
+	}
+
+	public void setUpdateTime(Date theTime) {
+		myUpdateTime = theTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
+
+	public String getId() {
+		return myId;
+	}
+
+	public void setId(String theId) {
+		myId = theId;
+	}
+
+	public String getDefinitionId() {
+		return myDefinitionId;
+	}
+
+	public void setDefinitionId(String theDefinitionId) {
+		myDefinitionId = theDefinitionId;
+	}
+
+	public int getDefinitionVersion() {
+		return myDefinitionVersion;
+	}
+
+	public void setDefinitionVersion(int theDefinitionVersion) {
+		myDefinitionVersion = theDefinitionVersion;
+	}
+
+	public StatusEnum getStatus() {
+		return myStatus;
+	}
+
+	public void setStatus(StatusEnum theStatus) {
+		myStatus = theStatus;
+	}
+
+	public String getParams() {
+		if (myParamsJsonLob != null) {
+				return myParamsJsonLob;
+		}
+		return myParamsJson;
+	}
+
+	public void setParams(String theParams) {
+		myParamsJsonLob = null;
+		myParamsJson = null;
+		if (theParams != null && theParams.length() > PARAMS_JSON_MAX_LENGTH) {
+				myParamsJsonLob = theParams;
+		} else {
+				myParamsJson = theParams;
+		}
+	}
+
+	public boolean getWorkChunksPurged() {
+		return myWorkChunksPurged;
+	}
+
+	public void setWorkChunksPurged(boolean theWorkChunksPurged) {
+		myWorkChunksPurged = theWorkChunksPurged;
+	}
+
+	public double getProgress() {
+		return myProgress;
+	}
+
+	public void setProgress(double theProgress) {
+		myProgress = theProgress;
+	}
+
+	public String getErrorMessage() {
+		return myErrorMessage;
+	}
+
+	public void setErrorMessage(String theErrorMessage) {
+		myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
+	}
+
+	public String getEstimatedTimeRemaining() {
+		return myEstimatedTimeRemaining;
+	}
+
+	public void setEstimatedTimeRemaining(String theEstimatedTimeRemaining) {
+		myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
+	}
+
+	public String getReport() {
+		return myReport;
+	}
+
+	public void setReport(String theReport) {
+		myReport = theReport;
+	}
+
+	public String getWarningMessages() {
+		return myWarningMessages;
+	}
+
+	public void setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("id", myId)
+					.append("definitionId", myDefinitionId)
+					.append("definitionVersion", myDefinitionVersion)
+					.append("errorCount", myErrorCount)
+					.append("createTime", myCreateTime)
+					.append("startTime", myStartTime)
+					.append("endTime", myEndTime)
+					.append("updateTime", myUpdateTime)
+					.append("status", myStatus)
+					.append("cancelled", myCancelled)
+					.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+					.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+					.append("totalElapsedMillis", myTotalElapsedMillis)
+					.append("workChunksPurged", myWorkChunksPurged)
+					.append("progress", myProgress)
+					.append("errorMessage", myErrorMessage)
+					.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+					.append("report", myReport)
+					.append("warningMessages", myWarningMessages)
+					.toString();
+	}
+
+	/**
+	* @return true if every step of the job has produced exactly 1 chunk.
+	*/
+	public boolean isFastTracking() {
+		if (myFastTracking == null) {
+				myFastTracking = false;
+		}
+		return myFastTracking;
+	}
+
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
+	}
 }

@@ -19,64 +19,63 @@
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
 
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.param.TokenParam;
+import java.util.List;
 
 /** Adapt the autocomplete result into a ValueSet suitable for our $expand extension. */
 public class ValueSetAutocompleteSearch {
-    private final FhirContext myFhirContext;
-    private final StorageSettings myStorageSettings;
-    private final TokenAutocompleteSearch myAutocompleteSearch;
-    static final int DEFAULT_SIZE = 30;
+	private final FhirContext myFhirContext;
+	private final StorageSettings myStorageSettings;
+	private final TokenAutocompleteSearch myAutocompleteSearch;
+	static final int DEFAULT_SIZE = 30;
 
-    public ValueSetAutocompleteSearch(
-            FhirContext theFhirContext,
-            StorageSettings theStorageSettings,
-            SearchSession theSession) {
-        myFhirContext = theFhirContext;
-        myStorageSettings = theStorageSettings;
-        myAutocompleteSearch =
-                new TokenAutocompleteSearch(myFhirContext, myStorageSettings, theSession);
-    }
+	public ValueSetAutocompleteSearch(
+				FhirContext theFhirContext,
+				StorageSettings theStorageSettings,
+				SearchSession theSession) {
+		myFhirContext = theFhirContext;
+		myStorageSettings = theStorageSettings;
+		myAutocompleteSearch =
+					new TokenAutocompleteSearch(myFhirContext, myStorageSettings, theSession);
+	}
 
-    public IBaseResource search(ValueSetAutocompleteOptions theOptions) {
-        List<TokenAutocompleteHit> aggEntries =
-                myAutocompleteSearch.search(
-                        theOptions.getResourceType(),
-                        theOptions.getSearchParamCode(),
-                        theOptions.getFilter(),
-                        theOptions.getSearchParamModifier(),
-                        (int) theOptions.getCount().orElse(DEFAULT_SIZE));
+	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {
+		List<TokenAutocompleteHit> aggEntries =
+					myAutocompleteSearch.search(
+								theOptions.getResourceType(),
+								theOptions.getSearchParamCode(),
+								theOptions.getFilter(),
+								theOptions.getSearchParamModifier(),
+								(int) theOptions.getCount().orElse(DEFAULT_SIZE));
 
-        ValueSet result = new ValueSet();
-        ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
-        result.setExpansion(expansion);
-        result.setStatus(Enumerations.PublicationStatus.ACTIVE);
-        aggEntries.stream().map(this::makeCoding).forEach(expansion::addContains);
+		ValueSet result = new ValueSet();
+		ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
+		result.setExpansion(expansion);
+		result.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		aggEntries.stream().map(this::makeCoding).forEach(expansion::addContains);
 
-        return result;
-    }
+		return result;
+	}
 
-    ValueSet.ValueSetExpansionContainsComponent makeCoding(TokenAutocompleteHit theSearchHit) {
-        TokenParam tokenParam = new TokenParam();
-        tokenParam.setValueAsQueryToken(myFhirContext, null, null, theSearchHit.mySystemCode);
+	ValueSet.ValueSetExpansionContainsComponent makeCoding(TokenAutocompleteHit theSearchHit) {
+		TokenParam tokenParam = new TokenParam();
+		tokenParam.setValueAsQueryToken(myFhirContext, null, null, theSearchHit.mySystemCode);
 
-        // R4 only for now.
-        //		IBaseCoding coding = TerserUtil.newElement(myFhirContext, "Coding");
-        ValueSet.ValueSetExpansionContainsComponent coding =
-                new ValueSet.ValueSetExpansionContainsComponent();
-        coding.setCode(tokenParam.getValue());
-        coding.setSystem(tokenParam.getSystem());
-        coding.setDisplay(theSearchHit.myDisplayText);
+		// R4 only for now.
+		//		IBaseCoding coding = TerserUtil.newElement(myFhirContext, "Coding");
+		ValueSet.ValueSetExpansionContainsComponent coding =
+					new ValueSet.ValueSetExpansionContainsComponent();
+		coding.setCode(tokenParam.getValue());
+		coding.setSystem(tokenParam.getSystem());
+		coding.setDisplay(theSearchHit.myDisplayText);
 
-        return coding;
-    }
+		return coding;
+	}
 }

@@ -20,16 +20,16 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 public enum ColumnTypeEnum {
-    LONG,
-    STRING,
-    DATE_ONLY,
-    DATE_TIMESTAMP,
-    BOOLEAN,
-    FLOAT,
-    INT,
-    TINYINT,
-    BLOB,
-    CLOB,
-    DOUBLE,
-    TEXT;
+	LONG,
+	STRING,
+	DATE_ONLY,
+	DATE_TIMESTAMP,
+	BOOLEAN,
+	FLOAT,
+	INT,
+	TINYINT,
+	BLOB,
+	CLOB,
+	DOUBLE,
+	TEXT;
 }

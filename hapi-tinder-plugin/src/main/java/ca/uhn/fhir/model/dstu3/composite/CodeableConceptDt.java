@@ -1,7 +1,5 @@
 package ca.uhn.fhir.model.dstu3.composite;
 
-import java.util.List;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -10,6 +8,8 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
+
+import java.util.List;
 
 /**
  * HAPI/FHIR <b>CodeableConceptDt</b> Datatype ()
@@ -24,163 +24,163 @@ import ca.uhn.fhir.model.primitive.StringDt;
 @DatatypeDef(name = "CodeableConceptDt")
 public class CodeableConceptDt extends BaseIdentifiableElement implements ICompositeDatatype {
 
-    /** Constructor */
-    public CodeableConceptDt() {
-        // nothing
-    }
+	/** Constructor */
+	public CodeableConceptDt() {
+		// nothing
+	}
 
-    /**
-     * Constructor which creates a CodeableConceptDt with one coding repetition, containing the
-     * given system and code
-     */
-    public CodeableConceptDt(String theSystem, String theCode) {
-        addCoding().setSystem(theSystem).setCode(theCode);
-    }
+	/**
+	* Constructor which creates a CodeableConceptDt with one coding repetition, containing the
+	* given system and code
+	*/
+	public CodeableConceptDt(String theSystem, String theCode) {
+		addCoding().setSystem(theSystem).setCode(theCode);
+	}
 
-    @Child(
-            name = "coding",
-            type = CodingDt.class,
-            order = 0,
-            min = 0,
-            max = Child.MAX_UNLIMITED,
-            summary = true,
-            modifier = false)
-    @Description(
-            shortDefinition = "",
-            formalDefinition = "A reference to a code defined by a terminology system")
-    private java.util.List<CodingDt> myCoding;
+	@Child(
+				name = "coding",
+				type = CodingDt.class,
+				order = 0,
+				min = 0,
+				max = Child.MAX_UNLIMITED,
+				summary = true,
+				modifier = false)
+	@Description(
+				shortDefinition = "",
+				formalDefinition = "A reference to a code defined by a terminology system")
+	private java.util.List<CodingDt> myCoding;
 
-    @Child(
-            name = "text",
-            type = StringDt.class,
-            order = 1,
-            min = 0,
-            max = 1,
-            summary = true,
-            modifier = false)
-    @Description(
-            shortDefinition = "",
-            formalDefinition =
-                    "A human language representation of the concept as seen/selected/uttered by the"
-                        + " user who entered the data and/or which represents the intended meaning"
-                        + " of the user")
-    private StringDt myText;
+	@Child(
+				name = "text",
+				type = StringDt.class,
+				order = 1,
+				min = 0,
+				max = 1,
+				summary = true,
+				modifier = false)
+	@Description(
+				shortDefinition = "",
+				formalDefinition =
+						"A human language representation of the concept as seen/selected/uttered by the"
+								+ " user who entered the data and/or which represents the intended meaning"
+								+ " of the user")
+	private StringDt myText;
 
-    @Override
-    public boolean isEmpty() {
-        return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(myCoding, myText);
-    }
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(myCoding, myText);
+	}
 
-    @Override
-    public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-        return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCoding, myText);
-    }
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCoding, myText);
+	}
 
-    /**
-     * Gets the value(s) for <b>coding</b> (). creating it if it does not exist. Will not return
-     * <code>null</code>.
-     *
-     * <p><b>Definition:</b> A reference to a code defined by a terminology system
-     */
-    public java.util.List<CodingDt> getCoding() {
-        if (myCoding == null) {
-            myCoding = new java.util.ArrayList<CodingDt>();
-        }
-        return myCoding;
-    }
+	/**
+	* Gets the value(s) for <b>coding</b> (). creating it if it does not exist. Will not return
+	* <code>null</code>.
+	*
+	* <p><b>Definition:</b> A reference to a code defined by a terminology system
+	*/
+	public java.util.List<CodingDt> getCoding() {
+		if (myCoding == null) {
+				myCoding = new java.util.ArrayList<CodingDt>();
+		}
+		return myCoding;
+	}
 
-    /**
-     * Sets the value(s) for <b>coding</b> ()
-     *
-     * <p><b>Definition:</b> A reference to a code defined by a terminology system
-     */
-    public CodeableConceptDt setCoding(java.util.List<CodingDt> theValue) {
-        myCoding = theValue;
-        return this;
-    }
+	/**
+	* Sets the value(s) for <b>coding</b> ()
+	*
+	* <p><b>Definition:</b> A reference to a code defined by a terminology system
+	*/
+	public CodeableConceptDt setCoding(java.util.List<CodingDt> theValue) {
+		myCoding = theValue;
+		return this;
+	}
 
-    /**
-     * Adds and returns a new value for <b>coding</b> ()
-     *
-     * <p><b>Definition:</b> A reference to a code defined by a terminology system
-     */
-    public CodingDt addCoding() {
-        CodingDt newType = new CodingDt();
-        getCoding().add(newType);
-        return newType;
-    }
+	/**
+	* Adds and returns a new value for <b>coding</b> ()
+	*
+	* <p><b>Definition:</b> A reference to a code defined by a terminology system
+	*/
+	public CodingDt addCoding() {
+		CodingDt newType = new CodingDt();
+		getCoding().add(newType);
+		return newType;
+	}
 
-    /**
-     * Adds a given new value for <b>coding</b> ()
-     *
-     * <p><b>Definition:</b> A reference to a code defined by a terminology system
-     *
-     * @param theValue The coding to add (must not be <code>null</code>)
-     */
-    public CodeableConceptDt addCoding(CodingDt theValue) {
-        if (theValue == null) {
-            throw new NullPointerException(Msg.code(87) + "theValue must not be null");
-        }
-        getCoding().add(theValue);
-        return this;
-    }
+	/**
+	* Adds a given new value for <b>coding</b> ()
+	*
+	* <p><b>Definition:</b> A reference to a code defined by a terminology system
+	*
+	* @param theValue The coding to add (must not be <code>null</code>)
+	*/
+	public CodeableConceptDt addCoding(CodingDt theValue) {
+		if (theValue == null) {
+				throw new NullPointerException(Msg.code(87) + "theValue must not be null");
+		}
+		getCoding().add(theValue);
+		return this;
+	}
 
-    /**
-     * Gets the first repetition for <b>coding</b> (), creating it if it does not already exist.
-     *
-     * <p><b>Definition:</b> A reference to a code defined by a terminology system
-     */
-    public CodingDt getCodingFirstRep() {
-        if (getCoding().isEmpty()) {
-            return addCoding();
-        }
-        return getCoding().get(0);
-    }
+	/**
+	* Gets the first repetition for <b>coding</b> (), creating it if it does not already exist.
+	*
+	* <p><b>Definition:</b> A reference to a code defined by a terminology system
+	*/
+	public CodingDt getCodingFirstRep() {
+		if (getCoding().isEmpty()) {
+				return addCoding();
+		}
+		return getCoding().get(0);
+	}
 
-    /**
-     * Gets the value(s) for <b>text</b> (). creating it if it does not exist. Will not return
-     * <code>null</code>.
-     *
-     * <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
-     * by the user who entered the data and/or which represents the intended meaning of the user
-     */
-    public StringDt getTextElement() {
-        if (myText == null) {
-            myText = new StringDt();
-        }
-        return myText;
-    }
+	/**
+	* Gets the value(s) for <b>text</b> (). creating it if it does not exist. Will not return
+	* <code>null</code>.
+	*
+	* <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
+	* by the user who entered the data and/or which represents the intended meaning of the user
+	*/
+	public StringDt getTextElement() {
+		if (myText == null) {
+				myText = new StringDt();
+		}
+		return myText;
+	}
 
-    /**
-     * Gets the value(s) for <b>text</b> (). creating it if it does not exist. Will not return
-     * <code>null</code>.
-     *
-     * <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
-     * by the user who entered the data and/or which represents the intended meaning of the user
-     */
-    public String getText() {
-        return getTextElement().getValue();
-    }
+	/**
+	* Gets the value(s) for <b>text</b> (). creating it if it does not exist. Will not return
+	* <code>null</code>.
+	*
+	* <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
+	* by the user who entered the data and/or which represents the intended meaning of the user
+	*/
+	public String getText() {
+		return getTextElement().getValue();
+	}
 
-    /**
-     * Sets the value(s) for <b>text</b> ()
-     *
-     * <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
-     * by the user who entered the data and/or which represents the intended meaning of the user
-     */
-    public CodeableConceptDt setText(StringDt theValue) {
-        myText = theValue;
-        return this;
-    }
+	/**
+	* Sets the value(s) for <b>text</b> ()
+	*
+	* <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
+	* by the user who entered the data and/or which represents the intended meaning of the user
+	*/
+	public CodeableConceptDt setText(StringDt theValue) {
+		myText = theValue;
+		return this;
+	}
 
-    /**
-     * Sets the value for <b>text</b> ()
-     *
-     * <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
-     * by the user who entered the data and/or which represents the intended meaning of the user
-     */
-    public CodeableConceptDt setText(String theString) {
-        myText = new StringDt(theString);
-        return this;
-    }
+	/**
+	* Sets the value for <b>text</b> ()
+	*
+	* <p><b>Definition:</b> A human language representation of the concept as seen/selected/uttered
+	* by the user who entered the data and/or which represents the intended meaning of the user
+	*/
+	public CodeableConceptDt setText(String theString) {
+		myText = new StringDt(theString);
+		return this;
+	}
 }

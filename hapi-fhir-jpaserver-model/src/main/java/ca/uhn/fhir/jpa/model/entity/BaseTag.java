@@ -28,24 +28,24 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BaseTag extends BasePartitionable implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @ManyToOne(cascade = {})
-    @JoinColumn(name = "TAG_ID", nullable = false)
-    private TagDefinition myTag;
+	@ManyToOne(cascade = {})
+	@JoinColumn(name = "TAG_ID", nullable = false)
+	private TagDefinition myTag;
 
-    @Column(name = "TAG_ID", insertable = false, updatable = false)
-    private Long myTagId;
+	@Column(name = "TAG_ID", insertable = false, updatable = false)
+	private Long myTagId;
 
-    public Long getTagId() {
-        return myTagId;
-    }
+	public Long getTagId() {
+		return myTagId;
+	}
 
-    public TagDefinition getTag() {
-        return myTag;
-    }
+	public TagDefinition getTag() {
+		return myTag;
+	}
 
-    public void setTag(TagDefinition theTag) {
-        myTag = theTag;
-    }
+	public void setTag(TagDefinition theTag) {
+		myTag = theTag;
+	}
 }

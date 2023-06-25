@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * This interface is used by any storage implementations to convert from persisted database format
@@ -32,8 +31,8 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
  */
 public interface IStorageResourceParser {
 
-    // TODO: JA2 - Remove theForHistoryOperation flag - It toggles adding a bit of extra
-    // metadata but there's no reason to not always just add that, and this would
-    // simplify this interface
-    IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
+	// TODO: JA2 - Remove theForHistoryOperation flag - It toggles adding a bit of extra
+	// metadata but there's no reason to not always just add that, and this would
+	// simplify this interface
+	IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
 }

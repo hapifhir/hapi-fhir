@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.List;
 
 /**
  * This class is a replacement for {@link DaoMethodOutcome} for delete operations, as they can
@@ -32,53 +31,53 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
  */
 public class DeleteMethodOutcome extends MethodOutcome {
 
-    private List<? extends IBasePersistedResource> myDeletedEntities;
-    @Deprecated private long myExpungedResourcesCount;
-    @Deprecated private long myExpungedEntitiesCount;
+	private List<? extends IBasePersistedResource> myDeletedEntities;
+	@Deprecated private long myExpungedResourcesCount;
+	@Deprecated private long myExpungedEntitiesCount;
 
-    public DeleteMethodOutcome() {}
+	public DeleteMethodOutcome() {}
 
-    public DeleteMethodOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
-        super(theBaseOperationOutcome);
-    }
+	public DeleteMethodOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
+		super(theBaseOperationOutcome);
+	}
 
-    public List<? extends IBasePersistedResource> getDeletedEntities() {
-        return myDeletedEntities;
-    }
+	public List<? extends IBasePersistedResource> getDeletedEntities() {
+		return myDeletedEntities;
+	}
 
-    /**
-     * Use {@literal ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
-     */
-    @Deprecated
-    public DeleteMethodOutcome setDeletedEntities(
-            List<? extends IBasePersistedResource> theDeletedEntities) {
-        myDeletedEntities = theDeletedEntities;
-        return this;
-    }
+	/**
+	* Use {@literal ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
+	*/
+	@Deprecated
+	public DeleteMethodOutcome setDeletedEntities(
+				List<? extends IBasePersistedResource> theDeletedEntities) {
+		myDeletedEntities = theDeletedEntities;
+		return this;
+	}
 
-    /**
-     * Use {@literal
-     * ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
-     */
-    @Deprecated
-    public long getExpungedResourcesCount() {
-        return myExpungedResourcesCount;
-    }
+	/**
+	* Use {@literal
+	* ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
+	*/
+	@Deprecated
+	public long getExpungedResourcesCount() {
+		return myExpungedResourcesCount;
+	}
 
-    @Deprecated
-    public DeleteMethodOutcome setExpungedResourcesCount(long theExpungedResourcesCount) {
-        myExpungedResourcesCount = theExpungedResourcesCount;
-        return this;
-    }
+	@Deprecated
+	public DeleteMethodOutcome setExpungedResourcesCount(long theExpungedResourcesCount) {
+		myExpungedResourcesCount = theExpungedResourcesCount;
+		return this;
+	}
 
-    @Deprecated
-    public long getExpungedEntitiesCount() {
-        return myExpungedEntitiesCount;
-    }
+	@Deprecated
+	public long getExpungedEntitiesCount() {
+		return myExpungedEntitiesCount;
+	}
 
-    @Deprecated
-    public DeleteMethodOutcome setExpungedEntitiesCount(long theExpungedEntitiesCount) {
-        myExpungedEntitiesCount = theExpungedEntitiesCount;
-        return this;
-    }
+	@Deprecated
+	public DeleteMethodOutcome setExpungedEntitiesCount(long theExpungedEntitiesCount) {
+		myExpungedEntitiesCount = theExpungedEntitiesCount;
+		return this;
+	}
 }

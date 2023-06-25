@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search;
 
 public interface IStaleSearchDeletingSvc {
 
-    void pollForStaleSearchesAndDeleteThem();
+	void pollForStaleSearchesAndDeleteThem();
 
-    void schedulePollForStaleSearches();
+	void schedulePollForStaleSearches();
 }

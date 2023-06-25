@@ -21,16 +21,16 @@ package org.hl7.fhir.instance.model.api;
 
 public interface INarrative extends ICompositeType {
 
-    @Override
-    boolean isEmpty();
+	@Override
+	boolean isEmpty();
 
-    // TODO: use less broad exception type here
-    public void setDivAsString(String theString) throws Exception;
+	// TODO: use less broad exception type here
+	public void setDivAsString(String theString) throws Exception;
 
-    // TODO: use less broad exception type here
-    public String getDivAsString() throws Exception;
+	// TODO: use less broad exception type here
+	public String getDivAsString() throws Exception;
 
-    public INarrative setStatusAsString(String theString);
+	public INarrative setStatusAsString(String theString);
 
-    public String getStatusAsString();
+	public String getStatusAsString();
 }

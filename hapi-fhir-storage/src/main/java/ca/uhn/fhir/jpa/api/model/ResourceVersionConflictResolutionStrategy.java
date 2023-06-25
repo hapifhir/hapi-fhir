@@ -26,23 +26,23 @@ import org.apache.commons.lang3.Validate;
  */
 public class ResourceVersionConflictResolutionStrategy {
 
-    private int myMaxRetries;
-    private boolean myRetry;
+	private int myMaxRetries;
+	private boolean myRetry;
 
-    public int getMaxRetries() {
-        return myMaxRetries;
-    }
+	public int getMaxRetries() {
+		return myMaxRetries;
+	}
 
-    public void setMaxRetries(int theMaxRetries) {
-        Validate.isTrue(theMaxRetries >= 0, "theRetryUpToMillis must not be negative");
-        myMaxRetries = theMaxRetries;
-    }
+	public void setMaxRetries(int theMaxRetries) {
+		Validate.isTrue(theMaxRetries >= 0, "theRetryUpToMillis must not be negative");
+		myMaxRetries = theMaxRetries;
+	}
 
-    public boolean isRetry() {
-        return myRetry;
-    }
+	public boolean isRetry() {
+		return myRetry;
+	}
 
-    public void setRetry(boolean theRetry) {
-        myRetry = theRetry;
-    }
+	public void setRetry(boolean theRetry) {
+		myRetry = theRetry;
+	}
 }

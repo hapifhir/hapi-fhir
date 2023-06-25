@@ -19,44 +19,43 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.List;
-import java.util.Optional;
-
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import java.util.List;
+import java.util.Optional;
 
 public interface ITermConceptMapDao
-        extends JpaRepository<TermConceptMap, Long>, IHapiFhirJpaRepository {
-    @Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
-    @Modifying
-    void deleteTermConceptMapById(@Param("pid") Long theId);
+		extends JpaRepository<TermConceptMap, Long>, IHapiFhirJpaRepository {
+	@Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
+	@Modifying
+	void deleteTermConceptMapById(@Param("pid") Long theId);
 
-    @Query("SELECT cm FROM TermConceptMap cm WHERE cm.myResourcePid = :resource_pid")
-    Optional<TermConceptMap> findTermConceptMapByResourcePid(
-            @Param("resource_pid") Long theResourcePid);
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myResourcePid = :resource_pid")
+	Optional<TermConceptMap> findTermConceptMapByResourcePid(
+				@Param("resource_pid") Long theResourcePid);
 
-    // Keep backwards compatibility, recommend to use findTermConceptMapByUrlAndNullVersion instead
-    @Deprecated
-    @Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
-    Optional<TermConceptMap> findTermConceptMapByUrl(@Param("url") String theUrl);
+	// Keep backwards compatibility, recommend to use findTermConceptMapByUrlAndNullVersion instead
+	@Deprecated
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
+	Optional<TermConceptMap> findTermConceptMapByUrl(@Param("url") String theUrl);
 
-    @Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
-    Optional<TermConceptMap> findTermConceptMapByUrlAndNullVersion(@Param("url") String theUrl);
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url and cm.myVersion is null")
+	Optional<TermConceptMap> findTermConceptMapByUrlAndNullVersion(@Param("url") String theUrl);
 
-    // Note that last updated version is considered current version.
-    @Query(
-            value =
-                    "SELECT cm FROM TermConceptMap cm INNER JOIN ResourceTable r ON r.myId ="
-                            + " cm.myResourcePid WHERE cm.myUrl = :url ORDER BY r.myUpdated DESC")
-    List<TermConceptMap> getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(
-            Pageable thePage, @Param("url") String theUrl);
+	// Note that last updated version is considered current version.
+	@Query(
+				value =
+						"SELECT cm FROM TermConceptMap cm INNER JOIN ResourceTable r ON r.myId ="
+									+ " cm.myResourcePid WHERE cm.myUrl = :url ORDER BY r.myUpdated DESC")
+	List<TermConceptMap> getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(
+				Pageable thePage, @Param("url") String theUrl);
 
-    @Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url AND cm.myVersion = :version")
-    Optional<TermConceptMap> findTermConceptMapByUrlAndVersion(
-            @Param("url") String theUrl, @Param("version") String theVersion);
+	@Query("SELECT cm FROM TermConceptMap cm WHERE cm.myUrl = :url AND cm.myVersion = :version")
+	Optional<TermConceptMap> findTermConceptMapByUrlAndVersion(
+				@Param("url") String theUrl, @Param("version") String theVersion);
 }

@@ -19,85 +19,84 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobInstanceStartRequest implements IModelJson {
 
-    @JsonProperty(value = "jobDefinitionId")
-    private String myJobDefinitionId;
+	@JsonProperty(value = "jobDefinitionId")
+	private String myJobDefinitionId;
 
-    @JsonProperty(value = "parameters")
-    private String myParameters;
+	@JsonProperty(value = "parameters")
+	private String myParameters;
 
-    /**
-     * If true, batch2 will check the existing jobs and if one with the same parameters that is
-     * already running (ie, not failed, cancelled, etc) it will return that id
-     */
-    @JsonProperty(value = "useCache")
-    private boolean myUseCache;
+	/**
+	* If true, batch2 will check the existing jobs and if one with the same parameters that is
+	* already running (ie, not failed, cancelled, etc) it will return that id
+	*/
+	@JsonProperty(value = "useCache")
+	private boolean myUseCache;
 
-    /** Constructor */
-    public JobInstanceStartRequest() {
-        super();
-    }
+	/** Constructor */
+	public JobInstanceStartRequest() {
+		super();
+	}
 
-    /** Copy constructor */
-    public JobInstanceStartRequest(JobInstanceStartRequest theJobInstance) {
-        super();
-        setJobDefinitionId(theJobInstance.getJobDefinitionId());
-        setParameters(theJobInstance.getParameters());
-    }
+	/** Copy constructor */
+	public JobInstanceStartRequest(JobInstanceStartRequest theJobInstance) {
+		super();
+		setJobDefinitionId(theJobInstance.getJobDefinitionId());
+		setParameters(theJobInstance.getParameters());
+	}
 
-    public String getJobDefinitionId() {
-        return myJobDefinitionId;
-    }
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
+	}
 
-    public void setJobDefinitionId(String theJobDefinitionId) {
-        myJobDefinitionId = theJobDefinitionId;
-    }
+	public void setJobDefinitionId(String theJobDefinitionId) {
+		myJobDefinitionId = theJobDefinitionId;
+	}
 
-    public String getParameters() {
-        return myParameters;
-    }
+	public String getParameters() {
+		return myParameters;
+	}
 
-    public void setParameters(String theParameters) {
-        myParameters = theParameters;
-    }
+	public void setParameters(String theParameters) {
+		myParameters = theParameters;
+	}
 
-    public JobInstanceStartRequest setParameters(IModelJson theParameters) {
-        myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
-        return this;
-    }
+	public JobInstanceStartRequest setParameters(IModelJson theParameters) {
+		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
+		return this;
+	}
 
-    public <T extends IModelJson> T getParameters(Class<T> theType) {
-        if (myParameters == null) {
-            return null;
-        }
-        return JsonUtil.deserialize(myParameters, theType);
-    }
+	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		if (myParameters == null) {
+				return null;
+		}
+		return JsonUtil.deserialize(myParameters, theType);
+	}
 
-    public boolean isUseCache() {
-        return myUseCache;
-    }
+	public boolean isUseCache() {
+		return myUseCache;
+	}
 
-    public void setUseCache(boolean theUseCache) {
-        myUseCache = theUseCache;
-    }
+	public void setUseCache(boolean theUseCache) {
+		myUseCache = theUseCache;
+	}
 
-    @Override
-    public String toString() {
-        return "JobInstanceStartRequest{"
-                + "myJobDefinitionId='"
-                + myJobDefinitionId
-                + '\''
-                + ", myParameters='"
-                + myParameters
-                + '\''
-                + ", myUseCache="
-                + myUseCache
-                + '}';
-    }
+	@Override
+	public String toString() {
+		return "JobInstanceStartRequest{"
+					+ "myJobDefinitionId='"
+					+ myJobDefinitionId
+					+ '\''
+					+ ", myParameters='"
+					+ myParameters
+					+ '\''
+					+ ", myUseCache="
+					+ myUseCache
+					+ '}';
+	}
 }

@@ -23,5 +23,5 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 
 public interface ISearchParamRegistryController {
 
-    ResourceChangeResult refreshCacheIfNecessary();
+	ResourceChangeResult refreshCacheIfNecessary();
 }

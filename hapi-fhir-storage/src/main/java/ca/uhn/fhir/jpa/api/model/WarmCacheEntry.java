@@ -29,47 +29,47 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class WarmCacheEntry {
 
-    private long myPeriodMillis;
-    private String myUrl;
+	private long myPeriodMillis;
+	private String myUrl;
 
-    @Override
-    public boolean equals(Object theO) {
-        if (this == theO) {
-            return true;
-        }
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+				return true;
+		}
 
-        if (theO == null || getClass() != theO.getClass()) {
-            return false;
-        }
+		if (theO == null || getClass() != theO.getClass()) {
+				return false;
+		}
 
-        WarmCacheEntry that = (WarmCacheEntry) theO;
+		WarmCacheEntry that = (WarmCacheEntry) theO;
 
-        return new EqualsBuilder()
-                .append(myPeriodMillis, that.myPeriodMillis)
-                .append(myUrl, that.myUrl)
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.append(myPeriodMillis, that.myPeriodMillis)
+					.append(myUrl, that.myUrl)
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(myPeriodMillis).append(myUrl).toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myPeriodMillis).append(myUrl).toHashCode();
+	}
 
-    public long getPeriodMillis() {
-        return myPeriodMillis;
-    }
+	public long getPeriodMillis() {
+		return myPeriodMillis;
+	}
 
-    public WarmCacheEntry setPeriodMillis(long thePeriodMillis) {
-        myPeriodMillis = thePeriodMillis;
-        return this;
-    }
+	public WarmCacheEntry setPeriodMillis(long thePeriodMillis) {
+		myPeriodMillis = thePeriodMillis;
+		return this;
+	}
 
-    public String getUrl() {
-        return myUrl;
-    }
+	public String getUrl() {
+		return myUrl;
+	}
 
-    public WarmCacheEntry setUrl(String theUrl) {
-        myUrl = theUrl;
-        return this;
-    }
+	public WarmCacheEntry setUrl(String theUrl) {
+		myUrl = theUrl;
+		return this;
+	}
 }

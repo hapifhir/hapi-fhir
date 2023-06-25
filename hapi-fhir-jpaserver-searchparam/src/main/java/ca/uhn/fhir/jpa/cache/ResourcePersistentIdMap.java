@@ -19,50 +19,49 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
 public class ResourcePersistentIdMap {
-    private final Map<IIdType, IResourcePersistentId> myMap = new HashMap<>();
+	private final Map<IIdType, IResourcePersistentId> myMap = new HashMap<>();
 
-    public static ResourcePersistentIdMap fromResourcePersistentIds(
-            List<IResourcePersistentId> theResourcePersistentIds) {
-        ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
-        theResourcePersistentIds.forEach(retval::add);
-        return retval;
-    }
+	public static ResourcePersistentIdMap fromResourcePersistentIds(
+				List<IResourcePersistentId> theResourcePersistentIds) {
+		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
+		theResourcePersistentIds.forEach(retval::add);
+		return retval;
+	}
 
-    private void add(IResourcePersistentId theResourcePersistentId) {
-        IIdType id = theResourcePersistentId.getAssociatedResourceId();
-        myMap.put(id.toUnqualifiedVersionless(), theResourcePersistentId);
-    }
+	private void add(IResourcePersistentId theResourcePersistentId) {
+		IIdType id = theResourcePersistentId.getAssociatedResourceId();
+		myMap.put(id.toUnqualifiedVersionless(), theResourcePersistentId);
+	}
 
-    public boolean containsKey(IIdType theId) {
-        return myMap.containsKey(theId.toUnqualifiedVersionless());
-    }
+	public boolean containsKey(IIdType theId) {
+		return myMap.containsKey(theId.toUnqualifiedVersionless());
+	}
 
-    public IResourcePersistentId getResourcePersistentId(IIdType theId) {
-        return myMap.get(theId.toUnqualifiedVersionless());
-    }
+	public IResourcePersistentId getResourcePersistentId(IIdType theId) {
+		return myMap.get(theId.toUnqualifiedVersionless());
+	}
 
-    public boolean isEmpty() {
-        return myMap.isEmpty();
-    }
+	public boolean isEmpty() {
+		return myMap.isEmpty();
+	}
 
-    public int size() {
-        return myMap.size();
-    }
+	public int size() {
+		return myMap.size();
+	}
 
-    public void put(IIdType theId, IResourcePersistentId thePid) {
-        myMap.put(theId, thePid);
-    }
+	public void put(IIdType theId, IResourcePersistentId thePid) {
+		myMap.put(theId, thePid);
+	}
 
-    public void putAll(ResourcePersistentIdMap theIdAndPID) {
-        myMap.putAll(theIdAndPID.myMap);
-    }
+	public void putAll(ResourcePersistentIdMap theIdAndPID) {
+		myMap.putAll(theIdAndPID.myMap);
+	}
 }

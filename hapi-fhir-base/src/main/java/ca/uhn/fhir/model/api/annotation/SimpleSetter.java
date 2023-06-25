@@ -34,11 +34,11 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.CONSTRUCTOR})
 public @interface SimpleSetter {
 
-    String suffix() default "";
+	String suffix() default "";
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(value = {ElementType.PARAMETER})
-    public @interface Parameter {
-        String name();
-    }
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(value = {ElementType.PARAMETER})
+	public @interface Parameter {
+		String name();
+	}
 }

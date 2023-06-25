@@ -19,15 +19,10 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
@@ -38,10 +33,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
-import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.util.StopWatch;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class {@link
@@ -51,86 +50,86 @@ import ca.uhn.fhir.util.StopWatch;
  */
 public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 
-    private HttpClient myClient;
-    private HttpRequestBase myRequest;
+	private HttpClient myClient;
+	private HttpRequestBase myRequest;
 
-    public ApacheHttpRequest(HttpClient theClient, HttpRequestBase theApacheRequest) {
-        this.myClient = theClient;
-        this.myRequest = theApacheRequest;
-    }
+	public ApacheHttpRequest(HttpClient theClient, HttpRequestBase theApacheRequest) {
+		this.myClient = theClient;
+		this.myRequest = theApacheRequest;
+	}
 
-    @Override
-    public void addHeader(String theName, String theValue) {
-        myRequest.addHeader(theName, theValue);
-    }
+	@Override
+	public void addHeader(String theName, String theValue) {
+		myRequest.addHeader(theName, theValue);
+	}
 
-    @Override
-    public IHttpResponse execute() throws IOException {
-        StopWatch responseStopWatch = new StopWatch();
-        HttpResponse httpResponse = myClient.execute(myRequest);
-        return new ApacheHttpResponse(httpResponse, responseStopWatch);
-    }
+	@Override
+	public IHttpResponse execute() throws IOException {
+		StopWatch responseStopWatch = new StopWatch();
+		HttpResponse httpResponse = myClient.execute(myRequest);
+		return new ApacheHttpResponse(httpResponse, responseStopWatch);
+	}
 
-    @Override
-    public Map<String, List<String>> getAllHeaders() {
-        Map<String, List<String>> result = new HashMap<>();
-        for (Header header : myRequest.getAllHeaders()) {
-            if (!result.containsKey(header.getName())) {
-                result.put(header.getName(), new LinkedList<>());
-            }
-            result.get(header.getName()).add(header.getValue());
-        }
-        return Collections.unmodifiableMap(result);
-    }
+	@Override
+	public Map<String, List<String>> getAllHeaders() {
+		Map<String, List<String>> result = new HashMap<>();
+		for (Header header : myRequest.getAllHeaders()) {
+				if (!result.containsKey(header.getName())) {
+					result.put(header.getName(), new LinkedList<>());
+				}
+				result.get(header.getName()).add(header.getValue());
+		}
+		return Collections.unmodifiableMap(result);
+	}
 
-    /**
-     * Get the ApacheRequest
-     *
-     * @return the ApacheRequest
-     */
-    public HttpRequestBase getApacheRequest() {
-        return myRequest;
-    }
+	/**
+	* Get the ApacheRequest
+	*
+	* @return the ApacheRequest
+	*/
+	public HttpRequestBase getApacheRequest() {
+		return myRequest;
+	}
 
-    @Override
-    public String getHttpVerbName() {
-        return myRequest.getMethod();
-    }
+	@Override
+	public String getHttpVerbName() {
+		return myRequest.getMethod();
+	}
 
-    @Override
-    public void removeHeaders(String theHeaderName) {
-        Validate.notBlank(theHeaderName, "theHeaderName must not be null or blank");
-        myRequest.removeHeaders(theHeaderName);
-    }
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		Validate.notBlank(theHeaderName, "theHeaderName must not be null or blank");
+		myRequest.removeHeaders(theHeaderName);
+	}
 
-    @Override
-    public String getRequestBodyFromStream() throws IOException {
-        if (myRequest instanceof HttpEntityEnclosingRequest) {
-            HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
-            if (entity.isRepeatable()) {
-                final Header contentTypeHeader = myRequest.getFirstHeader("Content-Type");
-                Charset charset =
-                        contentTypeHeader == null
-                                ? null
-                                : ContentType.parse(contentTypeHeader.getValue()).getCharset();
-                return IOUtils.toString(entity.getContent(), charset);
-            }
-        }
-        return null;
-    }
+	@Override
+	public String getRequestBodyFromStream() throws IOException {
+		if (myRequest instanceof HttpEntityEnclosingRequest) {
+				HttpEntity entity = ((HttpEntityEnclosingRequest) myRequest).getEntity();
+				if (entity.isRepeatable()) {
+					final Header contentTypeHeader = myRequest.getFirstHeader("Content-Type");
+					Charset charset =
+								contentTypeHeader == null
+										? null
+										: ContentType.parse(contentTypeHeader.getValue()).getCharset();
+					return IOUtils.toString(entity.getContent(), charset);
+				}
+		}
+		return null;
+	}
 
-    @Override
-    public String getUri() {
-        return myRequest.getURI().toString();
-    }
+	@Override
+	public String getUri() {
+		return myRequest.getURI().toString();
+	}
 
-    @Override
-    public void setUri(String theUrl) {
-        myRequest.setURI(URI.create(theUrl));
-    }
+	@Override
+	public void setUri(String theUrl) {
+		myRequest.setURI(URI.create(theUrl));
+	}
 
-    @Override
-    public String toString() {
-        return myRequest.toString();
-    }
+	@Override
+	public String toString() {
+		return myRequest.toString();
+	}
 }

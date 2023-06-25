@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.searchparam.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
@@ -51,109 +44,115 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 @Import({NicknameServiceConfig.class})
 @Configuration
 public class SearchParamConfig {
 
-    @Autowired private FhirContext myFhirContext;
+	@Autowired private FhirContext myFhirContext;
 
-    @Bean
-    public ISearchParamExtractor searchParamExtractor() {
-        switch (myFhirContext.getVersion().getVersion()) {
-            case DSTU2:
-                return new SearchParamExtractorDstu2();
-            case DSTU3:
-                return new SearchParamExtractorDstu3();
-            case R4:
-                return new SearchParamExtractorR4();
-            case R4B:
-                return new SearchParamExtractorR4B();
-            case R5:
-                return new SearchParamExtractorR5();
-            case DSTU2_HL7ORG:
-            case DSTU2_1:
-            default:
-                throw new IllegalStateException(
-                        Msg.code(501)
-                                + "Can not handle version: "
-                                + myFhirContext.getVersion().getVersion());
-        }
-    }
+	@Bean
+	public ISearchParamExtractor searchParamExtractor() {
+		switch (myFhirContext.getVersion().getVersion()) {
+				case DSTU2:
+					return new SearchParamExtractorDstu2();
+				case DSTU3:
+					return new SearchParamExtractorDstu3();
+				case R4:
+					return new SearchParamExtractorR4();
+				case R4B:
+					return new SearchParamExtractorR4B();
+				case R5:
+					return new SearchParamExtractorR5();
+				case DSTU2_HL7ORG:
+				case DSTU2_1:
+				default:
+					throw new IllegalStateException(
+								Msg.code(501)
+										+ "Can not handle version: "
+										+ myFhirContext.getVersion().getVersion());
+		}
+	}
 
-    @Bean
-    public ISearchParamRegistry searchParamRegistry() {
-        return new SearchParamRegistryImpl();
-    }
+	@Bean
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryImpl();
+	}
 
-    @Bean
-    public MatchUrlService matchUrlService() {
-        return new MatchUrlService();
-    }
+	@Bean
+	public MatchUrlService matchUrlService() {
+		return new MatchUrlService();
+	}
 
-    @Bean
-    @Lazy
-    public SearchParamExtractorService searchParamExtractorService() {
-        return new SearchParamExtractorService();
-    }
+	@Bean
+	@Lazy
+	public SearchParamExtractorService searchParamExtractorService() {
+		return new SearchParamExtractorService();
+	}
 
-    @Bean
-    @Lazy
-    public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
-        return new SearchParameterCanonicalizer(theFhirContext);
-    }
+	@Bean
+	@Lazy
+	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+		return new SearchParameterCanonicalizer(theFhirContext);
+	}
 
-    @Bean
-    public IndexedSearchParamExtractor indexedSearchParamExtractor() {
-        return new IndexedSearchParamExtractor();
-    }
+	@Bean
+	public IndexedSearchParamExtractor indexedSearchParamExtractor() {
+		return new IndexedSearchParamExtractor();
+	}
 
-    @Bean
-    public InMemoryResourceMatcher inMemoryResourceMatcher() {
-        return new InMemoryResourceMatcher();
-    }
+	@Bean
+	public InMemoryResourceMatcher inMemoryResourceMatcher() {
+		return new InMemoryResourceMatcher();
+	}
 
-    @Bean
-    public SearchParamMatcher searchParamMatcher() {
-        return new SearchParamMatcher();
-    }
+	@Bean
+	public SearchParamMatcher searchParamMatcher() {
+		return new SearchParamMatcher();
+	}
 
-    @Bean
-    IResourceChangeListenerRegistry resourceChangeListenerRegistry(
-            FhirContext theFhirContext,
-            ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-            InMemoryResourceMatcher theInMemoryResourceMatcher) {
-        return new ResourceChangeListenerRegistryImpl(
-                theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
-    }
+	@Bean
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry(
+				FhirContext theFhirContext,
+				ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
+				InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		return new ResourceChangeListenerRegistryImpl(
+					theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+	}
 
-    @Bean
-    IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
-        return new ResourceChangeListenerCacheRefresherImpl();
-    }
+	@Bean
+	IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
+		return new ResourceChangeListenerCacheRefresherImpl();
+	}
 
-    @Bean
-    ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
-        return new ResourceChangeListenerCacheFactory();
-    }
+	@Bean
+	ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
+		return new ResourceChangeListenerCacheFactory();
+	}
 
-    @Bean
-    @Scope("prototype")
-    ResourceChangeListenerCache registeredResourceChangeListener(
-            String theResourceName,
-            IResourceChangeListener theResourceChangeListener,
-            SearchParameterMap theSearchParameterMap,
-            long theRemoteRefreshIntervalMs) {
-        return new ResourceChangeListenerCache(
-                theResourceName,
-                theResourceChangeListener,
-                theSearchParameterMap,
-                theRemoteRefreshIntervalMs);
-    }
+	@Bean
+	@Scope("prototype")
+	ResourceChangeListenerCache registeredResourceChangeListener(
+				String theResourceName,
+				IResourceChangeListener theResourceChangeListener,
+				SearchParameterMap theSearchParameterMap,
+				long theRemoteRefreshIntervalMs) {
+		return new ResourceChangeListenerCache(
+					theResourceName,
+					theResourceChangeListener,
+					theSearchParameterMap,
+					theRemoteRefreshIntervalMs);
+	}
 
-    @Bean
-    @Lazy
-    SearchParameterHelper searchParameterHelper(FhirContext theFhirContext) {
-        return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
-    }
+	@Bean
+	@Lazy
+	SearchParameterHelper searchParameterHelper(FhirContext theFhirContext) {
+		return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
+	}
 }

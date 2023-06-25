@@ -19,15 +19,13 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +34,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 /**
  * Some of this is tested in {@link
@@ -53,207 +52,207 @@ import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
  */
 // wipmb For 6.8 - regularize the tx boundary.  Probably make them all MANDATORY
 public interface IJobPersistence extends IWorkChunkPersistence {
-    Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
+	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
 
-    /**
-     * Store a new job instance. This will be called when a new job instance is being kicked off.
-     *
-     * @param theInstance The details
-     */
-    @Transactional(propagation = Propagation.REQUIRED)
-    String storeNewInstance(JobInstance theInstance);
+	/**
+	* Store a new job instance. This will be called when a new job instance is being kicked off.
+	*
+	* @param theInstance The details
+	*/
+	@Transactional(propagation = Propagation.REQUIRED)
+	String storeNewInstance(JobInstance theInstance);
 
-    /**
-     * Fetch an instance
-     *
-     * @param theInstanceId The instance ID
-     */
-    Optional<JobInstance> fetchInstance(String theInstanceId);
+	/**
+	* Fetch an instance
+	*
+	* @param theInstanceId The instance ID
+	*/
+	Optional<JobInstance> fetchInstance(String theInstanceId);
 
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchInstances(
-            String theJobDefinitionId,
-            Set<StatusEnum> theStatuses,
-            Date theCutoff,
-            Pageable thePageable);
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstances(
+				String theJobDefinitionId,
+				Set<StatusEnum> theStatuses,
+				Date theCutoff,
+				Pageable thePageable);
 
-    /** Fetches any existing jobs matching provided request parameters */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchInstances(
-            FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
+	/** Fetches any existing jobs matching provided request parameters */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstances(
+				FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
 
-    /** Fetch all instances */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
+	/** Fetch all instances */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
-    /** Fetch instances ordered by myCreateTime DESC */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
+	/** Fetch instances ordered by myCreateTime DESC */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(
-            String theJobDefinitionId,
-            Set<StatusEnum> theRequestedStatuses,
-            int thePageSize,
-            int thePageIndex);
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(
+				String theJobDefinitionId,
+				Set<StatusEnum> theRequestedStatuses,
+				int thePageSize,
+				int thePageIndex);
 
-    /** Fetch all job instances for a given job definition id */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    List<JobInstance> fetchInstancesByJobDefinitionId(
-            String theJobDefinitionId, int theCount, int theStart);
+	/** Fetch all job instances for a given job definition id */
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	List<JobInstance> fetchInstancesByJobDefinitionId(
+				String theJobDefinitionId, int theCount, int theStart);
 
-    /**
-     * Fetches all job instances based on the JobFetchRequest
-     *
-     * @param theRequest - the job fetch request
-     * @return - a page of job instances
-     */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
+	/**
+	* Fetches all job instances based on the JobFetchRequest
+	*
+	* @param theRequest - the job fetch request
+	* @return - a page of job instances
+	*/
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
-    /**
-     * Fetch all chunks for a given instance.
-     *
-     * @param theInstanceId - instance id
-     * @param theWithData - whether or not to include the data
-     * @return - an iterator for fetching work chunks
-     */
-    Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
+	/**
+	* Fetch all chunks for a given instance.
+	*
+	* @param theInstanceId - instance id
+	* @param theWithData - whether or not to include the data
+	* @return - an iterator for fetching work chunks
+	*/
+	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
-    /**
-     * Fetch all chunks with data for a given instance for a given step id - read-only.
-     *
-     * @return - a stream for fetching work chunks
-     */
-    Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
+	/**
+	* Fetch all chunks with data for a given instance for a given step id - read-only.
+	*
+	* @return - a stream for fetching work chunks
+	*/
+	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
-    /**
-     * Callback to update a JobInstance within a locked transaction. Return true from the callback
-     * if the record write should continue, or false if the change should be discarded.
-     */
-    interface JobInstanceUpdateCallback {
-        /**
-         * Modify theInstance within a write-lock transaction.
-         *
-         * @param theInstance a copy of the instance to modify.
-         * @return true if the change to theInstance should be written back to the db.
-         */
-        boolean doUpdate(JobInstance theInstance);
-    }
+	/**
+	* Callback to update a JobInstance within a locked transaction. Return true from the callback
+	* if the record write should continue, or false if the change should be discarded.
+	*/
+	interface JobInstanceUpdateCallback {
+		/**
+			* Modify theInstance within a write-lock transaction.
+			*
+			* @param theInstance a copy of the instance to modify.
+			* @return true if the change to theInstance should be written back to the db.
+			*/
+		boolean doUpdate(JobInstance theInstance);
+	}
 
-    /**
-     * Brute-force hack for now to create a tx boundary - takes a write-lock on the instance while
-     * the theModifier runs. Keep the callback short to keep the lock-time short. If the status is
-     * changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater} inside theModifier
-     * to ensure state-change callbacks are invoked properly.
-     *
-     * @param theInstanceId the id of the instance to modify
-     * @param theModifier a hook to modify the instance - return true to finish the record write
-     * @return true if the instance was modified
-     */
-    // wipmb For 6.8 - consider changing callers to actual objects we can unit test
-    @Transactional
-    boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
+	/**
+	* Brute-force hack for now to create a tx boundary - takes a write-lock on the instance while
+	* the theModifier runs. Keep the callback short to keep the lock-time short. If the status is
+	* changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater} inside theModifier
+	* to ensure state-change callbacks are invoked properly.
+	*
+	* @param theInstanceId the id of the instance to modify
+	* @param theModifier a hook to modify the instance - return true to finish the record write
+	* @return true if the instance was modified
+	*/
+	// wipmb For 6.8 - consider changing callers to actual objects we can unit test
+	@Transactional
+	boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
 
-    /**
-     * Deletes the instance and all associated work chunks
-     *
-     * @param theInstanceId The instance ID
-     */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void deleteInstanceAndChunks(String theInstanceId);
+	/**
+	* Deletes the instance and all associated work chunks
+	*
+	* @param theInstanceId The instance ID
+	*/
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	void deleteInstanceAndChunks(String theInstanceId);
 
-    /**
-     * Deletes all work chunks associated with the instance
-     *
-     * @param theInstanceId The instance ID
-     */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
+	/**
+	* Deletes all work chunks associated with the instance
+	*
+	* @param theInstanceId The instance ID
+	*/
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    boolean markInstanceAsStatusWhenStatusIn(
-            String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
+	@Transactional(propagation = Propagation.MANDATORY)
+	boolean markInstanceAsStatusWhenStatusIn(
+				String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
 
-    /**
-     * Marks an instance as cancelled
-     *
-     * @param theInstanceId The instance ID
-     */
-    // on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-    JobOperationResultJson cancelInstance(String theInstanceId);
+	/**
+	* Marks an instance as cancelled
+	*
+	* @param theInstanceId The instance ID
+	*/
+	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	JobOperationResultJson cancelInstance(String theInstanceId);
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    void updateInstanceUpdateTime(String theInstanceId);
+	@Transactional(propagation = Propagation.MANDATORY)
+	void updateInstanceUpdateTime(String theInstanceId);
 
-    /*
-     * State transition events for job instances.
-     * These cause the transitions along {@link ca.uhn.fhir.batch2.model.StatusEnum}
-     *
-     * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
-     */
+	/*
+	* State transition events for job instances.
+	* These cause the transitions along {@link ca.uhn.fhir.batch2.model.StatusEnum}
+	*
+	* @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+	*/
 
-    class CreateResult {
-        public final String jobInstanceId;
-        public final String workChunkId;
+	class CreateResult {
+		public final String jobInstanceId;
+		public final String workChunkId;
 
-        public CreateResult(String theJobInstanceId, String theWorkChunkId) {
-            jobInstanceId = theJobInstanceId;
-            workChunkId = theWorkChunkId;
-        }
+		public CreateResult(String theJobInstanceId, String theWorkChunkId) {
+				jobInstanceId = theJobInstanceId;
+				workChunkId = theWorkChunkId;
+		}
 
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this)
-                    .append("jobInstanceId", jobInstanceId)
-                    .append("workChunkId", workChunkId)
-                    .toString();
-        }
-    }
+		@Override
+		public String toString() {
+				return new ToStringBuilder(this)
+						.append("jobInstanceId", jobInstanceId)
+						.append("workChunkId", workChunkId)
+						.toString();
+		}
+	}
 
-    /**
-     * Create the job, and it's first chunk.
-     *
-     * <p>We create the chunk atomically with the job so that we never have a state with zero
-     * unfinished chunks left until the job is complete. Makes the maintenance run simpler.
-     *
-     * @param theJobDefinition what kind of job
-     * @param theParameters params for the job
-     * @return the ids of the instance and first chunk
-     */
-    @Nonnull
-    @Transactional(propagation = Propagation.MANDATORY)
-    default CreateResult onCreateWithFirstChunk(
-            JobDefinition<?> theJobDefinition, String theParameters) {
-        JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
-        instance.setParameters(theParameters);
-        instance.setStatus(StatusEnum.QUEUED);
+	/**
+	* Create the job, and it's first chunk.
+	*
+	* <p>We create the chunk atomically with the job so that we never have a state with zero
+	* unfinished chunks left until the job is complete. Makes the maintenance run simpler.
+	*
+	* @param theJobDefinition what kind of job
+	* @param theParameters params for the job
+	* @return the ids of the instance and first chunk
+	*/
+	@Nonnull
+	@Transactional(propagation = Propagation.MANDATORY)
+	default CreateResult onCreateWithFirstChunk(
+				JobDefinition<?> theJobDefinition, String theParameters) {
+		JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
+		instance.setParameters(theParameters);
+		instance.setStatus(StatusEnum.QUEUED);
 
-        String instanceId = storeNewInstance(instance);
-        ourLog.info(
-                "Stored new {} job {} with status {}",
-                theJobDefinition.getJobDefinitionId(),
-                instanceId,
-                instance.getStatus());
-        ourLog.debug("Job parameters: {}", instance.getParameters());
+		String instanceId = storeNewInstance(instance);
+		ourLog.info(
+					"Stored new {} job {} with status {}",
+					theJobDefinition.getJobDefinitionId(),
+					instanceId,
+					instance.getStatus());
+		ourLog.debug("Job parameters: {}", instance.getParameters());
 
-        WorkChunkCreateEvent batchWorkChunk =
-                WorkChunkCreateEvent.firstChunk(theJobDefinition, instanceId);
-        String chunkId = onWorkChunkCreate(batchWorkChunk);
-        return new CreateResult(instanceId, chunkId);
-    }
+		WorkChunkCreateEvent batchWorkChunk =
+					WorkChunkCreateEvent.firstChunk(theJobDefinition, instanceId);
+		String chunkId = onWorkChunkCreate(batchWorkChunk);
+		return new CreateResult(instanceId, chunkId);
+	}
 
-    /**
-     * Move from QUEUED->IN_PROGRESS when a work chunk arrives. Ignore other prior states.
-     *
-     * @return did the transition happen
-     */
-    @Transactional(propagation = Propagation.MANDATORY)
-    default boolean onChunkDequeued(String theJobInstanceId) {
-        return markInstanceAsStatusWhenStatusIn(
-                theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
-    }
+	/**
+	* Move from QUEUED->IN_PROGRESS when a work chunk arrives. Ignore other prior states.
+	*
+	* @return did the transition happen
+	*/
+	@Transactional(propagation = Propagation.MANDATORY)
+	default boolean onChunkDequeued(String theJobInstanceId) {
+		return markInstanceAsStatusWhenStatusIn(
+					theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
+	}
 }

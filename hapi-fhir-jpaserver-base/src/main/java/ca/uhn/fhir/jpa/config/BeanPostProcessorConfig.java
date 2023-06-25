@@ -34,9 +34,9 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 // is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for
 // auto-proxying)
 public class BeanPostProcessorConfig {
-    @Bean
-    public PersistenceExceptionTranslationPostProcessor
-            persistenceExceptionTranslationPostProcessor() {
-        return new PersistenceExceptionTranslationPostProcessor();
-    }
+	@Bean
+	public PersistenceExceptionTranslationPostProcessor
+				persistenceExceptionTranslationPostProcessor() {
+		return new PersistenceExceptionTranslationPostProcessor();
+	}
 }

@@ -19,46 +19,45 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import org.apache.commons.collections4.CollectionUtils;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class BulkExportUtils {
-    private BulkExportUtils() {}
+	private BulkExportUtils() {}
 
-    /** Converts the BulkDataExportOptions -> BulkExportParameters */
-    public static BulkExportParameters createBulkExportJobParametersFromExportOptions(
-            BulkDataExportOptions theOptions) {
-        BulkExportParameters parameters =
-                new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
+	/** Converts the BulkDataExportOptions -> BulkExportParameters */
+	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(
+				BulkDataExportOptions theOptions) {
+		BulkExportParameters parameters =
+					new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 
-        parameters.setSince(theOptions.getSince());
-        parameters.setOutputFormat(theOptions.getOutputFormat());
-        parameters.setExportStyle(theOptions.getExportStyle());
-        parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
-        parameters.setPostFetchFilterUrls(new ArrayList<>(theOptions.getPostFetchFilterUrls()));
-        if (theOptions.getGroupId() != null) {
-            parameters.setGroupId(theOptions.getGroupId().getValue());
-        }
-        if (CollectionUtils.isNotEmpty(theOptions.getResourceTypes())) {
-            parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
-        }
-        if (CollectionUtils.isNotEmpty(theOptions.getPatientIds())) {
-            parameters.setPatientIds(
-                    theOptions.getPatientIds().stream()
-                            .map(IIdType::getValue)
-                            .collect(Collectors.toList()));
-        }
-        parameters.setExpandMdm(theOptions.isExpandMdm());
-        parameters.setUseExistingJobsFirst(true);
-        parameters.setExportIdentifier(theOptions.getExportIdentifier());
+		parameters.setSince(theOptions.getSince());
+		parameters.setOutputFormat(theOptions.getOutputFormat());
+		parameters.setExportStyle(theOptions.getExportStyle());
+		parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
+		parameters.setPostFetchFilterUrls(new ArrayList<>(theOptions.getPostFetchFilterUrls()));
+		if (theOptions.getGroupId() != null) {
+				parameters.setGroupId(theOptions.getGroupId().getValue());
+		}
+		if (CollectionUtils.isNotEmpty(theOptions.getResourceTypes())) {
+				parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
+		}
+		if (CollectionUtils.isNotEmpty(theOptions.getPatientIds())) {
+				parameters.setPatientIds(
+						theOptions.getPatientIds().stream()
+									.map(IIdType::getValue)
+									.collect(Collectors.toList()));
+		}
+		parameters.setExpandMdm(theOptions.isExpandMdm());
+		parameters.setUseExistingJobsFirst(true);
+		parameters.setExportIdentifier(theOptions.getExportIdentifier());
 
-        return parameters;
-    }
+		return parameters;
+	}
 }

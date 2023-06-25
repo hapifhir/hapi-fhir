@@ -19,34 +19,34 @@
  */
 package ca.uhn.fhir.jpa.bulk.imprt.model;
 
-import java.io.Serializable;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.Serializable;
 
 public class ParsedBulkImportRecord implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private final String myTenantName;
-    private final IBaseResource myRowContent;
-    private final int myLineIndex;
+	private final String myTenantName;
+	private final IBaseResource myRowContent;
+	private final int myLineIndex;
 
-    public ParsedBulkImportRecord(
-            String theTenantName, IBaseResource theRowContent, int theLineIndex) {
-        myTenantName = theTenantName;
-        myRowContent = theRowContent;
-        myLineIndex = theLineIndex;
-    }
+	public ParsedBulkImportRecord(
+				String theTenantName, IBaseResource theRowContent, int theLineIndex) {
+		myTenantName = theTenantName;
+		myRowContent = theRowContent;
+		myLineIndex = theLineIndex;
+	}
 
-    public int getLineIndex() {
-        return myLineIndex;
-    }
+	public int getLineIndex() {
+		return myLineIndex;
+	}
 
-    public String getTenantName() {
-        return myTenantName;
-    }
+	public String getTenantName() {
+		return myTenantName;
+	}
 
-    public IBaseResource getRowContent() {
-        return myRowContent;
-    }
+	public IBaseResource getRowContent() {
+		return myRowContent;
+	}
 }

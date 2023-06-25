@@ -19,15 +19,6 @@
  */
 package ca.uhn.fhir.jaxrs.server;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
@@ -41,6 +32,15 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import javax.interceptor.Interceptors;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
+
 /**
  * This server is the abstract superclass for all bundle providers. It exposes a large amount of the
  * fhir api functionality using JAXRS
@@ -50,145 +50,145 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 @SuppressWarnings("javadoc")
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 @Consumes({
-    MediaType.APPLICATION_FORM_URLENCODED,
-    MediaType.APPLICATION_JSON,
-    Constants.CT_FHIR_JSON,
-    Constants.CT_FHIR_XML
+	MediaType.APPLICATION_FORM_URLENCODED,
+	MediaType.APPLICATION_JSON,
+	Constants.CT_FHIR_JSON,
+	Constants.CT_FHIR_XML
 })
 @Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider
-        implements IRestfulServer<JaxRsRequest>, IBundleProvider {
+		implements IRestfulServer<JaxRsRequest>, IBundleProvider {
 
-    /** the method bindings for this class */
-    private final JaxRsMethodBindings theBindings;
+	/** the method bindings for this class */
+	private final JaxRsMethodBindings theBindings;
 
-    /**
-     * The default constructor. The method bindings are retrieved from the class being constructed.
-     */
-    protected AbstractJaxRsBundleProvider() {
-        super();
-        theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
-    }
+	/**
+	* The default constructor. The method bindings are retrieved from the class being constructed.
+	*/
+	protected AbstractJaxRsBundleProvider() {
+		super();
+		theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
+	}
 
-    /**
-     * Provides the ability to specify the {@link FhirContext}.
-     *
-     * @param ctx the {@link FhirContext} instance.
-     */
-    protected AbstractJaxRsBundleProvider(final FhirContext ctx) {
-        super(ctx);
-        theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
-    }
+	/**
+	* Provides the ability to specify the {@link FhirContext}.
+	*
+	* @param ctx the {@link FhirContext} instance.
+	*/
+	protected AbstractJaxRsBundleProvider(final FhirContext ctx) {
+		super(ctx);
+		theBindings = JaxRsMethodBindings.getMethodBindings(this, getClass());
+	}
 
-    /**
-     * This constructor takes in an explicit interface class. This subclass should be identical to
-     * the class being constructed but is given explicitly in order to avoid issues with proxy
-     * classes in a jee environment.
-     *
-     * @param theProviderClass the interface of the class
-     */
-    protected AbstractJaxRsBundleProvider(
-            final Class<? extends AbstractJaxRsProvider> theProviderClass) {
-        theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
-    }
+	/**
+	* This constructor takes in an explicit interface class. This subclass should be identical to
+	* the class being constructed but is given explicitly in order to avoid issues with proxy
+	* classes in a jee environment.
+	*
+	* @param theProviderClass the interface of the class
+	*/
+	protected AbstractJaxRsBundleProvider(
+				final Class<? extends AbstractJaxRsProvider> theProviderClass) {
+		theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
+	}
 
-    /**
-     * Create all resources in one transaction
-     *
-     * @param resource the body of the post method containing the bundle of the resources being
-     *     created in a xml/json form
-     * @return the response
-     * @see <a href="https://www.hl7.org/fhir/http.html#create">https://www.hl7.
-     *     org/fhir/http.html#create</a>
-     */
-    @POST
-    public Response create(final String resource) throws IOException {
-        return execute(
-                getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.TRANSACTION)
-                        .resource(resource));
-    }
+	/**
+	* Create all resources in one transaction
+	*
+	* @param resource the body of the post method containing the bundle of the resources being
+	*     created in a xml/json form
+	* @return the response
+	* @see <a href="https://www.hl7.org/fhir/http.html#create">https://www.hl7.
+	*     org/fhir/http.html#create</a>
+	*/
+	@POST
+	public Response create(final String resource) throws IOException {
+		return execute(
+					getRequest(RequestTypeEnum.POST, RestOperationTypeEnum.TRANSACTION)
+								.resource(resource));
+	}
 
-    /**
-     * Search the resource type based on some filter criteria
-     *
-     * @return the response
-     * @see <a
-     *     href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
-     */
-    @GET
-    public Response search() throws IOException {
-        return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
-    }
+	/**
+	* Search the resource type based on some filter criteria
+	*
+	* @return the response
+	* @see <a
+	*     href="https://www.hl7.org/fhir/http.html#search">https://www.hl7.org/fhir/http.html#search</a>
+	*/
+	@GET
+	public Response search() throws IOException {
+		return execute(getRequest(RequestTypeEnum.GET, RestOperationTypeEnum.SEARCH_TYPE));
+	}
 
-    /**
-     * Execute the method described by the requestBuilder and methodKey
-     *
-     * @param theRequestBuilder the requestBuilder that contains the information about the request
-     * @param methodKey the key determining the method to be executed
-     * @return the response
-     */
-    private Response execute(final Builder theRequestBuilder, final String methodKey)
-            throws IOException {
-        final JaxRsRequest theRequest = theRequestBuilder.build();
-        final BaseMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
-        try {
-            return (Response) method.invokeServer(this, theRequest);
-        } catch (final Throwable theException) {
-            return handleException(theRequest, theException);
-        }
-    }
+	/**
+	* Execute the method described by the requestBuilder and methodKey
+	*
+	* @param theRequestBuilder the requestBuilder that contains the information about the request
+	* @param methodKey the key determining the method to be executed
+	* @return the response
+	*/
+	private Response execute(final Builder theRequestBuilder, final String methodKey)
+				throws IOException {
+		final JaxRsRequest theRequest = theRequestBuilder.build();
+		final BaseMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
+		try {
+				return (Response) method.invokeServer(this, theRequest);
+		} catch (final Throwable theException) {
+				return handleException(theRequest, theException);
+		}
+	}
 
-    /**
-     * Execute the method described by the requestBuilder
-     *
-     * @param theRequestBuilder the requestBuilder that contains the information about the request
-     * @return the response
-     */
-    private Response execute(final Builder theRequestBuilder) throws IOException {
-        return execute(theRequestBuilder, JaxRsMethodBindings.DEFAULT_METHOD_KEY);
-    }
+	/**
+	* Execute the method described by the requestBuilder
+	*
+	* @param theRequestBuilder the requestBuilder that contains the information about the request
+	* @return the response
+	*/
+	private Response execute(final Builder theRequestBuilder) throws IOException {
+		return execute(theRequestBuilder, JaxRsMethodBindings.DEFAULT_METHOD_KEY);
+	}
 
-    /**
-     * Return the method binding for the given rest operation
-     *
-     * @param restOperation the rest operation to retrieve
-     * @param theBindingKey the key determining the method to be executed (needed for e.g. custom
-     *     operation)
-     * @return
-     */
-    protected BaseMethodBinding getBinding(
-            final RestOperationTypeEnum restOperation, final String theBindingKey) {
-        return getBindings().getBinding(restOperation, theBindingKey);
-    }
+	/**
+	* Return the method binding for the given rest operation
+	*
+	* @param restOperation the rest operation to retrieve
+	* @param theBindingKey the key determining the method to be executed (needed for e.g. custom
+	*     operation)
+	* @return
+	*/
+	protected BaseMethodBinding getBinding(
+				final RestOperationTypeEnum restOperation, final String theBindingKey) {
+		return getBindings().getBinding(restOperation, theBindingKey);
+	}
 
-    /**
-     * Default: an empty list of interceptors
-     *
-     * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
-     */
-    @Override
-    public List<IServerInterceptor> getInterceptors_() {
-        return Collections.emptyList();
-    }
+	/**
+	* Default: an empty list of interceptors
+	*
+	* @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
+	*/
+	@Override
+	public List<IServerInterceptor> getInterceptors_() {
+		return Collections.emptyList();
+	}
 
-    /** Default: no paging provider */
-    @Override
-    public IPagingProvider getPagingProvider() {
-        return null;
-    }
+	/** Default: no paging provider */
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return null;
+	}
 
-    /** Default: BundleInclusionRule.BASED_ON_INCLUDES */
-    @Override
-    public BundleInclusionRule getBundleInclusionRule() {
-        return BundleInclusionRule.BASED_ON_INCLUDES;
-    }
+	/** Default: BundleInclusionRule.BASED_ON_INCLUDES */
+	@Override
+	public BundleInclusionRule getBundleInclusionRule() {
+		return BundleInclusionRule.BASED_ON_INCLUDES;
+	}
 
-    /**
-     * Return the bindings defined in this resource provider
-     *
-     * @return the jax-rs method bindings
-     */
-    public JaxRsMethodBindings getBindings() {
-        return theBindings;
-    }
+	/**
+	* Return the bindings defined in this resource provider
+	*
+	* @return the jax-rs method bindings
+	*/
+	public JaxRsMethodBindings getBindings() {
+		return theBindings;
+	}
 }

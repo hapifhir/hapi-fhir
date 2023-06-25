@@ -19,49 +19,48 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 
 @DatatypeDef(name = "integer")
 public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDatatype {
 
-    /** Constructor */
-    public IntegerDt() {
-        super();
-    }
+	/** Constructor */
+	public IntegerDt() {
+		super();
+	}
 
-    /** Constructor */
-    @SimpleSetter
-    public IntegerDt(@SimpleSetter.Parameter(name = "theInteger") int theInteger) {
-        setValue(theInteger);
-    }
+	/** Constructor */
+	@SimpleSetter
+	public IntegerDt(@SimpleSetter.Parameter(name = "theInteger") int theInteger) {
+		setValue(theInteger);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theIntegerAsString A string representation of an integer
-     * @throws DataFormatException If the string is not a valid integer representation
-     */
-    public IntegerDt(String theIntegerAsString) {
-        setValueAsString(theIntegerAsString);
-    }
+	/**
+	* Constructor
+	*
+	* @param theIntegerAsString A string representation of an integer
+	* @throws DataFormatException If the string is not a valid integer representation
+	*/
+	public IntegerDt(String theIntegerAsString) {
+		setValueAsString(theIntegerAsString);
+	}
 
-    @Override
-    protected Integer parse(String theValue) {
-        try {
-            return Integer.parseInt(theValue);
-        } catch (NumberFormatException e) {
-            throw new DataFormatException(Msg.code(1873) + e);
-        }
-    }
+	@Override
+	protected Integer parse(String theValue) {
+		try {
+				return Integer.parseInt(theValue);
+		} catch (NumberFormatException e) {
+				throw new DataFormatException(Msg.code(1873) + e);
+		}
+	}
 
-    @Override
-    protected String encode(Integer theValue) {
-        return Integer.toString(theValue);
-    }
+	@Override
+	protected String encode(Integer theValue) {
+		return Integer.toString(theValue);
+	}
 }

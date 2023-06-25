@@ -26,37 +26,37 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 public enum NormalizedQuantitySearchLevel {
 
-    /**
-     * default, Quantity is stored in {@link ResourceIndexedSearchParamQuantity} only and it is used
-     * by searching.
-     */
-    NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED,
+	/**
+	* default, Quantity is stored in {@link ResourceIndexedSearchParamQuantity} only and it is used
+	* by searching.
+	*/
+	NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED,
 
-    /**
-     * Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link
-     * ResourceIndexedSearchParamQuantityNormalized}, but {@link ResourceIndexedSearchParamQuantity}
-     * is used by searching.
-     */
-    NORMALIZED_QUANTITY_STORAGE_SUPPORTED,
+	/**
+	* Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link
+	* ResourceIndexedSearchParamQuantityNormalized}, but {@link ResourceIndexedSearchParamQuantity}
+	* is used by searching.
+	*/
+	NORMALIZED_QUANTITY_STORAGE_SUPPORTED,
 
-    /**
-     * Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link
-     * ResourceIndexedSearchParamQuantityNormalized}, {@link
-     * ResourceIndexedSearchParamQuantityNormalized} is used by searching.
-     */
-    NORMALIZED_QUANTITY_SEARCH_SUPPORTED;
+	/**
+	* Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link
+	* ResourceIndexedSearchParamQuantityNormalized}, {@link
+	* ResourceIndexedSearchParamQuantityNormalized} is used by searching.
+	*/
+	NORMALIZED_QUANTITY_SEARCH_SUPPORTED;
 
-    /**
-     * Quantity is stored in only in {@link ResourceIndexedSearchParamQuantityNormalized}, {@link
-     * ResourceIndexedSearchParamQuantityNormalized} is used by searching. The existing non
-     * normalized quantity will be not supported NOTE： this option is not supported in this release
-     */
-    // When this is enabled, we can enable
-    // testSortByQuantityWithNormalizedQuantitySearchFullSupported()
-    // NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED,
+	/**
+	* Quantity is stored in only in {@link ResourceIndexedSearchParamQuantityNormalized}, {@link
+	* ResourceIndexedSearchParamQuantityNormalized} is used by searching. The existing non
+	* normalized quantity will be not supported NOTE： this option is not supported in this release
+	*/
+	// When this is enabled, we can enable
+	// testSortByQuantityWithNormalizedQuantitySearchFullSupported()
+	// NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED,
 
-    public boolean storageOrSearchSupported() {
-        return this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED)
-                || this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
-    }
+	public boolean storageOrSearchSupported() {
+		return this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED)
+					|| this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+	}
 }

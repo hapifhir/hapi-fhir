@@ -23,16 +23,16 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class StringOrListParam extends BaseOrListParam<StringOrListParam, StringParam> {
 
-    @CoverageIgnore
-    @Override
-    StringParam newInstance() {
-        return new StringParam();
-    }
+	@CoverageIgnore
+	@Override
+	StringParam newInstance() {
+		return new StringParam();
+	}
 
-    @CoverageIgnore
-    @Override
-    public StringOrListParam addOr(StringParam theParameter) {
-        add(theParameter);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public StringOrListParam addOr(StringParam theParameter) {
+		add(theParameter);
+		return this;
+	}
 }

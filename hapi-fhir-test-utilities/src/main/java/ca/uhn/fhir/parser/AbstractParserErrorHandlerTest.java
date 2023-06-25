@@ -29,35 +29,35 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * AbstractJsonParserErrorHandlerTest} can be sub-classed to create a complete test.
  */
 public abstract sealed class AbstractParserErrorHandlerTest
-        permits AbstractXmlParserErrorHandlerTest, AbstractJsonParserErrorHandlerTest {
+		permits AbstractXmlParserErrorHandlerTest, AbstractJsonParserErrorHandlerTest {
 
-    protected abstract IParser createParser();
+	protected abstract IParser createParser();
 
-    protected abstract String createResourceWithRepeatingChoice();
+	protected abstract String createResourceWithRepeatingChoice();
 
-    @Test
-    public void testRepeatingChoiceHandled() {
+	@Test
+	public void testRepeatingChoiceHandled() {
 
-        // Let error handler throw custom exception on unexpectedRepeatingElement
-        @SuppressWarnings("serial")
-        class RepeatingChoiceHandledException extends RuntimeException {}
-        IParserErrorHandler errorHandler =
-                new ErrorHandlerAdapter() {
-                    @Override
-                    public void unexpectedRepeatingElement(
-                            IParseLocation theLocation, String theElementName) {
-                        throw new RepeatingChoiceHandledException();
-                    }
-                };
+		// Let error handler throw custom exception on unexpectedRepeatingElement
+		@SuppressWarnings("serial")
+		class RepeatingChoiceHandledException extends RuntimeException {}
+		IParserErrorHandler errorHandler =
+					new ErrorHandlerAdapter() {
+						@Override
+						public void unexpectedRepeatingElement(
+									IParseLocation theLocation, String theElementName) {
+								throw new RepeatingChoiceHandledException();
+						}
+					};
 
-        IParser parser = createParser();
-        parser.setParserErrorHandler(errorHandler);
+		IParser parser = createParser();
+		parser.setParserErrorHandler(errorHandler);
 
-        String resourceStr = createResourceWithRepeatingChoice();
-        assertThrows(
-                RepeatingChoiceHandledException.class,
-                () -> {
-                    parser.parseResource(resourceStr);
-                });
-    }
+		String resourceStr = createResourceWithRepeatingChoice();
+		assertThrows(
+					RepeatingChoiceHandledException.class,
+					() -> {
+						parser.parseResource(resourceStr);
+					});
+	}
 }

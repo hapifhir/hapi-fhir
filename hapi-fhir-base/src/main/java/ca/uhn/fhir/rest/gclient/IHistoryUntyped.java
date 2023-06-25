@@ -23,24 +23,24 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public interface IHistoryUntyped {
 
-    /**
-     * Request that the method return a Bundle resource (such as <code>
-     * ca.uhn.fhir.model.dstu2.resource.Bundle</code>). Use this method if you are accessing a
-     * DSTU2+ server.
-     *
-     * @deprecated Use {@link #returnBundle(Class)} instead, which has the exact same functionality.
-     *     This was deprecated in HAPI FHIR 4.0.0 in order to be consistent with the similar method
-     *     on the search operation.
-     */
-    @Deprecated
-    <T extends IBaseBundle> IHistoryTyped<T> andReturnBundle(Class<T> theType);
+	/**
+	* Request that the method return a Bundle resource (such as <code>
+	* ca.uhn.fhir.model.dstu2.resource.Bundle</code>). Use this method if you are accessing a
+	* DSTU2+ server.
+	*
+	* @deprecated Use {@link #returnBundle(Class)} instead, which has the exact same functionality.
+	*     This was deprecated in HAPI FHIR 4.0.0 in order to be consistent with the similar method
+	*     on the search operation.
+	*/
+	@Deprecated
+	<T extends IBaseBundle> IHistoryTyped<T> andReturnBundle(Class<T> theType);
 
-    /**
-     * Request that the method return a Bundle resource (such as <code>
-     * ca.uhn.fhir.model.dstu2.resource.Bundle</code>). Use this method if you are accessing a
-     * DSTU2+ server.
-     *
-     * @since 4.0.0
-     */
-    <T extends IBaseBundle> IHistoryTyped<T> returnBundle(Class<T> theType);
+	/**
+	* Request that the method return a Bundle resource (such as <code>
+	* ca.uhn.fhir.model.dstu2.resource.Bundle</code>). Use this method if you are accessing a
+	* DSTU2+ server.
+	*
+	* @since 4.0.0
+	*/
+	<T extends IBaseBundle> IHistoryTyped<T> returnBundle(Class<T> theType);
 }

@@ -19,6 +19,17 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.util.LogicUtil;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,177 +39,165 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.util.LogicUtil;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-
 public class LoadedFileDescriptors implements Closeable {
-    private static final Logger ourLog = LoggerFactory.getLogger(LoadedFileDescriptors.class);
-    private List<File> myTemporaryFiles = new ArrayList<>();
-    private List<ITermLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
+	private static final Logger ourLog = LoggerFactory.getLogger(LoadedFileDescriptors.class);
+	private List<File> myTemporaryFiles = new ArrayList<>();
+	private List<ITermLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
 
-    LoadedFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFileDescriptors) {
-        try {
-            for (ITermLoaderSvc.FileDescriptor next : theFileDescriptors) {
-                if (next.getFilename().toLowerCase().endsWith(".zip")) {
-                    ourLog.info("Uncompressing {} into temporary files", next.getFilename());
-                    try (InputStream inputStream = next.getInputStream()) {
-                        try (BufferedInputStream bufferedInputStream =
-                                new BufferedInputStream(inputStream)) {
-                            try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
-                                for (ZipEntry nextEntry;
-                                        (nextEntry = zis.getNextEntry()) != null; ) {
-                                    try (BOMInputStream fis = new NonClosableBOMInputStream(zis)) {
-                                        File nextTemporaryFile =
-                                                File.createTempFile("hapifhir", ".tmp");
-                                        ourLog.info(
-                                                "Creating temporary file: {}",
-                                                nextTemporaryFile.getAbsolutePath());
-                                        nextTemporaryFile.deleteOnExit();
-                                        try (FileOutputStream fos =
-                                                new FileOutputStream(nextTemporaryFile, false)) {
-                                            IOUtils.copy(fis, fos);
-                                            String nextEntryFileName = nextEntry.getName();
-                                            myUncompressedFileDescriptors.add(
-                                                    new ITermLoaderSvc.FileDescriptor() {
-                                                        @Override
-                                                        public String getFilename() {
-                                                            return nextEntryFileName;
-                                                        }
+	LoadedFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFileDescriptors) {
+		try {
+				for (ITermLoaderSvc.FileDescriptor next : theFileDescriptors) {
+					if (next.getFilename().toLowerCase().endsWith(".zip")) {
+						ourLog.info("Uncompressing {} into temporary files", next.getFilename());
+						try (InputStream inputStream = next.getInputStream()) {
+								try (BufferedInputStream bufferedInputStream =
+										new BufferedInputStream(inputStream)) {
+									try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
+										for (ZipEntry nextEntry;
+													(nextEntry = zis.getNextEntry()) != null; ) {
+												try (BOMInputStream fis = new NonClosableBOMInputStream(zis)) {
+													File nextTemporaryFile =
+																File.createTempFile("hapifhir", ".tmp");
+													ourLog.info(
+																"Creating temporary file: {}",
+																nextTemporaryFile.getAbsolutePath());
+													nextTemporaryFile.deleteOnExit();
+													try (FileOutputStream fos =
+																new FileOutputStream(nextTemporaryFile, false)) {
+														IOUtils.copy(fis, fos);
+														String nextEntryFileName = nextEntry.getName();
+														myUncompressedFileDescriptors.add(
+																	new ITermLoaderSvc.FileDescriptor() {
+																		@Override
+																		public String getFilename() {
+																				return nextEntryFileName;
+																		}
 
-                                                        @Override
-                                                        public InputStream getInputStream() {
-                                                            try {
-                                                                return new FileInputStream(
-                                                                        nextTemporaryFile);
-                                                            } catch (FileNotFoundException e) {
-                                                                throw new InternalErrorException(
-                                                                        Msg.code(860) + e);
-                                                            }
-                                                        }
-                                                    });
-                                            myTemporaryFiles.add(nextTemporaryFile);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    myUncompressedFileDescriptors.add(next);
-                }
-            }
-        } catch (IOException e) {
-            throw new InternalErrorException(Msg.code(861) + e);
-        }
-    }
+																		@Override
+																		public InputStream getInputStream() {
+																				try {
+																					return new FileInputStream(
+																								nextTemporaryFile);
+																				} catch (FileNotFoundException e) {
+																					throw new InternalErrorException(
+																								Msg.code(860) + e);
+																				}
+																		}
+																	});
+														myTemporaryFiles.add(nextTemporaryFile);
+													}
+												}
+										}
+									}
+								}
+						}
+					} else {
+						myUncompressedFileDescriptors.add(next);
+					}
+				}
+		} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(861) + e);
+		}
+	}
 
-    public boolean hasFile(String theFilename) {
-        return myUncompressedFileDescriptors.stream()
-                .map(
-                        t ->
-                                t.getFilename()
-                                        .replaceAll(
-                                                ".*[\\\\/]",
-                                                "")) // Strip the path from the filename
-                .anyMatch(t -> t.equals(theFilename));
-    }
+	public boolean hasFile(String theFilename) {
+		return myUncompressedFileDescriptors.stream()
+					.map(
+								t ->
+										t.getFilename()
+													.replaceAll(
+																".*[\\\\/]",
+																"")) // Strip the path from the filename
+					.anyMatch(t -> t.equals(theFilename));
+	}
 
-    @Override
-    public void close() {
-        for (File next : myTemporaryFiles) {
-            ourLog.info("Deleting temporary file: {}", next.getAbsolutePath());
-            FileUtils.deleteQuietly(next);
-        }
-    }
+	@Override
+	public void close() {
+		for (File next : myTemporaryFiles) {
+				ourLog.info("Deleting temporary file: {}", next.getAbsolutePath());
+				FileUtils.deleteQuietly(next);
+		}
+	}
 
-    List<ITermLoaderSvc.FileDescriptor> getUncompressedFileDescriptors() {
-        return myUncompressedFileDescriptors;
-    }
+	List<ITermLoaderSvc.FileDescriptor> getUncompressedFileDescriptors() {
+		return myUncompressedFileDescriptors;
+	}
 
-    private List<String> notFound(List<String> theExpectedFilenameFragments) {
-        Set<String> foundFragments = new HashSet<>();
-        for (String nextExpected : theExpectedFilenameFragments) {
-            for (ITermLoaderSvc.FileDescriptor next : myUncompressedFileDescriptors) {
-                if (next.getFilename().contains(nextExpected)) {
-                    foundFragments.add(nextExpected);
-                    break;
-                }
-            }
-        }
+	private List<String> notFound(List<String> theExpectedFilenameFragments) {
+		Set<String> foundFragments = new HashSet<>();
+		for (String nextExpected : theExpectedFilenameFragments) {
+				for (ITermLoaderSvc.FileDescriptor next : myUncompressedFileDescriptors) {
+					if (next.getFilename().contains(nextExpected)) {
+						foundFragments.add(nextExpected);
+						break;
+					}
+				}
+		}
 
-        ArrayList<String> notFoundFileNameFragments = new ArrayList<>(theExpectedFilenameFragments);
-        notFoundFileNameFragments.removeAll(foundFragments);
-        return notFoundFileNameFragments;
-    }
+		ArrayList<String> notFoundFileNameFragments = new ArrayList<>(theExpectedFilenameFragments);
+		notFoundFileNameFragments.removeAll(foundFragments);
+		return notFoundFileNameFragments;
+	}
 
-    void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
-        List<String> notFound = notFound(theExpectedFilenameFragments);
-        if (!notFound.isEmpty()) {
-            throw new UnprocessableEntityException(
-                    Msg.code(862)
-                            + "Could not find the following mandatory files in input: "
-                            + notFound);
-        }
-    }
+	void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
+		List<String> notFound = notFound(theExpectedFilenameFragments);
+		if (!notFound.isEmpty()) {
+				throw new UnprocessableEntityException(
+						Msg.code(862)
+									+ "Could not find the following mandatory files in input: "
+									+ notFound);
+		}
+	}
 
-    void verifyOptionalFilesExist(List<String> theExpectedFilenameFragments) {
-        List<String> notFound = notFound(theExpectedFilenameFragments);
-        if (!notFound.isEmpty()) {
-            ourLog.warn("Could not find the following optional files: " + notFound);
-        }
-    }
+	void verifyOptionalFilesExist(List<String> theExpectedFilenameFragments) {
+		List<String> notFound = notFound(theExpectedFilenameFragments);
+		if (!notFound.isEmpty()) {
+				ourLog.warn("Could not find the following optional files: " + notFound);
+		}
+	}
 
-    boolean isOptionalFilesExist(List<String> theFileList) {
-        return notFound(theFileList).isEmpty();
-    }
+	boolean isOptionalFilesExist(List<String> theFileList) {
+		return notFound(theFileList).isEmpty();
+	}
 
-    void verifyPartLinkFilesExist(
-            List<String> theMultiPartLinkFiles, String theSinglePartLinkFile) {
-        List<String> notFoundMulti = notFound(theMultiPartLinkFiles);
-        List<String> notFoundSingle = notFound(Arrays.asList(theSinglePartLinkFile));
-        // Expect all of the files in theMultiPartLinkFiles to be found and theSinglePartLinkFile to
-        // not be found,
-        // or none of the files in theMultiPartLinkFiles to be found and the SinglePartLinkFile to
-        // be found.
-        boolean multiPartFilesFound = notFoundMulti.isEmpty();
-        boolean singlePartFilesFound = notFoundSingle.isEmpty();
-        if (!LogicUtil.multiXor(multiPartFilesFound, singlePartFilesFound)) {
-            String msg;
-            if (!multiPartFilesFound && !singlePartFilesFound) {
-                msg =
-                        "Could not find any of the PartLink files: "
-                                + notFoundMulti
-                                + " nor "
-                                + notFoundSingle;
-            } else {
-                msg =
-                        "Only either the single PartLink file or the split PartLink files can be"
-                                + " present. Found both the single PartLink file, "
-                                + theSinglePartLinkFile
-                                + ", and the split PartLink files: "
-                                + theMultiPartLinkFiles;
-            }
-            throw new UnprocessableEntityException(Msg.code(863) + msg);
-        }
-    }
+	void verifyPartLinkFilesExist(
+				List<String> theMultiPartLinkFiles, String theSinglePartLinkFile) {
+		List<String> notFoundMulti = notFound(theMultiPartLinkFiles);
+		List<String> notFoundSingle = notFound(Arrays.asList(theSinglePartLinkFile));
+		// Expect all of the files in theMultiPartLinkFiles to be found and theSinglePartLinkFile to
+		// not be found,
+		// or none of the files in theMultiPartLinkFiles to be found and the SinglePartLinkFile to
+		// be found.
+		boolean multiPartFilesFound = notFoundMulti.isEmpty();
+		boolean singlePartFilesFound = notFoundSingle.isEmpty();
+		if (!LogicUtil.multiXor(multiPartFilesFound, singlePartFilesFound)) {
+				String msg;
+				if (!multiPartFilesFound && !singlePartFilesFound) {
+					msg =
+								"Could not find any of the PartLink files: "
+										+ notFoundMulti
+										+ " nor "
+										+ notFoundSingle;
+				} else {
+					msg =
+								"Only either the single PartLink file or the split PartLink files can be"
+										+ " present. Found both the single PartLink file, "
+										+ theSinglePartLinkFile
+										+ ", and the split PartLink files: "
+										+ theMultiPartLinkFiles;
+				}
+				throw new UnprocessableEntityException(Msg.code(863) + msg);
+		}
+	}
 
-    private static class NonClosableBOMInputStream extends BOMInputStream {
-        NonClosableBOMInputStream(InputStream theWrap) {
-            super(theWrap);
-        }
+	private static class NonClosableBOMInputStream extends BOMInputStream {
+		NonClosableBOMInputStream(InputStream theWrap) {
+				super(theWrap);
+		}
 
-        @Override
-        public void close() {
-            // nothing
-        }
-    }
+		@Override
+		public void close() {
+				// nothing
+		}
+	}
 }

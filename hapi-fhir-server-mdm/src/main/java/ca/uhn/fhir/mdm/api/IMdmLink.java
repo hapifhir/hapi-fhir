@@ -19,99 +19,99 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import java.util.Date;
-
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
+import java.util.Date;
+
 public interface IMdmLink<T extends IResourcePersistentId> {
-    T getId();
+	T getId();
 
-    IMdmLink<T> setId(T theId);
+	IMdmLink<T> setId(T theId);
 
-    T getGoldenResourcePersistenceId();
+	T getGoldenResourcePersistenceId();
 
-    IMdmLink<T> setGoldenResourcePersistenceId(T theGoldenResourcePid);
+	IMdmLink<T> setGoldenResourcePersistenceId(T theGoldenResourcePid);
 
-    T getSourcePersistenceId();
+	T getSourcePersistenceId();
 
-    IMdmLink<T> setSourcePersistenceId(T theSourcePid);
+	IMdmLink<T> setSourcePersistenceId(T theSourcePid);
 
-    MdmMatchResultEnum getMatchResult();
+	MdmMatchResultEnum getMatchResult();
 
-    IMdmLink<T> setMatchResult(MdmMatchResultEnum theMatchResult);
+	IMdmLink<T> setMatchResult(MdmMatchResultEnum theMatchResult);
 
-    default boolean isNoMatch() {
-        return getMatchResult() == MdmMatchResultEnum.NO_MATCH;
-    }
+	default boolean isNoMatch() {
+		return getMatchResult() == MdmMatchResultEnum.NO_MATCH;
+	}
 
-    default boolean isMatch() {
-        return getMatchResult() == MdmMatchResultEnum.MATCH;
-    }
+	default boolean isMatch() {
+		return getMatchResult() == MdmMatchResultEnum.MATCH;
+	}
 
-    default boolean isPossibleMatch() {
-        return getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH;
-    }
+	default boolean isPossibleMatch() {
+		return getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH;
+	}
 
-    default boolean isRedirect() {
-        return getMatchResult() == MdmMatchResultEnum.REDIRECT;
-    }
+	default boolean isRedirect() {
+		return getMatchResult() == MdmMatchResultEnum.REDIRECT;
+	}
 
-    default boolean isPossibleDuplicate() {
-        return getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
-    }
+	default boolean isPossibleDuplicate() {
+		return getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
+	}
 
-    MdmLinkSourceEnum getLinkSource();
+	MdmLinkSourceEnum getLinkSource();
 
-    IMdmLink<T> setLinkSource(MdmLinkSourceEnum theLinkSource);
+	IMdmLink<T> setLinkSource(MdmLinkSourceEnum theLinkSource);
 
-    default boolean isAuto() {
-        return getLinkSource() == MdmLinkSourceEnum.AUTO;
-    }
+	default boolean isAuto() {
+		return getLinkSource() == MdmLinkSourceEnum.AUTO;
+	}
 
-    default boolean isManual() {
-        return getLinkSource() == MdmLinkSourceEnum.MANUAL;
-    }
+	default boolean isManual() {
+		return getLinkSource() == MdmLinkSourceEnum.MANUAL;
+	}
 
-    Date getCreated();
+	Date getCreated();
 
-    IMdmLink<T> setCreated(Date theCreated);
+	IMdmLink<T> setCreated(Date theCreated);
 
-    Date getUpdated();
+	Date getUpdated();
 
-    IMdmLink<T> setUpdated(Date theUpdated);
+	IMdmLink<T> setUpdated(Date theUpdated);
 
-    String getVersion();
+	String getVersion();
 
-    IMdmLink<T> setVersion(String theVersion);
+	IMdmLink<T> setVersion(String theVersion);
 
-    Boolean getEidMatch();
+	Boolean getEidMatch();
 
-    Boolean isEidMatchPresent();
+	Boolean isEidMatchPresent();
 
-    IMdmLink<T> setEidMatch(Boolean theEidMatch);
+	IMdmLink<T> setEidMatch(Boolean theEidMatch);
 
-    Boolean getHadToCreateNewGoldenResource();
+	Boolean getHadToCreateNewGoldenResource();
 
-    IMdmLink<T> setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource);
+	IMdmLink<T> setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource);
 
-    Long getVector();
+	Long getVector();
 
-    IMdmLink<T> setVector(Long theVector);
+	IMdmLink<T> setVector(Long theVector);
 
-    Double getScore();
+	Double getScore();
 
-    IMdmLink<T> setScore(Double theScore);
+	IMdmLink<T> setScore(Double theScore);
 
-    Long getRuleCount();
+	Long getRuleCount();
 
-    IMdmLink<T> setRuleCount(Long theRuleCount);
+	IMdmLink<T> setRuleCount(Long theRuleCount);
 
-    String getMdmSourceType();
+	String getMdmSourceType();
 
-    IMdmLink<T> setMdmSourceType(String theMdmSourceType);
+	IMdmLink<T> setMdmSourceType(String theMdmSourceType);
 
-    void setPartitionId(PartitionablePartitionId thePartitionablePartitionId);
+	void setPartitionId(PartitionablePartitionId thePartitionablePartitionId);
 
-    PartitionablePartitionId getPartitionId();
+	PartitionablePartitionId getPartitionId();
 }

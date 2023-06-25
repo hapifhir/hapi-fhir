@@ -19,30 +19,30 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+
 import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-
 public interface IGoldenResourceSearchSvc {
 
-    /**
-     * Fetches a page of resource IDs for golden resources of the given type. The page size is up to
-     * the discretion of the implementation.
-     *
-     * @param theStart The start of the date range, must be inclusive.
-     * @param theEnd The end of the date range, should be exclusive.
-     * @param thePageSize The number of golden resources to request at a time.
-     * @param theRequestPartitionId The request partition ID (may be <code>null</code> on
-     *     nonpartitioned systems)
-     * @param theResourceType the type of resource.
-     */
-    IResourcePidList fetchGoldenResourceIdsPage(
-            Date theStart,
-            Date theEnd,
-            @Nonnull Integer thePageSize,
-            @Nullable RequestPartitionId theRequestPartitionId,
-            @Nullable String theResourceType);
+	/**
+	* Fetches a page of resource IDs for golden resources of the given type. The page size is up to
+	* the discretion of the implementation.
+	*
+	* @param theStart The start of the date range, must be inclusive.
+	* @param theEnd The end of the date range, should be exclusive.
+	* @param thePageSize The number of golden resources to request at a time.
+	* @param theRequestPartitionId The request partition ID (may be <code>null</code> on
+	*     nonpartitioned systems)
+	* @param theResourceType the type of resource.
+	*/
+	IResourcePidList fetchGoldenResourceIdsPage(
+				Date theStart,
+				Date theEnd,
+				@Nonnull Integer thePageSize,
+				@Nullable RequestPartitionId theRequestPartitionId,
+				@Nullable String theResourceType);
 }

@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -36,6 +30,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -51,49 +50,49 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class FhirPathFilterInterceptor {
 
-    @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-    public void preProcessOutgoingResponse(
-            RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
-        IBaseResource responseResource = theResponseDetails.getResponseResource();
-        if (responseResource != null) {
-            String[] fhirPathParams =
-                    theRequestDetails.getParameters().get(Constants.PARAM_FHIRPATH);
-            if (fhirPathParams != null) {
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+	public void preProcessOutgoingResponse(
+				RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+		IBaseResource responseResource = theResponseDetails.getResponseResource();
+		if (responseResource != null) {
+				String[] fhirPathParams =
+						theRequestDetails.getParameters().get(Constants.PARAM_FHIRPATH);
+				if (fhirPathParams != null) {
 
-                FhirContext ctx = theRequestDetails.getFhirContext();
-                IBaseParameters responseParameters = ParametersUtil.newInstance(ctx);
+					FhirContext ctx = theRequestDetails.getFhirContext();
+					IBaseParameters responseParameters = ParametersUtil.newInstance(ctx);
 
-                for (String expression : fhirPathParams) {
-                    if (isNotBlank(expression)) {
-                        IBase resultPart =
-                                ParametersUtil.addParameterToParameters(
-                                        ctx, responseParameters, "result");
-                        ParametersUtil.addPartString(ctx, resultPart, "expression", expression);
+					for (String expression : fhirPathParams) {
+						if (isNotBlank(expression)) {
+								IBase resultPart =
+										ParametersUtil.addParameterToParameters(
+													ctx, responseParameters, "result");
+								ParametersUtil.addPartString(ctx, resultPart, "expression", expression);
 
-                        IFhirPath fhirPath = ctx.newFhirPath();
-                        List<IBase> outputs;
-                        try {
-                            outputs = fhirPath.evaluate(responseResource, expression, IBase.class);
-                        } catch (FhirPathExecutionException e) {
-                            throw new InvalidRequestException(
-                                    Msg.code(327)
-                                            + "Error parsing FHIRPath expression: "
-                                            + e.getMessage());
-                        }
+								IFhirPath fhirPath = ctx.newFhirPath();
+								List<IBase> outputs;
+								try {
+									outputs = fhirPath.evaluate(responseResource, expression, IBase.class);
+								} catch (FhirPathExecutionException e) {
+									throw new InvalidRequestException(
+												Msg.code(327)
+														+ "Error parsing FHIRPath expression: "
+														+ e.getMessage());
+								}
 
-                        for (IBase nextOutput : outputs) {
-                            if (nextOutput instanceof IBaseResource) {
-                                ParametersUtil.addPartResource(
-                                        ctx, resultPart, "result", (IBaseResource) nextOutput);
-                            } else {
-                                ParametersUtil.addPart(ctx, resultPart, "result", nextOutput);
-                            }
-                        }
-                    }
-                }
+								for (IBase nextOutput : outputs) {
+									if (nextOutput instanceof IBaseResource) {
+										ParametersUtil.addPartResource(
+													ctx, resultPart, "result", (IBaseResource) nextOutput);
+									} else {
+										ParametersUtil.addPart(ctx, resultPart, "result", nextOutput);
+									}
+								}
+						}
+					}
 
-                theResponseDetails.setResponseResource(responseParameters);
-            }
-        }
-    }
+					theResponseDetails.setResponseResource(responseParameters);
+				}
+		}
+	}
 }

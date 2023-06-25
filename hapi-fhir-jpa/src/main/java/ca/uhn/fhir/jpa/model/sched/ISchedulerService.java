@@ -19,64 +19,63 @@
  */
 package ca.uhn.fhir.jpa.model.sched;
 
-import java.util.Set;
-
+import com.google.common.annotations.VisibleForTesting;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.util.Set;
 
 public interface ISchedulerService {
 
-    @VisibleForTesting
-    void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
+	@VisibleForTesting
+	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 
-    void logStatusForUnitTest();
+	void logStatusForUnitTest();
 
-    /**
-     * This task will execute locally (and should execute on all nodes of the cluster if there is a
-     * cluster)
-     *
-     * @param theIntervalMillis How many milliseconds between passes should this job run
-     * @param theJobDefinition The Job to fire
-     */
-    void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+	/**
+	* This task will execute locally (and should execute on all nodes of the cluster if there is a
+	* cluster)
+	*
+	* @param theIntervalMillis How many milliseconds between passes should this job run
+	* @param theJobDefinition The Job to fire
+	*/
+	void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
-    /**
-     * Only one instance of this task will fire across the whole cluster (when running in a
-     * clustered environment).
-     *
-     * @param theIntervalMillis How many milliseconds between passes should this job run
-     * @param theJobDefinition The Job to fire
-     */
-    void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+	/**
+	* Only one instance of this task will fire across the whole cluster (when running in a
+	* clustered environment).
+	*
+	* @param theIntervalMillis How many milliseconds between passes should this job run
+	* @param theJobDefinition The Job to fire
+	*/
+	void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
-    @VisibleForTesting
-    Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
+	@VisibleForTesting
+	Set<JobKey> getLocalJobKeysForUnitTest() throws SchedulerException;
 
-    @VisibleForTesting
-    Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
+	@VisibleForTesting
+	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
-    boolean isStopping();
+	boolean isStopping();
 
-    /**
-     * Rather than waiting for the job to fire at its scheduled time, fire it immediately.
-     *
-     * @param theJobDefinition
-     */
-    default void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+	/**
+	* Rather than waiting for the job to fire at its scheduled time, fire it immediately.
+	*
+	* @param theJobDefinition
+	*/
+	default void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 
-    /**
-     * Rather than waiting for the job to fire at its scheduled time, fire it immediately.
-     *
-     * @param theJobDefinition
-     */
-    default void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+	/**
+	* Rather than waiting for the job to fire at its scheduled time, fire it immediately.
+	*
+	* @param theJobDefinition
+	*/
+	default void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 
-    /**
-     * @return true if this server supports clustered scheduling
-     */
-    default boolean isClusteredSchedulingEnabled() {
-        return false;
-    }
+	/**
+	* @return true if this server supports clustered scheduling
+	*/
+	default boolean isClusteredSchedulingEnabled() {
+		return false;
+	}
 }

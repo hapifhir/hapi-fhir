@@ -19,19 +19,18 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IResourceModifiedConsumer {
 
-    /** This is an internal API - Use with caution! */
-    void submitResourceModified(
-            IBaseResource theNewResource,
-            ResourceModifiedMessage.OperationTypeEnum theOperationType,
-            RequestDetails theRequest);
+	/** This is an internal API - Use with caution! */
+	void submitResourceModified(
+				IBaseResource theNewResource,
+				ResourceModifiedMessage.OperationTypeEnum theOperationType,
+				RequestDetails theRequest);
 
-    /** This is an internal API - Use with caution! */
-    void submitResourceModified(ResourceModifiedMessage theMsg);
+	/** This is an internal API - Use with caution! */
+	void submitResourceModified(ResourceModifiedMessage theMsg);
 }

@@ -19,43 +19,42 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IMdmFieldMatcher {
 
-    private boolean isEmpty(StringDt theValue) {
-        if (theValue == null) {
-            return true;
-        }
-        return theValue.isEmpty();
-    }
+	private boolean isEmpty(StringDt theValue) {
+		if (theValue == null) {
+				return true;
+		}
+		return theValue.isEmpty();
+	}
 
-    /**
-     * @return true if the two fhir identifiers are the same. If @param theIdentifierSystem is not
-     *     null, then the matcher only returns true if the identifier systems also match this
-     *     system.
-     * @throws UnsupportedOperationException if either Base is not an Identifier instance
-     */
-    @Override
-    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-        CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
-        if (theParams.getIdentifierSystem() != null) {
-            if (!theParams
-                    .getIdentifierSystem()
-                    .equals(left.getSystemElement().getValueAsString())) {
-                return false;
-            }
-        }
-        CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
-        if (isEmpty(left.getValueElement()) || isEmpty(right.getValueElement())) {
-            return false;
-        }
-        return left.equals(right);
-    }
+	/**
+	* @return true if the two fhir identifiers are the same. If @param theIdentifierSystem is not
+	*     null, then the matcher only returns true if the identifier systems also match this
+	*     system.
+	* @throws UnsupportedOperationException if either Base is not an Identifier instance
+	*/
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+		CanonicalIdentifier left = IdentifierUtil.identifierDtFromIdentifier(theLeftBase);
+		if (theParams.getIdentifierSystem() != null) {
+				if (!theParams
+						.getIdentifierSystem()
+						.equals(left.getSystemElement().getValueAsString())) {
+					return false;
+				}
+		}
+		CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
+		if (isEmpty(left.getValueElement()) || isEmpty(right.getValueElement())) {
+				return false;
+		}
+		return left.equals(right);
+	}
 }

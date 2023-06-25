@@ -28,9 +28,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public interface IPreResourceAccessDetails {
 
-    int size();
+	int size();
 
-    IBaseResource getResource(int theIndex);
+	IBaseResource getResource(int theIndex);
 
-    void setDontReturnResourceAtIndex(int theIndex);
+	void setDontReturnResourceAtIndex(int theIndex);
 }

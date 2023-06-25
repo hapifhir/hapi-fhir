@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Queue;
 
 public class SqlQueryList extends ArrayList<SqlQuery> {
-    public SqlQueryList() {
-        super();
-    }
+	public SqlQueryList() {
+		super();
+	}
 
-    public SqlQueryList(Queue<SqlQuery> theList) {
-        super(theList);
-    }
+	public SqlQueryList(Queue<SqlQuery> theList) {
+		super(theList);
+	}
 }

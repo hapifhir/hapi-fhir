@@ -35,33 +35,33 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 
-    @Embedded private PartitionablePartitionId myPartitionId;
+	@Embedded private PartitionablePartitionId myPartitionId;
 
-    /** This is here to support queries only, do not set this field directly */
-    @SuppressWarnings("unused")
-    @Column(
-            name = PartitionablePartitionId.PARTITION_ID,
-            insertable = false,
-            updatable = false,
-            nullable = true)
-    private Integer myPartitionIdValue;
+	/** This is here to support queries only, do not set this field directly */
+	@SuppressWarnings("unused")
+	@Column(
+				name = PartitionablePartitionId.PARTITION_ID,
+				insertable = false,
+				updatable = false,
+				nullable = true)
+	private Integer myPartitionIdValue;
 
-    @Nullable
-    public PartitionablePartitionId getPartitionId() {
-        return myPartitionId;
-    }
+	@Nullable
+	public PartitionablePartitionId getPartitionId() {
+		return myPartitionId;
+	}
 
-    public void setPartitionId(PartitionablePartitionId thePartitionId) {
-        myPartitionId = thePartitionId;
-    }
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
-    @Override
-    public String toString() {
-        return "BasePartitionable{"
-                + "myPartitionId="
-                + myPartitionId
-                + ", myPartitionIdValue="
-                + myPartitionIdValue
-                + '}';
-    }
+	@Override
+	public String toString() {
+		return "BasePartitionable{"
+					+ "myPartitionId="
+					+ myPartitionId
+					+ ", myPartitionIdValue="
+					+ myPartitionIdValue
+					+ '}';
+	}
 }

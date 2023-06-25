@@ -19,26 +19,25 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-    IBundleProvider patientInstanceEverything(
-            HttpServletRequest theServletRequest,
-            RequestDetails theRequestDetails,
-            PatientEverythingParameters theQueryParams,
-            IIdType theId);
+	IBundleProvider patientInstanceEverything(
+				HttpServletRequest theServletRequest,
+				RequestDetails theRequestDetails,
+				PatientEverythingParameters theQueryParams,
+				IIdType theId);
 
-    IBundleProvider patientTypeEverything(
-            HttpServletRequest theServletRequest,
-            RequestDetails theRequestDetails,
-            PatientEverythingParameters theQueryParams,
-            TokenOrListParam theId);
+	IBundleProvider patientTypeEverything(
+				HttpServletRequest theServletRequest,
+				RequestDetails theRequestDetails,
+				PatientEverythingParameters theQueryParams,
+				TokenOrListParam theId);
 }

@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -36,6 +26,15 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -68,181 +67,181 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class InteractionBlockingInterceptor {
 
-    public static final Set<RestOperationTypeEnum> ALLOWED_OP_TYPES;
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(InteractionBlockingInterceptor.class);
+	public static final Set<RestOperationTypeEnum> ALLOWED_OP_TYPES;
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(InteractionBlockingInterceptor.class);
 
-    static {
-        Set<RestOperationTypeEnum> allowedOpTypes = new TreeSet<>();
-        allowedOpTypes.add(RestOperationTypeEnum.META);
-        allowedOpTypes.add(RestOperationTypeEnum.META_ADD);
-        allowedOpTypes.add(RestOperationTypeEnum.META_DELETE);
-        allowedOpTypes.add(RestOperationTypeEnum.PATCH);
-        allowedOpTypes.add(RestOperationTypeEnum.READ);
-        allowedOpTypes.add(RestOperationTypeEnum.CREATE);
-        allowedOpTypes.add(RestOperationTypeEnum.UPDATE);
-        allowedOpTypes.add(RestOperationTypeEnum.DELETE);
-        allowedOpTypes.add(RestOperationTypeEnum.BATCH);
-        allowedOpTypes.add(RestOperationTypeEnum.TRANSACTION);
-        allowedOpTypes.add(RestOperationTypeEnum.VALIDATE);
-        allowedOpTypes.add(RestOperationTypeEnum.SEARCH_TYPE);
-        allowedOpTypes.add(RestOperationTypeEnum.HISTORY_TYPE);
-        allowedOpTypes.add(RestOperationTypeEnum.HISTORY_INSTANCE);
-        allowedOpTypes.add(RestOperationTypeEnum.HISTORY_SYSTEM);
-        ALLOWED_OP_TYPES = Collections.unmodifiableSet(allowedOpTypes);
-    }
+	static {
+		Set<RestOperationTypeEnum> allowedOpTypes = new TreeSet<>();
+		allowedOpTypes.add(RestOperationTypeEnum.META);
+		allowedOpTypes.add(RestOperationTypeEnum.META_ADD);
+		allowedOpTypes.add(RestOperationTypeEnum.META_DELETE);
+		allowedOpTypes.add(RestOperationTypeEnum.PATCH);
+		allowedOpTypes.add(RestOperationTypeEnum.READ);
+		allowedOpTypes.add(RestOperationTypeEnum.CREATE);
+		allowedOpTypes.add(RestOperationTypeEnum.UPDATE);
+		allowedOpTypes.add(RestOperationTypeEnum.DELETE);
+		allowedOpTypes.add(RestOperationTypeEnum.BATCH);
+		allowedOpTypes.add(RestOperationTypeEnum.TRANSACTION);
+		allowedOpTypes.add(RestOperationTypeEnum.VALIDATE);
+		allowedOpTypes.add(RestOperationTypeEnum.SEARCH_TYPE);
+		allowedOpTypes.add(RestOperationTypeEnum.HISTORY_TYPE);
+		allowedOpTypes.add(RestOperationTypeEnum.HISTORY_INSTANCE);
+		allowedOpTypes.add(RestOperationTypeEnum.HISTORY_SYSTEM);
+		ALLOWED_OP_TYPES = Collections.unmodifiableSet(allowedOpTypes);
+	}
 
-    private final Set<String> myAllowedKeys;
+	private final Set<String> myAllowedKeys;
 
-    /** Constructor */
-    private InteractionBlockingInterceptor(@Nonnull Builder theBuilder) {
-        myAllowedKeys = theBuilder.myAllowedKeys;
-    }
+	/** Constructor */
+	private InteractionBlockingInterceptor(@Nonnull Builder theBuilder) {
+		myAllowedKeys = theBuilder.myAllowedKeys;
+	}
 
-    @Hook(Pointcut.SERVER_PROVIDER_METHOD_BOUND)
-    public BaseMethodBinding bindMethod(BaseMethodBinding theMethodBinding) {
+	@Hook(Pointcut.SERVER_PROVIDER_METHOD_BOUND)
+	public BaseMethodBinding bindMethod(BaseMethodBinding theMethodBinding) {
 
-        boolean allowed = true;
-        String resourceName = theMethodBinding.getResourceName();
-        RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
-        switch (restOperationType) {
-            case EXTENDED_OPERATION_SERVER:
-            case EXTENDED_OPERATION_TYPE:
-            case EXTENDED_OPERATION_INSTANCE:
-                {
-                    OperationMethodBinding operationMethodBinding =
-                            (OperationMethodBinding) theMethodBinding;
-                    if (!myAllowedKeys.isEmpty()) {
-                        if (!myAllowedKeys.contains(operationMethodBinding.getName())) {
-                            allowed = false;
-                        }
-                    }
-                    break;
-                }
-            default:
-                {
-                    if (restOperationType == RestOperationTypeEnum.VREAD) {
-                        restOperationType = RestOperationTypeEnum.READ;
-                    }
-                    String key = toKey(resourceName, restOperationType);
-                    if (!myAllowedKeys.isEmpty()) {
-                        if (!myAllowedKeys.contains(key)) {
-                            allowed = false;
-                        }
-                    }
-                    break;
-                }
-        }
+		boolean allowed = true;
+		String resourceName = theMethodBinding.getResourceName();
+		RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
+		switch (restOperationType) {
+				case EXTENDED_OPERATION_SERVER:
+				case EXTENDED_OPERATION_TYPE:
+				case EXTENDED_OPERATION_INSTANCE:
+					{
+						OperationMethodBinding operationMethodBinding =
+									(OperationMethodBinding) theMethodBinding;
+						if (!myAllowedKeys.isEmpty()) {
+								if (!myAllowedKeys.contains(operationMethodBinding.getName())) {
+									allowed = false;
+								}
+						}
+						break;
+					}
+				default:
+					{
+						if (restOperationType == RestOperationTypeEnum.VREAD) {
+								restOperationType = RestOperationTypeEnum.READ;
+						}
+						String key = toKey(resourceName, restOperationType);
+						if (!myAllowedKeys.isEmpty()) {
+								if (!myAllowedKeys.contains(key)) {
+									allowed = false;
+								}
+						}
+						break;
+					}
+		}
 
-        if (!allowed) {
-            ourLog.info(
-                    "Skipping method binding for {}:{} provided by {}",
-                    resourceName,
-                    restOperationType,
-                    theMethodBinding.getMethod());
-            return null;
-        }
+		if (!allowed) {
+				ourLog.info(
+						"Skipping method binding for {}:{} provided by {}",
+						resourceName,
+						restOperationType,
+						theMethodBinding.getMethod());
+				return null;
+		}
 
-        return theMethodBinding;
-    }
+		return theMethodBinding;
+	}
 
-    private static String toKey(
-            String theResourceType, RestOperationTypeEnum theRestOperationTypeEnum) {
-        if (isBlank(theResourceType)) {
-            return theRestOperationTypeEnum.getCode();
-        }
-        return theResourceType + ":" + theRestOperationTypeEnum.getCode();
-    }
+	private static String toKey(
+				String theResourceType, RestOperationTypeEnum theRestOperationTypeEnum) {
+		if (isBlank(theResourceType)) {
+				return theRestOperationTypeEnum.getCode();
+		}
+		return theResourceType + ":" + theRestOperationTypeEnum.getCode();
+	}
 
-    public static class Builder {
+	public static class Builder {
 
-        private final Set<String> myAllowedKeys = new HashSet<>();
-        private final FhirContext myCtx;
+		private final Set<String> myAllowedKeys = new HashSet<>();
+		private final FhirContext myCtx;
 
-        /** Constructor */
-        public Builder(@Nonnull FhirContext theCtx) {
-            Validate.notNull(theCtx, "theCtx must not be null");
-            myCtx = theCtx;
-        }
+		/** Constructor */
+		public Builder(@Nonnull FhirContext theCtx) {
+				Validate.notNull(theCtx, "theCtx must not be null");
+				myCtx = theCtx;
+		}
 
-        /**
-         * Adds an interaction or operation that will be permitted. Allowable formats are:
-         *
-         * <ul>
-         *   <li><b>[resourceType]:[interaction]</b> - Use this form to allow type- and
-         *       instance-level interactions, such as <code>create</code>, <code>read</code>, and
-         *       <code>patch</code>. For example, the spec <code>Patient:create</code> allows the
-         *       Patient-level create operation (i.e. <code>POST /Patient</code>).
-         *   <li><b>$[operation-name]</b> - Use this form to allow operations (at any level) by
-         *       name. For example, the spec <code>$diff</code> permits the <a
-         *       href="https://hapifhir.io/hapi-fhir/docs/server_jpa/diff.html">Diff Operation</a>
-         *       to be applied at both the server- and instance-level.
-         * </ul>
-         *
-         * <p>Note that the spec does not differentiate between the <code>read</code> and <code>
-         * vread</code> interactions. If one is permitted the other will also be permitted.
-         *
-         * @return
-         */
-        public Builder addAllowedSpec(String theSpec) {
-            Validate.notBlank(theSpec, "theSpec must not be null or blank");
+		/**
+			* Adds an interaction or operation that will be permitted. Allowable formats are:
+			*
+			* <ul>
+			*   <li><b>[resourceType]:[interaction]</b> - Use this form to allow type- and
+			*       instance-level interactions, such as <code>create</code>, <code>read</code>, and
+			*       <code>patch</code>. For example, the spec <code>Patient:create</code> allows the
+			*       Patient-level create operation (i.e. <code>POST /Patient</code>).
+			*   <li><b>$[operation-name]</b> - Use this form to allow operations (at any level) by
+			*       name. For example, the spec <code>$diff</code> permits the <a
+			*       href="https://hapifhir.io/hapi-fhir/docs/server_jpa/diff.html">Diff Operation</a>
+			*       to be applied at both the server- and instance-level.
+			* </ul>
+			*
+			* <p>Note that the spec does not differentiate between the <code>read</code> and <code>
+			* vread</code> interactions. If one is permitted the other will also be permitted.
+			*
+			* @return
+			*/
+		public Builder addAllowedSpec(String theSpec) {
+				Validate.notBlank(theSpec, "theSpec must not be null or blank");
 
-            if (theSpec.startsWith("$")) {
-                addAllowedOperation(theSpec);
-                return this;
-            }
+				if (theSpec.startsWith("$")) {
+					addAllowedOperation(theSpec);
+					return this;
+				}
 
-            int colonIdx = theSpec.indexOf(':');
-            Validate.isTrue(colonIdx > 0, "Invalid interaction allowed spec: %s", theSpec);
+				int colonIdx = theSpec.indexOf(':');
+				Validate.isTrue(colonIdx > 0, "Invalid interaction allowed spec: %s", theSpec);
 
-            String resourceName = theSpec.substring(0, colonIdx);
-            String interactionName = theSpec.substring(colonIdx + 1);
-            if (interactionName.equals("search")) {
-                interactionName = "search-type";
-                validateInteraction(interactionName, theSpec, resourceName);
-            } else if (interactionName.equals("history")) {
-                validateInteraction("history-instance", theSpec, resourceName);
-                validateInteraction("history-type", theSpec, resourceName);
-            } else {
-                validateInteraction(interactionName, theSpec, resourceName);
-            }
-            return this;
-        }
+				String resourceName = theSpec.substring(0, colonIdx);
+				String interactionName = theSpec.substring(colonIdx + 1);
+				if (interactionName.equals("search")) {
+					interactionName = "search-type";
+					validateInteraction(interactionName, theSpec, resourceName);
+				} else if (interactionName.equals("history")) {
+					validateInteraction("history-instance", theSpec, resourceName);
+					validateInteraction("history-type", theSpec, resourceName);
+				} else {
+					validateInteraction(interactionName, theSpec, resourceName);
+				}
+				return this;
+		}
 
-        private void validateInteraction(
-                String theInteractionName, String theSpec, String theResourceName) {
-            RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(theInteractionName);
-            Validate.notNull(
-                    interaction, "Unknown interaction %s in spec %s", theInteractionName, theSpec);
-            addAllowedInteraction(theResourceName, interaction);
-        }
+		private void validateInteraction(
+					String theInteractionName, String theSpec, String theResourceName) {
+				RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(theInteractionName);
+				Validate.notNull(
+						interaction, "Unknown interaction %s in spec %s", theInteractionName, theSpec);
+				addAllowedInteraction(theResourceName, interaction);
+		}
 
-        /** Adds an interaction that will be permitted. */
-        private void addAllowedInteraction(
-                String theResourceType, RestOperationTypeEnum theInteractionType) {
-            Validate.notBlank(theResourceType, "theResourceType must not be null or blank");
-            Validate.notNull(theInteractionType, "theInteractionType must not be null");
-            Validate.isTrue(
-                    ALLOWED_OP_TYPES.contains(theInteractionType),
-                    "Operation type %s can not be used as an allowable rule",
-                    theInteractionType);
-            Validate.isTrue(
-                    myCtx.getResourceType(theResourceType) != null, "Unknown resource type: %s");
-            String key = toKey(theResourceType, theInteractionType);
-            myAllowedKeys.add(key);
-        }
+		/** Adds an interaction that will be permitted. */
+		private void addAllowedInteraction(
+					String theResourceType, RestOperationTypeEnum theInteractionType) {
+				Validate.notBlank(theResourceType, "theResourceType must not be null or blank");
+				Validate.notNull(theInteractionType, "theInteractionType must not be null");
+				Validate.isTrue(
+						ALLOWED_OP_TYPES.contains(theInteractionType),
+						"Operation type %s can not be used as an allowable rule",
+						theInteractionType);
+				Validate.isTrue(
+						myCtx.getResourceType(theResourceType) != null, "Unknown resource type: %s");
+				String key = toKey(theResourceType, theInteractionType);
+				myAllowedKeys.add(key);
+		}
 
-        private void addAllowedOperation(String theOperationName) {
-            Validate.notBlank(theOperationName, "theOperationName must not be null or blank");
-            Validate.isTrue(
-                    theOperationName.startsWith("$"),
-                    "Invalid operation name: %s",
-                    theOperationName);
-            myAllowedKeys.add(theOperationName);
-        }
+		private void addAllowedOperation(String theOperationName) {
+				Validate.notBlank(theOperationName, "theOperationName must not be null or blank");
+				Validate.isTrue(
+						theOperationName.startsWith("$"),
+						"Invalid operation name: %s",
+						theOperationName);
+				myAllowedKeys.add(theOperationName);
+		}
 
-        public InteractionBlockingInterceptor build() {
-            return new InteractionBlockingInterceptor(this);
-        }
-    }
+		public InteractionBlockingInterceptor build() {
+				return new InteractionBlockingInterceptor(this);
+		}
+	}
 }

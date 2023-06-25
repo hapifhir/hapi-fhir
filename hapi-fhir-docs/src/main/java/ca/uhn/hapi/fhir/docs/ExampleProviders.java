@@ -19,72 +19,71 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
-
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings(value = {"serial"})
 public class ExampleProviders {
 
-    // START SNIPPET: plainProvider
-    public class MyPlainProvider {
+	// START SNIPPET: plainProvider
+	public class MyPlainProvider {
 
-        /**
-         * This method is a Patient search, but HAPI can not automatically determine the resource
-         * type so it must be explicitly stated.
-         */
-        @Search(type = Patient.class)
-        public Bundle searchForPatients(@RequiredParam(name = Patient.SP_NAME) StringType theName) {
-            Bundle retVal = new Bundle();
-            // perform search
-            return retVal;
-        }
-    }
+		/**
+			* This method is a Patient search, but HAPI can not automatically determine the resource
+			* type so it must be explicitly stated.
+			*/
+		@Search(type = Patient.class)
+		public Bundle searchForPatients(@RequiredParam(name = Patient.SP_NAME) StringType theName) {
+				Bundle retVal = new Bundle();
+				// perform search
+				return retVal;
+		}
+	}
 
-    // END SNIPPET: plainProvider
+	// END SNIPPET: plainProvider
 
-    // START SNIPPET: plainProviderServer
-    public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
+	// START SNIPPET: plainProviderServer
+	public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
 
-        /** Constructor */
-        public ExampleServlet() {
-            /*
-             * Plain providers are passed to the server in the same way
-             * as resource providers. You may pass both resource providers
-             * and plain providers to the same server if you like.
-             */
-            registerProvider(new MyPlainProvider());
+		/** Constructor */
+		public ExampleServlet() {
+				/*
+				 * Plain providers are passed to the server in the same way
+				 * as resource providers. You may pass both resource providers
+				 * and plain providers to the same server if you like.
+				 */
+				registerProvider(new MyPlainProvider());
 
-            List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
-            // ...add some resource providers...
-            registerProviders(resourceProviders);
-        }
-    }
+				List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+				// ...add some resource providers...
+				registerProviders(resourceProviders);
+		}
+	}
 
-    // END SNIPPET: plainProviderServer
+	// END SNIPPET: plainProviderServer
 
-    // START SNIPPET: addressStrategy
-    public class MyServlet extends ca.uhn.fhir.rest.server.RestfulServer {
+	// START SNIPPET: addressStrategy
+	public class MyServlet extends ca.uhn.fhir.rest.server.RestfulServer {
 
-        /** Constructor */
-        public MyServlet() {
+		/** Constructor */
+		public MyServlet() {
 
-            String serverBaseUrl = "http://foo.com/fhir";
-            setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
+				String serverBaseUrl = "http://foo.com/fhir";
+				setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
 
-            // ...add some resource providers, etc...
-            List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
-            setResourceProviders(resourceProviders);
-        }
-    }
-    // END SNIPPET: addressStrategy
+				// ...add some resource providers, etc...
+				List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+				setResourceProviders(resourceProviders);
+		}
+	}
+	// END SNIPPET: addressStrategy
 
 }

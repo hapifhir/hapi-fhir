@@ -31,30 +31,30 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.TYPE})
 public @interface ResourceDef {
 
-    /**
-     * The name of the resource (e.g. "Patient" or "DiagnosticReport"). If you are defining your own
-     * custom extension to a built-in FHIR resource definition type (e.g. you are extending the
-     * built-in Patient class) you do not need to supply a value for this property, as it will be
-     * inferred from the parent class.
-     */
-    String name() default "";
+	/**
+	* The name of the resource (e.g. "Patient" or "DiagnosticReport"). If you are defining your own
+	* custom extension to a built-in FHIR resource definition type (e.g. you are extending the
+	* built-in Patient class) you do not need to supply a value for this property, as it will be
+	* inferred from the parent class.
+	*/
+	String name() default "";
 
-    /**
-     * if set, will be used as the id for any profiles generated for this resource. This property
-     * should be set for custom profile definition classes, and will be used as the resource ID for
-     * the generated profile exported by the server. For example, if you set this value to "hello"
-     * on a custom resource class, your server will automatically export a profile with the
-     * identity: <code>http://localhost:8080/fhir/Profile/hello</code> (the base URL will be
-     * whatever your server uses, not necessarily "http://localhost:8080/fhir")
-     */
-    String id() default "";
+	/**
+	* if set, will be used as the id for any profiles generated for this resource. This property
+	* should be set for custom profile definition classes, and will be used as the resource ID for
+	* the generated profile exported by the server. For example, if you set this value to "hello"
+	* on a custom resource class, your server will automatically export a profile with the
+	* identity: <code>http://localhost:8080/fhir/Profile/hello</code> (the base URL will be
+	* whatever your server uses, not necessarily "http://localhost:8080/fhir")
+	*/
+	String id() default "";
 
-    /**
-     * The URL indicating the profile for this resource definition. If specified, this URL will be
-     * automatically added to the meta tag when the resource is serialized.
-     *
-     * <p>This URL should be fully qualified to indicate the complete URL of the profile being used,
-     * e.g. <code>http://example.com/fhir/StructureDefiniton/some_profile</code>
-     */
-    String profile() default "";
+	/**
+	* The URL indicating the profile for this resource definition. If specified, this URL will be
+	* automatically added to the meta tag when the resource is serialized.
+	*
+	* <p>This URL should be fully qualified to indicate the complete URL of the profile being used,
+	* e.g. <code>http://example.com/fhir/StructureDefiniton/some_profile</code>
+	*/
+	String profile() default "";
 }

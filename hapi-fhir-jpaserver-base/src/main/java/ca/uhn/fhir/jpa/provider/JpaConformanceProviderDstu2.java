@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.dstu2.model.Subscription;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -51,134 +44,140 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
+import org.hl7.fhir.dstu2.model.Subscription;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
-    private volatile Conformance myCachedValue;
-    private JpaStorageSettings myStorageSettings;
-    private String myImplementationDescription;
-    private boolean myIncludeResourceCounts;
-    private RestfulServer myRestfulServer;
-    private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
-    private ResourceCountCache myResourceCountsCache;
+	private volatile Conformance myCachedValue;
+	private JpaStorageSettings myStorageSettings;
+	private String myImplementationDescription;
+	private boolean myIncludeResourceCounts;
+	private RestfulServer myRestfulServer;
+	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private ResourceCountCache myResourceCountsCache;
 
-    /** Constructor */
-    @CoverageIgnore
-    public JpaConformanceProviderDstu2() {
-        super();
-        super.setCache(false);
-        setIncludeResourceCounts(true);
-    }
+	/** Constructor */
+	@CoverageIgnore
+	public JpaConformanceProviderDstu2() {
+		super();
+		super.setCache(false);
+		setIncludeResourceCounts(true);
+	}
 
-    /** Constructor */
-    public JpaConformanceProviderDstu2(
-            RestfulServer theRestfulServer,
-            IFhirSystemDao<Bundle, MetaDt> theSystemDao,
-            JpaStorageSettings theStorageSettings) {
-        super(theRestfulServer);
-        myRestfulServer = theRestfulServer;
-        mySystemDao = theSystemDao;
-        myStorageSettings = theStorageSettings;
-        super.setCache(false);
-        setIncludeResourceCounts(true);
-    }
+	/** Constructor */
+	public JpaConformanceProviderDstu2(
+				RestfulServer theRestfulServer,
+				IFhirSystemDao<Bundle, MetaDt> theSystemDao,
+				JpaStorageSettings theStorageSettings) {
+		super(theRestfulServer);
+		myRestfulServer = theRestfulServer;
+		mySystemDao = theSystemDao;
+		myStorageSettings = theStorageSettings;
+		super.setCache(false);
+		setIncludeResourceCounts(true);
+	}
 
-    @Override
-    public Conformance getServerConformance(
-            HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-        Conformance retVal = myCachedValue;
+	@Override
+	public Conformance getServerConformance(
+				HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+		Conformance retVal = myCachedValue;
 
-        Map<String, Long> counts = null;
-        if (myIncludeResourceCounts) {
-            counts = mySystemDao.getResourceCountsFromCache();
-        }
-        counts = defaultIfNull(counts, Collections.emptyMap());
+		Map<String, Long> counts = null;
+		if (myIncludeResourceCounts) {
+				counts = mySystemDao.getResourceCountsFromCache();
+		}
+		counts = defaultIfNull(counts, Collections.emptyMap());
 
-        FhirContext ctx = myRestfulServer.getFhirContext();
+		FhirContext ctx = myRestfulServer.getFhirContext();
 
-        retVal = super.getServerConformance(theRequest, theRequestDetails);
-        for (Rest nextRest : retVal.getRest()) {
+		retVal = super.getServerConformance(theRequest, theRequestDetails);
+		for (Rest nextRest : retVal.getRest()) {
 
-            for (RestResource nextResource : nextRest.getResource()) {
+				for (RestResource nextResource : nextRest.getResource()) {
 
-                ConditionalDeleteStatusEnum conditionalDelete =
-                        nextResource.getConditionalDeleteElement().getValueAsEnum();
-                if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED
-                        && myStorageSettings.isAllowMultipleDelete() == false) {
-                    nextResource.setConditionalDelete(
-                            ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
-                }
+					ConditionalDeleteStatusEnum conditionalDelete =
+								nextResource.getConditionalDeleteElement().getValueAsEnum();
+					if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED
+								&& myStorageSettings.isAllowMultipleDelete() == false) {
+						nextResource.setConditionalDelete(
+									ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+					}
 
-                // Add resource counts
-                Long count = counts.get(nextResource.getTypeElement().getValueAsString());
-                if (count != null) {
-                    nextResource.addUndeclaredExtension(
-                            false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
-                }
+					// Add resource counts
+					Long count = counts.get(nextResource.getTypeElement().getValueAsString());
+					if (count != null) {
+						nextResource.addUndeclaredExtension(
+									false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
+					}
 
-                // Add chained params
-                for (RestResourceSearchParam nextParam : nextResource.getSearchParam()) {
-                    if (nextParam.getTypeElement().getValueAsEnum()
-                            == SearchParamTypeEnum.REFERENCE) {
-                        List<BoundCodeDt<ResourceTypeEnum>> targets = nextParam.getTarget();
-                        for (BoundCodeDt<ResourceTypeEnum> next : targets) {
-                            RuntimeResourceDefinition def =
-                                    ctx.getResourceDefinition(next.getValue());
-                            for (RuntimeSearchParam nextChainedParam : def.getSearchParams()) {
-                                nextParam.addChain(nextChainedParam.getName());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+					// Add chained params
+					for (RestResourceSearchParam nextParam : nextResource.getSearchParam()) {
+						if (nextParam.getTypeElement().getValueAsEnum()
+									== SearchParamTypeEnum.REFERENCE) {
+								List<BoundCodeDt<ResourceTypeEnum>> targets = nextParam.getTarget();
+								for (BoundCodeDt<ResourceTypeEnum> next : targets) {
+									RuntimeResourceDefinition def =
+												ctx.getResourceDefinition(next.getValue());
+									for (RuntimeSearchParam nextChainedParam : def.getSearchParams()) {
+										nextParam.addChain(nextChainedParam.getName());
+									}
+								}
+						}
+					}
+				}
+		}
 
-        if (myStorageSettings
-                .getSupportedSubscriptionTypes()
-                .contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
-            if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-                ExtensionDt websocketExtension = new ExtensionDt();
-                websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-                websocketExtension.setValue(new UriDt(myStorageSettings.getWebsocketContextPath()));
-                retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
-            }
-        }
+		if (myStorageSettings
+					.getSupportedSubscriptionTypes()
+					.contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
+				if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
+					ExtensionDt websocketExtension = new ExtensionDt();
+					websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
+					websocketExtension.setValue(new UriDt(myStorageSettings.getWebsocketContextPath()));
+					retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
+				}
+		}
 
-        if (isNotBlank(myImplementationDescription)) {
-            retVal.getImplementation().setDescription(myImplementationDescription);
-        }
-        myCachedValue = retVal;
-        return retVal;
-    }
+		if (isNotBlank(myImplementationDescription)) {
+				retVal.getImplementation().setDescription(myImplementationDescription);
+		}
+		myCachedValue = retVal;
+		return retVal;
+	}
 
-    public boolean isIncludeResourceCounts() {
-        return myIncludeResourceCounts;
-    }
+	public boolean isIncludeResourceCounts() {
+		return myIncludeResourceCounts;
+	}
 
-    public void setStorageSettings(JpaStorageSettings theStorageSettings) {
-        this.myStorageSettings = theStorageSettings;
-    }
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
+	}
 
-    @CoverageIgnore
-    public void setImplementationDescription(String theImplDesc) {
-        myImplementationDescription = theImplDesc;
-    }
+	@CoverageIgnore
+	public void setImplementationDescription(String theImplDesc) {
+		myImplementationDescription = theImplDesc;
+	}
 
-    public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
-        myIncludeResourceCounts = theIncludeResourceCounts;
-    }
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
+	}
 
-    @Override
-    public void setRestfulServer(RestfulServer theRestfulServer) {
-        this.myRestfulServer = theRestfulServer;
-        super.setRestfulServer(theRestfulServer);
-    }
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		this.myRestfulServer = theRestfulServer;
+		super.setRestfulServer(theRestfulServer);
+	}
 
-    @CoverageIgnore
-    public void setSystemDao(IFhirSystemDao<Bundle, MetaDt> mySystemDao) {
-        this.mySystemDao = mySystemDao;
-    }
+	@CoverageIgnore
+	public void setSystemDao(IFhirSystemDao<Bundle, MetaDt> mySystemDao) {
+		this.mySystemDao = mySystemDao;
+	}
 }

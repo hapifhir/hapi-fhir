@@ -19,44 +19,43 @@
  */
 package ca.uhn.fhir.jpa.bulk.imprt.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BulkImportJobFileJson implements IModelJson {
 
-    @JsonProperty("tenantName")
-    private String myTenantName;
+	@JsonProperty("tenantName")
+	private String myTenantName;
 
-    @JsonProperty("contents")
-    private String myContents;
+	@JsonProperty("contents")
+	private String myContents;
 
-    @JsonProperty("description")
-    private String myDescription;
+	@JsonProperty("description")
+	private String myDescription;
 
-    public String getDescription() {
-        return myDescription;
-    }
+	public String getDescription() {
+		return myDescription;
+	}
 
-    public void setDescription(String theDescription) {
-        myDescription = theDescription;
-    }
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
+	}
 
-    public String getTenantName() {
-        return myTenantName;
-    }
+	public String getTenantName() {
+		return myTenantName;
+	}
 
-    public BulkImportJobFileJson setTenantName(String theTenantName) {
-        myTenantName = theTenantName;
-        return this;
-    }
+	public BulkImportJobFileJson setTenantName(String theTenantName) {
+		myTenantName = theTenantName;
+		return this;
+	}
 
-    public String getContents() {
-        return myContents;
-    }
+	public String getContents() {
+		return myContents;
+	}
 
-    public BulkImportJobFileJson setContents(String theContents) {
-        myContents = theContents;
-        return this;
-    }
+	public BulkImportJobFileJson setContents(String theContents) {
+		myContents = theContents;
+		return this;
+	}
 }

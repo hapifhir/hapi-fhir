@@ -23,15 +23,15 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class NumberAndListParam extends BaseAndListParam<NumberOrListParam> {
 
-    @Override
-    NumberOrListParam newInstance() {
-        return new NumberOrListParam();
-    }
+	@Override
+	NumberOrListParam newInstance() {
+		return new NumberOrListParam();
+	}
 
-    @CoverageIgnore
-    @Override
-    public NumberAndListParam addAnd(NumberOrListParam theValue) {
-        addValue(theValue);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public NumberAndListParam addAnd(NumberOrListParam theValue) {
+		addValue(theValue);
+		return this;
+	}
 }

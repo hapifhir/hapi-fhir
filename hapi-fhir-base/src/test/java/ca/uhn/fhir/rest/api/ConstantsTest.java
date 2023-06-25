@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 public class ConstantsTest {
 
-    @Test
-    public void testConstants() {
-        new Constants();
-    }
+	@Test
+	public void testConstants() {
+		new Constants();
+	}
 }

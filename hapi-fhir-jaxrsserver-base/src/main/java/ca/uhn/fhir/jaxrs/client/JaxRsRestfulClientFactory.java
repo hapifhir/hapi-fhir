@@ -19,17 +19,17 @@
  */
 package ca.uhn.fhir.jaxrs.client;
 
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * A Restful Client Factory, based on Jax Rs Default Jax-Rs client is NOT thread safe in static
@@ -40,99 +40,99 @@ import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
  */
 public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
-    private Client myNativeClient;
-    private List<Class<?>> registeredComponents;
+	private Client myNativeClient;
+	private List<Class<?>> registeredComponents;
 
-    /**
-     * Constructor. Note that you must set the {@link FhirContext} manually using {@link
-     * #setFhirContext(FhirContext)} if this constructor is used!
-     */
-    public JaxRsRestfulClientFactory() {
-        super();
-    }
+	/**
+	* Constructor. Note that you must set the {@link FhirContext} manually using {@link
+	* #setFhirContext(FhirContext)} if this constructor is used!
+	*/
+	public JaxRsRestfulClientFactory() {
+		super();
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theFhirContext The context
-     */
-    public JaxRsRestfulClientFactory(FhirContext theFhirContext) {
-        super(theFhirContext);
-    }
+	/**
+	* Constructor
+	*
+	* @param theFhirContext The context
+	*/
+	public JaxRsRestfulClientFactory(FhirContext theFhirContext) {
+		super(theFhirContext);
+	}
 
-    public synchronized Client getNativeClientClient() {
-        if (myNativeClient == null) {
-            ClientBuilder builder = ClientBuilder.newBuilder();
-            myNativeClient = builder.build();
-        }
+	public synchronized Client getNativeClientClient() {
+		if (myNativeClient == null) {
+				ClientBuilder builder = ClientBuilder.newBuilder();
+				myNativeClient = builder.build();
+		}
 
-        if (registeredComponents != null && !registeredComponents.isEmpty()) {
-            for (Class<?> c : registeredComponents) {
-                myNativeClient = myNativeClient.register(c);
-            }
-        }
+		if (registeredComponents != null && !registeredComponents.isEmpty()) {
+				for (Class<?> c : registeredComponents) {
+					myNativeClient = myNativeClient.register(c);
+				}
+		}
 
-        return myNativeClient;
-    }
+		return myNativeClient;
+	}
 
-    @Override
-    public synchronized IHttpClient getHttpClient(
-            StringBuilder url,
-            Map<String, List<String>> theIfNoneExistParams,
-            String theIfNoneExistString,
-            RequestTypeEnum theRequestType,
-            List<Header> theHeaders) {
-        Client client = getNativeClientClient();
-        return new JaxRsHttpClient(
-                client,
-                url,
-                theIfNoneExistParams,
-                theIfNoneExistString,
-                theRequestType,
-                theHeaders);
-    }
+	@Override
+	public synchronized IHttpClient getHttpClient(
+				StringBuilder url,
+				Map<String, List<String>> theIfNoneExistParams,
+				String theIfNoneExistString,
+				RequestTypeEnum theRequestType,
+				List<Header> theHeaders) {
+		Client client = getNativeClientClient();
+		return new JaxRsHttpClient(
+					client,
+					url,
+					theIfNoneExistParams,
+					theIfNoneExistString,
+					theRequestType,
+					theHeaders);
+	}
 
-    /***
-     * Not supported with default Jax-Rs client implementation
-     * @param theHost
-     *            The host (or null to disable proxying, as is the default)
-     * @param thePort
-     */
-    @Override
-    public void setProxy(String theHost, Integer thePort) {
-        throw new UnsupportedOperationException(
-                Msg.code(605) + "Proxies are not supported yet in JAX-RS client");
-    }
+	/***
+	* Not supported with default Jax-Rs client implementation
+	* @param theHost
+	*            The host (or null to disable proxying, as is the default)
+	* @param thePort
+	*/
+	@Override
+	public void setProxy(String theHost, Integer thePort) {
+		throw new UnsupportedOperationException(
+					Msg.code(605) + "Proxies are not supported yet in JAX-RS client");
+	}
 
-    /**
-     * Only accept clients of type javax.ws.rs.client.Client Can be used to set a specific Client
-     * implementation
-     *
-     * @param theHttpClient
-     */
-    @Override
-    public synchronized void setHttpClient(Object theHttpClient) {
-        this.myNativeClient = (Client) theHttpClient;
-    }
+	/**
+	* Only accept clients of type javax.ws.rs.client.Client Can be used to set a specific Client
+	* implementation
+	*
+	* @param theHttpClient
+	*/
+	@Override
+	public synchronized void setHttpClient(Object theHttpClient) {
+		this.myNativeClient = (Client) theHttpClient;
+	}
 
-    /**
-     * Register a list of Jax-Rs component (provider, filter...)
-     *
-     * @param components list of Jax-Rs components to register
-     */
-    public void register(List<Class<?>> components) {
-        registeredComponents = components;
-    }
+	/**
+	* Register a list of Jax-Rs component (provider, filter...)
+	*
+	* @param components list of Jax-Rs components to register
+	*/
+	public void register(List<Class<?>> components) {
+		registeredComponents = components;
+	}
 
-    @Override
-    protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
-        return new JaxRsHttpClient(
-                getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
-    }
+	@Override
+	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
+		return new JaxRsHttpClient(
+					getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
+	}
 
-    @Override
-    protected void resetHttpClient() {
-        if (myNativeClient != null) myNativeClient.close(); // close client to avoid memory leak
-        myNativeClient = null;
-    }
+	@Override
+	protected void resetHttpClient() {
+		if (myNativeClient != null) myNativeClient.close(); // close client to avoid memory leak
+		myNativeClient = null;
+	}
 }

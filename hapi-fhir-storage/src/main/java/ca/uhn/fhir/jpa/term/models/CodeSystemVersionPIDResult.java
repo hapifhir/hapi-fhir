@@ -19,20 +19,19 @@
  */
 package ca.uhn.fhir.jpa.term.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CodeSystemVersionPIDResult implements IModelJson {
 
-    @JsonProperty("codeSystemVersionPID")
-    private long myCodeSystemVersionPID;
+	@JsonProperty("codeSystemVersionPID")
+	private long myCodeSystemVersionPID;
 
-    public long getCodeSystemVersionPID() {
-        return myCodeSystemVersionPID;
-    }
+	public long getCodeSystemVersionPID() {
+		return myCodeSystemVersionPID;
+	}
 
-    public void setCodeSystemVersionPID(long theCodeSystemVersionPID) {
-        myCodeSystemVersionPID = theCodeSystemVersionPID;
-    }
+	public void setCodeSystemVersionPID(long theCodeSystemVersionPID) {
+		myCodeSystemVersionPID = theCodeSystemVersionPID;
+	}
 }

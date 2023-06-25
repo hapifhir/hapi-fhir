@@ -19,51 +19,51 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum SearchContainedModeEnum {
 
-    /** default, search on the non-contained (normal) resources */
-    FALSE("false"),
+	/** default, search on the non-contained (normal) resources */
+	FALSE("false"),
 
-    /** search on the contained resources only */
-    TRUE("true"),
+	/** search on the contained resources only */
+	TRUE("true"),
 
-    /** Search on the normal resources and contained resources. This option is not supported yet. */
-    BOTH("both");
+	/** Search on the normal resources and contained resources. This option is not supported yet. */
+	BOTH("both");
 
-    private static volatile Map<String, SearchContainedModeEnum> ourCodeToEnum;
-    private final String myCode;
+	private static volatile Map<String, SearchContainedModeEnum> ourCodeToEnum;
+	private final String myCode;
 
-    SearchContainedModeEnum(String theCode) {
-        myCode = theCode;
-    }
+	SearchContainedModeEnum(String theCode) {
+		myCode = theCode;
+	}
 
-    public String getCode() {
-        return myCode;
-    }
+	public String getCode() {
+		return myCode;
+	}
 
-    public static SearchContainedModeEnum fromCode(String theCode) {
-        Map<String, SearchContainedModeEnum> codeToEnum = ourCodeToEnum;
-        if (codeToEnum == null) {
-            codeToEnum = new HashMap<>();
-            for (SearchContainedModeEnum next : values()) {
-                codeToEnum.put(next.getCode(), next);
-            }
-            ourCodeToEnum = codeToEnum;
-        }
+	public static SearchContainedModeEnum fromCode(String theCode) {
+		Map<String, SearchContainedModeEnum> codeToEnum = ourCodeToEnum;
+		if (codeToEnum == null) {
+				codeToEnum = new HashMap<>();
+				for (SearchContainedModeEnum next : values()) {
+					codeToEnum.put(next.getCode(), next);
+				}
+				ourCodeToEnum = codeToEnum;
+		}
 
-        SearchContainedModeEnum retVal = codeToEnum.get(theCode);
-        if (retVal == null) {
-            throw new InvalidRequestException(
-                    Msg.code(1963) + "Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
-        }
+		SearchContainedModeEnum retVal = codeToEnum.get(theCode);
+		if (retVal == null) {
+				throw new InvalidRequestException(
+						Msg.code(1963) + "Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 }

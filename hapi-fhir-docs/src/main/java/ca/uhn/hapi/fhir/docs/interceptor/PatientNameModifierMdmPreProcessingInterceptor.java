@@ -19,15 +19,14 @@
  */
 package ca.uhn.hapi.fhir.docs.interceptor;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -36,24 +35,24 @@ import static java.util.Arrays.asList;
  * This is a simple interceptor that will remove a humanName when it is found to be black listed.
  */
 public class PatientNameModifierMdmPreProcessingInterceptor {
-    List<String> myNamesToIgnore = asList("John Doe", "Jane Doe");
+	List<String> myNamesToIgnore = asList("John Doe", "Jane Doe");
 
-    @Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
-    public void invoke(IBaseResource theResource) {
+	@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
+	public void invoke(IBaseResource theResource) {
 
-        Patient patient = (Patient) theResource;
-        List<HumanName> nameList = patient.getName();
+		Patient patient = (Patient) theResource;
+		List<HumanName> nameList = patient.getName();
 
-        List<HumanName> validHumanNameList =
-                nameList.stream()
-                        .filter(
-                                theHumanName ->
-                                        !myNamesToIgnore.contains(
-                                                theHumanName.getNameAsSingleString()))
-                        .collect(Collectors.toList());
+		List<HumanName> validHumanNameList =
+					nameList.stream()
+								.filter(
+										theHumanName ->
+													!myNamesToIgnore.contains(
+																theHumanName.getNameAsSingleString()))
+								.collect(Collectors.toList());
 
-        patient.setName(validHumanNameList);
-    }
+		patient.setName(validHumanNameList);
+	}
 }
 
 // END SNIPPET: patientInterceptor

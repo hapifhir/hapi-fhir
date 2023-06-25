@@ -19,81 +19,79 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.model.api.IModelJson;
+import javax.annotation.Nullable;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @JsonProperty("headers")
-    private HapiMessageHeaders myHeaders;
+	@JsonProperty("headers")
+	private HapiMessageHeaders myHeaders;
 
-    /** Constructor */
-    public BaseJsonMessage() {
-        super();
-        setDefaultRetryHeaders();
-    }
+	/** Constructor */
+	public BaseJsonMessage() {
+		super();
+		setDefaultRetryHeaders();
+	}
 
-    protected void setDefaultRetryHeaders() {
-        HapiMessageHeaders messageHeaders = new HapiMessageHeaders();
-        setHeaders(messageHeaders);
-    }
+	protected void setDefaultRetryHeaders() {
+		HapiMessageHeaders messageHeaders = new HapiMessageHeaders();
+		setHeaders(messageHeaders);
+	}
 
-    @Override
-    public MessageHeaders getHeaders() {
-        return myHeaders.toMessageHeaders();
-    }
+	@Override
+	public MessageHeaders getHeaders() {
+		return myHeaders.toMessageHeaders();
+	}
 
-    public HapiMessageHeaders getHapiHeaders() {
-        if (isNull(myHeaders)) {
-            setDefaultRetryHeaders();
-        }
-        return myHeaders;
-    }
+	public HapiMessageHeaders getHapiHeaders() {
+		if (isNull(myHeaders)) {
+				setDefaultRetryHeaders();
+		}
+		return myHeaders;
+	}
 
-    public void setHeaders(HapiMessageHeaders theHeaders) {
-        myHeaders = theHeaders;
-    }
+	public void setHeaders(HapiMessageHeaders theHeaders) {
+		myHeaders = theHeaders;
+	}
 
-    @Deprecated
-    @Nullable
-    public String getMessageKeyOrNull() {
-        return getMessageKey();
-    }
+	@Deprecated
+	@Nullable
+	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
 
-    @Nullable
-    public String getMessageKey() {
-        return null;
-    }
+	@Nullable
+	public String getMessageKey() {
+		return null;
+	}
 
-    /**
-     * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link
-     * #getMessageKey()} returns null.
-     *
-     * @return the message key value or default
-     */
-    @Nullable
-    public String getMessageKeyOrDefault() {
-        return defaultString(getMessageKey(), getMessageKeyDefaultValue());
-    }
+	/**
+	* Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link
+	* #getMessageKey()} returns null.
+	*
+	* @return the message key value or default
+	*/
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		return defaultString(getMessageKey(), getMessageKeyDefaultValue());
+	}
 
-    /**
-     * Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
-     *
-     * @return null by default
-     */
-    @Nullable
-    protected String getMessageKeyDefaultValue() {
-        return null;
-    }
+	/**
+	* Provides a fallback value when the value returned by {@link #getMessageKey()} is null.
+	*
+	* @return null by default
+	*/
+	@Nullable
+	protected String getMessageKeyDefaultValue() {
+		return null;
+	}
 }

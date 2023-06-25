@@ -24,5 +24,5 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 @FunctionalInterface
 public interface IRepositoryFactory {
-    HapiFhirRepository create(RequestDetails theRequestDetails);
+	HapiFhirRepository create(RequestDetails theRequestDetails);
 }

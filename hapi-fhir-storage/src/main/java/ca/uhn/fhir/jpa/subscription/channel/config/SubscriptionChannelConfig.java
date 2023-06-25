@@ -19,33 +19,32 @@
  */
 package ca.uhn.fhir.jpa.subscription.channel.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SubscriptionChannelConfig {
 
-    /** Create a @Primary @Bean if you need a different implementation */
-    @Bean
-    public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
-        return new LinkedBlockingChannelFactory(theChannelNamer);
-    }
+	/** Create a @Primary @Bean if you need a different implementation */
+	@Bean
+	public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
+		return new LinkedBlockingChannelFactory(theChannelNamer);
+	}
 
-    @Bean
-    public SubscriptionChannelFactory subscriptionChannelFactory(
-            IChannelFactory theQueueChannelFactory) {
-        return new SubscriptionChannelFactory(theQueueChannelFactory);
-    }
+	@Bean
+	public SubscriptionChannelFactory subscriptionChannelFactory(
+				IChannelFactory theQueueChannelFactory) {
+		return new SubscriptionChannelFactory(theQueueChannelFactory);
+	}
 
-    /** Create a @Primary @Bean if you need a different implementation */
-    @Bean
-    // Default implementation returns the name unchanged
-    public IChannelNamer channelNamer() {
-        return (theNameComponent, theChannelSettings) -> theNameComponent;
-    }
+	/** Create a @Primary @Bean if you need a different implementation */
+	@Bean
+	// Default implementation returns the name unchanged
+	public IChannelNamer channelNamer() {
+		return (theNameComponent, theChannelSettings) -> theNameComponent;
+	}
 }

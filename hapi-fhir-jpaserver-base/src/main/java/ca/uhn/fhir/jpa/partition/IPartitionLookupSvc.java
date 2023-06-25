@@ -19,39 +19,39 @@
  */
 package ca.uhn.fhir.jpa.partition;
 
-import java.util.List;
-import javax.annotation.Nullable;
-
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
+import java.util.List;
+import javax.annotation.Nullable;
+
 public interface IPartitionLookupSvc {
 
-    /**
-     * This is mostly here for unit test purposes. Regular code is not expected to call this method
-     * directly.
-     */
-    void start();
+	/**
+	* This is mostly here for unit test purposes. Regular code is not expected to call this method
+	* directly.
+	*/
+	void start();
 
-    /**
-     * @throws ResourceNotFoundException If the name is not known
-     */
-    @Nullable
-    PartitionEntity getPartitionByName(String theName) throws ResourceNotFoundException;
+	/**
+	* @throws ResourceNotFoundException If the name is not known
+	*/
+	@Nullable
+	PartitionEntity getPartitionByName(String theName) throws ResourceNotFoundException;
 
-    /**
-     * @throws ResourceNotFoundException If the ID is not known
-     */
-    PartitionEntity getPartitionById(Integer theId) throws ResourceNotFoundException;
+	/**
+	* @throws ResourceNotFoundException If the ID is not known
+	*/
+	PartitionEntity getPartitionById(Integer theId) throws ResourceNotFoundException;
 
-    void clearCaches();
+	void clearCaches();
 
-    PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails);
+	PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails);
 
-    PartitionEntity updatePartition(PartitionEntity thePartition);
+	PartitionEntity updatePartition(PartitionEntity thePartition);
 
-    void deletePartition(Integer thePartitionId);
+	void deletePartition(Integer thePartitionId);
 
-    List<PartitionEntity> listPartitions();
+	List<PartitionEntity> listPartitions();
 }

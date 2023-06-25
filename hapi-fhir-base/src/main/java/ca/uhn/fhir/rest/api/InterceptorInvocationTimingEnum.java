@@ -24,6 +24,6 @@ package ca.uhn.fhir.rest.api;
  * in active or deferred fashion. This enum allows the pointcuts to see how they were invoked.
  */
 public enum InterceptorInvocationTimingEnum {
-    ACTIVE,
-    DEFERRED
+	ACTIVE,
+	DEFERRED
 }

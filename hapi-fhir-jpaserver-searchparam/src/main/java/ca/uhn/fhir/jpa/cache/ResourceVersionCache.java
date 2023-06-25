@@ -19,53 +19,52 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.model.primitive.IdDt;
 
 /**
  * This maintains a mapping of resource id to resource version. We cache these in order to detect
  * resources that were modified on remote servers in our cluster.
  */
 public class ResourceVersionCache {
-    private final Map<IIdType, Long> myVersionMap = new HashMap<>();
+	private final Map<IIdType, Long> myVersionMap = new HashMap<>();
 
-    public void clear() {
-        myVersionMap.clear();
-    }
+	public void clear() {
+		myVersionMap.clear();
+	}
 
-    /**
-     * @param theResourceId
-     * @param theVersion
-     * @return previous value
-     */
-    public Long put(IIdType theResourceId, Long theVersion) {
-        return myVersionMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
-    }
+	/**
+	* @param theResourceId
+	* @param theVersion
+	* @return previous value
+	*/
+	public Long put(IIdType theResourceId, Long theVersion) {
+		return myVersionMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
+	}
 
-    public Long getVersionForResourceId(IIdType theResourceId) {
-        return myVersionMap.get(new IdDt(theResourceId));
-    }
+	public Long getVersionForResourceId(IIdType theResourceId) {
+		return myVersionMap.get(new IdDt(theResourceId));
+	}
 
-    public Long removeResourceId(IIdType theResourceId) {
-        return myVersionMap.remove(new IdDt(theResourceId));
-    }
+	public Long removeResourceId(IIdType theResourceId) {
+		return myVersionMap.remove(new IdDt(theResourceId));
+	}
 
-    public void initialize(ResourceVersionMap theResourceVersionMap) {
-        for (IIdType resourceId : theResourceVersionMap.keySet()) {
-            myVersionMap.put(resourceId, theResourceVersionMap.get(resourceId));
-        }
-    }
+	public void initialize(ResourceVersionMap theResourceVersionMap) {
+		for (IIdType resourceId : theResourceVersionMap.keySet()) {
+				myVersionMap.put(resourceId, theResourceVersionMap.get(resourceId));
+		}
+	}
 
-    public int size() {
-        return myVersionMap.size();
-    }
+	public int size() {
+		return myVersionMap.size();
+	}
 
-    public Set<IIdType> keySet() {
-        return myVersionMap.keySet();
-    }
+	public Set<IIdType> keySet() {
+		return myVersionMap.keySet();
+	}
 }

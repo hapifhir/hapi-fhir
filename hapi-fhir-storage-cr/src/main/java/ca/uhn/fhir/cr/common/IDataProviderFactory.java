@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /**
  * Single abstract method interface to provide ability to create a DataProvider based of
@@ -30,6 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  */
 @FunctionalInterface
 public interface IDataProviderFactory {
-    DataProvider create(
-            RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);
+	DataProvider create(
+				RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);
 }

@@ -19,99 +19,98 @@
  */
 package ca.uhn.fhir.jpa.api.model;
 
-import java.util.function.Supplier;
-
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import java.util.function.Supplier;
 
 public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 
-    private Supplier<EntityAndResource> myEntitySupplier;
-    private Supplier<IIdType> myIdSupplier;
-    private Runnable myEntitySupplierUseCallback;
+	private Supplier<EntityAndResource> myEntitySupplier;
+	private Supplier<IIdType> myIdSupplier;
+	private Runnable myEntitySupplierUseCallback;
 
-    /** Constructor */
-    public LazyDaoMethodOutcome(IResourcePersistentId theResourcePersistentId) {
-        setPersistentId(theResourcePersistentId);
-    }
+	/** Constructor */
+	public LazyDaoMethodOutcome(IResourcePersistentId theResourcePersistentId) {
+		setPersistentId(theResourcePersistentId);
+	}
 
-    @Override
-    public IBasePersistedResource getEntity() {
-        IBasePersistedResource retVal = super.getEntity();
-        if (retVal == null) {
-            tryToRunSupplier();
-            retVal = super.getEntity();
-        }
-        return retVal;
-    }
+	@Override
+	public IBasePersistedResource getEntity() {
+		IBasePersistedResource retVal = super.getEntity();
+		if (retVal == null) {
+				tryToRunSupplier();
+				retVal = super.getEntity();
+		}
+		return retVal;
+	}
 
-    private void tryToRunSupplier() {
-        if (myEntitySupplier != null) {
-            EntityAndResource entityAndResource = myEntitySupplier.get();
-            setEntity(entityAndResource.getEntity());
-            setResource(entityAndResource.getResource());
-            setId(entityAndResource.getResource().getIdElement());
-            myEntitySupplierUseCallback.run();
-        }
-    }
+	private void tryToRunSupplier() {
+		if (myEntitySupplier != null) {
+				EntityAndResource entityAndResource = myEntitySupplier.get();
+				setEntity(entityAndResource.getEntity());
+				setResource(entityAndResource.getResource());
+				setId(entityAndResource.getResource().getIdElement());
+				myEntitySupplierUseCallback.run();
+		}
+	}
 
-    @Override
-    public IIdType getId() {
-        IIdType retVal = super.getId();
-        if (retVal == null) {
-            if (super.hasResource()) {
-                retVal = getResource().getIdElement();
-                setId(retVal);
-            } else {
-                if (myIdSupplier != null) {
-                    retVal = myIdSupplier.get();
-                    setId(retVal);
-                }
-            }
-        }
-        return retVal;
-    }
+	@Override
+	public IIdType getId() {
+		IIdType retVal = super.getId();
+		if (retVal == null) {
+				if (super.hasResource()) {
+					retVal = getResource().getIdElement();
+					setId(retVal);
+				} else {
+					if (myIdSupplier != null) {
+						retVal = myIdSupplier.get();
+						setId(retVal);
+					}
+				}
+		}
+		return retVal;
+	}
 
-    @Override
-    public IBaseResource getResource() {
-        IBaseResource retVal = super.getResource();
-        if (retVal == null) {
-            tryToRunSupplier();
-            retVal = super.getResource();
-        }
-        return retVal;
-    }
+	@Override
+	public IBaseResource getResource() {
+		IBaseResource retVal = super.getResource();
+		if (retVal == null) {
+				tryToRunSupplier();
+				retVal = super.getResource();
+		}
+		return retVal;
+	}
 
-    public void setEntitySupplier(Supplier<EntityAndResource> theEntitySupplier) {
-        myEntitySupplier = theEntitySupplier;
-    }
+	public void setEntitySupplier(Supplier<EntityAndResource> theEntitySupplier) {
+		myEntitySupplier = theEntitySupplier;
+	}
 
-    public void setEntitySupplierUseCallback(Runnable theEntitySupplierUseCallback) {
-        myEntitySupplierUseCallback = theEntitySupplierUseCallback;
-    }
+	public void setEntitySupplierUseCallback(Runnable theEntitySupplierUseCallback) {
+		myEntitySupplierUseCallback = theEntitySupplierUseCallback;
+	}
 
-    public void setIdSupplier(Supplier<IIdType> theIdSupplier) {
-        myIdSupplier = theIdSupplier;
-    }
+	public void setIdSupplier(Supplier<IIdType> theIdSupplier) {
+		myIdSupplier = theIdSupplier;
+	}
 
-    public static class EntityAndResource {
-        private final IBasePersistedResource myEntity;
-        private final IBaseResource myResource;
+	public static class EntityAndResource {
+		private final IBasePersistedResource myEntity;
+		private final IBaseResource myResource;
 
-        public EntityAndResource(IBasePersistedResource theEntity, IBaseResource theResource) {
-            myEntity = theEntity;
-            myResource = theResource;
-        }
+		public EntityAndResource(IBasePersistedResource theEntity, IBaseResource theResource) {
+				myEntity = theEntity;
+				myResource = theResource;
+		}
 
-        public IBasePersistedResource getEntity() {
-            return myEntity;
-        }
+		public IBasePersistedResource getEntity() {
+				return myEntity;
+		}
 
-        public IBaseResource getResource() {
-            return myResource;
-        }
-    }
+		public IBaseResource getResource() {
+				return myResource;
+		}
+	}
 }

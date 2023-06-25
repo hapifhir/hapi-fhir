@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import java.util.List;
-
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ca.uhn.fhir.model.api.IModelJson;
+import java.util.List;
 
 public class ListResult<T> implements IModelJson {
-    @JsonProperty("data")
-    private List<T> myData;
+	@JsonProperty("data")
+	private List<T> myData;
 
-    public ListResult(List<T> theData) {
-        myData = theData;
-    }
+	public ListResult(List<T> theData) {
+		myData = theData;
+	}
 
-    public List<T> getData() {
-        return myData;
-    }
+	public List<T> getData() {
+		return myData;
+	}
 }

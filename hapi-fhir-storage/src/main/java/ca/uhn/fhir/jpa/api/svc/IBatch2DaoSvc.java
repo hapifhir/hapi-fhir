@@ -19,38 +19,38 @@
  */
 package ca.uhn.fhir.jpa.api.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+
 import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-
 public interface IBatch2DaoSvc {
 
-    /**
-     * Indicates whether reindexing all resource types is supported. Implementations are expected to
-     * provide a static response (either they support this or they don't).
-     */
-    boolean isAllResourceTypeSupported();
+	/**
+	* Indicates whether reindexing all resource types is supported. Implementations are expected to
+	* provide a static response (either they support this or they don't).
+	*/
+	boolean isAllResourceTypeSupported();
 
-    /**
-     * Fetches a page of resource IDs for all resource types. The page size is up to the discretion
-     * of the implementation.
-     *
-     * @param theStart The start of the date range, must be inclusive.
-     * @param theEnd The end of the date range, should be exclusive.
-     * @param thePageSize The number of records to query in each pass.
-     * @param theRequestPartitionId The request partition ID (may be <code>null</code> on
-     *     nonpartitioned systems)
-     * @param theUrl The search URL, or <code>null</code> to return IDs for all resources across all
-     *     resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()}
-     *     returns <code>true</code>.
-     */
-    IResourcePidList fetchResourceIdsPage(
-            Date theStart,
-            Date theEnd,
-            @Nonnull Integer thePageSize,
-            @Nullable RequestPartitionId theRequestPartitionId,
-            @Nullable String theUrl);
+	/**
+	* Fetches a page of resource IDs for all resource types. The page size is up to the discretion
+	* of the implementation.
+	*
+	* @param theStart The start of the date range, must be inclusive.
+	* @param theEnd The end of the date range, should be exclusive.
+	* @param thePageSize The number of records to query in each pass.
+	* @param theRequestPartitionId The request partition ID (may be <code>null</code> on
+	*     nonpartitioned systems)
+	* @param theUrl The search URL, or <code>null</code> to return IDs for all resources across all
+	*     resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()}
+	*     returns <code>true</code>.
+	*/
+	IResourcePidList fetchResourceIdsPage(
+				Date theStart,
+				Date theEnd,
+				@Nonnull Integer thePageSize,
+				@Nullable RequestPartitionId theRequestPartitionId,
+				@Nullable String theUrl);
 }

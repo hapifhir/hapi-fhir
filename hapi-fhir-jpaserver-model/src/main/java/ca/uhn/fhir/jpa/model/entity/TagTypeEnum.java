@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.model.entity;
 
 public enum TagTypeEnum {
 
-    /*
-     * Do not reorder these! If you add to this list, add to the
-     * TagTypeEnumTest test too!
-     */
+	/*
+	* Do not reorder these! If you add to this list, add to the
+	* TagTypeEnumTest test too!
+	*/
 
-    TAG,
+	TAG,
 
-    PROFILE,
+	PROFILE,
 
-    SECURITY_LABEL
+	SECURITY_LABEL
 }

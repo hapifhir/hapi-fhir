@@ -19,73 +19,72 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
 
 public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody
-        extends BaseOutcomeReturningMethodBinding {
+		extends BaseOutcomeReturningMethodBinding {
 
-    private String myResourceName;
-    private Integer myIdParameterIndex;
+	private String myResourceName;
+	private Integer myIdParameterIndex;
 
-    public BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody(
-            Method theMethod,
-            FhirContext theContext,
-            Object theProvider,
-            Class<?> theMethodAnnotationType,
-            Class<? extends IBaseResource> theResourceTypeFromAnnotation) {
-        super(theMethod, theContext, theMethodAnnotationType, theProvider);
+	public BaseOutcomeReturningMethodBindingWithResourceIdButNoResourceBody(
+				Method theMethod,
+				FhirContext theContext,
+				Object theProvider,
+				Class<?> theMethodAnnotationType,
+				Class<? extends IBaseResource> theResourceTypeFromAnnotation) {
+		super(theMethod, theContext, theMethodAnnotationType, theProvider);
 
-        Class<? extends IBaseResource> resourceType = theResourceTypeFromAnnotation;
-        if (resourceType != IBaseResource.class) {
-            RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
-            myResourceName = def.getName();
-        } else {
-            if (theProvider != null && theProvider instanceof IResourceProvider) {
-                RuntimeResourceDefinition def =
-                        theContext.getResourceDefinition(
-                                ((IResourceProvider) theProvider).getResourceType());
-                myResourceName = def.getName();
-            } else {
-                throw new ConfigurationException(
-                        Msg.code(457)
-                                + "Can not determine resource type for method '"
-                                + theMethod.getName()
-                                + "' on type "
-                                + theMethod.getDeclaringClass().getCanonicalName()
-                                + " - Did you forget to include the resourceType() value on the @"
-                                + Delete.class.getSimpleName()
-                                + " method annotation?");
-            }
-        }
+		Class<? extends IBaseResource> resourceType = theResourceTypeFromAnnotation;
+		if (resourceType != IBaseResource.class) {
+				RuntimeResourceDefinition def = theContext.getResourceDefinition(resourceType);
+				myResourceName = def.getName();
+		} else {
+				if (theProvider != null && theProvider instanceof IResourceProvider) {
+					RuntimeResourceDefinition def =
+								theContext.getResourceDefinition(
+										((IResourceProvider) theProvider).getResourceType());
+					myResourceName = def.getName();
+				} else {
+					throw new ConfigurationException(
+								Msg.code(457)
+										+ "Can not determine resource type for method '"
+										+ theMethod.getName()
+										+ "' on type "
+										+ theMethod.getDeclaringClass().getCanonicalName()
+										+ " - Did you forget to include the resourceType() value on the @"
+										+ Delete.class.getSimpleName()
+										+ " method annotation?");
+				}
+		}
 
-        myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-        if (myIdParameterIndex == null) {
-            throw new ConfigurationException(
-                    Msg.code(458)
-                            + "Method '"
-                            + theMethod.getName()
-                            + "' on type '"
-                            + theMethod.getDeclaringClass().getCanonicalName()
-                            + "' has no parameter annotated with the @"
-                            + IdParam.class.getSimpleName()
-                            + " annotation");
-        }
-    }
+		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		if (myIdParameterIndex == null) {
+				throw new ConfigurationException(
+						Msg.code(458)
+									+ "Method '"
+									+ theMethod.getName()
+									+ "' on type '"
+									+ theMethod.getDeclaringClass().getCanonicalName()
+									+ "' has no parameter annotated with the @"
+									+ IdParam.class.getSimpleName()
+									+ " annotation");
+		}
+	}
 
-    @Override
-    public String getResourceName() {
-        return myResourceName;
-    }
+	@Override
+	public String getResourceName() {
+		return myResourceName;
+	}
 
-    protected Integer getIdParameterIndex() {
-        return myIdParameterIndex;
-    }
+	protected Integer getIdParameterIndex() {
+		return myIdParameterIndex;
+	}
 }

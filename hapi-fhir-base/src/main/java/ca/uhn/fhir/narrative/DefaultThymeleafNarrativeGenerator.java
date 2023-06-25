@@ -19,58 +19,58 @@
  */
 package ca.uhn.fhir.narrative;
 
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
-
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator
-        implements INarrativeGenerator {
+		implements INarrativeGenerator {
 
-    public static final String NARRATIVES_PROPERTIES =
-            "classpath:ca/uhn/fhir/narrative/narratives.properties";
-    static final String HAPISERVER_NARRATIVES_PROPERTIES =
-            "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
+	public static final String NARRATIVES_PROPERTIES =
+				"classpath:ca/uhn/fhir/narrative/narratives.properties";
+	static final String HAPISERVER_NARRATIVES_PROPERTIES =
+				"classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
 
-    private boolean myUseHapiServerConformanceNarrative;
-    private volatile NarrativeTemplateManifest myManifest;
+	private boolean myUseHapiServerConformanceNarrative;
+	private volatile NarrativeTemplateManifest myManifest;
 
-    public DefaultThymeleafNarrativeGenerator() {
-        super();
-    }
+	public DefaultThymeleafNarrativeGenerator() {
+		super();
+	}
 
-    @Override
-    protected NarrativeTemplateManifest getManifest() {
-        NarrativeTemplateManifest retVal = myManifest;
-        if (retVal == null) {
-            List<String> propertyFiles = new ArrayList<>();
-            propertyFiles.add(NARRATIVES_PROPERTIES);
-            if (myUseHapiServerConformanceNarrative) {
-                propertyFiles.add(HAPISERVER_NARRATIVES_PROPERTIES);
-            }
-            retVal = NarrativeTemplateManifest.forManifestFileLocation(propertyFiles);
-            myManifest = retVal;
-        }
-        return retVal;
-    }
+	@Override
+	protected NarrativeTemplateManifest getManifest() {
+		NarrativeTemplateManifest retVal = myManifest;
+		if (retVal == null) {
+				List<String> propertyFiles = new ArrayList<>();
+				propertyFiles.add(NARRATIVES_PROPERTIES);
+				if (myUseHapiServerConformanceNarrative) {
+					propertyFiles.add(HAPISERVER_NARRATIVES_PROPERTIES);
+				}
+				retVal = NarrativeTemplateManifest.forManifestFileLocation(propertyFiles);
+				myManifest = retVal;
+		}
+		return retVal;
+	}
 
-    /**
-     * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for
-     * the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
-     * instances. This narrative provides a friendly search page which can assist users of the
-     * service.
-     */
-    public void setUseHapiServerConformanceNarrative(boolean theValue) {
-        myUseHapiServerConformanceNarrative = theValue;
-    }
+	/**
+	* If set to <code>true</code> (default is <code>false</code>) a special custom narrative for
+	* the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
+	* instances. This narrative provides a friendly search page which can assist users of the
+	* service.
+	*/
+	public void setUseHapiServerConformanceNarrative(boolean theValue) {
+		myUseHapiServerConformanceNarrative = theValue;
+	}
 
-    /**
-     * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for
-     * the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
-     * instances. This narrative provides a friendly search page which can assist users of the
-     * service.
-     */
-    public boolean isUseHapiServerConformanceNarrative() {
-        return myUseHapiServerConformanceNarrative;
-    }
+	/**
+	* If set to <code>true</code> (default is <code>false</code>) a special custom narrative for
+	* the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
+	* instances. This narrative provides a friendly search page which can assist users of the
+	* service.
+	*/
+	public boolean isUseHapiServerConformanceNarrative() {
+		return myUseHapiServerConformanceNarrative;
+	}
 }

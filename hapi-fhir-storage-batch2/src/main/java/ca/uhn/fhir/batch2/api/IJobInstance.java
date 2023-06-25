@@ -19,51 +19,51 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import java.util.Date;
-
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
+import java.util.Date;
+
 public interface IJobInstance {
-    String getCurrentGatedStepId();
+	String getCurrentGatedStepId();
 
-    int getErrorCount();
+	int getErrorCount();
 
-    String getEstimatedTimeRemaining();
+	String getEstimatedTimeRemaining();
 
-    boolean isWorkChunksPurged();
+	boolean isWorkChunksPurged();
 
-    StatusEnum getStatus();
+	StatusEnum getStatus();
 
-    int getJobDefinitionVersion();
+	int getJobDefinitionVersion();
 
-    String getInstanceId();
+	String getInstanceId();
 
-    Date getStartTime();
+	Date getStartTime();
 
-    Date getEndTime();
+	Date getEndTime();
 
-    Integer getCombinedRecordsProcessed();
+	Integer getCombinedRecordsProcessed();
 
-    Double getCombinedRecordsProcessedPerSecond();
+	Double getCombinedRecordsProcessedPerSecond();
 
-    Date getCreateTime();
+	Date getCreateTime();
 
-    Integer getTotalElapsedMillis();
+	Integer getTotalElapsedMillis();
 
-    double getProgress();
+	double getProgress();
 
-    String getErrorMessage();
+	String getErrorMessage();
 
-    String getWarningMessages();
+	String getWarningMessages();
 
-    boolean isCancelled();
+	boolean isCancelled();
 
-    String getReport();
+	String getReport();
 
-    /**
-     * @return true if every step of the job has produced exactly 1 chunk.
-     */
-    boolean isFastTracking();
+	/**
+	* @return true if every step of the job has produced exactly 1 chunk.
+	*/
+	boolean isFastTracking();
 
-    void setFastTracking(boolean theFastTracking);
+	void setFastTracking(boolean theFastTracking);
 }

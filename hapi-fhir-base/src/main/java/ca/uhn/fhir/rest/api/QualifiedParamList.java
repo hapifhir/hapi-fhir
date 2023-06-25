@@ -19,118 +19,118 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class QualifiedParamList extends ArrayList<String> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private String myQualifier;
+	private String myQualifier;
 
-    public QualifiedParamList() {
-        super();
-    }
+	public QualifiedParamList() {
+		super();
+	}
 
-    public QualifiedParamList(int theCapacity) {
-        super(theCapacity);
-    }
+	public QualifiedParamList(int theCapacity) {
+		super(theCapacity);
+	}
 
-    public QualifiedParamList(IQueryParameterOr<?> theNextOr, FhirContext theContext) {
-        for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
-            if (myQualifier == null) {
-                myQualifier = next.getQueryParameterQualifier();
-            }
-            add(next.getValueAsQueryToken(theContext));
-        }
-    }
+	public QualifiedParamList(IQueryParameterOr<?> theNextOr, FhirContext theContext) {
+		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
+				if (myQualifier == null) {
+					myQualifier = next.getQueryParameterQualifier();
+				}
+				add(next.getValueAsQueryToken(theContext));
+		}
+	}
 
-    public String getQualifier() {
-        return myQualifier;
-    }
+	public String getQualifier() {
+		return myQualifier;
+	}
 
-    public void setQualifier(String theQualifier) {
-        myQualifier = theQualifier;
-    }
+	public void setQualifier(String theQualifier) {
+		myQualifier = theQualifier;
+	}
 
-    public static QualifiedParamList singleton(String theParamValue) {
-        return singleton(null, theParamValue);
-    }
+	public static QualifiedParamList singleton(String theParamValue) {
+		return singleton(null, theParamValue);
+	}
 
-    public static QualifiedParamList singleton(String theQualifier, String theParamValue) {
-        QualifiedParamList retVal = new QualifiedParamList(1);
-        retVal.setQualifier(theQualifier);
-        retVal.add(theParamValue);
-        return retVal;
-    }
+	public static QualifiedParamList singleton(String theQualifier, String theParamValue) {
+		QualifiedParamList retVal = new QualifiedParamList(1);
+		retVal.setQualifier(theQualifier);
+		retVal.add(theParamValue);
+		return retVal;
+	}
 
-    public static QualifiedParamList splitQueryStringByCommasIgnoreEscape(
-            String theQualifier, String theParams) {
-        QualifiedParamList retVal = new QualifiedParamList();
-        retVal.setQualifier(theQualifier);
+	public static QualifiedParamList splitQueryStringByCommasIgnoreEscape(
+				String theQualifier, String theParams) {
+		QualifiedParamList retVal = new QualifiedParamList();
+		retVal.setQualifier(theQualifier);
 
-        StringTokenizer tok = new StringTokenizer(theParams, ",", true);
-        String prev = null;
-        while (tok.hasMoreElements()) {
-            String str = tok.nextToken();
-            if (isBlank(str)) {
-                prev = null;
-                continue;
-            }
+		StringTokenizer tok = new StringTokenizer(theParams, ",", true);
+		String prev = null;
+		while (tok.hasMoreElements()) {
+				String str = tok.nextToken();
+				if (isBlank(str)) {
+					prev = null;
+					continue;
+				}
 
-            if (str.equals(",")) {
-                if (countTrailingSlashes(prev) % 2 == 1) {
-                    int idx = retVal.size() - 1;
-                    String existing = retVal.get(idx);
-                    prev = existing.substring(0, existing.length() - 1) + ',';
-                    retVal.set(idx, prev);
-                } else {
-                    prev = null;
-                }
-                continue;
-            }
+				if (str.equals(",")) {
+					if (countTrailingSlashes(prev) % 2 == 1) {
+						int idx = retVal.size() - 1;
+						String existing = retVal.get(idx);
+						prev = existing.substring(0, existing.length() - 1) + ',';
+						retVal.set(idx, prev);
+					} else {
+						prev = null;
+					}
+					continue;
+				}
 
-            if (prev != null && prev.length() > 0 && prev.charAt(prev.length() - 1) == ',') {
-                int idx = retVal.size() - 1;
-                String existing = retVal.get(idx);
-                prev = existing + str;
-                retVal.set(idx, prev);
-            } else {
-                retVal.add(str);
-                prev = str;
-            }
-        }
+				if (prev != null && prev.length() > 0 && prev.charAt(prev.length() - 1) == ',') {
+					int idx = retVal.size() - 1;
+					String existing = retVal.get(idx);
+					prev = existing + str;
+					retVal.set(idx, prev);
+				} else {
+					retVal.add(str);
+					prev = str;
+				}
+		}
 
-        // If no value was found, at least add that empty string as a value. It should get ignored
-        // later, but at
-        // least this lets us give a sensible error message if the parameter name was bad. See
-        // ResourceProviderR4Test#testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch for
-        // an example
-        if (retVal.size() == 0) {
-            retVal.add("");
-        }
+		// If no value was found, at least add that empty string as a value. It should get ignored
+		// later, but at
+		// least this lets us give a sensible error message if the parameter name was bad. See
+		// ResourceProviderR4Test#testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch for
+		// an example
+		if (retVal.size() == 0) {
+				retVal.add("");
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    private static int countTrailingSlashes(String theString) {
-        if (theString == null) {
-            return 0;
-        }
-        int retVal = 0;
-        for (int i = theString.length() - 1; i >= 0; i--) {
-            char nextChar = theString.charAt(i);
-            if (nextChar != '\\') {
-                break;
-            }
-            retVal++;
-        }
-        return retVal;
-    }
+	private static int countTrailingSlashes(String theString) {
+		if (theString == null) {
+				return 0;
+		}
+		int retVal = 0;
+		for (int i = theString.length() - 1; i >= 0; i--) {
+				char nextChar = theString.charAt(i);
+				if (nextChar != '\\') {
+					break;
+				}
+				retVal++;
+		}
+		return retVal;
+	}
 }

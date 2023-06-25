@@ -19,42 +19,41 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import java.util.Map;
-
-import org.apache.commons.csv.CSVRecord;
-
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import org.apache.commons.csv.CSVRecord;
+
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 
-    private final Map<String, TermConcept> myCode2Concept;
+	private final Map<String, TermConcept> myCode2Concept;
 
-    public LoincConsumerNameHandler(Map<String, TermConcept> theCode2concept) {
-        myCode2Concept = theCode2concept;
-    }
+	public LoincConsumerNameHandler(Map<String, TermConcept> theCode2concept) {
+		myCode2Concept = theCode2concept;
+	}
 
-    @Override
-    public void accept(CSVRecord theRecord) {
+	@Override
+	public void accept(CSVRecord theRecord) {
 
-        String loincNumber = trim(theRecord.get("LoincNumber"));
-        if (isBlank(loincNumber)) {
-            return;
-        }
+		String loincNumber = trim(theRecord.get("LoincNumber"));
+		if (isBlank(loincNumber)) {
+				return;
+		}
 
-        String consumerName = trim(theRecord.get("ConsumerName"));
-        if (isBlank(consumerName)) {
-            return;
-        }
+		String consumerName = trim(theRecord.get("ConsumerName"));
+		if (isBlank(consumerName)) {
+				return;
+		}
 
-        TermConcept loincCode = myCode2Concept.get(loincNumber);
-        if (loincCode == null) {
-            return;
-        }
+		TermConcept loincCode = myCode2Concept.get(loincNumber);
+		if (loincCode == null) {
+				return;
+		}
 
-        loincCode.addDesignation().setUseDisplay("ConsumerName").setValue(consumerName);
-    }
+		loincCode.addDesignation().setUseDisplay("ConsumerName").setValue(consumerName);
+	}
 }

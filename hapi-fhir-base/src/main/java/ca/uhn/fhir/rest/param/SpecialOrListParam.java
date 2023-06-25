@@ -23,16 +23,16 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class SpecialOrListParam extends BaseOrListParam<SpecialOrListParam, SpecialParam> {
 
-    @CoverageIgnore
-    @Override
-    SpecialParam newInstance() {
-        return new SpecialParam();
-    }
+	@CoverageIgnore
+	@Override
+	SpecialParam newInstance() {
+		return new SpecialParam();
+	}
 
-    @CoverageIgnore
-    @Override
-    public SpecialOrListParam addOr(SpecialParam theParameter) {
-        add(theParameter);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public SpecialOrListParam addOr(SpecialParam theParameter) {
+		add(theParameter);
+		return this;
+	}
 }

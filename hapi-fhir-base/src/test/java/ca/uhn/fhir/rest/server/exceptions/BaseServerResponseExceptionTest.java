@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BaseServerResponseExceptionTest {
 
-    @Test
-    public void testTrusted() {
-        assertTrue(
-                new InternalErrorException("aaa")
-                        .setErrorMessageTrusted(true)
-                        .isErrorMessageTrusted());
-    }
+	@Test
+	public void testTrusted() {
+		assertTrue(
+					new InternalErrorException("aaa")
+								.setErrorMessageTrusted(true)
+								.isErrorMessageTrusted());
+	}
 }

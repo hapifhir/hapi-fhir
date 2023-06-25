@@ -19,45 +19,44 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 
 @DatatypeDef(name = "boolean")
 public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDatatype {
 
-    /** Constructor */
-    public BooleanDt() {
-        super();
-    }
+	/** Constructor */
+	public BooleanDt() {
+		super();
+	}
 
-    /** Constructor */
-    @SimpleSetter
-    public BooleanDt(@SimpleSetter.Parameter(name = "theBoolean") boolean theBoolean) {
-        setValue(theBoolean);
-    }
+	/** Constructor */
+	@SimpleSetter
+	public BooleanDt(@SimpleSetter.Parameter(name = "theBoolean") boolean theBoolean) {
+		setValue(theBoolean);
+	}
 
-    @Override
-    protected Boolean parse(String theValue) {
-        if ("true".equals(theValue)) {
-            return Boolean.TRUE;
-        } else if ("false".equals(theValue)) {
-            return Boolean.FALSE;
-        } else {
-            throw new DataFormatException(
-                    Msg.code(1872) + "Invalid boolean string: '" + theValue + "'");
-        }
-    }
+	@Override
+	protected Boolean parse(String theValue) {
+		if ("true".equals(theValue)) {
+				return Boolean.TRUE;
+		} else if ("false".equals(theValue)) {
+				return Boolean.FALSE;
+		} else {
+				throw new DataFormatException(
+						Msg.code(1872) + "Invalid boolean string: '" + theValue + "'");
+		}
+	}
 
-    @Override
-    protected String encode(Boolean theValue) {
-        if (Boolean.TRUE.equals(theValue)) {
-            return "true";
-        }
-        return "false";
-    }
+	@Override
+	protected String encode(Boolean theValue) {
+		if (Boolean.TRUE.equals(theValue)) {
+				return "true";
+		}
+		return "false";
+	}
 }

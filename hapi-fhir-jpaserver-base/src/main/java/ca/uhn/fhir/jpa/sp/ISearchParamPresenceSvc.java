@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.jpa.sp;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 
+import java.util.Collection;
+
 public interface ISearchParamPresenceSvc {
 
-    AddRemoveCount updatePresence(
-            ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities);
+	AddRemoveCount updatePresence(
+				ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities);
 }

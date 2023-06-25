@@ -19,44 +19,43 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.model.api.IModelJson;
-
 /** */
 public class MdmResourceSearchParamJson implements IModelJson, Iterable<String> {
-    @JsonProperty(value = "resourceType", required = true)
-    String myResourceType;
+	@JsonProperty(value = "resourceType", required = true)
+	String myResourceType;
 
-    @JsonProperty(value = "searchParams", required = true)
-    List<String> mySearchParams;
+	@JsonProperty(value = "searchParams", required = true)
+	List<String> mySearchParams;
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public MdmResourceSearchParamJson setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-        return this;
-    }
+	public MdmResourceSearchParamJson setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
 
-    public Iterator<String> iterator() {
-        return getSearchParams().iterator();
-    }
+	public Iterator<String> iterator() {
+		return getSearchParams().iterator();
+	}
 
-    public MdmResourceSearchParamJson addSearchParam(String theSearchParam) {
-        getSearchParams().add(theSearchParam);
-        return this;
-    }
+	public MdmResourceSearchParamJson addSearchParam(String theSearchParam) {
+		getSearchParams().add(theSearchParam);
+		return this;
+	}
 
-    public List<String> getSearchParams() {
-        if (mySearchParams == null) {
-            mySearchParams = new ArrayList<>();
-        }
-        return mySearchParams;
-    }
+	public List<String> getSearchParams() {
+		if (mySearchParams == null) {
+				mySearchParams = new ArrayList<>();
+		}
+		return mySearchParams;
+	}
 }

@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -33,6 +26,12 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author James Agnew
@@ -40,92 +39,92 @@ import ca.uhn.fhir.util.UrlUtil;
  */
 public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
-    private final Map<String, List<String>> myParameters;
-    private final String myUrlPath;
-    private final UrlSourceEnum myUrlSource;
+	private final Map<String, List<String>> myParameters;
+	private final String myUrlPath;
+	private final UrlSourceEnum myUrlSource;
 
-    public HttpGetClientInvocation(
-            FhirContext theContext,
-            Map<String, List<String>> theParameters,
-            String... theUrlFragments) {
-        this(theContext, theParameters, UrlSourceEnum.GENERATED, theUrlFragments);
-    }
+	public HttpGetClientInvocation(
+				FhirContext theContext,
+				Map<String, List<String>> theParameters,
+				String... theUrlFragments) {
+		this(theContext, theParameters, UrlSourceEnum.GENERATED, theUrlFragments);
+	}
 
-    public HttpGetClientInvocation(
-            FhirContext theContext,
-            Map<String, List<String>> theParameters,
-            UrlSourceEnum theUrlSource,
-            String... theUrlFragments) {
-        super(theContext);
-        myParameters = theParameters;
-        myUrlPath = StringUtils.join(theUrlFragments, '/');
-        myUrlSource = theUrlSource;
-    }
+	public HttpGetClientInvocation(
+				FhirContext theContext,
+				Map<String, List<String>> theParameters,
+				UrlSourceEnum theUrlSource,
+				String... theUrlFragments) {
+		super(theContext);
+		myParameters = theParameters;
+		myUrlPath = StringUtils.join(theUrlFragments, '/');
+		myUrlSource = theUrlSource;
+	}
 
-    public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
-        super(theContext);
-        myParameters = new HashMap<>();
-        myUrlPath = theUrlPath;
-        myUrlSource = UrlSourceEnum.GENERATED;
-    }
+	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
+		super(theContext);
+		myParameters = new HashMap<>();
+		myUrlPath = theUrlPath;
+		myUrlSource = UrlSourceEnum.GENERATED;
+	}
 
-    private boolean addQueryParameter(
-            StringBuilder b, boolean first, String nextKey, String nextValue) {
-        boolean retVal = first;
-        if (retVal) {
-            b.append('?');
-            retVal = false;
-        } else {
-            b.append('&');
-        }
-        b.append(UrlUtil.escapeUrlParam(nextKey));
-        b.append('=');
-        b.append(UrlUtil.escapeUrlParam(nextValue));
+	private boolean addQueryParameter(
+				StringBuilder b, boolean first, String nextKey, String nextValue) {
+		boolean retVal = first;
+		if (retVal) {
+				b.append('?');
+				retVal = false;
+		} else {
+				b.append('&');
+		}
+		b.append(UrlUtil.escapeUrlParam(nextKey));
+		b.append('=');
+		b.append(UrlUtil.escapeUrlParam(nextValue));
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    @Override
-    public IHttpRequest asHttpRequest(
-            String theUrlBase,
-            Map<String, List<String>> theExtraParams,
-            EncodingEnum theEncoding,
-            Boolean thePrettyPrint) {
-        StringBuilder b = new StringBuilder();
+	@Override
+	public IHttpRequest asHttpRequest(
+				String theUrlBase,
+				Map<String, List<String>> theExtraParams,
+				EncodingEnum theEncoding,
+				Boolean thePrettyPrint) {
+		StringBuilder b = new StringBuilder();
 
-        if (!myUrlPath.contains("://")) {
-            b.append(theUrlBase);
-            if (!theUrlBase.endsWith("/") && !myUrlPath.startsWith("/")) {
-                b.append('/');
-            }
-        }
-        b.append(myUrlPath);
+		if (!myUrlPath.contains("://")) {
+				b.append(theUrlBase);
+				if (!theUrlBase.endsWith("/") && !myUrlPath.startsWith("/")) {
+					b.append('/');
+				}
+		}
+		b.append(myUrlPath);
 
-        boolean first = b.indexOf("?") == -1;
-        for (Entry<String, List<String>> next : myParameters.entrySet()) {
-            if (next.getValue() == null || next.getValue().isEmpty()) {
-                continue;
-            }
-            String nextKey = next.getKey();
-            for (String nextValue : next.getValue()) {
-                first = addQueryParameter(b, first, nextKey, nextValue);
-            }
-        }
+		boolean first = b.indexOf("?") == -1;
+		for (Entry<String, List<String>> next : myParameters.entrySet()) {
+				if (next.getValue() == null || next.getValue().isEmpty()) {
+					continue;
+				}
+				String nextKey = next.getKey();
+				for (String nextValue : next.getValue()) {
+					first = addQueryParameter(b, first, nextKey, nextValue);
+				}
+		}
 
-        appendExtraParamsWithQuestionMark(theExtraParams, b, first);
+		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-        IHttpRequest retVal =
-                super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
-        retVal.setUrlSource(myUrlSource);
+		IHttpRequest retVal =
+					super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
+		retVal.setUrlSource(myUrlSource);
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    public Map<String, List<String>> getParameters() {
-        return myParameters;
-    }
+	public Map<String, List<String>> getParameters() {
+		return myParameters;
+	}
 
-    public String getUrlPath() {
-        return myUrlPath;
-    }
+	public String getUrlPath() {
+		return myUrlPath;
+	}
 }

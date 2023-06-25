@@ -19,42 +19,41 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import java.util.Set;
-
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LogicalReferenceHelper {
 
-    public static boolean isLogicalReference(StorageSettings myConfig, IIdType theId) {
-        Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
-        if (treatReferencesAsLogical != null) {
-            for (String nextLogicalRef : treatReferencesAsLogical) {
-                nextLogicalRef = trim(nextLogicalRef);
-                if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
-                    if (theId.getValue()
-                            .startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() - 1))) {
-                        return true;
-                    }
-                } else {
-                    if (theId.getValue().equals(nextLogicalRef)) {
-                        return true;
-                    }
-                }
-            }
-        }
+	public static boolean isLogicalReference(StorageSettings myConfig, IIdType theId) {
+		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
+		if (treatReferencesAsLogical != null) {
+				for (String nextLogicalRef : treatReferencesAsLogical) {
+					nextLogicalRef = trim(nextLogicalRef);
+					if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
+						if (theId.getValue()
+									.startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() - 1))) {
+								return true;
+						}
+					} else {
+						if (theId.getValue().equals(nextLogicalRef)) {
+								return true;
+						}
+					}
+				}
+		}
 
-        /*
-         * Account for common logical references
-         */
+		/*
+			* Account for common logical references
+			*/
 
-        if (theId.getValue().startsWith("http://fhir.org/guides/argonaut/")) {
-            return true;
-        }
+		if (theId.getValue().startsWith("http://fhir.org/guides/argonaut/")) {
+				return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
-import java.util.List;
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -31,75 +32,73 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.util.ParametersUtil;
+import java.util.List;
+import javax.annotation.Nonnull;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-    List<IIdType> findCodeSystemIdsContainingSystemAndCode(
-            String theCode, String theSystem, RequestDetails theRequest);
+	List<IIdType> findCodeSystemIdsContainingSystemAndCode(
+				String theCode, String theSystem, RequestDetails theRequest);
 
-    @Transactional
-    @Nonnull
-    IValidationSupport.LookupCodeResult lookupCode(
-            IPrimitiveType<String> theCode,
-            IPrimitiveType<String> theSystem,
-            IBaseCoding theCoding,
-            RequestDetails theRequestDetails);
+	@Transactional
+	@Nonnull
+	IValidationSupport.LookupCodeResult lookupCode(
+				IPrimitiveType<String> theCode,
+				IPrimitiveType<String> theSystem,
+				IBaseCoding theCoding,
+				RequestDetails theRequestDetails);
 
-    @Nonnull
-    IValidationSupport.LookupCodeResult lookupCode(
-            IPrimitiveType<String> theCode,
-            IPrimitiveType<String> theSystem,
-            IBaseCoding theCoding,
-            IPrimitiveType<String> theDisplayLanguage,
-            RequestDetails theRequestDetails);
+	@Nonnull
+	IValidationSupport.LookupCodeResult lookupCode(
+				IPrimitiveType<String> theCode,
+				IPrimitiveType<String> theSystem,
+				IBaseCoding theCoding,
+				IPrimitiveType<String> theDisplayLanguage,
+				RequestDetails theRequestDetails);
 
-    SubsumesResult subsumes(
-            IPrimitiveType<String> theCodeA,
-            IPrimitiveType<String> theCodeB,
-            IPrimitiveType<String> theSystem,
-            IBaseCoding theCodingA,
-            IBaseCoding theCodingB,
-            RequestDetails theRequestDetails);
+	SubsumesResult subsumes(
+				IPrimitiveType<String> theCodeA,
+				IPrimitiveType<String> theCodeB,
+				IPrimitiveType<String> theSystem,
+				IBaseCoding theCodingA,
+				IBaseCoding theCodingB,
+				RequestDetails theRequestDetails);
 
-    @Nonnull
-    IValidationSupport.CodeValidationResult validateCode(
-            IIdType theCodeSystemId,
-            IPrimitiveType<String> theCodeSystemUrl,
-            IPrimitiveType<String> theVersion,
-            IPrimitiveType<String> theCode,
-            IPrimitiveType<String> theDisplay,
-            IBaseCoding theCoding,
-            IBaseDatatype theCodeableConcept,
-            RequestDetails theRequestDetails);
+	@Nonnull
+	IValidationSupport.CodeValidationResult validateCode(
+				IIdType theCodeSystemId,
+				IPrimitiveType<String> theCodeSystemUrl,
+				IPrimitiveType<String> theVersion,
+				IPrimitiveType<String> theCode,
+				IPrimitiveType<String> theDisplay,
+				IBaseCoding theCoding,
+				IBaseDatatype theCodeableConcept,
+				RequestDetails theRequestDetails);
 
-    class SubsumesResult {
+	class SubsumesResult {
 
-        private final ConceptSubsumptionOutcome myOutcome;
+		private final ConceptSubsumptionOutcome myOutcome;
 
-        public SubsumesResult(ConceptSubsumptionOutcome theOutcome) {
-            myOutcome = theOutcome;
-        }
+		public SubsumesResult(ConceptSubsumptionOutcome theOutcome) {
+				myOutcome = theOutcome;
+		}
 
-        public ConceptSubsumptionOutcome getOutcome() {
-            return myOutcome;
-        }
+		public ConceptSubsumptionOutcome getOutcome() {
+				return myOutcome;
+		}
 
-        @SuppressWarnings("unchecked")
-        public IBaseParameters toParameters(FhirContext theFhirContext) {
-            IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
+		@SuppressWarnings("unchecked")
+		public IBaseParameters toParameters(FhirContext theFhirContext) {
+				IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
 
-            IPrimitiveType<String> outcomeValue =
-                    (IPrimitiveType<String>)
-                            theFhirContext.getElementDefinition("code").newInstance();
-            outcomeValue.setValueAsString(getOutcome().toCode());
-            ParametersUtil.addParameterToParameters(
-                    theFhirContext, retVal, "outcome", outcomeValue);
+				IPrimitiveType<String> outcomeValue =
+						(IPrimitiveType<String>)
+									theFhirContext.getElementDefinition("code").newInstance();
+				outcomeValue.setValueAsString(getOutcome().toCode());
+				ParametersUtil.addParameterToParameters(
+						theFhirContext, retVal, "outcome", outcomeValue);
 
-            return retVal;
-        }
-    }
+				return retVal;
+		}
+	}
 }

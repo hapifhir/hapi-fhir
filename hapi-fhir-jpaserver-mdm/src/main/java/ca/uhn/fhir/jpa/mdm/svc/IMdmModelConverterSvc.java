@@ -27,19 +27,19 @@ import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 /** Contract for decoupling API dependency from the base / JPA modules. */
 public interface IMdmModelConverterSvc {
 
-    /**
-     * Creates JSON representation of the provided MDM link
-     *
-     * @param theLink Link to convert
-     * @return Returns the converted link
-     */
-    MdmLinkJson toJson(IMdmLink theLink);
+	/**
+	* Creates JSON representation of the provided MDM link
+	*
+	* @param theLink Link to convert
+	* @return Returns the converted link
+	*/
+	MdmLinkJson toJson(IMdmLink theLink);
 
-    /**
-     * Creates JSON representation of the provided MDM link with revision data
-     *
-     * @param theMdmLinkRevision Link with revision data to convert
-     * @return Returns the converted link
-     */
-    MdmLinkWithRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision);
+	/**
+	* Creates JSON representation of the provided MDM link with revision data
+	*
+	* @param theMdmLinkRevision Link with revision data to convert
+	* @return Returns the converted link
+	*/
+	MdmLinkWithRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision);
 }

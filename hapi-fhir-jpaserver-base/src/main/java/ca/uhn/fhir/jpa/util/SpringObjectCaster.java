@@ -26,21 +26,21 @@ import org.springframework.aop.support.AopUtils;
 /** Utility to get the Spring proxy object's target object */
 public class SpringObjectCaster {
 
-    /**
-     * Retrieve the Spring proxy object's target object
-     *
-     * @param proxy
-     * @param clazz
-     * @param <T>
-     * @return
-     * @throws Exception
-     */
-    public static <T> T getTargetObject(Object proxy, Class<T> clazz) throws Exception {
-        while ((AopUtils.isJdkDynamicProxy(proxy))) {
-            return clazz.cast(
-                    getTargetObject(((Advised) proxy).getTargetSource().getTarget(), clazz));
-        }
+	/**
+	* Retrieve the Spring proxy object's target object
+	*
+	* @param proxy
+	* @param clazz
+	* @param <T>
+	* @return
+	* @throws Exception
+	*/
+	public static <T> T getTargetObject(Object proxy, Class<T> clazz) throws Exception {
+		while ((AopUtils.isJdkDynamicProxy(proxy))) {
+				return clazz.cast(
+						getTargetObject(((Advised) proxy).getTargetSource().getTarget(), clazz));
+		}
 
-        return clazz.cast(proxy);
-    }
+		return clazz.cast(proxy);
+	}
 }

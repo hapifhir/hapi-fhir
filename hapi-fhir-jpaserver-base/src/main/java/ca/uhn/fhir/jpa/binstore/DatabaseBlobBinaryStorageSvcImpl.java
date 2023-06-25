@@ -19,6 +19,24 @@
  */
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
+import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.hash.HashingInputStream;
+import com.google.common.io.ByteStreams;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
+import org.hibernate.LobHelper;
+import org.hibernate.Session;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,163 +49,143 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CountingInputStream;
-import org.hibernate.LobHelper;
-import org.hibernate.Session;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.hash.HashingInputStream;
-import com.google.common.io.ByteStreams;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.binary.api.StoredDetails;
-import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
-import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-
 @Transactional
 public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
-    @PersistenceContext(type = PersistenceContextType.TRANSACTION)
-    private EntityManager myEntityManager;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
 
-    @Autowired private IBinaryStorageEntityDao myBinaryStorageEntityDao;
+	@Autowired private IBinaryStorageEntityDao myBinaryStorageEntityDao;
 
-    @Nonnull
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public StoredDetails storeBlob(
-            IIdType theResourceId,
-            String theBlobIdOrNull,
-            String theContentType,
-            InputStream theInputStream,
-            RequestDetails theRequestDetails)
-            throws IOException {
+	@Nonnull
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public StoredDetails storeBlob(
+				IIdType theResourceId,
+				String theBlobIdOrNull,
+				String theContentType,
+				InputStream theInputStream,
+				RequestDetails theRequestDetails)
+				throws IOException {
 
-        /*
-         * Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
-         * write in a new transaction.. I don't actually get why that was the original design, but it causes
-         * connection pool deadlocks under load!
-         */
+		/*
+			* Note on transactionality: This method used to have a propagation value of SUPPORTS and then do the actual
+			* write in a new transaction.. I don't actually get why that was the original design, but it causes
+			* connection pool deadlocks under load!
+			*/
 
-        Date publishedDate = new Date();
+		Date publishedDate = new Date();
 
-        HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
-        CountingInputStream countingInputStream = createCountingInputStream(hashingInputStream);
+		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
+		CountingInputStream countingInputStream = createCountingInputStream(hashingInputStream);
 
-        BinaryStorageEntity entity = new BinaryStorageEntity();
-        entity.setResourceId(theResourceId.toUnqualifiedVersionless().getValue());
-        entity.setBlobContentType(theContentType);
-        entity.setPublished(publishedDate);
+		BinaryStorageEntity entity = new BinaryStorageEntity();
+		entity.setResourceId(theResourceId.toUnqualifiedVersionless().getValue());
+		entity.setBlobContentType(theContentType);
+		entity.setPublished(publishedDate);
 
-        Session session = (Session) myEntityManager.getDelegate();
-        LobHelper lobHelper = session.getLobHelper();
-        byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-        String id =
-                super.provideIdForNewBlob(
-                        theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
-        entity.setBlobId(id);
-        Blob dataBlob = lobHelper.createBlob(loadedStream);
-        entity.setBlob(dataBlob);
+		Session session = (Session) myEntityManager.getDelegate();
+		LobHelper lobHelper = session.getLobHelper();
+		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
+		String id =
+					super.provideIdForNewBlob(
+								theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
+		entity.setBlobId(id);
+		Blob dataBlob = lobHelper.createBlob(loadedStream);
+		entity.setBlob(dataBlob);
 
-        // Update the entity with the final byte count and hash
-        long bytes = countingInputStream.getByteCount();
-        String hash = hashingInputStream.hash().toString();
-        entity.setSize(bytes);
-        entity.setHash(hash);
+		// Update the entity with the final byte count and hash
+		long bytes = countingInputStream.getByteCount();
+		String hash = hashingInputStream.hash().toString();
+		entity.setSize(bytes);
+		entity.setHash(hash);
 
-        // Save the entity
-        myEntityManager.persist(entity);
+		// Save the entity
+		myEntityManager.persist(entity);
 
-        return new StoredDetails()
-                .setBlobId(id)
-                .setBytes(bytes)
-                .setPublished(publishedDate)
-                .setHash(hash)
-                .setContentType(theContentType);
-    }
+		return new StoredDetails()
+					.setBlobId(id)
+					.setBytes(bytes)
+					.setPublished(publishedDate)
+					.setHash(hash)
+					.setContentType(theContentType);
+	}
 
-    @Override
-    public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	@Override
+	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
 
-        Optional<BinaryStorageEntity> entityOpt =
-                myBinaryStorageEntityDao.findByIdAndResourceId(
-                        theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-        if (entityOpt.isEmpty()) {
-            return null;
-        }
+		Optional<BinaryStorageEntity> entityOpt =
+					myBinaryStorageEntityDao.findByIdAndResourceId(
+								theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		if (entityOpt.isEmpty()) {
+				return null;
+		}
 
-        BinaryStorageEntity entity = entityOpt.get();
-        return new StoredDetails()
-                .setBlobId(theBlobId)
-                .setContentType(entity.getBlobContentType())
-                .setHash(entity.getHash())
-                .setPublished(entity.getPublished())
-                .setBytes(entity.getSize());
-    }
+		BinaryStorageEntity entity = entityOpt.get();
+		return new StoredDetails()
+					.setBlobId(theBlobId)
+					.setContentType(entity.getBlobContentType())
+					.setHash(entity.getHash())
+					.setPublished(entity.getPublished())
+					.setBytes(entity.getSize());
+	}
 
-    @Override
-    public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
-            throws IOException {
-        Optional<BinaryStorageEntity> entityOpt =
-                myBinaryStorageEntityDao.findByIdAndResourceId(
-                        theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-        if (entityOpt.isEmpty()) {
-            return false;
-        }
+	@Override
+	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+				throws IOException {
+		Optional<BinaryStorageEntity> entityOpt =
+					myBinaryStorageEntityDao.findByIdAndResourceId(
+								theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		if (entityOpt.isEmpty()) {
+				return false;
+		}
 
-        copyBlobToOutputStream(theOutputStream, entityOpt.get());
+		copyBlobToOutputStream(theOutputStream, entityOpt.get());
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public void expungeBlob(IIdType theResourceId, String theBlobId) {
-        Optional<BinaryStorageEntity> entityOpt =
-                myBinaryStorageEntityDao.findByIdAndResourceId(
-                        theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-        entityOpt.ifPresent(
-                theBinaryStorageEntity ->
-                        myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
-    }
+	@Override
+	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+		Optional<BinaryStorageEntity> entityOpt =
+					myBinaryStorageEntityDao.findByIdAndResourceId(
+								theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+		entityOpt.ifPresent(
+					theBinaryStorageEntity ->
+								myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
+	}
 
-    @Override
-    public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
-        BinaryStorageEntity entityOpt =
-                myBinaryStorageEntityDao
-                        .findByIdAndResourceId(
-                                theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
-                        .orElseThrow(
-                                () ->
-                                        new ResourceNotFoundException(
-                                                "Unknown blob ID: "
-                                                        + theBlobId
-                                                        + " for resource ID "
-                                                        + theResourceId));
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
+		BinaryStorageEntity entityOpt =
+					myBinaryStorageEntityDao
+								.findByIdAndResourceId(
+										theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
+								.orElseThrow(
+										() ->
+													new ResourceNotFoundException(
+																"Unknown blob ID: "
+																		+ theBlobId
+																		+ " for resource ID "
+																		+ theResourceId));
 
-        return copyBlobToByteArray(entityOpt);
-    }
+		return copyBlobToByteArray(entityOpt);
+	}
 
-    void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity)
-            throws IOException {
-        try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
-            IOUtils.copy(inputStream, theOutputStream);
-        } catch (SQLException e) {
-            throw new IOException(Msg.code(1341) + e);
-        }
-    }
+	void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity)
+				throws IOException {
+		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
+				IOUtils.copy(inputStream, theOutputStream);
+		} catch (SQLException e) {
+				throw new IOException(Msg.code(1341) + e);
+		}
+	}
 
-    byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
-        try {
-            return ByteStreams.toByteArray(theEntity.getBlob().getBinaryStream());
-        } catch (SQLException e) {
-            throw new IOException(Msg.code(1342) + e);
-        }
-    }
+	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
+		try {
+				return ByteStreams.toByteArray(theEntity.getBlob().getBinaryStream());
+		} catch (SQLException e) {
+				throw new IOException(Msg.code(1342) + e);
+		}
+	}
 }

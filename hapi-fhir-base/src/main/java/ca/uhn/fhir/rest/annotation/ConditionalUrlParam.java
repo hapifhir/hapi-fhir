@@ -37,13 +37,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface ConditionalUrlParam {
 
-    /**
-     * Does this param support operating over multiple objects without throwing an error? This
-     * should be set to <code>true</code> only for conditional delete operations if the server
-     * supports multiple deletes via a conditional URL.
-     *
-     * <p>Note that this flag is only a hint to the Conformance statement generator, it does not
-     * actually affect how the server itself works.
-     */
-    boolean supportsMultiple() default false;
+	/**
+	* Does this param support operating over multiple objects without throwing an error? This
+	* should be set to <code>true</code> only for conditional delete operations if the server
+	* supports multiple deletes via a conditional URL.
+	*
+	* <p>Note that this flag is only a hint to the Conformance statement generator, it does not
+	* actually affect how the server itself works.
+	*/
+	boolean supportsMultiple() default false;
 }

@@ -29,17 +29,17 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class FhirClientInappropriateForServerException extends BaseServerResponseException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public FhirClientInappropriateForServerException(Throwable theCause) {
-        super(0, theCause);
-    }
+	public FhirClientInappropriateForServerException(Throwable theCause) {
+		super(0, theCause);
+	}
 
-    public FhirClientInappropriateForServerException(String theMessage, Throwable theCause) {
-        super(0, theMessage, theCause);
-    }
+	public FhirClientInappropriateForServerException(String theMessage, Throwable theCause) {
+		super(0, theMessage, theCause);
+	}
 
-    public FhirClientInappropriateForServerException(String theMessage) {
-        super(0, theMessage);
-    }
+	public FhirClientInappropriateForServerException(String theMessage) {
+		super(0, theMessage);
+	}
 }

@@ -28,71 +28,71 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 public class ValidateUtil {
 
-    /** Throws {@link IllegalArgumentException} if theValue is <= theMinimum */
-    public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
-        if (theValue <= theMinimum) {
-            throw new IllegalArgumentException(Msg.code(1762) + theMessage);
-        }
-    }
+	/** Throws {@link IllegalArgumentException} if theValue is <= theMinimum */
+	public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
+		if (theValue <= theMinimum) {
+				throw new IllegalArgumentException(Msg.code(1762) + theMessage);
+		}
+	}
 
-    /** Throws {@link IllegalArgumentException} if theValue is < theMinimum */
-    public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
-        if (theValue < theMinimum) {
-            throw new IllegalArgumentException(Msg.code(1763) + theMessage);
-        }
-    }
+	/** Throws {@link IllegalArgumentException} if theValue is < theMinimum */
+	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
+		if (theValue < theMinimum) {
+				throw new IllegalArgumentException(Msg.code(1763) + theMessage);
+		}
+	}
 
-    public static void isNotBlankOrThrowIllegalArgument(String theString, String theMessage) {
-        if (isBlank(theString)) {
-            throw new IllegalArgumentException(Msg.code(1764) + theMessage);
-        }
-    }
+	public static void isNotBlankOrThrowIllegalArgument(String theString, String theMessage) {
+		if (isBlank(theString)) {
+				throw new IllegalArgumentException(Msg.code(1764) + theMessage);
+		}
+	}
 
-    public static void isNotBlankOrThrowInvalidRequest(String theString, String theMessage) {
-        if (isBlank(theString)) {
-            throw new InvalidRequestException(Msg.code(1765) + theMessage);
-        }
-    }
+	public static void isNotBlankOrThrowInvalidRequest(String theString, String theMessage) {
+		if (isBlank(theString)) {
+				throw new InvalidRequestException(Msg.code(1765) + theMessage);
+		}
+	}
 
-    public static void isNotBlankOrThrowUnprocessableEntity(String theString, String theMessage) {
-        if (isBlank(theString)) {
-            throw new UnprocessableEntityException(Msg.code(1766) + theMessage);
-        }
-    }
+	public static void isNotBlankOrThrowUnprocessableEntity(String theString, String theMessage) {
+		if (isBlank(theString)) {
+				throw new UnprocessableEntityException(Msg.code(1766) + theMessage);
+		}
+	}
 
-    public static void isNotNullOrThrowUnprocessableEntity(
-            Object theObject, String theMessage, Object... theValues) {
-        if (theObject == null) {
-            throw new UnprocessableEntityException(
-                    Msg.code(1767) + String.format(theMessage, theValues));
-        }
-    }
+	public static void isNotNullOrThrowUnprocessableEntity(
+				Object theObject, String theMessage, Object... theValues) {
+		if (theObject == null) {
+				throw new UnprocessableEntityException(
+						Msg.code(1767) + String.format(theMessage, theValues));
+		}
+	}
 
-    public static void isNotTooLongOrThrowIllegalArgument(
-            String theString, int theMaxLength, String theMessage) {
-        if (length(theString) > theMaxLength) {
-            throw new IllegalArgumentException(Msg.code(1768) + theMessage);
-        }
-    }
+	public static void isNotTooLongOrThrowIllegalArgument(
+				String theString, int theMaxLength, String theMessage) {
+		if (length(theString) > theMaxLength) {
+				throw new IllegalArgumentException(Msg.code(1768) + theMessage);
+		}
+	}
 
-    public static void isTrueOrThrowInvalidRequest(
-            boolean theSuccess, String theMessage, Object... theValues) {
-        if (!theSuccess) {
-            throw new InvalidRequestException(
-                    Msg.code(1769) + String.format(theMessage, theValues));
-        }
-    }
+	public static void isTrueOrThrowInvalidRequest(
+				boolean theSuccess, String theMessage, Object... theValues) {
+		if (!theSuccess) {
+				throw new InvalidRequestException(
+						Msg.code(1769) + String.format(theMessage, theValues));
+		}
+	}
 
-    public static void exactlyOneNotNullOrThrowInvalidRequestException(
-            Object[] theObjects, String theMessage) {
-        int count = 0;
-        for (Object next : theObjects) {
-            if (next != null) {
-                count++;
-            }
-        }
-        if (count != 1) {
-            throw new InvalidRequestException(Msg.code(1770) + theMessage);
-        }
-    }
+	public static void exactlyOneNotNullOrThrowInvalidRequestException(
+				Object[] theObjects, String theMessage) {
+		int count = 0;
+		for (Object next : theObjects) {
+				if (next != null) {
+					count++;
+				}
+		}
+		if (count != 1) {
+				throw new InvalidRequestException(Msg.code(1770) + theMessage);
+		}
+	}
 }

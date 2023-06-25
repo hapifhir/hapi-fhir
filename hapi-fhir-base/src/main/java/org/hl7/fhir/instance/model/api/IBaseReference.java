@@ -21,19 +21,19 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IBaseReference extends ICompositeType {
 
-    IBaseResource getResource();
+	IBaseResource getResource();
 
-    IBaseReference setResource(IBaseResource theResource);
+	IBaseReference setResource(IBaseResource theResource);
 
-    IIdType getReferenceElement();
+	IIdType getReferenceElement();
 
-    IBaseReference setReference(String theReference);
+	IBaseReference setReference(String theReference);
 
-    IBase setDisplay(String theValue);
+	IBase setDisplay(String theValue);
 
-    IPrimitiveType<String> getDisplayElement();
+	IPrimitiveType<String> getDisplayElement();
 
-    default boolean hasIdentifier() {
-        return false;
-    }
+	default boolean hasIdentifier() {
+		return false;
+	}
 }

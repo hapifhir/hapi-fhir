@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-
 public interface ITermValueSetConceptDesignationDao
-        extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermValueSetConceptDesignation, Long>, IHapiFhirJpaRepository {
 
-    @Query(
-            "SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid ="
-                    + " :pid")
-    Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
+	@Query(
+				"SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid ="
+						+ " :pid")
+	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-    @Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
-    @Modifying
-    void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
+	@Modifying
+	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 }

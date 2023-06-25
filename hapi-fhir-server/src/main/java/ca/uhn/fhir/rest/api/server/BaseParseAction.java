@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
+import ca.uhn.fhir.parser.IParser;
+
 import java.io.IOException;
 import java.io.Writer;
-
-import ca.uhn.fhir.parser.IParser;
 
 /**
  * @author Peter Van Houte
@@ -30,11 +30,11 @@ import ca.uhn.fhir.parser.IParser;
  */
 public abstract class BaseParseAction<T> {
 
-    protected T theOutcome;
+	protected T theOutcome;
 
-    protected BaseParseAction(T outcome) {
-        this.theOutcome = outcome;
-    }
+	protected BaseParseAction(T outcome) {
+		this.theOutcome = outcome;
+	}
 
-    public abstract void execute(IParser parser, Writer writer) throws IOException;
+	public abstract void execute(IParser parser, Writer writer) throws IOException;
 }

@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.mdm.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Creates a new {@link IMdmLink} either with the current {@link IMdmSettings#getRuleVersion()} or
@@ -34,37 +33,37 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
  * Database code makes use of SpringData {@link org.springframework.data.domain.Example} queries.
  */
 public class MdmLinkFactory<M extends IMdmLink> {
-    private final IMdmSettings myMdmSettings;
-    private final IMdmLinkImplFactory<M> myMdmLinkImplFactory;
+	private final IMdmSettings myMdmSettings;
+	private final IMdmLinkImplFactory<M> myMdmLinkImplFactory;
 
-    @Autowired
-    public MdmLinkFactory(
-            IMdmSettings theMdmSettings, IMdmLinkImplFactory<M> theMdmLinkImplFactory) {
-        myMdmSettings = theMdmSettings;
-        myMdmLinkImplFactory = theMdmLinkImplFactory;
-    }
+	@Autowired
+	public MdmLinkFactory(
+				IMdmSettings theMdmSettings, IMdmLinkImplFactory<M> theMdmLinkImplFactory) {
+		myMdmSettings = theMdmSettings;
+		myMdmLinkImplFactory = theMdmLinkImplFactory;
+	}
 
-    /**
-     * Create a new {@link IMdmLink}, populating it with the version of the ruleset used to create
-     * it.
-     *
-     * <p>Use this method **only** when writing a new MDM record.
-     *
-     * @return the new {@link IMdmLink}
-     */
-    public M newMdmLink() {
-        M retval = myMdmLinkImplFactory.newMdmLinkImpl();
-        retval.setVersion(myMdmSettings.getRuleVersion());
-        return retval;
-    }
+	/**
+	* Create a new {@link IMdmLink}, populating it with the version of the ruleset used to create
+	* it.
+	*
+	* <p>Use this method **only** when writing a new MDM record.
+	*
+	* @return the new {@link IMdmLink}
+	*/
+	public M newMdmLink() {
+		M retval = myMdmLinkImplFactory.newMdmLinkImpl();
+		retval.setVersion(myMdmSettings.getRuleVersion());
+		return retval;
+	}
 
-    /**
-     * Creating a new {@link IMdmLink} with the version deliberately omitted. It will return as
-     * null.
-     *
-     * <p>This is the recommended use when querying for any MDM records
-     */
-    public M newMdmLinkVersionless() {
-        return myMdmLinkImplFactory.newMdmLinkImpl();
-    }
+	/**
+	* Creating a new {@link IMdmLink} with the version deliberately omitted. It will return as
+	* null.
+	*
+	* <p>This is the recommended use when querying for any MDM records
+	*/
+	public M newMdmLinkVersionless() {
+		return myMdmLinkImplFactory.newMdmLinkImpl();
+	}
 }

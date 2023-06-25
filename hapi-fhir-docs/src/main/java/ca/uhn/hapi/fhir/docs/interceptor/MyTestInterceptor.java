@@ -29,14 +29,14 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 @Interceptor
 public class MyTestInterceptor {
 
-    @Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-    public boolean beforeRestHookDelivery(
-            ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+	@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
+	public boolean beforeRestHookDelivery(
+				ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 
-        String header = "Authorization: Bearer 1234567";
+		String header = "Authorization: Bearer 1234567";
 
-        theSubscription.addHeader(header);
+		theSubscription.addHeader(header);
 
-        return true;
-    }
+		return true;
+	}
 }

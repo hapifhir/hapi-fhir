@@ -19,19 +19,6 @@
  */
 package ca.uhn.fhir.jpa.config.r4;
 
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
@@ -54,74 +41,86 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
 @Import({FhirContextR4Config.class, GeneratedDaoAndResourceProviderConfigR4.class, JpaConfig.class})
 public class JpaR4Config {
 
-    @Bean
-    public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
-        return new TermVersionAdapterSvcR4();
-    }
+	@Bean
+	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
+		return new TermVersionAdapterSvcR4();
+	}
 
-    @Bean
-    public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
-        return new TransactionProcessorVersionAdapterR4();
-    }
+	@Bean
+	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterR4();
+	}
 
-    @Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
-    @Lazy
-    public GraphQLProvider graphQLProvider(
-            FhirContext theFhirContext,
-            IGraphQLStorageServices theGraphqlStorageServices,
-            IValidationSupport theValidationSupport,
-            ISearchParamRegistry theSearchParamRegistry,
-            IDaoRegistry theDaoRegistry) {
-        return new GraphQLProviderWithIntrospection(
-                theFhirContext,
-                theValidationSupport,
-                theGraphqlStorageServices,
-                theSearchParamRegistry,
-                theDaoRegistry);
-    }
+	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
+	@Lazy
+	public GraphQLProvider graphQLProvider(
+				FhirContext theFhirContext,
+				IGraphQLStorageServices theGraphqlStorageServices,
+				IValidationSupport theValidationSupport,
+				ISearchParamRegistry theSearchParamRegistry,
+				IDaoRegistry theDaoRegistry) {
+		return new GraphQLProviderWithIntrospection(
+					theFhirContext,
+					theValidationSupport,
+					theGraphqlStorageServices,
+					theSearchParamRegistry,
+					theDaoRegistry);
+	}
 
-    @Bean(name = "mySystemDaoR4")
-    public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
-        ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal =
-                new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
-        return retVal;
-    }
+	@Bean(name = "mySystemDaoR4")
+	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
+		ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal =
+					new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
+		return retVal;
+	}
 
-    @Bean(name = "mySystemProviderR4")
-    public JpaSystemProvider<Bundle, Meta> systemProviderR4(FhirContext theFhirContext) {
-        JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
-        retVal.setContext(theFhirContext);
-        retVal.setDao(systemDaoR4());
-        return retVal;
-    }
+	@Bean(name = "mySystemProviderR4")
+	public JpaSystemProvider<Bundle, Meta> systemProviderR4(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
+		retVal.setContext(theFhirContext);
+		retVal.setDao(systemDaoR4());
+		return retVal;
+	}
 
-    @Bean
-    public ITermLoaderSvc termLoaderService(
-            ITermDeferredStorageSvc theDeferredStorageSvc,
-            ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-        return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
-    }
+	@Bean
+	public ITermLoaderSvc termLoaderService(
+				ITermDeferredStorageSvc theDeferredStorageSvc,
+				ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
+	}
 
-    @Bean
-    public MemberMatcherR4Helper memberMatcherR4Helper(
-            @Autowired FhirContext theContext,
-            @Autowired IFhirResourceDao<Coverage> theCoverageDao,
-            @Autowired IFhirResourceDao<Patient> thePatientDao,
-            @Autowired IFhirResourceDao<Consent> theConsentDao,
-            @Autowired(required = false) IMemberMatchConsentHook theExtensionProvider) {
-        return new MemberMatcherR4Helper(
-                theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider);
-    }
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(
+				@Autowired FhirContext theContext,
+				@Autowired IFhirResourceDao<Coverage> theCoverageDao,
+				@Autowired IFhirResourceDao<Patient> thePatientDao,
+				@Autowired IFhirResourceDao<Consent> theConsentDao,
+				@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider) {
+		return new MemberMatcherR4Helper(
+					theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider);
+	}
 
-    @Bean
-    public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
-            FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
-        return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
-    }
+	@Bean
+	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
+				FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
+		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
+	}
 }

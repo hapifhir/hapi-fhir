@@ -19,15 +19,15 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Represents a FHIR date datatype. Valid precisions values for this type are:
@@ -51,101 +51,101 @@ import ca.uhn.fhir.parser.DataFormatException;
 @DatatypeDef(name = "date")
 public class DateDt extends BaseDateTimeDt {
 
-    /** The default precision for this type */
-    public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.DAY;
+	/** The default precision for this type */
+	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.DAY;
 
-    /** Constructor */
-    public DateDt() {
-        super();
-    }
+	/** Constructor */
+	public DateDt() {
+		super();
+	}
 
-    /**
-     * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
-     */
-    public DateDt(Calendar theCalendar) {
-        super(theCalendar.getTime(), DEFAULT_PRECISION);
-        setTimeZone(theCalendar.getTimeZone());
-    }
+	/**
+	* Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	*/
+	public DateDt(Calendar theCalendar) {
+		super(theCalendar.getTime(), DEFAULT_PRECISION);
+		setTimeZone(theCalendar.getTimeZone());
+	}
 
-    /**
-     * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
-     * <b>Please see the note on timezones</b> on the {@link DateDt class documentation} for
-     * considerations when using this constructor!
-     */
-    @SimpleSetter(suffix = "WithDayPrecision")
-    public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
-        super(theDate, DEFAULT_PRECISION);
-    }
+	/**
+	* Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	* <b>Please see the note on timezones</b> on the {@link DateDt class documentation} for
+	* considerations when using this constructor!
+	*/
+	@SimpleSetter(suffix = "WithDayPrecision")
+	public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
+		super(theDate, DEFAULT_PRECISION);
+	}
 
-    /**
-     * Constructor which accepts a date value and a precision value. Valid precisions values for
-     * this type are:
-     *
-     * <ul>
-     *   <li>{@link TemporalPrecisionEnum#YEAR}
-     *   <li>{@link TemporalPrecisionEnum#MONTH}
-     *   <li>{@link TemporalPrecisionEnum#DAY}
-     * </ul>
-     *
-     * <b>Please see the note on timezones</b> on the {@link DateDt class documentation} for
-     * considerations when using this constructor!
-     *
-     * @throws DataFormatException If the specified precision is not allowed for this type
-     */
-    @SimpleSetter
-    public DateDt(
-            @SimpleSetter.Parameter(name = "theDate") Date theDate,
-            @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
-        super(theDate, thePrecision);
-    }
+	/**
+	* Constructor which accepts a date value and a precision value. Valid precisions values for
+	* this type are:
+	*
+	* <ul>
+	*   <li>{@link TemporalPrecisionEnum#YEAR}
+	*   <li>{@link TemporalPrecisionEnum#MONTH}
+	*   <li>{@link TemporalPrecisionEnum#DAY}
+	* </ul>
+	*
+	* <b>Please see the note on timezones</b> on the {@link DateDt class documentation} for
+	* considerations when using this constructor!
+	*
+	* @throws DataFormatException If the specified precision is not allowed for this type
+	*/
+	@SimpleSetter
+	public DateDt(
+				@SimpleSetter.Parameter(name = "theDate") Date theDate,
+				@SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
+		super(theDate, thePrecision);
+	}
 
-    /**
-     * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
-     *
-     * @param theYear The year, e.g. 2015
-     * @param theMonth The month, e.g. 0 for January
-     * @param theDay The day (1 indexed) e.g. 1 for the first day of the month
-     */
-    public DateDt(int theYear, int theMonth, int theDay) {
-        this(toCalendarZulu(theYear, theMonth, theDay));
-    }
+	/**
+	* Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
+	*
+	* @param theYear The year, e.g. 2015
+	* @param theMonth The month, e.g. 0 for January
+	* @param theDay The day (1 indexed) e.g. 1 for the first day of the month
+	*/
+	public DateDt(int theYear, int theMonth, int theDay) {
+		this(toCalendarZulu(theYear, theMonth, theDay));
+	}
 
-    /**
-     * Constructor which accepts a date as a string in FHIR format
-     *
-     * @throws DataFormatException If the precision in the date string is not allowed for this type
-     */
-    public DateDt(String theDate) {
-        super(theDate);
-    }
+	/**
+	* Constructor which accepts a date as a string in FHIR format
+	*
+	* @throws DataFormatException If the precision in the date string is not allowed for this type
+	*/
+	public DateDt(String theDate) {
+		super(theDate);
+	}
 
-    /**
-     * Returns the default precision for this datatype
-     *
-     * @see #DEFAULT_PRECISION
-     */
-    @Override
-    protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
-        return DEFAULT_PRECISION;
-    }
+	/**
+	* Returns the default precision for this datatype
+	*
+	* @see #DEFAULT_PRECISION
+	*/
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
+	}
 
-    @Override
-    protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
-        switch (thePrecision) {
-            case YEAR:
-            case MONTH:
-            case DAY:
-                return true;
-            default:
-                return false;
-        }
-    }
+	@Override
+	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+		switch (thePrecision) {
+				case YEAR:
+				case MONTH:
+				case DAY:
+					return true;
+				default:
+					return false;
+		}
+	}
 
-    private static GregorianCalendar toCalendarZulu(int theYear, int theMonth, int theDay) {
-        GregorianCalendar retVal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-        retVal.set(Calendar.YEAR, theYear);
-        retVal.set(Calendar.MONTH, theMonth);
-        retVal.set(Calendar.DATE, theDay);
-        return retVal;
-    }
+	private static GregorianCalendar toCalendarZulu(int theYear, int theMonth, int theDay) {
+		GregorianCalendar retVal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+		retVal.set(Calendar.YEAR, theYear);
+		retVal.set(Calendar.MONTH, theMonth);
+		retVal.set(Calendar.DATE, theDay);
+		return retVal;
+	}
 }

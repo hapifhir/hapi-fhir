@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Optional;
-
+import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
+import java.util.Optional;
 
 public interface INpmPackageDao
-        extends JpaRepository<NpmPackageEntity, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<NpmPackageEntity, Long>, IHapiFhirJpaRepository {
 
-    @Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
-    Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);
+	@Query("SELECT p FROM NpmPackageEntity p WHERE p.myPackageId = :id")
+	Optional<NpmPackageEntity> findByPackageId(@Param("id") String thePackageId);
 }

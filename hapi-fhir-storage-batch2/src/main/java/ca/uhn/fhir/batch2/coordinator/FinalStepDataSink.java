@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -30,28 +26,31 @@ import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
 
 class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson>
-        extends BaseDataSink<PT, IT, VoidModel> {
-    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+		extends BaseDataSink<PT, IT, VoidModel> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-    /** Constructor */
-    FinalStepDataSink(
-            @Nonnull String theJobDefinitionId,
-            @Nonnull String theInstanceId,
-            @Nonnull JobWorkCursor<PT, IT, VoidModel> theJobWorkCursor) {
-        super(theInstanceId, theJobWorkCursor);
-    }
+	/** Constructor */
+	FinalStepDataSink(
+				@Nonnull String theJobDefinitionId,
+				@Nonnull String theInstanceId,
+				@Nonnull JobWorkCursor<PT, IT, VoidModel> theJobWorkCursor) {
+		super(theInstanceId, theJobWorkCursor);
+	}
 
-    @Override
-    public void accept(WorkChunkData<VoidModel> theData) {
-        String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
-        ourLog.error(msg);
-        throw new JobExecutionFailedException(Msg.code(2045) + msg);
-    }
+	@Override
+	public void accept(WorkChunkData<VoidModel> theData) {
+		String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
+		ourLog.error(msg);
+		throw new JobExecutionFailedException(Msg.code(2045) + msg);
+	}
 
-    @Override
-    public int getWorkChunkCount() {
-        return 0;
-    }
+	@Override
+	public int getWorkChunkCount() {
+		return 0;
+	}
 }

@@ -35,19 +35,19 @@ import java.util.function.Consumer;
  */
 public class TaskChunker<T> {
 
-    public void chunk(
-            Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
-        List<T> input;
-        if (theInput instanceof List) {
-            input = (List<T>) theInput;
-        } else {
-            input = new ArrayList<>(theInput);
-        }
-        for (int i = 0; i < input.size(); i += theChunkSize) {
-            int to = i + theChunkSize;
-            to = Math.min(to, input.size());
-            List<T> batch = input.subList(i, to);
-            theBatchConsumer.accept(batch);
-        }
-    }
+	public void chunk(
+				Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer) {
+		List<T> input;
+		if (theInput instanceof List) {
+				input = (List<T>) theInput;
+		} else {
+				input = new ArrayList<>(theInput);
+		}
+		for (int i = 0; i < input.size(); i += theChunkSize) {
+				int to = i + theChunkSize;
+				to = Math.min(to, input.size());
+				List<T> batch = input.subList(i, to);
+				theBatchConsumer.accept(batch);
+		}
+	}
 }

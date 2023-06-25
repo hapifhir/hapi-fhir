@@ -19,54 +19,54 @@
  */
 package ca.uhn.fhir.jpa.util;
 
-import java.io.Closeable;
-import java.util.Iterator;
-
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollableResults;
 
+import java.io.Closeable;
+import java.util.Iterator;
+
 public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
-        implements Iterator<T>, Closeable {
-    private boolean hasNext;
-    private T myNext;
-    private ScrollableResults myScroll;
+		implements Iterator<T>, Closeable {
+	private boolean hasNext;
+	private T myNext;
+	private ScrollableResults myScroll;
 
-    public ScrollableResultsIterator(ScrollableResults theScroll) {
-        myScroll = theScroll;
-    }
+	public ScrollableResultsIterator(ScrollableResults theScroll) {
+		myScroll = theScroll;
+	}
 
-    @SuppressWarnings("unchecked")
-    private void ensureHaveNext() {
-        if (myNext == null) {
-            if (myScroll.next()) {
-                hasNext = true;
-                myNext = (T) myScroll.get(0);
-            } else {
-                hasNext = false;
-            }
-        }
-    }
+	@SuppressWarnings("unchecked")
+	private void ensureHaveNext() {
+		if (myNext == null) {
+				if (myScroll.next()) {
+					hasNext = true;
+					myNext = (T) myScroll.get(0);
+				} else {
+					hasNext = false;
+				}
+		}
+	}
 
-    @Override
-    public boolean hasNext() {
-        ensureHaveNext();
-        return hasNext;
-    }
+	@Override
+	public boolean hasNext() {
+		ensureHaveNext();
+		return hasNext;
+	}
 
-    @Override
-    public T next() {
-        ensureHaveNext();
-        Validate.isTrue(hasNext);
-        T next = myNext;
-        myNext = null;
-        return next;
-    }
+	@Override
+	public T next() {
+		ensureHaveNext();
+		Validate.isTrue(hasNext);
+		T next = myNext;
+		myNext = null;
+		return next;
+	}
 
-    @Override
-    public void close() {
-        if (myScroll != null) {
-            myScroll.close();
-            myScroll = null;
-        }
-    }
+	@Override
+	public void close() {
+		if (myScroll != null) {
+				myScroll.close();
+				myScroll = null;
+		}
+	}
 }

@@ -28,9 +28,9 @@ import javax.persistence.PersistenceContext;
  */
 public class PersistenceContextProvider {
 
-    @PersistenceContext private EntityManager myEntityManager;
+	@PersistenceContext private EntityManager myEntityManager;
 
-    public EntityManager getEntityManager() {
-        return myEntityManager;
-    }
+	public EntityManager getEntityManager() {
+		return myEntityManager;
+	}
 }

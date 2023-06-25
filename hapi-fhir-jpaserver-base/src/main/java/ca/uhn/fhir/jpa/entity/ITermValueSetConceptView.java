@@ -20,29 +20,29 @@
 package ca.uhn.fhir.jpa.entity;
 
 public interface ITermValueSetConceptView {
-    String getConceptSystemUrl();
+	String getConceptSystemUrl();
 
-    String getConceptCode();
+	String getConceptCode();
 
-    String getConceptDisplay();
+	String getConceptDisplay();
 
-    String getConceptSystemVersion();
+	String getConceptSystemVersion();
 
-    Long getSourceConceptPid();
+	Long getSourceConceptPid();
 
-    String getSourceConceptDirectParentPids();
+	String getSourceConceptDirectParentPids();
 
-    Long getConceptPid();
+	Long getConceptPid();
 
-    Long getDesignationPid();
+	Long getDesignationPid();
 
-    String getDesignationUseSystem();
+	String getDesignationUseSystem();
 
-    String getDesignationUseCode();
+	String getDesignationUseCode();
 
-    String getDesignationUseDisplay();
+	String getDesignationUseDisplay();
 
-    String getDesignationVal();
+	String getDesignationVal();
 
-    String getDesignationLang();
+	String getDesignationLang();
 }

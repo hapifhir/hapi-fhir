@@ -19,59 +19,58 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler
-        implements IZipContentsHandlerCsv {
+		implements IZipContentsHandlerCsv {
 
-    private String myValueSetId;
-    private String myValueSetUri;
-    private String myValueSetName;
+	private String myValueSetId;
+	private String myValueSetUri;
+	private String myValueSetName;
 
-    public BaseLoincTop2000LabResultsHandler(
-            Map<String, TermConcept> theCode2concept,
-            List<ValueSet> theValueSets,
-            String theValueSetId,
-            String theValueSetUri,
-            String theValueSetName,
-            List<ConceptMap> theConceptMaps,
-            Properties theUploadProperties,
-            String theCopyrightStatement) {
-        super(
-                theCode2concept,
-                theValueSets,
-                theConceptMaps,
-                theUploadProperties,
-                theCopyrightStatement);
-        String versionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
-        if (versionId != null) {
-            myValueSetId = theValueSetId + "-" + versionId;
-        } else {
-            myValueSetId = theValueSetId;
-        }
-        myValueSetUri = theValueSetUri;
-        myValueSetName = theValueSetName;
-    }
+	public BaseLoincTop2000LabResultsHandler(
+				Map<String, TermConcept> theCode2concept,
+				List<ValueSet> theValueSets,
+				String theValueSetId,
+				String theValueSetUri,
+				String theValueSetName,
+				List<ConceptMap> theConceptMaps,
+				Properties theUploadProperties,
+				String theCopyrightStatement) {
+		super(
+					theCode2concept,
+					theValueSets,
+					theConceptMaps,
+					theUploadProperties,
+					theCopyrightStatement);
+		String versionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		if (versionId != null) {
+				myValueSetId = theValueSetId + "-" + versionId;
+		} else {
+				myValueSetId = theValueSetId;
+		}
+		myValueSetUri = theValueSetUri;
+		myValueSetName = theValueSetName;
+	}
 
-    @Override
-    public void accept(CSVRecord theRecord) {
-        String loincNumber = trim(theRecord.get("LOINC #"));
-        String displayName = trim(theRecord.get("Long Common Name"));
+	@Override
+	public void accept(CSVRecord theRecord) {
+		String loincNumber = trim(theRecord.get("LOINC #"));
+		String displayName = trim(theRecord.get("Long Common Name"));
 
-        ValueSet valueSet = getValueSet(myValueSetId, myValueSetUri, myValueSetName, null);
-        addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
-    }
+		ValueSet valueSet = getValueSet(myValueSetId, myValueSetUri, myValueSetName, null);
+		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, displayName);
+	}
 }

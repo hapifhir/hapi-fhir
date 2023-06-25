@@ -24,9 +24,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, MethodOutcome> {
 
-    /**
-     * Delete cascade mode - Note that this is a HAPI FHIR specific feature and is not supported on
-     * all servers.
-     */
-    IDeleteTyped cascade(DeleteCascadeModeEnum theDelete);
+	/**
+	* Delete cascade mode - Note that this is a HAPI FHIR specific feature and is not supported on
+	* all servers.
+	*/
+	IDeleteTyped cascade(DeleteCascadeModeEnum theDelete);
 }

@@ -19,10 +19,6 @@
  */
 package ca.uhn.hapi.fhir.docs;
 
-import org.hl7.fhir.r4.model.Patient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -30,40 +26,43 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Interceptors {
 
-    // START SNIPPET: sampleClass
-    @Interceptor
-    public class SimpleServerLoggingInterceptor {
+	// START SNIPPET: sampleClass
+	@Interceptor
+	public class SimpleServerLoggingInterceptor {
 
-        private final Logger ourLog = LoggerFactory.getLogger(SimpleServerLoggingInterceptor.class);
+		private final Logger ourLog = LoggerFactory.getLogger(SimpleServerLoggingInterceptor.class);
 
-        @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-        public void logRequests(RequestDetails theRequest) {
-            ourLog.info(
-                    "Request of type {} with request ID: {}",
-                    theRequest.getOperation(),
-                    theRequest.getRequestId());
-        }
-    }
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+		public void logRequests(RequestDetails theRequest) {
+				ourLog.info(
+						"Request of type {} with request ID: {}",
+						theRequest.getOperation(),
+						theRequest.getRequestId());
+		}
+	}
 
-    // END SNIPPET: sampleClass
+	// END SNIPPET: sampleClass
 
-    public void registerClient() {
+	public void registerClient() {
 
-        // START SNIPPET: registerClient
-        FhirContext ctx = FhirContext.forR4();
+		// START SNIPPET: registerClient
+		FhirContext ctx = FhirContext.forR4();
 
-        // Create a new client instance
-        IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
+		// Create a new client instance
+		IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
 
-        // Register an interceptor against the client
-        client.registerInterceptor(new LoggingInterceptor());
+		// Register an interceptor against the client
+		client.registerInterceptor(new LoggingInterceptor());
 
-        // Perform client actions...
-        Patient pt = client.read().resource(Patient.class).withId("example").execute();
-        // END SNIPPET: registerClient
+		// Perform client actions...
+		Patient pt = client.read().resource(Patient.class).withId("example").execute();
+		// END SNIPPET: registerClient
 
-    }
+	}
 }

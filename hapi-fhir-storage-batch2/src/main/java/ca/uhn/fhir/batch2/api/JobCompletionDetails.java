@@ -19,39 +19,38 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang3.Validate;
-
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
 
 public class JobCompletionDetails<PT extends IModelJson> {
 
-    private final PT myParameters;
-    private final IJobInstance myInstance;
+	private final PT myParameters;
+	private final IJobInstance myInstance;
 
-    public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
-        Validate.notNull(theParameters);
-        myParameters = theParameters;
-        // Make a copy of the instance.  Even though the interface is read-only, we don't want to
-        // risk users of this API
-        // casting the instance and changing values inside it.
-        myInstance = new JobInstance(theInstance);
-    }
+	public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
+		Validate.notNull(theParameters);
+		myParameters = theParameters;
+		// Make a copy of the instance.  Even though the interface is read-only, we don't want to
+		// risk users of this API
+		// casting the instance and changing values inside it.
+		myInstance = new JobInstance(theInstance);
+	}
 
-    /**
-     * Returns the parameters associated with this job instance. Note that parameters are set when
-     * the job instance is created and can not be modified after that.
-     */
-    @Nonnull
-    public PT getParameters() {
-        return myParameters;
-    }
+	/**
+	* Returns the parameters associated with this job instance. Note that parameters are set when
+	* the job instance is created and can not be modified after that.
+	*/
+	@Nonnull
+	public PT getParameters() {
+		return myParameters;
+	}
 
-    /** Returns the job instance ID being executed */
-    @Nonnull
-    public IJobInstance getInstance() {
-        return myInstance;
-    }
+	/** Returns the job instance ID being executed */
+	@Nonnull
+	public IJobInstance getInstance() {
+		return myInstance;
+	}
 }

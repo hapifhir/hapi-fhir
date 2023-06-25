@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import java.util.Optional;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -37,129 +31,134 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class WorkChunkProcessor {
-    /**
-     * This retry only works if your channel producer supports retries on message processing
-     * exceptions.
-     *
-     * <p>What's more, we may one day want to have this configurable by the caller. But since this
-     * is not a feature of HAPI, this has not been done yet.
-     */
-    public static final int MAX_CHUNK_ERROR_COUNT = 3;
+	/**
+	* This retry only works if your channel producer supports retries on message processing
+	* exceptions.
+	*
+	* <p>What's more, we may one day want to have this configurable by the caller. But since this
+	* is not a feature of HAPI, this has not been done yet.
+	*/
+	public static final int MAX_CHUNK_ERROR_COUNT = 3;
 
-    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-    private final IJobPersistence myJobPersistence;
-    private final BatchJobSender myBatchJobSender;
-    private final StepExecutor myStepExecutor;
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	private final IJobPersistence myJobPersistence;
+	private final BatchJobSender myBatchJobSender;
+	private final StepExecutor myStepExecutor;
 
-    public WorkChunkProcessor(IJobPersistence theJobPersistence, BatchJobSender theSender) {
-        myJobPersistence = theJobPersistence;
-        myBatchJobSender = theSender;
-        myStepExecutor = new StepExecutor(theJobPersistence);
-    }
+	public WorkChunkProcessor(IJobPersistence theJobPersistence, BatchJobSender theSender) {
+		myJobPersistence = theJobPersistence;
+		myBatchJobSender = theSender;
+		myStepExecutor = new StepExecutor(theJobPersistence);
+	}
 
-    /**
-     * Execute the work chunk.
-     *
-     * @param theCursor - work cursor
-     * @param theInstance - the job instance
-     * @param theWorkChunk - the work chunk (if available); can be null (for reduction step only!)
-     * @param <PT> - Job parameters Type
-     * @param <IT> - Step input parameters Type
-     * @param <OT> - Step output parameters Type
-     * @return - JobStepExecution output. Contains the datasink and whether or not the execution had
-     *     succeeded.
-     */
-    public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-            JobStepExecutorOutput<PT, IT, OT> doExecution(
-                    JobWorkCursor<PT, IT, OT> theCursor,
-                    JobInstance theInstance,
-                    @Nullable WorkChunk theWorkChunk) {
-        JobDefinitionStep<PT, IT, OT> step = theCursor.getCurrentStep();
-        JobDefinition<PT> jobDefinition = theCursor.getJobDefinition();
-        String instanceId = theInstance.getInstanceId();
-        Class<IT> inputType = step.getInputType();
-        PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
+	/**
+	* Execute the work chunk.
+	*
+	* @param theCursor - work cursor
+	* @param theInstance - the job instance
+	* @param theWorkChunk - the work chunk (if available); can be null (for reduction step only!)
+	* @param <PT> - Job parameters Type
+	* @param <IT> - Step input parameters Type
+	* @param <OT> - Step output parameters Type
+	* @return - JobStepExecution output. Contains the datasink and whether or not the execution had
+	*     succeeded.
+	*/
+	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+				JobStepExecutorOutput<PT, IT, OT> doExecution(
+						JobWorkCursor<PT, IT, OT> theCursor,
+						JobInstance theInstance,
+						@Nullable WorkChunk theWorkChunk) {
+		JobDefinitionStep<PT, IT, OT> step = theCursor.getCurrentStep();
+		JobDefinition<PT> jobDefinition = theCursor.getJobDefinition();
+		String instanceId = theInstance.getInstanceId();
+		Class<IT> inputType = step.getInputType();
+		PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
 
-        IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
-        BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
+		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
+		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
 
-        assert !step.isReductionStep();
+		assert !step.isReductionStep();
 
-        // all other kinds of steps
-        Validate.notNull(theWorkChunk);
-        Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
-                getExecutionDetailsForNonReductionStep(
-                        theWorkChunk, theInstance, inputType, parameters);
-        if (!stepExecutionDetailsOpt.isPresent()) {
-            return new JobStepExecutorOutput<>(false, dataSink);
-        }
+		// all other kinds of steps
+		Validate.notNull(theWorkChunk);
+		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
+					getExecutionDetailsForNonReductionStep(
+								theWorkChunk, theInstance, inputType, parameters);
+		if (!stepExecutionDetailsOpt.isPresent()) {
+				return new JobStepExecutorOutput<>(false, dataSink);
+		}
 
-        StepExecutionDetails<PT, IT> stepExecutionDetails = stepExecutionDetailsOpt.get();
+		StepExecutionDetails<PT, IT> stepExecutionDetails = stepExecutionDetailsOpt.get();
 
-        // execute the step
-        boolean success = myStepExecutor.executeStep(stepExecutionDetails, worker, dataSink);
+		// execute the step
+		boolean success = myStepExecutor.executeStep(stepExecutionDetails, worker, dataSink);
 
-        // return results with data sink
-        return new JobStepExecutorOutput<>(success, dataSink);
-    }
+		// return results with data sink
+		return new JobStepExecutorOutput<>(success, dataSink);
+	}
 
-    /** Get the correct datasink for the cursor/job provided. */
-    @SuppressWarnings("unchecked")
-    protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-            BaseDataSink<PT, IT, OT> getDataSink(
-                    JobWorkCursor<PT, IT, OT> theCursor,
-                    JobDefinition<PT> theJobDefinition,
-                    String theInstanceId) {
-        BaseDataSink<PT, IT, OT> dataSink;
+	/** Get the correct datasink for the cursor/job provided. */
+	@SuppressWarnings("unchecked")
+	protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+				BaseDataSink<PT, IT, OT> getDataSink(
+						JobWorkCursor<PT, IT, OT> theCursor,
+						JobDefinition<PT> theJobDefinition,
+						String theInstanceId) {
+		BaseDataSink<PT, IT, OT> dataSink;
 
-        assert !theCursor.isReductionStep();
-        if (theCursor.isFinalStep()) {
-            dataSink =
-                    (BaseDataSink<PT, IT, OT>)
-                            new FinalStepDataSink<>(
-                                    theJobDefinition.getJobDefinitionId(),
-                                    theInstanceId,
-                                    theCursor.asFinalCursor());
-        } else {
-            dataSink =
-                    new JobDataSink<>(
-                            myBatchJobSender,
-                            myJobPersistence,
-                            theJobDefinition,
-                            theInstanceId,
-                            theCursor);
-        }
-        return dataSink;
-    }
+		assert !theCursor.isReductionStep();
+		if (theCursor.isFinalStep()) {
+				dataSink =
+						(BaseDataSink<PT, IT, OT>)
+									new FinalStepDataSink<>(
+												theJobDefinition.getJobDefinitionId(),
+												theInstanceId,
+												theCursor.asFinalCursor());
+		} else {
+				dataSink =
+						new JobDataSink<>(
+									myBatchJobSender,
+									myJobPersistence,
+									theJobDefinition,
+									theInstanceId,
+									theCursor);
+		}
+		return dataSink;
+	}
 
-    /** Construct execution details for non-reduction step */
-    private <PT extends IModelJson, IT extends IModelJson>
-            Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
-                    WorkChunk theWorkChunk,
-                    JobInstance theInstance,
-                    Class<IT> theInputType,
-                    PT theParameters) {
-        IT inputData = null;
+	/** Construct execution details for non-reduction step */
+	private <PT extends IModelJson, IT extends IModelJson>
+				Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
+						WorkChunk theWorkChunk,
+						JobInstance theInstance,
+						Class<IT> theInputType,
+						PT theParameters) {
+		IT inputData = null;
 
-        if (!theInputType.equals(VoidModel.class)) {
-            if (isBlank(theWorkChunk.getData())) {
-                ourLog.info(
-                        "Ignoring chunk[{}] for step[{}] in status[{}] because it has no data",
-                        theWorkChunk.getId(),
-                        theWorkChunk.getTargetStepId(),
-                        theWorkChunk.getStatus());
-                return Optional.empty();
-            }
-            inputData = theWorkChunk.getData(theInputType);
-        }
+		if (!theInputType.equals(VoidModel.class)) {
+				if (isBlank(theWorkChunk.getData())) {
+					ourLog.info(
+								"Ignoring chunk[{}] for step[{}] in status[{}] because it has no data",
+								theWorkChunk.getId(),
+								theWorkChunk.getTargetStepId(),
+								theWorkChunk.getStatus());
+					return Optional.empty();
+				}
+				inputData = theWorkChunk.getData(theInputType);
+		}
 
-        String chunkId = theWorkChunk.getId();
+		String chunkId = theWorkChunk.getId();
 
-        return Optional.of(
-                new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
-    }
+		return Optional.of(
+					new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
+	}
 }

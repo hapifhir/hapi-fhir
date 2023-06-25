@@ -19,30 +19,30 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.model.api.IModelJson;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.IModelJson;
-
 public class MdmLinkEvent implements IModelJson {
 
-    private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
+	private List<MdmLinkJson> myMdmLinks = new ArrayList<>();
 
-    public List<MdmLinkJson> getMdmLinks() {
-        return myMdmLinks;
-    }
+	public List<MdmLinkJson> getMdmLinks() {
+		return myMdmLinks;
+	}
 
-    public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
-        myMdmLinks = theMdmLinks;
-    }
+	public void setMdmLinks(List<MdmLinkJson> theMdmLinks) {
+		myMdmLinks = theMdmLinks;
+	}
 
-    public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
-        getMdmLinks().add(theMdmLink);
-        return this;
-    }
+	public MdmLinkEvent addMdmLink(MdmLinkJson theMdmLink) {
+		getMdmLinks().add(theMdmLink);
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
-    }
+	@Override
+	public String toString() {
+		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
+	}
 }

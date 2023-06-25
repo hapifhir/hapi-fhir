@@ -19,48 +19,47 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IAnyResource;
-
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
+import java.util.List;
 
 public interface IMdmLinkSvc {
 
-    /**
-     * Update a link between a Golden Resource record and its source resource record. If a link does
-     * not exist between these two records, create it.
-     *
-     * @param theGoldenResource the Golden Resource to link the source resource to.
-     * @param theSourceResource the source resource, which can be of any of the MDM supported types
-     * @param theMatchResult the current status of the match to set the link to.
-     * @param theLinkSource MANUAL or AUTO: what caused the link.
-     * @param theMdmTransactionContext
-     */
-    void updateLink(
-            IAnyResource theGoldenResource,
-            IAnyResource theSourceResource,
-            MdmMatchOutcome theMatchResult,
-            MdmLinkSourceEnum theLinkSource,
-            MdmTransactionContext theMdmTransactionContext);
+	/**
+	* Update a link between a Golden Resource record and its source resource record. If a link does
+	* not exist between these two records, create it.
+	*
+	* @param theGoldenResource the Golden Resource to link the source resource to.
+	* @param theSourceResource the source resource, which can be of any of the MDM supported types
+	* @param theMatchResult the current status of the match to set the link to.
+	* @param theLinkSource MANUAL or AUTO: what caused the link.
+	* @param theMdmTransactionContext
+	*/
+	void updateLink(
+				IAnyResource theGoldenResource,
+				IAnyResource theSourceResource,
+				MdmMatchOutcome theMatchResult,
+				MdmLinkSourceEnum theLinkSource,
+				MdmTransactionContext theMdmTransactionContext);
 
-    /**
-     * Delete a link between given Golden Resource and the corresponding source resource
-     *
-     * @param theExistingGoldenResource
-     * @param theSourceResource
-     * @param theMdmTransactionContext
-     */
-    void deleteLink(
-            IAnyResource theExistingGoldenResource,
-            IAnyResource theSourceResource,
-            MdmTransactionContext theMdmTransactionContext);
+	/**
+	* Delete a link between given Golden Resource and the corresponding source resource
+	*
+	* @param theExistingGoldenResource
+	* @param theSourceResource
+	* @param theMdmTransactionContext
+	*/
+	void deleteLink(
+				IAnyResource theExistingGoldenResource,
+				IAnyResource theSourceResource,
+				MdmTransactionContext theMdmTransactionContext);
 
-    /**
-     * Delete all link records whose source or target points to the provided pids.
-     *
-     * @param thePersistentIds
-     */
-    void deleteLinksWithAnyReferenceTo(List<IResourcePersistentId> thePersistentIds);
+	/**
+	* Delete all link records whose source or target points to the provided pids.
+	*
+	* @param thePersistentIds
+	*/
+	void deleteLinksWithAnyReferenceTo(List<IResourcePersistentId> thePersistentIds);
 }

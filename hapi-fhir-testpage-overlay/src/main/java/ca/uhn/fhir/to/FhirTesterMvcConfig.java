@@ -1,7 +1,7 @@
 package ca.uhn.fhir.to;
 
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
+import ca.uhn.fhir.to.util.WebUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,67 +15,66 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
-import ca.uhn.fhir.to.util.WebUtil;
+import javax.annotation.Nonnull;
 
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "ca.uhn.fhir.to")
 public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
-    @Override
-    public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
-        WebUtil.webJarAddBoostrap(theRegistry);
-        WebUtil.webJarAddJQuery(theRegistry);
-        WebUtil.webJarAddFontAwesome(theRegistry);
-        WebUtil.webJarAddJSTZ(theRegistry);
-        WebUtil.webJarAddEonasdanBootstrapDatetimepicker(theRegistry);
-        WebUtil.webJarAddMomentJS(theRegistry);
-        WebUtil.webJarAddSelect2(theRegistry);
-        WebUtil.webJarAddAwesomeCheckbox(theRegistry);
-        WebUtil.webJarAddPopperJs(theRegistry);
+	@Override
+	public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
+		WebUtil.webJarAddBoostrap(theRegistry);
+		WebUtil.webJarAddJQuery(theRegistry);
+		WebUtil.webJarAddFontAwesome(theRegistry);
+		WebUtil.webJarAddJSTZ(theRegistry);
+		WebUtil.webJarAddEonasdanBootstrapDatetimepicker(theRegistry);
+		WebUtil.webJarAddMomentJS(theRegistry);
+		WebUtil.webJarAddSelect2(theRegistry);
+		WebUtil.webJarAddAwesomeCheckbox(theRegistry);
+		WebUtil.webJarAddPopperJs(theRegistry);
 
-        theRegistry.addResourceHandler("/css/**").addResourceLocations("/css/");
-        theRegistry.addResourceHandler("/fa/**").addResourceLocations("/fa/");
-        theRegistry.addResourceHandler("/fonts/**").addResourceLocations("/fonts/");
-        theRegistry.addResourceHandler("/img/**").addResourceLocations("/img/");
-        theRegistry.addResourceHandler("/js/**").addResourceLocations("/js/");
-    }
+		theRegistry.addResourceHandler("/css/**").addResourceLocations("/css/");
+		theRegistry.addResourceHandler("/fa/**").addResourceLocations("/fa/");
+		theRegistry.addResourceHandler("/fonts/**").addResourceLocations("/fonts/");
+		theRegistry.addResourceHandler("/img/**").addResourceLocations("/img/");
+		theRegistry.addResourceHandler("/js/**").addResourceLocations("/js/");
+	}
 
-    @Bean
-    public SpringResourceTemplateResolver templateResolver(TesterConfig theTesterConfig) {
-        SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
-        resolver.setPrefix("/WEB-INF/templates/");
-        resolver.setSuffix(".html");
-        resolver.setTemplateMode(TemplateMode.HTML);
-        resolver.setCharacterEncoding("UTF-8");
+	@Bean
+	public SpringResourceTemplateResolver templateResolver(TesterConfig theTesterConfig) {
+		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
+		resolver.setPrefix("/WEB-INF/templates/");
+		resolver.setSuffix(".html");
+		resolver.setTemplateMode(TemplateMode.HTML);
+		resolver.setCharacterEncoding("UTF-8");
 
-        if (theTesterConfig.getDebugTemplatesMode()) {
-            resolver.setCacheable(false);
-        }
+		if (theTesterConfig.getDebugTemplatesMode()) {
+				resolver.setCacheable(false);
+		}
 
-        return resolver;
-    }
+		return resolver;
+	}
 
-    @Bean
-    public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(
-            @Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
-        return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
-    }
+	@Bean
+	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(
+				@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
+		return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
+	}
 
-    @Bean
-    public ThymeleafViewResolver viewResolver(SpringTemplateEngine theTemplateEngine) {
-        ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-        viewResolver.setTemplateEngine(theTemplateEngine);
-        viewResolver.setCharacterEncoding("UTF-8");
-        return viewResolver;
-    }
+	@Bean
+	public ThymeleafViewResolver viewResolver(SpringTemplateEngine theTemplateEngine) {
+		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+		viewResolver.setTemplateEngine(theTemplateEngine);
+		viewResolver.setCharacterEncoding("UTF-8");
+		return viewResolver;
+	}
 
-    @Bean
-    public SpringTemplateEngine templateEngine(SpringResourceTemplateResolver theTemplateResolver) {
-        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.setTemplateResolver(theTemplateResolver);
+	@Bean
+	public SpringTemplateEngine templateEngine(SpringResourceTemplateResolver theTemplateResolver) {
+		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+		templateEngine.setTemplateResolver(theTemplateResolver);
 
-        return templateEngine;
-    }
+		return templateEngine;
+	}
 }

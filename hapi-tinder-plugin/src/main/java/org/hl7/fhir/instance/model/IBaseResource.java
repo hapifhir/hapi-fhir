@@ -27,9 +27,9 @@ package org.hl7.fhir.dstu2.model;
  */
 public interface IBaseResource extends IBase {
 
-    IIdType getIdElement();
+	IIdType getIdElement();
 
-    IBaseResource setId(String theId);
+	IBaseResource setId(String theId);
 
-    IBaseResource setId(IIdType theId);
+	IBaseResource setId(IIdType theId);
 }

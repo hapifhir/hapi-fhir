@@ -7,45 +7,45 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TagDefinitionTest {
 
-    @Test
-    public void testToString() {
-        TagDefinition def = new TagDefinition();
-        def.setCode("my_code");
-        def.setSystem("my_system");
-        def.setDisplay("my_display");
-        def.setVersion("V 1.0");
-        def.setUserSelected(true);
-        assertEquals(
-                "TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V"
-                        + " 1.0,userSelected=true]",
-                def.toString());
-    }
+	@Test
+	public void testToString() {
+		TagDefinition def = new TagDefinition();
+		def.setCode("my_code");
+		def.setSystem("my_system");
+		def.setDisplay("my_display");
+		def.setVersion("V 1.0");
+		def.setUserSelected(true);
+		assertEquals(
+					"TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V"
+								+ " 1.0,userSelected=true]",
+					def.toString());
+	}
 
-    @Test
-    public void testEquals() {
-        TagDefinition def = new TagDefinition();
-        def.setCode("my_code");
-        def.setSystem("my_system");
-        def.setDisplay("my_display");
+	@Test
+	public void testEquals() {
+		TagDefinition def = new TagDefinition();
+		def.setCode("my_code");
+		def.setSystem("my_system");
+		def.setDisplay("my_display");
 
-        TagDefinition def2 = new TagDefinition();
-        def2.setCode("my_code2");
-        def2.setSystem("my_system");
-        def2.setDisplay("my_display");
+		TagDefinition def2 = new TagDefinition();
+		def2.setCode("my_code2");
+		def2.setSystem("my_system");
+		def2.setDisplay("my_display");
 
-        assertEquals(def, def);
-        assertNotEquals(def, def2);
-        assertNotEquals(def, "");
-    }
+		assertEquals(def, def);
+		assertNotEquals(def, def2);
+		assertNotEquals(def, "");
+	}
 
-    @Test
-    public void testHashCode() {
-        TagDefinition def = new TagDefinition();
-        def.setCode("my_code");
-        def.setSystem("my_system");
-        def.setDisplay("my_display");
-        def.setVersion("V 1.0");
-        def.setUserSelected(true);
-        assertEquals(434167707, def.hashCode());
-    }
+	@Test
+	public void testHashCode() {
+		TagDefinition def = new TagDefinition();
+		def.setCode("my_code");
+		def.setSystem("my_system");
+		def.setDisplay("my_display");
+		def.setVersion("V 1.0");
+		def.setUserSelected(true);
+		assertEquals(434167707, def.hashCode());
+	}
 }

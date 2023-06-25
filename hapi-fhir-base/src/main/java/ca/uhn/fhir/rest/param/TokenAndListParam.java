@@ -23,28 +23,28 @@ import org.apache.commons.lang3.Validate;
 
 public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
 
-    @Override
-    TokenOrListParam newInstance() {
-        return new TokenOrListParam();
-    }
+	@Override
+	TokenOrListParam newInstance() {
+		return new TokenOrListParam();
+	}
 
-    @Override
-    public TokenAndListParam addAnd(TokenOrListParam theValue) {
-        addValue(theValue);
-        return this;
-    }
+	@Override
+	public TokenAndListParam addAnd(TokenOrListParam theValue) {
+		addValue(theValue);
+		return this;
+	}
 
-    /**
-     * @param theValue The OR values
-     * @return Returns a reference to this for convenient chaining
-     */
-    public TokenAndListParam addAnd(TokenParam... theValue) {
-        Validate.notNull(theValue, "theValue must not be null");
-        TokenOrListParam orListParam = new TokenOrListParam();
-        for (TokenParam next : theValue) {
-            orListParam.add(next);
-        }
-        addValue(orListParam);
-        return this;
-    }
+	/**
+	* @param theValue The OR values
+	* @return Returns a reference to this for convenient chaining
+	*/
+	public TokenAndListParam addAnd(TokenParam... theValue) {
+		Validate.notNull(theValue, "theValue must not be null");
+		TokenOrListParam orListParam = new TokenOrListParam();
+		for (TokenParam next : theValue) {
+				orListParam.add(next);
+		}
+		addValue(orListParam);
+		return this;
+	}
 }

@@ -21,58 +21,58 @@ package org.hl7.fhir.dstu2.model;
 
 public interface IIdType extends IBase {
 
-    @Override
-    boolean isEmpty();
+	@Override
+	boolean isEmpty();
 
-    /**
-     * Returns true if this ID represents a local reference (i.e. a reference beginning with the
-     * character '#')
-     */
-    boolean isLocal();
+	/**
+	* Returns true if this ID represents a local reference (i.e. a reference beginning with the
+	* character '#')
+	*/
+	boolean isLocal();
 
-    /**
-     * Returns the value of this ID. Note that this value may be a fully qualified URL, a
-     * relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
-     *
-     * @see #getIdPart()
-     */
-    String getValue();
+	/**
+	* Returns the value of this ID. Note that this value may be a fully qualified URL, a
+	* relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
+	*
+	* @see #getIdPart()
+	*/
+	String getValue();
 
-    /**
-     * Returns only the logical ID part of this ID. For example, given the ID
-     * "http://example,.com/fhir/Patient/123/_history/456", this method would return "123".
-     */
-    String getIdPart();
+	/**
+	* Returns only the logical ID part of this ID. For example, given the ID
+	* "http://example,.com/fhir/Patient/123/_history/456", this method would return "123".
+	*/
+	String getIdPart();
 
-    boolean hasIdPart();
+	boolean hasIdPart();
 
-    String getBaseUrl();
+	String getBaseUrl();
 
-    /** Returns a copy of this ID without the base URL or the version */
-    IIdType toUnqualifiedVersionless();
+	/** Returns a copy of this ID without the base URL or the version */
+	IIdType toUnqualifiedVersionless();
 
-    /** Returns a copy of this ID without the version */
-    IIdType toVersionless();
+	/** Returns a copy of this ID without the version */
+	IIdType toVersionless();
 
-    IIdType setValue(String theString);
+	IIdType setValue(String theString);
 
-    boolean hasVersionIdPart();
+	boolean hasVersionIdPart();
 
-    String getVersionIdPart();
+	String getVersionIdPart();
 
-    IIdType toUnqualified();
+	IIdType toUnqualified();
 
-    boolean hasResourceType();
+	boolean hasResourceType();
 
-    IIdType withResourceType(String theResName);
+	IIdType withResourceType(String theResName);
 
-    String getResourceType();
+	String getResourceType();
 
-    IIdType withServerBase(String theServerBase, String theResourceName);
+	IIdType withServerBase(String theServerBase, String theResourceName);
 
-    boolean isAbsolute();
+	boolean isAbsolute();
 
-    boolean isIdPartValidLong();
+	boolean isIdPartValidLong();
 
-    Long getIdPartAsLong();
+	Long getIdPartAsLong();
 }

@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
@@ -34,30 +29,34 @@ import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 @Import(NicknameServiceConfig.class)
 @Configuration
 public class MdmCommonConfig {
-    @Bean
-    MdmRuleValidator mdmRuleValidator(
-            FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-        return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-    }
+	@Bean
+	MdmRuleValidator mdmRuleValidator(
+				FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
+		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
+	}
 
-    @Bean
-    @Lazy
-    public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
-        return new MdmSearchExpandingInterceptor();
-    }
+	@Bean
+	@Lazy
+	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
+		return new MdmSearchExpandingInterceptor();
+	}
 
-    @Bean
-    MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-        return new MdmLinkDeleteSvc();
-    }
+	@Bean
+	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
+		return new MdmLinkDeleteSvc();
+	}
 
-    @Bean
-    public IMatcherFactory matcherFactory(
-            FhirContext theFhirContext, IMdmSettings theSettings, NicknameSvc theNicknameSvc) {
-        return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
-    }
+	@Bean
+	public IMatcherFactory matcherFactory(
+				FhirContext theFhirContext, IMdmSettings theSettings, NicknameSvc theNicknameSvc) {
+		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
+	}
 }

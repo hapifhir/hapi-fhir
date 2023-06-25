@@ -19,70 +19,68 @@
  */
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.PostConstruct;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor
-        implements ISearchParamExtractor {
+		implements ISearchParamExtractor {
 
-    private FHIRPathEngine myFhirPathEngine;
+	private FHIRPathEngine myFhirPathEngine;
 
-    /** Constructor */
-    public SearchParamExtractorDstu3() {
-        super();
-    }
+	/** Constructor */
+	public SearchParamExtractorDstu3() {
+		super();
+	}
 
-    // This constructor is used by tests
-    @VisibleForTesting
-    public SearchParamExtractorDstu3(
-            StorageSettings theStorageSettings,
-            PartitionSettings thePartitionSettings,
-            FhirContext theCtx,
-            ISearchParamRegistry theSearchParamRegistry) {
-        super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
-        initFhirPathEngine();
-        start();
-    }
+	// This constructor is used by tests
+	@VisibleForTesting
+	public SearchParamExtractorDstu3(
+				StorageSettings theStorageSettings,
+				PartitionSettings thePartitionSettings,
+				FhirContext theCtx,
+				ISearchParamRegistry theSearchParamRegistry) {
+		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
+		initFhirPathEngine();
+		start();
+	}
 
-    @Override
-    public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
-        return () -> {
-            List<IBase> values = new ArrayList<>();
-            List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
-            if (allValues.isEmpty() == false) {
-                values.addAll(allValues);
-            }
+	@Override
+	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
+		return () -> {
+				List<IBase> values = new ArrayList<>();
+				List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
+				if (allValues.isEmpty() == false) {
+					values.addAll(allValues);
+				}
 
-            return values;
-        };
-    }
+				return values;
+		};
+	}
 
-    @Override
-    @PostConstruct
-    public void start() {
-        super.start();
-        if (myFhirPathEngine == null) {
-            initFhirPathEngine();
-        }
-    }
+	@Override
+	@PostConstruct
+	public void start() {
+		super.start();
+		if (myFhirPathEngine == null) {
+				initFhirPathEngine();
+		}
+	}
 
-    public void initFhirPathEngine() {
-        IWorkerContext worker =
-                new HapiWorkerContext(getContext(), getContext().getValidationSupport());
-        myFhirPathEngine = new FHIRPathEngine(worker);
-    }
+	public void initFhirPathEngine() {
+		IWorkerContext worker =
+					new HapiWorkerContext(getContext(), getContext().getValidationSupport());
+		myFhirPathEngine = new FHIRPathEngine(worker);
+	}
 }

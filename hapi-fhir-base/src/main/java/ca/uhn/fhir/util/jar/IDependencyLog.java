@@ -21,5 +21,5 @@ package ca.uhn.fhir.util.jar;
 
 public interface IDependencyLog {
 
-    void logStaxImplementation(Class<?> theClass);
+	void logStaxImplementation(Class<?> theClass);
 }

@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;
+import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,34 +32,30 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;
-import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
-
 @Configuration
 @EnableWebSocket()
 @Controller
 public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
-    @Autowired StorageSettings myStorageSettings;
+	@Autowired StorageSettings myStorageSettings;
 
-    @Bean
-    public WebsocketConnectionValidator websocketConnectionValidator() {
-        return new WebsocketConnectionValidator();
-    }
+	@Bean
+	public WebsocketConnectionValidator websocketConnectionValidator() {
+		return new WebsocketConnectionValidator();
+	}
 
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-        theRegistry
-                .addHandler(
-                        subscriptionWebSocketHandler(), myStorageSettings.getWebsocketContextPath())
-                .setAllowedOrigins("*");
-    }
+	@Override
+	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
+		theRegistry
+					.addHandler(
+								subscriptionWebSocketHandler(), myStorageSettings.getWebsocketContextPath())
+					.setAllowedOrigins("*");
+	}
 
-    @Bean
-    public WebSocketHandler subscriptionWebSocketHandler() {
-        PerConnectionWebSocketHandler retVal =
-                new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
-        return retVal;
-    }
+	@Bean
+	public WebSocketHandler subscriptionWebSocketHandler() {
+		PerConnectionWebSocketHandler retVal =
+					new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
+		return retVal;
+	}
 }

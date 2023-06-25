@@ -19,74 +19,73 @@
  */
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.UriDt;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 
-    private String myValue;
+	private String myValue;
 
-    /** Constructor */
-    public SpecialParam() {
-        super();
-    }
+	/** Constructor */
+	public SpecialParam() {
+		super();
+	}
 
-    @Override
-    String doGetQueryParameterQualifier() {
-        return null;
-    }
+	@Override
+	String doGetQueryParameterQualifier() {
+		return null;
+	}
 
-    /** {@inheritDoc} */
-    @Override
-    String doGetValueAsQueryToken(FhirContext theContext) {
-        return ParameterUtil.escape(getValue());
-    }
+	/** {@inheritDoc} */
+	@Override
+	String doGetValueAsQueryToken(FhirContext theContext) {
+		return ParameterUtil.escape(getValue());
+	}
 
-    /** {@inheritDoc} */
-    @Override
-    void doSetValueAsQueryToken(
-            FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
-        setValue(ParameterUtil.unescape(theParameter));
-    }
+	/** {@inheritDoc} */
+	@Override
+	void doSetValueAsQueryToken(
+				FhirContext theContext, String theParamName, String theQualifier, String theParameter) {
+		setValue(ParameterUtil.unescape(theParameter));
+	}
 
-    /**
-     * Returns the value for the token (generally the value to the right of the vertical bar on the
-     * URL)
-     */
-    public String getValue() {
-        return myValue;
-    }
+	/**
+	* Returns the value for the token (generally the value to the right of the vertical bar on the
+	* URL)
+	*/
+	public String getValue() {
+		return myValue;
+	}
 
-    public String getValueNotNull() {
-        return defaultString(myValue);
-    }
+	public String getValueNotNull() {
+		return defaultString(myValue);
+	}
 
-    public boolean isEmpty() {
-        return StringUtils.isEmpty(myValue);
-    }
+	public boolean isEmpty() {
+		return StringUtils.isEmpty(myValue);
+	}
 
-    public SpecialParam setValue(String theValue) {
-        myValue = theValue;
-        return this;
-    }
+	public SpecialParam setValue(String theValue) {
+		myValue = theValue;
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("value", getValue());
-        if (getMissing() != null) {
-            builder.append(":missing", getMissing());
-        }
-        return builder.toString();
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("value", getValue());
+		if (getMissing() != null) {
+				builder.append(":missing", getMissing());
+		}
+		return builder.toString();
+	}
 
-    private static String toSystemValue(UriDt theSystem) {
-        return theSystem.getValueAsString();
-    }
+	private static String toSystemValue(UriDt theSystem) {
+		return theSystem.getValueAsString();
+	}
 }

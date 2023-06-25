@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.util.CoverageIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a restful search operation parameter for an "OR list" of tokens (in other
@@ -33,86 +33,86 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenParam> {
 
-    /** Create a new empty token "OR list" */
-    public TokenOrListParam() {}
+	/** Create a new empty token "OR list" */
+	public TokenOrListParam() {}
 
-    /**
-     * Create a new token "OR list" with a single token, or multiple tokens which have the same
-     * system value
-     *
-     * @param theSystem The system to use for the one token to pre-populate in this list
-     * @param theValues The values to use for the one token to pre-populate in this list
-     */
-    public TokenOrListParam(String theSystem, String... theValues) {
-        for (String next : theValues) {
-            add(theSystem, next);
-        }
-    }
+	/**
+	* Create a new token "OR list" with a single token, or multiple tokens which have the same
+	* system value
+	*
+	* @param theSystem The system to use for the one token to pre-populate in this list
+	* @param theValues The values to use for the one token to pre-populate in this list
+	*/
+	public TokenOrListParam(String theSystem, String... theValues) {
+		for (String next : theValues) {
+				add(theSystem, next);
+		}
+	}
 
-    /**
-     * Convenience method which adds a token to this OR list using the system and code from a coding
-     */
-    public void add(BaseCodingDt theCodingDt) {
-        add(new TokenParam(theCodingDt));
-    }
+	/**
+	* Convenience method which adds a token to this OR list using the system and code from a coding
+	*/
+	public void add(BaseCodingDt theCodingDt) {
+		add(new TokenParam(theCodingDt));
+	}
 
-    /**
-     * Convenience method which adds a token to this OR list using the system and value from an
-     * identifier
-     */
-    public void add(BaseIdentifierDt theIdentifierDt) {
-        add(new TokenParam(theIdentifierDt));
-    }
+	/**
+	* Convenience method which adds a token to this OR list using the system and value from an
+	* identifier
+	*/
+	public void add(BaseIdentifierDt theIdentifierDt) {
+		add(new TokenParam(theIdentifierDt));
+	}
 
-    /**
-     * Add a new token to this list
-     *
-     * @param theSystem The system to use for the one token to pre-populate in this list
-     */
-    public TokenOrListParam add(String theSystem, String theValue) {
-        add(new TokenParam(theSystem, theValue));
-        return this;
-    }
+	/**
+	* Add a new token to this list
+	*
+	* @param theSystem The system to use for the one token to pre-populate in this list
+	*/
+	public TokenOrListParam add(String theSystem, String theValue) {
+		add(new TokenParam(theSystem, theValue));
+		return this;
+	}
 
-    /** Add a new token to this list */
-    public TokenOrListParam add(String theValue) {
-        add(new TokenParam(null, theValue));
-        return this;
-    }
+	/** Add a new token to this list */
+	public TokenOrListParam add(String theValue) {
+		add(new TokenParam(null, theValue));
+		return this;
+	}
 
-    public List<BaseCodingDt> getListAsCodings() {
-        ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>();
-        for (TokenParam next : getValuesAsQueryTokens()) {
-            InternalCodingDt nextCoding = next.getValueAsCoding();
-            if (!nextCoding.isEmpty()) {
-                retVal.add(nextCoding);
-            }
-        }
-        return retVal;
-    }
+	public List<BaseCodingDt> getListAsCodings() {
+		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>();
+		for (TokenParam next : getValuesAsQueryTokens()) {
+				InternalCodingDt nextCoding = next.getValueAsCoding();
+				if (!nextCoding.isEmpty()) {
+					retVal.add(nextCoding);
+				}
+		}
+		return retVal;
+	}
 
-    @CoverageIgnore
-    @Override
-    TokenParam newInstance() {
-        return new TokenParam();
-    }
+	@CoverageIgnore
+	@Override
+	TokenParam newInstance() {
+		return new TokenParam();
+	}
 
-    public boolean doesCodingListMatch(List<? extends BaseCodingDt> theCodings) {
-        List<BaseCodingDt> paramCodings = getListAsCodings();
-        for (BaseCodingDt coding : theCodings) {
-            for (BaseCodingDt paramCoding : paramCodings) {
-                if (coding.matchesToken(paramCoding)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	public boolean doesCodingListMatch(List<? extends BaseCodingDt> theCodings) {
+		List<BaseCodingDt> paramCodings = getListAsCodings();
+		for (BaseCodingDt coding : theCodings) {
+				for (BaseCodingDt paramCoding : paramCodings) {
+					if (coding.matchesToken(paramCoding)) {
+						return true;
+					}
+				}
+		}
+		return false;
+	}
 
-    @CoverageIgnore
-    @Override
-    public TokenOrListParam addOr(TokenParam theParameter) {
-        add(theParameter);
-        return this;
-    }
+	@CoverageIgnore
+	@Override
+	public TokenOrListParam addOr(TokenParam theParameter) {
+		add(theParameter);
+		return this;
+	}
 }

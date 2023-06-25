@@ -19,24 +19,23 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
-
 public class MdmChunkRangeJson extends ChunkRangeJson {
-    @Nonnull
-    @JsonProperty("resourceType")
-    private String myResourceType;
+	@Nonnull
+	@JsonProperty("resourceType")
+	private String myResourceType;
 
-    @Nonnull
-    public String getResourceType() {
-        return myResourceType;
-    }
+	@Nonnull
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public void setResourceType(@Nullable String theResourceType) {
-        myResourceType = theResourceType;
-    }
+	public void setResourceType(@Nullable String theResourceType) {
+		myResourceType = theResourceType;
+	}
 }

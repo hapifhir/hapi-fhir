@@ -19,17 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import java.util.Collection;
 
 public interface IResourceSearchViewDao
-        extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
 
-    @Query("SELECT v FROM ResourceSearchView v WHERE v.myResourceId in (:pids)")
-    Collection<ResourceSearchView> findByResourceIds(@Param("pids") Collection<Long> pids);
+	@Query("SELECT v FROM ResourceSearchView v WHERE v.myResourceId in (:pids)")
+	Collection<ResourceSearchView> findByResourceIds(@Param("pids") Collection<Long> pids);
 }

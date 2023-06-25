@@ -30,11 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public interface IValidatorModule {
 
-    /**
-     * Validate the actual resource.
-     *
-     * <p>The {@link IValidationContext} can be used to access the resource being validated, and is
-     * populated with the results.
-     */
-    void validateResource(IValidationContext<IBaseResource> theCtx);
+	/**
+	* Validate the actual resource.
+	*
+	* <p>The {@link IValidationContext} can be used to access the resource being validated, and is
+	* populated with the results.
+	*/
+	void validateResource(IValidationContext<IBaseResource> theCtx);
 }

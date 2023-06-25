@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import java.io.IOException;
-import java.util.stream.Stream;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -18,14 +23,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.test.concurrency.PointcutLatch;
+import java.io.IOException;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -35,191 +34,191 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
-    public static final String ORGANIZATION_DUMMY = "Organization/dummy";
-    protected Practitioner myPractitioner;
-    protected StringType myPractitionerId;
-    protected IAnyResource myGoldenPractitioner;
-    protected StringType myGoldenPractitionerId;
-    protected Medication myMedication;
-    protected StringType myMedicationId;
-    protected IAnyResource myGoldenMedication;
-    protected StringType myGoldenMedicationId;
+	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
+	protected Practitioner myPractitioner;
+	protected StringType myPractitionerId;
+	protected IAnyResource myGoldenPractitioner;
+	protected StringType myGoldenPractitionerId;
+	protected Medication myMedication;
+	protected StringType myMedicationId;
+	protected IAnyResource myGoldenMedication;
+	protected StringType myGoldenMedicationId;
 
-    @Autowired IInterceptorService myInterceptorService;
-    @Autowired MdmSettings myMdmSettings;
+	@Autowired IInterceptorService myInterceptorService;
+	@Autowired MdmSettings myMdmSettings;
 
-    PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
+	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
-    public static Stream<Arguments> requestTypes() {
-        ServletRequestDetails asyncSrd = mock(ServletRequestDetails.class);
-        when(asyncSrd.getHeader("Prefer")).thenReturn("respond-async");
-        ServletRequestDetails syncSrd = mock(ServletRequestDetails.class);
+	public static Stream<Arguments> requestTypes() {
+		ServletRequestDetails asyncSrd = mock(ServletRequestDetails.class);
+		when(asyncSrd.getHeader("Prefer")).thenReturn("respond-async");
+		ServletRequestDetails syncSrd = mock(ServletRequestDetails.class);
 
-        return Stream.of(
-                Arguments.of(Named.of("Asynchronous Request", asyncSrd)),
-                Arguments.of(Named.of("Synchronous Request", syncSrd)));
-    }
+		return Stream.of(
+					Arguments.of(Named.of("Asynchronous Request", asyncSrd)),
+					Arguments.of(Named.of("Synchronous Request", syncSrd)));
+	}
 
-    @Override
-    @BeforeEach
-    public void before() throws Exception {
-        super.before();
-        myPractitioner =
-                createPractitionerAndUpdateLinks(
-                        buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
-        myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-        myGoldenPractitioner = getGoldenResourceFromTargetResource(myPractitioner);
-        myGoldenPractitionerId = new StringType(myGoldenPractitioner.getIdElement().getValue());
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+		myPractitioner =
+					createPractitionerAndUpdateLinks(
+								buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
+		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
+		myGoldenPractitioner = getGoldenResourceFromTargetResource(myPractitioner);
+		myGoldenPractitionerId = new StringType(myGoldenPractitioner.getIdElement().getValue());
 
-        Organization dummyOrganization = new Organization();
-        dummyOrganization.setId(ORGANIZATION_DUMMY);
-        myOrganizationDao.update(dummyOrganization);
+		Organization dummyOrganization = new Organization();
+		dummyOrganization.setId(ORGANIZATION_DUMMY);
+		myOrganizationDao.update(dummyOrganization);
 
-        myMedication = createMedicationAndUpdateLinks(buildMedication(ORGANIZATION_DUMMY));
-        myMedicationId = new StringType(myMedication.getIdElement().getValue());
-        myGoldenMedication = getGoldenResourceFromTargetResource(myMedication);
-        myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
+		myMedication = createMedicationAndUpdateLinks(buildMedication(ORGANIZATION_DUMMY));
+		myMedicationId = new StringType(myMedication.getIdElement().getValue());
+		myGoldenMedication = getGoldenResourceFromTargetResource(myMedication);
+		myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
 
-        myInterceptorService.registerAnonymousInterceptor(
-                Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
-        myMdmSettings.setEnabled(true);
-    }
+		myInterceptorService.registerAnonymousInterceptor(
+					Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
+		myMdmSettings.setEnabled(true);
+	}
 
-    @Override
-    @AfterEach
-    public void after() throws IOException {
-        myInterceptorService.unregisterInterceptor(afterMdmLatch);
-        myMdmSettings.setEnabled(false);
-        super.after();
-    }
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		myInterceptorService.unregisterInterceptor(afterMdmLatch);
+		myMdmSettings.setEnabled(false);
+		super.after();
+	}
 
-    @ParameterizedTest
-    @MethodSource("requestTypes")
-    public void testBatchRunOnAllMedications(ServletRequestDetails theSyncOrAsyncRequest)
-            throws InterruptedException {
-        StringType criteria = null;
-        clearMdmLinks();
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllMedications(ServletRequestDetails theSyncOrAsyncRequest)
+				throws InterruptedException {
+		StringType criteria = null;
+		clearMdmLinks();
 
-        afterMdmLatch.runWithExpectedCount(
-                1,
-                () ->
-                        myMdmProvider.mdmBatchOnAllSourceResources(
-                                new StringType("Medication"),
-                                criteria,
-                                null,
-                                theSyncOrAsyncRequest));
-        assertLinkCount(1);
-    }
+		afterMdmLatch.runWithExpectedCount(
+					1,
+					() ->
+								myMdmProvider.mdmBatchOnAllSourceResources(
+										new StringType("Medication"),
+										criteria,
+										null,
+										theSyncOrAsyncRequest));
+		assertLinkCount(1);
+	}
 
-    @ParameterizedTest
-    @MethodSource("requestTypes")
-    public void testBatchRunOnAllPractitioners(ServletRequestDetails theSyncOrAsyncRequest)
-            throws InterruptedException {
-        StringType criteria = null;
-        clearMdmLinks();
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllPractitioners(ServletRequestDetails theSyncOrAsyncRequest)
+				throws InterruptedException {
+		StringType criteria = null;
+		clearMdmLinks();
 
-        afterMdmLatch.runWithExpectedCount(
-                1,
-                () ->
-                        myMdmProvider.mdmBatchPractitionerType(
-                                criteria, null, theSyncOrAsyncRequest));
-        assertLinkCount(1);
-    }
+		afterMdmLatch.runWithExpectedCount(
+					1,
+					() ->
+								myMdmProvider.mdmBatchPractitionerType(
+										criteria, null, theSyncOrAsyncRequest));
+		assertLinkCount(1);
+	}
 
-    @Test
-    public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
-        clearMdmLinks();
-        afterMdmLatch.runWithExpectedCount(
-                1,
-                () ->
-                        myMdmProvider.mdmBatchPractitionerInstance(
-                                myPractitioner.getIdElement(), null));
-        assertLinkCount(1);
-    }
+	@Test
+	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(
+					1,
+					() ->
+								myMdmProvider.mdmBatchPractitionerInstance(
+										myPractitioner.getIdElement(), null));
+		assertLinkCount(1);
+	}
 
-    @Test
-    public void testBatchRunOnNonExistentSpecificPractitioner() {
-        clearMdmLinks();
-        try {
-            myMdmProvider.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
-            fail();
-        } catch (ResourceNotFoundException e) {
-        }
-    }
+	@Test
+	public void testBatchRunOnNonExistentSpecificPractitioner() {
+		clearMdmLinks();
+		try {
+				myMdmProvider.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
+				fail();
+		} catch (ResourceNotFoundException e) {
+		}
+	}
 
-    @ParameterizedTest
-    @MethodSource("requestTypes")
-    public void testBatchRunOnAllPatients(ServletRequestDetails theSyncOrAsyncRequest)
-            throws InterruptedException {
-        assertLinkCount(3);
-        StringType criteria = null;
-        clearMdmLinks();
-        afterMdmLatch.runWithExpectedCount(
-                1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
-        assertLinkCount(1);
-    }
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllPatients(ServletRequestDetails theSyncOrAsyncRequest)
+				throws InterruptedException {
+		assertLinkCount(3);
+		StringType criteria = null;
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(
+					1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
+		assertLinkCount(1);
+	}
 
-    @Test
-    public void testBatchRunOnSpecificPatient() throws InterruptedException {
-        assertLinkCount(3);
-        clearMdmLinks();
-        afterMdmLatch.runWithExpectedCount(
-                1, () -> myMdmProvider.mdmBatchPatientInstance(myPatient.getIdElement(), null));
-        assertLinkCount(1);
-    }
+	@Test
+	public void testBatchRunOnSpecificPatient() throws InterruptedException {
+		assertLinkCount(3);
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(
+					1, () -> myMdmProvider.mdmBatchPatientInstance(myPatient.getIdElement(), null));
+		assertLinkCount(1);
+	}
 
-    @Test
-    public void testBatchRunOnNonExistentSpecificPatient() {
-        assertLinkCount(3);
-        clearMdmLinks();
-        try {
-            myMdmProvider.mdmBatchPatientInstance(new IdType("Patient/999"), null);
-            fail();
-        } catch (ResourceNotFoundException e) {
-        }
-    }
+	@Test
+	public void testBatchRunOnNonExistentSpecificPatient() {
+		assertLinkCount(3);
+		clearMdmLinks();
+		try {
+				myMdmProvider.mdmBatchPatientInstance(new IdType("Patient/999"), null);
+				fail();
+		} catch (ResourceNotFoundException e) {
+		}
+	}
 
-    @ParameterizedTest
-    @MethodSource("requestTypes")
-    public void testBatchRunOnAllTypes(ServletRequestDetails theSyncOrAsyncRequest)
-            throws InterruptedException {
-        assertLinkCount(3);
-        StringType criteria = new StringType("");
-        clearMdmLinks();
-        afterMdmLatch.runWithExpectedCount(
-                3,
-                () -> {
-                    myMdmProvider.mdmBatchOnAllSourceResources(
-                            null, criteria, null, theSyncOrAsyncRequest);
-                });
-        assertLinkCount(3);
-    }
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllTypes(ServletRequestDetails theSyncOrAsyncRequest)
+				throws InterruptedException {
+		assertLinkCount(3);
+		StringType criteria = new StringType("");
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(
+					3,
+					() -> {
+						myMdmProvider.mdmBatchOnAllSourceResources(
+									null, criteria, null, theSyncOrAsyncRequest);
+					});
+		assertLinkCount(3);
+	}
 
-    @ParameterizedTest
-    @MethodSource("requestTypes")
-    public void testBatchRunOnAllTypesWithInvalidCriteria(
-            ServletRequestDetails theSyncOrAsyncRequest) {
-        assertLinkCount(3);
-        StringType criteria = new StringType("death-date=2020-06-01");
-        clearMdmLinks();
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllTypesWithInvalidCriteria(
+				ServletRequestDetails theSyncOrAsyncRequest) {
+		assertLinkCount(3);
+		StringType criteria = new StringType("death-date=2020-06-01");
+		clearMdmLinks();
 
-        try {
-            myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null, theSyncOrAsyncRequest);
-            fail();
-        } catch (InvalidRequestException e) {
+		try {
+				myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null, theSyncOrAsyncRequest);
+				fail();
+		} catch (InvalidRequestException e) {
 
-            assertThat(
-                    e.getMessage(),
-                    either(
-                                    containsString(
-                                            Msg.code(2039)
-                                                    + "Failed to validate"
-                                                    + " parameters"
-                                                    + " for job")) // Async case
-                            .or(
-                                    containsString(
-                                            Msg.code(488)
-                                                    + "Failed to parse match URL"))); // Sync case
-        }
-    }
+				assertThat(
+						e.getMessage(),
+						either(
+												containsString(
+														Msg.code(2039)
+																	+ "Failed to validate"
+																	+ " parameters"
+																	+ " for job")) // Async case
+									.or(
+												containsString(
+														Msg.code(488)
+																	+ "Failed to parse match URL"))); // Sync case
+		}
+	}
 }

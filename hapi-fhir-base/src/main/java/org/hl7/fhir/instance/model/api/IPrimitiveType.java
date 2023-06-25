@@ -23,22 +23,22 @@ import javax.annotation.Nullable;
 
 public interface IPrimitiveType<T> extends IBaseDatatype {
 
-    String getValueAsString();
+	String getValueAsString();
 
-    void setValueAsString(String theValue) throws IllegalArgumentException;
+	void setValueAsString(String theValue) throws IllegalArgumentException;
 
-    T getValue();
+	T getValue();
 
-    IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
+	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
 
-    boolean hasValue();
+	boolean hasValue();
 
-    /**
-     * If the supplied argument is non-null, returns the results of {@link #getValue()}. If the
-     * supplied argument is null, returns null.
-     */
-    @Nullable
-    static <T> T toValueOrNull(@Nullable IPrimitiveType<T> thePrimitiveType) {
-        return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
-    }
+	/**
+	* If the supplied argument is non-null, returns the results of {@link #getValue()}. If the
+	* supplied argument is null, returns null.
+	*/
+	@Nullable
+	static <T> T toValueOrNull(@Nullable IPrimitiveType<T> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
+	}
 }

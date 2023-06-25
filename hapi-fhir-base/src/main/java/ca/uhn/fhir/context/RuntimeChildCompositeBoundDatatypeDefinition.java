@@ -19,44 +19,43 @@
  */
 package ca.uhn.fhir.context;
 
-import java.lang.reflect.Field;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.lang.reflect.Field;
 
 public class RuntimeChildCompositeBoundDatatypeDefinition
-        extends RuntimeChildCompositeDatatypeDefinition {
+		extends RuntimeChildCompositeDatatypeDefinition {
 
-    private IValueSetEnumBinder<Enum<?>> myBinder;
-    private Class<? extends Enum<?>> myEnumType;
+	private IValueSetEnumBinder<Enum<?>> myBinder;
+	private Class<? extends Enum<?>> myEnumType;
 
-    public RuntimeChildCompositeBoundDatatypeDefinition(
-            Field theField,
-            String theElementName,
-            Child theChildAnnotation,
-            Description theDescriptionAnnotation,
-            Class<? extends IBase> theDatatype,
-            IValueSetEnumBinder<Enum<?>> theBinder,
-            Class<? extends Enum<?>> theEnumType) {
-        super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
-        Validate.notNull(theBinder, "theBinder must not be null");
-        Validate.notNull(theEnumType, "theEnumType must not be null");
+	public RuntimeChildCompositeBoundDatatypeDefinition(
+				Field theField,
+				String theElementName,
+				Child theChildAnnotation,
+				Description theDescriptionAnnotation,
+				Class<? extends IBase> theDatatype,
+				IValueSetEnumBinder<Enum<?>> theBinder,
+				Class<? extends Enum<?>> theEnumType) {
+		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
+		Validate.notNull(theBinder, "theBinder must not be null");
+		Validate.notNull(theEnumType, "theEnumType must not be null");
 
-        myBinder = theBinder;
-        myEnumType = theEnumType;
-    }
+		myBinder = theBinder;
+		myEnumType = theEnumType;
+	}
 
-    @Override
-    public IValueSetEnumBinder<Enum<?>> getInstanceConstructorArguments() {
-        return myBinder;
-    }
+	@Override
+	public IValueSetEnumBinder<Enum<?>> getInstanceConstructorArguments() {
+		return myBinder;
+	}
 
-    @Override
-    public Class<? extends Enum<?>> getBoundEnumType() {
-        return myEnumType;
-    }
+	@Override
+	public Class<? extends Enum<?>> getBoundEnumType() {
+		return myEnumType;
+	}
 }

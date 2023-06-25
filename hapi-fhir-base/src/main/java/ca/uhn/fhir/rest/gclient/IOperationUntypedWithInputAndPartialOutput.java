@@ -19,34 +19,33 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
-
 public interface IOperationUntypedWithInputAndPartialOutput<T extends IBaseParameters>
-        extends IOperationUntypedWithInput<T> {
+		extends IOperationUntypedWithInput<T> {
 
-    /**
-     * Use chained method calls to construct a Parameters input. This form is a convenience in order
-     * to allow simple method chaining to be used to build up a parameters resource for the input of
-     * an operation without needing to manually construct one.
-     *
-     * @param theName The first parameter name
-     * @param theValue The first parameter value
-     */
-    IOperationUntypedWithInputAndPartialOutput<T> andParameter(String theName, IBase theValue);
+	/**
+	* Use chained method calls to construct a Parameters input. This form is a convenience in order
+	* to allow simple method chaining to be used to build up a parameters resource for the input of
+	* an operation without needing to manually construct one.
+	*
+	* @param theName The first parameter name
+	* @param theValue The first parameter value
+	*/
+	IOperationUntypedWithInputAndPartialOutput<T> andParameter(String theName, IBase theValue);
 
-    /**
-     * Adds a URL parameter to the request.
-     *
-     * <p>Use chained method calls to construct a Parameters input. This form is a convenience in
-     * order to allow simple method chaining to be used to build up a parameters resource for the
-     * input of an operation without needing to manually construct one.
-     *
-     * @param theName The first parameter name
-     * @param theValue The first parameter value
-     */
-    IOperationUntypedWithInputAndPartialOutput<T> andSearchParameter(
-            String theName, IQueryParameterType theValue);
+	/**
+	* Adds a URL parameter to the request.
+	*
+	* <p>Use chained method calls to construct a Parameters input. This form is a convenience in
+	* order to allow simple method chaining to be used to build up a parameters resource for the
+	* input of an operation without needing to manually construct one.
+	*
+	* @param theName The first parameter name
+	* @param theValue The first parameter value
+	*/
+	IOperationUntypedWithInputAndPartialOutput<T> andSearchParameter(
+				String theName, IQueryParameterType theValue);
 }

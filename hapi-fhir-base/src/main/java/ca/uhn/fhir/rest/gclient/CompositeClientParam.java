@@ -21,20 +21,20 @@ package ca.uhn.fhir.rest.gclient;
 
 /** Composite parameter type for use in fluent client interfaces */
 public class CompositeClientParam<A extends IParam, B extends IParam> extends BaseClientParam
-        implements IParam {
+		implements IParam {
 
-    private String myName;
+	private String myName;
 
-    public CompositeClientParam(String theName) {
-        myName = theName;
-    }
+	public CompositeClientParam(String theName) {
+		myName = theName;
+	}
 
-    @Override
-    public String getParamName() {
-        return myName;
-    }
+	@Override
+	public String getParamName() {
+		return myName;
+	}
 
-    public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
-        return new CompositeCriterion<A, B>(myName, theLeft);
-    }
+	public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
+		return new CompositeCriterion<A, B>(myName, theLeft);
+	}
 }

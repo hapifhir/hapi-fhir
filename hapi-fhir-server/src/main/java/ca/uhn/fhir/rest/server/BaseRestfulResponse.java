@@ -19,52 +19,52 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
 public abstract class BaseRestfulResponse<T extends RequestDetails> implements IRestfulResponse {
-    private final Map<String, List<String>> myHeaders = new HashMap<>();
-    private T myRequestDetails;
+	private final Map<String, List<String>> myHeaders = new HashMap<>();
+	private T myRequestDetails;
 
-    public BaseRestfulResponse(T theRequestDetails) {
-        this.myRequestDetails = theRequestDetails;
-    }
+	public BaseRestfulResponse(T theRequestDetails) {
+		this.myRequestDetails = theRequestDetails;
+	}
 
-    @Override
-    public void addHeader(String headerKey, String headerValue) {
-        this.getHeaders().computeIfAbsent(headerKey, k -> new ArrayList<>()).add(headerValue);
-    }
+	@Override
+	public void addHeader(String headerKey, String headerValue) {
+		this.getHeaders().computeIfAbsent(headerKey, k -> new ArrayList<>()).add(headerValue);
+	}
 
-    /**
-     * Get the http headers
-     *
-     * @return the headers
-     */
-    @Override
-    public Map<String, List<String>> getHeaders() {
-        return myHeaders;
-    }
+	/**
+	* Get the http headers
+	*
+	* @return the headers
+	*/
+	@Override
+	public Map<String, List<String>> getHeaders() {
+		return myHeaders;
+	}
 
-    /**
-     * Get the requestDetails
-     *
-     * @return the requestDetails
-     */
-    public T getRequestDetails() {
-        return myRequestDetails;
-    }
+	/**
+	* Get the requestDetails
+	*
+	* @return the requestDetails
+	*/
+	public T getRequestDetails() {
+		return myRequestDetails;
+	}
 
-    /**
-     * Set the requestDetails
-     *
-     * @param requestDetails the requestDetails to set
-     */
-    public void setRequestDetails(T requestDetails) {
-        this.myRequestDetails = requestDetails;
-    }
+	/**
+	* Set the requestDetails
+	*
+	* @param requestDetails the requestDetails to set
+	*/
+	public void setRequestDetails(T requestDetails) {
+		this.myRequestDetails = requestDetails;
+	}
 }

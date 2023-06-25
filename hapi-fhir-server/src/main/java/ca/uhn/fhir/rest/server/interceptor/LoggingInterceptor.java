@@ -19,20 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map.Entry;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.text.StringSubstitutor;
-import org.apache.commons.text.lookup.StringLookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -45,6 +31,19 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.commons.text.lookup.StringLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map.Entry;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -127,211 +126,211 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class LoggingInterceptor {
 
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
-    private String myErrorMessageFormat = "ERROR - ${operationType} - ${idOrResourceName}";
-    private boolean myLogExceptions = true;
-    private Logger myLogger = ourLog;
-    private String myMessageFormat = "${operationType} - ${idOrResourceName}";
+	private String myErrorMessageFormat = "ERROR - ${operationType} - ${idOrResourceName}";
+	private boolean myLogExceptions = true;
+	private Logger myLogger = ourLog;
+	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
 
-    /** Constructor for server logging interceptor */
-    public LoggingInterceptor() {
-        super();
-    }
+	/** Constructor for server logging interceptor */
+	public LoggingInterceptor() {
+		super();
+	}
 
-    /** Get the log message format to be used when logging exceptions */
-    public String getErrorMessageFormat() {
-        return myErrorMessageFormat;
-    }
+	/** Get the log message format to be used when logging exceptions */
+	public String getErrorMessageFormat() {
+		return myErrorMessageFormat;
+	}
 
-    @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-    public boolean handleException(
-            RequestDetails theRequestDetails,
-            BaseServerResponseException theException,
-            HttpServletRequest theServletRequest,
-            HttpServletResponse theServletResponse)
-            throws ServletException, IOException {
-        if (myLogExceptions) {
-            // Perform any string substitutions from the message format
-            StringLookup lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
-            StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
+	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+	public boolean handleException(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				HttpServletRequest theServletRequest,
+				HttpServletResponse theServletResponse)
+				throws ServletException, IOException {
+		if (myLogExceptions) {
+				// Perform any string substitutions from the message format
+				StringLookup lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
+				StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
-            // Actuall log the line
-            String line = subs.replace(myErrorMessageFormat);
-            myLogger.info(line);
-        }
-        return true;
-    }
+				// Actuall log the line
+				String line = subs.replace(myErrorMessageFormat);
+				myLogger.info(line);
+		}
+		return true;
+	}
 
-    @Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
-    public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
-        // Perform any string substitutions from the message format
-        StringLookup lookup =
-                new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
-        StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
+	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
+	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
+		// Perform any string substitutions from the message format
+		StringLookup lookup =
+					new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
+		StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
-        // Actually log the line
-        String line = subs.replace(myMessageFormat);
-        myLogger.info(line);
-    }
+		// Actually log the line
+		String line = subs.replace(myMessageFormat);
+		myLogger.info(line);
+	}
 
-    /** Should exceptions be logged by this logger */
-    public boolean isLogExceptions() {
-        return myLogExceptions;
-    }
+	/** Should exceptions be logged by this logger */
+	public boolean isLogExceptions() {
+		return myLogExceptions;
+	}
 
-    /** Set the log message format to be used when logging exceptions */
-    public void setErrorMessageFormat(String theErrorMessageFormat) {
-        Validate.notBlank(theErrorMessageFormat, "Message format can not be null/empty");
-        myErrorMessageFormat = theErrorMessageFormat;
-    }
+	/** Set the log message format to be used when logging exceptions */
+	public void setErrorMessageFormat(String theErrorMessageFormat) {
+		Validate.notBlank(theErrorMessageFormat, "Message format can not be null/empty");
+		myErrorMessageFormat = theErrorMessageFormat;
+	}
 
-    /** Should exceptions be logged by this logger */
-    public void setLogExceptions(boolean theLogExceptions) {
-        myLogExceptions = theLogExceptions;
-    }
+	/** Should exceptions be logged by this logger */
+	public void setLogExceptions(boolean theLogExceptions) {
+		myLogExceptions = theLogExceptions;
+	}
 
-    public void setLogger(Logger theLogger) {
-        Validate.notNull(theLogger, "Logger can not be null");
-        myLogger = theLogger;
-    }
+	public void setLogger(Logger theLogger) {
+		Validate.notNull(theLogger, "Logger can not be null");
+		myLogger = theLogger;
+	}
 
-    public void setLoggerName(String theLoggerName) {
-        Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
-        myLogger = LoggerFactory.getLogger(theLoggerName);
-    }
+	public void setLoggerName(String theLoggerName) {
+		Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
+		myLogger = LoggerFactory.getLogger(theLoggerName);
+	}
 
-    /**
-     * Sets the message format itself. See the {@link LoggingInterceptor class documentation} for
-     * information on the format
-     */
-    public void setMessageFormat(String theMessageFormat) {
-        Validate.notBlank(theMessageFormat, "Message format can not be null/empty");
-        myMessageFormat = theMessageFormat;
-    }
+	/**
+	* Sets the message format itself. See the {@link LoggingInterceptor class documentation} for
+	* information on the format
+	*/
+	public void setMessageFormat(String theMessageFormat) {
+		Validate.notBlank(theMessageFormat, "Message format can not be null/empty");
+		myMessageFormat = theMessageFormat;
+	}
 
-    private static final class MyLookup implements StringLookup {
-        private final Throwable myException;
-        private final HttpServletRequest myRequest;
-        private final RequestDetails myRequestDetails;
+	private static final class MyLookup implements StringLookup {
+		private final Throwable myException;
+		private final HttpServletRequest myRequest;
+		private final RequestDetails myRequestDetails;
 
-        private MyLookup(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-            myRequest = theRequest;
-            myRequestDetails = theRequestDetails;
-            myException = null;
-        }
+		private MyLookup(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				myRequest = theRequest;
+				myRequestDetails = theRequestDetails;
+				myException = null;
+		}
 
-        MyLookup(
-                HttpServletRequest theServletRequest,
-                BaseServerResponseException theException,
-                RequestDetails theRequestDetails) {
-            myException = theException;
-            myRequestDetails = theRequestDetails;
-            myRequest = theServletRequest;
-        }
+		MyLookup(
+					HttpServletRequest theServletRequest,
+					BaseServerResponseException theException,
+					RequestDetails theRequestDetails) {
+				myException = theException;
+				myRequestDetails = theRequestDetails;
+				myRequest = theServletRequest;
+		}
 
-        @Override
-        public String lookup(String theKey) {
+		@Override
+		public String lookup(String theKey) {
 
-            /*
-             * TODO: this method could be made more efficient through some sort of lookup map
-             */
+				/*
+				 * TODO: this method could be made more efficient through some sort of lookup map
+				 */
 
-            if ("operationType".equals(theKey)) {
-                if (myRequestDetails.getRestOperationType() != null) {
-                    return myRequestDetails.getRestOperationType().getCode();
-                }
-                return "";
-            } else if ("operationName".equals(theKey)) {
-                if (myRequestDetails.getRestOperationType() != null) {
-                    switch (myRequestDetails.getRestOperationType()) {
-                        case EXTENDED_OPERATION_INSTANCE:
-                        case EXTENDED_OPERATION_SERVER:
-                        case EXTENDED_OPERATION_TYPE:
-                            return myRequestDetails.getOperation();
-                        default:
-                            return "";
-                    }
-                }
-                return "";
-            } else if ("id".equals(theKey)) {
-                if (myRequestDetails.getId() != null) {
-                    return myRequestDetails.getId().getValue();
-                }
-                return "";
-            } else if ("servletPath".equals(theKey)) {
-                return StringUtils.defaultString(myRequest.getServletPath());
-            } else if ("idOrResourceName".equals(theKey)) {
-                if (myRequestDetails.getId() != null) {
-                    return myRequestDetails.getId().getValue();
-                }
-                if (myRequestDetails.getResourceName() != null) {
-                    return myRequestDetails.getResourceName();
-                }
-                return "";
-            } else if (theKey.equals("requestParameters")) {
-                StringBuilder b = new StringBuilder();
-                for (Entry<String, String[]> next : myRequestDetails.getParameters().entrySet()) {
-                    for (String nextValue : next.getValue()) {
-                        if (b.length() == 0) {
-                            b.append('?');
-                        } else {
-                            b.append('&');
-                        }
-                        b.append(UrlUtil.escapeUrlParam(next.getKey()));
-                        b.append('=');
-                        b.append(UrlUtil.escapeUrlParam(nextValue));
-                    }
-                }
-                return b.toString();
-            } else if (theKey.startsWith("requestHeader.")) {
-                String val = myRequest.getHeader(theKey.substring("requestHeader.".length()));
-                return StringUtils.defaultString(val);
-            } else if (theKey.startsWith("remoteAddr")) {
-                return StringUtils.defaultString(myRequest.getRemoteAddr());
-            } else if (theKey.equals("responseEncodingNoDefault")) {
-                ResponseEncoding encoding =
-                        RestfulServerUtils.determineResponseEncodingNoDefault(
-                                myRequestDetails,
-                                myRequestDetails.getServer().getDefaultResponseEncoding());
-                if (encoding != null) {
-                    return encoding.getEncoding().name();
-                }
-                return "";
-            } else if (theKey.equals("exceptionMessage")) {
-                return myException != null ? myException.getMessage() : null;
-            } else if (theKey.equals("requestUrl")) {
-                return myRequest.getRequestURL().toString();
-            } else if (theKey.equals("requestVerb")) {
-                return myRequest.getMethod();
-            } else if (theKey.equals("requestBodyFhir")) {
-                String contentType = myRequest.getContentType();
-                if (isNotBlank(contentType)) {
-                    int colonIndex = contentType.indexOf(';');
-                    if (colonIndex != -1) {
-                        contentType = contentType.substring(0, colonIndex);
-                    }
-                    contentType = contentType.trim();
+				if ("operationType".equals(theKey)) {
+					if (myRequestDetails.getRestOperationType() != null) {
+						return myRequestDetails.getRestOperationType().getCode();
+					}
+					return "";
+				} else if ("operationName".equals(theKey)) {
+					if (myRequestDetails.getRestOperationType() != null) {
+						switch (myRequestDetails.getRestOperationType()) {
+								case EXTENDED_OPERATION_INSTANCE:
+								case EXTENDED_OPERATION_SERVER:
+								case EXTENDED_OPERATION_TYPE:
+									return myRequestDetails.getOperation();
+								default:
+									return "";
+						}
+					}
+					return "";
+				} else if ("id".equals(theKey)) {
+					if (myRequestDetails.getId() != null) {
+						return myRequestDetails.getId().getValue();
+					}
+					return "";
+				} else if ("servletPath".equals(theKey)) {
+					return StringUtils.defaultString(myRequest.getServletPath());
+				} else if ("idOrResourceName".equals(theKey)) {
+					if (myRequestDetails.getId() != null) {
+						return myRequestDetails.getId().getValue();
+					}
+					if (myRequestDetails.getResourceName() != null) {
+						return myRequestDetails.getResourceName();
+					}
+					return "";
+				} else if (theKey.equals("requestParameters")) {
+					StringBuilder b = new StringBuilder();
+					for (Entry<String, String[]> next : myRequestDetails.getParameters().entrySet()) {
+						for (String nextValue : next.getValue()) {
+								if (b.length() == 0) {
+									b.append('?');
+								} else {
+									b.append('&');
+								}
+								b.append(UrlUtil.escapeUrlParam(next.getKey()));
+								b.append('=');
+								b.append(UrlUtil.escapeUrlParam(nextValue));
+						}
+					}
+					return b.toString();
+				} else if (theKey.startsWith("requestHeader.")) {
+					String val = myRequest.getHeader(theKey.substring("requestHeader.".length()));
+					return StringUtils.defaultString(val);
+				} else if (theKey.startsWith("remoteAddr")) {
+					return StringUtils.defaultString(myRequest.getRemoteAddr());
+				} else if (theKey.equals("responseEncodingNoDefault")) {
+					ResponseEncoding encoding =
+								RestfulServerUtils.determineResponseEncodingNoDefault(
+										myRequestDetails,
+										myRequestDetails.getServer().getDefaultResponseEncoding());
+					if (encoding != null) {
+						return encoding.getEncoding().name();
+					}
+					return "";
+				} else if (theKey.equals("exceptionMessage")) {
+					return myException != null ? myException.getMessage() : null;
+				} else if (theKey.equals("requestUrl")) {
+					return myRequest.getRequestURL().toString();
+				} else if (theKey.equals("requestVerb")) {
+					return myRequest.getMethod();
+				} else if (theKey.equals("requestBodyFhir")) {
+					String contentType = myRequest.getContentType();
+					if (isNotBlank(contentType)) {
+						int colonIndex = contentType.indexOf(';');
+						if (colonIndex != -1) {
+								contentType = contentType.substring(0, colonIndex);
+						}
+						contentType = contentType.trim();
 
-                    EncodingEnum encoding = EncodingEnum.forContentType(contentType);
-                    if (encoding != null) {
-                        byte[] requestContents = myRequestDetails.loadRequestContents();
-                        return new String(requestContents, Constants.CHARSET_UTF8);
-                    }
-                }
-                return "";
-            } else if ("processingTimeMillis".equals(theKey)) {
-                Date startTime = (Date) myRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
-                if (startTime != null) {
-                    long time = System.currentTimeMillis() - startTime.getTime();
-                    return Long.toString(time);
-                }
-            } else if ("requestId".equals(theKey)) {
-                return myRequestDetails.getRequestId();
-            }
+						EncodingEnum encoding = EncodingEnum.forContentType(contentType);
+						if (encoding != null) {
+								byte[] requestContents = myRequestDetails.loadRequestContents();
+								return new String(requestContents, Constants.CHARSET_UTF8);
+						}
+					}
+					return "";
+				} else if ("processingTimeMillis".equals(theKey)) {
+					Date startTime = (Date) myRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
+					if (startTime != null) {
+						long time = System.currentTimeMillis() - startTime.getTime();
+						return Long.toString(time);
+					}
+				} else if ("requestId".equals(theKey)) {
+					return myRequestDetails.getRequestId();
+				}
 
-            return "!VAL!";
-        }
-    }
+				return "!VAL!";
+		}
+	}
 }

@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.subscription.FhirR4Util;
+import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Expression;
@@ -18,13 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
-
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.FhirR4Util;
-import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with
@@ -44,105 +42,105 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 @Disabled("Not implemented yet")
 public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
-    private static final Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
-    private static List<Observation> ourUpdatedObservations =
-            Collections.synchronizedList(Lists.newArrayList());
-    private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-    private static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
-    private static List<Observation> ourCreatedObservations =
-            Collections.synchronizedList(Lists.newArrayList());
-    private String myPatientId;
-    private String mySubscriptionId;
-    private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	private static final Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
+	private static List<Observation> ourUpdatedObservations =
+				Collections.synchronizedList(Lists.newArrayList());
+	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
+	private static List<Observation> ourCreatedObservations =
+				Collections.synchronizedList(Lists.newArrayList());
+	private String myPatientId;
+	private String mySubscriptionId;
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
-    @Autowired private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired private SubscriptionTestUtil mySubscriptionTestUtil;
 
-    @Override
-    @AfterEach
-    public void after() throws Exception {
-        super.after();
-    }
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		super.after();
+	}
 
-    @AfterEach
-    public void afterUnregisterRestHookListener() {
-        for (IIdType next : mySubscriptionIds) {
-            myClient.delete().resourceById(next).execute();
-        }
-        mySubscriptionIds.clear();
+	@AfterEach
+	public void afterUnregisterRestHookListener() {
+		for (IIdType next : mySubscriptionIds) {
+				myClient.delete().resourceById(next).execute();
+		}
+		mySubscriptionIds.clear();
 
-        myStorageSettings.setAllowMultipleDelete(true);
-        ourLog.info("Deleting all subscriptions");
-        myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-        myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
-        ourLog.info("Done deleting all subscriptions");
-        myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(true);
+		ourLog.info("Deleting all subscriptions");
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		ourLog.info("Done deleting all subscriptions");
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-        mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-    }
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+	}
 
-    @Test
-    public void testSubscriptionAddedTrigger() {
-        /*
-         * Create patient
-         */
+	@Test
+	public void testSubscriptionAddedTrigger() {
+		/*
+			* Create patient
+			*/
 
-        Patient patient = FhirR4Util.getPatient();
-        MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
-        myPatientId = methodOutcome.getId().getIdPart();
+		Patient patient = FhirR4Util.getPatient();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
+		myPatientId = methodOutcome.getId().getIdPart();
 
-        /*
-         * Create EventDefinition
-         */
+		/*
+			* Create EventDefinition
+			*/
 
-        EventDefinition eventDef = new EventDefinition();
-        eventDef.setPurpose("Monitor all admissions to Emergency")
-                .addTrigger(
-                        new TriggerDefinition()
-                                .setType(TriggerDefinition.TriggerType.DATAADDED)
-                                .setCondition(
-                                        new Expression()
-                                                .setDescription(
-                                                        "Encounter Location = emergency"
-                                                                + " (active/completed encounters,"
-                                                                + " current or previous)")
-                                                .setLanguage(
-                                                        Expression.ExpressionLanguage.TEXT_FHIRPATH
-                                                                .toCode())
-                                                .setExpression(
-                                                        "(this | %previous).location.where(location"
-                                                            + " = 'Location/emergency' and status"
-                                                            + " in {'active',"
-                                                            + " 'completed'}).exists()")));
+		EventDefinition eventDef = new EventDefinition();
+		eventDef.setPurpose("Monitor all admissions to Emergency")
+					.addTrigger(
+								new TriggerDefinition()
+										.setType(TriggerDefinition.TriggerType.DATAADDED)
+										.setCondition(
+													new Expression()
+																.setDescription(
+																		"Encounter Location = emergency"
+																					+ " (active/completed encounters,"
+																					+ " current or previous)")
+																.setLanguage(
+																		Expression.ExpressionLanguage.TEXT_FHIRPATH
+																					.toCode())
+																.setExpression(
+																		"(this | %previous).location.where(location"
+																				+ " = 'Location/emergency' and status"
+																				+ " in {'active',"
+																				+ " 'completed'}).exists()")));
 
-        /*
-         * Create subscription
-         */
-        Subscription subscription = new Subscription();
-        subscription.setReason(
-                "Monitor new neonatal function (note, age will be determined by the monitor)");
-        subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		/*
+			* Create subscription
+			*/
+		Subscription subscription = new Subscription();
+		subscription.setReason(
+					"Monitor new neonatal function (note, age will be determined by the monitor)");
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 
-        Subscription.SubscriptionChannelComponent channel =
-                new Subscription.SubscriptionChannelComponent();
-        channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
-        channel.setPayload("application/json");
-        subscription.setChannel(channel);
+		Subscription.SubscriptionChannelComponent channel =
+					new Subscription.SubscriptionChannelComponent();
+		channel.setType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		channel.setPayload("application/json");
+		subscription.setChannel(channel);
 
-        methodOutcome = myClient.create().resource(subscription).execute();
-        mySubscriptionId = methodOutcome.getId().getIdPart();
-    }
+		methodOutcome = myClient.create().resource(subscription).execute();
+		mySubscriptionId = methodOutcome.getId().getIdPart();
+	}
 
-    @BeforeEach
-    public void beforeRegisterRestHookListener() {
-        mySubscriptionTestUtil.registerRestHookInterceptor();
-    }
+	@BeforeEach
+	public void beforeRegisterRestHookListener() {
+		mySubscriptionTestUtil.registerRestHookInterceptor();
+	}
 
-    @BeforeEach
-    public void beforeReset() {
-        ourCreatedObservations.clear();
-        ourUpdatedObservations.clear();
-        ourContentTypes.clear();
-        ourHeaders.clear();
-    }
+	@BeforeEach
+	public void beforeReset() {
+		ourCreatedObservations.clear();
+		ourUpdatedObservations.clear();
+		ourContentTypes.clear();
+		ourHeaders.clear();
+	}
 }

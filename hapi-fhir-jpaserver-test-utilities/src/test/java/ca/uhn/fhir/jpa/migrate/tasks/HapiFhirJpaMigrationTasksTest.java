@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
-import java.util.Collections;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 public class HapiFhirJpaMigrationTasksTest {
 
-    @Test
-    public void testCreate() {
-        new HapiFhirJpaMigrationTasks(Collections.emptySet());
-    }
+	@Test
+	public void testCreate() {
+		new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	}
 }

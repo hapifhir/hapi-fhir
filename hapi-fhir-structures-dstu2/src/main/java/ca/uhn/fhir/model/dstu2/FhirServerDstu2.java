@@ -25,8 +25,8 @@ import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 
 public class FhirServerDstu2 implements IFhirVersionServer {
 
-    @Override
-    public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-        return new ServerConformanceProvider(theServer);
-    }
+	@Override
+	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
+		return new ServerConformanceProvider(theServer);
+	}
 }

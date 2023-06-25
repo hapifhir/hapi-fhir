@@ -5,49 +5,49 @@ import java.util.List;
 
 public class SimpleSetter {
 
-    private String myDatatype;
-    private List<Parameter> myParameters = new ArrayList<Parameter>();
-    private String mySuffix;
+	private String myDatatype;
+	private List<Parameter> myParameters = new ArrayList<Parameter>();
+	private String mySuffix;
 
-    public String getDatatype() {
-        return myDatatype;
-    }
+	public String getDatatype() {
+		return myDatatype;
+	}
 
-    public List<Parameter> getParameters() {
-        return myParameters;
-    }
+	public List<Parameter> getParameters() {
+		return myParameters;
+	}
 
-    public String getSuffix() {
-        return mySuffix;
-    }
+	public String getSuffix() {
+		return mySuffix;
+	}
 
-    public void setDatatype(String theDatatype) {
-        myDatatype = theDatatype;
-    }
+	public void setDatatype(String theDatatype) {
+		myDatatype = theDatatype;
+	}
 
-    public void setSuffix(String theSuffix) {
-        mySuffix = theSuffix;
-    }
+	public void setSuffix(String theSuffix) {
+		mySuffix = theSuffix;
+	}
 
-    public static class Parameter {
+	public static class Parameter {
 
-        private String myDatatype;
-        private String myParameter;
+		private String myDatatype;
+		private String myParameter;
 
-        public String getDatatype() {
-            return myDatatype;
-        }
+		public String getDatatype() {
+				return myDatatype;
+		}
 
-        public String getParameter() {
-            return myParameter;
-        }
+		public String getParameter() {
+				return myParameter;
+		}
 
-        public void setDatatype(String theDatatype) {
-            myDatatype = theDatatype;
-        }
+		public void setDatatype(String theDatatype) {
+				myDatatype = theDatatype;
+		}
 
-        public void setParameter(String theParameter) {
-            myParameter = theParameter;
-        }
-    }
+		public void setParameter(String theParameter) {
+				myParameter = theParameter;
+		}
+	}
 }

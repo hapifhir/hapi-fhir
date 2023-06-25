@@ -19,62 +19,60 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import javax.annotation.Nullable;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import javax.annotation.Nullable;
 
 public class MdmSimilarityJson implements IModelJson {
-    @JsonProperty(value = "algorithm", required = true)
-    MdmSimilarityEnum myAlgorithm;
+	@JsonProperty(value = "algorithm", required = true)
+	MdmSimilarityEnum myAlgorithm;
 
-    @JsonProperty(value = "matchThreshold", required = true)
-    Double myMatchThreshold;
+	@JsonProperty(value = "matchThreshold", required = true)
+	Double myMatchThreshold;
 
-    /**
-     * For String value types, should the values be normalized (case, accents) before they are
-     * compared
-     */
-    @JsonProperty(value = "exact")
-    boolean myExact;
+	/**
+	* For String value types, should the values be normalized (case, accents) before they are
+	* compared
+	*/
+	@JsonProperty(value = "exact")
+	boolean myExact;
 
-    public MdmSimilarityEnum getAlgorithm() {
-        return myAlgorithm;
-    }
+	public MdmSimilarityEnum getAlgorithm() {
+		return myAlgorithm;
+	}
 
-    public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
-        myAlgorithm = theAlgorithm;
-        return this;
-    }
+	public MdmSimilarityJson setAlgorithm(MdmSimilarityEnum theAlgorithm) {
+		myAlgorithm = theAlgorithm;
+		return this;
+	}
 
-    @Nullable
-    public Double getMatchThreshold() {
-        return myMatchThreshold;
-    }
+	@Nullable
+	public Double getMatchThreshold() {
+		return myMatchThreshold;
+	}
 
-    public MdmSimilarityJson setMatchThreshold(double theMatchThreshold) {
-        myMatchThreshold = theMatchThreshold;
-        return this;
-    }
+	public MdmSimilarityJson setMatchThreshold(double theMatchThreshold) {
+		myMatchThreshold = theMatchThreshold;
+		return this;
+	}
 
-    public boolean getExact() {
-        return myExact;
-    }
+	public boolean getExact() {
+		return myExact;
+	}
 
-    public MdmSimilarityJson setExact(boolean theExact) {
-        myExact = theExact;
-        return this;
-    }
+	public MdmSimilarityJson setExact(boolean theExact) {
+		myExact = theExact;
+		return this;
+	}
 
-    public MdmMatchEvaluation match(
-            FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
-        return myAlgorithm.match(
-                theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
-    }
+	public MdmMatchEvaluation match(
+				FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
+		return myAlgorithm.match(
+					theFhirContext, theLeftValue, theRightValue, myExact, myMatchThreshold);
+	}
 }

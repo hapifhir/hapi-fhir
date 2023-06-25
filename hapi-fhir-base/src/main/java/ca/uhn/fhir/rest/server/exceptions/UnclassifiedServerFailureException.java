@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Exception for use when a response is received or being sent that does not correspond to any other
@@ -31,29 +30,29 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class UnclassifiedServerFailureException extends BaseServerResponseException {
 
-    /**
-     * Constructor
-     *
-     * @param theStatusCode The HTTP status code to return (e.g. 404 if you wish to return an HTTP
-     *     404 status)
-     * @param theMessage The message to add to the status line
-     */
-    public UnclassifiedServerFailureException(int theStatusCode, String theMessage) {
-        super(theStatusCode, theMessage);
-    }
+	/**
+	* Constructor
+	*
+	* @param theStatusCode The HTTP status code to return (e.g. 404 if you wish to return an HTTP
+	*     404 status)
+	* @param theMessage The message to add to the status line
+	*/
+	public UnclassifiedServerFailureException(int theStatusCode, String theMessage) {
+		super(theStatusCode, theMessage);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theStatusCode The HTTP status code to return (e.g. 404 if you wish to return an HTTP
-     *     404 status)
-     * @param theMessage The message to add to the status line
-     * @param theOperationOutcome The OperationOutcome resource to return to the client
-     */
-    public UnclassifiedServerFailureException(
-            int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
-        super(theStatusCode, theMessage, theOperationOutcome);
-    }
+	/**
+	* Constructor
+	*
+	* @param theStatusCode The HTTP status code to return (e.g. 404 if you wish to return an HTTP
+	*     404 status)
+	* @param theMessage The message to add to the status line
+	* @param theOperationOutcome The OperationOutcome resource to return to the client
+	*/
+	public UnclassifiedServerFailureException(
+				int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
+		super(theStatusCode, theMessage, theOperationOutcome);
+	}
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 }

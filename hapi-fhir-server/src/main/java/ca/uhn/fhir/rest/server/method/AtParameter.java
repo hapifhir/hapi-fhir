@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 
 class AtParameter extends SinceOrAtParameter {
 
-    public AtParameter() {
-        super(Constants.PARAM_AT, At.class);
-    }
+	public AtParameter() {
+		super(Constants.PARAM_AT, At.class);
+	}
 }

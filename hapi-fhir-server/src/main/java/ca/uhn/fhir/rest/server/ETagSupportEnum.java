@@ -25,9 +25,9 @@ package ca.uhn.fhir.rest.server;
  * @see RestfulServer#setETagSupport(ETagSupportEnum)
  */
 public enum ETagSupportEnum {
-    /** Send ETag headers */
-    ENABLED,
+	/** Send ETag headers */
+	ENABLED,
 
-    /** Do not send ETag headers */
-    DISABLED
+	/** Do not send ETag headers */
+	DISABLED
 }

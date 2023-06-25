@@ -19,78 +19,77 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import java.sql.SQLException;
-
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
 
 public class MigratePostgresTextClobToBinaryClobTask extends BaseTableColumnTask {
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(MigratePostgresTextClobToBinaryClobTask.class);
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(MigratePostgresTextClobToBinaryClobTask.class);
 
-    /** Constructor */
-    public MigratePostgresTextClobToBinaryClobTask(
-            String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	/** Constructor */
+	public MigratePostgresTextClobToBinaryClobTask(
+				String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    @Override
-    public void validate() {
-        super.validate();
-        setDescription(
-                "Migrate text clob "
-                        + getColumnName()
-                        + " from table "
-                        + getTableName()
-                        + " (only affects Postgresql)");
-    }
+	@Override
+	public void validate() {
+		super.validate();
+		setDescription(
+					"Migrate text clob "
+								+ getColumnName()
+								+ " from table "
+								+ getTableName()
+								+ " (only affects Postgresql)");
+	}
 
-    @Override
-    protected void doExecute() throws SQLException {
-        if (getConnectionProperties().getDriverType() != DriverTypeEnum.POSTGRES_9_4) {
-            return;
-        }
+	@Override
+	protected void doExecute() throws SQLException {
+		if (getConnectionProperties().getDriverType() != DriverTypeEnum.POSTGRES_9_4) {
+				return;
+		}
 
-        String tableName = getTableName();
-        String columnName = getColumnName();
-        JdbcUtils.ColumnType columnType =
-                JdbcUtils.getColumnType(getConnectionProperties(), tableName, columnName);
-        if (columnType.getColumnTypeEnum() == ColumnTypeEnum.LONG) {
-            ourLog.info(
-                    "Table {} column {} is already of type LONG, no migration needed",
-                    tableName,
-                    columnName);
-            return;
-        }
+		String tableName = getTableName();
+		String columnName = getColumnName();
+		JdbcUtils.ColumnType columnType =
+					JdbcUtils.getColumnType(getConnectionProperties(), tableName, columnName);
+		if (columnType.getColumnTypeEnum() == ColumnTypeEnum.LONG) {
+				ourLog.info(
+						"Table {} column {} is already of type LONG, no migration needed",
+						tableName,
+						columnName);
+				return;
+		}
 
-        String tempColumnName = columnName + "_m".toLowerCase();
-        tableName = tableName.toLowerCase();
-        columnName = columnName.toLowerCase();
+		String tempColumnName = columnName + "_m".toLowerCase();
+		tableName = tableName.toLowerCase();
+		columnName = columnName.toLowerCase();
 
-        executeSql(
-                tableName, "alter table " + tableName + " add column " + tempColumnName + " oid");
-        executeSql(
-                tableName,
-                "update "
-                        + tableName
-                        + " set "
-                        + tempColumnName
-                        + " = cast("
-                        + columnName
-                        + " as oid) where "
-                        + columnName
-                        + " is not null");
-        executeSql(tableName, "alter table " + tableName + " drop column " + columnName);
-        executeSql(
-                tableName,
-                "alter table "
-                        + tableName
-                        + " rename column "
-                        + tempColumnName
-                        + " to "
-                        + columnName);
-    }
+		executeSql(
+					tableName, "alter table " + tableName + " add column " + tempColumnName + " oid");
+		executeSql(
+					tableName,
+					"update "
+								+ tableName
+								+ " set "
+								+ tempColumnName
+								+ " = cast("
+								+ columnName
+								+ " as oid) where "
+								+ columnName
+								+ " is not null");
+		executeSql(tableName, "alter table " + tableName + " drop column " + columnName);
+		executeSql(
+					tableName,
+					"alter table "
+								+ tableName
+								+ " rename column "
+								+ tempColumnName
+								+ " to "
+								+ columnName);
+	}
 }

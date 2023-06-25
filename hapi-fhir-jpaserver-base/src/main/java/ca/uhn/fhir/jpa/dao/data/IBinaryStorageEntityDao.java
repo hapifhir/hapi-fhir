@@ -19,25 +19,24 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Optional;
-
+import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
+import java.util.Optional;
 
 public interface IBinaryStorageEntityDao
-        extends JpaRepository<BinaryStorageEntity, String>, IHapiFhirJpaRepository {
+		extends JpaRepository<BinaryStorageEntity, String>, IHapiFhirJpaRepository {
 
-    @Query(
-            "SELECT e FROM BinaryStorageEntity e WHERE e.myBlobId = :blob_id AND e.myResourceId ="
-                    + " :resource_id")
-    Optional<BinaryStorageEntity> findByIdAndResourceId(
-            @Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);
+	@Query(
+				"SELECT e FROM BinaryStorageEntity e WHERE e.myBlobId = :blob_id AND e.myResourceId ="
+						+ " :resource_id")
+	Optional<BinaryStorageEntity> findByIdAndResourceId(
+				@Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);
 
-    @Modifying
-    @Query("DELETE FROM BinaryStorageEntity t WHERE t.myBlobId = :pid")
-    void deleteByPid(@Param("pid") String theId);
+	@Modifying
+	@Query("DELETE FROM BinaryStorageEntity t WHERE t.myBlobId = :pid")
+	void deleteByPid(@Param("pid") String theId);
 }

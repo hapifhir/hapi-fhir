@@ -19,22 +19,6 @@
  */
 package ca.uhn.fhir.batch2.jobs.export;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -61,231 +45,245 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ExpandResourcesStep
-        implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
-    private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
+		implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
+	private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
 
-    @Autowired private DaoRegistry myDaoRegistry;
+	@Autowired private DaoRegistry myDaoRegistry;
 
-    @Autowired private FhirContext myFhirContext;
+	@Autowired private FhirContext myFhirContext;
 
-    @Autowired private IBulkExportProcessor<?> myBulkExportProcessor;
+	@Autowired private IBulkExportProcessor<?> myBulkExportProcessor;
 
-    @Autowired private ApplicationContext myApplicationContext;
+	@Autowired private ApplicationContext myApplicationContext;
 
-    @Autowired private StorageSettings myStorageSettings;
+	@Autowired private StorageSettings myStorageSettings;
 
-    @Autowired private IIdHelperService myIdHelperService;
+	@Autowired private IIdHelperService myIdHelperService;
 
-    @Autowired private IHapiTransactionService myTransactionService;
+	@Autowired private IHapiTransactionService myTransactionService;
 
-    @Autowired private InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@Autowired private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-    private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
-    @Nonnull
-    @Override
-    public RunOutcome run(
-            @Nonnull
-                    StepExecutionDetails<BulkExportJobParameters, ResourceIdList>
-                            theStepExecutionDetails,
-            @Nonnull IJobDataSink<ExpandedResourcesList> theDataSink)
-            throws JobExecutionFailedException {
-        String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
-        String chunkId = theStepExecutionDetails.getChunkId();
-        ResourceIdList idList = theStepExecutionDetails.getData();
-        BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
+	@Nonnull
+	@Override
+	public RunOutcome run(
+				@Nonnull
+						StepExecutionDetails<BulkExportJobParameters, ResourceIdList>
+									theStepExecutionDetails,
+				@Nonnull IJobDataSink<ExpandedResourcesList> theDataSink)
+				throws JobExecutionFailedException {
+		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+		String chunkId = theStepExecutionDetails.getChunkId();
+		ResourceIdList idList = theStepExecutionDetails.getData();
+		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
-        ourLog.info(
-                "Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their"
-                        + " full resource bodies.",
-                instanceId,
-                chunkId,
-                idList.getIds().size());
+		ourLog.info(
+					"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their"
+								+ " full resource bodies.",
+					instanceId,
+					chunkId,
+					idList.getIds().size());
 
-        // search the resources
-        List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
+		// search the resources
+		List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
 
-        // Apply post-fetch filtering
-        String resourceType = idList.getResourceType();
-        List<String> postFetchFilterUrls =
-                parameters.getPostFetchFilterUrls().stream()
-                        .filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
-                        .collect(Collectors.toList());
-        if (!postFetchFilterUrls.isEmpty()) {
-            applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
-        }
+		// Apply post-fetch filtering
+		String resourceType = idList.getResourceType();
+		List<String> postFetchFilterUrls =
+					parameters.getPostFetchFilterUrls().stream()
+								.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+								.collect(Collectors.toList());
+		if (!postFetchFilterUrls.isEmpty()) {
+				applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
+		}
 
-        // if necessary, expand resources
-        if (parameters.isExpandMdm()) {
-            myBulkExportProcessor.expandMdmResources(allResources);
-        }
+		// if necessary, expand resources
+		if (parameters.isExpandMdm()) {
+				myBulkExportProcessor.expandMdmResources(allResources);
+		}
 
-        // Normalize terminology
-        if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-            ResponseTerminologyTranslationSvc terminologyTranslationSvc =
-                    myResponseTerminologyTranslationSvc;
-            if (terminologyTranslationSvc == null) {
-                terminologyTranslationSvc =
-                        myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
-                myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
-            }
-            terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
-        }
+		// Normalize terminology
+		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+				ResponseTerminologyTranslationSvc terminologyTranslationSvc =
+						myResponseTerminologyTranslationSvc;
+				if (terminologyTranslationSvc == null) {
+					terminologyTranslationSvc =
+								myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+					myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+				}
+				terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+		}
 
-        // encode them - Key is resource type, Value is a collection of serialized resources of that
-        // type
-        ListMultimap<String, String> resources = encodeToString(allResources, parameters);
+		// encode them - Key is resource type, Value is a collection of serialized resources of that
+		// type
+		ListMultimap<String, String> resources = encodeToString(allResources, parameters);
 
-        // set to datasink
-        for (String nextResourceType : resources.keySet()) {
+		// set to datasink
+		for (String nextResourceType : resources.keySet()) {
 
-            ExpandedResourcesList output = new ExpandedResourcesList();
-            output.setStringifiedResources(resources.get(nextResourceType));
-            output.setResourceType(nextResourceType);
-            theDataSink.accept(output);
+				ExpandedResourcesList output = new ExpandedResourcesList();
+				output.setStringifiedResources(resources.get(nextResourceType));
+				output.setResourceType(nextResourceType);
+				theDataSink.accept(output);
 
-            ourLog.info(
-                    "Expanding of {} resources of type {} completed",
-                    idList.getIds().size(),
-                    idList.getResourceType());
-        }
+				ourLog.info(
+						"Expanding of {} resources of type {} completed",
+						idList.getIds().size(),
+						idList.getResourceType());
+		}
 
-        // and return
-        return RunOutcome.SUCCESS;
-    }
+		// and return
+		return RunOutcome.SUCCESS;
+	}
 
-    private void applyPostFetchFiltering(
-            List<IBaseResource> theResources,
-            List<String> thePostFetchFilterUrls,
-            String theInstanceId,
-            String theChunkId) {
-        int numRemoved = 0;
-        for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
-            boolean matched =
-                    applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
+	private void applyPostFetchFiltering(
+				List<IBaseResource> theResources,
+				List<String> thePostFetchFilterUrls,
+				String theInstanceId,
+				String theChunkId) {
+		int numRemoved = 0;
+		for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
+				boolean matched =
+						applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
 
-            if (!matched) {
-                iter.remove();
-                numRemoved++;
-            }
-        }
+				if (!matched) {
+					iter.remove();
+					numRemoved++;
+				}
+		}
 
-        if (numRemoved > 0) {
-            ourLog.info(
-                    "Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of"
-                            + " post-fetch filter URLs",
-                    theInstanceId,
-                    theChunkId,
-                    numRemoved);
-        }
-    }
+		if (numRemoved > 0) {
+				ourLog.info(
+						"Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of"
+									+ " post-fetch filter URLs",
+						theInstanceId,
+						theChunkId,
+						numRemoved);
+		}
+	}
 
-    private boolean applyPostFetchFilteringForSingleResource(
-            List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
-        IBaseResource nextResource = iter.next();
-        String nextResourceType = myFhirContext.getResourceType(nextResource);
+	private boolean applyPostFetchFilteringForSingleResource(
+				List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
+		IBaseResource nextResource = iter.next();
+		String nextResourceType = myFhirContext.getResourceType(nextResource);
 
-        for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
-            if (nextPostFetchFilterUrl.contains("?")) {
-                String resourceType =
-                        nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
-                if (nextResourceType.equals(resourceType)) {
-                    InMemoryMatchResult matchResult =
-                            myInMemoryResourceMatcher.match(
-                                    nextPostFetchFilterUrl,
-                                    nextResource,
-                                    null,
-                                    new SystemRequestDetails());
-                    if (matchResult.matched()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+		for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
+				if (nextPostFetchFilterUrl.contains("?")) {
+					String resourceType =
+								nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
+					if (nextResourceType.equals(resourceType)) {
+						InMemoryMatchResult matchResult =
+									myInMemoryResourceMatcher.match(
+												nextPostFetchFilterUrl,
+												nextResource,
+												null,
+												new SystemRequestDetails());
+						if (matchResult.matched()) {
+								return true;
+						}
+					}
+				}
+		}
+		return false;
+	}
 
-    private List<IBaseResource> fetchAllResources(
-            ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
-        ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
-        theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
+	private List<IBaseResource> fetchAllResources(
+				ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
+		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
+		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
 
-        List<IBaseResource> resources = new ArrayList<>(theIds.getIds().size());
+		List<IBaseResource> resources = new ArrayList<>(theIds.getIds().size());
 
-        for (String resourceType : typeToIds.keySet()) {
+		for (String resourceType : typeToIds.keySet()) {
 
-            IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-            List<String> allIds = typeToIds.get(resourceType);
-            while (!allIds.isEmpty()) {
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+				List<String> allIds = typeToIds.get(resourceType);
+				while (!allIds.isEmpty()) {
 
-                // Load in batches in order to avoid having too many PIDs go into a
-                // single SQ statement at once
-                int batchSize = Math.min(500, allIds.size());
+					// Load in batches in order to avoid having too many PIDs go into a
+					// single SQ statement at once
+					int batchSize = Math.min(500, allIds.size());
 
-                Set<IResourcePersistentId> nextBatchOfPids =
-                        allIds.subList(0, batchSize).stream()
-                                .map(
-                                        t ->
-                                                myIdHelperService.newPidFromStringIdAndResourceName(
-                                                        t, resourceType))
-                                .collect(Collectors.toSet());
-                allIds = allIds.subList(batchSize, allIds.size());
+					Set<IResourcePersistentId> nextBatchOfPids =
+								allIds.subList(0, batchSize).stream()
+										.map(
+													t ->
+																myIdHelperService.newPidFromStringIdAndResourceName(
+																		t, resourceType))
+										.collect(Collectors.toSet());
+					allIds = allIds.subList(batchSize, allIds.size());
 
-                PersistentIdToForcedIdMap nextBatchOfResourceIds =
-                        myTransactionService
-                                .withRequest(null)
-                                .execute(
-                                        () ->
-                                                myIdHelperService.translatePidsToForcedIds(
-                                                        nextBatchOfPids));
+					PersistentIdToForcedIdMap nextBatchOfResourceIds =
+								myTransactionService
+										.withRequest(null)
+										.execute(
+													() ->
+																myIdHelperService.translatePidsToForcedIds(
+																		nextBatchOfPids));
 
-                TokenOrListParam idListParam = new TokenOrListParam();
-                for (IResourcePersistentId nextPid : nextBatchOfPids) {
-                    Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
-                    idListParam.add(resourceId.orElse(nextPid.getId().toString()));
-                }
+					TokenOrListParam idListParam = new TokenOrListParam();
+					for (IResourcePersistentId nextPid : nextBatchOfPids) {
+						Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
+						idListParam.add(resourceId.orElse(nextPid.getId().toString()));
+					}
 
-                SearchParameterMap spMap =
-                        SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-                IBundleProvider outcome =
-                        dao.search(
-                                spMap,
-                                new SystemRequestDetails()
-                                        .setRequestPartitionId(theRequestPartitionId));
-                resources.addAll(outcome.getAllResources());
-            }
-        }
+					SearchParameterMap spMap =
+								SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
+					IBundleProvider outcome =
+								dao.search(
+										spMap,
+										new SystemRequestDetails()
+													.setRequestPartitionId(theRequestPartitionId));
+					resources.addAll(outcome.getAllResources());
+				}
+		}
 
-        return resources;
-    }
+		return resources;
+	}
 
-    /**
-     * @return A map - Key is resource type, Value is a collection of serialized resources of that
-     *     type
-     */
-    private ListMultimap<String, String> encodeToString(
-            List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
-        IParser parser = getParser(theParameters);
+	/**
+	* @return A map - Key is resource type, Value is a collection of serialized resources of that
+	*     type
+	*/
+	private ListMultimap<String, String> encodeToString(
+				List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
+		IParser parser = getParser(theParameters);
 
-        ListMultimap<String, String> retVal = ArrayListMultimap.create();
-        for (IBaseResource resource : theResources) {
-            String type = myFhirContext.getResourceType(resource);
-            String jsonResource = parser.encodeResourceToString(resource);
-            retVal.put(type, jsonResource);
-        }
-        return retVal;
-    }
+		ListMultimap<String, String> retVal = ArrayListMultimap.create();
+		for (IBaseResource resource : theResources) {
+				String type = myFhirContext.getResourceType(resource);
+				String jsonResource = parser.encodeResourceToString(resource);
+				retVal.put(type, jsonResource);
+		}
+		return retVal;
+	}
 
-    private IParser getParser(BulkExportJobParameters theParameters) {
-        // The parser depends on the
-        // output format
-        // (but for now, only ndjson is supported
-        // see WriteBinaryStep as well
-        return myFhirContext.newJsonParser().setPrettyPrint(false);
-    }
+	private IParser getParser(BulkExportJobParameters theParameters) {
+		// The parser depends on the
+		// output format
+		// (but for now, only ndjson is supported
+		// see WriteBinaryStep as well
+		return myFhirContext.newJsonParser().setPrettyPrint(false);
+	}
 }

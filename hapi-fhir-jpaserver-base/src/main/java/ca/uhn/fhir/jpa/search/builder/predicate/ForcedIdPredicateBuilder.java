@@ -19,33 +19,31 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-
 public class ForcedIdPredicateBuilder extends BaseJoiningPredicateBuilder {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ForcedIdPredicateBuilder.class);
-    private final DbColumn myColumnResourceId;
-    private final DbColumn myColumnForcedId;
+	private static final Logger ourLog = LoggerFactory.getLogger(ForcedIdPredicateBuilder.class);
+	private final DbColumn myColumnResourceId;
+	private final DbColumn myColumnForcedId;
 
-    /** Constructor */
-    public ForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-        super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_FORCED_ID"));
+	/** Constructor */
+	public ForcedIdPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_FORCED_ID"));
 
-        myColumnResourceId = getTable().addColumn("RESOURCE_PID");
-        myColumnForcedId = getTable().addColumn("FORCED_ID");
-    }
+		myColumnResourceId = getTable().addColumn("RESOURCE_PID");
+		myColumnForcedId = getTable().addColumn("FORCED_ID");
+	}
 
-    @Override
-    public DbColumn getResourceIdColumn() {
-        return myColumnResourceId;
-    }
+	@Override
+	public DbColumn getResourceIdColumn() {
+		return myColumnResourceId;
+	}
 
-    public DbColumn getColumnForcedId() {
-        return myColumnForcedId;
-    }
+	public DbColumn getColumnForcedId() {
+		return myColumnForcedId;
+	}
 }

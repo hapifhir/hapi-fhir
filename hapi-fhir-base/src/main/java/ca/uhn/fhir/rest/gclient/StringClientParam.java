@@ -19,143 +19,142 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.Arrays;
-import java.util.List;
-
+import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.rest.api.Constants;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author james
  */
 public class StringClientParam extends BaseClientParam implements IParam {
 
-    private final String myParamName;
+	private final String myParamName;
 
-    public StringClientParam(String theParamName) {
-        myParamName = theParamName;
-    }
+	public StringClientParam(String theParamName) {
+		myParamName = theParamName;
+	}
 
-    @Override
-    public String getParamName() {
-        return myParamName;
-    }
+	@Override
+	public String getParamName() {
+		return myParamName;
+	}
 
-    /**
-     * The string matches the given value (servers will often, but are not required to) implement
-     * this as a left match, meaning that a value of "smi" would match "smi" and "smith".
-     */
-    public IStringMatch matches() {
-        return new StringMatches();
-    }
+	/**
+	* The string matches the given value (servers will often, but are not required to) implement
+	* this as a left match, meaning that a value of "smi" would match "smi" and "smith".
+	*/
+	public IStringMatch matches() {
+		return new StringMatches();
+	}
 
-    /** The string matches exactly the given value */
-    public IStringMatch matchesExactly() {
-        return new StringExactly();
-    }
+	/** The string matches exactly the given value */
+	public IStringMatch matchesExactly() {
+		return new StringExactly();
+	}
 
-    /** The string contains given value */
-    public IStringMatch contains() {
-        return new StringContains();
-    }
+	/** The string contains given value */
+	public IStringMatch contains() {
+		return new StringContains();
+	}
 
-    public interface IStringMatch {
+	public interface IStringMatch {
 
-        /** Requests that resources be returned which match the given value */
-        ICriterion<StringClientParam> value(String theValue);
+		/** Requests that resources be returned which match the given value */
+		ICriterion<StringClientParam> value(String theValue);
 
-        /**
-         * Requests that resources be returned which match ANY of the given values (this is an OR
-         * search, not an AND search). Note that to specify an AND search, simply add a subsequent
-         * {@link IQuery#where(ICriterion) where} criteria with the same parameter.
-         */
-        ICriterion<StringClientParam> values(List<String> theValues);
+		/**
+			* Requests that resources be returned which match ANY of the given values (this is an OR
+			* search, not an AND search). Note that to specify an AND search, simply add a subsequent
+			* {@link IQuery#where(ICriterion) where} criteria with the same parameter.
+			*/
+		ICriterion<StringClientParam> values(List<String> theValues);
 
-        /** Requests that resources be returned which match the given value */
-        ICriterion<StringClientParam> value(IPrimitiveType<String> theValue);
+		/** Requests that resources be returned which match the given value */
+		ICriterion<StringClientParam> value(IPrimitiveType<String> theValue);
 
-        /**
-         * Requests that resources be returned which match ANY of the given values (this is an OR
-         * search, not an AND search). Note that to specify an AND search, simply add a subsequent
-         * {@link IQuery#where(ICriterion) where} criteria with the same parameter.
-         */
-        ICriterion<?> values(String... theValues);
-    }
+		/**
+			* Requests that resources be returned which match ANY of the given values (this is an OR
+			* search, not an AND search). Note that to specify an AND search, simply add a subsequent
+			* {@link IQuery#where(ICriterion) where} criteria with the same parameter.
+			*/
+		ICriterion<?> values(String... theValues);
+	}
 
-    private class StringExactly implements IStringMatch {
-        @Override
-        public ICriterion<StringClientParam> value(String theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
-        }
+	private class StringExactly implements IStringMatch {
+		@Override
+		public ICriterion<StringClientParam> value(String theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+		}
 
-        @Override
-        public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
-        }
+		@Override
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
+		}
 
-        @Override
-        public ICriterion<StringClientParam> values(List<String> theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
-        }
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+		}
 
-        @Override
-        public ICriterion<?> values(String... theValues) {
-            return new StringCriterion<StringClientParam>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT,
-                    Arrays.asList(theValues));
-        }
-    }
+		@Override
+		public ICriterion<?> values(String... theValues) {
+				return new StringCriterion<StringClientParam>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT,
+						Arrays.asList(theValues));
+		}
+	}
 
-    private class StringContains implements IStringMatch {
-        @Override
-        public ICriterion<StringClientParam> value(String theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
-        }
+	private class StringContains implements IStringMatch {
+		@Override
+		public ICriterion<StringClientParam> value(String theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+		}
 
-        @Override
-        public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
-        }
+		@Override
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
+		}
 
-        @Override
-        public ICriterion<StringClientParam> values(List<String> theValue) {
-            return new StringCriterion<>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
-        }
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+				return new StringCriterion<>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+		}
 
-        @Override
-        public ICriterion<?> values(String... theValues) {
-            return new StringCriterion<StringClientParam>(
-                    getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS,
-                    Arrays.asList(theValues));
-        }
-    }
+		@Override
+		public ICriterion<?> values(String... theValues) {
+				return new StringCriterion<StringClientParam>(
+						getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS,
+						Arrays.asList(theValues));
+		}
+	}
 
-    private class StringMatches implements IStringMatch {
-        @Override
-        public ICriterion<StringClientParam> value(String theValue) {
-            return new StringCriterion<>(getParamName(), theValue);
-        }
+	private class StringMatches implements IStringMatch {
+		@Override
+		public ICriterion<StringClientParam> value(String theValue) {
+				return new StringCriterion<>(getParamName(), theValue);
+		}
 
-        @Override
-        public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
-            return new StringCriterion<>(getParamName(), theValue.getValue());
-        }
+		@Override
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+				return new StringCriterion<>(getParamName(), theValue.getValue());
+		}
 
-        @Override
-        public ICriterion<StringClientParam> values(List<String> theValue) {
-            return new StringCriterion<>(getParamName(), theValue);
-        }
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+				return new StringCriterion<>(getParamName(), theValue);
+		}
 
-        @Override
-        public ICriterion<?> values(String... theValues) {
-            return new StringCriterion<StringClientParam>(getParamName(), Arrays.asList(theValues));
-        }
-    }
+		@Override
+		public ICriterion<?> values(String... theValues) {
+				return new StringCriterion<StringClientParam>(getParamName(), Arrays.asList(theValues));
+		}
+	}
 }

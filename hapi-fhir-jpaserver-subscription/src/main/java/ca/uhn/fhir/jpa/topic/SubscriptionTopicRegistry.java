@@ -19,34 +19,34 @@
  */
 package ca.uhn.fhir.jpa.topic;
 
+import org.hl7.fhir.r5.model.SubscriptionTopic;
+
 import java.util.Collection;
 import java.util.Set;
 
-import org.hl7.fhir.r5.model.SubscriptionTopic;
-
 public class SubscriptionTopicRegistry {
-    private final ActiveSubscriptionTopicCache myActiveSubscriptionTopicCache =
-            new ActiveSubscriptionTopicCache();
+	private final ActiveSubscriptionTopicCache myActiveSubscriptionTopicCache =
+				new ActiveSubscriptionTopicCache();
 
-    public SubscriptionTopicRegistry() {}
+	public SubscriptionTopicRegistry() {}
 
-    public int size() {
-        return myActiveSubscriptionTopicCache.size();
-    }
+	public int size() {
+		return myActiveSubscriptionTopicCache.size();
+	}
 
-    public boolean register(SubscriptionTopic resource) {
-        return myActiveSubscriptionTopicCache.add(resource);
-    }
+	public boolean register(SubscriptionTopic resource) {
+		return myActiveSubscriptionTopicCache.add(resource);
+	}
 
-    public void unregisterAllIdsNotInCollection(Set<String> theIdsToRetain) {
-        myActiveSubscriptionTopicCache.removeIdsNotInCollection(theIdsToRetain);
-    }
+	public void unregisterAllIdsNotInCollection(Set<String> theIdsToRetain) {
+		myActiveSubscriptionTopicCache.removeIdsNotInCollection(theIdsToRetain);
+	}
 
-    public Collection<SubscriptionTopic> getAll() {
-        return myActiveSubscriptionTopicCache.getAll();
-    }
+	public Collection<SubscriptionTopic> getAll() {
+		return myActiveSubscriptionTopicCache.getAll();
+	}
 
-    public void unregister(String theSubscriptionTopicId) {
-        myActiveSubscriptionTopicCache.remove(theSubscriptionTopicId);
-    }
+	public void unregister(String theSubscriptionTopicId) {
+		myActiveSubscriptionTopicCache.remove(theSubscriptionTopicId);
+	}
 }

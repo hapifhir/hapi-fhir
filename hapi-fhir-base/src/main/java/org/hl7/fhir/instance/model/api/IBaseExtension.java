@@ -29,13 +29,13 @@ import java.util.List;
 // public interface IBaseExtension<T extends IBaseExtension<T, D>, D> extends ICompositeType {
 public interface IBaseExtension<T, D> extends ICompositeType {
 
-    List<T> getExtension();
+	List<T> getExtension();
 
-    String getUrl();
+	String getUrl();
 
-    IBaseDatatype getValue();
+	IBaseDatatype getValue();
 
-    T setUrl(String theUrl);
+	T setUrl(String theUrl);
 
-    T setValue(IBaseDatatype theValue);
+	T setValue(IBaseDatatype theValue);
 }

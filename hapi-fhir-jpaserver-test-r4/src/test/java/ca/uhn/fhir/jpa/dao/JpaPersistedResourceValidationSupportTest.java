@@ -20,8 +20,12 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.function.Function;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.sl.cache.Cache;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -34,12 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.sl.cache.Cache;
+import java.util.function.Function;
 
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -52,59 +51,59 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class JpaPersistedResourceValidationSupportTest {
 
-    private FhirContext theFhirContext = FhirContext.forR4();
+	private FhirContext theFhirContext = FhirContext.forR4();
 
-    @Mock private ITermReadSvc myTermReadSvc;
-    @Mock private DaoRegistry myDaoRegistry;
-    @Mock private Cache<String, IBaseResource> myLoadCache;
-    @Mock private IFhirResourceDao<ValueSet> myValueSetResourceDao;
+	@Mock private ITermReadSvc myTermReadSvc;
+	@Mock private DaoRegistry myDaoRegistry;
+	@Mock private Cache<String, IBaseResource> myLoadCache;
+	@Mock private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 
-    @InjectMocks
-    private IValidationSupport testedClass =
-            new JpaPersistedResourceValidationSupport(theFhirContext);
+	@InjectMocks
+	private IValidationSupport testedClass =
+				new JpaPersistedResourceValidationSupport(theFhirContext);
 
-    private Class<? extends IBaseResource> myCodeSystemType = CodeSystem.class;
-    private Class<? extends IBaseResource> myValueSetType = ValueSet.class;
+	private Class<? extends IBaseResource> myCodeSystemType = CodeSystem.class;
+	private Class<? extends IBaseResource> myValueSetType = ValueSet.class;
 
-    @BeforeEach
-    public void setup() {
-        ReflectionTestUtils.setField(testedClass, "myValueSetType", myValueSetType);
-    }
+	@BeforeEach
+	public void setup() {
+		ReflectionTestUtils.setField(testedClass, "myValueSetType", myValueSetType);
+	}
 
-    @Nested
-    public class FetchCodeSystemTests {
+	@Nested
+	public class FetchCodeSystemTests {
 
-        @Test
-        void fetchCodeSystemMustUseForcedId() {
-            testedClass.fetchCodeSystem("string-containing-loinc");
+		@Test
+		void fetchCodeSystemMustUseForcedId() {
+				testedClass.fetchCodeSystem("string-containing-loinc");
 
-            verify(myTermReadSvc, times(1)).readCodeSystemByForcedId(LOINC_LOW);
-            verify(myLoadCache, never()).get(anyString(), isA(Function.class));
-        }
+				verify(myTermReadSvc, times(1)).readCodeSystemByForcedId(LOINC_LOW);
+				verify(myLoadCache, never()).get(anyString(), isA(Function.class));
+		}
 
-        @Test
-        void fetchCodeSystemMustNotUseForcedId() {
-            testedClass.fetchCodeSystem("string-not-containing-l-o-i-n-c");
+		@Test
+		void fetchCodeSystemMustNotUseForcedId() {
+				testedClass.fetchCodeSystem("string-not-containing-l-o-i-n-c");
 
-            verify(myTermReadSvc, never()).readCodeSystemByForcedId(LOINC_LOW);
-            verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
-        }
-    }
+				verify(myTermReadSvc, never()).readCodeSystemByForcedId(LOINC_LOW);
+				verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
+		}
+	}
 
-    @Nested
-    public class FetchValueSetTests {
+	@Nested
+	public class FetchValueSetTests {
 
-        @Test
-        void fetchValueSetMustUseForcedId() {
-            final String valueSetId = "string-containing-loinc";
-            assertNull(testedClass.fetchValueSet(valueSetId));
-        }
+		@Test
+		void fetchValueSetMustUseForcedId() {
+				final String valueSetId = "string-containing-loinc";
+				assertNull(testedClass.fetchValueSet(valueSetId));
+		}
 
-        @Test
-        void fetchValueSetMustNotUseForcedId() {
-            testedClass.fetchValueSet("string-not-containing-l-o-i-n-c");
+		@Test
+		void fetchValueSetMustNotUseForcedId() {
+				testedClass.fetchValueSet("string-not-containing-l-o-i-n-c");
 
-            verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
-        }
-    }
+				verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
+		}
+	}
 }

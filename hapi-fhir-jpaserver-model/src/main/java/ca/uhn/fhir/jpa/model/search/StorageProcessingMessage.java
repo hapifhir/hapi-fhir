@@ -21,19 +21,19 @@ package ca.uhn.fhir.jpa.model.search;
 
 public class StorageProcessingMessage {
 
-    private String myMessage;
+	private String myMessage;
 
-    public String getMessage() {
-        return myMessage;
-    }
+	public String getMessage() {
+		return myMessage;
+	}
 
-    public StorageProcessingMessage setMessage(String theMessage) {
-        myMessage = theMessage;
-        return this;
-    }
+	public StorageProcessingMessage setMessage(String theMessage) {
+		myMessage = theMessage;
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        return myMessage;
-    }
+	@Override
+	public String toString() {
+		return myMessage;
+	}
 }

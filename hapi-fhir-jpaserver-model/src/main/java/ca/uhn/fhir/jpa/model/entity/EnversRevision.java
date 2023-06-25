@@ -20,58 +20,58 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import java.util.Date;
-import java.util.Objects;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.envers.RevisionType;
 
+import java.util.Date;
+import java.util.Objects;
+
 public class EnversRevision {
-    private final RevisionType myRevisionType;
-    private final long myRevisionNumber;
-    private final Date myRevisionTimestamp;
+	private final RevisionType myRevisionType;
+	private final long myRevisionNumber;
+	private final Date myRevisionTimestamp;
 
-    public EnversRevision(
-            RevisionType theRevisionType, long theRevisionNumber, Date theRevisionTimestamp) {
-        myRevisionType = theRevisionType;
-        myRevisionNumber = theRevisionNumber;
-        myRevisionTimestamp = theRevisionTimestamp;
-    }
+	public EnversRevision(
+				RevisionType theRevisionType, long theRevisionNumber, Date theRevisionTimestamp) {
+		myRevisionType = theRevisionType;
+		myRevisionNumber = theRevisionNumber;
+		myRevisionTimestamp = theRevisionTimestamp;
+	}
 
-    public RevisionType getRevisionType() {
-        return myRevisionType;
-    }
+	public RevisionType getRevisionType() {
+		return myRevisionType;
+	}
 
-    public long getRevisionNumber() {
-        return myRevisionNumber;
-    }
+	public long getRevisionNumber() {
+		return myRevisionNumber;
+	}
 
-    public Date getRevisionTimestamp() {
-        return myRevisionTimestamp;
-    }
+	public Date getRevisionTimestamp() {
+		return myRevisionTimestamp;
+	}
 
-    @Override
-    public boolean equals(Object theO) {
+	@Override
+	public boolean equals(Object theO) {
 
-        if (this == theO) return true;
-        if (theO == null || getClass() != theO.getClass()) return false;
-        final EnversRevision that = (EnversRevision) theO;
-        return myRevisionNumber == that.myRevisionNumber
-                && myRevisionTimestamp == that.myRevisionTimestamp
-                && myRevisionType == that.myRevisionType;
-    }
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		final EnversRevision that = (EnversRevision) theO;
+		return myRevisionNumber == that.myRevisionNumber
+					&& myRevisionTimestamp == that.myRevisionTimestamp
+					&& myRevisionType == that.myRevisionType;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(myRevisionType, myRevisionNumber, myRevisionTimestamp);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(myRevisionType, myRevisionNumber, myRevisionTimestamp);
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("myRevisionType", myRevisionType)
-                .append("myRevisionNumber", myRevisionNumber)
-                .append("myRevisionTimestamp", myRevisionTimestamp)
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+					.append("myRevisionType", myRevisionType)
+					.append("myRevisionNumber", myRevisionNumber)
+					.append("myRevisionTimestamp", myRevisionTimestamp)
+					.toString();
+	}
 }

@@ -19,132 +19,131 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
+import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
-import ca.uhn.fhir.model.api.IModelJson;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonAutoDetect(
-        creatorVisibility = JsonAutoDetect.Visibility.NONE,
-        fieldVisibility = JsonAutoDetect.Visibility.NONE,
-        getterVisibility = JsonAutoDetect.Visibility.NONE,
-        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE)
+		creatorVisibility = JsonAutoDetect.Visibility.NONE,
+		fieldVisibility = JsonAutoDetect.Visibility.NONE,
+		getterVisibility = JsonAutoDetect.Visibility.NONE,
+		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+		setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BulkExportResponseJson {
 
-    @JsonProperty("transactionTime")
-    @JsonSerialize(using = JsonDateSerializer.class)
-    @JsonDeserialize(using = JsonDateDeserializer.class)
-    private Date myTransactionTime;
+	@JsonProperty("transactionTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myTransactionTime;
 
-    @JsonProperty("request")
-    private String myRequest;
+	@JsonProperty("request")
+	private String myRequest;
 
-    @JsonProperty("requiresAccessToken")
-    private Boolean myRequiresAccessToken;
+	@JsonProperty("requiresAccessToken")
+	private Boolean myRequiresAccessToken;
 
-    @JsonProperty("output")
-    private List<Output> myOutput;
+	@JsonProperty("output")
+	private List<Output> myOutput;
 
-    /*
-     * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
-     */
-    @JsonInclude
-    @JsonProperty("error")
-    private List<Output> myError = new ArrayList<>();
+	/*
+	* Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
+	*/
+	@JsonInclude
+	@JsonProperty("error")
+	private List<Output> myError = new ArrayList<>();
 
-    @JsonProperty("message")
-    private String myMsg;
+	@JsonProperty("message")
+	private String myMsg;
 
-    public Date getTransactionTime() {
-        return myTransactionTime;
-    }
+	public Date getTransactionTime() {
+		return myTransactionTime;
+	}
 
-    public BulkExportResponseJson setTransactionTime(Date theTransactionTime) {
-        myTransactionTime = theTransactionTime;
-        return this;
-    }
+	public BulkExportResponseJson setTransactionTime(Date theTransactionTime) {
+		myTransactionTime = theTransactionTime;
+		return this;
+	}
 
-    public String getRequest() {
-        return myRequest;
-    }
+	public String getRequest() {
+		return myRequest;
+	}
 
-    public BulkExportResponseJson setRequest(String theRequest) {
-        myRequest = theRequest;
-        return this;
-    }
+	public BulkExportResponseJson setRequest(String theRequest) {
+		myRequest = theRequest;
+		return this;
+	}
 
-    public Boolean getRequiresAccessToken() {
-        return myRequiresAccessToken;
-    }
+	public Boolean getRequiresAccessToken() {
+		return myRequiresAccessToken;
+	}
 
-    public BulkExportResponseJson setRequiresAccessToken(Boolean theRequiresAccessToken) {
-        myRequiresAccessToken = theRequiresAccessToken;
-        return this;
-    }
+	public BulkExportResponseJson setRequiresAccessToken(Boolean theRequiresAccessToken) {
+		myRequiresAccessToken = theRequiresAccessToken;
+		return this;
+	}
 
-    public List<Output> getOutput() {
-        if (myOutput == null) {
-            myOutput = new ArrayList<>();
-        }
-        return myOutput;
-    }
+	public List<Output> getOutput() {
+		if (myOutput == null) {
+				myOutput = new ArrayList<>();
+		}
+		return myOutput;
+	}
 
-    public List<Output> getError() {
-        if (myError == null) {
-            myError = new ArrayList<>();
-        }
-        return myError;
-    }
+	public List<Output> getError() {
+		if (myError == null) {
+				myError = new ArrayList<>();
+		}
+		return myError;
+	}
 
-    public Output addOutput() {
-        Output retVal = new Output();
-        getOutput().add(retVal);
-        return retVal;
-    }
+	public Output addOutput() {
+		Output retVal = new Output();
+		getOutput().add(retVal);
+		return retVal;
+	}
 
-    public String getMsg() {
-        return myMsg;
-    }
+	public String getMsg() {
+		return myMsg;
+	}
 
-    public void setMsg(String theMsg) {
-        myMsg = theMsg;
-    }
+	public void setMsg(String theMsg) {
+		myMsg = theMsg;
+	}
 
-    public static class Output implements IModelJson {
+	public static class Output implements IModelJson {
 
-        @JsonProperty("type")
-        private String myType;
+		@JsonProperty("type")
+		private String myType;
 
-        @JsonProperty("url")
-        private String myUrl;
+		@JsonProperty("url")
+		private String myUrl;
 
-        public String getType() {
-            return myType;
-        }
+		public String getType() {
+				return myType;
+		}
 
-        public Output setType(String theType) {
-            myType = theType;
-            return this;
-        }
+		public Output setType(String theType) {
+				myType = theType;
+				return this;
+		}
 
-        public String getUrl() {
-            return myUrl;
-        }
+		public String getUrl() {
+				return myUrl;
+		}
 
-        public Output setUrl(String theUrl) {
-            myUrl = theUrl;
-            return this;
-        }
-    }
+		public Output setUrl(String theUrl) {
+				myUrl = theUrl;
+				return this;
+		}
+	}
 }

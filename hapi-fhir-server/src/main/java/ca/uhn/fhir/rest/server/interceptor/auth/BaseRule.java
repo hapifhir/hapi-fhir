@@ -19,142 +19,141 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 abstract class BaseRule implements IAuthRule {
-    private String myName;
-    private PolicyEnum myMode;
-    private List<IAuthRuleTester> myTesters;
+	private String myName;
+	private PolicyEnum myMode;
+	private List<IAuthRuleTester> myTesters;
 
-    BaseRule(String theRuleName) {
-        myName = theRuleName;
-    }
+	BaseRule(String theRuleName) {
+		myName = theRuleName;
+	}
 
-    public void addTester(IAuthRuleTester theTester) {
-        Validate.notNull(theTester, "theTester must not be null");
-        if (myTesters == null) {
-            myTesters = new ArrayList<>();
-        }
-        myTesters.add(theTester);
-    }
+	public void addTester(IAuthRuleTester theTester) {
+		Validate.notNull(theTester, "theTester must not be null");
+		if (myTesters == null) {
+				myTesters = new ArrayList<>();
+		}
+		myTesters.add(theTester);
+	}
 
-    public void addTesters(List<IAuthRuleTester> theTesters) {
-        theTesters.forEach(this::addTester);
-    }
+	public void addTesters(List<IAuthRuleTester> theTesters) {
+		theTesters.forEach(this::addTester);
+	}
 
-    private boolean applyTesters(
-            RestOperationTypeEnum theOperation,
-            RequestDetails theRequestDetails,
-            IIdType theInputResourceId,
-            IBaseResource theInputResource,
-            IBaseResource theOutputResource,
-            IRuleApplier theRuleApplier) {
-        assert !(theInputResource != null && theOutputResource != null);
+	private boolean applyTesters(
+				RestOperationTypeEnum theOperation,
+				RequestDetails theRequestDetails,
+				IIdType theInputResourceId,
+				IBaseResource theInputResource,
+				IBaseResource theOutputResource,
+				IRuleApplier theRuleApplier) {
+		assert !(theInputResource != null && theOutputResource != null);
 
-        boolean retVal = true;
-        if (theOutputResource == null) {
-            IAuthRuleTester.RuleTestRequest inputRequest =
-                    new IAuthRuleTester.RuleTestRequest(
-                            myMode,
-                            theOperation,
-                            theRequestDetails,
-                            theInputResourceId,
-                            theInputResource,
-                            theRuleApplier);
+		boolean retVal = true;
+		if (theOutputResource == null) {
+				IAuthRuleTester.RuleTestRequest inputRequest =
+						new IAuthRuleTester.RuleTestRequest(
+									myMode,
+									theOperation,
+									theRequestDetails,
+									theInputResourceId,
+									theInputResource,
+									theRuleApplier);
 
-            for (IAuthRuleTester next : getTesters()) {
-                if (!next.matches(inputRequest)) {
-                    retVal = false;
-                    break;
-                }
-            }
-        } else {
-            IAuthRuleTester.RuleTestRequest outputRequest =
-                    new IAuthRuleTester.RuleTestRequest(
-                            myMode,
-                            theOperation,
-                            theRequestDetails,
-                            theOutputResource.getIdElement(),
-                            theOutputResource,
-                            theRuleApplier);
-            for (IAuthRuleTester next : getTesters()) {
-                if (!next.matchesOutput(outputRequest)) {
-                    retVal = false;
-                    break;
-                }
-            }
-        }
+				for (IAuthRuleTester next : getTesters()) {
+					if (!next.matches(inputRequest)) {
+						retVal = false;
+						break;
+					}
+				}
+		} else {
+				IAuthRuleTester.RuleTestRequest outputRequest =
+						new IAuthRuleTester.RuleTestRequest(
+									myMode,
+									theOperation,
+									theRequestDetails,
+									theOutputResource.getIdElement(),
+									theOutputResource,
+									theRuleApplier);
+				for (IAuthRuleTester next : getTesters()) {
+					if (!next.matchesOutput(outputRequest)) {
+						retVal = false;
+						break;
+					}
+				}
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    PolicyEnum getMode() {
-        return myMode;
-    }
+	PolicyEnum getMode() {
+		return myMode;
+	}
 
-    BaseRule setMode(PolicyEnum theRuleMode) {
-        myMode = theRuleMode;
-        return this;
-    }
+	BaseRule setMode(PolicyEnum theRuleMode) {
+		myMode = theRuleMode;
+		return this;
+	}
 
-    @Override
-    public String getName() {
-        return myName;
-    }
+	@Override
+	public String getName() {
+		return myName;
+	}
 
-    public List<IAuthRuleTester> getTesters() {
-        if (myTesters == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(myTesters);
-    }
+	public List<IAuthRuleTester> getTesters() {
+		if (myTesters == null) {
+				return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(myTesters);
+	}
 
-    Verdict newVerdict(
-            RestOperationTypeEnum theOperation,
-            RequestDetails theRequestDetails,
-            IBaseResource theInputResource,
-            IIdType theInputResourceId,
-            IBaseResource theOutputResource,
-            IRuleApplier theRuleApplier) {
-        if (!applyTesters(
-                theOperation,
-                theRequestDetails,
-                theInputResourceId,
-                theInputResource,
-                theOutputResource,
-                theRuleApplier)) {
-            return null;
-        }
-        return new Verdict(myMode, this);
-    }
+	Verdict newVerdict(
+				RestOperationTypeEnum theOperation,
+				RequestDetails theRequestDetails,
+				IBaseResource theInputResource,
+				IIdType theInputResourceId,
+				IBaseResource theOutputResource,
+				IRuleApplier theRuleApplier) {
+		if (!applyTesters(
+					theOperation,
+					theRequestDetails,
+					theInputResourceId,
+					theInputResource,
+					theOutputResource,
+					theRuleApplier)) {
+				return null;
+		}
+		return new Verdict(myMode, this);
+	}
 
-    protected boolean isResourceAccess(Pointcut thePointcut) {
-        return thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES)
-                || thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
-    }
+	protected boolean isResourceAccess(Pointcut thePointcut) {
+		return thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES)
+					|| thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
+	}
 
-    @Override
-    public String toString() {
-        ToStringBuilder builder = toStringBuilder();
-        return builder.toString();
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder builder = toStringBuilder();
+		return builder.toString();
+	}
 
-    ToStringBuilder toStringBuilder() {
-        ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("testers", myTesters);
-        return builder;
-    }
+	ToStringBuilder toStringBuilder() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("testers", myTesters);
+		return builder;
+	}
 }

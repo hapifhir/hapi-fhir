@@ -19,32 +19,32 @@
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nonnull;
+
 /** A single autocomplete search hit. */
 class TokenAutocompleteHit {
-    @Nonnull final String mySystemCode;
-    final String myDisplayText;
+	@Nonnull final String mySystemCode;
+	final String myDisplayText;
 
-    TokenAutocompleteHit(@Nonnull String theSystemCode, String theDisplayText) {
-        Validate.notEmpty(theSystemCode);
-        mySystemCode = theSystemCode;
-        myDisplayText = theDisplayText;
-    }
+	TokenAutocompleteHit(@Nonnull String theSystemCode, String theDisplayText) {
+		Validate.notEmpty(theSystemCode);
+		mySystemCode = theSystemCode;
+		myDisplayText = theDisplayText;
+	}
 
-    @Nonnull
-    public String getSystemCode() {
-        return mySystemCode;
-    }
+	@Nonnull
+	public String getSystemCode() {
+		return mySystemCode;
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("mySystemCode", mySystemCode)
-                .append("myDisplayText", myDisplayText)
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+					.append("mySystemCode", mySystemCode)
+					.append("myDisplayText", myDisplayText)
+					.toString();
+	}
 }

@@ -30,5 +30,5 @@ import com.google.common.annotations.VisibleForTesting;
 @VisibleForTesting
 public interface IAnonymousInterceptor {
 
-    void invoke(IPointcut thePointcut, HookParams theArgs);
+	void invoke(IPointcut thePointcut, HookParams theArgs);
 }

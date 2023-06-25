@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -35,54 +27,61 @@ import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class CountParameter implements IParameter {
 
-    @Override
-    public void translateClientArgumentIntoQueryArgument(
-            FhirContext theContext,
-            Object theSourceClientArgument,
-            Map<String, List<String>> theTargetQueryArguments,
-            IBaseResource theTargetResource)
-            throws InternalErrorException {
-        if (theSourceClientArgument != null) {
-            IntegerDt since = ParameterUtil.toInteger(theSourceClientArgument);
-            if (since.isEmpty() == false) {
-                theTargetQueryArguments.put(
-                        Constants.PARAM_COUNT, Collections.singletonList(since.getValueAsString()));
-            }
-        }
-    }
+	@Override
+	public void translateClientArgumentIntoQueryArgument(
+				FhirContext theContext,
+				Object theSourceClientArgument,
+				Map<String, List<String>> theTargetQueryArguments,
+				IBaseResource theTargetResource)
+				throws InternalErrorException {
+		if (theSourceClientArgument != null) {
+				IntegerDt since = ParameterUtil.toInteger(theSourceClientArgument);
+				if (since.isEmpty() == false) {
+					theTargetQueryArguments.put(
+								Constants.PARAM_COUNT, Collections.singletonList(since.getValueAsString()));
+				}
+		}
+	}
 
-    @Override
-    public void initializeTypes(
-            Method theMethod,
-            Class<? extends Collection<?>> theOuterCollectionType,
-            Class<? extends Collection<?>> theInnerCollectionType,
-            Class<?> theParameterType) {
-        if (theOuterCollectionType != null) {
-            throw new ConfigurationException(
-                    Msg.code(1420)
-                            + "Method '"
-                            + theMethod.getName()
-                            + "' in type '"
-                            + theMethod.getDeclaringClass().getCanonicalName()
-                            + "' is annotated with @"
-                            + Count.class.getName()
-                            + " but can not be of collection type");
-        }
-        if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
-            throw new ConfigurationException(
-                    Msg.code(1421)
-                            + "Method '"
-                            + theMethod.getName()
-                            + "' in type '"
-                            + theMethod.getDeclaringClass().getCanonicalName()
-                            + "' is annotated with @"
-                            + Count.class.getName()
-                            + " but type '"
-                            + theParameterType
-                            + "' is an invalid type, must be Integer or IntegerType");
-        }
-    }
+	@Override
+	public void initializeTypes(
+				Method theMethod,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType,
+				Class<?> theParameterType) {
+		if (theOuterCollectionType != null) {
+				throw new ConfigurationException(
+						Msg.code(1420)
+									+ "Method '"
+									+ theMethod.getName()
+									+ "' in type '"
+									+ theMethod.getDeclaringClass().getCanonicalName()
+									+ "' is annotated with @"
+									+ Count.class.getName()
+									+ " but can not be of collection type");
+		}
+		if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
+				throw new ConfigurationException(
+						Msg.code(1421)
+									+ "Method '"
+									+ theMethod.getName()
+									+ "' in type '"
+									+ theMethod.getDeclaringClass().getCanonicalName()
+									+ "' is annotated with @"
+									+ Count.class.getName()
+									+ " but type '"
+									+ theParameterType
+									+ "' is an invalid type, must be Integer or IntegerType");
+		}
+	}
 }

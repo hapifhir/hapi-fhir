@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.mdm.batch2;
 
-import java.util.Date;
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -33,35 +27,40 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Date;
+import javax.annotation.Nonnull;
 
 public class MdmGenerateRangeChunksStep
-        implements IFirstJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson> {
-    private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
+		implements IFirstJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
-    @Nonnull
-    @Override
-    public RunOutcome run(
-            @Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails,
-            @Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink)
-            throws JobExecutionFailedException {
-        MdmClearJobParameters params = theStepExecutionDetails.getParameters();
+	@Nonnull
+	@Override
+	public RunOutcome run(
+				@Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails,
+				@Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink)
+				throws JobExecutionFailedException {
+		MdmClearJobParameters params = theStepExecutionDetails.getParameters();
 
-        Date start = Batch2Constants.BATCH_START_DATE;
-        Date end = new Date();
+		Date start = Batch2Constants.BATCH_START_DATE;
+		Date end = new Date();
 
-        for (String nextResourceType : params.getResourceNames()) {
-            ourLog.info(
-                    "Initiating mdm clear of [{}]] Golden Resources from {} to {}",
-                    nextResourceType,
-                    start,
-                    end);
-            MdmChunkRangeJson nextRange = new MdmChunkRangeJson();
-            nextRange.setResourceType(nextResourceType);
-            nextRange.setStart(start);
-            nextRange.setEnd(end);
-            theDataSink.accept(nextRange);
-        }
+		for (String nextResourceType : params.getResourceNames()) {
+				ourLog.info(
+						"Initiating mdm clear of [{}]] Golden Resources from {} to {}",
+						nextResourceType,
+						start,
+						end);
+				MdmChunkRangeJson nextRange = new MdmChunkRangeJson();
+				nextRange.setResourceType(nextResourceType);
+				nextRange.setStart(start);
+				nextRange.setEnd(end);
+				theDataSink.accept(nextRange);
+		}
 
-        return RunOutcome.SUCCESS;
-    }
+		return RunOutcome.SUCCESS;
+	}
 }

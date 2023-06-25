@@ -19,16 +19,16 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import javax.annotation.Nullable;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import javax.annotation.Nullable;
+
 public interface IExpungeEverythingService {
-    void expungeEverything(@Nullable RequestDetails theRequest);
+	void expungeEverything(@Nullable RequestDetails theRequest);
 
-    int getExpungeDeletedEntityCount();
+	int getExpungeDeletedEntityCount();
 
-    int expungeEverythingByType(Class<?> theEntityType);
+	int expungeEverythingByType(Class<?> theEntityType);
 
-    int expungeEverythingMdmLinks();
+	int expungeEverythingMdmLinks();
 }

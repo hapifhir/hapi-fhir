@@ -21,17 +21,17 @@ package ca.uhn.fhir.rest.server.method;
 
 public enum MethodMatchEnum {
 
-    // Order these from worst to best!
+	// Order these from worst to best!
 
-    NONE,
-    APPROXIMATE,
-    EXACT;
+	NONE,
+	APPROXIMATE,
+	EXACT;
 
-    public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
-        if (this.ordinal() < theOther.ordinal()) {
-            return this;
-        } else {
-            return theOther;
-        }
-    }
+	public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
+		if (this.ordinal() < theOther.ordinal()) {
+				return this;
+		} else {
+				return theOther;
+		}
+	}
 }

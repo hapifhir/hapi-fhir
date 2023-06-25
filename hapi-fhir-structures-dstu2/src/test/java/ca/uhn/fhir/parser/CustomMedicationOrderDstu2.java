@@ -10,24 +10,24 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 @ResourceDef(/*name="MedicationOrder"*/ )
 public class CustomMedicationOrderDstu2 extends MedicationOrder {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Child(
-            name = "medication",
-            order = Child.REPLACE_PARENT,
-            min = 1,
-            max = 1,
-            summary = false,
-            modifier = false,
-            type = {Medication.class})
-    private ResourceReferenceDt myMedication;
+	@Child(
+				name = "medication",
+				order = Child.REPLACE_PARENT,
+				min = 1,
+				max = 1,
+				summary = false,
+				modifier = false,
+				type = {Medication.class})
+	private ResourceReferenceDt myMedication;
 
-    @Override
-    public ResourceReferenceDt getMedication() {
-        return myMedication;
-    }
+	@Override
+	public ResourceReferenceDt getMedication() {
+		return myMedication;
+	}
 
-    public void setMedication(ResourceReferenceDt theMedication) {
-        myMedication = theMedication;
-    }
+	public void setMedication(ResourceReferenceDt theMedication) {
+		myMedication = theMedication;
+	}
 }

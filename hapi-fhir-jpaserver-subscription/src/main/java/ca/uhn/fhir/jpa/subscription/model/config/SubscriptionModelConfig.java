@@ -19,23 +19,22 @@
  */
 package ca.uhn.fhir.jpa.subscription.model.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SubscriptionModelConfig {
 
-    @Bean
-    public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-        return new SubscriptionCanonicalizer(theFhirContext);
-    }
+	@Bean
+	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
+		return new SubscriptionCanonicalizer(theFhirContext);
+	}
 
-    @Bean
-    public SubscriptionStrategyEvaluator subscriptionStrategyEvaluator() {
-        return new SubscriptionStrategyEvaluator();
-    }
+	@Bean
+	public SubscriptionStrategyEvaluator subscriptionStrategyEvaluator() {
+		return new SubscriptionStrategyEvaluator();
+	}
 }

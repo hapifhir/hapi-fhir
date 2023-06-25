@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import java.util.List;
-
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 
+import java.util.List;
+
 public interface ILibraryManagerFactory {
-    LibraryManager create(List<LibrarySourceProvider> theLibraryContentProviders);
+	LibraryManager create(List<LibrarySourceProvider> theLibraryContentProviders);
 }

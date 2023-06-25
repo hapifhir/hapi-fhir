@@ -23,35 +23,35 @@ import javax.annotation.Nullable;
 
 public class PreferHeader {
 
-    private PreferReturnEnum myReturn;
-    private boolean myRespondAsync;
-    private PreferHandlingEnum myHanding;
+	private PreferReturnEnum myReturn;
+	private boolean myRespondAsync;
+	private PreferHandlingEnum myHanding;
 
-    @Nullable
-    public PreferReturnEnum getReturn() {
-        return myReturn;
-    }
+	@Nullable
+	public PreferReturnEnum getReturn() {
+		return myReturn;
+	}
 
-    public PreferHeader setReturn(PreferReturnEnum theReturn) {
-        myReturn = theReturn;
-        return this;
-    }
+	public PreferHeader setReturn(PreferReturnEnum theReturn) {
+		myReturn = theReturn;
+		return this;
+	}
 
-    public boolean getRespondAsync() {
-        return myRespondAsync;
-    }
+	public boolean getRespondAsync() {
+		return myRespondAsync;
+	}
 
-    public PreferHeader setRespondAsync(boolean theRespondAsync) {
-        myRespondAsync = theRespondAsync;
-        return this;
-    }
+	public PreferHeader setRespondAsync(boolean theRespondAsync) {
+		myRespondAsync = theRespondAsync;
+		return this;
+	}
 
-    @Nullable
-    public PreferHandlingEnum getHanding() {
-        return myHanding;
-    }
+	@Nullable
+	public PreferHandlingEnum getHanding() {
+		return myHanding;
+	}
 
-    public void setHanding(PreferHandlingEnum theHanding) {
-        myHanding = theHanding;
-    }
+	public void setHanding(PreferHandlingEnum theHanding) {
+		myHanding = theHanding;
+	}
 }

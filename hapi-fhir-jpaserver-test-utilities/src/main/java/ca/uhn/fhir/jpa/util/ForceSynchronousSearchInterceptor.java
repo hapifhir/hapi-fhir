@@ -25,8 +25,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 public class ForceSynchronousSearchInterceptor {
 
-    @Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-    public void storagePreSearchRegistered(SearchParameterMap theMap) {
-        theMap.setLoadSynchronous(true);
-    }
+	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	public void storagePreSearchRegistered(SearchParameterMap theMap) {
+		theMap.setLoadSynchronous(true);
+	}
 }

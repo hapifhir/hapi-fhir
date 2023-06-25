@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.validation;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
+import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -30,58 +32,55 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
-import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChain extends ValidationSupportChain {
 
-    private final FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-    @Autowired
-    @Qualifier("myJpaValidationSupport")
-    public IValidationSupport myJpaValidationSupport;
+	@Autowired
+	@Qualifier("myJpaValidationSupport")
+	public IValidationSupport myJpaValidationSupport;
 
-    @Qualifier("myDefaultProfileValidationSupport")
-    @Autowired
-    private IValidationSupport myDefaultProfileValidationSupport;
+	@Qualifier("myDefaultProfileValidationSupport")
+	@Autowired
+	private IValidationSupport myDefaultProfileValidationSupport;
 
-    @Autowired private ITermReadSvc myTerminologyService;
-    @Autowired private NpmJpaValidationSupport myNpmJpaValidationSupport;
-    @Autowired private ITermConceptMappingSvc myConceptMappingSvc;
+	@Autowired private ITermReadSvc myTerminologyService;
+	@Autowired private NpmJpaValidationSupport myNpmJpaValidationSupport;
+	@Autowired private ITermConceptMappingSvc myConceptMappingSvc;
 
-    @Autowired
-    private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
+	@Autowired
+	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
-    /** Constructor */
-    public JpaValidationSupportChain(FhirContext theFhirContext) {
-        myFhirContext = theFhirContext;
-    }
+	/** Constructor */
+	public JpaValidationSupportChain(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
-    @Override
-    public FhirContext getFhirContext() {
-        return myFhirContext;
-    }
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
 
-    @PreDestroy
-    public void flush() {
-        invalidateCaches();
-    }
+	@PreDestroy
+	public void flush() {
+		invalidateCaches();
+	}
 
-    @PostConstruct
-    public void postConstruct() {
-        addValidationSupport(myDefaultProfileValidationSupport);
-        addValidationSupport(myJpaValidationSupport);
-        addValidationSupport(myTerminologyService);
-        addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
-        addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
-        addValidationSupport(myNpmJpaValidationSupport);
-        addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
-        addValidationSupport(myConceptMappingSvc);
+	@PostConstruct
+	public void postConstruct() {
+		addValidationSupport(myDefaultProfileValidationSupport);
+		addValidationSupport(myJpaValidationSupport);
+		addValidationSupport(myTerminologyService);
+		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
+		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
+		addValidationSupport(myNpmJpaValidationSupport);
+		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		addValidationSupport(myConceptMappingSvc);
 
-        // This needs to be last in the chain, it was designed for that
-        addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
-    }
+		// This needs to be last in the chain, it was designed for that
+		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
+	}
 }

@@ -19,40 +19,40 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
-import java.util.Objects;
-
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
+import java.util.Objects;
+
 public class TypedResourcePid {
-    public final String resourceType;
-    public final IResourcePersistentId id;
+	public final String resourceType;
+	public final IResourcePersistentId id;
 
-    public TypedResourcePid(String theResourceType, IResourcePersistentId theId) {
-        this.resourceType = theResourceType;
-        this.id = theId;
-    }
+	public TypedResourcePid(String theResourceType, IResourcePersistentId theId) {
+		this.resourceType = theResourceType;
+		this.id = theId;
+	}
 
-    public TypedResourcePid(String theResourceType, Long theId) {
-        this.resourceType = theResourceType;
-        this.id = JpaPid.fromId(theId);
-    }
+	public TypedResourcePid(String theResourceType, Long theId) {
+		this.resourceType = theResourceType;
+		this.id = JpaPid.fromId(theId);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TypedResourcePid that = (TypedResourcePid) o;
-        return resourceType.equals(that.resourceType) && id.equals(that.id);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		TypedResourcePid that = (TypedResourcePid) o;
+		return resourceType.equals(that.resourceType) && id.equals(that.id);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(resourceType, id);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(resourceType, id);
+	}
 
-    @Override
-    public String toString() {
-        return resourceType + "[" + id + "]";
-    }
+	@Override
+	public String toString() {
+		return resourceType + "[" + id + "]";
+	}
 }

@@ -19,13 +19,12 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import org.apache.commons.lang3.Validate;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
 
 /**
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests.
@@ -43,44 +42,44 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
-    private String myToken;
+	private String myToken;
 
-    /** Constructor. If this constructor is used, a token must be supplied later */
-    @CoverageIgnore
-    public BearerTokenAuthInterceptor() {
-        // nothing
-    }
+	/** Constructor. If this constructor is used, a token must be supplied later */
+	@CoverageIgnore
+	public BearerTokenAuthInterceptor() {
+		// nothing
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theToken The bearer token to use (must not be null)
-     */
-    public BearerTokenAuthInterceptor(String theToken) {
-        Validate.notNull(theToken, "theToken must not be null");
-        myToken = theToken;
-    }
+	/**
+	* Constructor
+	*
+	* @param theToken The bearer token to use (must not be null)
+	*/
+	public BearerTokenAuthInterceptor(String theToken) {
+		Validate.notNull(theToken, "theToken must not be null");
+		myToken = theToken;
+	}
 
-    /** Returns the bearer token to use */
-    public String getToken() {
-        return myToken;
-    }
+	/** Returns the bearer token to use */
+	public String getToken() {
+		return myToken;
+	}
 
-    @Override
-    public void interceptRequest(IHttpRequest theRequest) {
-        theRequest.addHeader(
-                Constants.HEADER_AUTHORIZATION,
-                (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
-    }
+	@Override
+	public void interceptRequest(IHttpRequest theRequest) {
+		theRequest.addHeader(
+					Constants.HEADER_AUTHORIZATION,
+					(Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
+	}
 
-    @Override
-    public void interceptResponse(IHttpResponse theResponse) {
-        // nothing
-    }
+	@Override
+	public void interceptResponse(IHttpResponse theResponse) {
+		// nothing
+	}
 
-    /** Sets the bearer token to use */
-    public void setToken(String theToken) {
-        Validate.notNull(theToken, "theToken must not be null");
-        myToken = theToken;
-    }
+	/** Sets the bearer token to use */
+	public void setToken(String theToken) {
+		Validate.notNull(theToken, "theToken must not be null");
+		myToken = theToken;
+	}
 }

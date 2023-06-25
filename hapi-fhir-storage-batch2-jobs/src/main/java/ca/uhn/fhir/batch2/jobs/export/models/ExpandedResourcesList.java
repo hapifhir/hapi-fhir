@@ -19,33 +19,33 @@
  */
 package ca.uhn.fhir.batch2.jobs.export.models;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 public class ExpandedResourcesList extends BulkExportJobBase {
 
-    /** List of stringified resources ready for writing to a file/binary. */
-    @JsonProperty("resources")
-    private List<String> myStringifiedResources;
+	/** List of stringified resources ready for writing to a file/binary. */
+	@JsonProperty("resources")
+	private List<String> myStringifiedResources;
 
-    /** only a single resource type per batch step */
-    @JsonProperty("resourceType")
-    private String myResourceType;
+	/** only a single resource type per batch step */
+	@JsonProperty("resourceType")
+	private String myResourceType;
 
-    public List<String> getStringifiedResources() {
-        return myStringifiedResources;
-    }
+	public List<String> getStringifiedResources() {
+		return myStringifiedResources;
+	}
 
-    public void setStringifiedResources(List<String> theStringifiedResources) {
-        myStringifiedResources = theStringifiedResources;
-    }
+	public void setStringifiedResources(List<String> theStringifiedResources) {
+		myStringifiedResources = theStringifiedResources;
+	}
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public void setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-    }
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
 }

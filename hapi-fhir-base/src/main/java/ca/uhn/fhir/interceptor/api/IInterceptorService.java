@@ -20,10 +20,10 @@
 package ca.uhn.fhir.interceptor.api;
 
 public interface IInterceptorService
-        extends IBaseInterceptorService<Pointcut>, IInterceptorBroadcaster {
+		extends IBaseInterceptorService<Pointcut>, IInterceptorBroadcaster {
 
-    void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
+	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 
-    void registerAnonymousInterceptor(
-            Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
+	void registerAnonymousInterceptor(
+				Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
 }

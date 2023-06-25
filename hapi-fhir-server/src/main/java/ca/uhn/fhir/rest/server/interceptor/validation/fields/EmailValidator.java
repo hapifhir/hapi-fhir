@@ -23,11 +23,11 @@ import java.util.regex.Pattern;
 
 public class EmailValidator implements IValidator {
 
-    private Pattern myEmailPattern =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+	private Pattern myEmailPattern =
+				Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-    @Override
-    public boolean isValid(String theString) {
-        return myEmailPattern.matcher(theString).matches();
-    }
+	@Override
+	public boolean isValid(String theString) {
+		return myEmailPattern.matcher(theString).matches();
+	}
 }

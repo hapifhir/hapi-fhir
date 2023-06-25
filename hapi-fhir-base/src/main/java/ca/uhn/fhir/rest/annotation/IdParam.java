@@ -28,10 +28,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface IdParam {
 
-    /**
-     * For {@link Operation extended operations}, any parameter with this value set to <code>true
-     * </code> (default is false) will also be invoked if the operation is invoked against the
-     * resource type.
-     */
-    boolean optional() default false;
+	/**
+	* For {@link Operation extended operations}, any parameter with this value set to <code>true
+	* </code> (default is false) will also be invoked if the operation is invoked against the
+	* resource type.
+	*/
+	boolean optional() default false;
 }

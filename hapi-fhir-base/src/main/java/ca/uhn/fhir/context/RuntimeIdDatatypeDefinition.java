@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-
 public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition
-        implements IRuntimeDatatypeDefinition {
+		implements IRuntimeDatatypeDefinition {
 
-    public RuntimeIdDatatypeDefinition(
-            DatatypeDef theDef,
-            Class<? extends IPrimitiveType<?>> theImplementingClass,
-            boolean theStandardType) {
-        super(theDef, theImplementingClass, theStandardType);
-    }
+	public RuntimeIdDatatypeDefinition(
+				DatatypeDef theDef,
+				Class<? extends IPrimitiveType<?>> theImplementingClass,
+				boolean theStandardType) {
+		super(theDef, theImplementingClass, theStandardType);
+	}
 
-    @Override
-    public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-        return ChildTypeEnum.ID_DATATYPE;
-    }
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.ID_DATATYPE;
+	}
 }

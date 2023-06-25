@@ -20,14 +20,14 @@
 
 package ca.uhn.fhir.model.dstu3.composite;
 
-import java.util.List;
-
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+
+import java.util.List;
 
 /**
  * HAPI/FHIR <b>Narrative</b> Datatype (A human-readable formatted text, including images)
@@ -39,65 +39,65 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 @DatatypeDef(name = "Narrative")
 public class NarrativeDt extends BaseNarrativeDt {
 
-    @Child(name = "div", type = XhtmlDt.class, order = 1, min = 1, max = 1)
-    private XhtmlDt myDiv;
+	@Child(name = "div", type = XhtmlDt.class, order = 1, min = 1, max = 1)
+	private XhtmlDt myDiv;
 
-    public NarrativeDt() {
-        // nothing
-    }
+	public NarrativeDt() {
+		// nothing
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return ca.uhn.fhir.util.ElementUtil.isEmpty(myDiv);
-    }
+	@Override
+	public boolean isEmpty() {
+		return ca.uhn.fhir.util.ElementUtil.isEmpty(myDiv);
+	}
 
-    @Override
-    public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-        return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDiv);
-    }
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDiv);
+	}
 
-    /**
-     * Gets the value(s) for <b>div</b> (Limited xhtml content). creating it if it does not exist.
-     * Will not return <code>null</code>.
-     *
-     * <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
-     */
-    public XhtmlDt getDivElement() {
-        return getDiv();
-    }
+	/**
+	* Gets the value(s) for <b>div</b> (Limited xhtml content). creating it if it does not exist.
+	* Will not return <code>null</code>.
+	*
+	* <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
+	*/
+	public XhtmlDt getDivElement() {
+		return getDiv();
+	}
 
-    /**
-     * Gets the value(s) for <b>div</b> (Limited xhtml content). creating it if it does not exist.
-     * Will not return <code>null</code>.
-     *
-     * <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
-     */
-    @Override
-    public XhtmlDt getDiv() {
-        if (myDiv == null) {
-            myDiv = new XhtmlDt();
-        }
-        return myDiv;
-    }
+	/**
+	* Gets the value(s) for <b>div</b> (Limited xhtml content). creating it if it does not exist.
+	* Will not return <code>null</code>.
+	*
+	* <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
+	*/
+	@Override
+	public XhtmlDt getDiv() {
+		if (myDiv == null) {
+				myDiv = new XhtmlDt();
+		}
+		return myDiv;
+	}
 
-    /**
-     * Sets the value(s) for <b>div</b> (Limited xhtml content)
-     *
-     * <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
-     */
-    public void setDiv(XhtmlDt theValue) {
-        myDiv = theValue;
-    }
+	/**
+	* Sets the value(s) for <b>div</b> (Limited xhtml content)
+	*
+	* <p><b>Definition:</b> The actual narrative content, a stripped down version of XHTML
+	*/
+	public void setDiv(XhtmlDt theValue) {
+		myDiv = theValue;
+	}
 
-    /**
-     * Sets the value using a textual DIV (or simple text block which will be converted to XHTML)
-     */
-    public void setDiv(String theTextDiv) {
-        myDiv = new XhtmlDt(theTextDiv);
-    }
+	/**
+	* Sets the value using a textual DIV (or simple text block which will be converted to XHTML)
+	*/
+	public void setDiv(String theTextDiv) {
+		myDiv = new XhtmlDt(theTextDiv);
+	}
 
-    @Override
-    public BoundCodeDt getStatus() {
-        return null;
-    }
+	@Override
+	public BoundCodeDt getStatus() {
+		return null;
+	}
 }

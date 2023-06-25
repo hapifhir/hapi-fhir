@@ -19,6 +19,16 @@
  */
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,17 +42,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.UrlUtil;
-
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -50,114 +49,114 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkImportFileServlet extends HttpServlet {
 
-    public static final String INDEX_PARAM = "index";
-    private static final long serialVersionUID = 8302513561762436076L;
-    private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
-    private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
+	public static final String INDEX_PARAM = "index";
+	private static final long serialVersionUID = 8302513561762436076L;
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
+	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
 
-    public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
+	public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
 
-    @Override
-    protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse)
-            throws IOException {
-        try {
-            String servletPath = theRequest.getServletPath();
-            String requestUri = theRequest.getRequestURI();
-            String contextPath = theRequest.getContextPath();
-            String requestPath = requestUri.substring(contextPath.length() + servletPath.length());
+	@Override
+	protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse)
+				throws IOException {
+		try {
+				String servletPath = theRequest.getServletPath();
+				String requestUri = theRequest.getRequestURI();
+				String contextPath = theRequest.getContextPath();
+				String requestPath = requestUri.substring(contextPath.length() + servletPath.length());
 
-            if ("/download".equals(requestPath)) {
-                handleDownload(theRequest, theResponse);
-                return;
-            }
+				if ("/download".equals(requestPath)) {
+					handleDownload(theRequest, theResponse);
+					return;
+				}
 
-            throw new ResourceNotFoundException(
-                    Msg.code(2049) + "Invalid request path: " + requestPath);
-        } catch (Exception e) {
-            ourLog.warn("Failure serving file", e);
-            int responseCode = 500;
-            if (e instanceof BaseServerResponseException) {
-                responseCode = ((BaseServerResponseException) e).getStatusCode();
-            }
+				throw new ResourceNotFoundException(
+						Msg.code(2049) + "Invalid request path: " + requestPath);
+		} catch (Exception e) {
+				ourLog.warn("Failure serving file", e);
+				int responseCode = 500;
+				if (e instanceof BaseServerResponseException) {
+					responseCode = ((BaseServerResponseException) e).getStatusCode();
+				}
 
-            theResponse.setStatus(responseCode);
-            theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_TEXT);
-            theResponse
-                    .getWriter()
-                    .print("Failed to handle response. See server logs for details.");
-            theResponse.getWriter().close();
-        }
-    }
+				theResponse.setStatus(responseCode);
+				theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_TEXT);
+				theResponse
+						.getWriter()
+						.print("Failed to handle response. See server logs for details.");
+				theResponse.getWriter().close();
+		}
+	}
 
-    private void handleDownload(HttpServletRequest theRequest, HttpServletResponse theResponse)
-            throws IOException {
-        String indexParam = defaultString(theRequest.getParameter(INDEX_PARAM));
-        if (isBlank(indexParam)) {
-            throw new ResourceNotFoundException(
-                    Msg.code(2050) + "Missing or invalid index parameter");
-        }
-        if (!myFileIds.containsKey(indexParam)) {
-            throw new ResourceNotFoundException(
-                    Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
-        }
+	private void handleDownload(HttpServletRequest theRequest, HttpServletResponse theResponse)
+				throws IOException {
+		String indexParam = defaultString(theRequest.getParameter(INDEX_PARAM));
+		if (isBlank(indexParam)) {
+				throw new ResourceNotFoundException(
+						Msg.code(2050) + "Missing or invalid index parameter");
+		}
+		if (!myFileIds.containsKey(indexParam)) {
+				throw new ResourceNotFoundException(
+						Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
+		}
 
-        ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
+		ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
 
-        theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, getHeaderContentType());
+		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, getHeaderContentType());
 
-        IFileSupplier supplier = myFileIds.get(indexParam);
-        if (supplier.isGzip()) {
-            theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-        }
+		IFileSupplier supplier = myFileIds.get(indexParam);
+		if (supplier.isGzip()) {
+				theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+		}
 
-        if (ourLog.isDebugEnabled()) {
-            try (Reader reader = new InputStreamReader(supplier.get())) {
-                String string = IOUtils.toString(reader);
-                ourLog.debug("file content: {}", string);
-            }
-        }
+		if (ourLog.isDebugEnabled()) {
+				try (Reader reader = new InputStreamReader(supplier.get())) {
+					String string = IOUtils.toString(reader);
+					ourLog.debug("file content: {}", string);
+				}
+		}
 
-        try (InputStream reader = supplier.get()) {
-            IOUtils.copy(reader, theResponse.getOutputStream());
-        }
-    }
+		try (InputStream reader = supplier.get()) {
+				IOUtils.copy(reader, theResponse.getOutputStream());
+		}
+	}
 
-    public String getHeaderContentType() {
-        return DEFAULT_HEADER_CONTENT_TYPE;
-    }
+	public String getHeaderContentType() {
+		return DEFAULT_HEADER_CONTENT_TYPE;
+	}
 
-    public void clearFiles() {
-        myFileIds.clear();
-    }
+	public void clearFiles() {
+		myFileIds.clear();
+	}
 
-    /** Registers a file, and returns the index descriptor */
-    public String registerFile(IFileSupplier theFile) {
-        String index = UUID.randomUUID().toString();
-        myFileIds.put(index, theFile);
-        return index;
-    }
+	/** Registers a file, and returns the index descriptor */
+	public String registerFile(IFileSupplier theFile) {
+		String index = UUID.randomUUID().toString();
+		myFileIds.put(index, theFile);
+		return index;
+	}
 
-    /** Mostly intended for unit tests, registers a file using raw file contents. */
-    public String registerFileByContents(String theFileContents) {
-        return registerFile(
-                new IFileSupplier() {
-                    @Override
-                    public boolean isGzip() {
-                        return false;
-                    }
+	/** Mostly intended for unit tests, registers a file using raw file contents. */
+	public String registerFileByContents(String theFileContents) {
+		return registerFile(
+					new IFileSupplier() {
+						@Override
+						public boolean isGzip() {
+								return false;
+						}
 
-                    @Override
-                    public InputStream get() {
-                        return new ReaderInputStream(
-                                new StringReader(theFileContents), StandardCharsets.UTF_8);
-                    }
-                });
-    }
+						@Override
+						public InputStream get() {
+								return new ReaderInputStream(
+										new StringReader(theFileContents), StandardCharsets.UTF_8);
+						}
+					});
+	}
 
-    public interface IFileSupplier {
+	public interface IFileSupplier {
 
-        boolean isGzip();
+		boolean isGzip();
 
-        InputStream get() throws IOException;
-    }
+		InputStream get() throws IOException;
+	}
 }

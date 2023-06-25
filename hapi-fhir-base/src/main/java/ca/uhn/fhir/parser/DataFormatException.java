@@ -21,21 +21,21 @@ package ca.uhn.fhir.parser;
 
 public class DataFormatException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public DataFormatException() {
-        super();
-    }
+	public DataFormatException() {
+		super();
+	}
 
-    public DataFormatException(String theMessage) {
-        super(theMessage);
-    }
+	public DataFormatException(String theMessage) {
+		super(theMessage);
+	}
 
-    public DataFormatException(String theMessage, Throwable theCause) {
-        super(theMessage, theCause);
-    }
+	public DataFormatException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 
-    public DataFormatException(Throwable theCause) {
-        super(theCause);
-    }
+	public DataFormatException(Throwable theCause) {
+		super(theCause);
+	}
 }

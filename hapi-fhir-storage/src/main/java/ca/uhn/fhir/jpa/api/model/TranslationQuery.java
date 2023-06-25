@@ -27,133 +27,133 @@ import org.hl7.fhir.r4.model.Coding;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TranslationQuery {
-    private Coding myCoding;
-    private IIdType myResourceId;
-    private String myUrl;
-    private String myConceptMapVersion;
-    private String mySource;
-    private String myTarget;
-    private String myTargetSystem;
+	private Coding myCoding;
+	private IIdType myResourceId;
+	private String myUrl;
+	private String myConceptMapVersion;
+	private String mySource;
+	private String myTarget;
+	private String myTargetSystem;
 
-    public TranslationQuery() {
-        super();
+	public TranslationQuery() {
+		super();
 
-        myCoding = new Coding();
-    }
+		myCoding = new Coding();
+	}
 
-    public Coding getCoding() {
-        return myCoding;
-    }
+	public Coding getCoding() {
+		return myCoding;
+	}
 
-    public void setCoding(Coding theCoding) {
-        myCoding = theCoding;
-    }
+	public void setCoding(Coding theCoding) {
+		myCoding = theCoding;
+	}
 
-    public boolean hasResourceId() {
-        return myResourceId != null;
-    }
+	public boolean hasResourceId() {
+		return myResourceId != null;
+	}
 
-    public IIdType getResourceId() {
-        return myResourceId;
-    }
+	public IIdType getResourceId() {
+		return myResourceId;
+	}
 
-    public void setResourceId(IIdType theResourceId) {
-        myResourceId = theResourceId;
-    }
+	public void setResourceId(IIdType theResourceId) {
+		myResourceId = theResourceId;
+	}
 
-    public boolean hasUrl() {
-        return isNotBlank(myUrl);
-    }
+	public boolean hasUrl() {
+		return isNotBlank(myUrl);
+	}
 
-    public String getUrl() {
-        return myUrl;
-    }
+	public String getUrl() {
+		return myUrl;
+	}
 
-    public void setUrl(String theUrl) {
-        myUrl = theUrl;
-    }
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
+	}
 
-    public boolean hasConceptMapVersion() {
-        return isNotBlank(myConceptMapVersion);
-    }
+	public boolean hasConceptMapVersion() {
+		return isNotBlank(myConceptMapVersion);
+	}
 
-    public String getConceptMapVersion() {
-        return myConceptMapVersion;
-    }
+	public String getConceptMapVersion() {
+		return myConceptMapVersion;
+	}
 
-    public void setConceptMapVersion(String theConceptMapVersion) {
-        myConceptMapVersion = theConceptMapVersion;
-    }
+	public void setConceptMapVersion(String theConceptMapVersion) {
+		myConceptMapVersion = theConceptMapVersion;
+	}
 
-    public boolean hasSource() {
-        return isNotBlank(mySource);
-    }
+	public boolean hasSource() {
+		return isNotBlank(mySource);
+	}
 
-    public String getSource() {
-        return mySource;
-    }
+	public String getSource() {
+		return mySource;
+	}
 
-    public void setSource(String theSource) {
-        mySource = theSource;
-    }
+	public void setSource(String theSource) {
+		mySource = theSource;
+	}
 
-    public boolean hasTarget() {
-        return isNotBlank(myTarget);
-    }
+	public boolean hasTarget() {
+		return isNotBlank(myTarget);
+	}
 
-    public String getTarget() {
-        return myTarget;
-    }
+	public String getTarget() {
+		return myTarget;
+	}
 
-    public void setTarget(String theTarget) {
-        myTarget = theTarget;
-    }
+	public void setTarget(String theTarget) {
+		myTarget = theTarget;
+	}
 
-    public boolean hasTargetSystem() {
-        return isNotBlank(myTargetSystem);
-    }
+	public boolean hasTargetSystem() {
+		return isNotBlank(myTargetSystem);
+	}
 
-    public String getTargetSystem() {
-        return myTargetSystem;
-    }
+	public String getTargetSystem() {
+		return myTargetSystem;
+	}
 
-    public void setTargetSystem(String theTargetSystem) {
-        myTargetSystem = theTargetSystem;
-    }
+	public void setTargetSystem(String theTargetSystem) {
+		myTargetSystem = theTargetSystem;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
 
-        if (!(o instanceof TranslationQuery)) return false;
+		if (!(o instanceof TranslationQuery)) return false;
 
-        TranslationQuery that = (TranslationQuery) o;
+		TranslationQuery that = (TranslationQuery) o;
 
-        return new EqualsBuilder()
-                .append(getCoding().getCode(), that.getCoding().getCode())
-                .append(getCoding().getSystem(), that.getCoding().getSystem())
-                .append(getCoding().getVersion(), that.getCoding().getVersion())
-                .append(getResourceId(), that.getResourceId())
-                .append(getUrl(), that.getUrl())
-                .append(getConceptMapVersion(), that.getConceptMapVersion())
-                .append(getSource(), that.getSource())
-                .append(getTarget(), that.getTarget())
-                .append(getTargetSystem(), that.getTargetSystem())
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.append(getCoding().getCode(), that.getCoding().getCode())
+					.append(getCoding().getSystem(), that.getCoding().getSystem())
+					.append(getCoding().getVersion(), that.getCoding().getVersion())
+					.append(getResourceId(), that.getResourceId())
+					.append(getUrl(), that.getUrl())
+					.append(getConceptMapVersion(), that.getConceptMapVersion())
+					.append(getSource(), that.getSource())
+					.append(getTarget(), that.getTarget())
+					.append(getTargetSystem(), that.getTargetSystem())
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getCoding().getCode())
-                .append(getCoding().getSystem())
-                .append(getCoding().getVersion())
-                .append(getResourceId())
-                .append(getUrl())
-                .append(getConceptMapVersion())
-                .append(getSource())
-                .append(getTarget())
-                .append(getTargetSystem())
-                .toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+					.append(getCoding().getCode())
+					.append(getCoding().getSystem())
+					.append(getCoding().getVersion())
+					.append(getResourceId())
+					.append(getUrl())
+					.append(getConceptMapVersion())
+					.append(getSource())
+					.append(getTarget())
+					.append(getTargetSystem())
+					.toHashCode();
+	}
 }

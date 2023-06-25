@@ -19,48 +19,47 @@
  */
 package ca.uhn.fhir.mdm.rules.matcher.fieldmatchers;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class HapiDateMatcher implements IMdmFieldMatcher {
 
-    private final FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-    public HapiDateMatcher(FhirContext theFhirContext) {
-        myFhirContext = theFhirContext;
-    }
+	public HapiDateMatcher(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
-    @Override
-    public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
-        DateTimeWrapper left = new DateTimeWrapper(myFhirContext, theLeftBase);
-        DateTimeWrapper right = new DateTimeWrapper(myFhirContext, theRightBase);
+	@Override
+	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
+		DateTimeWrapper left = new DateTimeWrapper(myFhirContext, theLeftBase);
+		DateTimeWrapper right = new DateTimeWrapper(myFhirContext, theRightBase);
 
-        /*
-         * we use the precision to determine how we should equate.
-         * We should use the same precision (the precision of the less
-         * precise date)
-         */
-        int comparison = left.getPrecision().compareTo(right.getPrecision());
+		/*
+			* we use the precision to determine how we should equate.
+			* We should use the same precision (the precision of the less
+			* precise date)
+			*/
+		int comparison = left.getPrecision().compareTo(right.getPrecision());
 
-        String leftString;
-        String rightString;
-        if (comparison == 0) {
-            // same precision
-            leftString = left.getValueAsString();
-            rightString = right.getValueAsString();
-        } else if (comparison > 0) {
-            // left date is more precise than right date
-            leftString = left.getValueAsStringWithPrecision(right.getPrecision());
-            rightString = right.getValueAsString();
-        } else {
-            // right date is more precise than left date
-            rightString = right.getValueAsStringWithPrecision(left.getPrecision());
-            leftString = left.getValueAsString();
-        }
+		String leftString;
+		String rightString;
+		if (comparison == 0) {
+				// same precision
+				leftString = left.getValueAsString();
+				rightString = right.getValueAsString();
+		} else if (comparison > 0) {
+				// left date is more precise than right date
+				leftString = left.getValueAsStringWithPrecision(right.getPrecision());
+				rightString = right.getValueAsString();
+		} else {
+				// right date is more precise than left date
+				rightString = right.getValueAsStringWithPrecision(left.getPrecision());
+				leftString = left.getValueAsString();
+		}
 
-        return leftString.equals(rightString);
-    }
+		return leftString.equals(rightString);
+	}
 }

@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import java.io.Serializable;
-
 import ca.uhn.fhir.i18n.Msg;
+
+import java.io.Serializable;
 
 /**
  * Represents values for <a
@@ -30,108 +30,108 @@ import ca.uhn.fhir.i18n.Msg;
  */
 public class SortSpec implements Serializable {
 
-    private static final long serialVersionUID = 2866833099879713467L;
+	private static final long serialVersionUID = 2866833099879713467L;
 
-    private SortSpec myChain;
-    private String myParamName;
-    private SortOrderEnum myOrder;
+	private SortSpec myChain;
+	private String myParamName;
+	private SortOrderEnum myOrder;
 
-    /** Constructor */
-    public SortSpec() {
-        super();
-    }
+	/** Constructor */
+	public SortSpec() {
+		super();
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
-     *     information.
-     */
-    public SortSpec(String theParamName) {
-        super();
-        myParamName = theParamName;
-    }
+	/**
+	* Constructor
+	*
+	* @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
+	*     information.
+	*/
+	public SortSpec(String theParamName) {
+		super();
+		myParamName = theParamName;
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
-     *     information.
-     * @param theOrder The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for
-     *     more information.
-     */
-    public SortSpec(String theParamName, SortOrderEnum theOrder) {
-        super();
-        myParamName = theParamName;
-        myOrder = theOrder;
-    }
+	/**
+	* Constructor
+	*
+	* @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
+	*     information.
+	* @param theOrder The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for
+	*     more information.
+	*/
+	public SortSpec(String theParamName, SortOrderEnum theOrder) {
+		super();
+		myParamName = theParamName;
+		myOrder = theOrder;
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
-     *     information.
-     * @param theOrder The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for
-     *     more information.
-     * @param theChain The next sorting spec, to be applied only when this spec makes two entries
-     *     equal. See {@link #setChain(SortSpec)} for more information.
-     */
-    public SortSpec(String theParamName, SortOrderEnum theOrder, SortSpec theChain) {
-        super();
-        myParamName = theParamName;
-        myOrder = theOrder;
-        myChain = theChain;
-    }
+	/**
+	* Constructor
+	*
+	* @param theParamName The search name to sort on. See {@link #setParamName(String)} for more
+	*     information.
+	* @param theOrder The order, or <code>null</code>. See {@link #setOrder(SortOrderEnum)} for
+	*     more information.
+	* @param theChain The next sorting spec, to be applied only when this spec makes two entries
+	*     equal. See {@link #setChain(SortSpec)} for more information.
+	*/
+	public SortSpec(String theParamName, SortOrderEnum theOrder, SortSpec theChain) {
+		super();
+		myParamName = theParamName;
+		myOrder = theOrder;
+		myChain = theChain;
+	}
 
-    /**
-     * Gets the chained sort specification, or <code>null</code> if none. If multiple sort
-     * parameters are chained (indicating a sub-sort), the second level sort is chained via this
-     * property.
-     */
-    public SortSpec getChain() {
-        return myChain;
-    }
+	/**
+	* Gets the chained sort specification, or <code>null</code> if none. If multiple sort
+	* parameters are chained (indicating a sub-sort), the second level sort is chained via this
+	* property.
+	*/
+	public SortSpec getChain() {
+		return myChain;
+	}
 
-    /** Returns the actual name of the search param to sort by */
-    public String getParamName() {
-        return myParamName;
-    }
+	/** Returns the actual name of the search param to sort by */
+	public String getParamName() {
+		return myParamName;
+	}
 
-    /**
-     * Returns the sort order specified by this parameter, or <code>null</code> if none is
-     * explicitly provided (which means {@link SortOrderEnum#ASC} according to the <a
-     * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
-     */
-    public SortOrderEnum getOrder() {
-        return myOrder;
-    }
+	/**
+	* Returns the sort order specified by this parameter, or <code>null</code> if none is
+	* explicitly provided (which means {@link SortOrderEnum#ASC} according to the <a
+	* href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
+	*/
+	public SortOrderEnum getOrder() {
+		return myOrder;
+	}
 
-    /**
-     * Sets the chained sort specification, or <code>null</code> if none. If multiple sort
-     * parameters are chained (indicating a sub-sort), the second level sort is chained via this
-     * property.
-     */
-    public SortSpec setChain(SortSpec theChain) {
-        if (theChain == this) {
-            throw new IllegalArgumentException(Msg.code(1966) + "Can not chain this to itself");
-        }
-        myChain = theChain;
-        return this;
-    }
+	/**
+	* Sets the chained sort specification, or <code>null</code> if none. If multiple sort
+	* parameters are chained (indicating a sub-sort), the second level sort is chained via this
+	* property.
+	*/
+	public SortSpec setChain(SortSpec theChain) {
+		if (theChain == this) {
+				throw new IllegalArgumentException(Msg.code(1966) + "Can not chain this to itself");
+		}
+		myChain = theChain;
+		return this;
+	}
 
-    /** Sets the actual name of the search param to sort by */
-    public SortSpec setParamName(String theFieldName) {
-        myParamName = theFieldName;
-        return this;
-    }
+	/** Sets the actual name of the search param to sort by */
+	public SortSpec setParamName(String theFieldName) {
+		myParamName = theFieldName;
+		return this;
+	}
 
-    /**
-     * Sets the sort order specified by this parameter, or <code>null</code> if none should be
-     * explicitly defined (which means {@link SortOrderEnum#ASC} according to the <a
-     * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
-     */
-    public SortSpec setOrder(SortOrderEnum theOrder) {
-        myOrder = theOrder;
-        return this;
-    }
+	/**
+	* Sets the sort order specified by this parameter, or <code>null</code> if none should be
+	* explicitly defined (which means {@link SortOrderEnum#ASC} according to the <a
+	* href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
+	*/
+	public SortSpec setOrder(SortOrderEnum theOrder) {
+		myOrder = theOrder;
+		return this;
+	}
 }

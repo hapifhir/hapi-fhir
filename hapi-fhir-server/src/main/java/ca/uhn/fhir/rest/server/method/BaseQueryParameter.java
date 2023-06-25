@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -33,107 +27,113 @@ import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 public abstract class BaseQueryParameter implements IParameter {
 
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
 
-    public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject)
-            throws InternalErrorException;
+	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject)
+				throws InternalErrorException;
 
-    public abstract String getName();
+	public abstract String getName();
 
-    public abstract RestSearchParameterTypeEnum getParamType();
+	public abstract RestSearchParameterTypeEnum getParamType();
 
-    /** Returns null if blacklist is "none" */
-    public Set<String> getQualifierBlacklist() {
-        return null;
-    }
+	/** Returns null if blacklist is "none" */
+	public Set<String> getQualifierBlacklist() {
+		return null;
+	}
 
-    /** Returns null if whitelist is "all" */
-    public Set<String> getQualifierWhitelist() {
-        return null;
-    }
+	/** Returns null if whitelist is "all" */
+	public Set<String> getQualifierWhitelist() {
+		return null;
+	}
 
-    protected abstract boolean supportsRepetition();
+	protected abstract boolean supportsRepetition();
 
-    /**
-     * Parameter should return true if {@link #parse(FhirContext, List)} should be called even if
-     * the query string contained no values for the given parameter
-     */
-    public abstract boolean handlesMissing();
+	/**
+	* Parameter should return true if {@link #parse(FhirContext, List)} should be called even if
+	* the query string contained no values for the given parameter
+	*/
+	public abstract boolean handlesMissing();
 
-    @Override
-    public void initializeTypes(
-            Method theMethod,
-            Class<? extends Collection<?>> theOuterCollectionType,
-            Class<? extends Collection<?>> theInnerCollectionType,
-            Class<?> theParameterType) {
-        // ignore for now
-    }
+	@Override
+	public void initializeTypes(
+				Method theMethod,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType,
+				Class<?> theParameterType) {
+		// ignore for now
+	}
 
-    public abstract boolean isRequired();
+	public abstract boolean isRequired();
 
-    public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString)
-            throws InternalErrorException, InvalidRequestException;
+	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString)
+				throws InternalErrorException, InvalidRequestException;
 
-    private void parseParams(
-            RequestDetails theRequest,
-            List<QualifiedParamList> paramList,
-            String theQualifiedParamName,
-            String theQualifier) {
-        QualifierDetails qualifiers =
-                QualifierDetails.extractQualifiersFromParameterName(theQualifier);
-        if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
-            return;
-        }
+	private void parseParams(
+				RequestDetails theRequest,
+				List<QualifiedParamList> paramList,
+				String theQualifiedParamName,
+				String theQualifier) {
+		QualifierDetails qualifiers =
+					QualifierDetails.extractQualifiersFromParameterName(theQualifier);
+		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
+				return;
+		}
 
-        String[] value = theRequest.getParameters().get(theQualifiedParamName);
-        if (value != null) {
-            for (String nextParam : value) {
-                if (nextParam.contains(",") == false) {
-                    paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
-                } else {
-                    paramList.add(
-                            QualifiedParamList.splitQueryStringByCommasIgnoreEscape(
-                                    theQualifier, nextParam));
-                }
-            }
-        }
-    }
+		String[] value = theRequest.getParameters().get(theQualifiedParamName);
+		if (value != null) {
+				for (String nextParam : value) {
+					if (nextParam.contains(",") == false) {
+						paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
+					} else {
+						paramList.add(
+									QualifiedParamList.splitQueryStringByCommasIgnoreEscape(
+												theQualifier, nextParam));
+					}
+				}
+		}
+	}
 
-    @Override
-    public Object translateQueryParametersIntoServerArgument(
-            RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-            throws InternalErrorException, InvalidRequestException {
+	@Override
+	public Object translateQueryParametersIntoServerArgument(
+				RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+				throws InternalErrorException, InvalidRequestException {
 
-        List<QualifiedParamList> paramList = new ArrayList<>();
-        String name = getName();
-        parseParams(theRequest, paramList, name, null);
+		List<QualifiedParamList> paramList = new ArrayList<>();
+		String name = getName();
+		parseParams(theRequest, paramList, name, null);
 
-        List<String> qualified = theRequest.getUnqualifiedToQualifiedNames().get(name);
-        if (qualified != null) {
-            for (String nextQualified : qualified) {
-                parseParams(
-                        theRequest,
-                        paramList,
-                        nextQualified,
-                        nextQualified.substring(name.length()));
-            }
-        }
+		List<String> qualified = theRequest.getUnqualifiedToQualifiedNames().get(name);
+		if (qualified != null) {
+				for (String nextQualified : qualified) {
+					parseParams(
+								theRequest,
+								paramList,
+								nextQualified,
+								nextQualified.substring(name.length()));
+				}
+		}
 
-        if (paramList.isEmpty()) {
+		if (paramList.isEmpty()) {
 
-            ourLog.debug(
-                    "No value for parameter '{}' - Qualified names {} and qualifier whitelist {}",
-                    new Object[] {getName(), qualified, getQualifierWhitelist()});
+				ourLog.debug(
+						"No value for parameter '{}' - Qualified names {} and qualifier whitelist {}",
+						new Object[] {getName(), qualified, getQualifierWhitelist()});
 
-            if (handlesMissing()) {
-                return parse(theRequest.getFhirContext(), paramList);
-            }
-            return null;
-        }
+				if (handlesMissing()) {
+					return parse(theRequest.getFhirContext(), paramList);
+				}
+				return null;
+		}
 
-        return parse(theRequest.getFhirContext(), paramList);
-    }
+		return parse(theRequest.getFhirContext(), paramList);
+	}
 }

@@ -26,13 +26,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public class FhirPathExecutionException extends InternalErrorException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public FhirPathExecutionException(Throwable theCause) {
-        super(theCause);
-    }
+	public FhirPathExecutionException(Throwable theCause) {
+		super(theCause);
+	}
 
-    public FhirPathExecutionException(String theMessage) {
-        super(theMessage);
-    }
+	public FhirPathExecutionException(String theMessage) {
+		super(theMessage);
+	}
 }

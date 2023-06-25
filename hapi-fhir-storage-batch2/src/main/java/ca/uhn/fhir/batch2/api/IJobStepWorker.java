@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.batch2.api;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.model.api.IModelJson;
+
+import javax.annotation.Nonnull;
 
 /**
  * This interface is implemented by step workers within the Batch2 framework. It will be called 0..*
@@ -34,22 +34,22 @@ import ca.uhn.fhir.model.api.IModelJson;
  * @param <OT> The step output datatype
  */
 public interface IJobStepWorker<
-        PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
+		PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 
-    /**
-     * Executes a step
-     *
-     * @param theStepExecutionDetails Contains details about the individual execution
-     * @param theDataSink A data sink for data produced during this step. This may never be used
-     *     during the final step of a job.
-     * @return Returns a {@link RunOutcome} containing details about the execution. See the javadoc
-     *     for that class for details about how to populate it.
-     * @throws JobExecutionFailedException This exception indicates an unrecoverable failure. If a
-     *     step worker throws this exception, processing for the job will be aborted.
-     */
-    @Nonnull
-    RunOutcome run(
-            @Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails,
-            @Nonnull IJobDataSink<OT> theDataSink)
-            throws JobExecutionFailedException;
+	/**
+	* Executes a step
+	*
+	* @param theStepExecutionDetails Contains details about the individual execution
+	* @param theDataSink A data sink for data produced during this step. This may never be used
+	*     during the final step of a job.
+	* @return Returns a {@link RunOutcome} containing details about the execution. See the javadoc
+	*     for that class for details about how to populate it.
+	* @throws JobExecutionFailedException This exception indicates an unrecoverable failure. If a
+	*     step worker throws this exception, processing for the job will be aborted.
+	*/
+	@Nonnull
+	RunOutcome run(
+				@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails,
+				@Nonnull IJobDataSink<OT> theDataSink)
+				throws JobExecutionFailedException;
 }

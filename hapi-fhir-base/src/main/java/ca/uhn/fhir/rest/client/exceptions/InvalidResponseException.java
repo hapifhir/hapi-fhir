@@ -25,33 +25,33 @@ import ca.uhn.fhir.util.CoverageIgnore;
 @CoverageIgnore
 public class InvalidResponseException extends BaseServerResponseException {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     */
-    public InvalidResponseException(String theMessage, int theStatusCode) {
-        super(theStatusCode, theMessage);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	*/
+	public InvalidResponseException(String theMessage, int theStatusCode) {
+		super(theStatusCode, theMessage);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theMessage The message
-     * @param theCause The cause
-     */
-    public InvalidResponseException(String theMessage, int theStatusCode, Throwable theCause) {
-        super(theStatusCode, theMessage, theCause);
-    }
+	/**
+	* Constructor
+	*
+	* @param theMessage The message
+	* @param theCause The cause
+	*/
+	public InvalidResponseException(String theMessage, int theStatusCode, Throwable theCause) {
+		super(theStatusCode, theMessage, theCause);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param theCause The underlying cause exception
-     */
-    public InvalidResponseException(Throwable theCause, int theStatusCode) {
-        super(theStatusCode, theCause.toString(), theCause);
-    }
+	/**
+	* Constructor
+	*
+	* @param theCause The underlying cause exception
+	*/
+	public InvalidResponseException(Throwable theCause, int theStatusCode) {
+		super(theStatusCode, theCause.toString(), theCause);
+	}
 }

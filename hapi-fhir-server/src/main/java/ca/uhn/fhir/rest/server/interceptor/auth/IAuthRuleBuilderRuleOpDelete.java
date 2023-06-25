@@ -21,16 +21,16 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 public interface IAuthRuleBuilderRuleOpDelete extends IAuthRuleBuilderRuleOp {
 
-    /**
-     * Specifies that this rule applies to cascading deletes as opposed to regular deletes. Note
-     * that if you want to allow cascading deletes, you will typically require at least two separate
-     * rules: one for the original source resource, and one for the cascade.
-     */
-    IAuthRuleBuilderRuleOp onCascade();
+	/**
+	* Specifies that this rule applies to cascading deletes as opposed to regular deletes. Note
+	* that if you want to allow cascading deletes, you will typically require at least two separate
+	* rules: one for the original source resource, and one for the cascade.
+	*/
+	IAuthRuleBuilderRuleOp onCascade();
 
-    /**
-     * Specifies that this rule applies to delete expunges as opposed to regular deletes. A delete
-     * expunge is a delete operation called with the _expunge=true parameter.
-     */
-    IAuthRuleBuilderRuleOp onExpunge();
+	/**
+	* Specifies that this rule applies to delete expunges as opposed to regular deletes. A delete
+	* expunge is a delete operation called with the _expunge=true parameter.
+	*/
+	IAuthRuleBuilderRuleOp onExpunge();
 }

@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Map.Entry;
-import java.util.*;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -31,11 +32,9 @@ import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map.Entry;
+import java.util.*;
 
 /**
  * A Http Client based on Apache. This is an adapter around the class {@link
@@ -45,97 +44,97 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 
-    private final HttpClient myClient;
+	private final HttpClient myClient;
 
-    public ApacheHttpClient(
-            HttpClient theClient,
-            StringBuilder theUrl,
-            Map<String, List<String>> theIfNoneExistParams,
-            String theIfNoneExistString,
-            RequestTypeEnum theRequestType,
-            List<Header> theHeaders) {
-        super(theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
-        this.myClient = theClient;
-    }
+	public ApacheHttpClient(
+				HttpClient theClient,
+				StringBuilder theUrl,
+				Map<String, List<String>> theIfNoneExistParams,
+				String theIfNoneExistString,
+				RequestTypeEnum theRequestType,
+				List<Header> theHeaders) {
+		super(theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+		this.myClient = theClient;
+	}
 
-    private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
-        String url = myUrl.toString();
-        switch (myRequestType) {
-            case DELETE:
-                return new HttpDelete(url);
-            case PATCH:
-                HttpPatch httpPatch = new HttpPatch(url);
-                httpPatch.setEntity(theEntity);
-                return httpPatch;
-            case OPTIONS:
-                return new HttpOptions(url);
-            case POST:
-                HttpPost httpPost = new HttpPost(url);
-                httpPost.setEntity(theEntity);
-                return httpPost;
-            case PUT:
-                HttpPut httpPut = new HttpPut(url);
-                httpPut.setEntity(theEntity);
-                return httpPut;
-            case GET:
-            default:
-                return new HttpGet(url);
-        }
-    }
+	private HttpRequestBase constructRequestBase(HttpEntity theEntity) {
+		String url = myUrl.toString();
+		switch (myRequestType) {
+				case DELETE:
+					return new HttpDelete(url);
+				case PATCH:
+					HttpPatch httpPatch = new HttpPatch(url);
+					httpPatch.setEntity(theEntity);
+					return httpPatch;
+				case OPTIONS:
+					return new HttpOptions(url);
+				case POST:
+					HttpPost httpPost = new HttpPost(url);
+					httpPost.setEntity(theEntity);
+					return httpPost;
+				case PUT:
+					HttpPut httpPut = new HttpPut(url);
+					httpPut.setEntity(theEntity);
+					return httpPut;
+				case GET:
+				default:
+					return new HttpGet(url);
+		}
+	}
 
-    private UrlEncodedFormEntity createFormEntity(List<NameValuePair> parameters) {
-        try {
-            return new UrlEncodedFormEntity(parameters, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new InternalErrorException(
-                    Msg.code(1479) + "Server does not support UTF-8 (should not happen)", e);
-        }
-    }
+	private UrlEncodedFormEntity createFormEntity(List<NameValuePair> parameters) {
+		try {
+				return new UrlEncodedFormEntity(parameters, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+				throw new InternalErrorException(
+						Msg.code(1479) + "Server does not support UTF-8 (should not happen)", e);
+		}
+	}
 
-    @Override
-    protected IHttpRequest createHttpRequest() {
-        return createHttpRequest((HttpEntity) null);
-    }
+	@Override
+	protected IHttpRequest createHttpRequest() {
+		return createHttpRequest((HttpEntity) null);
+	}
 
-    @Override
-    protected IHttpRequest createHttpRequest(byte[] content) {
-        /*
-         * Note: Be careful about changing which constructor we use for
-         * ByteArrayEntity, as Android's version of HTTPClient doesn't support
-         * the newer ones for whatever reason.
-         */
-        ByteArrayEntity entity = new ByteArrayEntity(content);
-        return createHttpRequest(entity);
-    }
+	@Override
+	protected IHttpRequest createHttpRequest(byte[] content) {
+		/*
+			* Note: Be careful about changing which constructor we use for
+			* ByteArrayEntity, as Android's version of HTTPClient doesn't support
+			* the newer ones for whatever reason.
+			*/
+		ByteArrayEntity entity = new ByteArrayEntity(content);
+		return createHttpRequest(entity);
+	}
 
-    private ApacheHttpRequest createHttpRequest(HttpEntity theEntity) {
-        HttpRequestBase request = constructRequestBase(theEntity);
-        return new ApacheHttpRequest(myClient, request);
-    }
+	private ApacheHttpRequest createHttpRequest(HttpEntity theEntity) {
+		HttpRequestBase request = constructRequestBase(theEntity);
+		return new ApacheHttpRequest(myClient, request);
+	}
 
-    @Override
-    protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
-        List<NameValuePair> parameters = new ArrayList<>();
-        for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
-            List<String> value = nextParam.getValue();
-            for (String s : value) {
-                parameters.add(new BasicNameValuePair(nextParam.getKey(), s));
-            }
-        }
+	@Override
+	protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
+		List<NameValuePair> parameters = new ArrayList<>();
+		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
+				List<String> value = nextParam.getValue();
+				for (String s : value) {
+					parameters.add(new BasicNameValuePair(nextParam.getKey(), s));
+				}
+		}
 
-        UrlEncodedFormEntity entity = createFormEntity(parameters);
-        return createHttpRequest(entity);
-    }
+		UrlEncodedFormEntity entity = createFormEntity(parameters);
+		return createHttpRequest(entity);
+	}
 
-    @Override
-    protected IHttpRequest createHttpRequest(String theContents) {
-        /*
-         * We aren't using a StringEntity here because the constructors
-         * supported by Android aren't available in non-Android, and vice versa.
-         * Since we add the content type header manually, it makes no difference
-         * which one we use anyhow.
-         */
-        ByteArrayEntity entity = new ByteArrayEntity(theContents.getBytes(Constants.CHARSET_UTF8));
-        return createHttpRequest(entity);
-    }
+	@Override
+	protected IHttpRequest createHttpRequest(String theContents) {
+		/*
+			* We aren't using a StringEntity here because the constructors
+			* supported by Android aren't available in non-Android, and vice versa.
+			* Since we add the content type header manually, it makes no difference
+			* which one we use anyhow.
+			*/
+		ByteArrayEntity entity = new ByteArrayEntity(theContents.getBytes(Constants.CHARSET_UTF8));
+		return createHttpRequest(entity);
+	}
 }

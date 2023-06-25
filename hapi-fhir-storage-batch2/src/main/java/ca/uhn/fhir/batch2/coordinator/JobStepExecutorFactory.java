@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -29,38 +27,40 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
 
+import javax.annotation.Nonnull;
+
 public class JobStepExecutorFactory {
-    private final IJobPersistence myJobPersistence;
-    private final BatchJobSender myBatchJobSender;
-    private final WorkChunkProcessor myJobStepExecutorSvc;
-    private final IJobMaintenanceService myJobMaintenanceService;
-    private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final IJobPersistence myJobPersistence;
+	private final BatchJobSender myBatchJobSender;
+	private final WorkChunkProcessor myJobStepExecutorSvc;
+	private final IJobMaintenanceService myJobMaintenanceService;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-    public JobStepExecutorFactory(
-            @Nonnull IJobPersistence theJobPersistence,
-            @Nonnull BatchJobSender theBatchJobSender,
-            @Nonnull WorkChunkProcessor theExecutorSvc,
-            @Nonnull IJobMaintenanceService theJobMaintenanceService,
-            @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
-        myJobPersistence = theJobPersistence;
-        myBatchJobSender = theBatchJobSender;
-        myJobStepExecutorSvc = theExecutorSvc;
-        myJobMaintenanceService = theJobMaintenanceService;
-        myJobDefinitionRegistry = theJobDefinitionRegistry;
-    }
+	public JobStepExecutorFactory(
+				@Nonnull IJobPersistence theJobPersistence,
+				@Nonnull BatchJobSender theBatchJobSender,
+				@Nonnull WorkChunkProcessor theExecutorSvc,
+				@Nonnull IJobMaintenanceService theJobMaintenanceService,
+				@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+		myJobPersistence = theJobPersistence;
+		myBatchJobSender = theBatchJobSender;
+		myJobStepExecutorSvc = theExecutorSvc;
+		myJobMaintenanceService = theJobMaintenanceService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
+	}
 
-    public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-            JobStepExecutor<PT, IT, OT> newJobStepExecutor(
-                    @Nonnull JobInstance theInstance,
-                    WorkChunk theWorkChunk,
-                    @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-        return new JobStepExecutor<>(
-                myJobPersistence,
-                theInstance,
-                theWorkChunk,
-                theCursor,
-                myJobStepExecutorSvc,
-                myJobMaintenanceService,
-                myJobDefinitionRegistry);
-    }
+	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+				JobStepExecutor<PT, IT, OT> newJobStepExecutor(
+						@Nonnull JobInstance theInstance,
+						WorkChunk theWorkChunk,
+						@Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
+		return new JobStepExecutor<>(
+					myJobPersistence,
+					theInstance,
+					theWorkChunk,
+					theCursor,
+					myJobStepExecutorSvc,
+					myJobMaintenanceService,
+					myJobDefinitionRegistry);
+	}
 }

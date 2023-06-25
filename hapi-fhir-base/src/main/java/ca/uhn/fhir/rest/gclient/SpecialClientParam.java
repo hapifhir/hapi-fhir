@@ -22,14 +22,14 @@ package ca.uhn.fhir.rest.gclient;
 /** */
 public class SpecialClientParam extends BaseClientParam implements IParam {
 
-    private final String myParamName;
+	private final String myParamName;
 
-    public SpecialClientParam(String theParamName) {
-        myParamName = theParamName;
-    }
+	public SpecialClientParam(String theParamName) {
+		myParamName = theParamName;
+	}
 
-    @Override
-    public String getParamName() {
-        return myParamName;
-    }
+	@Override
+	public String getParamName() {
+		return myParamName;
+	}
 }

@@ -19,6 +19,17 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,143 +39,130 @@ import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Charsets;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-
 /** Use this API with caution, it may change! */
 public class ClasspathUtil {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ClasspathUtil.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ClasspathUtil.class);
 
-    /** Non instantiable */
-    private ClasspathUtil() {
-        // nothing
-    }
+	/** Non instantiable */
+	private ClasspathUtil() {
+		// nothing
+	}
 
-    /**
-     * Load a classpath resource, throw an {@link InternalErrorException} if not found
-     *
-     * @throws InternalErrorException If the resource can't be found
-     */
-    public static String loadResource(String theClasspath) throws InternalErrorException {
-        return loadResource(theClasspath, Function.identity());
-    }
+	/**
+	* Load a classpath resource, throw an {@link InternalErrorException} if not found
+	*
+	* @throws InternalErrorException If the resource can't be found
+	*/
+	public static String loadResource(String theClasspath) throws InternalErrorException {
+		return loadResource(theClasspath, Function.identity());
+	}
 
-    /**
-     * Load a classpath resource, throw an {@link InternalErrorException} if not found
-     *
-     * @throws InternalErrorException If the resource can't be found
-     */
-    @Nonnull
-    public static InputStream loadResourceAsStream(String theClasspath)
-            throws InternalErrorException {
-        String classpath = theClasspath;
-        if (classpath.startsWith("classpath:")) {
-            classpath = classpath.substring("classpath:".length());
-        }
+	/**
+	* Load a classpath resource, throw an {@link InternalErrorException} if not found
+	*
+	* @throws InternalErrorException If the resource can't be found
+	*/
+	@Nonnull
+	public static InputStream loadResourceAsStream(String theClasspath)
+				throws InternalErrorException {
+		String classpath = theClasspath;
+		if (classpath.startsWith("classpath:")) {
+				classpath = classpath.substring("classpath:".length());
+		}
 
-        InputStream retVal = ClasspathUtil.class.getResourceAsStream(classpath);
-        if (retVal == null) {
-            if (classpath.startsWith("/")) {
-                retVal = ClasspathUtil.class.getResourceAsStream(classpath.substring(1));
-            } else {
-                retVal = ClasspathUtil.class.getResourceAsStream("/" + classpath);
-            }
-            if (retVal == null) {
-                throw new InternalErrorException(
-                        Msg.code(1758) + "Unable to find classpath resource: " + classpath);
-            }
-        }
-        return retVal;
-    }
+		InputStream retVal = ClasspathUtil.class.getResourceAsStream(classpath);
+		if (retVal == null) {
+				if (classpath.startsWith("/")) {
+					retVal = ClasspathUtil.class.getResourceAsStream(classpath.substring(1));
+				} else {
+					retVal = ClasspathUtil.class.getResourceAsStream("/" + classpath);
+				}
+				if (retVal == null) {
+					throw new InternalErrorException(
+								Msg.code(1758) + "Unable to find classpath resource: " + classpath);
+				}
+		}
+		return retVal;
+	}
 
-    public static Reader loadResourceAsReader(String theClasspath) {
-        return new InputStreamReader(loadResourceAsStream(theClasspath), StandardCharsets.UTF_8);
-    }
+	public static Reader loadResourceAsReader(String theClasspath) {
+		return new InputStreamReader(loadResourceAsStream(theClasspath), StandardCharsets.UTF_8);
+	}
 
-    /** Load a classpath resource, throw an {@link InternalErrorException} if not found */
-    @Nonnull
-    public static String loadResource(
-            String theClasspath, Function<InputStream, InputStream> theStreamTransform) {
-        try (InputStream stream = loadResourceAsStream(theClasspath)) {
-            InputStream newStream = theStreamTransform.apply(stream);
-            return IOUtils.toString(newStream, Charsets.UTF_8);
-        } catch (IOException e) {
-            throw new InternalErrorException(Msg.code(1759) + e);
-        }
-    }
+	/** Load a classpath resource, throw an {@link InternalErrorException} if not found */
+	@Nonnull
+	public static String loadResource(
+				String theClasspath, Function<InputStream, InputStream> theStreamTransform) {
+		try (InputStream stream = loadResourceAsStream(theClasspath)) {
+				InputStream newStream = theStreamTransform.apply(stream);
+				return IOUtils.toString(newStream, Charsets.UTF_8);
+		} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(1759) + e);
+		}
+	}
 
-    @Nonnull
-    public static String loadCompressedResource(String theClasspath) {
-        Function<InputStream, InputStream> streamTransform =
-                t -> {
-                    try {
-                        return new GZIPInputStream(t);
-                    } catch (IOException e) {
-                        throw new InternalErrorException(Msg.code(1760) + e);
-                    }
-                };
-        return loadResource(theClasspath, streamTransform);
-    }
+	@Nonnull
+	public static String loadCompressedResource(String theClasspath) {
+		Function<InputStream, InputStream> streamTransform =
+					t -> {
+						try {
+								return new GZIPInputStream(t);
+						} catch (IOException e) {
+								throw new InternalErrorException(Msg.code(1760) + e);
+						}
+					};
+		return loadResource(theClasspath, streamTransform);
+	}
 
-    /**
-     * Load a classpath resource, throw an {@link InternalErrorException} if not found
-     *
-     * @since 6.4.0
-     */
-    @Nonnull
-    public static <T extends IBaseResource> T loadCompressedResource(
-            FhirContext theCtx, Class<T> theType, String theClasspath) {
-        String resource = loadCompressedResource(theClasspath);
-        return parseResource(theCtx, theType, resource);
-    }
+	/**
+	* Load a classpath resource, throw an {@link InternalErrorException} if not found
+	*
+	* @since 6.4.0
+	*/
+	@Nonnull
+	public static <T extends IBaseResource> T loadCompressedResource(
+				FhirContext theCtx, Class<T> theType, String theClasspath) {
+		String resource = loadCompressedResource(theClasspath);
+		return parseResource(theCtx, theType, resource);
+	}
 
-    @Nonnull
-    public static <T extends IBaseResource> T loadResource(
-            FhirContext theCtx, Class<T> theType, String theClasspath) {
-        String raw = loadResource(theClasspath);
-        return parseResource(theCtx, theType, raw);
-    }
+	@Nonnull
+	public static <T extends IBaseResource> T loadResource(
+				FhirContext theCtx, Class<T> theType, String theClasspath) {
+		String raw = loadResource(theClasspath);
+		return parseResource(theCtx, theType, raw);
+	}
 
-    private static <T extends IBaseResource> T parseResource(
-            FhirContext theCtx, Class<T> theType, String raw) {
-        return EncodingEnum.detectEncodingNoDefault(raw)
-                .newParser(theCtx)
-                .parseResource(theType, raw);
-    }
+	private static <T extends IBaseResource> T parseResource(
+				FhirContext theCtx, Class<T> theType, String raw) {
+		return EncodingEnum.detectEncodingNoDefault(raw)
+					.newParser(theCtx)
+					.parseResource(theType, raw);
+	}
 
-    public static void close(InputStream theInput) {
-        try {
-            if (theInput != null) {
-                theInput.close();
-            }
-        } catch (IOException e) {
-            ourLog.debug("Closing InputStream threw exception", e);
-        }
-    }
+	public static void close(InputStream theInput) {
+		try {
+				if (theInput != null) {
+					theInput.close();
+				}
+		} catch (IOException e) {
+				ourLog.debug("Closing InputStream threw exception", e);
+		}
+	}
 
-    public static Function<InputStream, InputStream> withBom() {
-        return t -> new BOMInputStream(t);
-    }
+	public static Function<InputStream, InputStream> withBom() {
+		return t -> new BOMInputStream(t);
+	}
 
-    public static byte[] loadResourceAsByteArray(String theClasspath) {
-        InputStream stream = loadResourceAsStream(theClasspath);
-        try {
-            return IOUtils.toByteArray(stream);
-        } catch (IOException e) {
-            throw new InternalErrorException(Msg.code(1761) + e);
-        } finally {
-            close(stream);
-        }
-    }
+	public static byte[] loadResourceAsByteArray(String theClasspath) {
+		InputStream stream = loadResourceAsStream(theClasspath);
+		try {
+				return IOUtils.toByteArray(stream);
+		} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(1761) + e);
+		} finally {
+				close(stream);
+		}
+	}
 }

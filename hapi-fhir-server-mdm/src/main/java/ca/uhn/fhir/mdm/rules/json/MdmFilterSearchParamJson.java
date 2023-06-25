@@ -19,10 +19,9 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class, unlike {@link MdmResourceSearchParamJson}, is responsible for doing inclusions during
@@ -30,56 +29,56 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
  * all MdmFilterSearchParams.
  */
 public class MdmFilterSearchParamJson implements IModelJson {
-    @JsonProperty(value = "resourceType", required = true)
-    String myResourceType;
+	@JsonProperty(value = "resourceType", required = true)
+	String myResourceType;
 
-    @JsonProperty(value = "searchParam", required = true)
-    String mySearchParam;
+	@JsonProperty(value = "searchParam", required = true)
+	String mySearchParam;
 
-    @JsonProperty(value = "qualifier", required = true)
-    TokenParamModifier myTokenParamModifier;
+	@JsonProperty(value = "qualifier", required = true)
+	TokenParamModifier myTokenParamModifier;
 
-    @JsonProperty(value = "fixedValue", required = true)
-    String myFixedValue;
+	@JsonProperty(value = "fixedValue", required = true)
+	String myFixedValue;
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public MdmFilterSearchParamJson setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-        return this;
-    }
+	public MdmFilterSearchParamJson setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
 
-    public String getSearchParam() {
-        return mySearchParam;
-    }
+	public String getSearchParam() {
+		return mySearchParam;
+	}
 
-    public MdmFilterSearchParamJson setSearchParam(String theSearchParam) {
-        mySearchParam = theSearchParam;
-        return this;
-    }
+	public MdmFilterSearchParamJson setSearchParam(String theSearchParam) {
+		mySearchParam = theSearchParam;
+		return this;
+	}
 
-    public TokenParamModifier getTokenParamModifier() {
-        return myTokenParamModifier;
-    }
+	public TokenParamModifier getTokenParamModifier() {
+		return myTokenParamModifier;
+	}
 
-    public MdmFilterSearchParamJson setTokenParamModifier(
-            TokenParamModifier theTokenParamModifier) {
-        myTokenParamModifier = theTokenParamModifier;
-        return this;
-    }
+	public MdmFilterSearchParamJson setTokenParamModifier(
+				TokenParamModifier theTokenParamModifier) {
+		myTokenParamModifier = theTokenParamModifier;
+		return this;
+	}
 
-    public String getFixedValue() {
-        return myFixedValue;
-    }
+	public String getFixedValue() {
+		return myFixedValue;
+	}
 
-    public MdmFilterSearchParamJson setFixedValue(String theFixedValue) {
-        myFixedValue = theFixedValue;
-        return this;
-    }
+	public MdmFilterSearchParamJson setFixedValue(String theFixedValue) {
+		myFixedValue = theFixedValue;
+		return this;
+	}
 
-    public String getTokenParamModifierAsString() {
-        return myTokenParamModifier == null ? "" : myTokenParamModifier.getValue();
-    }
+	public String getTokenParamModifierAsString() {
+		return myTokenParamModifier == null ? "" : myTokenParamModifier.getValue();
+	}
 }

@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * This interface isn't used by hapi-fhir-base, but is used by the <a
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
  */
 public interface ITestingUiClientFactory {
 
-    /** Instantiate a new client */
-    IGenericClient newClient(
-            FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl);
+	/** Instantiate a new client */
+	IGenericClient newClient(
+				FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl);
 }

@@ -1,32 +1,5 @@
 package ca.uhn.fhir.jpa.bulk.export.svc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -54,6 +27,32 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -75,514 +74,514 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class JpaBulkExportProcessorTest {
 
-    private static class ListResultIterator implements IResultIterator<JpaPid> {
+	private static class ListResultIterator implements IResultIterator<JpaPid> {
 
-        private final List<JpaPid> myList;
+		private final List<JpaPid> myList;
 
-        private int index;
+		private int index;
 
-        public ListResultIterator(List<JpaPid> theList) {
-            myList = theList;
-        }
+		public ListResultIterator(List<JpaPid> theList) {
+				myList = theList;
+		}
 
-        @Override
-        public int getSkippedCount() {
-            return 0;
-        }
+		@Override
+		public int getSkippedCount() {
+				return 0;
+		}
 
-        @Override
-        public int getNonSkippedCount() {
-            return 0;
-        }
-
-        @Override
-        public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-            return null;
-        }
-
-        @Override
-        public void close() {}
-
-        @Override
-        public boolean hasNext() {
-            return index < myList.size();
-        }
-
-        @Override
-        public JpaPid next() {
-            return myList.get(index++);
-        }
-    }
-
-    @Spy private FhirContext myFhirContext = FhirContext.forR4Cached();
-
-    @Mock private BulkExportHelperService myBulkExportHelperService;
-
-    @Mock private JpaStorageSettings myStorageSettings;
-
-    @Mock private DaoRegistry myDaoRegistry;
-
-    @Mock private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-
-    @Mock private IIdHelperService<JpaPid> myIdHelperService;
-
-    @Mock private IMdmLinkDao<JpaPid, ?> myMdmLinkDao;
-
-    @Mock private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
-
-    @Spy
-    private IHapiTransactionService myTransactionService =
-            new NonTransactionalHapiTransactionService();
-
-    @InjectMocks private JpaBulkExportProcessor myProcessor;
-
-    private ExportPIDIteratorParameters createExportParameters(
-            BulkDataExportOptions.ExportStyle theExportStyle) {
-        ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
-        parameters.setInstanceId("instanceId");
-        parameters.setExportStyle(theExportStyle);
-        if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
-            parameters.setGroupId("123");
-        }
-        parameters.setStartDate(new Date());
-        return parameters;
-    }
-
-    private List<IIdType> createPatientTypes() {
-        long id1 = 123;
-        long id2 = 456;
-        String patient1Id = "Patient/" + id1;
-        String patient2Id = "Patient/" + id2;
-
-        return Arrays.asList(new IdDt(patient1Id), new IdDt(patient2Id));
-    }
-
-    private MdmPidTuple<JpaPid> createTuple(long theGroupId, long theGoldenId) {
-        return MdmPidTuple.fromGoldenAndSource(
-                JpaPid.fromId(theGoldenId), JpaPid.fromId(theGroupId));
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void getResourcePidIterator_paramsWithPatientExportStyle_returnsAnIterator(
-            boolean thePartitioned) {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
-        parameters.setResourceType("Patient");
-
-        parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
-
-        SearchParameterMap map = new SearchParameterMap();
-        List<SearchParameterMap> maps = new ArrayList<>();
-        maps.add(map);
-
-        JpaPid pid = JpaPid.fromId(123L);
-        JpaPid pid2 = JpaPid.fromId(456L);
-        ListResultIterator resultIterator = new ListResultIterator(Arrays.asList(pid, pid2));
-
-        // extra mocks
-        IFhirResourceDao<Patient> mockDao = mock(IFhirResourceDao.class);
-        ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
-
-        // when
-        when(myStorageSettings.getIndexMissingFields())
-                .thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
-        when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
-                        any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
-                .thenReturn(maps);
-        // from getSearchBuilderForLocalResourceType
-        when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
-        when(mySearchBuilderFactory.newSearchBuilder(
-                        eq(mockDao), eq(parameters.getResourceType()), any()))
-                .thenReturn(searchBuilder);
-        // ret
-        when(searchBuilder.createQuery(any(), any(), any(), any())).thenReturn(resultIterator);
-
-        // test
-        Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
-
-        // verify
-        assertNotNull(pidIterator);
-        assertTrue(pidIterator.hasNext());
-        assertEquals(pid, pidIterator.next());
-        assertTrue(pidIterator.hasNext());
-        assertEquals(pid2, pidIterator.next());
-        assertFalse(pidIterator.hasNext());
-        verify(searchBuilder, times(1))
-                .createQuery(
-                        eq(map),
-                        any(SearchRuntimeDetails.class),
-                        nullable(RequestDetails.class),
-                        eq(getPartitionIdFromParams(thePartitioned)));
-    }
-
-    private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {
-        if (thePartitioned) {
-            return RequestPartitionId.fromPartitionName("Partition-A");
-        } else {
-            return RequestPartitionId.allPartitions();
-        }
-    }
-
-    @Test
-    public void getResourcePidIterator_patientStyleWithIndexMissingFieldsDisabled_throws() {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
-        parameters.setResourceType("Patient");
-
-        // when
-        when(myStorageSettings.getIndexMissingFields())
-                .thenReturn(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-
-        // test
-        try {
-            myProcessor.getResourcePidIterator(parameters);
-            fail();
-        } catch (InternalErrorException ex) {
-            assertThat(
-                    ex.getMessage(),
-                    containsString("You attempted to start a Patient Bulk Export,"));
-        }
-    }
-
-    @ParameterizedTest
-    @CsvSource({"false, false", "false, true", "true, true", "true, false"})
-    public void getResourcePidIterator_groupExportStyleWithPatientResource_returnsIterator(
-            boolean theMdm, boolean thePartitioned) {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
-        parameters.setResourceType("Patient");
-
-        JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
-        long groupGoldenPid = 4567;
-
-        Group groupResource = new Group();
-        groupResource.setId(parameters.getGroupId());
-
-        List<IIdType> patientTypes = createPatientTypes();
-        List<JpaPid> pids = new ArrayList<>();
-        for (IIdType type : patientTypes) {
-            pids.add(JpaPid.fromId(type.getIdPartAsLong()));
-        }
-
-        MdmPidTuple<JpaPid> tuple = createTuple(groupId.getId(), groupGoldenPid);
-
-        IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
-        parameters.setExpandMdm(theMdm); // set mdm expansion
-        parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
-
-        // extra mocks
-        IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
-        ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
-
-        // from getMembersFromGroupWithFilter
-        when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
-                        any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
-                .thenReturn(Collections.singletonList(new SearchParameterMap()));
-        // from getSearchBuilderForLocalResourceType
-        when(myDaoRegistry.getResourceDao(not(eq("Group")))).thenReturn(mockDao);
-        when(mySearchBuilderFactory.newSearchBuilder(
-                        eq(mockDao), eq(parameters.getResourceType()), any()))
-                .thenReturn(searchBuilder);
-        // ret
-        when(searchBuilder.createQuery(
-                        any(SearchParameterMap.class),
-                        any(SearchRuntimeDetails.class),
-                        any(),
-                        eq(getPartitionIdFromParams(thePartitioned))))
-                .thenReturn(new ListResultIterator(pids));
-
-        // mdm expansion stuff
-        if (theMdm) {
-            when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(groupDao);
-            when(groupDao.read(
-                            eq(new IdDt(parameters.getGroupId())), any(SystemRequestDetails.class)))
-                    .thenReturn(groupResource);
-            when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
-                    .thenAnswer(
-                            params -> {
-                                Set<JpaPid> uniqPids = params.getArgument(0);
-                                HashMap<JpaPid, Optional<String>> answer = new HashMap<>();
-                                for (JpaPid l : uniqPids) {
-                                    answer.put(l, Optional.empty());
-                                }
-                                return new PersistentIdToForcedIdMap<>(answer);
-                            });
-            when(myIdHelperService.getPidOrNull(
-                            eq(getPartitionIdFromParams(thePartitioned)), any(Group.class)))
-                    .thenReturn(groupId);
-            when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(
-                            any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
-                    .thenReturn(Collections.singletonList(tuple));
-            when(myMdmExpansionCacheSvc.hasBeenPopulated())
-                    .thenReturn(
-                            false); // does not matter, since if false, it then goes and populates
-        }
-
-        // test
-        Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
-
-        // verify
-        assertNotNull(pidIterator);
-        int count = 0;
-        assertTrue(pidIterator.hasNext());
-        while (pidIterator.hasNext()) {
-            JpaPid pid = pidIterator.next();
-            long idAsLong = pid.getId();
-            boolean existing = pids.contains(JpaPid.fromId(idAsLong));
-            if (!existing) {
-                assertTrue(theMdm);
-                assertEquals(groupGoldenPid, idAsLong);
-            } else {
-                count++;
-            }
-        }
-        int total = pids.size();
-        assertEquals(total, count);
-        if (theMdm) {
-            ArgumentCaptor<SystemRequestDetails> requestDetailsCaptor =
-                    ArgumentCaptor.forClass(SystemRequestDetails.class);
-            verify(groupDao)
-                    .read(eq(new IdDt(parameters.getGroupId())), requestDetailsCaptor.capture());
-            validatePartitionId(
-                    thePartitioned, requestDetailsCaptor.getValue().getRequestPartitionId());
-        }
-    }
-
-    private void validatePartitionId(boolean thePartitioned, RequestPartitionId thePartitionId) {
-
-        if (thePartitioned) {
-            assertNotNull(thePartitionId.getPartitionNames());
-            assertEquals("Partition-A", thePartitionId.getPartitionNames().get(0));
-        } else {
-            assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
-        }
-    }
-
-    // source is: "isExpandMdm,(whether or not to test on a specific partition)
-    @ParameterizedTest
-    @CsvSource({"false, false", "false, true", "true, true", "true, false"})
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void getResourcePidIterator_groupExportStyleWithNonPatientResource_returnsIterator(
-            boolean theMdm, boolean thePartitioned) {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
-        parameters.setResourceType("Observation");
-
-        JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
-        Group groupResource = new Group();
-        groupResource.setId(parameters.getGroupId());
-        long groupGoldenPid = 4567;
-
-        JpaPid patientPid = JpaPid.fromId(123L);
-        JpaPid patientPid2 = JpaPid.fromId(456L);
-        ListResultIterator patientResultsIterator =
-                new ListResultIterator(Arrays.asList(patientPid, patientPid2));
-
-        JpaPid observationPid = JpaPid.fromId(234L);
-        JpaPid observationPid2 = JpaPid.fromId(567L);
-        ListResultIterator observationResultsIterator =
-                new ListResultIterator(Arrays.asList(observationPid, observationPid2));
-
-        HashSet<JpaPid> observationPidSet = new HashSet<>();
-        observationPidSet.add(observationPid);
-        observationPidSet.add(observationPid2);
-
-        MdmPidTuple<JpaPid> tuple = createTuple(groupId.getId(), groupGoldenPid);
-
-        IFhirResourceDao<Patient> patientDao = mock(IFhirResourceDao.class);
-        IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
-        IFhirResourceDao<Observation> observationDao = mock(IFhirResourceDao.class);
-        parameters.setExpandMdm(theMdm); // set mdm expansion
-
-        parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
-
-        // extra mocks
-        ISearchBuilder<JpaPid> patientSearchBuilder = mock(ISearchBuilder.class);
-        ISearchBuilder<JpaPid> observationSearchBuilder = mock(ISearchBuilder.class);
-
-        // when
-        // expandAllPatientPidsFromGroup
-        when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(groupDao);
-        when(groupDao.read(any(IIdType.class), any(SystemRequestDetails.class)))
-                .thenReturn(groupResource);
-        when(myIdHelperService.getPidOrNull(
-                        eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
-                .thenReturn(groupId);
-        // getMembersFromGroupWithFilter
-        when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(patientDao);
-        when(mySearchBuilderFactory.newSearchBuilder(
-                        eq(patientDao), eq("Patient"), eq(Patient.class)))
-                .thenReturn(patientSearchBuilder);
-        RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
-        SearchParameterMap patientSpMap = new SearchParameterMap();
-        when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
-                        eq(patientDef), eq(parameters), any(boolean.class)))
-                .thenReturn(Collections.singletonList(patientSpMap));
-        when(patientSearchBuilder.createQuery(
-                        eq(patientSpMap),
-                        any(),
-                        any(),
-                        eq(getPartitionIdFromParams(thePartitioned))))
-                .thenReturn(patientResultsIterator);
-        // queryResourceTypeWithReferencesToPatients
-        SearchParameterMap observationSpMap = new SearchParameterMap();
-        RuntimeResourceDefinition observationDef =
-                myFhirContext.getResourceDefinition("Observation");
-        when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
-                        eq(observationDef), eq(parameters), any(boolean.class)))
-                .thenReturn(Collections.singletonList(observationSpMap));
-        when(myDaoRegistry.getResourceDao((eq("Observation")))).thenReturn(observationDao);
-        when(mySearchBuilderFactory.newSearchBuilder(
-                        eq(observationDao), eq("Observation"), eq(Observation.class)))
-                .thenReturn(observationSearchBuilder);
-        when(observationSearchBuilder.loadIncludes(any(SearchBuilderLoadIncludesParameters.class)))
-                .thenReturn(new HashSet<>());
-
-        // ret
-        when(observationSearchBuilder.createQuery(
-                        eq(observationSpMap),
-                        any(SearchRuntimeDetails.class),
-                        any(),
-                        eq(getPartitionIdFromParams(thePartitioned))))
-                .thenReturn(observationResultsIterator);
-
-        if (theMdm) {
-            when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(
-                            any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
-                    .thenReturn(Collections.singletonList(tuple));
-            when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
-                    .thenAnswer(
-                            params -> {
-                                Set<JpaPid> uniqPids = params.getArgument(0);
-                                HashMap<JpaPid, Optional<String>> answer = new HashMap<>();
-                                for (JpaPid l : uniqPids) {
-                                    answer.put(l, Optional.empty());
-                                }
-                                return new PersistentIdToForcedIdMap<>(answer);
-                            });
-        }
-
-        // test
-        Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
-
-        // verify
-        assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
-        assertTrue(pidIterator.hasNext(), "PID iterator empty for mdm = " + theMdm);
-        ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor =
-                ArgumentCaptor.forClass(SystemRequestDetails.class);
-        verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
-        validatePartitionId(
-                thePartitioned,
-                groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
-        ArgumentCaptor<SearchBuilderLoadIncludesParameters>
-                searchBuilderLoadIncludesRequestDetailsCaptor =
-                        ArgumentCaptor.forClass(SearchBuilderLoadIncludesParameters.class);
-        verify(observationSearchBuilder)
-                .loadIncludes(searchBuilderLoadIncludesRequestDetailsCaptor.capture());
-        SearchBuilderLoadIncludesParameters param =
-                searchBuilderLoadIncludesRequestDetailsCaptor.getValue();
-        assertTrue(param.getRequestDetails() instanceof SystemRequestDetails);
-        SystemRequestDetails details = (SystemRequestDetails) param.getRequestDetails();
-        validatePartitionId(thePartitioned, details.getRequestPartitionId());
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void getResourcePidIterator_systemExport_returnsIterator(boolean thePartitioned) {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
-        parameters.setResourceType("Patient");
-
-        parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
-
-        JpaPid pid = JpaPid.fromId(123L);
-        JpaPid pid2 = JpaPid.fromId(456L);
-        ListResultIterator resultIterator = new ListResultIterator(Arrays.asList(pid, pid2));
-
-        // extra mocks
-        IFhirResourceDao<Patient> dao = mock(IFhirResourceDao.class);
-        ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
-
-        // when
-        when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
-                        any(RuntimeResourceDefinition.class),
-                        any(ExportPIDIteratorParameters.class),
-                        any(boolean.class)))
-                .thenReturn(Collections.singletonList(new SearchParameterMap()));
-        when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(dao);
-        when(mySearchBuilderFactory.newSearchBuilder(
-                        any(IFhirResourceDao.class), anyString(), any()))
-                .thenReturn(searchBuilder);
-        when(searchBuilder.createQuery(
-                        any(SearchParameterMap.class),
-                        any(SearchRuntimeDetails.class),
-                        any(),
-                        eq(getPartitionIdFromParams(thePartitioned))))
-                .thenReturn(resultIterator);
-
-        // test
-        Iterator<JpaPid> iterator = myProcessor.getResourcePidIterator(parameters);
-
-        // verify
-        assertNotNull(iterator);
-        assertTrue(iterator.hasNext());
-        int count = 0;
-        while (iterator.hasNext()) {
-            JpaPid ret = iterator.next();
-            assertTrue(ret.equals(pid) || ret.equals(pid2));
-            count++;
-        }
-        assertEquals(2, count);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void getResourcePidIterator_groupExportStyleWithGroupResource_returnsAnIterator(
-            boolean thePartitioned) {
-        // setup
-        ExportPIDIteratorParameters parameters =
-                createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
-        parameters.setResourceType("Group");
-
-        parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
-
-        Long groupId = Long.parseLong(parameters.getGroupId());
-        JpaPid pid = JpaPid.fromId(groupId);
-        Group groupResource = new Group();
-        groupResource.setId(parameters.getGroupId());
-
-        // extra mocks
-        IFhirResourceDao<Group> mockDao = mock(IFhirResourceDao.class);
-
-        // when
-        when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(mockDao);
-        when(mockDao.read(any(IdDt.class), any(SystemRequestDetails.class)))
-                .thenReturn(groupResource);
-
-        // ret
-        when(myIdHelperService.getPidOrNull(
-                        eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
-                .thenReturn(pid);
-
-        // test
-        Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
-
-        // verify
-        assertNotNull(pidIterator);
-        assertTrue(pidIterator.hasNext());
-        assertEquals(pid, pidIterator.next());
-        assertFalse(pidIterator.hasNext());
-        ArgumentCaptor<SystemRequestDetails> resourceDaoServletRequestDetailsCaptor =
-                ArgumentCaptor.forClass(SystemRequestDetails.class);
-        verify(mockDao).read(any(IdDt.class), resourceDaoServletRequestDetailsCaptor.capture());
-        validatePartitionId(
-                thePartitioned,
-                resourceDaoServletRequestDetailsCaptor.getValue().getRequestPartitionId());
-    }
+		@Override
+		public int getNonSkippedCount() {
+				return 0;
+		}
+
+		@Override
+		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
+				return null;
+		}
+
+		@Override
+		public void close() {}
+
+		@Override
+		public boolean hasNext() {
+				return index < myList.size();
+		}
+
+		@Override
+		public JpaPid next() {
+				return myList.get(index++);
+		}
+	}
+
+	@Spy private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+	@Mock private BulkExportHelperService myBulkExportHelperService;
+
+	@Mock private JpaStorageSettings myStorageSettings;
+
+	@Mock private DaoRegistry myDaoRegistry;
+
+	@Mock private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
+	@Mock private IIdHelperService<JpaPid> myIdHelperService;
+
+	@Mock private IMdmLinkDao<JpaPid, ?> myMdmLinkDao;
+
+	@Mock private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
+
+	@Spy
+	private IHapiTransactionService myTransactionService =
+				new NonTransactionalHapiTransactionService();
+
+	@InjectMocks private JpaBulkExportProcessor myProcessor;
+
+	private ExportPIDIteratorParameters createExportParameters(
+				BulkDataExportOptions.ExportStyle theExportStyle) {
+		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
+		parameters.setInstanceId("instanceId");
+		parameters.setExportStyle(theExportStyle);
+		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
+				parameters.setGroupId("123");
+		}
+		parameters.setStartDate(new Date());
+		return parameters;
+	}
+
+	private List<IIdType> createPatientTypes() {
+		long id1 = 123;
+		long id2 = 456;
+		String patient1Id = "Patient/" + id1;
+		String patient2Id = "Patient/" + id2;
+
+		return Arrays.asList(new IdDt(patient1Id), new IdDt(patient2Id));
+	}
+
+	private MdmPidTuple<JpaPid> createTuple(long theGroupId, long theGoldenId) {
+		return MdmPidTuple.fromGoldenAndSource(
+					JpaPid.fromId(theGoldenId), JpaPid.fromId(theGroupId));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void getResourcePidIterator_paramsWithPatientExportStyle_returnsAnIterator(
+				boolean thePartitioned) {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setResourceType("Patient");
+
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
+
+		SearchParameterMap map = new SearchParameterMap();
+		List<SearchParameterMap> maps = new ArrayList<>();
+		maps.add(map);
+
+		JpaPid pid = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
+		ListResultIterator resultIterator = new ListResultIterator(Arrays.asList(pid, pid2));
+
+		// extra mocks
+		IFhirResourceDao<Patient> mockDao = mock(IFhirResourceDao.class);
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		// when
+		when(myStorageSettings.getIndexMissingFields())
+					.thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
+								any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
+					.thenReturn(maps);
+		// from getSearchBuilderForLocalResourceType
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
+		when(mySearchBuilderFactory.newSearchBuilder(
+								eq(mockDao), eq(parameters.getResourceType()), any()))
+					.thenReturn(searchBuilder);
+		// ret
+		when(searchBuilder.createQuery(any(), any(), any(), any())).thenReturn(resultIterator);
+
+		// test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertNotNull(pidIterator);
+		assertTrue(pidIterator.hasNext());
+		assertEquals(pid, pidIterator.next());
+		assertTrue(pidIterator.hasNext());
+		assertEquals(pid2, pidIterator.next());
+		assertFalse(pidIterator.hasNext());
+		verify(searchBuilder, times(1))
+					.createQuery(
+								eq(map),
+								any(SearchRuntimeDetails.class),
+								nullable(RequestDetails.class),
+								eq(getPartitionIdFromParams(thePartitioned)));
+	}
+
+	private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {
+		if (thePartitioned) {
+				return RequestPartitionId.fromPartitionName("Partition-A");
+		} else {
+				return RequestPartitionId.allPartitions();
+		}
+	}
+
+	@Test
+	public void getResourcePidIterator_patientStyleWithIndexMissingFieldsDisabled_throws() {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setResourceType("Patient");
+
+		// when
+		when(myStorageSettings.getIndexMissingFields())
+					.thenReturn(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+
+		// test
+		try {
+				myProcessor.getResourcePidIterator(parameters);
+				fail();
+		} catch (InternalErrorException ex) {
+				assertThat(
+						ex.getMessage(),
+						containsString("You attempted to start a Patient Bulk Export,"));
+		}
+	}
+
+	@ParameterizedTest
+	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
+	public void getResourcePidIterator_groupExportStyleWithPatientResource_returnsIterator(
+				boolean theMdm, boolean thePartitioned) {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setResourceType("Patient");
+
+		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
+		long groupGoldenPid = 4567;
+
+		Group groupResource = new Group();
+		groupResource.setId(parameters.getGroupId());
+
+		List<IIdType> patientTypes = createPatientTypes();
+		List<JpaPid> pids = new ArrayList<>();
+		for (IIdType type : patientTypes) {
+				pids.add(JpaPid.fromId(type.getIdPartAsLong()));
+		}
+
+		MdmPidTuple<JpaPid> tuple = createTuple(groupId.getId(), groupGoldenPid);
+
+		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
+		parameters.setExpandMdm(theMdm); // set mdm expansion
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
+
+		// extra mocks
+		IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		// from getMembersFromGroupWithFilter
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
+								any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
+					.thenReturn(Collections.singletonList(new SearchParameterMap()));
+		// from getSearchBuilderForLocalResourceType
+		when(myDaoRegistry.getResourceDao(not(eq("Group")))).thenReturn(mockDao);
+		when(mySearchBuilderFactory.newSearchBuilder(
+								eq(mockDao), eq(parameters.getResourceType()), any()))
+					.thenReturn(searchBuilder);
+		// ret
+		when(searchBuilder.createQuery(
+								any(SearchParameterMap.class),
+								any(SearchRuntimeDetails.class),
+								any(),
+								eq(getPartitionIdFromParams(thePartitioned))))
+					.thenReturn(new ListResultIterator(pids));
+
+		// mdm expansion stuff
+		if (theMdm) {
+				when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(groupDao);
+				when(groupDao.read(
+									eq(new IdDt(parameters.getGroupId())), any(SystemRequestDetails.class)))
+						.thenReturn(groupResource);
+				when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
+						.thenAnswer(
+									params -> {
+										Set<JpaPid> uniqPids = params.getArgument(0);
+										HashMap<JpaPid, Optional<String>> answer = new HashMap<>();
+										for (JpaPid l : uniqPids) {
+												answer.put(l, Optional.empty());
+										}
+										return new PersistentIdToForcedIdMap<>(answer);
+									});
+				when(myIdHelperService.getPidOrNull(
+									eq(getPartitionIdFromParams(thePartitioned)), any(Group.class)))
+						.thenReturn(groupId);
+				when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(
+									any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
+						.thenReturn(Collections.singletonList(tuple));
+				when(myMdmExpansionCacheSvc.hasBeenPopulated())
+						.thenReturn(
+									false); // does not matter, since if false, it then goes and populates
+		}
+
+		// test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertNotNull(pidIterator);
+		int count = 0;
+		assertTrue(pidIterator.hasNext());
+		while (pidIterator.hasNext()) {
+				JpaPid pid = pidIterator.next();
+				long idAsLong = pid.getId();
+				boolean existing = pids.contains(JpaPid.fromId(idAsLong));
+				if (!existing) {
+					assertTrue(theMdm);
+					assertEquals(groupGoldenPid, idAsLong);
+				} else {
+					count++;
+				}
+		}
+		int total = pids.size();
+		assertEquals(total, count);
+		if (theMdm) {
+				ArgumentCaptor<SystemRequestDetails> requestDetailsCaptor =
+						ArgumentCaptor.forClass(SystemRequestDetails.class);
+				verify(groupDao)
+						.read(eq(new IdDt(parameters.getGroupId())), requestDetailsCaptor.capture());
+				validatePartitionId(
+						thePartitioned, requestDetailsCaptor.getValue().getRequestPartitionId());
+		}
+	}
+
+	private void validatePartitionId(boolean thePartitioned, RequestPartitionId thePartitionId) {
+
+		if (thePartitioned) {
+				assertNotNull(thePartitionId.getPartitionNames());
+				assertEquals("Partition-A", thePartitionId.getPartitionNames().get(0));
+		} else {
+				assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
+		}
+	}
+
+	// source is: "isExpandMdm,(whether or not to test on a specific partition)
+	@ParameterizedTest
+	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public void getResourcePidIterator_groupExportStyleWithNonPatientResource_returnsIterator(
+				boolean theMdm, boolean thePartitioned) {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setResourceType("Observation");
+
+		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
+		Group groupResource = new Group();
+		groupResource.setId(parameters.getGroupId());
+		long groupGoldenPid = 4567;
+
+		JpaPid patientPid = JpaPid.fromId(123L);
+		JpaPid patientPid2 = JpaPid.fromId(456L);
+		ListResultIterator patientResultsIterator =
+					new ListResultIterator(Arrays.asList(patientPid, patientPid2));
+
+		JpaPid observationPid = JpaPid.fromId(234L);
+		JpaPid observationPid2 = JpaPid.fromId(567L);
+		ListResultIterator observationResultsIterator =
+					new ListResultIterator(Arrays.asList(observationPid, observationPid2));
+
+		HashSet<JpaPid> observationPidSet = new HashSet<>();
+		observationPidSet.add(observationPid);
+		observationPidSet.add(observationPid2);
+
+		MdmPidTuple<JpaPid> tuple = createTuple(groupId.getId(), groupGoldenPid);
+
+		IFhirResourceDao<Patient> patientDao = mock(IFhirResourceDao.class);
+		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
+		IFhirResourceDao<Observation> observationDao = mock(IFhirResourceDao.class);
+		parameters.setExpandMdm(theMdm); // set mdm expansion
+
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
+
+		// extra mocks
+		ISearchBuilder<JpaPid> patientSearchBuilder = mock(ISearchBuilder.class);
+		ISearchBuilder<JpaPid> observationSearchBuilder = mock(ISearchBuilder.class);
+
+		// when
+		// expandAllPatientPidsFromGroup
+		when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(groupDao);
+		when(groupDao.read(any(IIdType.class), any(SystemRequestDetails.class)))
+					.thenReturn(groupResource);
+		when(myIdHelperService.getPidOrNull(
+								eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
+					.thenReturn(groupId);
+		// getMembersFromGroupWithFilter
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(patientDao);
+		when(mySearchBuilderFactory.newSearchBuilder(
+								eq(patientDao), eq("Patient"), eq(Patient.class)))
+					.thenReturn(patientSearchBuilder);
+		RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
+		SearchParameterMap patientSpMap = new SearchParameterMap();
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
+								eq(patientDef), eq(parameters), any(boolean.class)))
+					.thenReturn(Collections.singletonList(patientSpMap));
+		when(patientSearchBuilder.createQuery(
+								eq(patientSpMap),
+								any(),
+								any(),
+								eq(getPartitionIdFromParams(thePartitioned))))
+					.thenReturn(patientResultsIterator);
+		// queryResourceTypeWithReferencesToPatients
+		SearchParameterMap observationSpMap = new SearchParameterMap();
+		RuntimeResourceDefinition observationDef =
+					myFhirContext.getResourceDefinition("Observation");
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
+								eq(observationDef), eq(parameters), any(boolean.class)))
+					.thenReturn(Collections.singletonList(observationSpMap));
+		when(myDaoRegistry.getResourceDao((eq("Observation")))).thenReturn(observationDao);
+		when(mySearchBuilderFactory.newSearchBuilder(
+								eq(observationDao), eq("Observation"), eq(Observation.class)))
+					.thenReturn(observationSearchBuilder);
+		when(observationSearchBuilder.loadIncludes(any(SearchBuilderLoadIncludesParameters.class)))
+					.thenReturn(new HashSet<>());
+
+		// ret
+		when(observationSearchBuilder.createQuery(
+								eq(observationSpMap),
+								any(SearchRuntimeDetails.class),
+								any(),
+								eq(getPartitionIdFromParams(thePartitioned))))
+					.thenReturn(observationResultsIterator);
+
+		if (theMdm) {
+				when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(
+									any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
+						.thenReturn(Collections.singletonList(tuple));
+				when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
+						.thenAnswer(
+									params -> {
+										Set<JpaPid> uniqPids = params.getArgument(0);
+										HashMap<JpaPid, Optional<String>> answer = new HashMap<>();
+										for (JpaPid l : uniqPids) {
+												answer.put(l, Optional.empty());
+										}
+										return new PersistentIdToForcedIdMap<>(answer);
+									});
+		}
+
+		// test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
+		assertTrue(pidIterator.hasNext(), "PID iterator empty for mdm = " + theMdm);
+		ArgumentCaptor<SystemRequestDetails> groupDaoReadSystemRequestDetailsCaptor =
+					ArgumentCaptor.forClass(SystemRequestDetails.class);
+		verify(groupDao).read(any(IIdType.class), groupDaoReadSystemRequestDetailsCaptor.capture());
+		validatePartitionId(
+					thePartitioned,
+					groupDaoReadSystemRequestDetailsCaptor.getValue().getRequestPartitionId());
+		ArgumentCaptor<SearchBuilderLoadIncludesParameters>
+					searchBuilderLoadIncludesRequestDetailsCaptor =
+								ArgumentCaptor.forClass(SearchBuilderLoadIncludesParameters.class);
+		verify(observationSearchBuilder)
+					.loadIncludes(searchBuilderLoadIncludesRequestDetailsCaptor.capture());
+		SearchBuilderLoadIncludesParameters param =
+					searchBuilderLoadIncludesRequestDetailsCaptor.getValue();
+		assertTrue(param.getRequestDetails() instanceof SystemRequestDetails);
+		SystemRequestDetails details = (SystemRequestDetails) param.getRequestDetails();
+		validatePartitionId(thePartitioned, details.getRequestPartitionId());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void getResourcePidIterator_systemExport_returnsIterator(boolean thePartitioned) {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setResourceType("Patient");
+
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
+
+		JpaPid pid = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
+		ListResultIterator resultIterator = new ListResultIterator(Arrays.asList(pid, pid2));
+
+		// extra mocks
+		IFhirResourceDao<Patient> dao = mock(IFhirResourceDao.class);
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		// when
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
+								any(RuntimeResourceDefinition.class),
+								any(ExportPIDIteratorParameters.class),
+								any(boolean.class)))
+					.thenReturn(Collections.singletonList(new SearchParameterMap()));
+		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(dao);
+		when(mySearchBuilderFactory.newSearchBuilder(
+								any(IFhirResourceDao.class), anyString(), any()))
+					.thenReturn(searchBuilder);
+		when(searchBuilder.createQuery(
+								any(SearchParameterMap.class),
+								any(SearchRuntimeDetails.class),
+								any(),
+								eq(getPartitionIdFromParams(thePartitioned))))
+					.thenReturn(resultIterator);
+
+		// test
+		Iterator<JpaPid> iterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertNotNull(iterator);
+		assertTrue(iterator.hasNext());
+		int count = 0;
+		while (iterator.hasNext()) {
+				JpaPid ret = iterator.next();
+				assertTrue(ret.equals(pid) || ret.equals(pid2));
+				count++;
+		}
+		assertEquals(2, count);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void getResourcePidIterator_groupExportStyleWithGroupResource_returnsAnIterator(
+				boolean thePartitioned) {
+		// setup
+		ExportPIDIteratorParameters parameters =
+					createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setResourceType("Group");
+
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
+
+		Long groupId = Long.parseLong(parameters.getGroupId());
+		JpaPid pid = JpaPid.fromId(groupId);
+		Group groupResource = new Group();
+		groupResource.setId(parameters.getGroupId());
+
+		// extra mocks
+		IFhirResourceDao<Group> mockDao = mock(IFhirResourceDao.class);
+
+		// when
+		when(myDaoRegistry.getResourceDao(eq("Group"))).thenReturn(mockDao);
+		when(mockDao.read(any(IdDt.class), any(SystemRequestDetails.class)))
+					.thenReturn(groupResource);
+
+		// ret
+		when(myIdHelperService.getPidOrNull(
+								eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
+					.thenReturn(pid);
+
+		// test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertNotNull(pidIterator);
+		assertTrue(pidIterator.hasNext());
+		assertEquals(pid, pidIterator.next());
+		assertFalse(pidIterator.hasNext());
+		ArgumentCaptor<SystemRequestDetails> resourceDaoServletRequestDetailsCaptor =
+					ArgumentCaptor.forClass(SystemRequestDetails.class);
+		verify(mockDao).read(any(IdDt.class), resourceDaoServletRequestDetailsCaptor.capture());
+		validatePartitionId(
+					thePartitioned,
+					resourceDaoServletRequestDetailsCaptor.getValue().getRequestPartitionId());
+	}
 }

@@ -19,26 +19,25 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import java.util.List;
-
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import java.util.List;
 
 public abstract class BaseCandidateFinder {
-    @Autowired IIdHelperService myIdHelperService;
-    @Autowired MdmLinkDaoSvc myMdmLinkDaoSvc;
+	@Autowired IIdHelperService myIdHelperService;
+	@Autowired MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-    CandidateList findCandidates(IAnyResource theTarget) {
-        CandidateList candidateList = new CandidateList(getStrategy());
-        candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
-        return candidateList;
-    }
+	CandidateList findCandidates(IAnyResource theTarget) {
+		CandidateList candidateList = new CandidateList(getStrategy());
+		candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
+		return candidateList;
+	}
 
-    protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
-            IAnyResource theTarget);
+	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+				IAnyResource theTarget);
 
-    protected abstract CandidateStrategyEnum getStrategy();
+	protected abstract CandidateStrategyEnum getStrategy();
 }

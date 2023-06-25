@@ -19,12 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import java.util.List;
-import java.util.Objects;
-import javax.annotation.CheckReturnValue;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -33,45 +27,50 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.CheckReturnValue;
 
 public class ServerInterceptorUtil {
 
-    private ServerInterceptorUtil() {
-        super();
-    }
+	private ServerInterceptorUtil() {
+		super();
+	}
 
-    /**
-     * Fires {@link Pointcut#STORAGE_PRESHOW_RESOURCES} interceptor hook, and potentially remove
-     * resources from the resource list
-     */
-    @CheckReturnValue
-    public static List<IBaseResource> fireStoragePreshowResource(
-            List<IBaseResource> theResources,
-            RequestDetails theRequest,
-            IInterceptorBroadcaster theInterceptorBroadcaster) {
-        List<IBaseResource> retVal = theResources;
-        retVal.removeIf(Objects::isNull);
+	/**
+	* Fires {@link Pointcut#STORAGE_PRESHOW_RESOURCES} interceptor hook, and potentially remove
+	* resources from the resource list
+	*/
+	@CheckReturnValue
+	public static List<IBaseResource> fireStoragePreshowResource(
+				List<IBaseResource> theResources,
+				RequestDetails theRequest,
+				IInterceptorBroadcaster theInterceptorBroadcaster) {
+		List<IBaseResource> retVal = theResources;
+		retVal.removeIf(Objects::isNull);
 
-        // Interceptor call: STORAGE_PRESHOW_RESOURCE
-        // This can be used to remove results from the search result details before
-        // the user has a chance to know that they were in the results
-        if (retVal.size() > 0) {
-            SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
-            HookParams params =
-                    new HookParams()
-                            .add(IPreResourceShowDetails.class, accessDetails)
-                            .add(RequestDetails.class, theRequest)
-                            .addIfMatchesType(ServletRequestDetails.class, theRequest);
-            CompositeInterceptorBroadcaster.doCallHooks(
-                    theInterceptorBroadcaster,
-                    theRequest,
-                    Pointcut.STORAGE_PRESHOW_RESOURCES,
-                    params);
+		// Interceptor call: STORAGE_PRESHOW_RESOURCE
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (retVal.size() > 0) {
+				SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
+				HookParams params =
+						new HookParams()
+									.add(IPreResourceShowDetails.class, accessDetails)
+									.add(RequestDetails.class, theRequest)
+									.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				CompositeInterceptorBroadcaster.doCallHooks(
+						theInterceptorBroadcaster,
+						theRequest,
+						Pointcut.STORAGE_PRESHOW_RESOURCES,
+						params);
 
-            retVal = accessDetails.toList();
-            retVal.removeIf(Objects::isNull);
-        }
+				retVal = accessDetails.toList();
+				retVal.removeIf(Objects::isNull);
+		}
 
-        return retVal;
-    }
+		return retVal;
+	}
 }

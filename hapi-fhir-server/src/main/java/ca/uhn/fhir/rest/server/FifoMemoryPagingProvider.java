@@ -19,41 +19,40 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.Validate;
+
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
 public class FifoMemoryPagingProvider extends BasePagingProvider {
 
-    private final LinkedHashMap<String, IBundleProvider> myBundleProviders;
-    private final int mySize;
+	private final LinkedHashMap<String, IBundleProvider> myBundleProviders;
+	private final int mySize;
 
-    public FifoMemoryPagingProvider(int theSize) {
-        Validate.isTrue(theSize > 0, "theSize must be greater than 0");
+	public FifoMemoryPagingProvider(int theSize) {
+		Validate.isTrue(theSize > 0, "theSize must be greater than 0");
 
-        mySize = theSize;
-        myBundleProviders = new LinkedHashMap<>(mySize);
-    }
+		mySize = theSize;
+		myBundleProviders = new LinkedHashMap<>(mySize);
+	}
 
-    @Override
-    public synchronized IBundleProvider retrieveResultList(
-            RequestDetails theRequest, String theId) {
-        return myBundleProviders.get(theId);
-    }
+	@Override
+	public synchronized IBundleProvider retrieveResultList(
+				RequestDetails theRequest, String theId) {
+		return myBundleProviders.get(theId);
+	}
 
-    @Override
-    public synchronized String storeResultList(
-            RequestDetails theRequestDetails, IBundleProvider theList) {
-        while (myBundleProviders.size() > mySize) {
-            myBundleProviders.remove(myBundleProviders.keySet().iterator().next());
-        }
+	@Override
+	public synchronized String storeResultList(
+				RequestDetails theRequestDetails, IBundleProvider theList) {
+		while (myBundleProviders.size() > mySize) {
+				myBundleProviders.remove(myBundleProviders.keySet().iterator().next());
+		}
 
-        String key = UUID.randomUUID().toString();
-        myBundleProviders.put(key, theList);
-        return key;
-    }
+		String key = UUID.randomUUID().toString();
+		myBundleProviders.put(key, theList);
+		return key;
+	}
 }

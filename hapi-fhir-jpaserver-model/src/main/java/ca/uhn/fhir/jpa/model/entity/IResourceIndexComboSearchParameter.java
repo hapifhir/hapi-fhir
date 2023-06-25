@@ -28,13 +28,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
  */
 public interface IResourceIndexComboSearchParameter {
 
-    IIdType getSearchParameterId();
+	IIdType getSearchParameterId();
 
-    void setSearchParameterId(IIdType theSearchParameterId);
+	void setSearchParameterId(IIdType theSearchParameterId);
 
-    String getIndexString();
+	String getIndexString();
 
-    ResourceTable getResource();
+	ResourceTable getResource();
 
-    void setResource(ResourceTable theResourceTable);
+	void setResource(ResourceTable theResourceTable);
 }

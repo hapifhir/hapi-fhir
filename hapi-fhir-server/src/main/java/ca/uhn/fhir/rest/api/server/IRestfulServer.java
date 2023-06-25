@@ -26,14 +26,14 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 
 public interface IRestfulServer<T extends RequestDetails> extends IRestfulServerDefaults {
 
-    @Override
-    IPagingProvider getPagingProvider();
+	@Override
+	IPagingProvider getPagingProvider();
 
-    BundleInclusionRule getBundleInclusionRule();
+	BundleInclusionRule getBundleInclusionRule();
 
-    PreferReturnEnum getDefaultPreferReturn();
+	PreferReturnEnum getDefaultPreferReturn();
 
-    default boolean canStoreSearchResults() {
-        return getPagingProvider() != null && getPagingProvider().canStoreSearchResults();
-    }
+	default boolean canStoreSearchResults() {
+		return getPagingProvider() != null && getPagingProvider().canStoreSearchResults();
+	}
 }

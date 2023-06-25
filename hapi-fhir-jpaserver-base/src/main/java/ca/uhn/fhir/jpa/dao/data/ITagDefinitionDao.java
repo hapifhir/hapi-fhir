@@ -19,11 +19,10 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-
 public interface ITagDefinitionDao
-        extends JpaRepository<TagDefinition, Long>, IHapiFhirJpaRepository {
-    // nothing
+		extends JpaRepository<TagDefinition, Long>, IHapiFhirJpaRepository {
+	// nothing
 }

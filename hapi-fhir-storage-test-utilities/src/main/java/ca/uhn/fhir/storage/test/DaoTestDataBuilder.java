@@ -19,6 +19,13 @@
  */
 package ca.uhn.fhir.storage.test;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -29,15 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-
 /**
  * Implements ITestDataBuilder via a live DaoRegistry.
  *
@@ -46,81 +44,81 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
  * bean.
  */
 public class DaoTestDataBuilder
-        implements ITestDataBuilder.WithSupport, ITestDataBuilder.Support, AfterEachCallback {
-    private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
+		implements ITestDataBuilder.WithSupport, ITestDataBuilder.Support, AfterEachCallback {
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
 
-    final FhirContext myFhirCtx;
-    final DaoRegistry myDaoRegistry;
-    SystemRequestDetails mySrd;
-    final SetMultimap<String, IIdType> myIds = HashMultimap.create();
+	final FhirContext myFhirCtx;
+	final DaoRegistry myDaoRegistry;
+	SystemRequestDetails mySrd;
+	final SetMultimap<String, IIdType> myIds = HashMultimap.create();
 
-    public DaoTestDataBuilder(
-            FhirContext theFhirCtx, DaoRegistry theDaoRegistry, SystemRequestDetails theSrd) {
-        myFhirCtx = theFhirCtx;
-        myDaoRegistry = theDaoRegistry;
-        mySrd = theSrd;
-    }
+	public DaoTestDataBuilder(
+				FhirContext theFhirCtx, DaoRegistry theDaoRegistry, SystemRequestDetails theSrd) {
+		myFhirCtx = theFhirCtx;
+		myDaoRegistry = theDaoRegistry;
+		mySrd = theSrd;
+	}
 
-    @Override
-    public IIdType doCreateResource(IBaseResource theResource) {
-        if (ourLog.isDebugEnabled()) {
-            ourLog.debug(
-                    "create resource {}",
-                    myFhirCtx.newJsonParser().encodeResourceToString(theResource));
-        }
-        //noinspection rawtypes
-        IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-        //noinspection unchecked
-        IIdType id = dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
-        myIds.put(theResource.fhirType(), id);
-        return id;
-    }
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		if (ourLog.isDebugEnabled()) {
+				ourLog.debug(
+						"create resource {}",
+						myFhirCtx.newJsonParser().encodeResourceToString(theResource));
+		}
+		//noinspection rawtypes
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		//noinspection unchecked
+		IIdType id = dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
+		myIds.put(theResource.fhirType(), id);
+		return id;
+	}
 
-    @Override
-    public IIdType doUpdateResource(IBaseResource theResource) {
-        //noinspection rawtypes
-        IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-        //noinspection unchecked
-        return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
-    }
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		//noinspection rawtypes
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
+		//noinspection unchecked
+		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
 
-    @Override
-    public Support getTestDataBuilderSupport() {
-        return this;
-    }
+	@Override
+	public Support getTestDataBuilderSupport() {
+		return this;
+	}
 
-    @Override
-    public FhirContext getFhirContext() {
-        return myFhirCtx;
-    }
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirCtx;
+	}
 
-    /** Delete anything created */
-    public void cleanup() {
-        ourLog.info("cleanup {}", myIds);
+	/** Delete anything created */
+	public void cleanup() {
+		ourLog.info("cleanup {}", myIds);
 
-        myIds.keySet()
-                .forEach(
-                        nextType -> {
-                            // todo do this in a bundle for perf.
-                            IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
-                            myIds.get(nextType).forEach(dao::delete);
-                        });
-        myIds.clear();
-    }
+		myIds.keySet()
+					.forEach(
+								nextType -> {
+									// todo do this in a bundle for perf.
+									IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
+									myIds.get(nextType).forEach(dao::delete);
+								});
+		myIds.clear();
+	}
 
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        cleanup();
-    }
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		cleanup();
+	}
 
-    @Configuration
-    public static class Config {
-        @Autowired FhirContext myFhirContext;
-        @Autowired DaoRegistry myDaoRegistry;
+	@Configuration
+	public static class Config {
+		@Autowired FhirContext myFhirContext;
+		@Autowired DaoRegistry myDaoRegistry;
 
-        @Bean
-        DaoTestDataBuilder testDataBuilder() {
-            return new DaoTestDataBuilder(myFhirContext, myDaoRegistry, new SystemRequestDetails());
-        }
-    }
+		@Bean
+		DaoTestDataBuilder testDataBuilder() {
+				return new DaoTestDataBuilder(myFhirContext, myDaoRegistry, new SystemRequestDetails());
+		}
+	}
 }

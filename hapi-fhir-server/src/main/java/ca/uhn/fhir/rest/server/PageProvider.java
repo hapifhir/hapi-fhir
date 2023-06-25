@@ -25,9 +25,9 @@ import ca.uhn.fhir.util.CoverageIgnore;
 
 public class PageProvider {
 
-    @GetPage()
-    @CoverageIgnore
-    public IResource getPage() {
-        return null;
-    }
+	@GetPage()
+	@CoverageIgnore
+	public IResource getPage() {
+		return null;
+	}
 }

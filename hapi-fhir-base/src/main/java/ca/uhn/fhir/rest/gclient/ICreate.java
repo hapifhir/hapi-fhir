@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ICreate {
-    ICreateTyped resource(IBaseResource theResource);
+	ICreateTyped resource(IBaseResource theResource);
 
-    ICreateTyped resource(String theResourceAsText);
+	ICreateTyped resource(String theResourceAsText);
 }

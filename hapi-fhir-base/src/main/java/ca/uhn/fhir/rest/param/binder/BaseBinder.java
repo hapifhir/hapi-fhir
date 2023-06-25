@@ -19,65 +19,65 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import java.lang.reflect.Constructor;
-import java.util.List;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+import java.lang.reflect.Constructor;
+import java.util.List;
+
 abstract class BaseBinder<T> {
-    private List<Class<? extends IQueryParameterType>> myCompositeTypes;
-    private Constructor<? extends T> myConstructor;
-    private final Class<? extends T> myType;
+	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
+	private Constructor<? extends T> myConstructor;
+	private final Class<? extends T> myType;
 
-    public BaseBinder(
-            Class<? extends T> theType,
-            List<Class<? extends IQueryParameterType>> theCompositeTypes) {
-        myType = theType;
-        myCompositeTypes = theCompositeTypes;
+	public BaseBinder(
+				Class<? extends T> theType,
+				List<Class<? extends IQueryParameterType>> theCompositeTypes) {
+		myType = theType;
+		myCompositeTypes = theCompositeTypes;
 
-        if (myType.equals(CompositeParam.class)) {
-            if (myCompositeTypes.size() != 2) {
-                throw new ConfigurationException(
-                        Msg.code(1959)
-                                + "Search parameter of type "
-                                + myType.getName()
-                                + " must have 2 composite types declared in parameter annotation,"
-                                + " found "
-                                + theCompositeTypes.size());
-            }
-        }
+		if (myType.equals(CompositeParam.class)) {
+				if (myCompositeTypes.size() != 2) {
+					throw new ConfigurationException(
+								Msg.code(1959)
+										+ "Search parameter of type "
+										+ myType.getName()
+										+ " must have 2 composite types declared in parameter annotation,"
+										+ " found "
+										+ theCompositeTypes.size());
+				}
+		}
 
-        try {
-            Class<?>[] types = new Class<?>[myCompositeTypes.size()];
-            for (int i = 0; i < myCompositeTypes.size(); i++) {
-                types[i] = Class.class;
-            }
-            myConstructor = myType.getConstructor(types);
-        } catch (NoSuchMethodException e) {
-            throw new ConfigurationException(
-                    Msg.code(1960)
-                            + "Query parameter type "
-                            + theType.getName()
-                            + " has no constructor with types "
-                            + theCompositeTypes);
-        }
-    }
+		try {
+				Class<?>[] types = new Class<?>[myCompositeTypes.size()];
+				for (int i = 0; i < myCompositeTypes.size(); i++) {
+					types[i] = Class.class;
+				}
+				myConstructor = myType.getConstructor(types);
+		} catch (NoSuchMethodException e) {
+				throw new ConfigurationException(
+						Msg.code(1960)
+									+ "Query parameter type "
+									+ theType.getName()
+									+ " has no constructor with types "
+									+ theCompositeTypes);
+		}
+	}
 
-    public T newInstance() {
-        try {
-            final Object[] args = new Object[myCompositeTypes.size()];
-            for (int i = 0; i < myCompositeTypes.size(); i++) {
-                args[i] = myCompositeTypes.get(i); // .newInstance();
-            }
+	public T newInstance() {
+		try {
+				final Object[] args = new Object[myCompositeTypes.size()];
+				for (int i = 0; i < myCompositeTypes.size(); i++) {
+					args[i] = myCompositeTypes.get(i); // .newInstance();
+				}
 
-            T dt = myConstructor.newInstance(args);
-            return dt;
-        } catch (final Exception e) {
-            throw new InternalErrorException(Msg.code(1961) + e);
-        }
-    }
+				T dt = myConstructor.newInstance(args);
+				return dt;
+		} catch (final Exception e) {
+				throw new InternalErrorException(Msg.code(1961) + e);
+		}
+	}
 }

@@ -19,18 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -53,221 +41,232 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
-    private static final org.slf4j.Logger ourLog =
-            org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
+	private static final org.slf4j.Logger ourLog =
+				org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 
-    private Integer myIdIndex;
-    private boolean mySupportsVersion;
-    private Class<? extends IIdType> myIdParameterType;
+	private Integer myIdIndex;
+	private boolean mySupportsVersion;
+	private Class<? extends IIdType> myIdParameterType;
 
-    @SuppressWarnings("unchecked")
-    public ReadMethodBinding(
-            Class<? extends IBaseResource> theAnnotatedResourceType,
-            Method theMethod,
-            FhirContext theContext,
-            Object theProvider) {
-        super(theAnnotatedResourceType, theMethod, theContext, theProvider);
+	@SuppressWarnings("unchecked")
+	public ReadMethodBinding(
+				Class<? extends IBaseResource> theAnnotatedResourceType,
+				Method theMethod,
+				FhirContext theContext,
+				Object theProvider) {
+		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
-        Validate.notNull(theMethod, "Method must not be null");
+		Validate.notNull(theMethod, "Method must not be null");
 
-        Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
+		Integer idIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 
-        Class<?>[] parameterTypes = theMethod.getParameterTypes();
+		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 
-        mySupportsVersion = theMethod.getAnnotation(Read.class).version();
-        myIdIndex = idIndex;
+		mySupportsVersion = theMethod.getAnnotation(Read.class).version();
+		myIdIndex = idIndex;
 
-        if (myIdIndex == null) {
-            throw new ConfigurationException(
-                    Msg.code(382)
-                            + "@"
-                            + Read.class.getSimpleName()
-                            + " method "
-                            + theMethod.getName()
-                            + " on type \""
-                            + theMethod.getDeclaringClass().getName()
-                            + "\" does not have a parameter annotated with @"
-                            + IdParam.class.getSimpleName());
-        }
-        myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
+		if (myIdIndex == null) {
+				throw new ConfigurationException(
+						Msg.code(382)
+									+ "@"
+									+ Read.class.getSimpleName()
+									+ " method "
+									+ theMethod.getName()
+									+ " on type \""
+									+ theMethod.getDeclaringClass().getName()
+									+ "\" does not have a parameter annotated with @"
+									+ IdParam.class.getSimpleName());
+		}
+		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
 
-        if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
-            throw new ConfigurationException(
-                    Msg.code(383)
-                            + "ID parameter must be of type IdDt or IdType - Found: "
-                            + myIdParameterType);
-        }
-    }
+		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
+				throw new ConfigurationException(
+						Msg.code(383)
+									+ "ID parameter must be of type IdDt or IdType - Found: "
+									+ myIdParameterType);
+		}
+	}
 
-    @Override
-    public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
-        if (mySupportsVersion && theRequestDetails.getId().hasVersionIdPart()) {
-            return RestOperationTypeEnum.VREAD;
-        }
-        return RestOperationTypeEnum.READ;
-    }
+	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		if (mySupportsVersion && theRequestDetails.getId().hasVersionIdPart()) {
+				return RestOperationTypeEnum.VREAD;
+		}
+		return RestOperationTypeEnum.READ;
+	}
 
-    @Override
-    public List<Class<?>> getAllowableParamAnnotations() {
-        ArrayList<Class<?>> retVal = new ArrayList<>();
-        retVal.add(IdParam.class);
-        retVal.add(Elements.class);
-        return retVal;
-    }
+	@Override
+	public List<Class<?>> getAllowableParamAnnotations() {
+		ArrayList<Class<?>> retVal = new ArrayList<>();
+		retVal.add(IdParam.class);
+		retVal.add(Elements.class);
+		return retVal;
+	}
 
-    @Nonnull
-    @Override
-    public RestOperationTypeEnum getRestOperationType() {
-        return isVread() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
-    }
+	@Nonnull
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return isVread() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
+	}
 
-    @Override
-    public ReturnTypeEnum getReturnType() {
-        return ReturnTypeEnum.RESOURCE;
-    }
+	@Override
+	public ReturnTypeEnum getReturnType() {
+		return ReturnTypeEnum.RESOURCE;
+	}
 
-    @Override
-    public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-        if (!theRequest.getResourceName().equals(getResourceName())) {
-            return MethodMatchEnum.NONE;
-        }
-        for (String next : theRequest.getParameters().keySet()) {
-            if (!next.startsWith("_")) {
-                return MethodMatchEnum.NONE;
-            }
-        }
-        if (theRequest.getId() == null) {
-            return MethodMatchEnum.NONE;
-        }
-        if (mySupportsVersion == false) {
-            if (theRequest.getId().hasVersionIdPart()) {
-                return MethodMatchEnum.NONE;
-            }
-        }
-        if (isNotBlank(theRequest.getCompartmentName())) {
-            return MethodMatchEnum.NONE;
-        }
-        if (theRequest.getRequestType() != RequestTypeEnum.GET
-                && theRequest.getRequestType() != RequestTypeEnum.HEAD) {
-            ourLog.trace(
-                    "Method {} doesn't match because request type is not GET or HEAD: {}",
-                    theRequest.getId(),
-                    theRequest.getRequestType());
-            return MethodMatchEnum.NONE;
-        }
-        if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
-            if (mySupportsVersion == false) {
-                return MethodMatchEnum.NONE;
-            } else if (theRequest.getId().hasVersionIdPart() == false) {
-                return MethodMatchEnum.NONE;
-            }
-        } else if (!StringUtils.isBlank(theRequest.getOperation())) {
-            return MethodMatchEnum.NONE;
-        }
-        return MethodMatchEnum.EXACT;
-    }
+	@Override
+	public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		if (!theRequest.getResourceName().equals(getResourceName())) {
+				return MethodMatchEnum.NONE;
+		}
+		for (String next : theRequest.getParameters().keySet()) {
+				if (!next.startsWith("_")) {
+					return MethodMatchEnum.NONE;
+				}
+		}
+		if (theRequest.getId() == null) {
+				return MethodMatchEnum.NONE;
+		}
+		if (mySupportsVersion == false) {
+				if (theRequest.getId().hasVersionIdPart()) {
+					return MethodMatchEnum.NONE;
+				}
+		}
+		if (isNotBlank(theRequest.getCompartmentName())) {
+				return MethodMatchEnum.NONE;
+		}
+		if (theRequest.getRequestType() != RequestTypeEnum.GET
+					&& theRequest.getRequestType() != RequestTypeEnum.HEAD) {
+				ourLog.trace(
+						"Method {} doesn't match because request type is not GET or HEAD: {}",
+						theRequest.getId(),
+						theRequest.getRequestType());
+				return MethodMatchEnum.NONE;
+		}
+		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
+				if (mySupportsVersion == false) {
+					return MethodMatchEnum.NONE;
+				} else if (theRequest.getId().hasVersionIdPart() == false) {
+					return MethodMatchEnum.NONE;
+				}
+		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
+				return MethodMatchEnum.NONE;
+		}
+		return MethodMatchEnum.EXACT;
+	}
 
-    @Override
-    public IBundleProvider invokeServer(
-            IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
-            throws InvalidRequestException, InternalErrorException {
-        IIdType requestId = theRequest.getId();
-        FhirContext ctx = theRequest.getServer().getFhirContext();
+	@Override
+	public IBundleProvider invokeServer(
+				IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+				throws InvalidRequestException, InternalErrorException {
+		IIdType requestId = theRequest.getId();
+		FhirContext ctx = theRequest.getServer().getFhirContext();
 
-        String[] invalidQueryStringParams =
-                new String[] {
-                    Constants.PARAM_CONTAINED,
-                    Constants.PARAM_COUNT,
-                    Constants.PARAM_INCLUDE,
-                    Constants.PARAM_REVINCLUDE,
-                    Constants.PARAM_SORT,
-                    Constants.PARAM_SEARCH_TOTAL_MODE
-                };
-        List<String> invalidQueryStringParamsInRequest = new ArrayList<>();
-        Set<String> queryStringParamsInRequest = theRequest.getParameters().keySet();
+		String[] invalidQueryStringParams =
+					new String[] {
+						Constants.PARAM_CONTAINED,
+						Constants.PARAM_COUNT,
+						Constants.PARAM_INCLUDE,
+						Constants.PARAM_REVINCLUDE,
+						Constants.PARAM_SORT,
+						Constants.PARAM_SEARCH_TOTAL_MODE
+					};
+		List<String> invalidQueryStringParamsInRequest = new ArrayList<>();
+		Set<String> queryStringParamsInRequest = theRequest.getParameters().keySet();
 
-        for (String queryStringParamName : queryStringParamsInRequest) {
-            String lowercaseQueryStringParamName = queryStringParamName.toLowerCase();
-            if (StringUtils.startsWithAny(
-                    lowercaseQueryStringParamName, invalidQueryStringParams)) {
-                invalidQueryStringParamsInRequest.add(queryStringParamName);
-            }
-        }
+		for (String queryStringParamName : queryStringParamsInRequest) {
+				String lowercaseQueryStringParamName = queryStringParamName.toLowerCase();
+				if (StringUtils.startsWithAny(
+						lowercaseQueryStringParamName, invalidQueryStringParams)) {
+					invalidQueryStringParamsInRequest.add(queryStringParamName);
+				}
+		}
 
-        if (!invalidQueryStringParamsInRequest.isEmpty()) {
-            throw new InvalidRequestException(
-                    Msg.code(384)
-                            + ctx.getLocalizer()
-                                    .getMessage(
-                                            ReadMethodBinding.class,
-                                            "invalidParamsInRequest",
-                                            invalidQueryStringParamsInRequest));
-        }
+		if (!invalidQueryStringParamsInRequest.isEmpty()) {
+				throw new InvalidRequestException(
+						Msg.code(384)
+									+ ctx.getLocalizer()
+												.getMessage(
+														ReadMethodBinding.class,
+														"invalidParamsInRequest",
+														invalidQueryStringParamsInRequest));
+		}
 
-        theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
+		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
-        Object response = invokeServerMethod(theRequest, theMethodParams);
-        IBundleProvider retVal = toResourceList(response);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
+		IBundleProvider retVal = toResourceList(response);
 
-        if (Integer.valueOf(1).equals(retVal.size())) {
-            List<IBaseResource> responseResources = retVal.getResources(0, 1);
-            IBaseResource responseResource = responseResources.get(0);
+		if (Integer.valueOf(1).equals(retVal.size())) {
+				List<IBaseResource> responseResources = retVal.getResources(0, 1);
+				IBaseResource responseResource = responseResources.get(0);
 
-            // If-None-Match
-            if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-                String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
-                if (StringUtils.isNotBlank(ifNoneMatch)) {
-                    ifNoneMatch = ParameterUtil.parseETagValue(ifNoneMatch);
-                    String versionIdPart = responseResource.getIdElement().getVersionIdPart();
-                    if (StringUtils.isBlank(versionIdPart)) {
-                        versionIdPart = responseResource.getMeta().getVersionId();
-                    }
-                    if (ifNoneMatch.equals(versionIdPart)) {
-                        ourLog.debug(
-                                "Returning HTTP 304 because request specified {}={}",
-                                Constants.HEADER_IF_NONE_MATCH,
-                                ifNoneMatch);
-                        throw new NotModifiedException(Msg.code(385) + "Not Modified");
-                    }
-                }
-            }
+				// If-None-Match
+				if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
+					String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+					if (StringUtils.isNotBlank(ifNoneMatch)) {
+						ifNoneMatch = ParameterUtil.parseETagValue(ifNoneMatch);
+						String versionIdPart = responseResource.getIdElement().getVersionIdPart();
+						if (StringUtils.isBlank(versionIdPart)) {
+								versionIdPart = responseResource.getMeta().getVersionId();
+						}
+						if (ifNoneMatch.equals(versionIdPart)) {
+								ourLog.debug(
+										"Returning HTTP 304 because request specified {}={}",
+										Constants.HEADER_IF_NONE_MATCH,
+										ifNoneMatch);
+								throw new NotModifiedException(Msg.code(385) + "Not Modified");
+						}
+					}
+				}
 
-            // If-Modified-Since
-            String ifModifiedSince = theRequest.getHeader(Constants.HEADER_IF_MODIFIED_SINCE_LC);
-            if (isNotBlank(ifModifiedSince)) {
-                Date ifModifiedSinceDate = DateUtils.parseDate(ifModifiedSince);
-                Date lastModified = null;
-                if (responseResource instanceof IResource) {
-                    InstantDt lastModifiedDt =
-                            ResourceMetadataKeyEnum.UPDATED.get((IResource) responseResource);
-                    if (lastModifiedDt != null) {
-                        lastModified = lastModifiedDt.getValue();
-                    }
-                } else {
-                    lastModified = responseResource.getMeta().getLastUpdated();
-                }
+				// If-Modified-Since
+				String ifModifiedSince = theRequest.getHeader(Constants.HEADER_IF_MODIFIED_SINCE_LC);
+				if (isNotBlank(ifModifiedSince)) {
+					Date ifModifiedSinceDate = DateUtils.parseDate(ifModifiedSince);
+					Date lastModified = null;
+					if (responseResource instanceof IResource) {
+						InstantDt lastModifiedDt =
+									ResourceMetadataKeyEnum.UPDATED.get((IResource) responseResource);
+						if (lastModifiedDt != null) {
+								lastModified = lastModifiedDt.getValue();
+						}
+					} else {
+						lastModified = responseResource.getMeta().getLastUpdated();
+					}
 
-                if (lastModified != null
-                        && lastModified.getTime() <= ifModifiedSinceDate.getTime()) {
-                    ourLog.debug("Returning HTTP 304 because If-Modified-Since does not match");
-                    throw new NotModifiedException(Msg.code(386) + "Not Modified");
-                }
-            }
-        } // if we have at least 1 result
+					if (lastModified != null
+								&& lastModified.getTime() <= ifModifiedSinceDate.getTime()) {
+						ourLog.debug("Returning HTTP 304 because If-Modified-Since does not match");
+						throw new NotModifiedException(Msg.code(386) + "Not Modified");
+					}
+				}
+		} // if we have at least 1 result
 
-        return retVal;
-    }
+		return retVal;
+	}
 
-    public boolean isVread() {
-        return mySupportsVersion;
-    }
+	public boolean isVread() {
+		return mySupportsVersion;
+	}
 
-    @Override
-    protected BundleTypeEnum getResponseBundleType() {
-        return null;
-    }
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
+	}
 }

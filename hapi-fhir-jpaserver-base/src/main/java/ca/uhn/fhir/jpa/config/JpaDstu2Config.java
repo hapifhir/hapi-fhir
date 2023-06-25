@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.jpa.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
@@ -33,38 +28,42 @@ import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
 @Import({
-    FhirContextDstu2Config.class,
-    GeneratedDaoAndResourceProviderConfigDstu2.class,
-    JpaConfig.class
+	FhirContextDstu2Config.class,
+	GeneratedDaoAndResourceProviderConfigDstu2.class,
+	JpaConfig.class
 })
 public class JpaDstu2Config {
-    @Bean
-    public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
-        return new TransactionProcessorVersionAdapterDstu2();
-    }
+	@Bean
+	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterDstu2();
+	}
 
-    @Bean
-    public ITermVersionAdapterSvc translationAdaptorVersion() {
-        return new TermVersionAdapterSvcDstu2();
-    }
+	@Bean
+	public ITermVersionAdapterSvc translationAdaptorVersion() {
+		return new TermVersionAdapterSvcDstu2();
+	}
 
-    @Bean(name = "mySystemDaoDstu2")
-    public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
-        ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal =
-                new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
-        return retVal;
-    }
+	@Bean(name = "mySystemDaoDstu2")
+	public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
+		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal =
+					new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
+		return retVal;
+	}
 
-    @Bean(name = "mySystemProviderDstu2")
-    public JpaSystemProvider<Bundle, MetaDt> systemProviderDstu2(FhirContext theFhirContext) {
-        JpaSystemProvider<Bundle, MetaDt> retVal =
-                new ca.uhn.fhir.jpa.provider.JpaSystemProvider<>();
-        retVal.setDao(systemDaoDstu2());
-        retVal.setContext(theFhirContext);
-        return retVal;
-    }
+	@Bean(name = "mySystemProviderDstu2")
+	public JpaSystemProvider<Bundle, MetaDt> systemProviderDstu2(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, MetaDt> retVal =
+					new ca.uhn.fhir.jpa.provider.JpaSystemProvider<>();
+		retVal.setDao(systemDaoDstu2());
+		retVal.setContext(theFhirContext);
+		return retVal;
+	}
 }

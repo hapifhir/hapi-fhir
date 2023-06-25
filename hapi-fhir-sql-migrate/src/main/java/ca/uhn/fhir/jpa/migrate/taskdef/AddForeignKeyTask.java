@@ -19,140 +19,139 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import java.sql.SQLException;
-import java.util.Set;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import java.sql.SQLException;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class AddForeignKeyTask extends BaseTableColumnTask {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(AddForeignKeyTask.class);
-    private String myConstraintName;
-    private String myForeignTableName;
-    private String myForeignColumnName;
+	private static final Logger ourLog = LoggerFactory.getLogger(AddForeignKeyTask.class);
+	private String myConstraintName;
+	private String myForeignTableName;
+	private String myForeignColumnName;
 
-    public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
-        super(theProductVersion, theSchemaVersion);
-    }
+	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
+		super(theProductVersion, theSchemaVersion);
+	}
 
-    public void setConstraintName(String theConstraintName) {
-        myConstraintName = theConstraintName;
-    }
+	public void setConstraintName(String theConstraintName) {
+		myConstraintName = theConstraintName;
+	}
 
-    public void setForeignTableName(String theForeignTableName) {
-        myForeignTableName = theForeignTableName;
-    }
+	public void setForeignTableName(String theForeignTableName) {
+		myForeignTableName = theForeignTableName;
+	}
 
-    public void setForeignColumnName(String theForeignColumnName) {
-        myForeignColumnName = theForeignColumnName;
-    }
+	public void setForeignColumnName(String theForeignColumnName) {
+		myForeignColumnName = theForeignColumnName;
+	}
 
-    @Override
-    public void validate() {
-        super.validate();
+	@Override
+	public void validate() {
+		super.validate();
 
-        Validate.isTrue(isNotBlank(myConstraintName));
-        Validate.isTrue(isNotBlank(myForeignTableName));
-        Validate.isTrue(isNotBlank(myForeignColumnName));
-        setDescription(
-                "Add foreign key "
-                        + myConstraintName
-                        + " from column "
-                        + getColumnName()
-                        + " of table "
-                        + getTableName()
-                        + " to column "
-                        + myForeignColumnName
-                        + " of table "
-                        + myForeignTableName);
-    }
+		Validate.isTrue(isNotBlank(myConstraintName));
+		Validate.isTrue(isNotBlank(myForeignTableName));
+		Validate.isTrue(isNotBlank(myForeignColumnName));
+		setDescription(
+					"Add foreign key "
+								+ myConstraintName
+								+ " from column "
+								+ getColumnName()
+								+ " of table "
+								+ getTableName()
+								+ " to column "
+								+ myForeignColumnName
+								+ " of table "
+								+ myForeignTableName);
+	}
 
-    @Override
-    public void doExecute() throws SQLException {
+	@Override
+	public void doExecute() throws SQLException {
 
-        Set<String> existing =
-                JdbcUtils.getForeignKeys(
-                        getConnectionProperties(), myForeignTableName, getTableName());
-        if (existing.contains(myConstraintName)) {
-            logInfo(
-                    ourLog,
-                    "Already have constraint named {} - No action performed",
-                    myConstraintName);
-            return;
-        }
+		Set<String> existing =
+					JdbcUtils.getForeignKeys(
+								getConnectionProperties(), myForeignTableName, getTableName());
+		if (existing.contains(myConstraintName)) {
+				logInfo(
+						ourLog,
+						"Already have constraint named {} - No action performed",
+						myConstraintName);
+				return;
+		}
 
-        String sql;
-        switch (getDriverType()) {
-            case MARIADB_10_1:
-            case MYSQL_5_7:
-                // Quote the column names as "SYSTEM" is a reserved word in MySQL
-                sql =
-                        "alter table "
-                                + getTableName()
-                                + " add constraint "
-                                + myConstraintName
-                                + " foreign key (`"
-                                + getColumnName()
-                                + "`) references "
-                                + myForeignTableName
-                                + " (`"
-                                + myForeignColumnName
-                                + "`)";
-                break;
-            case COCKROACHDB_21_1:
-            case POSTGRES_9_4:
-            case DERBY_EMBEDDED:
-            case H2_EMBEDDED:
-            case ORACLE_12C:
-            case MSSQL_2012:
-                sql =
-                        "alter table "
-                                + getTableName()
-                                + " add constraint "
-                                + myConstraintName
-                                + " foreign key ("
-                                + getColumnName()
-                                + ") references "
-                                + myForeignTableName;
-                break;
-            default:
-                throw new IllegalStateException(Msg.code(68));
-        }
+		String sql;
+		switch (getDriverType()) {
+				case MARIADB_10_1:
+				case MYSQL_5_7:
+					// Quote the column names as "SYSTEM" is a reserved word in MySQL
+					sql =
+								"alter table "
+										+ getTableName()
+										+ " add constraint "
+										+ myConstraintName
+										+ " foreign key (`"
+										+ getColumnName()
+										+ "`) references "
+										+ myForeignTableName
+										+ " (`"
+										+ myForeignColumnName
+										+ "`)";
+					break;
+				case COCKROACHDB_21_1:
+				case POSTGRES_9_4:
+				case DERBY_EMBEDDED:
+				case H2_EMBEDDED:
+				case ORACLE_12C:
+				case MSSQL_2012:
+					sql =
+								"alter table "
+										+ getTableName()
+										+ " add constraint "
+										+ myConstraintName
+										+ " foreign key ("
+										+ getColumnName()
+										+ ") references "
+										+ myForeignTableName;
+					break;
+				default:
+					throw new IllegalStateException(Msg.code(68));
+		}
 
-        try {
-            executeSql(getTableName(), sql);
-        } catch (Exception e) {
-            if (e.toString().contains("already exists")) {
-                ourLog.warn("Index {} already exists", myConstraintName);
-            } else {
-                throw e;
-            }
-        }
-    }
+		try {
+				executeSql(getTableName(), sql);
+		} catch (Exception e) {
+				if (e.toString().contains("already exists")) {
+					ourLog.warn("Index {} already exists", myConstraintName);
+				} else {
+					throw e;
+				}
+		}
+	}
 
-    @Override
-    protected void generateHashCode(HashCodeBuilder theBuilder) {
-        super.generateHashCode(theBuilder);
-        theBuilder.append(myConstraintName);
-        theBuilder.append(myForeignTableName);
-        theBuilder.append(myForeignColumnName);
-    }
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myConstraintName);
+		theBuilder.append(myForeignTableName);
+		theBuilder.append(myForeignColumnName);
+	}
 
-    @Override
-    protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-        AddForeignKeyTask otherObject = (AddForeignKeyTask) theOtherObject;
-        super.generateEquals(theBuilder, otherObject);
-        theBuilder.append(myConstraintName, otherObject.myConstraintName);
-        theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
-        theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
-    }
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		AddForeignKeyTask otherObject = (AddForeignKeyTask) theOtherObject;
+		super.generateEquals(theBuilder, otherObject);
+		theBuilder.append(myConstraintName, otherObject.myConstraintName);
+		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
+		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
+	}
 }

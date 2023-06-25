@@ -24,31 +24,31 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IAuthRuleBuilderOperationNamed {
 
-    /** Rule applies to invocations of this operation at the <code>server</code> level */
-    IAuthRuleBuilderOperationNamedAndScoped onServer();
+	/** Rule applies to invocations of this operation at the <code>server</code> level */
+	IAuthRuleBuilderOperationNamedAndScoped onServer();
 
-    /** Rule applies to invocations of this operation at the <code>type</code> level */
-    IAuthRuleBuilderOperationNamedAndScoped onType(Class<? extends IBaseResource> theType);
+	/** Rule applies to invocations of this operation at the <code>type</code> level */
+	IAuthRuleBuilderOperationNamedAndScoped onType(Class<? extends IBaseResource> theType);
 
-    /** Rule applies to invocations of this operation at the <code>type</code> level on any type */
-    IAuthRuleBuilderOperationNamedAndScoped onAnyType();
+	/** Rule applies to invocations of this operation at the <code>type</code> level on any type */
+	IAuthRuleBuilderOperationNamedAndScoped onAnyType();
 
-    /** Rule applies to invocations of this operation at the <code>instance</code> level */
-    IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
+	/** Rule applies to invocations of this operation at the <code>instance</code> level */
+	IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
 
-    /**
-     * Rule applies to invocations of this operation at the <code>instance</code> level on any
-     * instance of the given type
-     */
-    IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
-            Class<? extends IBaseResource> theType);
+	/**
+	* Rule applies to invocations of this operation at the <code>instance</code> level on any
+	* instance of the given type
+	*/
+	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
+				Class<? extends IBaseResource> theType);
 
-    /**
-     * Rule applies to invocations of this operation at the <code>instance</code> level on any
-     * instance
-     */
-    IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
+	/**
+	* Rule applies to invocations of this operation at the <code>instance</code> level on any
+	* instance
+	*/
+	IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
 
-    /** Rule applies to invocations of this operation at any level (server, type or instance) */
-    IAuthRuleBuilderOperationNamedAndScoped atAnyLevel();
+	/** Rule applies to invocations of this operation at any level (server, type or instance) */
+	IAuthRuleBuilderOperationNamedAndScoped atAnyLevel();
 }

@@ -19,14 +19,6 @@
  */
 package ca.uhn.fhir.mdm.batch2.submit;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -42,69 +34,76 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.Logs;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
 
 public class MdmInflateAndSubmitResourcesStep
-        implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
-    private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+		implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-    @Autowired private DaoRegistry myDaoRegistry;
+	@Autowired private DaoRegistry myDaoRegistry;
 
-    @Autowired(required = false)
-    private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	@Autowired(required = false)
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
-    @Autowired private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
-    @Autowired private IIdHelperService<? extends IResourcePersistentId> myIdHelperService;
+	@Autowired private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+	@Autowired private IIdHelperService<? extends IResourcePersistentId> myIdHelperService;
 
-    @Nonnull
-    @Override
-    public RunOutcome run(
-            @Nonnull
-                    StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson>
-                            theStepExecutionDetails,
-            @Nonnull IJobDataSink<VoidModel> theDataSink)
-            throws JobExecutionFailedException {
-        ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
+	@Nonnull
+	@Override
+	public RunOutcome run(
+				@Nonnull
+						StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson>
+									theStepExecutionDetails,
+				@Nonnull IJobDataSink<VoidModel> theDataSink)
+				throws JobExecutionFailedException {
+		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
-        ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
-        ourLog.info(
-                "About to expand {} resource IDs into their full resource bodies.",
-                idList.getResourcePersistentIds(myIdHelperService).size());
+		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
+		ourLog.info(
+					"About to expand {} resource IDs into their full resource bodies.",
+					idList.getResourcePersistentIds(myIdHelperService).size());
 
-        // Inflate the resources by PID
-        List<IBaseResource> allResources =
-                fetchAllResources(idList.getResourcePersistentIds(myIdHelperService));
+		// Inflate the resources by PID
+		List<IBaseResource> allResources =
+					fetchAllResources(idList.getResourcePersistentIds(myIdHelperService));
 
-        // Replace the terminology
-        if (myResponseTerminologyTranslationSvc != null) {
-            myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(
-                    allResources);
-        }
+		// Replace the terminology
+		if (myResponseTerminologyTranslationSvc != null) {
+				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(
+						allResources);
+		}
 
-        // Submit
-        for (IBaseResource nextResource : allResources) {
-            myMdmChannelSubmitterSvc.submitResourceToMdmChannel(nextResource);
-        }
+		// Submit
+		for (IBaseResource nextResource : allResources) {
+				myMdmChannelSubmitterSvc.submitResourceToMdmChannel(nextResource);
+		}
 
-        ourLog.info("Expanding of {} resources of type completed", idList.size());
-        return new RunOutcome(allResources.size());
-    }
+		ourLog.info("Expanding of {} resources of type completed", idList.size());
+		return new RunOutcome(allResources.size());
+	}
 
-    private List<IBaseResource> fetchAllResources(List<? extends IResourcePersistentId> theIds) {
-        List<IBaseResource> resources = new ArrayList<>();
-        for (IResourcePersistentId id : theIds) {
-            assert id.getResourceType() != null;
-            IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-            // This should be a query, but we have PIDs, and we don't have a _pid search param. TODO
-            // GGG, figure out how to make this search by pid.
-            try {
-                resources.add(dao.readByPid(id));
-            } catch (ResourceNotFoundException e) {
-                ourLog.warn(
-                        "While attempging to send [{}] to the MDM queue, the resource was not"
-                                + " found.",
-                        id);
-            }
-        }
-        return resources;
-    }
+	private List<IBaseResource> fetchAllResources(List<? extends IResourcePersistentId> theIds) {
+		List<IBaseResource> resources = new ArrayList<>();
+		for (IResourcePersistentId id : theIds) {
+				assert id.getResourceType() != null;
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
+				// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO
+				// GGG, figure out how to make this search by pid.
+				try {
+					resources.add(dao.readByPid(id));
+				} catch (ResourceNotFoundException e) {
+					ourLog.warn(
+								"While attempging to send [{}] to the MDM queue, the resource was not"
+										+ " found.",
+								id);
+				}
+		}
+		return resources;
+	}
 }

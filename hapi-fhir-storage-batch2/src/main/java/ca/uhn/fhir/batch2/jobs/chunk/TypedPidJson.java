@@ -19,75 +19,73 @@
  */
 package ca.uhn.fhir.batch2.jobs.chunk;
 
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.model.api.IModelJson;
-
 public class TypedPidJson implements IModelJson {
 
-    @JsonProperty("type")
-    private String myResourceType;
+	@JsonProperty("type")
+	private String myResourceType;
 
-    @JsonProperty("id")
-    private String myPid;
+	@JsonProperty("id")
+	private String myPid;
 
-    public TypedPidJson() {}
+	public TypedPidJson() {}
 
-    public TypedPidJson(String theResourceType, String theId) {
-        myResourceType = theResourceType;
-        myPid = theId;
-    }
+	public TypedPidJson(String theResourceType, String theId) {
+		myResourceType = theResourceType;
+		myPid = theId;
+	}
 
-    public TypedPidJson(TypedResourcePid theTypedResourcePid) {
-        myResourceType = theTypedResourcePid.resourceType;
-        myPid = theTypedResourcePid.id.toString();
-    }
+	public TypedPidJson(TypedResourcePid theTypedResourcePid) {
+		myResourceType = theTypedResourcePid.resourceType;
+		myPid = theTypedResourcePid.id.toString();
+	}
 
-    @Override
-    public String toString() {
-        // We put a space in here and not a "/" since this is a PID, not
-        // a resource ID
-        return "[" + myResourceType + " " + myPid + "]";
-    }
+	@Override
+	public String toString() {
+		// We put a space in here and not a "/" since this is a PID, not
+		// a resource ID
+		return "[" + myResourceType + " " + myPid + "]";
+	}
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public TypedPidJson setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-        return this;
-    }
+	public TypedPidJson setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
 
-    public String getPid() {
-        return myPid;
-    }
+	public String getPid() {
+		return myPid;
+	}
 
-    public TypedPidJson setPid(String thePid) {
-        myPid = thePid;
-        return this;
-    }
+	public TypedPidJson setPid(String thePid) {
+		myPid = thePid;
+		return this;
+	}
 
-    @Override
-    public boolean equals(Object theO) {
-        if (this == theO) return true;
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
 
-        if (theO == null || getClass() != theO.getClass()) return false;
+		if (theO == null || getClass() != theO.getClass()) return false;
 
-        TypedPidJson id = (TypedPidJson) theO;
+		TypedPidJson id = (TypedPidJson) theO;
 
-        return new EqualsBuilder()
-                .append(myResourceType, id.myResourceType)
-                .append(myPid, id.myPid)
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.append(myResourceType, id.myResourceType)
+					.append(myPid, id.myPid)
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
+	}
 }

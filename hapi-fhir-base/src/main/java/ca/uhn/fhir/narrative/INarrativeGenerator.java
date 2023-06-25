@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.narrative;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface INarrativeGenerator {
 
-    /**
-     * Generate any narratives for the given resource that have applicable templates, and populates
-     * the appropriate field(s). This almost always means the <code>Resource.text.narrative</code>
-     * field, but for some resource types it can mean other fields (e.g. <code>Composition.</code>
-     *
-     * @return Returns <code>true</code> if a narrative was actually generated
-     */
-    boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
+	/**
+	* Generate any narratives for the given resource that have applicable templates, and populates
+	* the appropriate field(s). This almost always means the <code>Resource.text.narrative</code>
+	* field, but for some resource types it can mean other fields (e.g. <code>Composition.</code>
+	*
+	* @return Returns <code>true</code> if a narrative was actually generated
+	*/
+	boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 
-    /** Generates the narrative for the given resource and returns it as a string */
-    String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
+	/** Generates the narrative for the given resource and returns it as a string */
+	String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 }

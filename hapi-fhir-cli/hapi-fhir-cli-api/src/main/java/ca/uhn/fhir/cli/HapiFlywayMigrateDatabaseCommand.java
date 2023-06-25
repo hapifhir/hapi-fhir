@@ -19,42 +19,41 @@
  */
 package ca.uhn.fhir.cli;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class HapiFlywayMigrateDatabaseCommand
-        extends BaseFlywayMigrateDatabaseCommand<VersionEnum> {
+		extends BaseFlywayMigrateDatabaseCommand<VersionEnum> {
 
-    @Override
-    protected List<VersionEnum> provideAllowedVersions() {
-        return Arrays.asList(VersionEnum.values());
-    }
+	@Override
+	protected List<VersionEnum> provideAllowedVersions() {
+		return Arrays.asList(VersionEnum.values());
+	}
 
-    @Override
-    protected Class<VersionEnum> provideVersionEnumType() {
-        return VersionEnum.class;
-    }
+	@Override
+	protected Class<VersionEnum> provideVersionEnumType() {
+		return VersionEnum.class;
+	}
 
-    @Override
-    protected void addTasks(HapiMigrator theMigrator, String theSkipVersions) {
-        MigrationTaskList taskList =
-                new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
-        taskList.setDoNothingOnSkippedTasks(theSkipVersions);
-        theMigrator.addTasks(taskList);
-    }
+	@Override
+	protected void addTasks(HapiMigrator theMigrator, String theSkipVersions) {
+		MigrationTaskList taskList =
+					new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
+		taskList.setDoNothingOnSkippedTasks(theSkipVersions);
+		theMigrator.addTasks(taskList);
+	}
 
-    @Override
-    public void run(CommandLine theCommandLine) throws ParseException {
-        setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
-        super.run(theCommandLine);
-    }
+	@Override
+	public void run(CommandLine theCommandLine) throws ParseException {
+		setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+		super.run(theCommandLine);
+	}
 }

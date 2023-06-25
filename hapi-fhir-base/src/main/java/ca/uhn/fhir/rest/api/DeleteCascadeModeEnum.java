@@ -25,7 +25,7 @@ package ca.uhn.fhir.rest.api;
  * <p>Note that this is a HAPI FHIR specific feature, and may not work on other platforms.
  */
 public enum DeleteCascadeModeEnum {
-    NONE,
+	NONE,
 
-    DELETE
+	DELETE
 }

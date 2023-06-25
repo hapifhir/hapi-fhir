@@ -19,68 +19,67 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
-
 public interface IOperationUntyped {
 
-    /**
-     * Use the given parameters resource as the input to the operation
-     *
-     * @param theParameters The parameters to use as input. May also be <code>null</code> if the
-     *     operation does not require any input parameters.
-     */
-    <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameters(
-            T theParameters);
+	/**
+	* Use the given parameters resource as the input to the operation
+	*
+	* @param theParameters The parameters to use as input. May also be <code>null</code> if the
+	*     operation does not require any input parameters.
+	*/
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameters(
+				T theParameters);
 
-    /**
-     * The operation does not require any input parameters
-     *
-     * @param theOutputParameterType The type to use for the output parameters (this should be set
-     *     to <code>Parameters.class</code> drawn from the version of the FHIR structures you are
-     *     using)
-     */
-    <T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(
-            Class<T> theOutputParameterType);
+	/**
+	* The operation does not require any input parameters
+	*
+	* @param theOutputParameterType The type to use for the output parameters (this should be set
+	*     to <code>Parameters.class</code> drawn from the version of the FHIR structures you are
+	*     using)
+	*/
+	<T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(
+				Class<T> theOutputParameterType);
 
-    /**
-     * Use chained method calls to construct a Parameters input. This form is a convenience in order
-     * to allow simple method chaining to be used to build up a parameters resource for the input of
-     * an operation without needing to manually construct one.
-     *
-     * <p>A sample invocation of this class could look like:<br>
-     *
-     * <pre>Bundle bundle = client.operation()
-     *   .onInstance(new IdType("Patient/A161443"))
-     *   .named("everything")
-     *   .withParameter(Parameters.class, "_count", new IntegerType(50))
-     *   .useHttpGet()
-     *   .returnResourceType(Bundle.class)
-     *   .execute();
-     * </pre>
-     *
-     * @param theParameterType The type to use for the output parameters (this should be set to
-     *     <code>Parameters.class</code> drawn from the version of the FHIR structures you are
-     *     using)
-     * @param theName The first parameter name
-     * @param theValue The first parameter value
-     */
-    <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameter(
-            Class<T> theParameterType, String theName, IBase theValue);
+	/**
+	* Use chained method calls to construct a Parameters input. This form is a convenience in order
+	* to allow simple method chaining to be used to build up a parameters resource for the input of
+	* an operation without needing to manually construct one.
+	*
+	* <p>A sample invocation of this class could look like:<br>
+	*
+	* <pre>Bundle bundle = client.operation()
+	*   .onInstance(new IdType("Patient/A161443"))
+	*   .named("everything")
+	*   .withParameter(Parameters.class, "_count", new IntegerType(50))
+	*   .useHttpGet()
+	*   .returnResourceType(Bundle.class)
+	*   .execute();
+	* </pre>
+	*
+	* @param theParameterType The type to use for the output parameters (this should be set to
+	*     <code>Parameters.class</code> drawn from the version of the FHIR structures you are
+	*     using)
+	* @param theName The first parameter name
+	* @param theValue The first parameter value
+	*/
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameter(
+				Class<T> theParameterType, String theName, IBase theValue);
 
-    /**
-     * Use chained method calls to construct a Parameters input. This form is a convenience in order
-     * to allow simple method chaining to be used to build up a parameters resource for the input of
-     * an operation without needing to manually construct one.
-     *
-     * @param theParameterType The type to use for the output parameters (this should be set to
-     *     <code>Parameters.class</code> drawn from the version of the FHIR structures you are
-     *     using)
-     * @param theName The first parameter name
-     * @param theValue The first parameter value
-     */
-    <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withSearchParameter(
-            Class<T> theParameterType, String theName, IQueryParameterType theValue);
+	/**
+	* Use chained method calls to construct a Parameters input. This form is a convenience in order
+	* to allow simple method chaining to be used to build up a parameters resource for the input of
+	* an operation without needing to manually construct one.
+	*
+	* @param theParameterType The type to use for the output parameters (this should be set to
+	*     <code>Parameters.class</code> drawn from the version of the FHIR structures you are
+	*     using)
+	* @param theName The first parameter name
+	* @param theValue The first parameter value
+	*/
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withSearchParameter(
+				Class<T> theParameterType, String theName, IQueryParameterType theValue);
 }

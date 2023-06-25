@@ -19,20 +19,19 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-
 public interface ITermConceptPropertyDao
-        extends JpaRepository<TermConceptProperty, Long>, IHapiFhirJpaRepository {
+		extends JpaRepository<TermConceptProperty, Long>, IHapiFhirJpaRepository {
 
-    @Modifying
-    @Query("DELETE FROM TermConceptProperty WHERE myCodeSystemVersion.myId = :cs_pid")
-    int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	@Modifying
+	@Query("DELETE FROM TermConceptProperty WHERE myCodeSystemVersion.myId = :cs_pid")
+	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-    @Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
-    Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	@Query("SELECT COUNT(t) FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
+	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 }

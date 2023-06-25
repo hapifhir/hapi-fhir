@@ -26,34 +26,34 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public class ResponseDetails {
 
-    private IBaseResource myResponseResource;
-    private int myResponseCode;
+	private IBaseResource myResponseResource;
+	private int myResponseCode;
 
-    /** Constructor */
-    public ResponseDetails() {
-        super();
-    }
+	/** Constructor */
+	public ResponseDetails() {
+		super();
+	}
 
-    /** Constructor */
-    public ResponseDetails(IBaseResource theResponseResource) {
-        setResponseResource(theResponseResource);
-    }
+	/** Constructor */
+	public ResponseDetails(IBaseResource theResponseResource) {
+		setResponseResource(theResponseResource);
+	}
 
-    public int getResponseCode() {
-        return myResponseCode;
-    }
+	public int getResponseCode() {
+		return myResponseCode;
+	}
 
-    public void setResponseCode(int theResponseCode) {
-        myResponseCode = theResponseCode;
-    }
+	public void setResponseCode(int theResponseCode) {
+		myResponseCode = theResponseCode;
+	}
 
-    /** Get the resource which will be returned to the client */
-    public IBaseResource getResponseResource() {
-        return myResponseResource;
-    }
+	/** Get the resource which will be returned to the client */
+	public IBaseResource getResponseResource() {
+		return myResponseResource;
+	}
 
-    /** Set the resource which will be returned to the client */
-    public void setResponseResource(IBaseResource theResponseResource) {
-        myResponseResource = theResponseResource;
-    }
+	/** Set the resource which will be returned to the client */
+	public void setResponseResource(IBaseResource theResponseResource) {
+		myResponseResource = theResponseResource;
+	}
 }

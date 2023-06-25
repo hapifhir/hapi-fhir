@@ -19,23 +19,6 @@
  */
 package ca.uhn.fhir.tinder.ant;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import org.apache.commons.lang.WordUtils;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.AbstractGenerator;
@@ -50,6 +33,22 @@ import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.TargetType;
+import org.apache.commons.lang.WordUtils;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * /** Generate files from FHIR resource/composite metadata using Velocity templates.
@@ -255,470 +254,470 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  */
 public class TinderGeneratorTask extends Task {
 
-    private String version;
+	private String version;
 
-    private String projectHome;
+	private String projectHome;
 
-    private boolean generateResources;
+	private boolean generateResources;
 
-    private boolean generateDatatypes;
+	private boolean generateDatatypes;
 
-    private boolean generateValueSets;
+	private boolean generateValueSets;
 
-    private boolean generateProfiles;
+	private boolean generateProfiles;
 
-    private File targetSourceDirectory;
-
-    private String targetPackage;
-
-    private String packageBase;
-
-    private String targetFile;
-
-    private String filenamePrefix;
-
-    private String filenameSuffix;
-
-    private File targetResourceDirectory;
-
-    private String targetFolder;
-
-    // one of these two is required
-    private String template;
-    private File templateFile;
-
-    private String velocityPath;
-
-    private String velocityProperties;
-
-    private List<String> includeResources;
-
-    private List<String> excludeResources;
-
-    private String resourceSource;
-
-    private List<ValueSetFileDefinition> valueSetFiles;
-
-    private boolean verbose;
-
-    private FhirContext fhirContext; // set from version in validateAttributes
-
-    /** */
-    public TinderGeneratorTask() {
-        super();
-    }
-
-    protected void cleanup() {}
-
-    @Override
-    public void execute() throws BuildException {
-        validateAttributes();
-
-        GeneratorContext context = new GeneratorContext();
-        Generator generator = new Generator();
-        try {
-            context.setVersion(version);
-            context.setBaseDir(projectHome);
-            context.setIncludeResources(includeResources);
-            context.setExcludeResources(excludeResources);
-            context.setResourceSource(resourceSource);
-            context.setValueSetFiles(valueSetFiles);
-            if (ResourceSource.MODEL.equals(context.getResourceSource())) {
-                if (generateDatatypes) {
-                    throw new BuildException(
-                            Msg.code(135)
-                                    + "Cannot use \"generateDatatypes\" when resourceSource=model");
-                }
-                if (generateValueSets) {
-                    throw new BuildException(
-                            Msg.code(136)
-                                    + "Cannot use \"generateValueSets\" when resourceSource=model");
-                }
-            }
-
-            generator.prepare(context);
-        } catch (MojoFailureException | FailureException e) {
-            throw new BuildException(Msg.code(137) + e.getMessage(), e.getCause());
-        }
-
-        /*
-         * Deal with the generation target
-         */
-        TargetType targetType = null;
-        File targetDirectory = null;
-        if (targetSourceDirectory != null) {
-            if (targetResourceDirectory != null) {
-                throw new BuildException(
-                        Msg.code(138)
-                                + "Both [targetSourceDirectory] and [targetResourceDirectory] are"
-                                + " specified. Please choose just one.");
-            }
-            targetType = TargetType.SOURCE;
-            if (null == targetPackage) {
-                throw new BuildException(
-                        Msg.code(139)
-                                + "The [targetPackage] property must be specified when generating"
-                                + " Java source code.");
-            }
-            targetDirectory =
-                    new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
-        } else if (targetResourceDirectory != null) {
-            if (targetSourceDirectory != null) {
-                throw new BuildException(
-                        Msg.code(140)
-                                + "Both [targetSourceDirectory] and [targetResourceDirectory] are"
-                                + " specified. Please choose just one.");
-            }
-            targetType = TargetType.RESOURCE;
-            if (targetFolder != null) {
-                targetDirectory = new File(targetResourceDirectory, targetFolder);
-            } else {
-                targetDirectory = targetResourceDirectory;
-            }
-            if (null == targetPackage) {
-                targetPackage = "";
-            }
-        } else {
-            throw new BuildException(
-                    Msg.code(141)
-                            + "Either [targetSourceDirectory] or [targetResourceDirectory] must be"
-                            + " specified.");
-        }
-        targetDirectory.mkdirs();
-        log(
-                " * Output ["
-                        + targetType.toString()
-                        + "] Directory: "
-                        + targetDirectory.getAbsolutePath());
-
-        try {
-            /*
-             * Single file with all elements
-             */
-            if (targetFile != null) {
-                if (targetType == TargetType.SOURCE) {
-                    if (!targetFile.endsWith(".java")) {
-                        targetFile += ".java";
-                    }
-                }
-                File target = new File(targetDirectory, targetFile);
-                OutputStreamWriter targetWriter =
-                        new OutputStreamWriter(new FileOutputStream(target, false), "UTF-8");
-
-                /*
-                 * Next, deal with the template and initialize velocity
-                 */
-                VelocityEngine v =
-                        VelocityHelper.configureVelocityEngine(
-                                templateFile, velocityPath, velocityProperties);
-                InputStream templateIs = null;
-                if (templateFile != null) {
-                    templateIs = new FileInputStream(templateFile);
-                } else {
-                    templateIs = this.getClass().getResourceAsStream(template);
-                }
-                InputStreamReader templateReader = new InputStreamReader(templateIs);
-
-                /*
-                 * build new Velocity Context
-                 */
-                VelocityContext ctx = new VelocityContext();
-                if (packageBase != null) {
-                    ctx.put("packageBase", packageBase);
-                } else if (targetPackage != null) {
-                    int ix = targetPackage.lastIndexOf('.');
-                    if (ix > 0) {
-                        ctx.put("packageBase", targetPackage.subSequence(0, ix));
-                    } else {
-                        ctx.put("packageBase", targetPackage);
-                    }
-                }
-                ctx.put("targetPackage", targetPackage);
-                ctx.put("targetFolder", targetFolder);
-                ctx.put("version", version);
-                ctx.put(
-                        "isRi",
-                        BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
-                ctx.put("hash", "#");
-                ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
-                if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
-                    ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
-                } else {
-                    ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
-                }
-
-                String capitalize = WordUtils.capitalize(version);
-                if ("R4b".equals(capitalize)) {
-                    capitalize = "R4B";
-                }
-                ctx.put("versionCapitalized", capitalize);
-
-                /*
-                 * Write resources if selected
-                 */
-                BaseStructureParser rp = context.getResourceGenerator();
-                if (generateResources && rp != null) {
-                    log("Writing Resources...");
-                    ctx.put("resources", rp.getResources());
-                    v.evaluate(ctx, targetWriter, "", templateReader);
-                    targetWriter.close();
-                } else {
-                    DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
-                    if (generateDatatypes && dtp != null) {
-                        log("Writing DataTypes...");
-                        ctx.put("datatypes", dtp.getResources());
-                        v.evaluate(ctx, targetWriter, "", templateReader);
-                        targetWriter.close();
-                    }
-                }
-
-                /*
-                 * Multiple files.. one for each element
-                 */
-            } else {
-                /*
-                 * Write resources if selected
-                 */
-                BaseStructureParser rp = context.getResourceGenerator();
-                if (generateResources && rp != null) {
-                    log("Writing Resources...");
-                    rp.setFilenamePrefix(filenamePrefix);
-                    rp.setFilenameSuffix(filenameSuffix);
-                    rp.setTemplate(template);
-                    rp.setTemplateFile(templateFile);
-                    rp.setVelocityPath(velocityPath);
-                    rp.setVelocityProperties(velocityProperties);
-                    rp.writeAll(targetType, targetDirectory, null, targetPackage);
-                }
-
-                /*
-                 * Write composite datatypes
-                 */
-                DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
-                if (generateDatatypes && dtp != null) {
-                    log("Writing Composite Datatypes...");
-                    dtp.setFilenamePrefix(filenamePrefix);
-                    dtp.setFilenameSuffix(filenameSuffix);
-                    dtp.setTemplate(template);
-                    dtp.setTemplateFile(templateFile);
-                    dtp.setVelocityPath(velocityPath);
-                    dtp.setVelocityProperties(velocityProperties);
-                    dtp.writeAll(targetType, targetDirectory, null, targetPackage);
-                }
-
-                /*
-                 * Write valuesets
-                 */
-                ValueSetGenerator vsp = context.getValueSetGenerator();
-                if (generateValueSets && vsp != null) {
-                    log("Writing ValueSet Enums...");
-                    vsp.setFilenamePrefix(filenamePrefix);
-                    vsp.setFilenameSuffix(filenameSuffix);
-                    vsp.setTemplate(template);
-                    vsp.setTemplateFile(templateFile);
-                    vsp.setVelocityPath(velocityPath);
-                    vsp.setVelocityProperties(velocityProperties);
-                    vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
-                }
-            }
-
-        } catch (Exception e) {
-            if (e instanceof BuildException) {
-                throw (BuildException) e;
-            }
-            log("Caught exception: " + e.getClass().getName() + " [" + e.getMessage() + "]", 1);
-            e.printStackTrace();
-            throw new BuildException(
-                    Msg.code(142) + "Error processing " + getTaskName() + " task.", e);
-        } finally {
-            cleanup();
-        }
-    }
-
-    public void setExcludeResources(String names) {
-        if (null == this.excludeResources) {
-            this.excludeResources = new ArrayList<String>();
-        }
-        if (names != null) {
-            StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
-            while (tokens.hasMoreTokens()) {
-                String token = tokens.nextToken();
-                this.excludeResources.add(token.trim());
-            }
-        }
-    }
-
-    public void setFilenamePrefix(String filenamePrefix) {
-        this.filenamePrefix = filenamePrefix;
-    }
-
-    public void setFilenameSuffix(String filenameSuffix) {
-        this.filenameSuffix = filenameSuffix;
-    }
-
-    public void setGenerateDatatypes(boolean generateDatatypes) {
-        this.generateDatatypes = generateDatatypes;
-    }
-
-    public void setGenerateProfiles(boolean generateProfiles) {
-        this.generateProfiles = generateProfiles;
-    }
-
-    public void setGenerateResources(boolean generateResources) {
-        this.generateResources = generateResources;
-    }
-
-    public void setGenerateValueSets(boolean generateValueSets) {
-        this.generateValueSets = generateValueSets;
-    }
-
-    public void setIncludeResources(String names) {
-        if (null == this.includeResources) {
-            this.includeResources = new ArrayList<String>();
-        }
-        if (names != null) {
-            StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
-            while (tokens.hasMoreTokens()) {
-                String token = tokens.nextToken();
-                this.includeResources.add(token.trim());
-            }
-        }
-    }
-
-    public void setPackageBase(String packageBase) {
-        this.packageBase = packageBase;
-    }
-
-    public void setProjectHome(String projectHome) {
-        this.projectHome = projectHome;
-    }
-
-    public String getResourceSource() {
-        return resourceSource;
-    }
-
-    public void setResourceSource(String resourceSource) {
-        this.resourceSource = resourceSource;
-    }
-
-    public void setTargetFile(String targetFile) {
-        this.targetFile = targetFile;
-    }
-
-    public void setTargetFolder(String targetFolder) {
-        this.targetFolder = targetFolder;
-    }
-
-    public void setTargetPackage(String targetPackage) {
-        this.targetPackage = targetPackage;
-    }
-
-    public void setTargetResourceDirectory(File targetResourceDirectory) {
-        this.targetResourceDirectory = targetResourceDirectory;
-    }
-
-    public void setTargetSourceDirectory(File targetSourceDirectory) {
-        this.targetSourceDirectory = targetSourceDirectory;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
-    public void setTemplateFile(File templateFile) {
-        this.templateFile = templateFile;
-    }
-
-    public void setValueSetFiles(String names) {
-        if (null == this.valueSetFiles) {
-            this.valueSetFiles = new ArrayList<ValueSetFileDefinition>();
-        }
-        if (names != null) {
-            StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
-            while (tokens.hasMoreTokens()) {
-                String token = tokens.nextToken();
-                ValueSetFileDefinition def = new ValueSetFileDefinition();
-                def.setValueSetFile(token.trim());
-                this.valueSetFiles.add(def);
-            }
-        }
-    }
-
-    public void setVelocityPath(String velocityPath) {
-        this.velocityPath = velocityPath;
-    }
-
-    public void setVelocityProperties(String velocityProperties) {
-        this.velocityProperties = velocityProperties;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    protected void validateAttributes() throws BuildException {
-        if (null == version) {
-            throw new BuildException(
-                    Msg.code(143)
-                            + "The "
-                            + this.getTaskName()
-                            + " task requires \"version\" attribute.");
-        }
-        if (null == template) {
-            if (null == templateFile) {
-                throw new BuildException(
-                        Msg.code(144)
-                                + "The "
-                                + this.getTaskName()
-                                + " task requires \"template\" or \"templateFile\" attribute.");
-            }
-            if (!templateFile.exists()) {
-                throw new BuildException(
-                        Msg.code(145)
-                                + "The Velocity template file  ["
-                                + templateFile.getAbsolutePath()
-                                + "] does not exist.");
-            }
-            if (!templateFile.canRead()) {
-                throw new BuildException(
-                        Msg.code(146)
-                                + "The Velocity template file ["
-                                + templateFile.getAbsolutePath()
-                                + "] cannot be read.");
-            }
-            if (!templateFile.isFile()) {
-                throw new BuildException(
-                        Msg.code(147)
-                                + "The Velocity template file ["
-                                + templateFile.getAbsolutePath()
-                                + "] is not a file.");
-            }
-        }
-
-        if (null == projectHome) {
-            throw new BuildException(
-                    Msg.code(148)
-                            + "The "
-                            + this.getTaskName()
-                            + " task requires \"projectHome\" attribute.");
-        }
-    }
-
-    class Generator extends AbstractGenerator {
-        @Override
-        protected void logDebug(String message) {
-            if (verbose) {
-                log(message);
-            }
-        }
-
-        @Override
-        protected void logInfo(String message) {
-            log(message);
-        }
-    }
+	private File targetSourceDirectory;
+
+	private String targetPackage;
+
+	private String packageBase;
+
+	private String targetFile;
+
+	private String filenamePrefix;
+
+	private String filenameSuffix;
+
+	private File targetResourceDirectory;
+
+	private String targetFolder;
+
+	// one of these two is required
+	private String template;
+	private File templateFile;
+
+	private String velocityPath;
+
+	private String velocityProperties;
+
+	private List<String> includeResources;
+
+	private List<String> excludeResources;
+
+	private String resourceSource;
+
+	private List<ValueSetFileDefinition> valueSetFiles;
+
+	private boolean verbose;
+
+	private FhirContext fhirContext; // set from version in validateAttributes
+
+	/** */
+	public TinderGeneratorTask() {
+		super();
+	}
+
+	protected void cleanup() {}
+
+	@Override
+	public void execute() throws BuildException {
+		validateAttributes();
+
+		GeneratorContext context = new GeneratorContext();
+		Generator generator = new Generator();
+		try {
+				context.setVersion(version);
+				context.setBaseDir(projectHome);
+				context.setIncludeResources(includeResources);
+				context.setExcludeResources(excludeResources);
+				context.setResourceSource(resourceSource);
+				context.setValueSetFiles(valueSetFiles);
+				if (ResourceSource.MODEL.equals(context.getResourceSource())) {
+					if (generateDatatypes) {
+						throw new BuildException(
+									Msg.code(135)
+												+ "Cannot use \"generateDatatypes\" when resourceSource=model");
+					}
+					if (generateValueSets) {
+						throw new BuildException(
+									Msg.code(136)
+												+ "Cannot use \"generateValueSets\" when resourceSource=model");
+					}
+				}
+
+				generator.prepare(context);
+		} catch (MojoFailureException | FailureException e) {
+				throw new BuildException(Msg.code(137) + e.getMessage(), e.getCause());
+		}
+
+		/*
+			* Deal with the generation target
+			*/
+		TargetType targetType = null;
+		File targetDirectory = null;
+		if (targetSourceDirectory != null) {
+				if (targetResourceDirectory != null) {
+					throw new BuildException(
+								Msg.code(138)
+										+ "Both [targetSourceDirectory] and [targetResourceDirectory] are"
+										+ " specified. Please choose just one.");
+				}
+				targetType = TargetType.SOURCE;
+				if (null == targetPackage) {
+					throw new BuildException(
+								Msg.code(139)
+										+ "The [targetPackage] property must be specified when generating"
+										+ " Java source code.");
+				}
+				targetDirectory =
+						new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
+		} else if (targetResourceDirectory != null) {
+				if (targetSourceDirectory != null) {
+					throw new BuildException(
+								Msg.code(140)
+										+ "Both [targetSourceDirectory] and [targetResourceDirectory] are"
+										+ " specified. Please choose just one.");
+				}
+				targetType = TargetType.RESOURCE;
+				if (targetFolder != null) {
+					targetDirectory = new File(targetResourceDirectory, targetFolder);
+				} else {
+					targetDirectory = targetResourceDirectory;
+				}
+				if (null == targetPackage) {
+					targetPackage = "";
+				}
+		} else {
+				throw new BuildException(
+						Msg.code(141)
+									+ "Either [targetSourceDirectory] or [targetResourceDirectory] must be"
+									+ " specified.");
+		}
+		targetDirectory.mkdirs();
+		log(
+					" * Output ["
+								+ targetType.toString()
+								+ "] Directory: "
+								+ targetDirectory.getAbsolutePath());
+
+		try {
+				/*
+				 * Single file with all elements
+				 */
+				if (targetFile != null) {
+					if (targetType == TargetType.SOURCE) {
+						if (!targetFile.endsWith(".java")) {
+								targetFile += ".java";
+						}
+					}
+					File target = new File(targetDirectory, targetFile);
+					OutputStreamWriter targetWriter =
+								new OutputStreamWriter(new FileOutputStream(target, false), "UTF-8");
+
+					/*
+					* Next, deal with the template and initialize velocity
+					*/
+					VelocityEngine v =
+								VelocityHelper.configureVelocityEngine(
+										templateFile, velocityPath, velocityProperties);
+					InputStream templateIs = null;
+					if (templateFile != null) {
+						templateIs = new FileInputStream(templateFile);
+					} else {
+						templateIs = this.getClass().getResourceAsStream(template);
+					}
+					InputStreamReader templateReader = new InputStreamReader(templateIs);
+
+					/*
+					* build new Velocity Context
+					*/
+					VelocityContext ctx = new VelocityContext();
+					if (packageBase != null) {
+						ctx.put("packageBase", packageBase);
+					} else if (targetPackage != null) {
+						int ix = targetPackage.lastIndexOf('.');
+						if (ix > 0) {
+								ctx.put("packageBase", targetPackage.subSequence(0, ix));
+						} else {
+								ctx.put("packageBase", targetPackage);
+						}
+					}
+					ctx.put("targetPackage", targetPackage);
+					ctx.put("targetFolder", targetFolder);
+					ctx.put("version", version);
+					ctx.put(
+								"isRi",
+								BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
+					ctx.put("hash", "#");
+					ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
+					if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
+						ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
+					} else {
+						ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
+					}
+
+					String capitalize = WordUtils.capitalize(version);
+					if ("R4b".equals(capitalize)) {
+						capitalize = "R4B";
+					}
+					ctx.put("versionCapitalized", capitalize);
+
+					/*
+					* Write resources if selected
+					*/
+					BaseStructureParser rp = context.getResourceGenerator();
+					if (generateResources && rp != null) {
+						log("Writing Resources...");
+						ctx.put("resources", rp.getResources());
+						v.evaluate(ctx, targetWriter, "", templateReader);
+						targetWriter.close();
+					} else {
+						DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
+						if (generateDatatypes && dtp != null) {
+								log("Writing DataTypes...");
+								ctx.put("datatypes", dtp.getResources());
+								v.evaluate(ctx, targetWriter, "", templateReader);
+								targetWriter.close();
+						}
+					}
+
+					/*
+					* Multiple files.. one for each element
+					*/
+				} else {
+					/*
+					* Write resources if selected
+					*/
+					BaseStructureParser rp = context.getResourceGenerator();
+					if (generateResources && rp != null) {
+						log("Writing Resources...");
+						rp.setFilenamePrefix(filenamePrefix);
+						rp.setFilenameSuffix(filenameSuffix);
+						rp.setTemplate(template);
+						rp.setTemplateFile(templateFile);
+						rp.setVelocityPath(velocityPath);
+						rp.setVelocityProperties(velocityProperties);
+						rp.writeAll(targetType, targetDirectory, null, targetPackage);
+					}
+
+					/*
+					* Write composite datatypes
+					*/
+					DatatypeGeneratorUsingSpreadsheet dtp = context.getDatatypeGenerator();
+					if (generateDatatypes && dtp != null) {
+						log("Writing Composite Datatypes...");
+						dtp.setFilenamePrefix(filenamePrefix);
+						dtp.setFilenameSuffix(filenameSuffix);
+						dtp.setTemplate(template);
+						dtp.setTemplateFile(templateFile);
+						dtp.setVelocityPath(velocityPath);
+						dtp.setVelocityProperties(velocityProperties);
+						dtp.writeAll(targetType, targetDirectory, null, targetPackage);
+					}
+
+					/*
+					* Write valuesets
+					*/
+					ValueSetGenerator vsp = context.getValueSetGenerator();
+					if (generateValueSets && vsp != null) {
+						log("Writing ValueSet Enums...");
+						vsp.setFilenamePrefix(filenamePrefix);
+						vsp.setFilenameSuffix(filenameSuffix);
+						vsp.setTemplate(template);
+						vsp.setTemplateFile(templateFile);
+						vsp.setVelocityPath(velocityPath);
+						vsp.setVelocityProperties(velocityProperties);
+						vsp.writeMarkedValueSets(targetType, targetDirectory, targetPackage);
+					}
+				}
+
+		} catch (Exception e) {
+				if (e instanceof BuildException) {
+					throw (BuildException) e;
+				}
+				log("Caught exception: " + e.getClass().getName() + " [" + e.getMessage() + "]", 1);
+				e.printStackTrace();
+				throw new BuildException(
+						Msg.code(142) + "Error processing " + getTaskName() + " task.", e);
+		} finally {
+				cleanup();
+		}
+	}
+
+	public void setExcludeResources(String names) {
+		if (null == this.excludeResources) {
+				this.excludeResources = new ArrayList<String>();
+		}
+		if (names != null) {
+				StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
+				while (tokens.hasMoreTokens()) {
+					String token = tokens.nextToken();
+					this.excludeResources.add(token.trim());
+				}
+		}
+	}
+
+	public void setFilenamePrefix(String filenamePrefix) {
+		this.filenamePrefix = filenamePrefix;
+	}
+
+	public void setFilenameSuffix(String filenameSuffix) {
+		this.filenameSuffix = filenameSuffix;
+	}
+
+	public void setGenerateDatatypes(boolean generateDatatypes) {
+		this.generateDatatypes = generateDatatypes;
+	}
+
+	public void setGenerateProfiles(boolean generateProfiles) {
+		this.generateProfiles = generateProfiles;
+	}
+
+	public void setGenerateResources(boolean generateResources) {
+		this.generateResources = generateResources;
+	}
+
+	public void setGenerateValueSets(boolean generateValueSets) {
+		this.generateValueSets = generateValueSets;
+	}
+
+	public void setIncludeResources(String names) {
+		if (null == this.includeResources) {
+				this.includeResources = new ArrayList<String>();
+		}
+		if (names != null) {
+				StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
+				while (tokens.hasMoreTokens()) {
+					String token = tokens.nextToken();
+					this.includeResources.add(token.trim());
+				}
+		}
+	}
+
+	public void setPackageBase(String packageBase) {
+		this.packageBase = packageBase;
+	}
+
+	public void setProjectHome(String projectHome) {
+		this.projectHome = projectHome;
+	}
+
+	public String getResourceSource() {
+		return resourceSource;
+	}
+
+	public void setResourceSource(String resourceSource) {
+		this.resourceSource = resourceSource;
+	}
+
+	public void setTargetFile(String targetFile) {
+		this.targetFile = targetFile;
+	}
+
+	public void setTargetFolder(String targetFolder) {
+		this.targetFolder = targetFolder;
+	}
+
+	public void setTargetPackage(String targetPackage) {
+		this.targetPackage = targetPackage;
+	}
+
+	public void setTargetResourceDirectory(File targetResourceDirectory) {
+		this.targetResourceDirectory = targetResourceDirectory;
+	}
+
+	public void setTargetSourceDirectory(File targetSourceDirectory) {
+		this.targetSourceDirectory = targetSourceDirectory;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	public void setTemplateFile(File templateFile) {
+		this.templateFile = templateFile;
+	}
+
+	public void setValueSetFiles(String names) {
+		if (null == this.valueSetFiles) {
+				this.valueSetFiles = new ArrayList<ValueSetFileDefinition>();
+		}
+		if (names != null) {
+				StringTokenizer tokens = new StringTokenizer(names, ", \t\r\n");
+				while (tokens.hasMoreTokens()) {
+					String token = tokens.nextToken();
+					ValueSetFileDefinition def = new ValueSetFileDefinition();
+					def.setValueSetFile(token.trim());
+					this.valueSetFiles.add(def);
+				}
+		}
+	}
+
+	public void setVelocityPath(String velocityPath) {
+		this.velocityPath = velocityPath;
+	}
+
+	public void setVelocityProperties(String velocityProperties) {
+		this.velocityProperties = velocityProperties;
+	}
+
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	protected void validateAttributes() throws BuildException {
+		if (null == version) {
+				throw new BuildException(
+						Msg.code(143)
+									+ "The "
+									+ this.getTaskName()
+									+ " task requires \"version\" attribute.");
+		}
+		if (null == template) {
+				if (null == templateFile) {
+					throw new BuildException(
+								Msg.code(144)
+										+ "The "
+										+ this.getTaskName()
+										+ " task requires \"template\" or \"templateFile\" attribute.");
+				}
+				if (!templateFile.exists()) {
+					throw new BuildException(
+								Msg.code(145)
+										+ "The Velocity template file  ["
+										+ templateFile.getAbsolutePath()
+										+ "] does not exist.");
+				}
+				if (!templateFile.canRead()) {
+					throw new BuildException(
+								Msg.code(146)
+										+ "The Velocity template file ["
+										+ templateFile.getAbsolutePath()
+										+ "] cannot be read.");
+				}
+				if (!templateFile.isFile()) {
+					throw new BuildException(
+								Msg.code(147)
+										+ "The Velocity template file ["
+										+ templateFile.getAbsolutePath()
+										+ "] is not a file.");
+				}
+		}
+
+		if (null == projectHome) {
+				throw new BuildException(
+						Msg.code(148)
+									+ "The "
+									+ this.getTaskName()
+									+ " task requires \"projectHome\" attribute.");
+		}
+	}
+
+	class Generator extends AbstractGenerator {
+		@Override
+		protected void logDebug(String message) {
+				if (verbose) {
+					log(message);
+				}
+		}
+
+		@Override
+		protected void logInfo(String message) {
+				log(message);
+		}
+	}
 }

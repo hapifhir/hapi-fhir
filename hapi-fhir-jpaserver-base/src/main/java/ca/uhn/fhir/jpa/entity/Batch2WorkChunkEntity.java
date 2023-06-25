@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -38,278 +42,273 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(
-        name = "BT2_WORK_CHUNK",
-        indexes = {@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ")})
+		name = "BT2_WORK_CHUNK",
+		indexes = {@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ")})
 public class Batch2WorkChunkEntity implements Serializable {
 
-    public static final int ERROR_MSG_MAX_LENGTH = 500;
-    private static final long serialVersionUID = -6202771941965780558L;
+	public static final int ERROR_MSG_MAX_LENGTH = 500;
+	private static final long serialVersionUID = -6202771941965780558L;
 
-    @Id
-    @Column(name = "ID", length = ID_MAX_LENGTH)
-    private String myId;
+	@Id
+	@Column(name = "ID", length = ID_MAX_LENGTH)
+	private String myId;
 
-    @Column(name = "SEQ", nullable = false)
-    private int mySequence;
+	@Column(name = "SEQ", nullable = false)
+	private int mySequence;
 
-    @Column(name = "CREATE_TIME", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myCreateTime;
+	@Column(name = "CREATE_TIME", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myCreateTime;
 
-    @Column(name = "START_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myStartTime;
+	@Column(name = "START_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myStartTime;
 
-    @Column(name = "END_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myEndTime;
+	@Column(name = "END_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myEndTime;
 
-    @Version
-    @Column(name = "UPDATE_TIME", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date myUpdateTime;
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
 
-    @Column(name = "RECORDS_PROCESSED", nullable = true)
-    private Integer myRecordsProcessed;
+	@Column(name = "RECORDS_PROCESSED", nullable = true)
+	private Integer myRecordsProcessed;
 
-    @Column(name = "DEFINITION_ID", length = ID_MAX_LENGTH, nullable = false)
-    private String myJobDefinitionId;
+	@Column(name = "DEFINITION_ID", length = ID_MAX_LENGTH, nullable = false)
+	private String myJobDefinitionId;
 
-    @Column(name = "DEFINITION_VER", length = ID_MAX_LENGTH, nullable = false)
-    private int myJobDefinitionVersion;
+	@Column(name = "DEFINITION_VER", length = ID_MAX_LENGTH, nullable = false)
+	private int myJobDefinitionVersion;
 
-    @Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
-    private String myTargetStepId;
+	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
+	private String myTargetStepId;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
-    private String mySerializedData;
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
+	private String mySerializedData;
 
-    @Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
-    @Enumerated(EnumType.STRING)
-    private WorkChunkStatusEnum myStatus;
+	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
+	@Enumerated(EnumType.STRING)
+	private WorkChunkStatusEnum myStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "INSTANCE_ID",
-            insertable = false,
-            updatable = false,
-            foreignKey = @ForeignKey(name = "FK_BT2WC_INSTANCE"))
-    private Batch2JobInstanceEntity myInstance;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+				name = "INSTANCE_ID",
+				insertable = false,
+				updatable = false,
+				foreignKey = @ForeignKey(name = "FK_BT2WC_INSTANCE"))
+	private Batch2JobInstanceEntity myInstance;
 
-    @Column(name = "INSTANCE_ID", length = ID_MAX_LENGTH, nullable = false)
-    private String myInstanceId;
+	@Column(name = "INSTANCE_ID", length = ID_MAX_LENGTH, nullable = false)
+	private String myInstanceId;
 
-    @Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
-    private String myErrorMessage;
+	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
+	private String myErrorMessage;
 
-    @Column(name = "ERROR_COUNT", nullable = false)
-    private int myErrorCount;
+	@Column(name = "ERROR_COUNT", nullable = false)
+	private int myErrorCount;
 
-    @Lob
-    @Column(name = "WARNING_MSG", nullable = true)
-    private String myWarningMessage;
+	@Lob
+	@Column(name = "WARNING_MSG", nullable = true)
+	private String myWarningMessage;
 
-    /** Default constructor for Hibernate. */
-    public Batch2WorkChunkEntity() {}
+	/** Default constructor for Hibernate. */
+	public Batch2WorkChunkEntity() {}
 
-    /** Projection constructor for no-data path. */
-    public Batch2WorkChunkEntity(
-            String theId,
-            int theSequence,
-            String theJobDefinitionId,
-            int theJobDefinitionVersion,
-            String theInstanceId,
-            String theTargetStepId,
-            WorkChunkStatusEnum theStatus,
-            Date theCreateTime,
-            Date theStartTime,
-            Date theUpdateTime,
-            Date theEndTime,
-            String theErrorMessage,
-            int theErrorCount,
-            Integer theRecordsProcessed,
-            String theWarningMessage) {
-        myId = theId;
-        mySequence = theSequence;
-        myJobDefinitionId = theJobDefinitionId;
-        myJobDefinitionVersion = theJobDefinitionVersion;
-        myInstanceId = theInstanceId;
-        myTargetStepId = theTargetStepId;
-        myStatus = theStatus;
-        myCreateTime = theCreateTime;
-        myStartTime = theStartTime;
-        myUpdateTime = theUpdateTime;
-        myEndTime = theEndTime;
-        myErrorMessage = theErrorMessage;
-        myErrorCount = theErrorCount;
-        myRecordsProcessed = theRecordsProcessed;
-        myWarningMessage = theWarningMessage;
-    }
+	/** Projection constructor for no-data path. */
+	public Batch2WorkChunkEntity(
+				String theId,
+				int theSequence,
+				String theJobDefinitionId,
+				int theJobDefinitionVersion,
+				String theInstanceId,
+				String theTargetStepId,
+				WorkChunkStatusEnum theStatus,
+				Date theCreateTime,
+				Date theStartTime,
+				Date theUpdateTime,
+				Date theEndTime,
+				String theErrorMessage,
+				int theErrorCount,
+				Integer theRecordsProcessed,
+				String theWarningMessage) {
+		myId = theId;
+		mySequence = theSequence;
+		myJobDefinitionId = theJobDefinitionId;
+		myJobDefinitionVersion = theJobDefinitionVersion;
+		myInstanceId = theInstanceId;
+		myTargetStepId = theTargetStepId;
+		myStatus = theStatus;
+		myCreateTime = theCreateTime;
+		myStartTime = theStartTime;
+		myUpdateTime = theUpdateTime;
+		myEndTime = theEndTime;
+		myErrorMessage = theErrorMessage;
+		myErrorCount = theErrorCount;
+		myRecordsProcessed = theRecordsProcessed;
+		myWarningMessage = theWarningMessage;
+	}
 
-    public int getErrorCount() {
-        return myErrorCount;
-    }
+	public int getErrorCount() {
+		return myErrorCount;
+	}
 
-    public void setErrorCount(int theErrorCount) {
-        myErrorCount = theErrorCount;
-    }
+	public void setErrorCount(int theErrorCount) {
+		myErrorCount = theErrorCount;
+	}
 
-    public String getErrorMessage() {
-        return myErrorMessage;
-    }
+	public String getErrorMessage() {
+		return myErrorMessage;
+	}
 
-    public void setErrorMessage(String theErrorMessage) {
-        myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
-    }
+	public void setErrorMessage(String theErrorMessage) {
+		myErrorMessage = left(theErrorMessage, ERROR_MSG_MAX_LENGTH);
+	}
 
-    public String getWarningMessage() {
-        return myWarningMessage;
-    }
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
 
-    public void setWarningMessage(String theWarningMessage) {
-        myWarningMessage = theWarningMessage;
-    }
+	public void setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
+	}
 
-    public int getSequence() {
-        return mySequence;
-    }
+	public int getSequence() {
+		return mySequence;
+	}
 
-    public void setSequence(int theSequence) {
-        mySequence = theSequence;
-    }
+	public void setSequence(int theSequence) {
+		mySequence = theSequence;
+	}
 
-    public Date getCreateTime() {
-        return myCreateTime;
-    }
+	public Date getCreateTime() {
+		return myCreateTime;
+	}
 
-    public void setCreateTime(Date theCreateTime) {
-        myCreateTime = theCreateTime;
-    }
+	public void setCreateTime(Date theCreateTime) {
+		myCreateTime = theCreateTime;
+	}
 
-    public Date getStartTime() {
-        return myStartTime;
-    }
+	public Date getStartTime() {
+		return myStartTime;
+	}
 
-    public void setStartTime(Date theStartTime) {
-        myStartTime = theStartTime;
-    }
+	public void setStartTime(Date theStartTime) {
+		myStartTime = theStartTime;
+	}
 
-    public Date getEndTime() {
-        return myEndTime;
-    }
+	public Date getEndTime() {
+		return myEndTime;
+	}
 
-    public void setEndTime(Date theEndTime) {
-        myEndTime = theEndTime;
-    }
+	public void setEndTime(Date theEndTime) {
+		myEndTime = theEndTime;
+	}
 
-    public Date getUpdateTime() {
-        return myUpdateTime;
-    }
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
 
-    public Integer getRecordsProcessed() {
-        return myRecordsProcessed;
-    }
+	public Integer getRecordsProcessed() {
+		return myRecordsProcessed;
+	}
 
-    public void setRecordsProcessed(Integer theRecordsProcessed) {
-        myRecordsProcessed = theRecordsProcessed;
-    }
+	public void setRecordsProcessed(Integer theRecordsProcessed) {
+		myRecordsProcessed = theRecordsProcessed;
+	}
 
-    public Batch2JobInstanceEntity getInstance() {
-        return myInstance;
-    }
+	public Batch2JobInstanceEntity getInstance() {
+		return myInstance;
+	}
 
-    public void setInstance(Batch2JobInstanceEntity theInstance) {
-        myInstance = theInstance;
-    }
+	public void setInstance(Batch2JobInstanceEntity theInstance) {
+		myInstance = theInstance;
+	}
 
-    public String getJobDefinitionId() {
-        return myJobDefinitionId;
-    }
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
+	}
 
-    public void setJobDefinitionId(String theJobDefinitionId) {
-        myJobDefinitionId = theJobDefinitionId;
-    }
+	public void setJobDefinitionId(String theJobDefinitionId) {
+		myJobDefinitionId = theJobDefinitionId;
+	}
 
-    public int getJobDefinitionVersion() {
-        return myJobDefinitionVersion;
-    }
+	public int getJobDefinitionVersion() {
+		return myJobDefinitionVersion;
+	}
 
-    public void setJobDefinitionVersion(int theJobDefinitionVersion) {
-        myJobDefinitionVersion = theJobDefinitionVersion;
-    }
+	public void setJobDefinitionVersion(int theJobDefinitionVersion) {
+		myJobDefinitionVersion = theJobDefinitionVersion;
+	}
 
-    public String getTargetStepId() {
-        return myTargetStepId;
-    }
+	public String getTargetStepId() {
+		return myTargetStepId;
+	}
 
-    public void setTargetStepId(String theTargetStepId) {
-        myTargetStepId = theTargetStepId;
-    }
+	public void setTargetStepId(String theTargetStepId) {
+		myTargetStepId = theTargetStepId;
+	}
 
-    public String getSerializedData() {
-        return mySerializedData;
-    }
+	public String getSerializedData() {
+		return mySerializedData;
+	}
 
-    public void setSerializedData(String theSerializedData) {
-        mySerializedData = theSerializedData;
-    }
+	public void setSerializedData(String theSerializedData) {
+		mySerializedData = theSerializedData;
+	}
 
-    public WorkChunkStatusEnum getStatus() {
-        return myStatus;
-    }
+	public WorkChunkStatusEnum getStatus() {
+		return myStatus;
+	}
 
-    public void setStatus(WorkChunkStatusEnum theStatus) {
-        myStatus = theStatus;
-    }
+	public void setStatus(WorkChunkStatusEnum theStatus) {
+		myStatus = theStatus;
+	}
 
-    public String getId() {
-        return myId;
-    }
+	public String getId() {
+		return myId;
+	}
 
-    public void setId(String theId) {
-        myId = theId;
-    }
+	public void setId(String theId) {
+		myId = theId;
+	}
 
-    public String getInstanceId() {
-        return myInstanceId;
-    }
+	public String getInstanceId() {
+		return myInstanceId;
+	}
 
-    public void setInstanceId(String theInstanceId) {
-        myInstanceId = theInstanceId;
-    }
+	public void setInstanceId(String theInstanceId) {
+		myInstanceId = theInstanceId;
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", myId)
-                .append("instanceId", myInstanceId)
-                .append("sequence", mySequence)
-                .append("errorCount", myErrorCount)
-                .append("jobDefinitionId", myJobDefinitionId)
-                .append("jobDefinitionVersion", myJobDefinitionVersion)
-                .append("createTime", myCreateTime)
-                .append("startTime", myStartTime)
-                .append("endTime", myEndTime)
-                .append("updateTime", myUpdateTime)
-                .append("recordsProcessed", myRecordsProcessed)
-                .append("targetStepId", myTargetStepId)
-                .append("serializedData", mySerializedData)
-                .append("status", myStatus)
-                .append("errorMessage", myErrorMessage)
-                .append("warningMessage", myWarningMessage)
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("id", myId)
+					.append("instanceId", myInstanceId)
+					.append("sequence", mySequence)
+					.append("errorCount", myErrorCount)
+					.append("jobDefinitionId", myJobDefinitionId)
+					.append("jobDefinitionVersion", myJobDefinitionVersion)
+					.append("createTime", myCreateTime)
+					.append("startTime", myStartTime)
+					.append("endTime", myEndTime)
+					.append("updateTime", myUpdateTime)
+					.append("recordsProcessed", myRecordsProcessed)
+					.append("targetStepId", myTargetStepId)
+					.append("serializedData", mySerializedData)
+					.append("status", myStatus)
+					.append("errorMessage", myErrorMessage)
+					.append("warningMessage", myWarningMessage)
+					.toString();
+	}
 }

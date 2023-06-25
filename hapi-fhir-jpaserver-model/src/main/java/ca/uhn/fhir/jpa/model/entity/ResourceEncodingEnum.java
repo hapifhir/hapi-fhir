@@ -24,28 +24,28 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum ResourceEncodingEnum {
 
-    /*
-     * NB: Constants in this enum must be 5 chars long or less!!!
-     *
-     * See ResourceHistoryTable RES_ENCODING column
-     */
+	/*
+	* NB: Constants in this enum must be 5 chars long or less!!!
+	*
+	* See ResourceHistoryTable RES_ENCODING column
+	*/
 
-    /** Json */
-    JSON,
+	/** Json */
+	JSON,
 
-    /** Json Compressed */
-    JSONC,
+	/** Json Compressed */
+	JSONC,
 
-    /** Resource was deleted - No contents expected */
-    DEL,
+	/** Resource was deleted - No contents expected */
+	DEL,
 
-    /**
-     * Externally stored resource - Resource text is a reference to an external storage location,
-     * which will be stored in {@link ResourceHistoryTable#getResourceTextVc()}
-     */
-    ESR;
+	/**
+	* Externally stored resource - Resource text is a reference to an external storage location,
+	* which will be stored in {@link ResourceHistoryTable#getResourceTextVc()}
+	*/
+	ESR;
 
-    public IParser newParser(FhirContext theContext) {
-        return theContext.newJsonParser();
-    }
+	public IParser newParser(FhirContext theContext) {
+		return theContext.newJsonParser();
+	}
 }

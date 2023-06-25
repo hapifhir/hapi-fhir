@@ -26,8 +26,8 @@ import org.apache.commons.text.matcher.StringMatcher;
  * class to return tokens that are whitespace trimmed.
  */
 public class StringTrimmingTrimmerMatcher implements StringMatcher {
-    @Override
-    public int isMatch(char[] buffer, int start, int bufferStart, int bufferEnd) {
-        return (buffer[start] <= 32) ? 1 : 0;
-    }
+	@Override
+	public int isMatch(char[] buffer, int start, int bufferStart, int bufferEnd) {
+		return (buffer[start] <= 32) ? 1 : 0;
+	}
 }

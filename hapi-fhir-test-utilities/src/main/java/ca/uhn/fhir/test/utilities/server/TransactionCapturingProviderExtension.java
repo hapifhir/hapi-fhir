@@ -19,10 +19,8 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -30,8 +28,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,59 +38,59 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class TransactionCapturingProviderExtension<T extends IBaseBundle>
-        implements BeforeEachCallback, AfterEachCallback {
+		implements BeforeEachCallback, AfterEachCallback {
 
-    private static final Logger ourLog =
-            LoggerFactory.getLogger(TransactionCapturingProviderExtension.class);
-    private final RestfulServerExtension myRestfulServerExtension;
-    private final PlainProvider myProvider = new PlainProvider();
+	private static final Logger ourLog =
+				LoggerFactory.getLogger(TransactionCapturingProviderExtension.class);
+	private final RestfulServerExtension myRestfulServerExtension;
+	private final PlainProvider myProvider = new PlainProvider();
 
-    /** Constructor */
-    public TransactionCapturingProviderExtension(
-            RestfulServerExtension theRestfulServerExtension, Class<T> theBundleType) {
-        myRestfulServerExtension = theRestfulServerExtension;
-    }
+	/** Constructor */
+	public TransactionCapturingProviderExtension(
+				RestfulServerExtension theRestfulServerExtension, Class<T> theBundleType) {
+		myRestfulServerExtension = theRestfulServerExtension;
+	}
 
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
-        myProvider.clear();
-    }
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		myRestfulServerExtension.getRestfulServer().unregisterProvider(myProvider);
+		myProvider.clear();
+	}
 
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-        myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
-    }
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
+		myRestfulServerExtension.getRestfulServer().registerProvider(myProvider);
+	}
 
-    public void waitForTransactionCount(int theCount) {
-        assertThat(theCount, greaterThanOrEqualTo(myProvider.size()));
-        await().until(() -> myProvider.size(), equalTo(theCount));
-    }
+	public void waitForTransactionCount(int theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(myProvider.size()));
+		await().until(() -> myProvider.size(), equalTo(theCount));
+	}
 
-    public List<T> getTransactions() {
-        return myProvider.getTransactions();
-    }
+	public List<T> getTransactions() {
+		return myProvider.getTransactions();
+	}
 
-    private class PlainProvider {
-        private final List<T> myInputBundles = Collections.synchronizedList(new ArrayList<>());
+	private class PlainProvider {
+		private final List<T> myInputBundles = Collections.synchronizedList(new ArrayList<>());
 
-        @Transaction
-        public T transaction(@TransactionParam T theInput) {
-            ourLog.info("Received transaction update");
-            myInputBundles.add(theInput);
-            return theInput;
-        }
+		@Transaction
+		public T transaction(@TransactionParam T theInput) {
+				ourLog.info("Received transaction update");
+				myInputBundles.add(theInput);
+				return theInput;
+		}
 
-        public void clear() {
-            myInputBundles.clear();
-        }
+		public void clear() {
+				myInputBundles.clear();
+		}
 
-        public int size() {
-            return myInputBundles.size();
-        }
+		public int size() {
+				return myInputBundles.size();
+		}
 
-        public List<T> getTransactions() {
-            return Collections.unmodifiableList(myInputBundles);
-        }
-    }
+		public List<T> getTransactions() {
+				return Collections.unmodifiableList(myInputBundles);
+		}
+	}
 }

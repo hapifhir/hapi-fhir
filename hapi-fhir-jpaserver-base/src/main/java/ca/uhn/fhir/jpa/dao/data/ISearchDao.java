@@ -19,10 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
-
+import ca.uhn.fhir.jpa.entity.Search;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,40 +27,42 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.Search;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Optional;
 
 public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
-    @Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
-    Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
+	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
+	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
-    @Query(
-            "SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS"
-                    + " NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted ="
-                    + " FALSE)")
-    Slice<Long> findWhereCreatedBefore(
-            @Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
+	@Query(
+				"SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS"
+						+ " NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted ="
+						+ " FALSE)")
+	Slice<Long> findWhereCreatedBefore(
+				@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
 
-    @Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
-    Slice<Long> findDeleted(Pageable thePage);
+	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
+	Slice<Long> findDeleted(Pageable thePage);
 
-    @Query(
-            "SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash ="
-                    + " :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <>"
-                    + " 'FAILED'")
-    Collection<Search> findWithCutoffOrExpiry(
-            @Param("type") String theResourceType,
-            @Param("hash") int theHashCode,
-            @Param("cutoff") Date theCreatedCutoff);
+	@Query(
+				"SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash ="
+						+ " :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <>"
+						+ " 'FAILED'")
+	Collection<Search> findWithCutoffOrExpiry(
+				@Param("type") String theResourceType,
+				@Param("hash") int theHashCode,
+				@Param("cutoff") Date theCreatedCutoff);
 
-    @Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")
-    int countDeleted();
+	@Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")
+	int countDeleted();
 
-    @Modifying
-    @Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")
-    void updateDeleted(@Param("pid") Long thePid, @Param("deleted") boolean theDeleted);
+	@Modifying
+	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")
+	void updateDeleted(@Param("pid") Long thePid, @Param("deleted") boolean theDeleted);
 
-    @Modifying
-    @Query("DELETE FROM Search s WHERE s.myId = :pid")
-    void deleteByPid(@Param("pid") Long theId);
+	@Modifying
+	@Query("DELETE FROM Search s WHERE s.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
 }

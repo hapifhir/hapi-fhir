@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -31,33 +28,36 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
-    private CloseableHttpClient myClient;
+	private CloseableHttpClient myClient;
 
-    public CloseableHttpClient getClient() {
-        return myClient;
-    }
+	public CloseableHttpClient getClient() {
+		return myClient;
+	}
 
-    @Override
-    public void afterEach(ExtensionContext theExtensionContext) throws Exception {
-        myClient.close();
-    }
+	@Override
+	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
+		myClient.close();
+	}
 
-    @Override
-    public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
-        PoolingHttpClientConnectionManager connectionManager =
-                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-        connectionManager.setMaxTotal(99);
-        connectionManager.setDefaultMaxPerRoute(99);
-        myClient =
-                HttpClientBuilder.create()
-                        .setConnectionManager(connectionManager)
-                        .setMaxConnPerRoute(99)
-                        .build();
-    }
+	@Override
+	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
+		PoolingHttpClientConnectionManager connectionManager =
+					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		connectionManager.setMaxTotal(99);
+		connectionManager.setDefaultMaxPerRoute(99);
+		myClient =
+					HttpClientBuilder.create()
+								.setConnectionManager(connectionManager)
+								.setMaxConnPerRoute(99)
+								.build();
+	}
 
-    public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
-        return myClient.execute(theRequest);
-    }
+	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
+		return myClient.execute(theRequest);
+	}
 }

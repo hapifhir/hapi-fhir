@@ -19,53 +19,53 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class BaseAndListParam<T extends IQueryParameterOr<?>>
-        implements IQueryParameterAnd<T> {
+		implements IQueryParameterAnd<T> {
 
-    private List<T> myValues = new ArrayList<>();
+	private List<T> myValues = new ArrayList<>();
 
-    public abstract BaseAndListParam<T> addAnd(T theValue);
+	public abstract BaseAndListParam<T> addAnd(T theValue);
 
-    public BaseAndListParam<T> addValue(T theValue) {
-        myValues.add(theValue);
-        return this;
-    }
+	public BaseAndListParam<T> addValue(T theValue) {
+		myValues.add(theValue);
+		return this;
+	}
 
-    @Override
-    public List<T> getValuesAsQueryTokens() {
-        return myValues;
-    }
+	@Override
+	public List<T> getValuesAsQueryTokens() {
+		return myValues;
+	}
 
-    abstract T newInstance();
+	abstract T newInstance();
 
-    @Override
-    public void setValuesAsQueryTokens(
-            FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
-            throws InvalidRequestException {
-        myValues.clear();
-        for (QualifiedParamList nextParam : theParameters) {
-            T nextList = newInstance();
-            nextList.setValuesAsQueryTokens(theContext, theParamName, nextParam);
-            myValues.add(nextList);
-        }
-    }
+	@Override
+	public void setValuesAsQueryTokens(
+				FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
+				throws InvalidRequestException {
+		myValues.clear();
+		for (QualifiedParamList nextParam : theParameters) {
+				T nextList = newInstance();
+				nextList.setValuesAsQueryTokens(theContext, theParamName, nextParam);
+				myValues.add(nextList);
+		}
+	}
 
-    @Override
-    public String toString() {
-        return myValues.toString();
-    }
+	@Override
+	public String toString() {
+		return myValues.toString();
+	}
 
-    /** Returns the number of AND parameters */
-    public int size() {
-        return myValues.size();
-    }
+	/** Returns the number of AND parameters */
+	public int size() {
+		return myValues.size();
+	}
 }

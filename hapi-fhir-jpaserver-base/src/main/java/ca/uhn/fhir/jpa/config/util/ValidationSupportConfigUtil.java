@@ -19,28 +19,27 @@
  */
 package ca.uhn.fhir.jpa.config.util;
 
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
-
 public final class ValidationSupportConfigUtil {
-    private ValidationSupportConfigUtil() {}
+	private ValidationSupportConfigUtil() {}
 
-    public static CachingValidationSupport newCachingValidationSupport(
-            JpaValidationSupportChain theJpaValidationSupportChain) {
-        return newCachingValidationSupport(theJpaValidationSupportChain, false);
-    }
+	public static CachingValidationSupport newCachingValidationSupport(
+				JpaValidationSupportChain theJpaValidationSupportChain) {
+		return newCachingValidationSupport(theJpaValidationSupportChain, false);
+	}
 
-    public static CachingValidationSupport newCachingValidationSupport(
-            JpaValidationSupportChain theJpaValidationSupportChain,
-            boolean theIsEnabledValidationForCodingsLogicalAnd) {
-        // Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
-        CachingValidationSupport.CacheTimeouts cacheTimeouts =
-                CachingValidationSupport.CacheTimeouts.defaultValues().setTranslateCodeMillis(1000);
+	public static CachingValidationSupport newCachingValidationSupport(
+				JpaValidationSupportChain theJpaValidationSupportChain,
+				boolean theIsEnabledValidationForCodingsLogicalAnd) {
+		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
+		CachingValidationSupport.CacheTimeouts cacheTimeouts =
+					CachingValidationSupport.CacheTimeouts.defaultValues().setTranslateCodeMillis(1000);
 
-        return new CachingValidationSupport(
-                theJpaValidationSupportChain,
-                cacheTimeouts,
-                theIsEnabledValidationForCodingsLogicalAnd);
-    }
+		return new CachingValidationSupport(
+					theJpaValidationSupportChain,
+					cacheTimeouts,
+					theIsEnabledValidationForCodingsLogicalAnd);
+	}
 }

@@ -24,49 +24,49 @@ import java.util.List;
 
 public interface IForcedIdQueries {
 
-    /**
-     * This method returns a Collection where each row is an element in the collection. Each element
-     * in the collection is an object array, where the order matters (the array represents columns
-     * returned by the query). Deleted resources should not be filtered.
-     */
-    Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(
-            String theResourceType, Collection<String> theForcedIds);
+	/**
+	* This method returns a Collection where each row is an element in the collection. Each element
+	* in the collection is an object array, where the order matters (the array represents columns
+	* returned by the query). Deleted resources should not be filtered.
+	*/
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+				String theResourceType, Collection<String> theForcedIds);
 
-    /**
-     * This method returns a Collection where each row is an element in the collection. Each element
-     * in the collection is an object array, where the order matters (the array represents columns
-     * returned by the query). Deleted resources are optionally filtered.
-     */
-    Collection<Object[]> findAndResolveByForcedIdWithNoType(
-            String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
+	/**
+	* This method returns a Collection where each row is an element in the collection. Each element
+	* in the collection is an object array, where the order matters (the array represents columns
+	* returned by the query). Deleted resources are optionally filtered.
+	*/
+	Collection<Object[]> findAndResolveByForcedIdWithNoType(
+				String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
 
-    /**
-     * This method returns a Collection where each row is an element in the collection. Each element
-     * in the collection is an object array, where the order matters (the array represents columns
-     * returned by the query). Deleted resources are optionally filtered.
-     */
-    Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(
-            String theResourceType,
-            Collection<String> theForcedIds,
-            Collection<Integer> thePartitionId,
-            boolean theExcludeDeleted);
+	/**
+	* This method returns a Collection where each row is an element in the collection. Each element
+	* in the collection is an object array, where the order matters (the array represents columns
+	* returned by the query). Deleted resources are optionally filtered.
+	*/
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(
+				String theResourceType,
+				Collection<String> theForcedIds,
+				Collection<Integer> thePartitionId,
+				boolean theExcludeDeleted);
 
-    /**
-     * This method returns a Collection where each row is an element in the collection. Each element
-     * in the collection is an object array, where the order matters (the array represents columns
-     * returned by the query). Deleted resources are optionally filtered.
-     */
-    Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
-            String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
+	/**
+	* This method returns a Collection where each row is an element in the collection. Each element
+	* in the collection is an object array, where the order matters (the array represents columns
+	* returned by the query). Deleted resources are optionally filtered.
+	*/
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
 
-    /**
-     * This method returns a Collection where each row is an element in the collection. Each element
-     * in the collection is an object array, where the order matters (the array represents columns
-     * returned by the query). Deleted resources are optionally filtered.
-     */
-    Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
-            String theNextResourceType,
-            Collection<String> theNextIds,
-            List<Integer> thePartitionIdsWithoutDefault,
-            boolean theExcludeDeleted);
+	/**
+	* This method returns a Collection where each row is an element in the collection. Each element
+	* in the collection is an object array, where the order matters (the array represents columns
+	* returned by the query). Deleted resources are optionally filtered.
+	*/
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				String theNextResourceType,
+				Collection<String> theNextIds,
+				List<Integer> thePartitionIdsWithoutDefault,
+				boolean theExcludeDeleted);
 }

@@ -19,53 +19,52 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** NOP implementation of {@link IServerOperationInterceptor} */
 public class ServerOperationInterceptorAdapter extends InterceptorAdapter
-        implements IServerOperationInterceptor {
+		implements IServerOperationInterceptor {
 
-    @Override
-    public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-        // nothing
-    }
+	@Override
+	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    @Override
-    public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
-        // nothing
-    }
+	@Override
+	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    @Override
-    public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
-        // nothing
-    }
+	@Override
+	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    @Override
-    public void resourcePreUpdate(
-            RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-        // nothing
-    }
+	@Override
+	public void resourcePreUpdate(
+				RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		// nothing
+	}
 
-    @Override
-    public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-        // nothing
-    }
+	@Override
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    /**
-     * @deprecated Deprecated in HAPI FHIR 2.6 in favour of {@link #resourceUpdated(RequestDetails,
-     *     IBaseResource, IBaseResource)}
-     */
-    @Deprecated
-    @Override
-    public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
-        // nothing
-    }
+	/**
+	* @deprecated Deprecated in HAPI FHIR 2.6 in favour of {@link #resourceUpdated(RequestDetails,
+	*     IBaseResource, IBaseResource)}
+	*/
+	@Deprecated
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theResource) {
+		// nothing
+	}
 
-    @Override
-    public void resourceUpdated(
-            RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-        // nothing
-    }
+	@Override
+	public void resourceUpdated(
+				RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		// nothing
+	}
 }

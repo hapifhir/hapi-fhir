@@ -19,11 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search.lastn;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -37,57 +34,59 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class ElasticsearchRestClientFactory {
 
-    public static RestHighLevelClient createElasticsearchHighLevelRestClient(
-            String protocol,
-            String hosts,
-            @Nullable String theUsername,
-            @Nullable String thePassword) {
+	public static RestHighLevelClient createElasticsearchHighLevelRestClient(
+				String protocol,
+				String hosts,
+				@Nullable String theUsername,
+				@Nullable String thePassword) {
 
-        if (hosts.contains("://")) {
-            throw new ConfigurationException(
-                    Msg.code(1173)
-                            + "Elasticsearch URLs cannot include a protocol, that is a separate"
-                            + " property. Remove http:// or https:// from this URL.");
-        }
-        String[] hostArray = hosts.split(",");
-        List<Node> clientNodes =
-                Arrays.stream(hostArray)
-                        .map(String::trim)
-                        .filter(s -> s.contains(":"))
-                        .map(
-                                h -> {
-                                    int colonIndex = h.indexOf(":");
-                                    String host = h.substring(0, colonIndex);
-                                    int port = Integer.parseInt(h.substring(colonIndex + 1));
-                                    return new Node(new HttpHost(host, port, protocol));
-                                })
-                        .collect(Collectors.toList());
-        if (hostArray.length != clientNodes.size()) {
-            throw new ConfigurationException(
-                    Msg.code(1174)
-                            + "Elasticsearch URLs have to contain ':' as a host:port separator."
-                            + " Example: localhost:9200,localhost:9201,localhost:9202");
-        }
+		if (hosts.contains("://")) {
+				throw new ConfigurationException(
+						Msg.code(1173)
+									+ "Elasticsearch URLs cannot include a protocol, that is a separate"
+									+ " property. Remove http:// or https:// from this URL.");
+		}
+		String[] hostArray = hosts.split(",");
+		List<Node> clientNodes =
+					Arrays.stream(hostArray)
+								.map(String::trim)
+								.filter(s -> s.contains(":"))
+								.map(
+										h -> {
+												int colonIndex = h.indexOf(":");
+												String host = h.substring(0, colonIndex);
+												int port = Integer.parseInt(h.substring(colonIndex + 1));
+												return new Node(new HttpHost(host, port, protocol));
+										})
+								.collect(Collectors.toList());
+		if (hostArray.length != clientNodes.size()) {
+				throw new ConfigurationException(
+						Msg.code(1174)
+									+ "Elasticsearch URLs have to contain ':' as a host:port separator."
+									+ " Example: localhost:9200,localhost:9201,localhost:9202");
+		}
 
-        RestClientBuilder clientBuilder = RestClient.builder(clientNodes.toArray(new Node[0]));
-        if (StringUtils.isNotBlank(theUsername) && StringUtils.isNotBlank(thePassword)) {
-            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(
-                    AuthScope.ANY, new UsernamePasswordCredentials(theUsername, thePassword));
-            clientBuilder.setHttpClientConfigCallback(
-                    httpClientBuilder ->
-                            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
-        }
+		RestClientBuilder clientBuilder = RestClient.builder(clientNodes.toArray(new Node[0]));
+		if (StringUtils.isNotBlank(theUsername) && StringUtils.isNotBlank(thePassword)) {
+				final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+				credentialsProvider.setCredentials(
+						AuthScope.ANY, new UsernamePasswordCredentials(theUsername, thePassword));
+				clientBuilder.setHttpClientConfigCallback(
+						httpClientBuilder ->
+									httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+		}
 
-        Header[] defaultHeaders =
-                new Header[] {new BasicHeader("Content-Type", "application/json")};
-        clientBuilder.setDefaultHeaders(defaultHeaders);
+		Header[] defaultHeaders =
+					new Header[] {new BasicHeader("Content-Type", "application/json")};
+		clientBuilder.setDefaultHeaders(defaultHeaders);
 
-        return new RestHighLevelClient(clientBuilder);
-    }
+		return new RestHighLevelClient(clientBuilder);
+	}
 }

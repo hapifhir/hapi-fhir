@@ -28,94 +28,94 @@ import org.apache.commons.lang3.Validate;
  */
 public class ValueSetExpansionOptions {
 
-    private boolean myFailOnMissingCodeSystem = true;
-    private int myCount = 1000;
-    private int myOffset = 0;
-    private boolean myIncludeHierarchy;
-    private String myFilter;
+	private boolean myFailOnMissingCodeSystem = true;
+	private int myCount = 1000;
+	private int myOffset = 0;
+	private boolean myIncludeHierarchy;
+	private String myFilter;
 
-    private String myDisplayLanguage;
+	private String myDisplayLanguage;
 
-    public String getFilter() {
-        return myFilter;
-    }
+	public String getFilter() {
+		return myFilter;
+	}
 
-    public ValueSetExpansionOptions setFilter(String theFilter) {
-        myFilter = theFilter;
-        return this;
-    }
+	public ValueSetExpansionOptions setFilter(String theFilter) {
+		myFilter = theFilter;
+		return this;
+	}
 
-    /**
-     * The number of codes to return.
-     *
-     * <p>Default is 1000
-     */
-    public int getCount() {
-        return myCount;
-    }
+	/**
+	* The number of codes to return.
+	*
+	* <p>Default is 1000
+	*/
+	public int getCount() {
+		return myCount;
+	}
 
-    /**
-     * The number of codes to return.
-     *
-     * <p>Default is 1000
-     */
-    public ValueSetExpansionOptions setCount(int theCount) {
-        Validate.isTrue(theCount >= 0, "theCount must be >= 0");
-        myCount = theCount;
-        return this;
-    }
+	/**
+	* The number of codes to return.
+	*
+	* <p>Default is 1000
+	*/
+	public ValueSetExpansionOptions setCount(int theCount) {
+		Validate.isTrue(theCount >= 0, "theCount must be >= 0");
+		myCount = theCount;
+		return this;
+	}
 
-    /** The code index to start at (i.e the individual code index, not the page number) */
-    public int getOffset() {
-        return myOffset;
-    }
+	/** The code index to start at (i.e the individual code index, not the page number) */
+	public int getOffset() {
+		return myOffset;
+	}
 
-    /** The code index to start at (i.e the individual code index, not the page number) */
-    public ValueSetExpansionOptions setOffset(int theOffset) {
-        Validate.isTrue(theOffset >= 0, "theOffset must be >= 0");
-        myOffset = theOffset;
-        return this;
-    }
+	/** The code index to start at (i.e the individual code index, not the page number) */
+	public ValueSetExpansionOptions setOffset(int theOffset) {
+		Validate.isTrue(theOffset >= 0, "theOffset must be >= 0");
+		myOffset = theOffset;
+		return this;
+	}
 
-    /**
-     * Should the expansion fail if a codesystem is referenced by the valueset, but it can not be
-     * found?
-     *
-     * <p>Default is <code>true</code>
-     */
-    public boolean isFailOnMissingCodeSystem() {
-        return myFailOnMissingCodeSystem;
-    }
+	/**
+	* Should the expansion fail if a codesystem is referenced by the valueset, but it can not be
+	* found?
+	*
+	* <p>Default is <code>true</code>
+	*/
+	public boolean isFailOnMissingCodeSystem() {
+		return myFailOnMissingCodeSystem;
+	}
 
-    /**
-     * Should the expansion fail if a codesystem is referenced by the valueset, but it can not be
-     * found?
-     *
-     * <p>Default is <code>true</code>
-     */
-    public ValueSetExpansionOptions setFailOnMissingCodeSystem(boolean theFailOnMissingCodeSystem) {
-        myFailOnMissingCodeSystem = theFailOnMissingCodeSystem;
-        return this;
-    }
+	/**
+	* Should the expansion fail if a codesystem is referenced by the valueset, but it can not be
+	* found?
+	*
+	* <p>Default is <code>true</code>
+	*/
+	public ValueSetExpansionOptions setFailOnMissingCodeSystem(boolean theFailOnMissingCodeSystem) {
+		myFailOnMissingCodeSystem = theFailOnMissingCodeSystem;
+		return this;
+	}
 
-    public boolean isIncludeHierarchy() {
-        return myIncludeHierarchy;
-    }
+	public boolean isIncludeHierarchy() {
+		return myIncludeHierarchy;
+	}
 
-    public void setIncludeHierarchy(boolean theIncludeHierarchy) {
-        myIncludeHierarchy = theIncludeHierarchy;
-    }
+	public void setIncludeHierarchy(boolean theIncludeHierarchy) {
+		myIncludeHierarchy = theIncludeHierarchy;
+	}
 
-    public static ValueSetExpansionOptions forOffsetAndCount(int theOffset, int theCount) {
-        return new ValueSetExpansionOptions().setOffset(theOffset).setCount(theCount);
-    }
+	public static ValueSetExpansionOptions forOffsetAndCount(int theOffset, int theCount) {
+		return new ValueSetExpansionOptions().setOffset(theOffset).setCount(theCount);
+	}
 
-    public String getTheDisplayLanguage() {
-        return myDisplayLanguage;
-    }
+	public String getTheDisplayLanguage() {
+		return myDisplayLanguage;
+	}
 
-    public ValueSetExpansionOptions setTheDisplayLanguage(String theDisplayLanguage) {
-        myDisplayLanguage = theDisplayLanguage;
-        return this;
-    }
+	public ValueSetExpansionOptions setTheDisplayLanguage(String theDisplayLanguage) {
+		myDisplayLanguage = theDisplayLanguage;
+		return this;
+	}
 }

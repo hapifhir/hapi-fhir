@@ -19,59 +19,58 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 
 @Service
 public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 
-    private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-    @Autowired private MdmCandidateSearchSvc myMdmCandidateSearchSvc;
-    @Autowired private MdmResourceMatcherSvc myMdmResourceMatcherSvc;
+	@Autowired private MdmCandidateSearchSvc myMdmCandidateSearchSvc;
+	@Autowired private MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 
-    @Override
-    @Nonnull
-    @Transactional
-    public List<MatchedTarget> getMatchedTargets(
-            String theResourceType,
-            IAnyResource theResource,
-            RequestPartitionId theRequestPartitionId) {
-        Collection<IAnyResource> targetCandidates =
-                myMdmCandidateSearchSvc.findCandidates(
-                        theResourceType, theResource, theRequestPartitionId);
+	@Override
+	@Nonnull
+	@Transactional
+	public List<MatchedTarget> getMatchedTargets(
+				String theResourceType,
+				IAnyResource theResource,
+				RequestPartitionId theRequestPartitionId) {
+		Collection<IAnyResource> targetCandidates =
+					myMdmCandidateSearchSvc.findCandidates(
+								theResourceType, theResource, theRequestPartitionId);
 
-        List<MatchedTarget> matches =
-                targetCandidates.stream()
-                        .map(
-                                candidate ->
-                                        new MatchedTarget(
-                                                candidate,
-                                                myMdmResourceMatcherSvc.getMatchResult(
-                                                        theResource, candidate)))
-                        .collect(Collectors.toList());
+		List<MatchedTarget> matches =
+					targetCandidates.stream()
+								.map(
+										candidate ->
+													new MatchedTarget(
+																candidate,
+																myMdmResourceMatcherSvc.getMatchResult(
+																		theResource, candidate)))
+								.collect(Collectors.toList());
 
-        ourLog.trace(
-                "Found {} matched targets for {}.",
-                matches.size(),
-                idOrType(theResource, theResourceType));
-        return matches;
-    }
+		ourLog.trace(
+					"Found {} matched targets for {}.",
+					matches.size(),
+					idOrType(theResource, theResourceType));
+		return matches;
+	}
 }

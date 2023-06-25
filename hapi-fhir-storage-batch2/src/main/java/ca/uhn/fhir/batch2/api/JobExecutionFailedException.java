@@ -31,15 +31,15 @@ import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
  */
 public class JobExecutionFailedException extends BaseUnrecoverableRuntimeException {
 
-    private static final long serialVersionUID = 4871161727526723730L;
+	private static final long serialVersionUID = 4871161727526723730L;
 
-    /** Constructor */
-    public JobExecutionFailedException(String theMessage) {
-        super(theMessage);
-    }
+	/** Constructor */
+	public JobExecutionFailedException(String theMessage) {
+		super(theMessage);
+	}
 
-    /** Constructor */
-    public JobExecutionFailedException(String theMessage, Throwable theCause) {
-        super(theMessage, theCause);
-    }
+	/** Constructor */
+	public JobExecutionFailedException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 }

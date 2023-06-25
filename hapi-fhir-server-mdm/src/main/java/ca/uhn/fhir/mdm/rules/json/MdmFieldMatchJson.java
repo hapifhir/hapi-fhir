@@ -19,12 +19,11 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import javax.annotation.Nonnull;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.annotation.Nonnull;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
@@ -34,75 +33,75 @@ import ca.uhn.fhir.model.api.IModelJson;
  * used for comparison. (e.g. name.given)
  */
 public class MdmFieldMatchJson implements IModelJson {
-    @JsonProperty(value = "name", required = true)
-    String myName;
+	@JsonProperty(value = "name", required = true)
+	String myName;
 
-    @JsonProperty(value = "resourceType", required = true)
-    String myResourceType;
+	@JsonProperty(value = "resourceType", required = true)
+	String myResourceType;
 
-    @JsonProperty(value = "resourcePath", required = false)
-    String myResourcePath;
+	@JsonProperty(value = "resourcePath", required = false)
+	String myResourcePath;
 
-    @JsonProperty(value = "fhirPath", required = false)
-    String myFhirPath;
+	@JsonProperty(value = "fhirPath", required = false)
+	String myFhirPath;
 
-    @JsonProperty(value = "matcher", required = false)
-    MdmMatcherJson myMatcher;
+	@JsonProperty(value = "matcher", required = false)
+	MdmMatcherJson myMatcher;
 
-    @JsonProperty(value = "similarity", required = false)
-    MdmSimilarityJson mySimilarity;
+	@JsonProperty(value = "similarity", required = false)
+	MdmSimilarityJson mySimilarity;
 
-    public String getResourceType() {
-        return myResourceType;
-    }
+	public String getResourceType() {
+		return myResourceType;
+	}
 
-    public MdmFieldMatchJson setResourceType(String theResourceType) {
-        myResourceType = theResourceType;
-        return this;
-    }
+	public MdmFieldMatchJson setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+		return this;
+	}
 
-    public String getResourcePath() {
-        return myResourcePath;
-    }
+	public String getResourcePath() {
+		return myResourcePath;
+	}
 
-    public MdmFieldMatchJson setResourcePath(String theResourcePath) {
-        myResourcePath = theResourcePath;
-        return this;
-    }
+	public MdmFieldMatchJson setResourcePath(String theResourcePath) {
+		myResourcePath = theResourcePath;
+		return this;
+	}
 
-    public String getName() {
-        return myName;
-    }
+	public String getName() {
+		return myName;
+	}
 
-    public MdmFieldMatchJson setName(@Nonnull String theName) {
-        myName = theName;
-        return this;
-    }
+	public MdmFieldMatchJson setName(@Nonnull String theName) {
+		myName = theName;
+		return this;
+	}
 
-    public MdmMatcherJson getMatcher() {
-        return myMatcher;
-    }
+	public MdmMatcherJson getMatcher() {
+		return myMatcher;
+	}
 
-    public MdmFieldMatchJson setMatcher(MdmMatcherJson theMatcher) {
-        myMatcher = theMatcher;
-        return this;
-    }
+	public MdmFieldMatchJson setMatcher(MdmMatcherJson theMatcher) {
+		myMatcher = theMatcher;
+		return this;
+	}
 
-    public MdmSimilarityJson getSimilarity() {
-        return mySimilarity;
-    }
+	public MdmSimilarityJson getSimilarity() {
+		return mySimilarity;
+	}
 
-    public MdmFieldMatchJson setSimilarity(MdmSimilarityJson theSimilarity) {
-        mySimilarity = theSimilarity;
-        return this;
-    }
+	public MdmFieldMatchJson setSimilarity(MdmSimilarityJson theSimilarity) {
+		mySimilarity = theSimilarity;
+		return this;
+	}
 
-    public String getFhirPath() {
-        return myFhirPath;
-    }
+	public String getFhirPath() {
+		return myFhirPath;
+	}
 
-    public MdmFieldMatchJson setFhirPath(String theFhirPath) {
-        myFhirPath = theFhirPath;
-        return this;
-    }
+	public MdmFieldMatchJson setFhirPath(String theFhirPath) {
+		myFhirPath = theFhirPath;
+		return this;
+	}
 }

@@ -19,24 +19,23 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
 public class SearchBuilderFactory<T extends IResourcePersistentId<?>> {
 
-    @Autowired private ApplicationContext myApplicationContext;
+	@Autowired private ApplicationContext myApplicationContext;
 
-    public ISearchBuilder<T> newSearchBuilder(
-            IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-        return (ISearchBuilder<T>)
-                myApplicationContext.getBean(
-                        ISearchBuilder.SEARCH_BUILDER_BEAN_NAME,
-                        theDao,
-                        theResourceName,
-                        theResourceType);
-    }
+	public ISearchBuilder<T> newSearchBuilder(
+				IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return (ISearchBuilder<T>)
+					myApplicationContext.getBean(
+								ISearchBuilder.SEARCH_BUILDER_BEAN_NAME,
+								theDao,
+								theResourceName,
+								theResourceType);
+	}
 }

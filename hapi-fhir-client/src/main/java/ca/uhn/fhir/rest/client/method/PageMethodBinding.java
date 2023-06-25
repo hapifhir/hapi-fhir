@@ -19,10 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -30,35 +26,38 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
-    public PageMethodBinding(FhirContext theContext, Method theMethod) {
-        super(null, theMethod, theContext, null);
-    }
+	public PageMethodBinding(FhirContext theContext, Method theMethod) {
+		super(null, theMethod, theContext, null);
+	}
 
-    @Override
-    protected BundleTypeEnum getResponseBundleType() {
-        return null;
-    }
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
+	}
 
-    @Override
-    public RestOperationTypeEnum getRestOperationType() {
-        return RestOperationTypeEnum.GET_PAGE;
-    }
+	@Override
+	public RestOperationTypeEnum getRestOperationType() {
+		return RestOperationTypeEnum.GET_PAGE;
+	}
 
-    @Override
-    public ReturnTypeEnum getReturnType() {
-        return ReturnTypeEnum.BUNDLE;
-    }
+	@Override
+	public ReturnTypeEnum getReturnType() {
+		return ReturnTypeEnum.BUNDLE;
+	}
 
-    @CoverageIgnore
-    @Override
-    public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-        throw new UnsupportedOperationException(Msg.code(1446));
-    }
+	@CoverageIgnore
+	@Override
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		throw new UnsupportedOperationException(Msg.code(1446));
+	}
 
-    public IBaseResource provider() {
-        return null;
-    }
+	public IBaseResource provider() {
+		return null;
+	}
 }

@@ -19,62 +19,61 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 class ConditionalParamBinder implements IParameter {
 
-    private boolean mySupportsMultiple;
+	private boolean mySupportsMultiple;
 
-    ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
-        Validate.notNull(theOperationType, "theOperationType can not be null");
-        mySupportsMultiple = theSupportsMultiple;
-    }
+	ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
+		Validate.notNull(theOperationType, "theOperationType can not be null");
+		mySupportsMultiple = theSupportsMultiple;
+	}
 
-    @Override
-    public void initializeTypes(
-            Method theMethod,
-            Class<? extends Collection<?>> theOuterCollectionType,
-            Class<? extends Collection<?>> theInnerCollectionType,
-            Class<?> theParameterType) {
-        if (theOuterCollectionType != null
-                || theInnerCollectionType != null
-                || theParameterType.equals(String.class) == false) {
-            throw new ConfigurationException(
-                    Msg.code(1439)
-                            + "Parameters annotated with @"
-                            + ConditionalUrlParam.class.getSimpleName()
-                            + " must be of type String, found incorrect parameter in method \""
-                            + theMethod
-                            + "\"");
-        }
-    }
+	@Override
+	public void initializeTypes(
+				Method theMethod,
+				Class<? extends Collection<?>> theOuterCollectionType,
+				Class<? extends Collection<?>> theInnerCollectionType,
+				Class<?> theParameterType) {
+		if (theOuterCollectionType != null
+					|| theInnerCollectionType != null
+					|| theParameterType.equals(String.class) == false) {
+				throw new ConfigurationException(
+						Msg.code(1439)
+									+ "Parameters annotated with @"
+									+ ConditionalUrlParam.class.getSimpleName()
+									+ " must be of type String, found incorrect parameter in method \""
+									+ theMethod
+									+ "\"");
+		}
+	}
 
-    public boolean isSupportsMultiple() {
-        return mySupportsMultiple;
-    }
+	public boolean isSupportsMultiple() {
+		return mySupportsMultiple;
+	}
 
-    @Override
-    public void translateClientArgumentIntoQueryArgument(
-            FhirContext theContext,
-            Object theSourceClientArgument,
-            Map<String, List<String>> theTargetQueryArguments,
-            IBaseResource theTargetResource)
-            throws InternalErrorException {
-        throw new UnsupportedOperationException(
-                Msg.code(1440)
-                        + "Can not use @"
-                        + getClass().getName()
-                        + " annotated parameters in client");
-    }
+	@Override
+	public void translateClientArgumentIntoQueryArgument(
+				FhirContext theContext,
+				Object theSourceClientArgument,
+				Map<String, List<String>> theTargetQueryArguments,
+				IBaseResource theTargetResource)
+				throws InternalErrorException {
+		throw new UnsupportedOperationException(
+					Msg.code(1440)
+								+ "Can not use @"
+								+ getClass().getName()
+								+ " annotated parameters in client");
+	}
 }

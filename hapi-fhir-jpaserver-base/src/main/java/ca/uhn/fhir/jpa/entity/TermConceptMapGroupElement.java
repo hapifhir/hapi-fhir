@@ -19,188 +19,187 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.util.ValidateUtil;
-
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(
-        name = "TRM_CONCEPT_MAP_GRP_ELEMENT",
-        indexes = {@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")})
+		name = "TRM_CONCEPT_MAP_GRP_ELEMENT",
+		indexes = {@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE")})
 public class TermConceptMapGroupElement implements Serializable {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Id()
-    @SequenceGenerator(
-            name = "SEQ_CONCEPT_MAP_GRP_ELM_PID",
-            sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
-    @Column(name = "PID")
-    private Long myId;
+	@Id()
+	@SequenceGenerator(
+				name = "SEQ_CONCEPT_MAP_GRP_ELM_PID",
+				sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
+	@Column(name = "PID")
+	private Long myId;
 
-    @ManyToOne()
-    @JoinColumn(
-            name = "CONCEPT_MAP_GROUP_PID",
-            nullable = false,
-            referencedColumnName = "PID",
-            foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
-    private TermConceptMapGroup myConceptMapGroup;
+	@ManyToOne()
+	@JoinColumn(
+				name = "CONCEPT_MAP_GROUP_PID",
+				nullable = false,
+				referencedColumnName = "PID",
+				foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
+	private TermConceptMapGroup myConceptMapGroup;
 
-    @Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
-    private String myCode;
+	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
+	private String myCode;
 
-    @Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DISP_LENGTH)
-    private String myDisplay;
+	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DISP_LENGTH)
+	private String myDisplay;
 
-    @OneToMany(mappedBy = "myConceptMapGroupElement")
-    private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
+	@OneToMany(mappedBy = "myConceptMapGroupElement")
+	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
 
-    @Column(name = "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
-    private String myConceptMapUrl;
+	@Column(name = "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
+	private String myConceptMapUrl;
 
-    @Column(name = "SYSTEM_URL", nullable = true, length = TermCodeSystem.MAX_URL_LENGTH)
-    private String mySystem;
+	@Column(name = "SYSTEM_URL", nullable = true, length = TermCodeSystem.MAX_URL_LENGTH)
+	private String mySystem;
 
-    @Column(
-            name = "SYSTEM_VERSION",
-            nullable = true,
-            length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
-    private String mySystemVersion;
+	@Column(
+				name = "SYSTEM_VERSION",
+				nullable = true,
+				length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
+	private String mySystemVersion;
 
-    @Column(name = "VALUESET_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
-    private String myValueSet;
+	@Column(name = "VALUESET_URL", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
+	private String myValueSet;
 
-    public String getCode() {
-        return myCode;
-    }
+	public String getCode() {
+		return myCode;
+	}
 
-    public TermConceptMapGroupElement setCode(@Nonnull String theCode) {
-        ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-        ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-                theCode,
-                TermConcept.MAX_CODE_LENGTH,
-                "Code exceeds maximum length ("
-                        + TermConcept.MAX_CODE_LENGTH
-                        + "): "
-                        + length(theCode));
-        myCode = theCode;
-        return this;
-    }
+	public TermConceptMapGroupElement setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+					theCode,
+					TermConcept.MAX_CODE_LENGTH,
+					"Code exceeds maximum length ("
+								+ TermConcept.MAX_CODE_LENGTH
+								+ "): "
+								+ length(theCode));
+		myCode = theCode;
+		return this;
+	}
 
-    public TermConceptMapGroup getConceptMapGroup() {
-        return myConceptMapGroup;
-    }
+	public TermConceptMapGroup getConceptMapGroup() {
+		return myConceptMapGroup;
+	}
 
-    public TermConceptMapGroupElement setConceptMapGroup(
-            TermConceptMapGroup theTermConceptMapGroup) {
-        myConceptMapGroup = theTermConceptMapGroup;
-        return this;
-    }
+	public TermConceptMapGroupElement setConceptMapGroup(
+				TermConceptMapGroup theTermConceptMapGroup) {
+		myConceptMapGroup = theTermConceptMapGroup;
+		return this;
+	}
 
-    public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
-        if (myConceptMapGroupElementTargets == null) {
-            myConceptMapGroupElementTargets = new ArrayList<>();
-        }
+	public List<TermConceptMapGroupElementTarget> getConceptMapGroupElementTargets() {
+		if (myConceptMapGroupElementTargets == null) {
+				myConceptMapGroupElementTargets = new ArrayList<>();
+		}
 
-        return myConceptMapGroupElementTargets;
-    }
+		return myConceptMapGroupElementTargets;
+	}
 
-    public String getConceptMapUrl() {
-        if (myConceptMapUrl == null) {
-            myConceptMapUrl = getConceptMapGroup().getConceptMap().getUrl();
-        }
-        return myConceptMapUrl;
-    }
+	public String getConceptMapUrl() {
+		if (myConceptMapUrl == null) {
+				myConceptMapUrl = getConceptMapGroup().getConceptMap().getUrl();
+		}
+		return myConceptMapUrl;
+	}
 
-    public String getDisplay() {
-        return myDisplay;
-    }
+	public String getDisplay() {
+		return myDisplay;
+	}
 
-    public TermConceptMapGroupElement setDisplay(String theDisplay) {
-        myDisplay = left(theDisplay, TermConcept.MAX_DISP_LENGTH);
-        return this;
-    }
+	public TermConceptMapGroupElement setDisplay(String theDisplay) {
+		myDisplay = left(theDisplay, TermConcept.MAX_DISP_LENGTH);
+		return this;
+	}
 
-    public Long getId() {
-        return myId;
-    }
+	public Long getId() {
+		return myId;
+	}
 
-    public String getSystem() {
-        if (mySystem == null) {
-            mySystem = getConceptMapGroup().getSource();
-        }
-        return mySystem;
-    }
+	public String getSystem() {
+		if (mySystem == null) {
+				mySystem = getConceptMapGroup().getSource();
+		}
+		return mySystem;
+	}
 
-    public String getSystemVersion() {
-        if (mySystemVersion == null) {
-            mySystemVersion = getConceptMapGroup().getSourceVersion();
-        }
-        return mySystemVersion;
-    }
+	public String getSystemVersion() {
+		if (mySystemVersion == null) {
+				mySystemVersion = getConceptMapGroup().getSourceVersion();
+		}
+		return mySystemVersion;
+	}
 
-    public String getValueSet() {
-        if (myValueSet == null) {
-            myValueSet = getConceptMapGroup().getSourceValueSet();
-        }
-        return myValueSet;
-    }
+	public String getValueSet() {
+		if (myValueSet == null) {
+				myValueSet = getConceptMapGroup().getSourceValueSet();
+		}
+		return myValueSet;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
 
-        if (!(o instanceof TermConceptMapGroupElement)) return false;
+		if (!(o instanceof TermConceptMapGroupElement)) return false;
 
-        TermConceptMapGroupElement that = (TermConceptMapGroupElement) o;
+		TermConceptMapGroupElement that = (TermConceptMapGroupElement) o;
 
-        return new EqualsBuilder()
-                .append(getCode(), that.getCode())
-                .append(getSystem(), that.getSystem())
-                .append(getSystemVersion(), that.getSystemVersion())
-                .isEquals();
-    }
+		return new EqualsBuilder()
+					.append(getCode(), that.getCode())
+					.append(getSystem(), that.getSystem())
+					.append(getSystemVersion(), that.getSystemVersion())
+					.isEquals();
+	}
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getCode())
-                .append(getSystem())
-                .append(getSystemVersion())
-                .toHashCode();
-    }
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+					.append(getCode())
+					.append(getSystem())
+					.append(getSystemVersion())
+					.toHashCode();
+	}
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("myId", myId)
-                .append(
-                        myConceptMapGroup != null
-                                ? ("myConceptMapGroup - id=" + myConceptMapGroup.getId())
-                                : ("myConceptMapGroup=(null)"))
-                .append("myCode", myCode)
-                .append("myDisplay", myDisplay)
-                .append(
-                        myConceptMapGroupElementTargets != null
-                                ? ("myConceptMapGroupElementTargets - size="
-                                        + myConceptMapGroupElementTargets.size())
-                                : ("myConceptMapGroupElementTargets=(null)"))
-                .append("myConceptMapUrl", this.getConceptMapUrl())
-                .append("mySystem", this.getSystem())
-                .append("mySystemVersion", this.getSystemVersion())
-                .append("myValueSet", this.getValueSet())
-                .toString();
-    }
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+					.append("myId", myId)
+					.append(
+								myConceptMapGroup != null
+										? ("myConceptMapGroup - id=" + myConceptMapGroup.getId())
+										: ("myConceptMapGroup=(null)"))
+					.append("myCode", myCode)
+					.append("myDisplay", myDisplay)
+					.append(
+								myConceptMapGroupElementTargets != null
+										? ("myConceptMapGroupElementTargets - size="
+													+ myConceptMapGroupElementTargets.size())
+										: ("myConceptMapGroupElementTargets=(null)"))
+					.append("myConceptMapUrl", this.getConceptMapUrl())
+					.append("mySystem", this.getSystem())
+					.append("mySystemVersion", this.getSystemVersion())
+					.append("myValueSet", this.getValueSet())
+					.toString();
+	}
 }

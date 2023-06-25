@@ -19,48 +19,48 @@
  */
 package ca.uhn.fhir.jpa.validation;
 
-import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.thymeleaf.util.Validate;
 
+import javax.annotation.Nonnull;
+
 public class ValidationSettings {
 
-    private ReferenceValidationPolicy myLocalReferenceValidationDefaultPolicy =
-            ReferenceValidationPolicy.IGNORE;
+	private ReferenceValidationPolicy myLocalReferenceValidationDefaultPolicy =
+				ReferenceValidationPolicy.IGNORE;
 
-    /**
-     * Supplies a default policy for validating local references. Default is {@literal
-     * IResourceValidator.ReferenceValidationPolicy.IGNORE}.
-     *
-     * <p>Note that this setting can have a measurable impact on validation performance, as it will
-     * cause reference targets to be resolved during validation. In other words, if a resource has a
-     * reference to (for example) "Patient/123", the resource with that ID will be loaded from the
-     * database during validation.
-     *
-     * @since 5.1.0
-     */
-    @Nonnull
-    public ReferenceValidationPolicy getLocalReferenceValidationDefaultPolicy() {
-        return myLocalReferenceValidationDefaultPolicy;
-    }
+	/**
+	* Supplies a default policy for validating local references. Default is {@literal
+	* IResourceValidator.ReferenceValidationPolicy.IGNORE}.
+	*
+	* <p>Note that this setting can have a measurable impact on validation performance, as it will
+	* cause reference targets to be resolved during validation. In other words, if a resource has a
+	* reference to (for example) "Patient/123", the resource with that ID will be loaded from the
+	* database during validation.
+	*
+	* @since 5.1.0
+	*/
+	@Nonnull
+	public ReferenceValidationPolicy getLocalReferenceValidationDefaultPolicy() {
+		return myLocalReferenceValidationDefaultPolicy;
+	}
 
-    /**
-     * Supplies a default policy for validating local references. Default is {@literal
-     * IResourceValidator.ReferenceValidationPolicy.IGNORE}.
-     *
-     * <p>Note that this setting can have a measurable impact on validation performance, as it will
-     * cause reference targets to be resolved during validation. In other words, if a resource has a
-     * reference to (for example) "Patient/123", the resource with that ID will be loaded from the
-     * database during validation.
-     *
-     * @since 5.1.0
-     */
-    public void setLocalReferenceValidationDefaultPolicy(
-            @Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
-        Validate.notNull(
-                theLocalReferenceValidationDefaultPolicy,
-                "theLocalReferenceValidationDefaultPolicy must not be null");
-        myLocalReferenceValidationDefaultPolicy = theLocalReferenceValidationDefaultPolicy;
-    }
+	/**
+	* Supplies a default policy for validating local references. Default is {@literal
+	* IResourceValidator.ReferenceValidationPolicy.IGNORE}.
+	*
+	* <p>Note that this setting can have a measurable impact on validation performance, as it will
+	* cause reference targets to be resolved during validation. In other words, if a resource has a
+	* reference to (for example) "Patient/123", the resource with that ID will be loaded from the
+	* database during validation.
+	*
+	* @since 5.1.0
+	*/
+	public void setLocalReferenceValidationDefaultPolicy(
+				@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
+		Validate.notNull(
+					theLocalReferenceValidationDefaultPolicy,
+					"theLocalReferenceValidationDefaultPolicy must not be null");
+		myLocalReferenceValidationDefaultPolicy = theLocalReferenceValidationDefaultPolicy;
+	}
 }

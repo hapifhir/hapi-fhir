@@ -9,72 +9,72 @@ import org.junit.jupiter.api.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class HSearchElementCacheTest {
-    static class TestDocumentElement implements DocumentElement {
-        final TestDocumentElement myParent;
+	static class TestDocumentElement implements DocumentElement {
+		final TestDocumentElement myParent;
 
-        TestDocumentElement(TestDocumentElement myParent) {
-            this.myParent = myParent;
-        }
+		TestDocumentElement(TestDocumentElement myParent) {
+				this.myParent = myParent;
+		}
 
-        @Override
-        public <F> void addValue(IndexFieldReference<F> fieldReference, F value) {
-            // nop
-        }
+		@Override
+		public <F> void addValue(IndexFieldReference<F> fieldReference, F value) {
+				// nop
+		}
 
-        @Override
-        public DocumentElement addObject(IndexObjectFieldReference fieldReference) {
-            // nop
-            return null;
-        }
+		@Override
+		public DocumentElement addObject(IndexObjectFieldReference fieldReference) {
+				// nop
+				return null;
+		}
 
-        @Override
-        public void addNullObject(IndexObjectFieldReference fieldReference) {
-            // not used
-        }
+		@Override
+		public void addNullObject(IndexObjectFieldReference fieldReference) {
+				// not used
+		}
 
-        @Override
-        public void addValue(String relativeFieldName, Object value) {
-            // not used
-        }
+		@Override
+		public void addValue(String relativeFieldName, Object value) {
+				// not used
+		}
 
-        @Override
-        public DocumentElement addObject(String relativeFieldName) {
-            return new TestDocumentElement(this);
-        }
+		@Override
+		public DocumentElement addObject(String relativeFieldName) {
+				return new TestDocumentElement(this);
+		}
 
-        @Override
-        public void addNullObject(String relativeFieldName) {
-            // not used;
-        }
-    }
+		@Override
+		public void addNullObject(String relativeFieldName) {
+				// not used;
+		}
+	}
 
-    TestDocumentElement myRoot = new TestDocumentElement(null);
-    HSearchElementCache mySvc = new HSearchElementCache(myRoot);
+	TestDocumentElement myRoot = new TestDocumentElement(null);
+	HSearchElementCache mySvc = new HSearchElementCache(myRoot);
 
-    @Test
-    public void emptyPathReturnsRoot() {
-        assertThat(mySvc.getObjectElement(), Matchers.sameInstance(myRoot));
-    }
+	@Test
+	public void emptyPathReturnsRoot() {
+		assertThat(mySvc.getObjectElement(), Matchers.sameInstance(myRoot));
+	}
 
-    @Test
-    public void simpleChildIsRemembered() {
-        DocumentElement child = mySvc.getObjectElement("child");
+	@Test
+	public void simpleChildIsRemembered() {
+		DocumentElement child = mySvc.getObjectElement("child");
 
-        assertThat(mySvc.getObjectElement("child"), Matchers.sameInstance(child));
-    }
+		assertThat(mySvc.getObjectElement("child"), Matchers.sameInstance(child));
+	}
 
-    @Test
-    public void deeperPathRemembered() {
-        DocumentElement child = mySvc.getObjectElement("child", "grandchild");
+	@Test
+	public void deeperPathRemembered() {
+		DocumentElement child = mySvc.getObjectElement("child", "grandchild");
 
-        assertThat(mySvc.getObjectElement("child", "grandchild"), Matchers.sameInstance(child));
-    }
+		assertThat(mySvc.getObjectElement("child", "grandchild"), Matchers.sameInstance(child));
+	}
 
-    @Test
-    public void grandchildParentIsChild() {
-        DocumentElement child = mySvc.getObjectElement("child");
-        TestDocumentElement grandChild =
-                (TestDocumentElement) mySvc.getObjectElement("child", "grandchild");
-        assertThat(grandChild.myParent, Matchers.sameInstance(child));
-    }
+	@Test
+	public void grandchildParentIsChild() {
+		DocumentElement child = mySvc.getObjectElement("child");
+		TestDocumentElement grandChild =
+					(TestDocumentElement) mySvc.getObjectElement("child", "grandchild");
+		assertThat(grandChild.myParent, Matchers.sameInstance(child));
+	}
 }
