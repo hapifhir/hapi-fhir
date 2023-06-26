@@ -2784,21 +2784,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
+		assertEquals(initial, val.size());
+
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(longStr1, longStr2)), null);
 		assertEquals(initial + 1, val.size());
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(longStr1, subStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, longStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
 	}
 
 	@Test
