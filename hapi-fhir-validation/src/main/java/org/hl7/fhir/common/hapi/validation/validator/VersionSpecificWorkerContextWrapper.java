@@ -344,6 +344,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public <T extends Resource> T fetchResourceRaw(Class<T> class_, String uri) {
+		return fetchResource(class_, uri);
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
 
 		if (isBlank(uri)) {
