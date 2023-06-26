@@ -48,4 +48,6 @@ public class SearchBundleEntryParts {
 	public BundleEntrySearchModeEnum getSearchMode() {
 		return mySearchMode;
 	}
+
+
 }

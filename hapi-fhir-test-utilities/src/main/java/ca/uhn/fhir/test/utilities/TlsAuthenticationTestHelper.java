@@ -54,7 +54,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 	private final TrustStoreInfo myTrustStoreInfo;
 	private File myTempFile;
 
-	public TlsAuthenticationTestHelper() {
+	public TlsAuthenticationTestHelper(){
 		myKeystoreInfo = new KeyStoreInfo(KEYSTORE_RESOURCE_PATH, KEYSTORE_STOREPASS, KEYSTORE_KEYPASS, KEYSTORE_ALIAS);
 		myTrustStoreInfo = new TrustStoreInfo(TRUSTSTORE_RESOURCE_PATH, TRUSTSTORE_STOREPASS, TRUSTSTORE_ALIAS);
 		myTlsAuthentication = new TlsAuthentication(Optional.of(myKeystoreInfo), Optional.of(myTrustStoreInfo));
@@ -62,21 +62,20 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
-		if (myTempFile != null && myTempFile.exists()) {
+		if(myTempFile != null && myTempFile.exists()){
 			assertTrue(myTempFile.delete());
 			myTempFile = null;
 		}
 	}
 
-	public String[] createBaseRequestGeneratingCommandArgs(
-			String[] theBaseArgs, String theUrlFlag, boolean theAddTls, BaseRestServerHelper theRestServerHelper) {
-		if (isBlank(theUrlFlag)) {
+	public String[] createBaseRequestGeneratingCommandArgs(String[] theBaseArgs, String theUrlFlag, boolean theAddTls, BaseRestServerHelper theRestServerHelper){
+		if(isBlank(theUrlFlag)){
 			return theBaseArgs;
 		}
 
 		String[] retVal;
-		if (theAddTls) {
-			int newSize = theBaseArgs.length + 4;
+		if(theAddTls){
+			int newSize = theBaseArgs.length +  4;
 			retVal = Arrays.copyOf(theBaseArgs, newSize);
 
 			retVal[newSize - 4] = theUrlFlag;
@@ -85,8 +84,9 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 			myTempFile = createTlsAuthenticationFile();
 			retVal[newSize - 2] = "--tls-auth";
 			retVal[newSize - 1] = myTempFile.getAbsolutePath();
-		} else {
-			int newSize = theBaseArgs.length + 2;
+		}
+		else {
+			int newSize = theBaseArgs.length +  2;
 			retVal = Arrays.copyOf(theBaseArgs, newSize);
 			retVal[newSize - 2] = theUrlFlag;
 			retVal[newSize - 1] = theRestServerHelper.getBase(); // HTTP
@@ -95,7 +95,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 		return retVal;
 	}
 
-	public TlsAuthentication getTlsAuthentication() {
+	public TlsAuthentication getTlsAuthentication(){
 		return myTlsAuthentication;
 	}
 
@@ -124,7 +124,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 			}
 			return inputFile;
 		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(2122) + "Failed to load test TLS authentication file", e);
+			throw new RuntimeException(Msg.code(2122)+"Failed to load test TLS authentication file", e);
 		}
 	}
 }

@@ -26,14 +26,10 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 	@Test
 	public void testTranslateWithConceptMapUrlAndVersion() {
-		// - conceptMap1 v1
+		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
-		conceptMap1
-				.setUrl(CM_URL)
-				.setVersion("v1")
-				.setSourceScope(new UriType(VS_URL))
-				.setTargetScope(new UriType(VS_URL_2));
-
+		conceptMap1.setUrl(CM_URL).setVersion("v1").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
+		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
 		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
@@ -42,22 +38,16 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		TargetElementComponent target1 = element1.addTarget();
 		target1.setCode("12222").setDisplay("Target Code 12222");
-
-		IIdType conceptMapId1 =
-				myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
+		
+		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap1 = myConceptMapDao.read(conceptMapId1);
-
-		ourLog.debug("ConceptMap: 2 \n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
-
-		// - conceptMap1 v2
+		
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+	
+		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
-		conceptMap2
-				.setUrl(CM_URL)
-				.setVersion("v2")
-				.setSourceScope(new UriType(VS_URL))
-				.setTargetScope(new UriType(VS_URL_2));
-
+		conceptMap2.setUrl(CM_URL).setVersion("v2").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
+		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
 		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
@@ -66,13 +56,11 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		TargetElementComponent target2 = element2.addTarget();
 		target2.setCode("13333").setDisplay("Target Code 13333");
-
-		IIdType conceptMapId2 =
-				myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
+		
+		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap2 = myConceptMapDao.read(conceptMapId2);
-
-		ourLog.debug("ConceptMap: 2 \n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
+		
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
 
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
@@ -81,17 +69,16 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.debug("Request Parameters:\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient.operation()
-				.onType(ConceptMap.class)
-				.named("translate")
-				.withParameters(inParams)
-				.execute();
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
 
-		ourLog.debug("Response Parameters\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -103,7 +90,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		param = getParametersByName(respParams, "match").get(0);
 
 		assertEquals(3, param.getPart().size());
-
+		
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("13333", coding.getCode());
@@ -111,25 +98,21 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertFalse(coding.getUserSelected());
 		assertEquals(CS_URL_2, coding.getSystem());
 		assertEquals("Version 2", coding.getVersion());
-
+		
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		part = getPartByName(param, "equivalence");
 		assertEquals("relatedto", part.getValue().toString());
 	}
-
+	
 	@Test
 	public void testTranslateWithReverseConceptMapUrlAndVersion() {
-
-		// - conceptMap1 v1
+		
+		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
-		conceptMap1
-				.setUrl(CM_URL)
-				.setVersion("v1")
-				.setSourceScope(new UriType(VS_URL))
-				.setTargetScope(new UriType(VS_URL_2));
-
+		conceptMap1.setUrl(CM_URL).setVersion("v1").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
+		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
 		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
@@ -138,22 +121,16 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		TargetElementComponent target1 = element1.addTarget();
 		target1.setCode("11111").setDisplay("11111").setRelationship(ConceptMapRelationship.EQUIVALENT);
-
-		IIdType conceptMapId1 =
-				myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
+		
+		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap1 = myConceptMapDao.read(conceptMapId1);
-
-		ourLog.debug("ConceptMap: 2 \n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
-
-		// - conceptMap1 v2
+		
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+	
+		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
-		conceptMap2
-				.setUrl(CM_URL)
-				.setVersion("v2")
-				.setSourceScope(new UriType(VS_URL))
-				.setTargetScope(new UriType(VS_URL_2));
-
+		conceptMap2.setUrl(CM_URL).setVersion("v2").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
+		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
 		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
 
@@ -162,32 +139,32 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		TargetElementComponent target2 = element2.addTarget();
 		target2.setCode("11111").setDisplay("Target Code 11111").setRelationship(ConceptMapRelationship.EQUIVALENT);
-
-		IIdType conceptMapId2 =
-				myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
+		
+		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap2 = myConceptMapDao.read(conceptMapId2);
+		
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
 
-		ourLog.debug("ConceptMap: 2 \n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
-
+		
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
 		inParams.addParameter().setName("conceptMapVersion").setValue(new StringType("v2"));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.debug("Request Parameters:\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient.operation()
-				.onType(ConceptMap.class)
-				.named("translate")
-				.withParameters(inParams)
-				.execute();
+		
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
 
-		ourLog.debug("Response Parameters\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
-
+		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		
+		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
@@ -207,6 +184,6 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertEquals(CS_URL, coding.getSystem());
 		assertEquals("Version 1", coding.getVersion());
 		part = getPartByName(param, "source");
-		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());	
 	}
 }

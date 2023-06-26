@@ -40,9 +40,7 @@ public class CandidateList {
 		return myList.isEmpty();
 	}
 
-	public void addAll(List<MatchedGoldenResourceCandidate> theList) {
-		myList.addAll(theList);
-	}
+	public void addAll(List<MatchedGoldenResourceCandidate> theList) { myList.addAll(theList); }
 
 	public MatchedGoldenResourceCandidate getOnlyMatch() {
 		assert myList.size() == 1;
@@ -50,7 +48,7 @@ public class CandidateList {
 	}
 
 	public boolean exactlyOneMatch() {
-		return myList.size() == 1;
+		return myList.size()== 1;
 	}
 
 	public Stream<MatchedGoldenResourceCandidate> stream() {
@@ -65,11 +63,11 @@ public class CandidateList {
 		return myList.get(0);
 	}
 
-	public boolean isEidMatch() {
+    public boolean isEidMatch() {
 		return myStrategy.isEidMatch();
-	}
+    }
 
-	public int size() {
+    public int size() {
 		return myList.size();
-	}
+    }
 }

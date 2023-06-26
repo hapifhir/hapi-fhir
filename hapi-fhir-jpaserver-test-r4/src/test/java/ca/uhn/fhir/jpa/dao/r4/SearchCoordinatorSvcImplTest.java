@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
+
 	@Autowired
 	private ISearchDao mySearchDao;
 
@@ -38,10 +39,8 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(
-				DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
-		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(
-				DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
+		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND);
 	}
 
 	@Test
@@ -49,17 +48,17 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(5);
 		DatabaseSearchCacheSvcImpl.setMaximumSearchesToCheckForDeletionCandidacyForUnitTest(10);
 
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			mySearchResultDao.deleteAll();
 			mySearchDao.deleteAll();
 		});
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchResultDao.count());
 		});
 
 		// Create lots of searches
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			for (int i = 0; i < 20; i++) {
 				Search search = new Search();
 				search.setCreated(DateUtils.addDays(new Date(), -1));
@@ -78,16 +77,17 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 						mySearchResultDao.save(sr);
 					}
 				}
+
 			}
 		});
 
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertEquals(20, mySearchDao.count());
 			assertEquals(30, mySearchResultDao.count());
 		});
 
 		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			// We should delete up to 10, but 3 don't get deleted since they have too many results to delete in one pass
 			assertEquals(13, mySearchDao.count());
 			assertEquals(3, mySearchDao.countDeleted());
@@ -96,7 +96,7 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 		});
 
 		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			// Once again we attempt to delete 10, but the first 3 don't get deleted and still remain
 			// (total is 6 because 3 weren't deleted, and they blocked another 3 that might have been)
 			assertEquals(6, mySearchDao.count());
@@ -105,10 +105,11 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 		});
 
 		myDatabaseCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertEquals(0, mySearchDao.count());
 			assertEquals(0, mySearchDao.countDeleted());
 			assertEquals(0, mySearchResultDao.count());
 		});
 	}
+
 }

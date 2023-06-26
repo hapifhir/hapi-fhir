@@ -2,6 +2,7 @@ package ca.uhn.fhir.okhttp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import okhttp3.Call;
@@ -14,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLHandshakeException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,9 +49,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 	@Test
 	public void testSetHttpClient() {
-		OkHttpClient okHttpClient = new OkHttpClient.Builder()
-				.writeTimeout(5000, TimeUnit.MILLISECONDS)
-				.build();
+		OkHttpClient okHttpClient = new OkHttpClient.Builder().writeTimeout(5000, TimeUnit.MILLISECONDS).build();
 
 		clientFactory.setHttpClient(okHttpClient);
 
@@ -80,14 +79,13 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		OkHttpClient client = (OkHttpClient) clientFactory.getNativeClient();
 
 		Request request = new Request.Builder()
-				.url(fhirVersionParams.getPatientEndpoint())
-				.build();
+			.url(fhirVersionParams.getPatientEndpoint())
+			.build();
 
 		Response response = client.newCall(request).execute();
 		assertEquals(200, response.code());
 		String json = response.body().string();
-		IBaseResource bundle =
-				fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
+		IBaseResource bundle = fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
 		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
@@ -100,8 +98,8 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 		try {
 			Request request = new Request.Builder()
-					.url(fhirVersionParams.getSecuredPatientEndpoint())
-					.build();
+				.url(fhirVersionParams.getSecuredPatientEndpoint())
+				.build();
 			unauthenticatedClient.newCall(request).execute();
 			fail();
 		} catch (Exception e) {
@@ -116,10 +114,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		String base = fhirVersionParams.getBase();
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
-		IBaseResource bundle = context.newRestfulGenericClient(base)
-				.search()
-				.forResource("Patient")
-				.execute();
+		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
 		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 
@@ -131,16 +126,10 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
 		try {
-			context.newRestfulGenericClient(secureBase)
-					.search()
-					.forResource("Patient")
-					.execute();
+			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
 			fail();
 		} catch (Exception e) {
-			assertTrue(
-					e.getMessage()
-							.contains(
-									"HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
+			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
 	}

@@ -24,11 +24,11 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.time.LocalDate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.time.LocalDate;
 
 @Embeddable
 public class PartitionablePartitionId implements Cloneable {
@@ -37,7 +37,6 @@ public class PartitionablePartitionId implements Cloneable {
 
 	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
 	private Integer myPartitionId;
-
 	@Column(name = "PARTITION_DATE", nullable = true, insertable = true, updatable = false)
 	private LocalDate myPartitionDate;
 
@@ -73,18 +72,12 @@ public class PartitionablePartitionId implements Cloneable {
 		}
 
 		PartitionablePartitionId that = (PartitionablePartitionId) theO;
-		return new EqualsBuilder()
-				.append(myPartitionId, that.myPartitionId)
-				.append(myPartitionDate, that.myPartitionDate)
-				.isEquals();
+		return new EqualsBuilder().append(myPartitionId, that.myPartitionId).append(myPartitionDate, that.myPartitionDate).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-				.append(myPartitionId)
-				.append(myPartitionDate)
-				.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myPartitionId).append(myPartitionDate).toHashCode();
 	}
 
 	@Nullable
@@ -100,7 +93,9 @@ public class PartitionablePartitionId implements Cloneable {
 	@SuppressWarnings({"CloneDoesntDeclareCloneNotSupportedException", "MethodDoesntCallSuperMethod"})
 	@Override
 	protected PartitionablePartitionId clone() {
-		return new PartitionablePartitionId().setPartitionId(getPartitionId()).setPartitionDate(getPartitionDate());
+		return new PartitionablePartitionId()
+			.setPartitionId(getPartitionId())
+			.setPartitionDate(getPartitionDate());
 	}
 
 	public RequestPartitionId toPartitionId() {
@@ -109,9 +104,10 @@ public class PartitionablePartitionId implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "PartitionablePartitionId{" + "myPartitionId="
-				+ myPartitionId + ", myPartitionDate="
-				+ myPartitionDate + '}';
+		return "PartitionablePartitionId{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionDate=" + myPartitionDate +
+			'}';
 	}
 
 	@Nonnull
@@ -124,12 +120,12 @@ public class PartitionablePartitionId implements Cloneable {
 	}
 
 	@Nonnull
-	public static PartitionablePartitionId toStoragePartition(
-			@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull PartitionSettings thePartitionSettings) {
+	public static PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull PartitionSettings thePartitionSettings) {
 		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 		if (partitionId == null) {
 			partitionId = thePartitionSettings.getDefaultPartitionId();
 		}
 		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
 	}
+
 }

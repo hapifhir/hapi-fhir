@@ -1,8 +1,9 @@
 package ca.uhn.fhirtest;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class FhirContextFactory implements FactoryBean<FhirContext>, InitializingBean {
 
@@ -36,7 +37,8 @@ public class FhirContextFactory implements FactoryBean<FhirContext>, Initializin
 
 	private FhirContext myCtx;
 
-	public FhirContextFactory() {}
+	public FhirContextFactory() {
+	}
 
 	@Override
 	public FhirContext getObject() throws Exception {
@@ -60,4 +62,5 @@ public class FhirContextFactory implements FactoryBean<FhirContext>, Initializin
 		myCtx.getRestfulClientFactory().setSocketTimeout(mySocketTimeout);
 		myCtx.getRestfulClientFactory().setConnectionRequestTimeout(myConnectionRequestTimeout);
 	}
+
 }

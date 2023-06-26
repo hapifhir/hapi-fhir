@@ -19,7 +19,6 @@ class ResourceChangeListenerRegistryInterceptorTest {
 
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
-
 	@MockBean
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 

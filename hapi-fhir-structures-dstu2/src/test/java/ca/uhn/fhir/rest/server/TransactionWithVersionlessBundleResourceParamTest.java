@@ -35,11 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransactionWithVersionlessBundleResourceParamTest {
 
+
 	private static CloseableHttpClient ourClient;
 
+	
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(TransactionWithVersionlessBundleResourceParamTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionWithVersionlessBundleResourceParamTest.class);
 	private static int ourPort;
 	private static boolean ourReturnOperationOutcome;
 	private static Server ourServer;
@@ -78,8 +79,9 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 
 		Entry entry0 = bundle.getEntry().get(0);
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
-	}
 
+	}
+	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -94,8 +96,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler =
-				new org.eclipse.jetty.servlet.ServletContextHandler();
+		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();
@@ -104,14 +105,15 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 
 	public static class DummyProvider {
 
@@ -138,5 +140,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 
 			return retVal;
 		}
+
 	}
+
 }

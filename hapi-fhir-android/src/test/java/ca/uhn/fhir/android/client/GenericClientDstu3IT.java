@@ -49,6 +49,7 @@ import static org.mockito.Mockito.when;
 
 public class GenericClientDstu3IT {
 
+	
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientDstu3IT.class);
 	private int myAnswerCount;
@@ -75,15 +76,15 @@ public class GenericClientDstu3IT {
 			public Response answer(InvocationOnMock theInvocation) {
 				myAnswerCount++;
 				return myHttpResponse;
-			}
-		});
+			}});
 		myAnswerCount = 0;
+
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR "
-				+ FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp)";
 	}
+
 
 	private String extractBodyAsString(ArgumentCaptor<Request> capt) throws IOException {
 		Buffer sink = new Buffer();
@@ -128,18 +129,13 @@ public class GenericClientDstu3IT {
 		assertThat(request.url().toString(), startsWith("http://example.com/fhir/Binary"));
 		validateUserAgent(capt);
 
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW + ";charset=utf-8",
-				request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
 		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
-		Patient outputPt =
-				(Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>",
-				outputPt.getText().getDivAsString());
+		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
 	}
 
 	/**
@@ -154,21 +150,23 @@ public class GenericClientDstu3IT {
 
 		int idx = 0;
 
-		client.search()
-				.forResource(Patient.class)
-				.where(Patient.FAMILY.matches().value((String) null))
-				.and(Patient.BIRTHDATE.exactly().day((Date) null))
-				.and(Patient.GENDER.exactly().code(null))
-				.and(Patient.ORGANIZATION.hasId((String) null))
-				.returnBundle(Bundle.class)
-				.execute();
+      client
+      	.search()
+      	.forResource(Patient.class)
+      	.where(Patient.FAMILY.matches().value((String)null))
+      	.and(Patient.BIRTHDATE.exactly().day((Date)null))
+      	.and(Patient.GENDER.exactly().code(null))
+      	.and(Patient.ORGANIZATION.hasId((String)null))
+      	.returnBundle(Bundle.class)
+      	.execute();
 
-		assertEquals(
-				"http://example.com/fhir/Patient?_format=json",
-				capt.getAllValues().get(idx).url().toString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(idx).url().toString());
 		idx++;
+		
 	}
-
+	
+	
+	
 	/**
 	 * TODO: narratives don't work without stax
 	 */
@@ -192,25 +190,19 @@ public class GenericClientDstu3IT {
 		client.setEncoding(EncodingEnum.JSON);
 
 		Binary bin = new Binary();
-		bin.setContent(new byte[] {0, 1, 2, 3, 4});
+		bin.setContent(new byte[] { 0, 1, 2, 3, 4 });
 		client.create().resource(bin).execute();
 
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertEquals(
-				"http://example.com/fhir/Binary?_format=json", request.url().toString());
+		assertEquals("http://example.com/fhir/Binary?_format=json", request.url().toString());
 		validateUserAgent(capt);
 
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW + ";charset=utf-8",
-				request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
-		assertArrayEquals(
-				new byte[] {0, 1, 2, 3, 4},
-				ourCtx.newJsonParser()
-						.parseResource(Binary.class, extractBodyAsString(capt))
-						.getContent());
+		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -218,7 +210,7 @@ public class GenericClientDstu3IT {
 	public void testClientFailures() {
 		ResponseBody body = mock(ResponseBody.class);
 		when(body.source()).thenThrow(IllegalStateException.class, RuntimeException.class);
-
+		
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)
 				.protocol(myProtocol)
@@ -242,7 +234,10 @@ public class GenericClientDstu3IT {
 		} catch (RuntimeException e) {
 			// good
 		}
+
 	}
+
+
 
 	/**
 	 * TODO: narratives don't work without stax
@@ -270,26 +265,19 @@ public class GenericClientDstu3IT {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create()
-				.resource(pt)
-				.prefer(PreferReturnEnum.REPRESENTATION)
-				.execute();
+		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
 		assertEquals(1, capt.getAllValues().size());
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
-				((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals(
-				"http://example.com/fhir/Patient?_format=json",
-				capt.getAllValues().get(0).url().toString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(0).url().toString());
 	}
 
+	
 	private ArgumentCaptor<Request> prepareClientForSearchResponse() {
-		final String respString =
-				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String respString = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)
 				.protocol(myProtocol)
@@ -302,6 +290,7 @@ public class GenericClientDstu3IT {
 		return capt;
 	}
 
+	
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
@@ -309,10 +298,10 @@ public class GenericClientDstu3IT {
 
 	@BeforeAll
 	public static void beforeClass() {
-
-		//		// Force StAX to fail like it will on android
-		//		System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), "FOO");
-		//		System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), "FOO");
+		
+//		// Force StAX to fail like it will on android
+//		System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), "FOO");
+//		System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), "FOO");
 
 		ourCtx = FhirContext.forDstu3();
 	}

@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Disabled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @Disabled
 public class BulkExportUseCaseTestAnyModeIT extends BulkExportUseCaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTestAnyModeIT.class);
+
 
 	@BeforeEach
 	public void setup() {
@@ -20,4 +22,5 @@ public class BulkExportUseCaseTestAnyModeIT extends BulkExportUseCaseTest {
 	public void tearDown() {
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 	}
+
 }

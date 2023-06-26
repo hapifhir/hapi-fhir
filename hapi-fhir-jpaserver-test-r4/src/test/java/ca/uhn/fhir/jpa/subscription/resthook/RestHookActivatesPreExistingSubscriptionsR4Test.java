@@ -30,11 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,7 +51,6 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
-
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
@@ -63,14 +62,13 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(
-				org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		mySubscriptionMatcherInterceptor.startIfNeeded();
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 
-	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint)
-			throws InterruptedException {
+
+	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -129,10 +127,11 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		mySubscriptionTestUtil.waitForQueueToDrain();
+			mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
 	public static class ObservationListener implements IResourceProvider {
+
 
 		private void extractHeaders(HttpServletRequest theRequest) {
 			java.util.Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
@@ -155,17 +154,17 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Update");
 			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(
-					theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			extractHeaders(theRequest);
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
+
 	}
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
 		ourListenerRestServer = new RestfulServer(FhirContext.forR4Cached());
-
+		
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
@@ -180,12 +179,13 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}
+
 }

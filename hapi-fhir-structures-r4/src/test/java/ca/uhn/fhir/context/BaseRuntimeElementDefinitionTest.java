@@ -21,8 +21,7 @@ public class BaseRuntimeElementDefinitionTest {
 			def.newInstance(123);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(
-					Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
+			assertEquals(Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
 		}
 	}
 
@@ -55,9 +54,7 @@ public class BaseRuntimeElementDefinitionTest {
 			mutator.remove(patient, 0);
 			fail();
 		} catch (UnsupportedOperationException e) {
-			assertEquals(
-					"HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.",
-					e.getMessage());
+			assertEquals("HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.", e.getMessage());
 		}
 	}
 }

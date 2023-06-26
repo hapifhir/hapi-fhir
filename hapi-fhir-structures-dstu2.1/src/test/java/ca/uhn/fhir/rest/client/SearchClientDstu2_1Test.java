@@ -80,10 +80,8 @@ public class SearchClientDstu2_1Test {
 		final String response = createBundleWithSearchExtension();
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -98,9 +96,7 @@ public class SearchClientDstu2_1Test {
 		assertEquals("Sample Clinic", matches.get(0).getName());
 
 		HttpGet value = (HttpGet) capt.getValue();
-		assertEquals(
-				"http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100",
-				value.getURI().toString());
+		assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
 	}
 
 	/**
@@ -112,10 +108,8 @@ public class SearchClientDstu2_1Test {
 		final String response = createBundleWithSearchExtension();
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -128,14 +122,10 @@ public class SearchClientDstu2_1Test {
 		int idx = 0;
 
 		client.search(new SortSpec("param1", SortOrderEnum.ASC));
-		assertEquals(
-				"http://localhost/fhir/Bundle?_sort=param1",
-				((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
 
 		client.search(new SortSpec("param1", SortOrderEnum.ASC).setChain(new SortSpec("param2", SortOrderEnum.DESC)));
-		assertEquals(
-				"http://localhost/fhir/Bundle?_sort=param1%2C-param2",
-				((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
 	}
 
 	@Test
@@ -152,10 +142,8 @@ public class SearchClientDstu2_1Test {
 			final String response = createBundleWithSearchExtension();
 			ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 			when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-			when(ourHttpResponse.getStatusLine())
-					.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-			when(ourHttpResponse.getEntity().getContentType())
-					.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+			when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+			when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 			when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 				@Override
 				public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -168,16 +156,12 @@ public class SearchClientDstu2_1Test {
 			int idx = 0;
 
 			client.search("STRING1", new StringType("STRING2"), date, cal);
-			assertEquals(
-					"http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00",
-					UrlUtil.unescape(
-							((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+			assertEquals("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00",
+					UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
 
 			client.search(null, null, null, null);
-			assertEquals(
-					"http://localhost/fhir/Bundle",
-					UrlUtil.unescape(
-							((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+			assertEquals("http://localhost/fhir/Bundle",
+					UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
 		} finally {
 			TimeZone.setDefault(tz);
 		}
@@ -192,10 +176,8 @@ public class SearchClientDstu2_1Test {
 		final String response = createBundleWithSearchExtension();
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -211,18 +193,15 @@ public class SearchClientDstu2_1Test {
 		BundleEntryComponent entry = matches.getEntry().get(0);
 		assertEquals("Sample Clinic", ((Location) entry.getResource()).getName());
 
-		List<Extension> ext =
-				entry.getSearch().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/algorithmic-match");
+		List<Extension> ext = entry.getSearch().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/algorithmic-match");
 		assertEquals(1, ext.size());
 
 		HttpGet value = (HttpGet) capt.getValue();
-		assertEquals(
-				"http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100",
-				value.getURI().toString());
+		assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
 	}
 
 	private String createBundleWithSearchExtension() {
-		// @formatter:off
+		//@formatter:off
 		final String response = "<Bundle xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"f61f6ddc-95e8-4ef9-a4cd-17c79bbb74f3\"></id>"
 				+ "<meta><lastUpdated value=\"2016-02-19T12:04:02.616-05:00\"></lastUpdated></meta>"
@@ -244,27 +223,24 @@ public class SearchClientDstu2_1Test {
 				+ "</search>"
 				+ "</entry>"
 				+ "</Bundle>";
-		// @formatter:on
+		//@formatter:on
 		return response;
 	}
 
 	public interface ILocationClient extends IRestfulClient {
 		@Search(queryName = "match")
-		public List<Location> getMatches(
-				final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
+		public List<Location> getMatches(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
 
 		@Search(queryName = "match", type = Location.class)
-		public Bundle getMatchesReturnBundle(
-				final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
+		public Bundle getMatchesReturnBundle(final @RequiredParam(name = Location.SP_NAME) StringParam name, final @Count Integer count);
 
 		@Search
 		public Bundle search(@Sort SortSpec theSort);
 
 		@Search
-		public Bundle search(
-				@OptionalParam(name = "stringParam") String theString,
-				@OptionalParam(name = "stringTypeParam") StringType theStringDt,
-				@OptionalParam(name = "dateParam") Date theDate,
+		public Bundle search(@OptionalParam(name = "stringParam") String theString, @OptionalParam(name = "stringTypeParam") StringType theStringDt, @OptionalParam(name = "dateParam") Date theDate,
 				@OptionalParam(name = "calParam") Calendar theCal);
+
 	}
+
 }

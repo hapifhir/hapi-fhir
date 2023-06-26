@@ -48,16 +48,12 @@ import javax.annotation.Nonnull;
  */
 public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
-
 	@Autowired
 	private FhirContext myFhirContext;
-
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -115,6 +111,7 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 		} else {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 		}
+
 	}
 
 	/**
@@ -126,11 +123,11 @@ public class SubscriptionRegisteringSubscriber implements MessageHandler {
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
-			// enabled
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
+
 }

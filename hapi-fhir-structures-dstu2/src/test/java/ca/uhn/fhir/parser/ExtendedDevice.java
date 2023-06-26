@@ -6,17 +6,17 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Device;
 
-@ResourceDef(name = "Device", id = "ExtendedDevice")
+@ResourceDef(name="Device", id="ExtendedDevice")
 public class ExtendedDevice extends Device {
 
 	private static final long serialVersionUID = 1L;
-
-	@Child(name = "someOrg")
-	@Extension(url = "http://extensionsBaseUrl/Device#someOrg", definedLocally = true, isModifier = false)
+	
+	@Child(name="someOrg")
+	@Extension(url="http://extensionsBaseUrl/Device#someOrg", definedLocally=true, isModifier = false)
 	private ResourceReferenceDt someOrg;
-
-	@Child(name = "someOtherOrg")
-	@Extension(url = "http://extensionsBaseUrl/Device#someOtherOrg", definedLocally = true, isModifier = false)
+	
+	@Child(name="someOtherOrg")
+	@Extension(url="http://extensionsBaseUrl/Device#someOtherOrg", definedLocally=true, isModifier = false)
 	private ResourceReferenceDt someOtherOrg;
 
 	public ResourceReferenceDt getSomeOrg() {
@@ -40,4 +40,5 @@ public class ExtendedDevice extends Device {
 	public void setSomeOtherOrg(ResourceReferenceDt someOtherOrg) {
 		this.someOtherOrg = someOtherOrg;
 	}
+	
 }

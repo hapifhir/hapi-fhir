@@ -28,8 +28,7 @@ public class SubscriptionTopicSupport {
 	private final DaoRegistry myDaoRegistry;
 	private final SearchParamMatcher mySearchParamMatcher;
 
-	public SubscriptionTopicSupport(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
+	public SubscriptionTopicSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		mySearchParamMatcher = theSearchParamMatcher;

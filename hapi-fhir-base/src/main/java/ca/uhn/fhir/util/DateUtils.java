@@ -77,7 +77,11 @@ public final class DateUtils {
 
 	private static final String PATTERN_INTEGER_DATE = "yyyyMMdd";
 
-	private static final String[] DEFAULT_PATTERNS = new String[] {PATTERN_RFC1123, PATTERN_RFC1036, PATTERN_ASCTIME};
+	private static final String[] DEFAULT_PATTERNS = new String[]{
+		PATTERN_RFC1123,
+		PATTERN_RFC1036,
+		PATTERN_ASCTIME
+	};
 	private static final Date DEFAULT_TWO_DIGIT_YEAR_START;
 
 	static {
@@ -91,17 +95,17 @@ public final class DateUtils {
 	/**
 	 * This class should not be instantiated.
 	 */
-	private DateUtils() {}
+	private DateUtils() {
+	}
 
 	/**
 	 * A factory for {@link SimpleDateFormat}s. The instances are stored in a
 	 * threadlocal way because SimpleDateFormat is not thread safe as noted in
 	 * {@link SimpleDateFormat its javadoc}.
 	 */
-	static final class DateFormatHolder {
+	final static class DateFormatHolder {
 
-		private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS =
-				ThreadLocal.withInitial(() -> new SoftReference<>(new HashMap<>()));
+		private static final ThreadLocal<SoftReference<Map<String, SimpleDateFormat>>> THREADLOCAL_FORMATS = ThreadLocal.withInitial(() -> new SoftReference<>(new HashMap<>()));
 
 		/**
 		 * creates a {@link SimpleDateFormat} for the requested format string.
@@ -119,7 +123,8 @@ public final class DateUtils {
 			Map<String, SimpleDateFormat> formats = ref.get();
 			if (formats == null) {
 				formats = new HashMap<>();
-				THREADLOCAL_FORMATS.set(new SoftReference<>(formats));
+				THREADLOCAL_FORMATS.set(
+					new SoftReference<>(formats));
 			}
 
 			SimpleDateFormat format = formats.get(pattern);
@@ -131,6 +136,7 @@ public final class DateUtils {
 
 			return format;
 		}
+
 	}
 
 	/**
@@ -220,12 +226,12 @@ public final class DateUtils {
 		}
 		return argument;
 	}
-
+		
 	/**
 	 * Convert an incomplete date e.g. 2020 or 2020-01 to a complete date with lower
 	 * bound to the first day of the year/month, and upper bound to the last day of
 	 * the year/month
-	 *
+	 * 
 	 *  e.g. 2020 to 2020-01-01 (left), 2020-12-31 (right)
 	 *  2020-02 to 2020-02-01 (left), 2020-02-29 (right)
 	 *
@@ -233,45 +239,47 @@ public final class DateUtils {
 	 * @return a pair of complete date, left is lower bound, and right is upper bound
 	 */
 	public static Pair<String, String> getCompletedDate(String theIncompleteDateStr) {
-
-		if (StringUtils.isBlank(theIncompleteDateStr)) return new ImmutablePair<>(null, null);
-
+		
+		if (StringUtils.isBlank(theIncompleteDateStr)) 
+			return new ImmutablePair<>(null, null);
+			
 		String lbStr, upStr;
 		// YYYY only, return the last day of the year
-		if (theIncompleteDateStr.length() == 4) {
+		if (theIncompleteDateStr.length() == 4)  {
 			lbStr = theIncompleteDateStr + "-01-01"; // first day of the year
 			upStr = theIncompleteDateStr + "-12-31"; // last day of the year
 			return new ImmutablePair<>(lbStr, upStr);
 		}
-
+		
 		// Not YYYY-MM, no change
-		if (theIncompleteDateStr.length() != 7) return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
-
+		if (theIncompleteDateStr.length() != 7)
+			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
+		
 		// YYYY-MM Only
 		Date lb;
 		try {
 			// first day of the month
-			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr + "-01");
+			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr+"-01");   
 		} catch (ParseException e) {
 			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
 		}
-
+		
 		// last day of the month
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(lb);
+	    Calendar calendar = Calendar.getInstance();  
+	    calendar.setTime(lb);  
 
-		calendar.add(Calendar.MONTH, 1);
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		calendar.add(Calendar.DATE, -1);
+	    calendar.add(Calendar.MONTH, 1);  
+	    calendar.set(Calendar.DAY_OF_MONTH, 1);  
+	    calendar.add(Calendar.DATE, -1);  
 
-		Date ub = calendar.getTime();
+	    Date ub = calendar.getTime();  
 
-		lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);
-		upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);
-
+	    lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);  
+	    upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);  
+		
 		return new ImmutablePair<>(lbStr, upStr);
 	}
-
+	
 	public static Date getEndOfDay(Date theDate) {
 
 		Calendar cal = Calendar.getInstance();

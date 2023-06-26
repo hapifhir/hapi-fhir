@@ -32,7 +32,6 @@ import java.util.List;
 public class MdmResourceSearchParamJson implements IModelJson, Iterable<String> {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
-
 	@JsonProperty(value = "searchParams", required = true)
 	List<String> mySearchParams;
 

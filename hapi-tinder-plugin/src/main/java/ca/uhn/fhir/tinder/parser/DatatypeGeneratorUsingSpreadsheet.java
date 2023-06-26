@@ -1,22 +1,24 @@
 package ca.uhn.fhir.tinder.parser;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.tinder.model.BaseElement;
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.Composite;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
-import org.apache.maven.plugin.MojoFailureException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.maven.plugin.MojoFailureException;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Composite;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 
 public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 
@@ -57,12 +59,10 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	}
 
 	@Override
-	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase)
-			throws MojoFailureException {
+	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 
 		try {
-			ImmutableSet<ClassInfo> tlc = ClassPath.from(getClass().getClassLoader())
-					.getTopLevelClasses(StringDt.class.getPackage().getName());
+			ImmutableSet<ClassInfo> tlc = ClassPath.from(getClass().getClassLoader()).getTopLevelClasses(StringDt.class.getPackage().getName());
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
@@ -78,8 +78,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		}
 
 		try {
-			ImmutableSet<ClassInfo> tlc =
-					ClassPath.from(getClass().getClassLoader()).getTopLevelClasses(thePackageBase + ".composite");
+			ImmutableSet<ClassInfo> tlc = ClassPath.from(getClass().getClassLoader()).getTopLevelClasses(thePackageBase + ".composite");
 			for (ClassInfo classInfo : tlc) {
 				DatatypeDef def = Class.forName(classInfo.getName()).getAnnotation(DatatypeDef.class);
 				if (def != null) {
@@ -141,4 +140,5 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 		return retVal;
 	}
+
 }

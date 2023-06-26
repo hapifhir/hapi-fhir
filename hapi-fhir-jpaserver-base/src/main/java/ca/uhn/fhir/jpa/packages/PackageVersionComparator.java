@@ -59,7 +59,7 @@ public class PackageVersionComparator implements Comparator<String> {
 		String[] o1parts = theSpec.split("\\.");
 		String[] o2parts = thePackageVersion.split("\\.");
 
-		for (int i = 0; i < o1parts.length; i++) {
+		for (int i = 0; i < o1parts.length; i++ ) {
 			if (!o1parts[i].equals("x")) {
 				if (!o1parts[i].equals(o2parts[i])) {
 					return false;

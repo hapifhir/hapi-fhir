@@ -88,15 +88,17 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myUseCache;
 	}
 
+
 	public void setUseCache(boolean theUseCache) {
 		myUseCache = theUseCache;
 	}
 
 	@Override
 	public String toString() {
-		return "JobInstanceStartRequest{" + "myJobDefinitionId='"
-				+ myJobDefinitionId + '\'' + ", myParameters='"
-				+ myParameters + '\'' + ", myUseCache="
-				+ myUseCache + '}';
+		return "JobInstanceStartRequest{" +
+			"myJobDefinitionId='" + myJobDefinitionId + '\'' +
+			", myParameters='" + myParameters + '\'' +
+			", myUseCache=" + myUseCache +
+			'}';
 	}
 }

@@ -19,10 +19,13 @@ public class CorsR4Test extends BaseResourceProviderR4Test {
 		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
 		get.addHeader("Origin", "file://");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
-
+		
 		ourLog.info(resp.toString());
-
+		
 		IOUtils.closeQuietly(resp.getEntity().getContent());
 		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
+
+
+
 }

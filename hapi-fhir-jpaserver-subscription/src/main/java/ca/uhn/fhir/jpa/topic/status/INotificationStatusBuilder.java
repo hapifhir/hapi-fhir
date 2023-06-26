@@ -33,6 +33,5 @@ public interface INotificationStatusBuilder<T extends IBaseResource> {
 	 * @param theTopicUrl	The topic URL of the topic subscription
 	 * @return the notification status resource.  The resource type varies depending on the FHIR version.
 	 */
-	T buildNotificationStatus(
-			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl);
+	T buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl);
 }

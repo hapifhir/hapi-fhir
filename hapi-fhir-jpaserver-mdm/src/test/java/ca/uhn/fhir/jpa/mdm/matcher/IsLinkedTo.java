@@ -19,29 +19,30 @@ public class IsLinkedTo extends BaseGoldenResourceMatcher {
 	private List<IResourcePersistentId> baseResourceGoldenResourcePids;
 	private IResourcePersistentId incomingResourceGoldenResourcePid;
 
-	protected IsLinkedTo(
-			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
+
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		incomingResourceGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
-		// OK, lets grab all the golden resource pids of the resources passed in via the constructor.
+		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
 		baseResourceGoldenResourcePids = myBaseResources.stream()
-				.map(this::getMatchedResourcePidFromResource)
-				.collect(Collectors.toList());
+			.map(this::getMatchedResourcePidFromResource)
+			.collect(Collectors.toList());
 
-		// The resources are linked if all golden resource pids match the incoming golden resource pid.
-		return baseResourceGoldenResourcePids.stream().allMatch(pid -> pid.equals(incomingResourceGoldenResourcePid));
+		//The resources are linked if all golden resource pids match the incoming golden resource pid.
+		return baseResourceGoldenResourcePids.stream()
+			.allMatch(pid -> pid.equals(incomingResourceGoldenResourcePid));
 	}
 
 	@Override
-	public void describeTo(Description theDescription) {}
+	public void describeTo(Description theDescription) {
+	}
 
-	public static Matcher<IAnyResource> linkedTo(
-			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> linkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

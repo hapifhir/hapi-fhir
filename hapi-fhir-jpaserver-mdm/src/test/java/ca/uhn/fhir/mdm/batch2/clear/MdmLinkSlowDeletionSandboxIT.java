@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled("Keeping as a sandbox to be used whenever we need a lot of MdmLinks in DB for performance testing")
 @ContextConfiguration(classes = {MdmLinkSlowDeletionSandboxIT.TestDataSource.class})
-public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
+public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkSlowDeletionSandboxIT.class);
 
 	private final int ourMdmLinksToCreate = 1_000_000;
@@ -41,7 +41,7 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 	@Override
 	public void afterPurgeDatabase() {
 		// keep the generated data!
-		//		super.afterPurgeDatabase();
+//		super.afterPurgeDatabase();
 	}
 
 	@Disabled
@@ -53,6 +53,7 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 		ourLog.info("Total links in DB: {}", totalLinks);
 		assertTrue(totalLinks > 0);
 	}
+	
 
 	private void generatePatientsAndMdmLinks(int theLinkCount) {
 		StopWatch sw = new StopWatch();
@@ -65,19 +66,16 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 			totalMdmLinksCreated++;
 
 			if (totalMdmLinksCreated % ourLogMdmLinksEach == 0) {
-				ourLog.info(
-						"Total MDM links created: {} in {} - ETA: {}",
-						totalMdmLinksCreated,
-						sw,
-						sw.getEstimatedTimeRemaining(totalMdmLinksCreated, ourMdmLinksToCreate));
+				ourLog.info("Total MDM links created: {} in {} - ETA: {}", totalMdmLinksCreated, sw,
+					sw.getEstimatedTimeRemaining(totalMdmLinksCreated, ourMdmLinksToCreate));
 			}
 		}
 	}
 
 	private void createMdmLink(JpaPid thePidSource, JpaPid thePidTarget) {
 		MdmLink link = new MdmLink();
-		link.setGoldenResourcePersistenceId(thePidSource);
-		link.setSourcePersistenceId(thePidTarget);
+		link.setGoldenResourcePersistenceId( thePidSource );
+		link.setSourcePersistenceId( thePidTarget );
 		Date now = new Date();
 		link.setCreated(now);
 		link.setUpdated(now);
@@ -100,17 +98,12 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 			patient.addName().setFamily(String.format("lastn-%07d", i)).addGiven(String.format("name-%07d", i));
 			if (i % 2 == 1) {
 				patient.getMeta()
-						.addTag(new Coding().setSystem(SYSTEM_MDM_MANAGED).setCode(CODE_HAPI_MDM_MANAGED));
+					.addTag(new Coding().setSystem(SYSTEM_MDM_MANAGED).setCode(CODE_HAPI_MDM_MANAGED));
 			} else {
 				patient.getMeta()
-						.addTag(new Coding()
-								.setSystem(SYSTEM_GOLDEN_RECORD_STATUS)
-								.setCode(CODE_GOLDEN_RECORD));
+					.addTag(new Coding().setSystem(SYSTEM_GOLDEN_RECORD_STATUS).setCode(CODE_GOLDEN_RECORD));
 			}
-			Long pId = myPatientDao
-					.create(patient, new SystemRequestDetails())
-					.getId()
-					.getIdPartAsLong();
+			Long pId = myPatientDao.create(patient, new SystemRequestDetails()).getId().getIdPartAsLong();
 			JpaPid jpaPid = JpaPid.fromIdAndResourceType(pId, "Patient");
 			patientIds.add(jpaPid);
 		}
@@ -124,7 +117,7 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 		public String getHibernateDialect() {
 			return PostgreSQL9Dialect.class.getName();
 
-			//			return Oracle12cDialect.class.getName();
+//			return Oracle12cDialect.class.getName();
 		}
 
 		@Override
@@ -136,12 +129,15 @@ public class MdmLinkSlowDeletionSandboxIT extends BaseJpaR4Test {
 			theDataSource.setPassword("smileCDR");
 			theDataSource.setMaxTotal(ourMaxThreads);
 
-			//			theDataSource.setDriver(DriverTypeEnum.ORACLE_12C);
-			//			theDataSource.setUrl("jdbc:oracle:thin:@localhost:1527/cdr.localdomain");
-			//			theDataSource.setMaxWaitMillis(30000);
-			//			theDataSource.setUsername("cdr");
-			//			theDataSource.setPassword("smileCDR");
-			//			theDataSource.setMaxTotal(ourMaxThreads);
+//			theDataSource.setDriver(DriverTypeEnum.ORACLE_12C);
+//			theDataSource.setUrl("jdbc:oracle:thin:@localhost:1527/cdr.localdomain");
+//			theDataSource.setMaxWaitMillis(30000);
+//			theDataSource.setUsername("cdr");
+//			theDataSource.setPassword("smileCDR");
+//			theDataSource.setMaxTotal(ourMaxThreads);
 		}
 	}
+
 }
+
+

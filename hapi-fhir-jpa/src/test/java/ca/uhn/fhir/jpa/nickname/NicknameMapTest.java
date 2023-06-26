@@ -12,8 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NicknameMapTest {
 	@Test
 	public void testLoad() throws IOException {
-		String testData =
-				"""
+		String testData = """
 kendall,ken,kenny
 kendra,kenj,kenji,kay,kenny
 kendrick,ken,kenny
@@ -26,8 +25,6 @@ kent,ken,kenny,kendrick
 		map.load(new StringReader(testData));
 		assertEquals(7, map.size());
 		assertThat(map.getNicknamesFromFormalName("kenneth"), containsInAnyOrder("ken", "kenny", "kendrick"));
-		assertThat(
-				map.getFormalNamesFromNickname("ken"),
-				containsInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
+		assertThat(map.getFormalNamesFromNickname("ken"), containsInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
 	}
 }

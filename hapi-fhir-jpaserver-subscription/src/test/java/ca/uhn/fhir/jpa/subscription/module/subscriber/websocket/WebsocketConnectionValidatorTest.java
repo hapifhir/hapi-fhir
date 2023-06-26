@@ -47,37 +47,27 @@ public class WebsocketConnectionValidatorTest {
 
 	@MockBean
 	MatchUrlService myMatchUrlService;
-
 	@MockBean
 	DaoRegistry myDaoRegistry;
-
 	@MockBean
 	PlatformTransactionManager myPlatformTransactionManager;
-
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
-
 	@MockBean
 	SubscriptionChannelConfig mySubscriptionChannelConfig;
-
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
-
 	@MockBean
 	IInterceptorBroadcaster myInterceptorBroadcaster;
-
 	@MockBean
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
-
 	@MockBean
 	SubscriptionRegistry mySubscriptionRegistry;
-
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;
-
 	@Autowired
 	IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
@@ -107,16 +97,12 @@ public class WebsocketConnectionValidatorTest {
 		idType = new IdType(NON_EXISTENT_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
 		assertFalse(response.isValid());
-		assertEquals(
-				"Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID,
-				response.getMessage());
+		assertEquals("Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID, response.getMessage());
 
 		idType = new IdType(RESTHOOK_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
 		assertFalse(response.isValid());
-		assertEquals(
-				"Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription",
-				response.getMessage());
+		assertEquals("Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription", response.getMessage());
 
 		idType = new IdType(WEBSOCKET_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
@@ -155,10 +141,10 @@ public class WebsocketConnectionValidatorTest {
 		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
 			return mock(IResourceChangeListenerRegistry.class, RETURNS_DEEP_STUBS);
 		}
-
 		@Bean
-		public IEmailSender emailSender() {
+		public IEmailSender emailSender(){
 			return mock(IEmailSender.class);
 		}
+
 	}
 }

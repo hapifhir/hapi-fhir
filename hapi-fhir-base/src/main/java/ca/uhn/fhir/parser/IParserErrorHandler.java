@@ -48,13 +48,7 @@ public interface IParserErrorHandler {
 	 * @param theFoundScalarType    If theFoundValueType is {@link ValueType#SCALAR}, this is the specific scalar type found. Otherwise this parameter will be null.
 	 * @since 2.2
 	 */
-	void incorrectJsonType(
-			IParseLocation theLocation,
-			String theElementName,
-			ValueType theExpectedValueType,
-			ScalarType theExpectedScalarType,
-			ValueType theFoundValueType,
-			ScalarType theFoundScalarType);
+	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpectedValueType, ScalarType theExpectedScalarType, ValueType theFoundValueType, ScalarType theFoundScalarType);
 
 	/**
 	 * The parser detected an attribute value that was invalid (such as: empty "" values are not permitted)
@@ -131,5 +125,7 @@ public interface IParserErrorHandler {
 		 * @since 2.1
 		 */
 		String getParentElementName();
+
 	}
+
 }

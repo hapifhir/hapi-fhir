@@ -1,15 +1,20 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.BundleBuilder;
-import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.TestUtil;
+
+import org.hl7.fhir.r4.model.Patient;
 
 public class NDJsonParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -23,7 +28,7 @@ public class NDJsonParserTest {
 	private IBaseResource fromNDJson(String ndjson) throws DataFormatException {
 		IParser p = ourCtx.newNDJsonParser();
 		return p.parseResource(ndjson);
-	}
+	} 
 
 	private boolean fhirResourcesEqual(IBaseResource expected, IBaseResource actual) {
 		// I would prefer to use, e.g., EqualsBuilder to do this instead.
@@ -31,7 +36,7 @@ public class NDJsonParserTest {
 		String encoded_actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual);
 
 		ourLog.info("Expected: {}", encoded_expected);
-		ourLog.info("Actual  : {}", encoded_actual);
+ 		ourLog.info("Actual  : {}", encoded_actual);
 
 		return encoded_expected.equals(encoded_actual);
 	}
@@ -98,9 +103,8 @@ public class NDJsonParserTest {
 	public void testOnlyEncodesBundles() {
 		Patient p = new Patient();
 		p.setId("Patient/P1");
-		assertThrows(IllegalArgumentException.class, () -> {
-			toNDJson(p);
-		});
+		assertThrows(IllegalArgumentException.class,
+		             ()->{toNDJson(p);});
 	}
 
 	@Test
@@ -111,13 +115,12 @@ public class NDJsonParserTest {
 		p.setId("Patient/P1");
 		myBuilder.addCollectionEntry(p);
 		IBaseResource myBundle = myBuilder.getBundle();
-		String myBundleJson = toNDJson(myBundle);
+ 		String myBundleJson = toNDJson(myBundle);
 		IParser parser = ourCtx.newNDJsonParser();
-		assertThrows(DataFormatException.class, () -> {
-			parser.parseResource(Patient.class, myBundleJson);
-		});
+		assertThrows(DataFormatException.class,
+		             ()->{parser.parseResource(Patient.class, myBundleJson);});
 	}
-
+	
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();

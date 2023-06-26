@@ -14,7 +14,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Configuration
-@TestPropertySource(properties = {"scheduling_disabled=true"})
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class TestSubscriptionConfig {
 
 	@Bean

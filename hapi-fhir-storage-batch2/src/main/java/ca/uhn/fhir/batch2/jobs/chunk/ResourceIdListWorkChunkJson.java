@@ -37,7 +37,6 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 
 	@JsonProperty("requestPartitionId")
 	private RequestPartitionId myRequestPartitionId;
-
 	@JsonProperty("ids")
 	private List<TypedPidJson> myTypedPids;
 
@@ -51,8 +50,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public ResourceIdListWorkChunkJson(
-			Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
+	public ResourceIdListWorkChunkJson(Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
 		this();
 		getTypedPids().addAll(theTypedPids);
 		myRequestPartitionId = theRequestPartitionId;
@@ -72,8 +70,8 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("ids", myTypedPids)
-				.toString();
+			.append("ids", myTypedPids)
+			.toString();
 	}
 
 	public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
@@ -81,12 +79,13 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 			return Collections.emptyList();
 		}
 
-		return myTypedPids.stream()
-				.map(t -> {
-					T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
-					return retval;
-				})
-				.collect(Collectors.toList());
+		return myTypedPids
+			.stream()
+			.map(t -> {
+				T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
+				return retval;
+			})
+			.collect(Collectors.toList());
 	}
 
 	public int size() {
@@ -100,4 +99,5 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	public String getResourceType(int index) {
 		return getTypedPids().get(index).getResourceType();
 	}
+
 }

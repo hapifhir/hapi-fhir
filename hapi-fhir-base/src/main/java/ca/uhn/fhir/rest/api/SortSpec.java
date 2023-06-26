@@ -30,7 +30,7 @@ import java.io.Serializable;
 public class SortSpec implements Serializable {
 
 	private static final long serialVersionUID = 2866833099879713467L;
-
+	
 	private SortSpec myChain;
 	private String myParamName;
 	private SortOrderEnum myOrder;
@@ -44,7 +44,7 @@ public class SortSpec implements Serializable {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theParamName
 	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
 	 */
@@ -55,7 +55,7 @@ public class SortSpec implements Serializable {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theParamName
 	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
 	 * @param theOrder
@@ -69,7 +69,7 @@ public class SortSpec implements Serializable {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theParamName
 	 *            The search name to sort on. See {@link #setParamName(String)} for more information.
 	 * @param theOrder
@@ -138,4 +138,5 @@ public class SortSpec implements Serializable {
 		myOrder = theOrder;
 		return this;
 	}
+
 }

@@ -31,4 +31,5 @@ public class ProducingChannelParameters extends BaseChannelParameters {
 	public ProducingChannelParameters(String theChannelName) {
 		super(theChannelName);
 	}
+
 }

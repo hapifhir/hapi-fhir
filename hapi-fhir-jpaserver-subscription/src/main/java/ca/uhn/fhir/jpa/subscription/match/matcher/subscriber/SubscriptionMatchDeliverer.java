@@ -48,26 +48,18 @@ public class SubscriptionMatchDeliverer {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
-	public SubscriptionMatchDeliverer(
-			FhirContext theFhirContext,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+	public SubscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
 		myFhirContext = theFhirContext;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverPayload(
-			@Nullable IBaseResource thePayload,
-			@Nonnull ResourceModifiedMessage theMsg,
-			@Nonnull ActiveSubscription theActiveSubscription,
-			@Nullable InMemoryMatchResult theInMemoryMatchResult) {
+	public boolean deliverPayload(@Nullable IBaseResource thePayload, @Nonnull ResourceModifiedMessage theMsg, @Nonnull ActiveSubscription theActiveSubscription, @Nullable InMemoryMatchResult theInMemoryMatchResult) {
 		SubscriptionDeliveryRequest subscriptionDeliveryRequest;
 		if (thePayload != null) {
 			subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(thePayload, theMsg, theActiveSubscription);
 		} else {
-			subscriptionDeliveryRequest =
-					new SubscriptionDeliveryRequest(theMsg.getPayloadId(myFhirContext), theMsg, theActiveSubscription);
+			subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(theMsg.getPayloadId(myFhirContext), theMsg, theActiveSubscription);
 		}
 		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
 		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
@@ -75,27 +67,20 @@ public class SubscriptionMatchDeliverer {
 		return sendToDeliveryChannel(theActiveSubscription, theInMemoryMatchResult, deliveryMsg);
 	}
 
-	public boolean deliverPayload(
-			@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest,
-			@Nullable InMemoryMatchResult theInMemoryMatchResult) {
+	public boolean deliverPayload(@Nonnull SubscriptionDeliveryRequest subscriptionDeliveryRequest, @Nullable InMemoryMatchResult theInMemoryMatchResult) {
 		ResourceDeliveryMessage deliveryMsg = buildResourceDeliveryMessage(subscriptionDeliveryRequest);
 
-		return sendToDeliveryChannel(
-				subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg);
+		return sendToDeliveryChannel(subscriptionDeliveryRequest.getActiveSubscription(), theInMemoryMatchResult, deliveryMsg);
 	}
 
-	private boolean sendToDeliveryChannel(
-			@Nonnull ActiveSubscription theActiveSubscription,
-			@Nullable InMemoryMatchResult theInMemoryMatchResult,
-			@Nonnull ResourceDeliveryMessage deliveryMsg) {
+	private boolean sendToDeliveryChannel(@Nonnull ActiveSubscription theActiveSubscription, @Nullable InMemoryMatchResult theInMemoryMatchResult, @Nonnull ResourceDeliveryMessage deliveryMsg) {
 		if (!callHooks(theActiveSubscription, theInMemoryMatchResult, deliveryMsg)) {
 			return false;
 		}
 
 		boolean retVal = false;
 		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-		MessageChannel deliveryChannel =
-				mySubscriptionChannelRegistry.getDeliverySenderChannel(theActiveSubscription.getChannelName());
+		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(theActiveSubscription.getChannelName());
 		if (deliveryChannel != null) {
 			retVal = true;
 			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
@@ -110,9 +95,7 @@ public class SubscriptionMatchDeliverer {
 
 		CanonicalSubscription subscription = theRequest.getSubscription();
 
-		if (subscription != null
-				&& subscription.getPayloadString() != null
-				&& !subscription.getPayloadString().isEmpty()) {
+		if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 			encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 		}
 		encoding = defaultIfNull(encoding, EncodingEnum.JSON);
@@ -131,25 +114,20 @@ public class SubscriptionMatchDeliverer {
 		return deliveryMsg;
 	}
 
-	private boolean callHooks(
-			ActiveSubscription theActiveSubscription,
-			InMemoryMatchResult theInMemoryMatchResult,
-			ResourceDeliveryMessage deliveryMsg) {
+	private boolean callHooks(ActiveSubscription theActiveSubscription, InMemoryMatchResult theInMemoryMatchResult, ResourceDeliveryMessage deliveryMsg) {
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 		HookParams params = new HookParams()
-				.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
-				.add(ResourceDeliveryMessage.class, deliveryMsg)
-				.add(InMemoryMatchResult.class, theInMemoryMatchResult);
+			.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
+			.add(ResourceDeliveryMessage.class, deliveryMsg)
+			.add(InMemoryMatchResult.class, theInMemoryMatchResult);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
-			ourLog.info(
-					"Interceptor has decided to abort processing of subscription {}", theActiveSubscription.getId());
+			ourLog.info("Interceptor has decided to abort processing of subscription {}", theActiveSubscription.getId());
 			return false;
 		}
 		return true;
 	}
 
-	private void trySendToDeliveryChannel(
-			ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
+	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
 		try {
 			boolean success = theDeliveryChannel.send(theWrappedMsg);
 			if (!success) {

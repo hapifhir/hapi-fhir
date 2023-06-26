@@ -29,16 +29,11 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	public void before() {
 		super.before();
 
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active"))
-				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		{
 			myLeft = new Patient();
@@ -76,22 +71,22 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 
 	protected MdmRulesJson buildNamePhoneRules(MatchTypeEnum theMatcherEnum) {
 		MdmFieldMatchJson lastNameMatchField = new MdmFieldMatchJson()
-				.setName(PATIENT_FAMILY)
-				.setResourceType("Patient")
-				.setResourcePath("name.family")
-				.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
+			.setName(PATIENT_FAMILY)
+			.setResourceType("Patient")
+			.setResourcePath("name.family")
+			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmFieldMatchJson firstNameMatchField = new MdmFieldMatchJson()
-				.setName(PATIENT_GIVEN)
-				.setResourceType("Patient")
-				.setResourcePath("name.given")
-				.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
+			.setName(PATIENT_GIVEN)
+			.setResourceType("Patient")
+			.setResourcePath("name.given")
+			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmFieldMatchJson phoneField = new MdmFieldMatchJson()
-				.setName(PATIENT_PHONE)
-				.setResourceType("Patient")
-				.setResourcePath("telecom.value")
-				.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.STRING));
+			.setName(PATIENT_PHONE)
+			.setResourceType("Patient")
+			.setResourcePath("telecom.value")
+			.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.STRING));
 
 		MdmRulesJson retval = new MdmRulesJson();
 		retval.setVersion("test version");

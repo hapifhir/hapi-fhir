@@ -42,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MetadataConformanceDstu3Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu3Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
@@ -87,8 +86,7 @@ public class MetadataConformanceDstu3Test {
 	public void testElements() throws Exception {
 		String output;
 
-		HttpRequestBase httpPost =
-				new HttpGet("http://localhost:" + ourPort + "/metadata?_elements=fhirVersion&_pretty=true");
+		HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_elements=fhirVersion&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -110,14 +108,8 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<CapabilityStatement"));
-			assertThat(
-					status.getFirstHeader("X-Powered-By").getValue(),
-					containsString("HAPI FHIR " + VersionUtil.getVersion()));
-			assertThat(
-					status.getFirstHeader("X-Powered-By").getValue(),
-					containsString("REST Server (FHIR Server; FHIR "
-							+ ourCtx.getVersion().getVersion().getFhirVersionString() + "/"
-							+ ourCtx.getVersion().getVersion().name() + ")"));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		}
 
 		httpOperation = new HttpOptions("http://localhost:" + ourPort);
@@ -125,24 +117,15 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<CapabilityStatement"));
-			assertThat(
-					status.getFirstHeader("X-Powered-By").getValue(),
-					containsString("HAPI FHIR " + VersionUtil.getVersion()));
-			assertThat(
-					status.getFirstHeader("X-Powered-By").getValue(),
-					containsString("REST Server (FHIR Server; FHIR "
-							+ ourCtx.getVersion().getVersion().getFhirVersionString() + "/"
-							+ ourCtx.getVersion().getVersion().name() + ")"));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		}
 
 		httpOperation = new HttpPost("http://localhost:" + ourPort + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""
-							+ Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>",
-					output);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(388)+ "/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
 		}
 
 		/*
@@ -197,10 +180,11 @@ public class MetadataConformanceDstu3Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

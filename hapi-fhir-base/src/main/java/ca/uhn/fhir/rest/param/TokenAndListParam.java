@@ -21,13 +21,14 @@ package ca.uhn.fhir.rest.param;
 
 import org.apache.commons.lang3.Validate;
 
+
 public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
 
 	@Override
 	TokenOrListParam newInstance() {
 		return new TokenOrListParam();
 	}
-
+	
 	@Override
 	public TokenAndListParam addAnd(TokenOrListParam theValue) {
 		addValue(theValue);

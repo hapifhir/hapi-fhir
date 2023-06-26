@@ -85,15 +85,13 @@ public class ResourceSearchParams {
 	}
 
 	public void removeInactive() {
-		myMap.entrySet()
-				.removeIf(entry ->
-						entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		myMap.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 	}
 
 	public Stream<String> getReferenceSearchParamNames() {
 		return myMap.entrySet().stream()
-				.filter(entry -> entry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-				.map(Map.Entry::getKey);
+			.filter(entry -> entry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+			.map(Map.Entry::getKey);
 	}
 
 	public ResourceSearchParams makeCopy() {

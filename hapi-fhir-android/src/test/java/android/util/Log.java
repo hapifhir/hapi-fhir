@@ -16,9 +16,10 @@ public class Log {
 	public static boolean isLoggable(int thePriority) {
 		return true;
 	}
-
+	
 	public static int println(int thePriority, String theName, String theMessage) {
 		System.out.println("[" + theName + "] " + theMessage);
 		return 0;
 	}
+	
 }

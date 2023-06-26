@@ -54,4 +54,5 @@ public abstract class BasePagingProvider implements IPagingProvider {
 		myMaximumPageSize = theMaximumPageSize;
 		return this;
 	}
+
 }

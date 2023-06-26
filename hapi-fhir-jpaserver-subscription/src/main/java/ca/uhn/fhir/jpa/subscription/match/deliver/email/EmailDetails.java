@@ -31,9 +31,9 @@ import org.thymeleaf.spring5.dialect.SpringStandardDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class EmailDetails {
 	private final SpringTemplateEngine myTemplateEngine;
@@ -93,12 +93,12 @@ public class EmailDetails {
 	public Email toEmail() {
 		try {
 			return EmailBuilder.startingBlank()
-					.from(getFrom())
-					.to(getTo())
-					.withSubject(getSubject())
-					.withPlainText(getBody())
-					.withHeader("X-FHIR-Subscription", getSubscriptionId())
-					.buildEmail();
+				.from(getFrom())
+				.to(getTo())
+				.withSubject(getSubject())
+				.withPlainText(getBody())
+				.withHeader("X-FHIR-Subscription", getSubscriptionId())
+				.buildEmail();
 		} catch (IllegalArgumentException e) {
 			throw new InternalErrorException(Msg.code(3) + "Failed to create email message", e);
 		}
@@ -119,4 +119,5 @@ public class EmailDetails {
 
 		return springTemplateEngine;
 	}
+
 }

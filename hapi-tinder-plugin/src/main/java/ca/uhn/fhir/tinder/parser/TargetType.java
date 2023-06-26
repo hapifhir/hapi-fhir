@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package ca.uhn.fhir.tinder.parser;
 
@@ -13,7 +13,7 @@ public enum TargetType {
 	 * but others might also be generated.
 	 */
 	SOURCE,
-
+	
 	/*
 	 * The generator will primarilly produce non-source
 	 * files that should be added to Maven Resources

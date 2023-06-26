@@ -77,4 +77,5 @@ public class DatabaseSearchCacheSvcImplTest {
 		assertFalse(outcome.isPresent());
 		verify(mySearchDao, never()).save(any());
 	}
+
 }

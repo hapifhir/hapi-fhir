@@ -12,14 +12,14 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.r5.model.Composition;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
-import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -31,8 +31,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -91,18 +91,18 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
 
@@ -123,10 +123,12 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
 			assertThat(params.toString(), params, empty());
 		});
 	}
@@ -143,8 +145,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Bundle", "composition");
 		SearchParameter sp = new SearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("type"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("type"));
 
 		sp.setId(subjectSp.getId());
 		sp.setCode(subjectSp.getName());
@@ -153,8 +154,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression("Bundle.entry[0].resource.as(Composition)");
-		subjectSp.getBase().forEach(t -> sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
-		subjectSp.getTargets().forEach(t -> sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
 		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp, mySrd);
 
@@ -174,11 +175,15 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllTokenIndexes();
 
-			List<String> params = myResourceIndexedSearchParamTokenDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
-					.toList();
-			assertThat(params.toString(), params, containsInAnyOrder("composition.type http://foo|bar"));
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.type http://foo|bar"
+			));
 		});
 	}
 
@@ -197,6 +202,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 			// Verify
 			assertThat(e.getMessage(), containsString("Resource Patient/P1 is not known"));
 		}
+
 	}
 
 	@Test
@@ -209,8 +215,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionUpdateEntry(
-				newEncounter(ENCOUNTER_E1, IdType.newRandomUuid().getValue()));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, IdType.newRandomUuid().getValue()));
 		Bundle requestBundle = bb.getBundleTyped();
 
 		try {
@@ -221,7 +226,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 			// Verify
 			assertThat(e.getMessage(), containsString("Unable to satisfy placeholder ID"));
 		}
+
 	}
+
 
 	@Test
 	public void testCreate_InTransaction_SourceAndTarget() {
@@ -253,18 +260,18 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
 
@@ -302,20 +309,21 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
+
 
 	@Test
 	public void testCreate_InTransaction_TargetConditionalUpdated_NotAlreadyExisting() {
@@ -332,10 +340,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
-		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id))
-				.conditional("Patient?identifier=http://system|200");
-		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id))
-				.conditional("Patient?identifier=http://system|300");
+		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("Patient?identifier=http://system|200");
+		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("Patient?identifier=http://system|300");
 		Bundle requestBundle = bb.getBundleTyped();
 
 		myCaptureQueriesListener.clear();
@@ -352,18 +358,18 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
 
@@ -373,16 +379,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		createSearchParam_EncounterSubject_WithUpliftOnName();
 		createPractitionerPr1_BarneyGumble();
-		myPatientDao.create(
-				new Patient()
-						.addIdentifier(
-								new Identifier().setSystem("http://system").setValue("200")),
-				mySrd);
-		myPatientDao.create(
-				new Patient()
-						.addIdentifier(
-								new Identifier().setSystem("http://system").setValue("300")),
-				mySrd);
+		myPatientDao.create(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("200")), mySrd);
+		myPatientDao.create(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("300")), mySrd);
 
 		// Test
 
@@ -392,10 +390,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
-		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id))
-				.conditional("Patient?identifier=http://system|200");
-		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id))
-				.conditional("Patient?identifier=http://system|300");
+		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("Patient?identifier=http://system|200");
+		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("Patient?identifier=http://system|300");
 		Bundle requestBundle = bb.getBundleTyped();
 
 		myCaptureQueriesListener.clear();
@@ -412,18 +408,18 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
 
@@ -443,10 +439,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
-		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson().setId(p1Id))
-				.conditional("identifier=http://system|200");
-		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id))
-				.conditional("identifier=http://system|300");
+		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("identifier=http://system|200");
+		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("identifier=http://system|300");
 		;
 		Bundle requestBundle = bb.getBundleTyped();
 
@@ -463,20 +457,21 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
+
 
 	@Test
 	public void testCreate_InTransaction_TargetConditionalCreatedAlreadyExisting_RefsUsePlaceholderIds() {
@@ -499,16 +494,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
-		bb.addTransactionCreateEntry(new Patient()
-						.addIdentifier(
-								new Identifier().setSystem("http://system").setValue("200"))
-						.setId(p1Id))
-				.conditional("identifier=http://system|200");
-		bb.addTransactionCreateEntry(new Patient()
-						.addIdentifier(
-								new Identifier().setSystem("http://system").setValue("300"))
-						.setId(p2Id))
-				.conditional("identifier=http://system|300");
+		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("200")).setId(p1Id)).conditional("identifier=http://system|200");
+		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("300")).setId(p2Id)).conditional("identifier=http://system|300");
 		;
 		Bundle requestBundle = bb.getBundleTyped();
 
@@ -525,18 +512,18 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllStringIndexes();
 
-			List<String> params = myResourceIndexedSearchParamStringDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getValueExact())
-					.toList();
-			assertThat(
-					params.toString(),
-					params,
-					containsInAnyOrder(
-							"subject.name Homer",
-							"subject.name Simpson",
-							"subject.name Marge",
-							"subject.name Simpson"));
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
 		});
 	}
 
@@ -552,7 +539,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous("subject", new ReferenceParam("name", "homer"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("subject", new ReferenceParam("name", "homer"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -560,12 +548,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, contains(ENCOUNTER_E1));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(2, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
@@ -586,7 +570,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous("subject", new ReferenceParam("name", "homer"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("subject", new ReferenceParam("name", "homer"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -594,12 +579,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, contains(ENCOUNTER_E1));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(0, countMatches(querySql, "HFJ_RES_LINK"), querySql);
@@ -625,8 +606,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map =
-				SearchParameterMap.newSynchronous("subject", new ReferenceParam("organization.name", "springfield"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("subject", new ReferenceParam("organization.name", "springfield"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -634,12 +615,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, contains(ENCOUNTER_E1));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(2, countMatches(querySql, "HFJ_RES_LINK"), querySql);
@@ -663,7 +640,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("subject.name"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("subject.name"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -671,12 +650,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
@@ -700,7 +675,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("Patient:subject.name"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("Patient:subject.name"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -708,12 +685,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
@@ -737,7 +710,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("patient.name"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("patient.name"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -745,12 +720,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
@@ -774,9 +745,10 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous()
-				.add("patient", new ReferenceParam("name", "Simpson"))
-				.setSort(new SortSpec("patient.name"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.add("patient", new ReferenceParam("name", "Simpson"))
+			.setSort(new SortSpec("patient.name"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -784,12 +756,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(2, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
@@ -813,7 +781,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("patient.identifier"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("patient.identifier"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -821,12 +791,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_TOKEN"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
@@ -849,7 +815,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("patient.birthdate"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("patient.birthdate"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -857,12 +825,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_DATE"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
@@ -885,7 +849,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("Patient:subject.name"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous()
+			.setSort(new SortSpec("Patient:subject.name"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myEncounterDao.search(map, mySrd);
 
@@ -893,12 +859,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual.toString(), actual, contains(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2));
-		assertEquals(
-				2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		String querySql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(true, false);
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
@@ -915,15 +877,15 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("focus.name"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("focus.name"));
 			myObservationDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Unable to sort on a chained parameter from 'focus' as this parameter has multiple target types. Please specify the target type."));
+			assertThat(e.getMessage(), containsString("Unable to sort on a chained parameter from 'focus' as this parameter has multiple target types. Please specify the target type."));
 		}
+
 	}
 
 	/**
@@ -935,12 +897,15 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("date.name"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("date.name"));
 			myObservationDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Invalid chain, date is not a reference SearchParameter"));
 		}
+
 	}
 
 	@Test
@@ -949,17 +914,17 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("subject.name"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("subject.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Unable to sort on a chained parameter from 'subject' as this parameter has multiple target types. Please specify the target type"));
+			assertThat(e.getMessage(), containsString("Unable to sort on a chained parameter from 'subject' as this parameter has multiple target types. Please specify the target type"));
+
 		}
 	}
 
@@ -969,18 +934,17 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map =
-					SearchParameterMap.newSynchronous().setSort(new SortSpec("patient.organization.name"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("patient.organization.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Invalid _sort expression, can not chain more than once in a sort expression: patient.organization.name"));
+			assertThat(e.getMessage(), containsString("Invalid _sort expression, can not chain more than once in a sort expression: patient.organization.name"));
+
 		}
 	}
 
@@ -990,16 +954,17 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("foo.name"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("foo.name"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString("Unknown _sort parameter value \"foo\" for resource type \"Encounter\""));
+			assertThat(e.getMessage(), containsString("Unknown _sort parameter value \"foo\" for resource type \"Encounter\""));
+
 		}
 	}
 
@@ -1009,16 +974,17 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("patient.foo"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("patient.foo"));
 			myCaptureQueriesListener.clear();
 			myEncounterDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString("Unknown _sort parameter value \"foo\" for resource type \"Patient\""));
+			assertThat(e.getMessage(), containsString("Unknown _sort parameter value \"foo\" for resource type \"Patient\""));
+
 		}
 	}
 
@@ -1028,17 +994,17 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setSort(new SortSpec("result.value-quantity"));
+			SearchParameterMap map = SearchParameterMap
+				.newSynchronous()
+				.setSort(new SortSpec("result.value-quantity"));
 			myCaptureQueriesListener.clear();
 			myDiagnosticReportDao.search(map, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Unable to sort on a chained parameter result.value-quantity as this parameter. Can not sort on chains of target type: QUANTITY"));
+			assertThat(e.getMessage(), containsString("Unable to sort on a chained parameter result.value-quantity as this parameter. Can not sort on chains of target type: QUANTITY"));
+
 		}
 	}
 
@@ -1088,8 +1054,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
 		SearchParameter sp = new SearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name"));
 
 		sp.setId(subjectSp.getId());
 		sp.setCode(subjectSp.getName());
@@ -1098,8 +1063,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
 		sp.setExpression(subjectSp.getPath());
-		subjectSp.getBase().forEach(t -> sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
-		subjectSp.getTargets().forEach(t -> sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getBase().forEach(t->sp.addBase(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
+		subjectSp.getTargets().forEach(t->sp.addTarget(Enumerations.VersionIndependentResourceTypesAll.fromCode(t)));
 		mySearchParameterDao.create(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1141,4 +1106,6 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		p2.addName().setFamily("Simpson").addGiven("Marge");
 		return p2;
 	}
+
+
 }

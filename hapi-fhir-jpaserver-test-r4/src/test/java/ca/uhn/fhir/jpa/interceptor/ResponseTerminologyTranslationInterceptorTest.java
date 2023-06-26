@@ -22,11 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -38,9 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
 
 	public static final String TEST_OBV_FILTER = "Observation?status=amended";
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorTest.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorTest.class);
 	@Autowired
 	private ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
 
@@ -57,8 +55,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	public void afterEach() {
 		myResponseTerminologyTranslationInterceptor.clearMappingSpecifications();
 		myServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
-		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(
-				new StorageSettings().isNormalizeTerminologyForBulkExportJobs());
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(new StorageSettings().isNormalizeTerminologyForBulkExportJobs());
 	}
 
 	@Test
@@ -67,18 +64,17 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.getCode().addCoding(new Coding(CS_URL, "12345", null));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(
-				toCodeStrings(observation).toString(),
-				toCodeStrings(observation),
-				Matchers.contains(
-						"[system=http://example.com/my_code_system, code=12345, display=null]",
-						"[system=http://example.com/my_code_system2, code=34567, display=Target Code 34567]"));
+		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
+			"[system=http://example.com/my_code_system, code=12345, display=null]",
+			"[system=http://example.com/my_code_system2, code=34567, display=Target Code 34567]"
+		));
 	}
 
 	@Test
@@ -87,19 +83,18 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.getCode().addCoding(new Coding(CS_URL, "12345", null));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(
-				toCodeStrings(observation).toString(),
-				toCodeStrings(observation),
-				Matchers.contains(
-						"[system=http://example.com/my_code_system, code=12345, display=null]",
-						"[system=http://example.com/my_code_system3, code=56789, display=Target Code 56789]",
-						"[system=http://example.com/my_code_system3, code=67890, display=Target Code 67890]"));
+		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
+			"[system=http://example.com/my_code_system, code=12345, display=null]",
+			"[system=http://example.com/my_code_system3, code=56789, display=Target Code 56789]",
+			"[system=http://example.com/my_code_system3, code=67890, display=Target Code 67890]"
+		));
 	}
 
 	/**
@@ -111,21 +106,18 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation
-				.getCode()
-				.addCoding(new Coding(CS_URL, "12345", null))
-				.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null))
+			.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
 		IIdType id = myObservationDao.create(observation).getId();
 
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(
-				toCodeStrings(observation).toString(),
-				toCodeStrings(observation),
-				Matchers.contains(
-						"[system=http://example.com/my_code_system, code=12345, display=null]",
-						"[system=http://example.com/my_code_system2, code=9999, display=Display 9999]"));
+		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
+			"[system=http://example.com/my_code_system, code=12345, display=null]",
+			"[system=http://example.com/my_code_system2, code=9999, display=Display 9999]"
+		));
 	}
 
 	@Test
@@ -134,16 +126,16 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.getCode().addCoding(new Coding(CS_URL, "FOO", null));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "FOO", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
 		// Read it back
 		observation = myClient.read().resource(Observation.class).withId(id).execute();
 
-		assertThat(
-				toCodeStrings(observation).toString(),
-				toCodeStrings(observation),
-				Matchers.contains("[system=http://example.com/my_code_system, code=FOO, display=null]"));
+		assertThat(toCodeStrings(observation).toString(), toCodeStrings(observation), Matchers.contains(
+			"[system=http://example.com/my_code_system, code=FOO, display=null]"
+		));
 	}
 
 	@Test
@@ -153,14 +145,15 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.getCode().addCoding(new Coding(CS_URL, "12345", null));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
 		myObservationDao.create(observation);
 
 		// set mapping specs
 		myResponseTerminologyTranslationInterceptor.addMappingSpecification(CS_URL, CS_URL_2);
 		List<String> codingList = Arrays.asList(
-				"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
-				"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"34567\",\"display\":\"Target Code 34567\"}");
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
+			"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"34567\",\"display\":\"Target Code 34567\"}");
 
 		createBulkJobAndCheckCodingList(codingList);
 	}
@@ -172,17 +165,16 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation
-				.getCode()
-				.addCoding(new Coding(CS_URL, "12345", null))
-				.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null))
+			.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
 		myObservationDao.create(observation);
 
 		// set mapping specs
 		myResponseTerminologyTranslationInterceptor.addMappingSpecification(CS_URL, CS_URL_2);
 		List<String> codingList = Arrays.asList(
-				"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
-				"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"9999\",\"display\":\"Display 9999\"}");
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
+			"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"9999\",\"display\":\"Display 9999\"}");
 
 		createBulkJobAndCheckCodingList(codingList);
 	}
@@ -194,10 +186,12 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.getCode().addCoding(new Coding(CS_URL, "12345", null));
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
 		myObservationDao.create(observation);
 
-		List<String> codingList = List.of("{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}");
+		List<String> codingList = List.of(
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}");
 
 		createBulkJobAndCheckCodingList(codingList);
 	}
@@ -210,22 +204,19 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse =
-				myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() ->
-				myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		for (Map.Entry<String, List<String>> file :
-				results.getResourceTypeToBinaryIds().entrySet()) {
+		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
 			List<String> binaryIds = file.getValue();
 			assertEquals(1, binaryIds.size());
@@ -247,8 +238,6 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Nonnull
 	private List<String> toCodeStrings(Observation observation) {
-		return observation.getCode().getCoding().stream()
-				.map(t -> "[system=" + t.getSystem() + ", code=" + t.getCode() + ", display=" + t.getDisplay() + "]")
-				.collect(Collectors.toList());
+		return observation.getCode().getCoding().stream().map(t -> "[system=" + t.getSystem() + ", code=" + t.getCode() + ", display=" + t.getDisplay() + "]").collect(Collectors.toList());
 	}
 }

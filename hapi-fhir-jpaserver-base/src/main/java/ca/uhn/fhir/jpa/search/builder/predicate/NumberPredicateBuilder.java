@@ -45,7 +45,6 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NumberPredicateBuilder.class);
 	private final DbColumn myColumnValue;
-
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -58,15 +57,8 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
 
-	public Condition createPredicateNumeric(
-			String theResourceName,
-			String theParamName,
-			SearchFilterParser.CompareOperation theOperation,
-			BigDecimal theValue,
-			RequestPartitionId theRequestPartitionId,
-			IQueryParameterType theActualParam) {
-		Condition numericPredicate = createPredicateNumeric(
-				this, theOperation, theValue, myColumnValue, "invalidNumberPrefix", myFhirContext, theActualParam);
+	public Condition createPredicateNumeric(String theResourceName, String theParamName, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, RequestPartitionId theRequestPartitionId, IQueryParameterType theActualParam) {
+		Condition numericPredicate = createPredicateNumeric(this, theOperation, theValue, myColumnValue, "invalidNumberPrefix", myFhirContext, theActualParam);
 		return combineWithHashIdentityPredicate(theResourceName, theParamName, numericPredicate);
 	}
 
@@ -74,21 +66,13 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return myColumnValue;
 	}
 
-	static Condition createPredicateNumeric(
-			BaseSearchParamPredicateBuilder theIndexTable,
-			SearchFilterParser.CompareOperation theOperation,
-			BigDecimal theValue,
-			DbColumn theColumn,
-			String theInvalidValueKey,
-			FhirContext theFhirContext,
-			IQueryParameterType theActualParam) {
+
+	static Condition createPredicateNumeric(BaseSearchParamPredicateBuilder theIndexTable, SearchFilterParser.CompareOperation theOperation, BigDecimal theValue, DbColumn theColumn, String theInvalidValueKey, FhirContext theFhirContext, IQueryParameterType theActualParam) {
 		Condition num;
 
-		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL
-		// operators below so as to
+		// Per discussions with Grahame Grieve and James Agnew on 11/13/19, modified logic for EQUAL and NOT_EQUAL operators below so as to
 		//   use exact value matching.  The "fuzz amount" matching is still used with the APPROXIMATE operator.
-		SearchFilterParser.CompareOperation operation =
-				defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
+		SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
 		switch (operation) {
 			case gt:
 				num = BinaryCondition.greaterThan(theColumn, theIndexTable.generatePlaceholder(theValue));
@@ -119,10 +103,7 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				break;
 			default:
 				String paramValue = theActualParam.getValueAsQueryToken(theFhirContext);
-				String msg = theIndexTable
-						.getFhirContext()
-						.getLocalizer()
-						.getMessage(NumberPredicateBuilder.class, theInvalidValueKey, operation, paramValue);
+				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(NumberPredicateBuilder.class, theInvalidValueKey, operation, paramValue);
 				throw new InvalidRequestException(Msg.code(1235) + msg);
 		}
 

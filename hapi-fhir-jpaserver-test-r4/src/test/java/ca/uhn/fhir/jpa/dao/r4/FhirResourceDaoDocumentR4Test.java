@@ -10,8 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FhirResourceDaoDocumentR4Test extends BaseJpaR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDocumentR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDocumentR4Test.class);
 
 	@Test
 	public void testPostDocument() throws Exception {
@@ -19,4 +18,6 @@ public class FhirResourceDaoDocumentR4Test extends BaseJpaR4Test {
 		Bundle inputBundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		DaoMethodOutcome responseBundle = myBundleDao.create(inputBundle, mySrd);
 	}
+	
+
 }

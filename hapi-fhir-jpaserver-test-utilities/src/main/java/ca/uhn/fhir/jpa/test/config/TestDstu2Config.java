@@ -45,11 +45,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -79,11 +79,11 @@ public class TestDstu2Config {
 		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 			ourMaxThreads = 1;
 		}
+
 	}
 
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
-
 	private Exception myLastStackTrace;
 	private String myLastStackTraceThreadName;
 
@@ -96,6 +96,7 @@ public class TestDstu2Config {
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
+
 			@Override
 			public Connection getConnection() throws SQLException {
 				ConnectionWrapper retVal;
@@ -105,10 +106,10 @@ public class TestDstu2Config {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
 
-					//					if ("true".equals(System.getStringProperty("ci"))) {
+//					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e.toString());
-					//					}
-					//					System.exit(1);
+//					}
+//					System.exit(1);
 					retVal = null;
 				}
 
@@ -139,6 +140,7 @@ public class TestDstu2Config {
 				ourLog.info(b.toString());
 				ourLog.info("Last connection thread: {}", myLastStackTraceThreadName);
 			}
+
 		};
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_dstu2");
@@ -148,22 +150,21 @@ public class TestDstu2Config {
 
 		retVal.setMaxTotal(ourMaxThreads);
 
-		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
-				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
-				.afterQuery(captureQueriesListener())
-				.afterQuery(new CurrentThreadCaptureQueriesListener())
-				.countQuery(new ThreadQueryCountHolder())
-				.build();
+		DataSource dataSource = ProxyDataSourceBuilder
+			.create(retVal)
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
+			.countQuery(new ThreadQueryCountHolder())
+			.build();
 
 		return dataSource;
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -188,6 +189,7 @@ public class TestDstu2Config {
 
 		return extraProperties;
 	}
+
 
 	/**
 	 * Bean which validates incoming requests

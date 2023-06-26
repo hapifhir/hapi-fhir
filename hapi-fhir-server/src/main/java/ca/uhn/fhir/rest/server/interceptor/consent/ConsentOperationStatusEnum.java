@@ -39,4 +39,5 @@ public enum ConsentOperationStatusEnum {
 	 * counting/caching methods)
 	 */
 	AUTHORIZED,
+
 }

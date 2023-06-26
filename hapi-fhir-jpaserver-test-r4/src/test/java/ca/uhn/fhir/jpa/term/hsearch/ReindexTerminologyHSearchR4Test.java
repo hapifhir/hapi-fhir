@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -12,7 +13,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -34,24 +34,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityManager;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(
-		classes = {
-			TestR4Config.class,
-			TestHSearchAddInConfig.LuceneFilesystem.class,
-			ReindexTerminologyHSearchR4Test.NoopMandatoryTransactionListener.class
-		})
+@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.LuceneFilesystem.class
+	, ReindexTerminologyHSearchR4Test.NoopMandatoryTransactionListener.class
+})
 public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final String LOINC_URL = "http://loinc.org";
 	public static final String TEST_FILES_CLASSPATH = "loinc-reindex/";
@@ -61,48 +58,46 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final String CS_VERSION = "2.68";
 	public static final int CS_CONCEPTS_NUMBER = 81;
 	public static final String LOINC_PROPERTIES_CLASSPATH =
-			ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
+		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
 	public static final String LOINC_ZIP_CLASSPATH =
-			ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
+		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyHSearchR4Test.class);
 	long termCodeSystemVersionWithVersionId;
 	long termCodeSystemVersionWithNoVersionId;
 	Map<String, Long> conceptCounts = Map.ofEntries(
-			entry("http://loinc.org/vs", 81L),
-			entry("http://loinc.org/vs/LG100-4", 0L),
-			entry("http://loinc.org/vs/LG1695-8", 0L),
-			entry("http://loinc.org/vs/LL1000-0", 3L),
-			entry("http://loinc.org/vs/LL1001-8", 7L),
-			entry("http://loinc.org/vs/LL1892-0", 0L),
-			entry("http://loinc.org/vs/loinc-document-ontology", 1L),
-			entry("http://loinc.org/vs/loinc-imaging-document-codes", 1L),
-			entry("http://loinc.org/vs/loinc-rsna-radiology-playbook", 1L),
-			entry("http://loinc.org/vs/loinc-universal-order-set", 0L),
-			entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
-			entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L));
+		entry("http://loinc.org/vs", 81L),
+		entry("http://loinc.org/vs/LG100-4", 0L),
+		entry("http://loinc.org/vs/LG1695-8", 0L),
+		entry("http://loinc.org/vs/LL1000-0", 3L),
+		entry("http://loinc.org/vs/LL1001-8", 7L),
+		entry("http://loinc.org/vs/LL1892-0", 0L),
+		entry("http://loinc.org/vs/loinc-document-ontology", 1L),
+		entry("http://loinc.org/vs/loinc-imaging-document-codes", 1L),
+		entry("http://loinc.org/vs/loinc-rsna-radiology-playbook", 1L),
+		entry("http://loinc.org/vs/loinc-universal-order-set", 0L),
+		entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
+		entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L)
+	);
 	Map<String, Long> conceptDesignationCounts = Map.ofEntries(
-			entry("http://loinc.org/vs", 55L),
-			entry("http://loinc.org/vs/LG100-4", 0L),
-			entry("http://loinc.org/vs/LG1695-8", 0L),
-			entry("http://loinc.org/vs/LL1000-0", 0L),
-			entry("http://loinc.org/vs/LL1001-8", 0L),
-			entry("http://loinc.org/vs/LL1892-0", 0L),
-			entry("http://loinc.org/vs/loinc-document-ontology", 0L),
-			entry("http://loinc.org/vs/loinc-imaging-document-codes", 1L),
-			entry("http://loinc.org/vs/loinc-rsna-radiology-playbook", 1L),
-			entry("http://loinc.org/vs/loinc-universal-order-set", 0L),
-			entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
-			entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L));
-
+		entry("http://loinc.org/vs", 55L),
+		entry("http://loinc.org/vs/LG100-4", 0L),
+		entry("http://loinc.org/vs/LG1695-8", 0L),
+		entry("http://loinc.org/vs/LL1000-0", 0L),
+		entry("http://loinc.org/vs/LL1001-8", 0L),
+		entry("http://loinc.org/vs/LL1892-0", 0L),
+		entry("http://loinc.org/vs/loinc-document-ontology", 0L),
+		entry("http://loinc.org/vs/loinc-imaging-document-codes", 1L),
+		entry("http://loinc.org/vs/loinc-rsna-radiology-playbook", 1L),
+		entry("http://loinc.org/vs/loinc-universal-order-set", 0L),
+		entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
+		entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L)
+	);
 	@Autowired
 	private EntityManager myEntityManager;
-
 	@Autowired
 	private TermLoaderSvcImpl myTermLoaderSvc;
-
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
-
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
@@ -142,40 +137,39 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		validateValueSetPreexpansion();
 	}
 
+
 	private void removeValueSetPreExpansions() {
 		List<TermValueSet> termValueSets = myTermValueSetDao.findAll();
 		for (TermValueSet termValueSet : termValueSets) {
-			myTermReadSvc.invalidatePreCalculatedExpansion(
-					termValueSet.getResource().getIdDt(), new SystemRequestDetails());
+			myTermReadSvc.invalidatePreCalculatedExpansion(termValueSet.getResource().getIdDt(), new SystemRequestDetails());
 		}
 	}
+
 
 	/**
 	 * check number of TermConcepts (DB vs freetext-indexed)
 	 */
 	private void validateFreetextCounts() {
-		int dbTermConceptCountForVersion =
-				runInTransaction(() -> myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
+		int dbTermConceptCountForVersion = runInTransaction(() ->
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
 		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForVersion);
 
 		long termConceptCountForVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
-		ourLog.info(
-				"=================> Number of freetext found concepts after re-indexing for version {}: {}",
-				CS_VERSION,
-				termConceptCountForVersion);
+		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
+			CS_VERSION, termConceptCountForVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountForVersion);
 
-		int dbTermConceptCountForNullVersion =
-				runInTransaction(() -> myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
+
+		int dbTermConceptCountForNullVersion = runInTransaction(() ->
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
 		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
 
 		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		ourLog.info(
-				"=================> Number of freetext found concepts after re-indexing for version {}: {}",
-				NULL,
-				termConceptCountNullVersion);
+		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
+			NULL, termConceptCountNullVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);
 	}
+
 
 	private void validateFreetextIndexesEmpty() {
 		long termConceptCountVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
@@ -199,49 +193,48 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		}
 	}
 
+
 	private void validateSavedConceptsCount() {
 		termCodeSystemVersionWithVersionId = getTermCodeSystemVersionNotNullId();
-		int dbVersionedTermConceptCount =
-				runInTransaction(() -> myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
-		ourLog.info(
-				"=================> Number of stored concepts for version {}: {}",
-				CS_VERSION,
-				dbVersionedTermConceptCount);
+		int dbVersionedTermConceptCount = runInTransaction(() ->
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
+		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbVersionedTermConceptCount);
 
 		termCodeSystemVersionWithNoVersionId = getTermCodeSystemVersionNullId();
-		int dbNotVersionedTermConceptCount =
-				runInTransaction(() -> myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		ourLog.info(
-				"=================> Number of stored concepts for version {}: {}",
-				NULL,
-				dbNotVersionedTermConceptCount);
+		int dbNotVersionedTermConceptCount = runInTransaction(() ->
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
+		ourLog.info("=================> Number of stored concepts for version {}: {}", NULL, dbNotVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbNotVersionedTermConceptCount);
 	}
+
 
 	private void reFreetextIndexTerminology() throws InterruptedException {
 		myTermReadSvc.reindexTerminology();
 	}
 
+
 	private long getTermCodeSystemVersionNotNullId() {
 		return runInTransaction(() -> {
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(LOINC_URL);
-			TermCodeSystemVersion termCodeSystemVersion =
-					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), CS_VERSION);
+			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao
+				.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), CS_VERSION);
 			assertNotNull(termCodeSystemVersion);
 			return termCodeSystemVersion.getPid();
 		});
 	}
 
+
 	private long getTermCodeSystemVersionNullId() {
 		return runInTransaction(() -> {
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(LOINC_URL);
-			TermCodeSystemVersion termCodeSystemVersion =
-					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao
+				.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertNotNull(termCodeSystemVersion);
 			return termCodeSystemVersion.getPid();
 		});
 	}
+
 
 	private List<ITermLoaderSvc.FileDescriptor> buildFileDescriptors() throws FileNotFoundException {
 		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
@@ -255,23 +248,24 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		return fileDescriptors;
 	}
 
+
 	private long searchAllIndexedTermConceptCount(long theCodeSystemVersionId) {
 		return runInTransaction(() -> {
 			SearchSession searchSession = Search.session(myEntityManager);
-			SearchPredicateFactory predicate =
-					searchSession.scope(TermConcept.class).predicate();
+			SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 			PredicateFinalStep step = predicate.bool(b ->
-					b.must(predicate.match().field("myCodeSystemVersionPid").matching(theCodeSystemVersionId)));
+				b.must(predicate.match().field("myCodeSystemVersionPid").matching(theCodeSystemVersionId)));
 
 			SearchQuery<EntityReference> termConceptsQuery = searchSession
-					.search(TermConcept.class)
-					.selectEntityReference()
-					.where(f -> step)
-					.toQuery();
+				.search(TermConcept.class)
+				.selectEntityReference()
+				.where(f -> step)
+				.toQuery();
 
 			ourLog.trace("About to query: {}", termConceptsQuery.queryString());
 			return termConceptsQuery.fetchTotalHitCount();
 		});
+
 	}
 
 	@Override
@@ -317,8 +311,10 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
 			return new ProxyDataSourceBuilder.SingleQueryExecution() {
 				@Override
-				public void execute(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {}
+				public void execute(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
+				}
 			};
 		}
 	}
 }
+

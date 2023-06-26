@@ -23,11 +23,11 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 @Service
 public class DeleteConflictFinderService {
@@ -35,8 +35,7 @@ public class DeleteConflictFinderService {
 	protected EntityManager myEntityManager;
 
 	List<ResourceLink> findConflicts(ResourceTable theEntity, int maxResults) {
-		TypedQuery<ResourceLink> query = myEntityManager.createQuery(
-				"SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
+		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(maxResults);
 		return query.getResultList();

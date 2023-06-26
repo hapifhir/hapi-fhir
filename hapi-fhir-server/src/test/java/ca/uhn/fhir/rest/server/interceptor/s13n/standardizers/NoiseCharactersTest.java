@@ -57,8 +57,8 @@ class NoiseCharactersTest {
 
 	@Test
 	public void testInvalidChar() {
-		String[] invalidPatterns =
-				new String[] {"", "1", "ABC", "\\u21", "#x0001-#x0000", "#x0001 - #x - #x0000", "#x0000 #x0022"};
+		String[] invalidPatterns = new String[]{"", "1", "ABC", "\\u21", "#x0001-#x0000"
+			, "#x0001 - #x - #x0000", "#x0000 #x0022"};
 
 		for (String i : invalidPatterns) {
 			assertThrows(IllegalArgumentException.class, () -> {
@@ -66,4 +66,5 @@ class NoiseCharactersTest {
 			});
 		}
 	}
+
 }

@@ -21,13 +21,10 @@ class MdmResourceFilteringSvcMockTest {
 
 	@MockBean
 	private IMdmSettings myMdmSettings;
-
 	@MockBean
 	MdmSearchParamSvc myMdmSearchParamSvc;
-
 	@MockBean
 	FhirContext myFhirContext;
-
 	@Autowired
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
 

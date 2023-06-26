@@ -156,12 +156,10 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		}
 
 		ourLog.info("About to wait for FAMILY3 to complete");
-		await().until(
-						() -> {
-							ourLog.info("Received names: {}", myReceivedNames);
-							return myReceivedNames;
-						},
-						contains("FAMILY3"));
+		await().until(() -> {
+			ourLog.info("Received names: {}", myReceivedNames);
+			return myReceivedNames;
+		}, contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
 		searchBlockingInterceptorFamily1.getLatch().countDown();
@@ -172,6 +170,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 
 		assertEquals(1, searchBlockingInterceptorFamily1.getHits());
 	}
+
 
 	@Interceptor
 	public static class SearchBlockingInterceptor {
@@ -192,8 +191,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 				try {
 					myHits.incrementAndGet();
 					if (!myLatch.await(1, TimeUnit.MINUTES)) {
-						throw new InternalErrorException(
-								"Timed out waiting for " + Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED);
+						throw new InternalErrorException("Timed out waiting for " + Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED);
 					}
 				} catch (InterruptedException e) {
 					throw new InternalErrorException(e);
@@ -209,4 +207,6 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			return myLatch;
 		}
 	}
+
+
 }

@@ -37,11 +37,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,17 +68,13 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	public static final String nonMatchingCode = CODE_PREFIX + 99;
 	public static final String matchingCode = CODE_PREFIX + 1;
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-
 	@RegisterExtension
 	private final HttpClientExtension myClient = new HttpClientExtension();
-
 	private final ObservationHashMapResourceProvider myObservationProvider = new ObservationHashMapResourceProvider();
 	private final MyPatientProvider myPatientProvider = new MyPatientProvider();
 	private final ConsentInterceptor myConsentInterceptor = new ConsentInterceptor();
-
 	@Mock
 	private IValidationSupport myValidationSupport;
-
 	private List<IAuthRule> myAuthorizationInterceptorRuleList;
 	private final AuthorizationInterceptor myAuthorizationInterceptor = new AuthorizationInterceptor() {
 		@Override
@@ -95,14 +91,13 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			return mySearchNarrowingInterceptorAuthorizedList;
 		}
 	};
-
 	@RegisterExtension
 	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
-			.registerInterceptor(myAuthorizationInterceptor)
-			.registerInterceptor(myConsentInterceptor)
-			.registerInterceptor(mySearchNarrowingInterceptor)
-			.registerProvider(myPatientProvider)
-			.registerProvider(myObservationProvider);
+		.registerInterceptor(myAuthorizationInterceptor)
+		.registerInterceptor(myConsentInterceptor)
+		.registerInterceptor(mySearchNarrowingInterceptor)
+		.registerProvider(myPatientProvider)
+		.registerProvider(myObservationProvider);
 
 	private IGenericClient myFhirClient;
 	private List<IBaseResource> myNextPatientResponse;
@@ -124,28 +119,20 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
@@ -160,18 +147,17 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.search()
-				.forResource(Observation.class)
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Observation.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(
-				myObservationProvider.getRequestParams().get(0).isEmpty(),
-				myObservationProvider.getRequestParams().toString());
+		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+
 	}
 
 	@Test
@@ -179,28 +165,20 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
@@ -216,18 +194,17 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.search()
-				.forResource(Observation.class)
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Observation.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(
-				myObservationProvider.getRequestParams().get(0).isEmpty(),
-				myObservationProvider.getRequestParams().toString());
+		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O0"));
+
 	}
 
 	@Test
@@ -235,33 +212,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeNotInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeNotInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeNotInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.deny()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeNotInValueSet("code", VALUESET_1_URL).andThen()
+			.deny().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
@@ -276,18 +241,17 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.search()
-				.forResource(Observation.class)
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Observation.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(
-				myObservationProvider.getRequestParams().get(0).isEmpty(),
-				myObservationProvider.getRequestParams().toString());
+		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+
 	}
 
 	@Test
@@ -295,33 +259,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeNotInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeNotInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeNotInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.deny()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeNotInValueSet("code", VALUESET_1_URL).andThen()
+			.deny().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
@@ -337,50 +289,39 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.search()
-				.forResource(Observation.class)
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Observation.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(
-				myObservationProvider.getRequestParams().get(0).isEmpty(),
-				myObservationProvider.getRequestParams().toString());
+		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Observation/O1"));
+
 	}
+
 
 	@Test
 	public void testSearchWithRevInclude_AllowOnlyCodeInValueSet_LargeCodeSystem() {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.allow()
-				.read()
-				.resourcesOfType("Patient")
-				.withAnyId()
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		myNextPatientResponse = new ArrayList<>();
 
@@ -402,15 +343,16 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.search()
-				.forResource(Patient.class)
-				.revInclude(Patient.INCLUDE_ALL)
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource(Patient.class)
+			.revInclude(Patient.INCLUDE_ALL)
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+
 	}
 
 	@Test
@@ -418,37 +360,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Setup
 
-		mySearchNarrowingInterceptorAuthorizedList =
-				new AuthorizedList().addCodeInValueSet("Observation", "code", VALUESET_1_URL);
+		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", VALUESET_1_URL);
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.allow()
-				.read()
-				.resourcesOfType("Patient")
-				.withAnyId()
-				.andThen()
-				.allow()
-				.operation()
-				.named("$everything")
-				.onAnyInstance()
-				.andRequireExplicitResponseAuthorization()
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().operation().named("$everything").onAnyInstance().andRequireExplicitResponseAuthorization().andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		myNextPatientResponse = new ArrayList<>();
 
@@ -470,16 +396,17 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 		// Execute
 
 		Bundle response = myFhirClient
-				.operation()
-				.onInstance(new IdType("Patient/P0"))
-				.named("$everything")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
+			.operation()
+			.onInstance(new IdType("Patient/P0"))
+			.named("$everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
 
 		// Verify
 
 		assertThat(toUnqualifiedVersionlessIdValues(response), contains("Patient/P0", "Observation/O0"));
+
 	}
 
 	@Test
@@ -489,34 +416,18 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		mySearchNarrowingInterceptorAuthorizedList = new AuthorizedList();
 		myAuthorizationInterceptorRuleList = new RuleBuilder()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withCodeInValueSet("code", VALUESET_1_URL)
-				.andThen()
-				.allow()
-				.read()
-				.resourcesOfType("Patient")
-				.withAnyId()
-				.andThen()
-				.allow()
-				.operation()
-				.named("$everything")
-				.onAnyInstance()
-				.andRequireExplicitResponseAuthorization()
-				.andThen()
-				.denyAll()
-				.build();
+			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", VALUESET_1_URL).andThen()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().operation().named("$everything").onAnyInstance().andRequireExplicitResponseAuthorization().andThen()
+			.denyAll()
+			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(matchingCode));
-		when(myValidationSupport.validateCode(
-						any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
-						.setMessage("Code could not be found!"));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(matchingCode));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("Code could not be found!"));
 
 		myNextPatientResponse = new ArrayList<>();
 
@@ -539,18 +450,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		try {
 			myFhirClient
-					.operation()
-					.onInstance(new IdType("Patient/P0"))
-					.named("$everything")
-					.withNoParameters(Parameters.class)
-					.returnResourceType(Bundle.class)
-					.execute();
+				.operation()
+				.onInstance(new IdType("Patient/P0"))
+				.named("$everything")
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 
 			// Verify
 			assertThat(e.getMessage(), containsString("Access denied by"));
+
 		}
+
+
 	}
 
 	@Nonnull
@@ -566,13 +480,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	private class MyPatientProvider implements IResourceProvider {
 
 		@Search(allowUnknownParams = true)
-		public List<IBaseResource> searchAll(
-				RequestDetails theRequestDetails, @IncludeParam(reverse = true) Set<Include> theRevIncludes) {
+		public List<IBaseResource> searchAll(RequestDetails theRequestDetails, @IncludeParam(reverse = true) Set<Include> theRevIncludes) {
 			assertNotNull(myNextPatientResponse);
-			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(
-					myNextPatientResponse,
-					theRequestDetails,
-					myServer.getRestfulServer().getInterceptorService());
+			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return myNextPatientResponse;
 		}
 
@@ -581,16 +491,16 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			return Patient.class;
 		}
 
+
 		@Operation(name = "$everything")
 		public IBundleProvider everything(RequestDetails theRequestDetails, @IdParam IdType theId) {
 			assertNotNull(myNextPatientResponse);
-			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(
-					myNextPatientResponse,
-					theRequestDetails,
-					myServer.getRestfulServer().getInterceptorService());
+			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return new SimpleBundleProvider(myNextPatientResponse);
 		}
+
 	}
+
 
 	private static class ObservationHashMapResourceProvider extends HashMapResourceProvider<Observation> {
 		private final List<Map<String, String[]>> myRequestParams = new ArrayList<>();
@@ -618,4 +528,6 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			return super.searchAll(theRequestDetails);
 		}
 	}
+
+
 }

@@ -19,19 +19,17 @@ public class ResourceMetadataKeyEnumTest {
 		assertEquals(ResourceMetadataKeyEnum.PROFILES, ResourceMetadataKeyEnum.PROFILES);
 	}
 
+
 	@Test
 	public void testExtensionResourceEquals() {
-		assertNotEquals(
-				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"),
-				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://bar"));
+		assertNotEquals(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"), new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://bar"));
 		assertNotEquals(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"), null);
 		assertNotEquals(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"), "");
-		assertEquals(
-				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"),
-				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
+		assertEquals(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"), new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 
-		ResourceMetadataKeyEnum.ExtensionResourceMetadataKey foo =
-				new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo");
+		ResourceMetadataKeyEnum.ExtensionResourceMetadataKey foo = new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo");
 		assertEquals(foo, foo);
 	}
+
+
 }

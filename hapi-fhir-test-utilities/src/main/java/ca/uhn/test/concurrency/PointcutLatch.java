@@ -19,6 +19,7 @@
  */
 package ca.uhn.test.concurrency;
 
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -81,11 +82,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void setExpectedCount(int theCount, boolean theExactMatch) {
 		if (myPointcutLatchSession.get() != null) {
 			String previousStack = myPointcutLatchSession.get().getStackTrace();
-			throw new PointcutLatchException(
-					Msg.code(1480)
-							+ "setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n"
-							+ previousStack,
-					myName);
+			throw new PointcutLatchException(Msg.code(1480) + "setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n" + previousStack, myName);
 		}
 		startSession(theCount, theExactMatch);
 		if (theExactMatch) {
@@ -123,9 +120,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		try {
 			if (isSet()) {
 				retval = myPointcutLatchSession.get().awaitExpectedWithTimeout(theTimeoutSecond);
-				Validate.isTrue(
-						initialSession.equals(myPointcutLatchSession.get()),
-						"Concurrency error: Latch session switched while waiting.");
+				Validate.isTrue(initialSession.equals(myPointcutLatchSession.get()), "Concurrency error: Latch session switched while waiting.");
 			} else {
 				throw new PointcutLatchException("awaitExpected() called before setExpected() called.", myName);
 			}
@@ -152,9 +147,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			PointcutLatchException firstException = myUnexpectedInvocations.get(0);
 			int size = myUnexpectedInvocations.size();
 			if (firstException != null) {
-				throw new AssertionError(
-						Msg.code(2344) + getName() + " had " + size + " exceptions.  Throwing first one.",
-						firstException);
+				throw new AssertionError(Msg.code(2344) + getName() + " had " + size + " exceptions.  Throwing first one.", firstException);
 			}
 		}
 	}
@@ -166,11 +159,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		try {
 			PointcutLatchSession session = myPointcutLatchSession.get();
 			if (session == null) {
-				throw new PointcutLatchException(
-						Msg.code(1485)
-								+ "invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().",
-						myName,
-						theArgs);
+				throw new PointcutLatchException(Msg.code(1485) + "invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke().", myName, theArgs);
 			}
 			session.invoke(theArgs);
 		} catch (PointcutLatchException e) {
@@ -186,9 +175,9 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("name", myName)
-				.append("pointCutLatchSession", myPointcutLatchSession)
-				.toString();
+			.append("name", myName)
+			.append("pointCutLatchSession", myPointcutLatchSession)
+			.toString();
 	}
 
 	public void setStrict(Boolean theStrict) {

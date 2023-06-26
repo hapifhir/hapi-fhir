@@ -33,11 +33,10 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IJobInstance myInstance;
 	private final String myChunkId;
 
-	public StepExecutionDetails(
-			@Nonnull PT theParameters,
-			@Nullable IT theData,
-			@Nonnull JobInstance theInstance,
-			@Nonnull String theChunkId) {
+	public StepExecutionDetails(@Nonnull PT theParameters,
+										 @Nullable IT theData,
+										 @Nonnull JobInstance theInstance,
+										 @Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;

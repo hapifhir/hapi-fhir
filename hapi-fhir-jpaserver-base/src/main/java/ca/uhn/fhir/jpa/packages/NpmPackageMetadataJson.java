@@ -28,32 +28,24 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 @Schema(description = "Represents an NPM package metadata response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(
-		creatorVisibility = JsonAutoDetect.Visibility.NONE,
-		fieldVisibility = JsonAutoDetect.Visibility.NONE,
-		getterVisibility = JsonAutoDetect.Visibility.NONE,
-		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-		setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageMetadataJson {
 
 	@JsonProperty("dist-tags")
 	private DistTags myDistTags;
-
 	@JsonProperty("modified")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myModified;
-
 	@JsonProperty("name")
 	private String myName;
-
 	@JsonProperty("versions")
 	private Map<String, Version> myVersionIdToVersion;
 
@@ -85,6 +77,7 @@ public class NpmPackageMetadataJson {
 		myName = theName;
 	}
 
+
 	public static class DistTags {
 
 		@JsonProperty("latest")
@@ -100,27 +93,19 @@ public class NpmPackageMetadataJson {
 		}
 	}
 
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonAutoDetect(
-			creatorVisibility = JsonAutoDetect.Visibility.NONE,
-			fieldVisibility = JsonAutoDetect.Visibility.NONE,
-			getterVisibility = JsonAutoDetect.Visibility.NONE,
-			isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-			setterVisibility = JsonAutoDetect.Visibility.NONE)
+	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class Version {
 
 		@JsonProperty("name")
 		private String myName;
-
 		@JsonProperty("version")
 		private String myVersion;
-
 		@JsonProperty("description")
 		private String myDescription;
-
 		@JsonProperty("fhirVersion")
 		private String myFhirVersion;
-
 		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;

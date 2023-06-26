@@ -36,10 +36,7 @@ public class SimplePartitionTestHelper implements BeforeEachCallback, AfterEachC
 	private final IInterceptorService myInterceptorRegistry;
 	private final PartitionInterceptorReadAllPartitions myInterceptor = new PartitionInterceptorReadAllPartitions();
 
-	public SimplePartitionTestHelper(
-			PartitionSettings thePartitionSettings,
-			IPartitionLookupSvc thePartitionConfigSvc,
-			IInterceptorService theInterceptorRegistry) {
+	public SimplePartitionTestHelper(PartitionSettings thePartitionSettings, IPartitionLookupSvc thePartitionConfigSvc, IInterceptorService theInterceptorRegistry) {
 		myPartitionSettings = thePartitionSettings;
 		myPartitionConfigSvc = thePartitionConfigSvc;
 		myInterceptorRegistry = theInterceptorRegistry;
@@ -48,8 +45,7 @@ public class SimplePartitionTestHelper implements BeforeEachCallback, AfterEachC
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(
-				new PartitionEntity().setId(TEST_PARTITION_ID).setName(TEST_PARTITION_NAME), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(TEST_PARTITION_ID).setName(TEST_PARTITION_NAME), null);
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 

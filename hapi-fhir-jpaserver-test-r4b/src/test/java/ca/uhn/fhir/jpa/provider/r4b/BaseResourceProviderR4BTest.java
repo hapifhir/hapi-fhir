@@ -41,65 +41,61 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-			.withServerBeforeAll(s -> {
-				s.registerProviders(myResourceProviders.createProviders());
-				s.setDefaultResponseEncoding(EncodingEnum.XML);
-				s.setDefaultPrettyPrint(false);
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer).withServerBeforeAll(s -> {
+		s.registerProviders(myResourceProviders.createProviders());
+		s.setDefaultResponseEncoding(EncodingEnum.XML);
+		s.setDefaultPrettyPrint(false);
 
-				s.registerProvider(mySystemProvider);
-				s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
-				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+		s.registerProvider(mySystemProvider);
+		s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+		s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+		s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
+		s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
-				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+		s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-				s.registerProvider(myBinaryAccessProvider);
-				s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
+		s.registerProvider(myBinaryAccessProvider);
+		s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 
-				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(
-						s, mySystemDao, this.myStorageSettings, mySearchParamRegistry, myValidationSupport);
-				confProvider.setImplementationDescription("THIS IS THE DESC");
-				s.setServerConformanceProvider(confProvider);
+		JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, this.myStorageSettings, mySearchParamRegistry, myValidationSupport);
+		confProvider.setImplementationDescription("THIS IS THE DESC");
+		s.setServerConformanceProvider(confProvider);
 
-				// Register a CORS filter
-				CorsConfiguration config = new CorsConfiguration();
-				CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-				config.addAllowedHeader("Accept");
-				config.addAllowedHeader("Access-Control-Request-Headers");
-				config.addAllowedHeader("Access-Control-Request-Method");
-				config.addAllowedHeader("Cache-Control");
-				config.addAllowedHeader("Content-Type");
-				config.addAllowedHeader("Origin");
-				config.addAllowedHeader("Prefer");
-				config.addAllowedHeader("x-fhir-starter");
-				config.addAllowedHeader("X-Requested-With");
-				config.addAllowedOrigin("*");
-				config.addExposedHeader("Location");
-				config.addExposedHeader("Content-Location");
-				config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-				s.registerInterceptor(corsInterceptor);
-			})
-			.withServerBeforeEach(s -> {
+		// Register a CORS filter
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Cache-Control");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Prefer");
+		config.addAllowedHeader("x-fhir-starter");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		s.registerInterceptor(corsInterceptor);
 
-				// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-				myPort = myServer.getPort();
-				myServerBase = myServer.getBaseUrl();
-				myClient = myServer.getFhirClient();
+	}).withServerBeforeEach(s -> {
 
-				myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
-				if (shouldLogClient()) {
-					myClient.registerInterceptor(new LoggingInterceptor());
-				}
-			});
+		// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
+		myPort = myServer.getPort();
+		myServerBase = myServer.getBaseUrl();
+		myClient = myServer.getFhirClient();
+
+		myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+		if (shouldLogClient()) {
+			myClient.registerInterceptor(new LoggingInterceptor());
+		}
+	});
 
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
-
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
-
 	@Autowired
 	ResourceCountCache ourResourceCountsCache;
 
@@ -116,4 +112,5 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	protected boolean shouldLogClient() {
 		return true;
 	}
+
 }

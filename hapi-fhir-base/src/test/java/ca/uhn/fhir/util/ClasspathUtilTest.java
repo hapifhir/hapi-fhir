@@ -54,8 +54,9 @@ public class ClasspathUtilTest {
 	 */
 	@Test
 	public void testClose_Ok() {
-		ClasspathUtil.close(new ByteArrayInputStream(new byte[] {0, 1, 2}));
+		ClasspathUtil.close(new ByteArrayInputStream(new byte[]{0,1,2}));
 	}
+
 
 	/**
 	 * Should not throw any exception
@@ -66,4 +67,5 @@ public class ClasspathUtilTest {
 		doThrow(new IOException("FOO")).when(is).close();
 		ClasspathUtil.close(is);
 	}
+
 }

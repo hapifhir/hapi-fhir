@@ -37,8 +37,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
 
-	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject)
-			throws InternalErrorException;
+	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException;
 
 	public abstract String getName();
 
@@ -67,24 +66,15 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract boolean handlesMissing();
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
 	}
 
 	public abstract boolean isRequired();
 
-	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString)
-			throws InternalErrorException, InvalidRequestException;
+	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
 
-	private void parseParams(
-			RequestDetails theRequest,
-			List<QualifiedParamList> paramList,
-			String theQualifiedParamName,
-			String theQualifier) {
+	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
 		QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(theQualifier);
 		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
 			return;
@@ -102,10 +92,9 @@ public abstract class BaseQueryParameter implements IParameter {
 		}
 	}
 
+
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		List<QualifiedParamList> paramList = new ArrayList<>();
 		String name = getName();
@@ -120,9 +109,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 		if (paramList.isEmpty()) {
 
-			ourLog.debug(
-					"No value for parameter '{}' - Qualified names {} and qualifier whitelist {}",
-					new Object[] {getName(), qualified, getQualifierWhitelist()});
+			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", new Object[] { getName(), qualified, getQualifierWhitelist() });
 
 			if (handlesMissing()) {
 				return parse(theRequest.getFhirContext(), paramList);
@@ -131,5 +118,7 @@ public abstract class BaseQueryParameter implements IParameter {
 		}
 
 		return parse(theRequest.getFhirContext(), paramList);
+
 	}
+
 }

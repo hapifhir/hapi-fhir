@@ -33,7 +33,7 @@ public class RandomDataHelper {
 	}
 
 	public void fillFields(Object theTarget) {
-		ReflectionUtils.doWithFields(theTarget.getClass(), field -> {
+		ReflectionUtils.doWithFields(theTarget.getClass(), field->{
 			Class<?> fieldType = field.getType();
 			if (!Modifier.isFinal(field.getModifiers())) {
 				ReflectionUtils.makeAccessible(field);
@@ -42,6 +42,7 @@ public class RandomDataHelper {
 			}
 		});
 	}
+
 
 	public Object generateRandomValue(Class<?> fieldType) {
 		Random random = new Random();

@@ -29,7 +29,9 @@ public class ChangelogFilesTest {
 	@Test
 	public void testChangelogFiles() {
 		Collection<File> files = FileUtils.listFiles(
-				new File("src/main/resources/ca/uhn/hapi/fhir/changelog"), new String[] {"yaml"}, true);
+			new File("src/main/resources/ca/uhn/hapi/fhir/changelog"),
+			new String[]{"yaml"},
+			true);
 
 		for (File next : files) {
 			ourLog.info("Checking file: {}", next);

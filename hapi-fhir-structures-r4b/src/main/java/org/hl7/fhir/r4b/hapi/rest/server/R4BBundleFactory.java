@@ -43,13 +43,13 @@ import org.hl7.fhir.r4b.model.DomainResource;
 import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.Resource;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -64,12 +64,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addResourcesToBundle(
-			List<IBaseResource> theResult,
-			BundleTypeEnum theBundleType,
-			String theServerBase,
-			BundleInclusionRule theBundleInclusionRule,
-			Set<Include> theIncludes) {
+	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
 		ensureBundle();
 
 		List<IAnyResource> includedResources = new ArrayList<IAnyResource>();
@@ -98,13 +93,11 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (theBundleInclusionRule != null
-							&& !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
 						continue;
 					}
 
-					IAnyResource nextRes =
-							(IAnyResource) nextRefInfo.getResourceReference().getResource();
+					IAnyResource nextRes = (IAnyResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getIdElement().hasIdPart()) {
 							if (containedIds.contains(nextRes.getIdElement().getValue())) {
@@ -122,6 +115,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 								addedResourceIds.add(id);
 								addedResourcesThisPass.add(nextRes);
 							}
+
 						}
 					}
 				}
@@ -131,8 +125,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<>();
 				for (IAnyResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceInfo> newReferences =
-							myContext.newTerser().getAllResourceReferences(iResource);
+					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
 					references.addAll(newReferences);
 				}
 			} while (references.isEmpty() == false);
@@ -142,8 +135,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 			IIdType id = populateBundleEntryFullUrl(next, entry);
 
 			// Populate Request
-			BundleEntryTransactionMethodEnum httpVerb =
-					ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
+			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
 			if (httpVerb != null) {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb.name());
 				if (id != null) {
@@ -187,14 +179,12 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 			entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
 			populateBundleEntryFullUrl(next, entry);
 		}
+
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(
-			String theId,
-			@Nonnull BundleLinks theBundleLinks,
-			Integer theTotalResults,
-			IPrimitiveType<Date> theLastUpdated) {
+	public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
+													  IPrimitiveType<Date> theLastUpdated) {
 		ensureBundle();
 
 		myBase = theBundleLinks.serverBase;
@@ -257,6 +247,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 		return false;
 	}
 
+
 	@Override
 	public void initializeWithBundleResource(IBaseResource theBundle) {
 		myBundle = (Bundle) theBundle;
@@ -287,8 +278,7 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 				IdType id = new IdType(next.getResponse().getLocation());
 				String resourceType = id.getResourceType();
 				if (isNotBlank(resourceType)) {
-					IAnyResource res = (IAnyResource)
-							myContext.getResourceDefinition(resourceType).newInstance();
+					IAnyResource res = (IAnyResource) myContext.getResourceDefinition(resourceType).newInstance();
 					res.setId(id);
 					retVal.add(res);
 				}
@@ -296,4 +286,5 @@ public class R4BBundleFactory implements IVersionSpecificBundleFactory {
 		}
 		return retVal;
 	}
+
 }

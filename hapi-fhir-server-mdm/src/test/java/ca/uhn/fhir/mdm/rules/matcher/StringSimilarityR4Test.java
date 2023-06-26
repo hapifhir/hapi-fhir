@@ -31,7 +31,7 @@ public class StringSimilarityR4Test extends BaseMatcherR4Test {
 		ourLog.info("" + similarity(LEVENSCHTEIN, LEFT, RIGHT));
 		ourLog.info("" + similarity(SORENSEN_DICE, LEFT, RIGHT));
 	}
-
+	
 	private double similarity(IMdmFieldSimilarity theSimilarity, String theLeft, String theRight) {
 		return theSimilarity.similarity(ourFhirContext, new StringType(theLeft), new StringType(theRight), false);
 	}

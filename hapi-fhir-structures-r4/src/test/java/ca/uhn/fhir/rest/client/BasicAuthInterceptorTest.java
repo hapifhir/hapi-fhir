@@ -44,8 +44,8 @@ public class BasicAuthInterceptorTest {
 	}
 
 	private String crerateMsg() {
-		// @formatter:off
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">"
+		//@formatter:off
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
 				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
@@ -54,7 +54,7 @@ public class BasicAuthInterceptorTest {
 				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
 				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
 				+ "</Patient>";
-		// @formatter:on
+		//@formatter:on
 		return msg;
 	}
 
@@ -64,15 +64,12 @@ public class BasicAuthInterceptorTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		Header[] headers = new Header[] {};
 
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
@@ -81,14 +78,11 @@ public class BasicAuthInterceptorTest {
 		assertEquals(1, capt.getAllValues().size());
 		HttpUriRequest req = capt.getAllValues().get(0);
 		assertEquals(1, req.getHeaders("Authorization").length);
-		assertEquals(
-				"Basic bXl1c2VyOm15cGFzcw==",
-				req.getFirstHeader("Authorization").getValue());
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
 
 		// Create a second client and make sure we get the same results
 
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
 		client.getPatientById(new IdType("111"));
@@ -96,9 +90,8 @@ public class BasicAuthInterceptorTest {
 		assertEquals(2, capt.getAllValues().size());
 		req = capt.getAllValues().get(1);
 		assertEquals(1, req.getHeaders("Authorization").length);
-		assertEquals(
-				"Basic bXl1c2VyOm15cGFzcw==",
-				req.getFirstHeader("Authorization").getValue());
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
+
 	}
 
 	@BeforeAll
@@ -106,8 +99,10 @@ public class BasicAuthInterceptorTest {
 		ourCtx = FhirContext.forR4();
 	}
 
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

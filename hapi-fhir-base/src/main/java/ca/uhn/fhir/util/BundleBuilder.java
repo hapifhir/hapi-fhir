@@ -34,10 +34,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.Date;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * This class can be used to build a Bundle resource to be used as a FHIR transaction. Convenience methods provide
@@ -118,8 +118,7 @@ public class BundleBuilder {
 		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName(theFieldName);
 		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
 
-		IPrimitiveType<?> type = (IPrimitiveType<?>)
-				typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
 		type.setValueAsString(theFieldValue);
 		typeChild.getMutator().setValue(myBundle, type);
 		return this;
@@ -136,8 +135,7 @@ public class BundleBuilder {
 		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
 		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
 
-		IPrimitiveType<?> type = (IPrimitiveType<?>)
-				typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
 		type.setValueAsString(theFieldValue);
 		typeChild.getMutator().setValue(theSearch, type);
 		return this;
@@ -163,11 +161,7 @@ public class BundleBuilder {
 		Validate.notBlank(theTarget.getResourceType(), "theTarget must contain a resource type");
 		Validate.notBlank(theTarget.getIdPart(), "theTarget must contain an ID");
 
-		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(
-				thePatch,
-				theTarget.getValue(),
-				theTarget.toUnqualifiedVersionless().getValue(),
-				"PATCH");
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(thePatch, theTarget.getValue(), theTarget.toUnqualifiedVersionless().getValue(), "PATCH");
 
 		return new PatchBuilder(url);
 	}
@@ -212,21 +206,18 @@ public class BundleBuilder {
 	}
 
 	@Nonnull
-	private IPrimitiveType<?> addAndPopulateTransactionBundleEntryRequest(
-			IBaseResource theResource, String theFullUrl, String theRequestUrl, String theHttpVerb) {
+	private IPrimitiveType<?> addAndPopulateTransactionBundleEntryRequest(IBaseResource theResource, String theFullUrl, String theRequestUrl, String theHttpVerb) {
 		setBundleField("type", "transaction");
 
 		IBase request = addEntryAndReturnRequest(theResource, theFullUrl);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(theRequestUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.method
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
 		method.setValueAsString(theHttpVerb);
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
 		return url;
@@ -241,20 +232,17 @@ public class BundleBuilder {
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
 		setBundleField("type", "transaction");
 
-		IBase request =
-				addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		IBase request = addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(resourceType);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
 		method.setValueAsString("POST");
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
 
@@ -317,9 +305,7 @@ public class BundleBuilder {
 		setBundleField("type", "transaction");
 		IdDt idDt = new IdDt(theIdPart);
 
-		String deleteUrl = idDt.toUnqualifiedVersionless()
-				.withResourceType(theResourceType)
-				.getValue();
+		String deleteUrl = idDt.toUnqualifiedVersionless().withResourceType(theResourceType).getValue();
 
 		return addDeleteEntry(deleteUrl);
 	}
@@ -341,19 +327,18 @@ public class BundleBuilder {
 		IBase request = addEntryAndReturnRequest();
 
 		// Bundle.entry.request.url
-		IPrimitiveType<?> url =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		url.setValueAsString(theDeleteUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.method
-		IPrimitiveType<?> method = (IPrimitiveType<?>)
-				myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
 		method.setValueAsString("DELETE");
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
 
 		return new DeleteBuilder();
 	}
+
 
 	/**
 	 * Adds an entry for a Collection bundle type
@@ -391,9 +376,7 @@ public class BundleBuilder {
 	 * @return Returns the search instance
 	 */
 	public IBaseBackboneElement addSearch(IBase entry) {
-		Validate.isTrue(
-				myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3),
-				"This method may only be called for FHIR version DSTU3 and above");
+		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "This method may only be called for FHIR version DSTU3 and above");
 
 		IBase searchInstance = mySearchDef.newInstance();
 		mySearchChild.getMutator().setValue(entry, searchInstance);
@@ -406,8 +389,7 @@ public class BundleBuilder {
 		IBase entry = addEntry();
 
 		// Bundle.entry.fullUrl
-		IPrimitiveType<?> fullUrl =
-				(IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+		IPrimitiveType<?> fullUrl = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
 		fullUrl.setValueAsString(theFullUrl);
 		myEntryFullUrlChild.getMutator().setValue(entry, fullUrl);
 
@@ -427,7 +409,9 @@ public class BundleBuilder {
 		IBase request = myEntryRequestDef.newInstance();
 		myEntryRequestChild.getMutator().setValue(entry, request);
 		return request;
+
 	}
+
 
 	public IBaseBundle getBundle() {
 		return myBundle;
@@ -447,12 +431,9 @@ public class BundleBuilder {
 	 * on DSTU3+.
 	 */
 	public BundleBuilder setMetaField(String theFieldName, IBase theFieldValue) {
-		Validate.isTrue(
-				myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3),
-				"This method may only be called for FHIR version DSTU3 and above");
+		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "This method may only be called for FHIR version DSTU3 and above");
 
-		BaseRuntimeChildDefinition.IMutator mutator =
-				myMetaDef.getChildByName(theFieldName).getMutator();
+		BaseRuntimeChildDefinition.IMutator mutator = myMetaDef.getChildByName(theFieldName).getMutator();
 		mutator.setValue(myBundle.getMeta(), theFieldValue);
 		return this;
 	}
@@ -479,8 +460,7 @@ public class BundleBuilder {
 		addToBase(theSearch, theSearchFieldName, theSearchFieldValue, mySearchDef);
 	}
 
-	private void addToBase(
-			IBase theBase, String theSearchChildName, IBase theValue, BaseRuntimeElementDefinition mySearchDef) {
+	private void addToBase(IBase theBase, String theSearchChildName, IBase theValue, BaseRuntimeElementDefinition mySearchDef) {
 		BaseRuntimeChildDefinition defn = mySearchDef.getChildByName(theSearchChildName);
 		Validate.notNull(defn, "Unable to get child definition %s from %s", theSearchChildName, theBase);
 		defn.getMutator().addValue(theBase, theValue);
@@ -546,23 +526,27 @@ public class BundleBuilder {
 		terser.setElement(myBundle, "Bundle.timestamp", theTimestamp.getValueAsString());
 	}
 
+
 	public class DeleteBuilder extends BaseOperationBuilder {
 
 		// nothing yet
 
 	}
 
+
 	public class PatchBuilder extends BaseOperationBuilderWithConditionalUrl<PatchBuilder> {
 
 		PatchBuilder(IPrimitiveType<?> theUrl) {
 			super(theUrl);
 		}
+
 	}
 
 	public class UpdateBuilder extends BaseOperationBuilderWithConditionalUrl<UpdateBuilder> {
 		UpdateBuilder(IPrimitiveType<?> theUrl) {
 			super(theUrl);
 		}
+
 	}
 
 	public class CreateBuilder extends BaseOperationBuilder {
@@ -576,8 +560,7 @@ public class BundleBuilder {
 		 * Make this create a Conditional Create
 		 */
 		public CreateBuilder conditional(String theConditionalUrl) {
-			BaseRuntimeElementDefinition<?> stringDefinition =
-					Objects.requireNonNull(myContext.getElementDefinition("string"));
+			BaseRuntimeElementDefinition<?> stringDefinition = Objects.requireNonNull(myContext.getElementDefinition("string"));
 			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) stringDefinition.newInstance();
 			ifNoneExist.setValueAsString(theConditionalUrl);
 
@@ -585,6 +568,7 @@ public class BundleBuilder {
 
 			return this;
 		}
+
 	}
 
 	public abstract class BaseOperationBuilder {
@@ -601,10 +585,11 @@ public class BundleBuilder {
 		public BundleBuilder andThen() {
 			return BundleBuilder.this;
 		}
+
+
 	}
 
-	public abstract class BaseOperationBuilderWithConditionalUrl<T extends BaseOperationBuilder>
-			extends BaseOperationBuilder {
+	public abstract class BaseOperationBuilderWithConditionalUrl<T extends BaseOperationBuilder> extends BaseOperationBuilder {
 
 		private final IPrimitiveType<?> myUrl;
 
@@ -620,5 +605,6 @@ public class BundleBuilder {
 			myUrl.setValueAsString(theConditionalUrl);
 			return (T) this;
 		}
+
 	}
 }

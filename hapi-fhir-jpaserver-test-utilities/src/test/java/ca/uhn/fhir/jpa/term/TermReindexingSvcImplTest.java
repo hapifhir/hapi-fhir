@@ -15,11 +15,9 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class TermReindexingSvcImplTest {
 
-	@Mock
-	JobExecutionContext myJobExecutionContext;
+	@Mock JobExecutionContext myJobExecutionContext;
+	@Mock ITermReindexingSvc jobReindexingSvc;
 
-	@Mock
-	ITermReindexingSvc jobReindexingSvc;
 
 	@Test
 	void validateReindexingJobExecutesReindexing() {
@@ -37,4 +35,5 @@ class TermReindexingSvcImplTest {
 		// validates that inner Job calls myTermReindexingSvc.processReindexing when executed
 		verify(jobReindexingSvc, atLeastOnce()).processReindexing();
 	}
+
 }

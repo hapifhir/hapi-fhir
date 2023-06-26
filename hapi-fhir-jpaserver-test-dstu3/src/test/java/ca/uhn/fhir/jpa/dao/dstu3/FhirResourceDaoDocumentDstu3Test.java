@@ -10,8 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FhirResourceDaoDocumentDstu3Test extends BaseJpaDstu3Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDocumentDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDocumentDstu3Test.class);
 
 	@Test
 	public void testPostDocument() throws Exception {

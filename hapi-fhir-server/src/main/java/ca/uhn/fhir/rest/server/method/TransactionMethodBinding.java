@@ -36,9 +36,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -55,11 +55,9 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
-					throw new ConfigurationException(Msg.code(372) + "Method '" + theMethod.getName() + "' in type "
-							+ theMethod.getDeclaringClass().getCanonicalName()
-							+ " has multiple parameters annotated with the @"
-							+ TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
-							+ " methods");
+					throw new ConfigurationException(Msg.code(372) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @"
+						+ TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
+						+ " methods");
 				}
 				myTransactionParamIndex = index;
 				myTransactionParamStyle = ((TransactionParameter) next).getParamStyle();
@@ -68,9 +66,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (myTransactionParamIndex == -1) {
-			throw new ConfigurationException(Msg.code(373) + "Method '" + theMethod.getName() + "' in type "
-					+ theMethod.getDeclaringClass().getCanonicalName()
-					+ " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
+			throw new ConfigurationException(Msg.code(373) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @"
+				+ TransactionParam.class + " annotation");
 		}
 	}
 
@@ -106,8 +103,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
-			throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 
 		/*
 		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a
@@ -136,8 +132,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
-					throw new InternalErrorException(Msg.code(374) + "Transaction method returned resource at index "
-							+ i + " with no id specified - IResource#setId(IdDt)");
+					throw new InternalErrorException(Msg.code(374) + "Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
 				}
 			}
 		}
@@ -156,11 +151,11 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		if (myTransactionParamIndex != -1) {
 			resource = (IBaseResource) theMethodParams[myTransactionParamIndex];
 		} else {
-			Class<? extends IBaseResource> resourceType =
-					getContext().getResourceDefinition("Bundle").getImplementingClass();
+			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
 			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType);
 		}
 
 		theRequestDetails.setResource(resource);
 	}
+
 }

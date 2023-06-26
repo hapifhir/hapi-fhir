@@ -50,10 +50,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -70,10 +70,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestDstu3Config {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
-
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
-
 	private Exception myLastStackTrace;
 
 	@Bean
@@ -85,6 +83,7 @@ public class TestDstu3Config {
 	public BasicDataSource basicDataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
+
 			@Override
 			public Connection getConnection() {
 				ConnectionWrapper retVal;
@@ -93,10 +92,10 @@ public class TestDstu3Config {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-					//					if ("true".equals(System.getStringProperty("ci"))) {
+//					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e);
-					//					}
-					//					System.exit(1);
+//					}
+//					System.exit(1);
 					retVal = null;
 				}
 
@@ -125,6 +124,7 @@ public class TestDstu3Config {
 				}
 				ourLog.info(b.toString());
 			}
+
 		};
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_dstu3");
@@ -154,30 +154,28 @@ public class TestDstu3Config {
 	@Primary()
 	public DataSource dataSource() {
 
-		DataSource dataSource = ProxyDataSourceBuilder.create(basicDataSource())
-				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
-				.afterQuery(captureQueriesListener())
-				.afterQuery(new CurrentThreadCaptureQueriesListener())
-				.countQuery()
-				.build();
+		DataSource dataSource = ProxyDataSourceBuilder
+			.create(basicDataSource())
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
+			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
+			.countQuery()
+			.build();
 
 		return dataSource;
 	}
 
 	@Bean
 	public IEmailSender emailSender() {
-		final MailConfig mailConfig =
-				new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
+		final MailConfig mailConfig = new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
 		final IMailSvc mailSvc = new MailSvc(mailConfig);
 		return new EmailSenderImpl(mailSvc);
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -221,4 +219,6 @@ public class TestDstu3Config {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
+
+
 }

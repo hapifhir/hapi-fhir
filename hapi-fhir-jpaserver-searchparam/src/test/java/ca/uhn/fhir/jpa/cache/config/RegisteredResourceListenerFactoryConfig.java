@@ -11,18 +11,12 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class RegisteredResourceListenerFactoryConfig {
 	@Bean
-	ResourceChangeListenerCacheFactory resourceChangeListenerCacheFactory() {
+    ResourceChangeListenerCacheFactory resourceChangeListenerCacheFactory() {
 		return new ResourceChangeListenerCacheFactory();
 	}
-
 	@Bean
 	@Scope("prototype")
-	ResourceChangeListenerCache resourceChangeListenerCache(
-			String theResourceName,
-			IResourceChangeListener theResourceChangeListener,
-			SearchParameterMap theSearchParameterMap,
-			long theRemoteRefreshIntervalMs) {
-		return new ResourceChangeListenerCache(
-				theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+	ResourceChangeListenerCache resourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
 }

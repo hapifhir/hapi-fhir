@@ -33,24 +33,21 @@ public class ElasticsearchPrefixTest {
 	ElasticsearchContainer elasticsearchContainer;
 
 	public static String ELASTIC_PREFIX = "hapi-fhir";
-
 	@Test
 	public void test() throws IOException {
-		// Given
-		RestHighLevelClient elasticsearchHighLevelRestClient =
-				ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
-						"http",
-						elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200),
-						"",
-						"");
+		//Given
+		RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(
+			"http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 
-		// When
+		//When
 		RestClient lowLevelClient = elasticsearchHighLevelRestClient.getLowLevelClient();
 		Response get = lowLevelClient.performRequest(new Request("GET", "/_cat/indices"));
 		String catIndexes = EntityUtils.toString(get.getEntity());
 
-		// Then
+		//Then
 		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-resourcetable-000001"));
 		assertThat(catIndexes, containsString(ELASTIC_PREFIX + "-termconcept-000001"));
+
 	}
+
 }

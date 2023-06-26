@@ -22,8 +22,8 @@ package ca.uhn.fhir.rest.server;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Bundle provider that uses named pages instead of counts
@@ -44,8 +44,7 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 	 * @see #setNextPageId(String)
 	 * @see #setPreviousPageId(String)
 	 */
-	public BundleProviderWithNamedPages(
-			List<IBaseResource> theResultsInThisPage, String theSearchId, String thePageId, Integer theTotalResults) {
+	public BundleProviderWithNamedPages(List<IBaseResource> theResultsInThisPage, String theSearchId, String thePageId, Integer theTotalResults) {
 		super(theResultsInThisPage, theSearchId);
 
 		Validate.notNull(theResultsInThisPage, "theResultsInThisPage must not be null");
@@ -96,4 +95,5 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 		super.setSize(theSize);
 		return this;
 	}
+
 }

@@ -38,7 +38,7 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-
+		
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -48,12 +48,15 @@ public class LoincConsumerNameHandler implements IZipContentsHandlerCsv {
 		if (isBlank(consumerName)) {
 			return;
 		}
-
+		
 		TermConcept loincCode = myCode2Concept.get(loincNumber);
 		if (loincCode == null) {
 			return;
 		}
-
-		loincCode.addDesignation().setUseDisplay("ConsumerName").setValue(consumerName);
+			
+		loincCode.addDesignation()
+		    .setUseDisplay("ConsumerName")
+		    .setValue(consumerName);
 	}
+
 }

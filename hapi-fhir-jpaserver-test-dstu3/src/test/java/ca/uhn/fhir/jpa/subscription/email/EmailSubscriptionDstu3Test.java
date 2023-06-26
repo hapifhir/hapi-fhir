@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
 import static org.awaitility.Awaitility.await;
@@ -63,9 +63,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete()
-				.resourceConditionalByUrl("Observation?code:missing=false")
-				.execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
@@ -87,8 +85,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setEmailFromAddress("123@hapifhir.io");
 	}
 
-	private Subscription createSubscription(
-			String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {
+	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -115,7 +112,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		waitForQueueToDrain();
 
-		await().until(() -> mySubscriptionRegistry.getAll().size() == initialCount + 1);
+		await().until(()-> mySubscriptionRegistry.getAll().size() == initialCount + 1);
 
 		return subscription;
 	}
@@ -162,18 +159,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
-		assertEquals(
-				mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(),
-				received.get(0).getHeader("X-FHIR-Subscription")[0]);
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as XML
-		Observation parsedObservation = (Observation) myClient.getFhirContext()
-				.newXmlParser()
-				.parseResource(received.get(0).getContent().toString().trim());
-		assertEquals(
-				"SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
-		assertEquals(
-				"1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
+		Observation parsedObservation = (Observation) myClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
 	/**
@@ -187,17 +178,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Consumer<Subscription> modifier = subscriptionTemp -> {
-			subscriptionTemp
-					.getChannel()
-					.addExtension()
-					.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
-					.setValue(new StringType("mailto:myfrom@from.com"));
-			subscriptionTemp
-					.getChannel()
-					.addExtension()
-					.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
-					.setValue(new StringType("This is a subject"));
+		Consumer<Subscription> modifier = subscriptionTemp->{
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
+				.setValue(new StringType("mailto:myfrom@from.com"));
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+				.setValue(new StringType("This is a subject"));
 			subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 		};
 
@@ -219,18 +206,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().trim());
-		assertEquals(
-				mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(),
-				received.get(0).getHeader("X-FHIR-Subscription")[0]);
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as JSON
-		Observation parsedObservation = (Observation) myClient.getFhirContext()
-				.newJsonParser()
-				.parseResource(received.get(0).getContent().toString().trim());
-		assertEquals(
-				"SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
-		assertEquals(
-				"1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
+		Observation parsedObservation = (Observation) myClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
 	/**
@@ -244,17 +225,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Consumer<Subscription> modifier = subscriptionTemp -> {
-			subscriptionTemp
-					.getChannel()
-					.addExtension()
-					.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
-					.setValue(new StringType("myfrom@from.com"));
-			subscriptionTemp
-					.getChannel()
-					.addExtension()
-					.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
-					.setValue(new StringType("This is a subject"));
+		Consumer<Subscription> modifier = subscriptionTemp ->{
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM)
+				.setValue(new StringType("myfrom@from.com"));
+			subscriptionTemp.getChannel().addExtension()
+				.setUrl(HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+				.setValue(new StringType("This is a subject"));
 			subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 		};
 
@@ -278,14 +255,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().trim());
 		assertEquals("", received.get(0).getContent().toString().trim());
-		assertEquals(
-				mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(),
-				received.get(0).getHeader("X-FHIR-Subscription")[0]);
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
-		Subscription subscription = myClient.read()
-				.resource(Subscription.class)
-				.withId(sub1.getIdElement().toUnqualifiedVersionless())
-				.execute();
+		Subscription subscription = myClient.read().resource(Subscription.class).withId(sub1.getIdElement().toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		assertEquals("2", subscription.getIdElement().getVersionIdPart());
 	}
@@ -296,8 +268,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private IMailSvc withMailService() {
 		final MailConfig mailConfig = new MailConfig()
-				.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-				.setSmtpPort(ourGreenMail.getSmtp().getPort());
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 		return new MailSvc(mailConfig);
 	}
+
 }

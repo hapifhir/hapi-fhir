@@ -36,8 +36,7 @@ public class IdTypeR4Test {
 		assertEquals("http://my.org", id.getBaseUrl());
 
 		assertEquals("Patient", id.withResourceType("Patient").getValue());
-		assertEquals(
-				"http://foo/Patient", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://foo/Patient", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("http://my.org/foo//_history/2", id.withVersion("2").getValue());
 	}
 
@@ -53,9 +52,7 @@ public class IdTypeR4Test {
 		assertEquals("http://my.org/a/b", id.getBaseUrl());
 
 		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
-		assertEquals(
-				"http://foo/Patient/foo",
-				id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("http://my.org/a/b/c/foo/_history/2", id.withVersion("2").getValue());
 	}
 
@@ -64,6 +61,7 @@ public class IdTypeR4Test {
 
 		IdType id = new IdType(new BigDecimal("123"));
 		assertEquals(id.getIdPartAsBigDecimal(), new BigDecimal("123"));
+
 	}
 
 	/**
@@ -87,6 +85,7 @@ public class IdTypeR4Test {
 		assertNull(id2.getResourceType());
 		assertNull(id2.getVersionIdPart());
 		assertEquals("#Patient/cid:Patient-72/_history/1", id2.getIdPart());
+
 	}
 
 	@Test
@@ -114,29 +113,17 @@ public class IdTypeR4Test {
 
 	@Test
 	public void testDetectLocalBase() {
-		assertEquals(
-				"urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
 		assertEquals(null, new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals(
-				"urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
-		assertEquals(
-				"cid:180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
+		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
 		assertEquals(null, new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals(
-				"cid:180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals("cid:180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 
-		assertEquals(
-				"#180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
+		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getValue());
 		assertEquals(null, new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl());
-		assertEquals(
-				"#180f219f-97a8-486d-99d9-ed631fe4fc57",
-				new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
+		assertEquals("#180f219f-97a8-486d-99d9-ed631fe4fc57", new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart());
 	}
 
 	@Test
@@ -152,6 +139,7 @@ public class IdTypeR4Test {
 
 		rr = new IdType("Organization/123/_history/123");
 		assertEquals(null, rr.getBaseUrl());
+
 	}
 
 	@Test
@@ -189,9 +177,7 @@ public class IdTypeR4Test {
 		assertEquals(null, id.getBaseUrl());
 
 		assertEquals("Patient/foo", id.withResourceType("Patient").getValue());
-		assertEquals(
-				"http://foo/Patient/foo",
-				id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("http://foo/Patient/foo", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("foo/_history/2", id.withVersion("2").getValue());
 	}
 
@@ -207,8 +193,7 @@ public class IdTypeR4Test {
 		assertEquals(null, id.getBaseUrl());
 
 		assertEquals("urn:oid:1.2.3.4", id.withResourceType("Patient").getValue());
-		assertEquals(
-				"urn:oid:1.2.3.4", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("urn:oid:1.2.3.4", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("urn:oid:1.2.3.4", id.withVersion("2").getValue());
 	}
 
@@ -224,6 +209,7 @@ public class IdTypeR4Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals("Organization", ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
+
 	}
 
 	@Test
@@ -238,6 +224,7 @@ public class IdTypeR4Test {
 		assertEquals("Organization", ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
 		assertEquals(null, ref.getReferenceElement().getVersionIdPart());
+
 	}
 
 	@Test
@@ -251,6 +238,7 @@ public class IdTypeR4Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals(null, ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
+
 	}
 
 	@Test
@@ -264,6 +252,7 @@ public class IdTypeR4Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals(null, ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
+
 	}
 
 	@Test
@@ -277,6 +266,7 @@ public class IdTypeR4Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals("Organization", ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
+
 	}
 
 	@Test
@@ -290,6 +280,7 @@ public class IdTypeR4Test {
 		Reference ref = actual.getManagingOrganization();
 		assertEquals("Organization", ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
+
 	}
 
 	@Test
@@ -304,6 +295,7 @@ public class IdTypeR4Test {
 		assertEquals(null, ref.getReferenceElement().getResourceType());
 		assertEquals("123", ref.getReferenceElement().getIdPart());
 		assertEquals(null, ref.getReferenceElement().getVersionIdPart());
+
 	}
 
 	@Test
@@ -318,8 +310,7 @@ public class IdTypeR4Test {
 		assertEquals(null, id.getBaseUrl());
 
 		assertEquals("urn:uuid:1234-5678", id.withResourceType("Patient").getValue());
-		assertEquals(
-				"urn:uuid:1234-5678", id.withServerBase("http://foo", "Patient").getValue());
+		assertEquals("urn:uuid:1234-5678", id.withServerBase("http://foo", "Patient").getValue());
 		assertEquals("urn:uuid:1234-5678", id.withVersion("2").getValue());
 	}
 
@@ -333,9 +324,7 @@ public class IdTypeR4Test {
 
 	@Test
 	public void testWithVersionNull() {
-		assertEquals(
-				"Patient/123",
-				new IdType("Patient/123/_history/2").withVersion("").getValue());
+		assertEquals("Patient/123", new IdType("Patient/123/_history/2").withVersion("").getValue());
 	}
 
 	@AfterAll
@@ -347,4 +336,5 @@ public class IdTypeR4Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}
+
 }

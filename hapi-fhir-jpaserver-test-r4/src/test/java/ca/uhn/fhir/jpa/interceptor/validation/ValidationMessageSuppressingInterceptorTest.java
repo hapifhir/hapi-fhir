@@ -32,12 +32,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidationMessageSuppressingInterceptorTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ValidationMessageSuppressingInterceptorTest.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationMessageSuppressingInterceptorTest.class);
 	@Autowired
 	private ApplicationContext myApplicationContext;
-
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
@@ -58,6 +55,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 
 		MethodOutcome result = myObservationDao.validate(inputObs, null, input, null, null, null, null);
+
 
 		ValidationMessageSuppressingInterceptor interceptor = new ValidationMessageSuppressingInterceptor();
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
@@ -86,17 +84,12 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		requestInterceptor.setValidator(validator);
 		myServer.registerInterceptor(requestInterceptor);
 
+
 		// Without suppression
 		{
-			Observation inputObs =
-					loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			try {
-				myClient.create()
-						.resource(inputObs)
-						.execute()
-						.getId()
-						.toUnqualifiedVersionless()
-						.getValue();
+				myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 				fail();
 			} catch (UnprocessableEntityException e) {
 				String encode = encode(e.getOperationOutcome());
@@ -110,14 +103,8 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		{
-			Observation inputObs =
-					loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
-			String id = myClient.create()
-					.resource(inputObs)
-					.execute()
-					.getId()
-					.toUnqualifiedVersionless()
-					.getValue();
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
+			String id = myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 			assertThat(id, matchesPattern("Observation/[0-9]+"));
 		}
 	}
@@ -126,14 +113,10 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 	public void testRepositoryValidation() {
 		createPatient(withActiveTrue(), withId("A"));
 
-		List<IRepositoryValidatingRule> rules = myApplicationContext
-				.getBean(
-						RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER,
-						RepositoryValidatingRuleBuilder.class)
-				.forResourcesOfType("Encounter")
-				.requireValidationToDeclaredProfiles()
-				.withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
-				.build();
+		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
+			.forResourcesOfType("Encounter")
+			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
+			.build();
 
 		RepositoryValidatingInterceptor repositoryValidatingInterceptor = new RepositoryValidatingInterceptor();
 		repositoryValidatingInterceptor.setFhirContext(myFhirContext);
@@ -163,5 +146,8 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		encounter.setSubject(new Reference("Patient/A"));
 		IIdType id = myEncounterDao.create(encounter).getId().toUnqualifiedVersionless();
 		assertThat(id.getValue(), matchesPattern("Encounter/[0-9]+"));
+
 	}
+
+
 }

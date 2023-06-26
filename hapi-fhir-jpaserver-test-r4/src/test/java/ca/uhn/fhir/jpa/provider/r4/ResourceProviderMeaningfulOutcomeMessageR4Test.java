@@ -50,94 +50,70 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		Patient p = new Patient();
 		p.setId("Patient/A");
 		p.setActive(true);
-		OperationOutcome oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Update with change
 
 		p.setId("Patient/A");
 		p.setActive(false);
-		oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdate", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdate", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Update with no change
 
 		p.setId("Patient/A");
-		oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Initial create: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateNoChange", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateNoChange", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Delete
 
-		oo = (OperationOutcome)
-				myClient.delete().resourceById("Patient", "A").execute().getOperationOutcome();
-		ourLog.debug(
-				"Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		oo = (OperationOutcome) myClient
+			.delete()
+			.resourceById("Patient", "A")
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Delete with no change
 
-		oo = (OperationOutcome)
-				myClient.delete().resourceById("Patient", "A").execute().getOperationOutcome();
-		ourLog.debug(
-				"Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		oo = (OperationOutcome) myClient
+			.delete()
+			.resourceById("Patient", "A")
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("deleteResourceAlreadyDeleted"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -149,101 +125,86 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setId("Patient/A");
 		p.setActive(true);
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Initial create: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Update with change
 
 		p.setId("Patient/A");
 		p.setActive(false);
 		input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.andThen()
-				.getBundle();
-		output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdate"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Update with no change
 
 		p.setId("Patient/A");
 		input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.andThen()
-				.getBundle();
-		output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateNoChange"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Delete
 
 		input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionDeleteEntry("Patient", "A")
-				.andThen()
-				.getBundle();
-		output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+			.addTransactionDeleteEntry("Patient", "A")
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 		// Delete With No Change
 
 		input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionDeleteEntry("Patient", "A")
-				.andThen()
-				.getBundle();
-		output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+			.addTransactionDeleteEntry("Patient", "A")
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("deleteResourceAlreadyDeleted"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -253,23 +214,19 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionCreateEntry(p)
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulCreate", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionCreateEntry(p)
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulCreate", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -279,25 +236,21 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionCreateEntry(p)
-				.conditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesPattern(
-						"Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms."));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionCreateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(),
+			matchesPattern("Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -308,22 +261,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionCreateEntry(p)
-				.conditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+			.addTransactionCreateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulCreateConditionalWithMatch"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -331,23 +282,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		Patient p = new Patient();
 		p.setActive(true);
 
-		OperationOutcome oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.conditionalByUrl("Patient?active=true")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -358,23 +304,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 		p.addName().setFamily("Test");
 
-		OperationOutcome oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.conditionalByUrl("Patient?active=true")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateConditionalWithMatch", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalWithMatch", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -384,23 +325,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		Patient p = new Patient();
 		p.setActive(true);
 
-		OperationOutcome oo = (OperationOutcome) myClient.update()
-				.resource(p)
-				.conditionalByUrl("Patient?active=true")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -409,24 +345,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.conditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -438,22 +370,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.addName().setFamily("Test");
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.conditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalWithMatch"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -464,24 +394,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		p.setActive(true);
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionUpdateEntry(p)
-				.conditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -490,23 +416,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient.patch()
-				.withFhirPatch(patch)
-				.withId("Patient/A")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulPatch", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.patch()
+			.withFhirPatch(patch)
+			.withId("Patient/A")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatch", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -515,24 +436,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient.patch()
-				.withFhirPatch(patch)
-				.withId("Patient/A")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulPatchNoChange", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.patch()
+			.withFhirPatch(patch)
+			.withId("Patient/A")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchNoChange", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
+
 
 	@Test
 	public void testPatch_Conditional_MatchWithChanges() {
@@ -540,23 +457,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient.patch()
-				.withFhirPatch(patch)
-				.conditionalByUrl("Patient?birthdate=2022-01-01")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulPatchConditional", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.patch()
+			.withFhirPatch(patch)
+			.conditionalByUrl("Patient?birthdate=2022-01-01")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditional", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -565,24 +477,20 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient.patch()
-				.withFhirPatch(patch)
-				.conditionalByUrl("Patient?birthdate=2022-01-01")
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulPatchConditionalNoChange", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.patch()
+			.withFhirPatch(patch)
+			.conditionalByUrl("Patient?birthdate=2022-01-01")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditionalNoChange", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
+
 
 	@Test
 	public void testPatch_WithChanges_InTransaction() {
@@ -593,19 +501,16 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
 
-		Bundle response =
-				myClient.transaction().withBundle((Bundle) bb.getBundle()).execute();
-		OperationOutcome oo =
-				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatch"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -617,20 +522,18 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
 
-		Bundle response =
-				myClient.transaction().withBundle((Bundle) bb.getBundle()).execute();
-		OperationOutcome oo =
-				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchNoChange"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
+
 
 	@Test
 	public void testPatch_Conditional_MatchWithChanges_InTransaction() {
@@ -641,19 +544,16 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?birthdate=2022-01-01");
 
-		Bundle response =
-				myClient.transaction().withBundle((Bundle) bb.getBundle()).execute();
-		OperationOutcome oo =
-				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditional"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -665,37 +565,30 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?birthdate=2022-01-01");
 
-		Bundle response =
-				myClient.transaction().withBundle((Bundle) bb.getBundle()).execute();
-		OperationOutcome oo =
-				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditionalNoChange"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
-	}
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
+	}
 	@Test
 	public void testMultiDelete_NoneFound() {
 
-		OperationOutcome oo = (OperationOutcome) myClient.delete()
-				.resourceConditionalByUrl("Patient?active=true")
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		OperationOutcome oo = (OperationOutcome) myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?active=true")
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("unableToDeleteNotFound"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -705,21 +598,16 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		createPatient(withActiveTrue());
 		createPatient(withActiveTrue());
 
-		OperationOutcome oo = (OperationOutcome) myClient.delete()
-				.resourceConditionalByUrl("Patient?active=true")
-				.execute()
-				.getOperationOutcome();
-		ourLog.debug(
-				"Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		OperationOutcome oo = (OperationOutcome) myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?active=true")
+			.execute()
+			.getOperationOutcome();
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	@Test
@@ -729,23 +617,19 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		createPatient(withActiveTrue());
 
 		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
-				.addTransactionDeleteEntryConditional("Patient?active=true")
-				.andThen()
-				.getBundle();
-		Bundle output = myClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Delete {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		OperationOutcome oo =
-				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
-		assertThat(
-				oo.getIssueFirstRep().getDiagnostics(),
-				matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
-		assertEquals(
-				StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(),
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
-		assertEquals(
-				StorageResponseCodeEnum.SYSTEM,
-				oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+			.addTransactionDeleteEntryConditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.debug("Delete {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
 	}
 
 	private static Parameters createPatchToSetPatientActiveFalse() {
@@ -757,6 +641,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		return patch;
 	}
 
+
 	private Matcher<String> matchesHapiMessage(String... theMessageKey) {
 		StringBuilder joinedPattern = new StringBuilder();
 
@@ -764,20 +649,23 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			String qualifiedKey = BaseStorageDao.class.getName() + "." + next;
 			String pattern = myFhirContext.getLocalizer().getFormatString(qualifiedKey);
 			assertTrue(isNotBlank(pattern));
-			pattern = pattern.replace("\"", "\\\"")
-					.replace("(", "\\(")
-					.replace(")", "\\)")
-					.replace("[", "\\[")
-					.replace("]", "\\]")
-					.replace(".", "\\.")
-					.replaceAll("\\{[0-9]+}", ".*");
+			pattern = pattern
+				.replace("\"", "\\\"")
+				.replace("(", "\\(")
+				.replace(")", "\\)")
+				.replace("[", "\\[")
+				.replace("]", "\\]")
+				.replace(".", "\\.")
+				.replaceAll("\\{[0-9]+}", ".*");
 
 			if (joinedPattern.length() > 0) {
 				joinedPattern.append(' ');
 			}
 			joinedPattern.append(pattern);
+
 		}
 
 		return matchesPattern(joinedPattern.toString());
 	}
+
 }

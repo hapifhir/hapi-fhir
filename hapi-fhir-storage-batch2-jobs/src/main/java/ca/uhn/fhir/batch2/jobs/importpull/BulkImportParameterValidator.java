@@ -27,10 +27,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -45,8 +45,7 @@ public class BulkImportParameterValidator implements IJobParametersValidator<Bat
 
 	@Nullable
 	@Override
-	public List<String> validate(
-			RequestDetails theRequestDetails, @Nonnull Batch2BulkImportPullJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull Batch2BulkImportPullJobParameters theParameters) {
 		ourLog.info("BulkImportPull parameter validation begin");
 
 		ArrayList<String> errors = new ArrayList<>();

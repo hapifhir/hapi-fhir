@@ -29,13 +29,10 @@ import static org.mockito.Mockito.verify;
 
 public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
-
 	@Mock
 	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-
 	@Spy
 	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
-
 	@Mock
 	protected SearchBuilder mySearchBuilder;
 
@@ -54,8 +51,7 @@ public class BaseSearchSvc {
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	public void after() {
-		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated))
-				.newSearchBuilder(any(), any(), any());
+		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
 	protected List<JpaPid> createPidSequence(int to) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.embedded;
 
+
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -17,15 +18,16 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Properties;
-import javax.sql.DataSource;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class HapiSchemaMigrationTest {
 
@@ -54,8 +56,7 @@ public class HapiSchemaMigrationTest {
 
 		JpaEmbeddedDatabase database = myEmbeddedServersExtension.getEmbeddedDatabase(theDriverType);
 		DataSource dataSource = database.getDataSource();
-		HapiMigrationDao hapiMigrationDao =
-				new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
 		VersionEnum[] allVersions = VersionEnum.values();
@@ -67,13 +68,7 @@ public class HapiSchemaMigrationTest {
 		VersionEnum to = allVersions[lastVersion];
 
 		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(
-				TEST_SCHEMA_NAME,
-				HAPI_FHIR_MIGRATION_TABLENAME,
-				dataSource,
-				new Properties(),
-				migrationTasks,
-				hapiMigrationStorageSvc);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
 		schemaMigrator.createMigrationTableIfRequired();
 		schemaMigrator.migrate();
@@ -84,9 +79,11 @@ public class HapiSchemaMigrationTest {
 			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
 			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
 			// 4 Postgres is generally the fastest/least terrible relational db supported
-			new HapiForeignKeyIndexHelper().ensureAllForeignKeysAreIndexed(dataSource);
+			new HapiForeignKeyIndexHelper()
+				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
 	}
+
 
 	@Test
 	public void testCreateMigrationTableIfRequired() throws SQLException {
@@ -97,23 +94,17 @@ public class HapiSchemaMigrationTest {
 		dataSource.setPassword("SA");
 		dataSource.start();
 
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet())
-				.getTaskList(VersionEnum.V6_0_0, VersionEnum.V6_4_0);
-		HapiMigrationDao hapiMigrationDao =
-				new HapiMigrationDao(dataSource, DriverTypeEnum.H2_EMBEDDED, HAPI_FHIR_MIGRATION_TABLENAME);
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(VersionEnum.V6_0_0, VersionEnum.V6_4_0);
+		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, DriverTypeEnum.H2_EMBEDDED, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(
-				TEST_SCHEMA_NAME,
-				HAPI_FHIR_MIGRATION_TABLENAME,
-				dataSource,
-				new Properties(),
-				migrationTasks,
-				hapiMigrationStorageSvc);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 
 		// Test & Validate
 		assertTrue(schemaMigrator.createMigrationTableIfRequired());
 		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+
 	}
+
 }

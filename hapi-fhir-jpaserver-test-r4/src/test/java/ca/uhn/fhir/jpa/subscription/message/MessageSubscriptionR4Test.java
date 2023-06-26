@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -39,8 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Autowired
-	private SubscriptionChannelFactory myChannelFactory;
-
+	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
 
@@ -51,8 +52,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(
-				new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
@@ -60,8 +60,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerMessageInterceptor();
 
-		IChannelReceiver receiver =
-				myChannelFactory.newMatchingReceivingChannel("my-queue-name", new ChannelConsumerSettings());
+		IChannelReceiver receiver = myChannelFactory.newMatchingReceivingChannel("my-queue-name", new ChannelConsumerSettings());
 		handler = new TestQueueConsumerHandler();
 		receiver.subscribe(handler);
 	}
@@ -84,47 +83,19 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	private static Stream<Arguments> sourceTypes() {
 		return Stream.of(
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID,
-						"explicit-source",
-						null,
-						"explicit-source"),
-				Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null),
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI,
-						"explicit-source",
-						"request-id",
-						"explicit-source"),
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID,
-						"explicit-source",
-						"request-id",
-						"explicit-source#request-id"),
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI,
-						"explicit-source",
-						null,
-						"explicit-source"),
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID,
-						null,
-						"request-id",
-						"#request-id"),
-				Arguments.of(
-						JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID,
-						"explicit-source",
-						"request-id",
-						"#request-id"));
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", "request-id", "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", "request-id", "explicit-source#request-id"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", null, "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, null, "request-id", "#request-id"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id")
+		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("sourceTypes")
-	public void testCreateUpdateAndPatchRetainCorrectSourceThroughDelivery(
-			JpaStorageSettings.StoreMetaSourceInformationEnum theStorageStyle,
-			String theExplicitSource,
-			String theRequestId,
-			String theExpectedSourceValue)
-			throws Exception {
+	public void testCreateUpdateAndPatchRetainCorrectSourceThroughDelivery(JpaStorageSettings.StoreMetaSourceInformationEnum theStorageStyle, String theExplicitSource, String theRequestId, String theExpectedSourceValue) throws Exception {
 		myStorageSettings.setStoreMetaSourceInformation(theStorageStyle);
 		createSubscriptionWithCriteria("[Observation]");
 
@@ -132,14 +103,14 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		Observation obs = sendObservation("zoop", "SNOMED-CT", theExplicitSource, theRequestId);
 
-		// Quick validation source stored.
+		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 		assertThat(readObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 
-		// Should receive at our queue receiver
+		//Should receive at our queue receiver
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(resource, instanceOf(Observation.class));
 		Observation receivedObs = (Observation) resource;
@@ -174,9 +145,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		patient = new Patient();
 		patient.setId(id);
 		patient.setActive(true);
-		patient.getMeta()
-				.getTag()
-				.add(new Coding().setSystem("http://www.example.com/tags").setCode("tag-3"));
+		patient.getMeta().getTag().add(new Coding().setSystem("http://www.example.com/tags").setCode("tag-3"));
 		myClient.update().resource(patient).execute();
 
 		waitForQueueToDrain();
@@ -188,19 +157,18 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		List<Coding> receivedTagList = receivedPatient.getMeta().getTag();
 		ourLog.info(getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedPatient));
 		assertThat(receivedTagList.size(), is(equalTo(3)));
-		List<String> actual =
-				receivedTagList.stream().map(t -> t.getCode()).sorted().collect(Collectors.toList());
+		List<String> actual = receivedTagList.stream().map(t -> t.getCode()).sorted().collect(Collectors.toList());
 		assertTrue(expected.equals(actual));
 	}
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
 		assertThat(handler.getMessages().size(), is(equalTo(1)));
-		ResourceModifiedJsonMessage resourceModifiedJsonMessage =
-				handler.getMessages().get(0);
+		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
 		handler.clearMessages();
 		return resource;
 	}
+
 }

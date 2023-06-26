@@ -26,16 +26,11 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 	public void before() {
 		super.before();
 
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active"))
-				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		myMdmResourceMatcherSvc = buildMatcher(buildActiveBirthdateIdRules());
 
@@ -44,6 +39,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 
 		myJohn.addName().setFamily("LastName");
 		myJohny.addName().setFamily("DifferentLastName");
+
 	}
 
 	@Test
@@ -56,10 +52,9 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
 		assertNotNull(result);
 
-		// this test assumes, that the defined algorithm for calculating scores doesn't change
+		//this test assumes, that the defined algorithm for calculating scores doesn't change
 		assertTrue(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE));
-		assertTrue(memoryAppender.contains(
-				"Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
+		assertTrue(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
 	}
 
 	@Test
@@ -74,8 +69,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		assertNotNull(result);
 
 		assertTrue(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG));
-		assertTrue(
-				memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE));
+		assertTrue(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE));
 	}
 
 	protected Patient buildSomeoneElse() {
@@ -85,6 +79,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		patient.setId("Patient/3");
 		return patient;
 	}
+
 
 	protected MemoryAppender createAndAssignMemoryAppender(Logger theLogger) {
 
@@ -103,8 +98,10 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 
 		public boolean contains(String string, Level level) {
 			return this.list.stream()
-					.anyMatch(event -> event.toString().contains(string)
-							&& event.getLevel().equals(level));
+				.anyMatch(event -> event.toString().contains(string)
+					&& event.getLevel().equals(level));
 		}
+
 	}
+
 }

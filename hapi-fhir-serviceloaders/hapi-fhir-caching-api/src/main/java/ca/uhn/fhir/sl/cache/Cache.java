@@ -21,6 +21,7 @@ package ca.uhn.fhir.sl.cache;
  */
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 /**
@@ -31,23 +32,23 @@ import java.util.function.Function;
  * Please check their documentation for information in the methods below.
  */
 public interface Cache<K, V> {
-	V getIfPresent(K key);
+    V getIfPresent(K key);
 
-	V get(K key, Function<? super K, ? extends V> mappingFunction);
+    V get(K key, Function<? super K, ? extends V> mappingFunction);
 
-	Map<K, V> getAllPresent(Iterable<? extends K> keys);
+    Map<K, V> getAllPresent(Iterable<? extends K> keys);
 
-	void put(K key, V value);
+    void put(K key, V value);
 
-	void putAll(Map<? extends K, ? extends V> map);
+    void putAll(Map<? extends K, ? extends V> map);
 
-	void invalidate(K key);
+    void invalidate(K key);
 
-	void invalidateAll(Iterable<? extends K> keys);
+    void invalidateAll(Iterable<? extends K> keys);
 
-	void invalidateAll();
+    void invalidateAll();
 
-	long estimatedSize();
+    long estimatedSize();
 
-	void cleanUp();
+    void cleanUp();
 }

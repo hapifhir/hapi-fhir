@@ -66,11 +66,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -80,6 +75,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -91,28 +91,20 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	private final int myFetchSize = TermReadSvcImpl.DEFAULT_FETCH_SIZE;
-
 	@Autowired
 	protected ITermConceptMapDao myConceptMapDao;
-
 	@Autowired
 	protected ITermConceptMapGroupDao myConceptMapGroupDao;
-
 	@Autowired
 	protected ITermConceptMapGroupElementDao myConceptMapGroupElementDao;
-
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	private FhirContext myContext;
-
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
 
@@ -144,29 +136,20 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		if (isPlaceholder(theConceptMap)) {
-			ourLog.info(
-					"Not storing TermConceptMap for placeholder {}",
-					theConceptMap.getIdElement().toVersionless().getValueAsString());
+			ourLog.info("Not storing TermConceptMap for placeholder {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 			return;
 		}
 
-		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(
-				theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
-		ourLog.info(
-				"Storing TermConceptMap for {}",
-				theConceptMap.getIdElement().toVersionless().getValueAsString());
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
+		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
 		termConceptMap.setVersion(theConceptMap.getVersion());
 
-		String source = theConceptMap.hasSourceUriType()
-				? theConceptMap.getSourceUriType().getValueAsString()
-				: null;
-		String target = theConceptMap.hasTargetUriType()
-				? theConceptMap.getTargetUriType().getValueAsString()
-				: null;
+		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
+		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
 
 		/*
 		 * If this is a mapping between "resources" instead of purely between
@@ -176,8 +159,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		 * See here for a description of what that is:
 		 * http://hl7.org/fhir/conceptmap.html#bnr
 		 */
-		if ("StructureDefinition".equals(new IdType(source).getResourceType())
-				|| "StructureDefinition".equals(new IdType(target).getResourceType())) {
+		if ("StructureDefinition".equals(new IdType(source).getResourceType()) ||
+			"StructureDefinition".equals(new IdType(target).getResourceType())) {
 			return;
 		}
 
@@ -202,8 +185,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		if (isBlank(conceptMapVersion)) {
 			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndNullVersion(conceptMapUrl);
 		} else {
-			optionalExistingTermConceptMapByUrl =
-					myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
+			optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrlAndVersion(conceptMapUrl, conceptMapVersion);
 		}
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
@@ -227,8 +209,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					groupSource = source;
 				}
 				if (isBlank(groupSource)) {
-					throw new UnprocessableEntityException(Msg.code(838) + "ConceptMap[url='" + theConceptMap.getUrl()
-							+ "'] contains at least one group without a value in ConceptMap.group.source");
+					throw new UnprocessableEntityException(Msg.code(838) + "ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
 				}
 
 				String groupTarget = group.getTarget();
@@ -236,8 +217,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					groupTarget = target;
 				}
 				if (isBlank(groupTarget)) {
-					throw new UnprocessableEntityException(Msg.code(839) + "ConceptMap[url='" + theConceptMap.getUrl()
-							+ "'] contains at least one group without a value in ConceptMap.group.target");
+					throw new UnprocessableEntityException(Msg.code(839) + "ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
 				}
 
 				termConceptMapGroup = new TermConceptMapGroup();
@@ -273,9 +253,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 								termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
 								termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
 								termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
-								termConceptMapGroupElement
-										.getConceptMapGroupElementTargets()
-										.add(termConceptMapGroupElementTarget);
+								termConceptMapGroupElement.getConceptMapGroupElementTargets().add(termConceptMapGroupElementTarget);
 								myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 								if (++codesSaved % 250 == 0) {
@@ -292,40 +270,24 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
 			if (isBlank(conceptMapVersion)) {
-				String msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateConceptMapUrl",
-								conceptMapUrl,
-								existingTermConceptMap
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
+				String msg = myContext.getLocalizer().getMessage(
+					TermReadSvcImpl.class,
+					"cannotCreateDuplicateConceptMapUrl",
+					conceptMapUrl,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(Msg.code(840) + msg);
 
 			} else {
-				String msg = myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"cannotCreateDuplicateConceptMapUrlAndVersion",
-								conceptMapUrl,
-								conceptMapVersion,
-								existingTermConceptMap
-										.getResource()
-										.getIdDt()
-										.toUnqualifiedVersionless()
-										.getValue());
+				String msg = myContext.getLocalizer().getMessage(
+					TermReadSvcImpl.class,
+					"cannotCreateDuplicateConceptMapUrlAndVersion",
+					conceptMapUrl, conceptMapVersion,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(Msg.code(841) + msg);
 			}
 		}
 
-		ourLog.info(
-				"Done storing TermConceptMap[{}] for {}",
-				termConceptMap.getId(),
-				theConceptMap.getIdElement().toVersionless().getValueAsString());
+		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
@@ -334,12 +296,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		TranslateConceptResults retVal = new TranslateConceptResults();
 
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TermConceptMapGroupElementTarget> query =
-				criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
+		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
 		Root<TermConceptMapGroupElementTarget> root = query.from(TermConceptMapGroupElementTarget.class);
 
-		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin =
-				root.join("myConceptMapGroupElement");
+		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin = root.join("myConceptMapGroupElement");
 		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
@@ -348,14 +308,13 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
-		// -- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
+		//-- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
 		String latestConceptMapVersion = null;
 		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
 
 		for (TranslationQuery translationQuery : translationQueries) {
-			cachedTargets = myMemoryCacheService.getIfPresent(
-					MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery);
+			cachedTargets = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION, translationQuery);
 			if (cachedTargets == null) {
 				final List<TranslateConceptResult> targets = new ArrayList<>();
 
@@ -365,8 +324,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				if (coding.hasCode()) {
 					predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(842) + "A code must be provided for translation to occur.");
+					throw new InvalidRequestException(Msg.code(842) + "A code must be provided for translation to occur.");
 				}
 
 				if (coding.hasSystem()) {
@@ -378,21 +336,18 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasTargetSystem()) {
-					predicates.add(
-							criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
 				}
 
 				if (translationQuery.hasUrl()) {
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
 					if (translationQuery.hasConceptMapVersion()) {
 						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(
-								conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
 					} else {
 						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 							// only url and use latestConceptMapVersion
-							predicates.add(
-									criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
 						} else {
 							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 						}
@@ -409,8 +364,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				if (translationQuery.hasResourceId()) {
 					IIdType resourceId = translationQuery.getResourceId();
-					JpaPid resourcePid =
-							myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					JpaPid resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 				}
 
@@ -418,14 +372,11 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				query.where(outerPredicate);
 
 				// Use scrollable results.
-				final TypedQuery<TermConceptMapGroupElementTarget> typedQuery =
-						myEntityManager.createQuery(query.select(root));
-				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery =
-						(org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
+				final TypedQuery<TermConceptMapGroupElementTarget> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator =
-						new ScrollableResultsIterator<>(scrollableResults)) {
+				try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 
 					Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
 					while (scrollableResultsIterator.hasNext()) {
@@ -434,8 +385,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 							TranslateConceptResult translationMatch = new TranslateConceptResult();
 							if (next.getEquivalence() != null) {
-								translationMatch.setEquivalence(
-										next.getEquivalence().toCode());
+								translationMatch.setEquivalence(next.getEquivalence().toCode());
 							}
 
 							translationMatch.setCode(next.getCode());
@@ -449,6 +399,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 							targets.add(translationMatch);
 						}
 					}
+
 				}
 
 				ourLastResultsFromTranslationCache = false; // For testing.
@@ -473,8 +424,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		CriteriaQuery<TermConceptMapGroupElement> query = criteriaBuilder.createQuery(TermConceptMapGroupElement.class);
 		Root<TermConceptMapGroupElement> root = query.from(TermConceptMapGroupElement.class);
 
-		Join<TermConceptMapGroupElement, TermConceptMapGroupElementTarget> targetJoin =
-				root.join("myConceptMapGroupElementTargets");
+		Join<TermConceptMapGroupElement, TermConceptMapGroupElementTarget> targetJoin = root.join("myConceptMapGroupElementTargets");
 		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = root.join("myConceptMapGroup");
 		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
 
@@ -483,14 +433,13 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		ArrayList<Predicate> predicates;
 		Coding coding;
 
-		// -- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
+		//-- get the latest ConceptMapVersion if theTranslationRequest has ConceptMap url but no ConceptMap version
 		String latestConceptMapVersion = null;
 		if (theTranslationRequest.hasUrl() && !theTranslationRequest.hasConceptMapVersion())
 			latestConceptMapVersion = getLatestConceptMapVersion(theTranslationRequest);
 
 		for (TranslationQuery translationQuery : translationQueries) {
-			cachedElements = myMemoryCacheService.getIfPresent(
-					MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery);
+			cachedElements = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery);
 			if (cachedElements == null) {
 				final List<TranslateConceptResult> elements = new ArrayList<>();
 
@@ -503,8 +452,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
 					targetCode = coding.getCode();
 				} else {
-					throw new InvalidRequestException(
-							Msg.code(843) + "A code must be provided for translation to occur.");
+					throw new InvalidRequestException(Msg.code(843) + "A code must be provided for translation to occur.");
 				}
 
 				if (coding.hasSystem()) {
@@ -520,13 +468,11 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
 					if (translationQuery.hasConceptMapVersion()) {
 						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(
-								conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
 					} else {
 						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 							// only url and use latestConceptMapVersion
-							predicates.add(
-									criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
+							predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), latestConceptMapVersion));
 						} else {
 							predicates.add(criteriaBuilder.isNull(conceptMapJoin.get("myVersion")));
 						}
@@ -534,8 +480,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasTargetSystem()) {
-					predicates.add(
-							criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
 				}
 
 				if (translationQuery.hasSource()) {
@@ -548,8 +493,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				if (translationQuery.hasResourceId()) {
 					IIdType resourceId = translationQuery.getResourceId();
-					JpaPid resourcePid =
-							myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					JpaPid resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 				}
 
@@ -557,14 +501,11 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				query.where(outerPredicate);
 
 				// Use scrollable results.
-				final TypedQuery<TermConceptMapGroupElement> typedQuery =
-						myEntityManager.createQuery(query.select(root));
-				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery =
-						(org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
+				final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator =
-						new ScrollableResultsIterator<>(scrollableResults)) {
+				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 
 					Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
 					while (scrollableResultsIterator.hasNext()) {
@@ -574,18 +515,15 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 						 * but removing it causes tests in TerminologySvcImplR4Test to fail. We use the outcome
 						 * in a trace log to avoid ErrorProne flagging an unused return value.
 						 */
-						int size =
-								nextElement.getConceptMapGroupElementTargets().size();
+						int size = nextElement.getConceptMapGroupElementTargets().size();
 						ourLog.trace("Have {} targets", size);
 
 						myEntityManager.detach(nextElement);
 
 						if (isNotBlank(targetCode)) {
-							for (TermConceptMapGroupElementTarget next :
-									nextElement.getConceptMapGroupElementTargets()) {
+							for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
 								if (matches.add(next)) {
-									if (isBlank(targetCodeSystem)
-											|| StringUtils.equals(targetCodeSystem, next.getSystem())) {
+									if (isBlank(targetCodeSystem) || StringUtils.equals(targetCodeSystem, next.getSystem())) {
 										if (StringUtils.equals(targetCode, next.getCode())) {
 											TranslateConceptResult translationMatch = new TranslateConceptResult();
 											translationMatch.setCode(nextElement.getCode());
@@ -596,27 +534,26 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 											translationMatch.setSystemVersion(nextElement.getSystemVersion());
 											translationMatch.setConceptMapUrl(nextElement.getConceptMapUrl());
 											if (next.getEquivalence() != null) {
-												translationMatch.setEquivalence(
-														next.getEquivalence().toCode());
+												translationMatch.setEquivalence(next.getEquivalence().toCode());
 											}
 
-											if (alreadyContainsMapping(elements, translationMatch)
-													|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
+											if (alreadyContainsMapping(elements, translationMatch) || alreadyContainsMapping(retVal.getResults(), translationMatch)) {
 												continue;
 											}
 
 											elements.add(translationMatch);
 										}
 									}
+
 								}
 							}
 						}
 					}
+
 				}
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
-				myMemoryCacheService.put(
-						MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery, elements);
+				myMemoryCacheService.put(MemoryCacheService.CacheEnum.CONCEPT_TRANSLATION_REVERSE, translationQuery, elements);
 				retVal.getResults().addAll(elements);
 			} else {
 				ourLastResultsFromTranslationWithReverseCache = true; // For testing.
@@ -628,8 +565,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		return retVal;
 	}
 
-	private boolean alreadyContainsMapping(
-			List<TranslateConceptResult> elements, TranslateConceptResult translationMatch) {
+	private boolean alreadyContainsMapping(List<TranslateConceptResult> elements, TranslateConceptResult translationMatch) {
 		for (TranslateConceptResult nextExistingElement : elements) {
 			if (StringUtils.equals(nextExistingElement.getSystem(), translationMatch.getSystem())) {
 				if (StringUtils.equals(nextExistingElement.getSystemVersion(), translationMatch.getSystemVersion())) {
@@ -644,8 +580,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
-		Optional<TermConceptMap> optionalExistingTermConceptMapById =
-				myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
 
 		if (optionalExistingTermConceptMapById.isPresent()) {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
@@ -676,8 +611,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	private String getLatestConceptMapVersion(TranslationRequest theTranslationRequest) {
 
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(
-				page, theTranslationRequest.getUrl());
+		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page,
+			theTranslationRequest.getUrl());
 		if (!theConceptMapList.isEmpty()) {
 			return theConceptMapList.get(0).getVersion();
 		}
@@ -697,7 +632,9 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "matchesFound");
 			theTranslationResult.setMessage(msg);
 		}
+
 	}
+
 
 	/**
 	 * This method is present only for unit tests, do not call from client code
@@ -741,25 +678,20 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		}
 
 		for (TranslateConceptResult translationMatch : theTranslationResult.getResults()) {
-			Parameters.ParametersParameterComponent matchParam =
-					retVal.addParameter().setName("match");
+			Parameters.ParametersParameterComponent matchParam = retVal.addParameter().setName("match");
 			populateTranslateMatchParts(translationMatch, matchParam);
 		}
 
 		return retVal;
 	}
 
-	private static void populateTranslateMatchParts(
-			TranslateConceptResult theTranslationMatch, Parameters.ParametersParameterComponent theParam) {
+	private static void populateTranslateMatchParts(TranslateConceptResult theTranslationMatch, Parameters.ParametersParameterComponent theParam) {
 		if (theTranslationMatch.getEquivalence() != null) {
 			theParam.addPart().setName("equivalence").setValue(new CodeType(theTranslationMatch.getEquivalence()));
 		}
 
-		if (isNotBlank(theTranslationMatch.getSystem())
-				|| isNotBlank(theTranslationMatch.getCode())
-				|| isNotBlank(theTranslationMatch.getDisplay())) {
-			Coding value = new Coding(
-					theTranslationMatch.getSystem(), theTranslationMatch.getCode(), theTranslationMatch.getDisplay());
+		if (isNotBlank(theTranslationMatch.getSystem()) || isNotBlank(theTranslationMatch.getCode()) || isNotBlank(theTranslationMatch.getDisplay())) {
+			Coding value = new Coding(theTranslationMatch.getSystem(), theTranslationMatch.getCode(), theTranslationMatch.getDisplay());
 
 			if (isNotBlank(theTranslationMatch.getSystemVersion())) {
 				value.setVersion(theTranslationMatch.getSystemVersion());

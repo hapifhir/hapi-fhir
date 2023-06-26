@@ -48,12 +48,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -90,7 +90,7 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchWithInvalidPostUrl() throws Exception {
 		// should end with _search
-		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central");
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); 
 
 		// add parameters to the post method
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -104,11 +104,8 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(
-				responseContent,
-				containsString(
-						"<diagnostics value=\"" + Msg.code(446)
-								+ "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
+		assertThat(responseContent, containsString("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
+
 	}
 
 	@Test
@@ -122,11 +119,7 @@ public class SearchDstu2Test {
 		assertThat(responseContent, not(containsString("text")));
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Patient patient = (Patient) ourCtx.newXmlParser()
-				.parseResource(Bundle.class, responseContent)
-				.getEntry()
-				.get(0)
-				.getResource();
+		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
@@ -143,11 +136,7 @@ public class SearchDstu2Test {
 		assertThat(responseContent, not(containsString("text")));
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Patient patient = (Patient) ourCtx.newJsonParser()
-				.parseResource(Bundle.class, responseContent)
-				.getEntry()
-				.get(0)
-				.getResource();
+		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
@@ -157,8 +146,7 @@ public class SearchDstu2Test {
 	public void testResultBundleHasUpdateTime() throws Exception {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -181,8 +169,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchBlacklist01Failing() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.black1=value");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.black1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -192,8 +179,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchBlacklist01Passing() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.white1=value");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchBlacklist01&ref.white1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -205,8 +191,7 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchByPost() throws Exception {
 		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
-		StringEntity entity = new StringEntity(
-				"searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
 		HttpResponse status = ourClient.execute(httpGet);
@@ -215,36 +200,10 @@ public class SearchDstu2Test {
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				"2001",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValueAsString());
-		assertEquals(
-				"2002",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValueAsString());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent, containsString("SYSTEM"));
 	}
 
@@ -263,8 +222,7 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
 		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
-		StringEntity entity = new StringEntity(
-				"searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -273,37 +231,12 @@ public class SearchDstu2Test {
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				"2001",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValueAsString());
-		assertEquals(
-				"2002",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValueAsString());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent, containsString(":\"SYSTEM\""));
+
 	}
 
 	@Test
@@ -311,8 +244,7 @@ public class SearchDstu2Test {
 		ourServlet.setIgnoreServerParsedRequestParameters(false);
 
 		HttpPost httpGet = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=json");
-		StringEntity entity = new StringEntity(
-				"searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -321,44 +253,18 @@ public class SearchDstu2Test {
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				"2001",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValueAsString());
-		assertEquals(
-				"2002",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValueAsString());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent, containsString(":\"SYSTEM\""));
+
 	}
 
 	@Test
 	public void testSearchByPut() throws Exception {
 		HttpPut httpGet = new HttpPut("http://localhost:" + ourPort + "/Patient/_search");
-		StringEntity entity = new StringEntity(
-				"searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
+		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
 		httpGet.setEntity(entity);
 
 		HttpResponse status = ourClient.execute(httpGet);
@@ -370,44 +276,17 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchDateAndList() throws Exception {
-		HttpGet httpGet = new HttpGet(
-				"http://localhost:" + ourPort + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				2,
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.size());
-		assertEquals(
-				"2001",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValueAsString());
-		assertEquals(
-				"2002",
-				ourLastDateAndList
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValueAsString());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
+		assertEquals(2, ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().size());
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 	}
 
 	/**
@@ -417,8 +296,7 @@ public class SearchDstu2Test {
 	public void testSearchPagesAllHaveCorrectBundleType() throws Exception {
 		Bundle resp;
 		{
-			HttpGet httpGet = new HttpGet(
-					"http://localhost:" + ourPort + "/Patient?searchHugeResults=yes&_count=10&_pretty=true");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchHugeResults=yes&_count=10&_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -516,8 +394,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams03() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -604,6 +481,7 @@ public class SearchDstu2Test {
 		assertEquals("stringParam:false:false", ourLastMethod);
 	}
 
+
 	@Test
 	public void testSearchWhitelist01Failing() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref=value");
@@ -616,8 +494,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchWhitelist01Passing() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref.white1=value");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref.white1=value");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -649,13 +526,13 @@ public class SearchDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceNoIdProvider implements IResourceProvider {
@@ -665,13 +542,14 @@ public class SearchDstu2Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
-		public List<Patient> searchByRef(@RequiredParam(name = "reference") ReferenceParam theParam) {
+		public List<Patient> searchByRef(
+			@RequiredParam(name = "reference") ReferenceParam theParam) {
 			ourLastMethod = "noIdProvider";
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -681,14 +559,14 @@ public class SearchDstu2Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
-		@Search(queryName = "searchBlacklist01")
+		//@formatter:off
+		@Search(queryName="searchBlacklist01")
 		public List<Patient> searchBlacklist01(
-				@RequiredParam(chainBlacklist = "black1", name = "ref") ReferenceParam theParam) {
+				@RequiredParam(chainBlacklist="black1", name = "ref") ReferenceParam theParam) {
 			ourLastMethod = "searchBlacklist01";
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
 		/**
 		 * For testSearchWithInvalidPostUrl, ok to add a real body later
@@ -698,29 +576,30 @@ public class SearchDstu2Test {
 			throw new UnsupportedOperationException();
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
 		public List<Patient> searchByIdRef(
-				@RequiredParam(name = "_id") StringParam id,
-				@OptionalParam(name = "reference") ReferenceParam theParam) {
+			@RequiredParam(name="_id") StringParam id,
+			@OptionalParam(name = "reference") ReferenceParam theParam) {
 			ourLastMethod = "idProvider";
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
 		public List<Patient> searchByQualifiedString(
-				@RequiredParam(name = "_id") StringParam id,
-				@RequiredParam(name = "stringParam") StringParam stringParam) {
+			@RequiredParam(name="_id") StringParam id,
+			@RequiredParam(name = "stringParam") StringParam stringParam) {
 			ourLastMethod = "stringParam:" + id.isExact() + ":" + stringParam.isExact();
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
-		public List<Patient> searchDateAndList(@RequiredParam(name = "searchDateAndList") DateAndListParam theParam) {
+		public List<Patient> searchDateAndList(
+				@RequiredParam(name = "searchDateAndList") DateAndListParam theParam) {
 			ourLastMethod = "searchDateAndList";
 			ourLastDateAndList = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
@@ -729,56 +608,59 @@ public class SearchDstu2Test {
 			retVal.add(patient.addIdentifier(new IdentifierDt("SYSTEM", "CODE")));
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
-		public List<Patient> searchHugeResults(@RequiredParam(name = "searchHugeResults") StringParam theParam) {
+		public List<Patient> searchHugeResults(
+				@RequiredParam(name = "searchHugeResults") StringParam theParam) {
 			ourLastMethod = "searchHugeResults";
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 0; i < 100; i++) {
 				Patient patient = new Patient();
 				patient.setId("" + i);
-				retVal.add(patient.addIdentifier(new IdentifierDt("SYSTEM", "CODE" + i)));
+				retVal.add(patient.addIdentifier(new IdentifierDt("SYSTEM", "CODE"+ i)));
 			}
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
-		@Search(queryName = "searchNoList")
-		public List<Patient> searchNoList(@RequiredParam(name = "ref") ReferenceParam theParam) {
+		//@formatter:off
+		@Search(queryName="searchNoList")
+		public List<Patient> searchNoList(
+				@RequiredParam(name = "ref") ReferenceParam theParam) {
 			ourLastMethod = "searchNoList";
 			ourLastRef = theParam;
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
-		@Search(queryName = "searchReturnNull")
+		//@formatter:off
+		@Search(queryName="searchReturnNull")
 		public List<Patient> searchNoList() {
 			ourLastMethod = "searchReturnNull";
 			return null;
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
-		public List<Patient> searchQuantity(@RequiredParam(name = "quantity") QuantityParam theParam) {
+		public List<Patient> searchQuantity(
+				@RequiredParam(name="quantity") QuantityParam theParam) {
 			ourLastMethod = "searchQuantity";
 			ourLastQuantity = theParam;
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
-		// @formatter:off
-		@Search(queryName = "searchWhitelist01")
+		//@formatter:off
+		@Search(queryName="searchWhitelist01")
 		public List<Patient> searchWhitelist01(
-				@RequiredParam(chainWhitelist = "white1", name = "ref") ReferenceParam theParam) {
+				@RequiredParam(chainWhitelist="white1", name = "ref") ReferenceParam theParam) {
 			ourLastMethod = "searchWhitelist01";
 			return Collections.emptyList();
 		}
-		// @formatter:on
+		//@formatter:on
 
 		@Search(queryName = "searchWithBundleProvider")
 		public IBundleProvider searchWithBundleProvider() {
@@ -816,9 +698,10 @@ public class SearchDstu2Test {
 		public Patient searchWithRef() {
 			Patient patient = new Patient();
 			patient.setId("Patient/1/_history/1");
-			patient.getManagingOrganization()
-					.setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
+			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
 			return patient;
 		}
+
 	}
+
 }

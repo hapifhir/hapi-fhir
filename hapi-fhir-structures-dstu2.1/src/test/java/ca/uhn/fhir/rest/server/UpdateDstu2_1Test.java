@@ -61,9 +61,7 @@ public class UpdateDstu2_1Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?_id=001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -71,11 +69,12 @@ public class UpdateDstu2_1Test {
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertEquals("Patient?_id=001", ourConditionalUrl);
+			assertEquals("Patient?_id=001",ourConditionalUrl);
 			assertEquals(null, ourId);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -85,9 +84,7 @@ public class UpdateDstu2_1Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -97,12 +94,9 @@ public class UpdateDstu2_1Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
-
+		
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(
-				Msg.code(419)
-						+ "Can not update resource, resource body must contain an ID element for update (PUT) operation",
-				oo.getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -113,9 +107,7 @@ public class UpdateDstu2_1Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -128,6 +120,7 @@ public class UpdateDstu2_1Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -138,9 +131,7 @@ public class UpdateDstu2_1Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/1/_history/2");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -170,13 +161,13 @@ public class UpdateDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -187,15 +178,10 @@ public class UpdateDstu2_1Test {
 		}
 
 		@Update()
-		public MethodOutcome updatePatient(
-				@IdParam IdType theId,
-				@ResourceParam Patient thePatient,
-				@ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			ourId = theId;
 			ourConditionalUrl = theConditionalUrl;
-			IdType id = theId != null
-					? theId.withVersion(thePatient.getIdentifier().get(0).getValue())
-					: new IdType("Patient/1");
+			IdType id = theId != null ? theId.withVersion(thePatient.getIdentifier().get(0).getValue()) : new IdType("Patient/1");
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics("OODETAILS");
 			if (id.getValueAsString().contains("CREATE")) {
@@ -204,5 +190,6 @@ public class UpdateDstu2_1Test {
 
 			return new MethodOutcome(id, oo);
 		}
+
 	}
 }

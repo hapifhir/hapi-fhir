@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NumberParamTest {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-
+	
 	@Test
 	public void testFull() {
 		NumberParam p = new NumberParam();
@@ -38,7 +38,7 @@ public class NumberParamTest {
 		assertEquals("5.4", p.getValue().toPlainString());
 		assertEquals("ap5.4", p.getValueAsQueryToken(ourCtx));
 	}
-
+	
 	@Test
 	public void testNoQualifier() {
 		NumberParam p = new NumberParam();
@@ -48,6 +48,7 @@ public class NumberParamTest {
 		assertEquals("5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
+	
 	/**
 	 * See #696
 	 */
@@ -61,8 +62,10 @@ public class NumberParamTest {
 		assertEquals("-5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

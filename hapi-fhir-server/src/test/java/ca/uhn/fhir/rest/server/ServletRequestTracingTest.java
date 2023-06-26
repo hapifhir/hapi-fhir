@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankString;
@@ -26,7 +27,7 @@ public class ServletRequestTracingTest {
 
 		// verify
 		assertThat("id generated", myRequestIdResult, not(blankString()));
-		assertEquals(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID), myRequestIdResult);
+		assertEquals(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID),myRequestIdResult);
 	}
 
 	@Test
@@ -52,4 +53,5 @@ public class ServletRequestTracingTest {
 		assertThat("id generated", secondResult, not(blankString()));
 		assertEquals(myRequestIdResult, secondResult);
 	}
+
 }

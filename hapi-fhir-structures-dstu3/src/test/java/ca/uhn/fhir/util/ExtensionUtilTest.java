@@ -22,5 +22,8 @@ class ExtensionUtilTest {
 		assertEquals("false", ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child2"));
 		assertEquals(null, ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "unknown"));
 		assertEquals(null, ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child3"));
+
 	}
+
+
 }

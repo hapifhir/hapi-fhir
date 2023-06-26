@@ -1,15 +1,16 @@
 package ca.uhn.fhir.tinder.parser;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.tinder.model.BaseElement;
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.Resource;
-import org.apache.maven.plugin.MojoFailureException;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.maven.plugin.MojoFailureException;
+
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Resource;
 
 public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 	private List<String> myInputStreamNames;
@@ -28,11 +29,11 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	@Override
 	protected void postProcess(BaseElement theTarget) throws MojoFailureException {
 		super.postProcess(theTarget);
-
+		
 		if ("Bundle".equals(theTarget.getName())) {
 			addEverythingToSummary(theTarget);
 		}
-
+		
 		if (getVersion().equals("dstu2") && theTarget instanceof Resource) {
 			try {
 				new CompartmentParser(getVersion(), (Resource) theTarget).parse();
@@ -40,6 +41,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 				throw new MojoFailureException(Msg.code(161) + e.toString(), e);
 			}
 		}
+		
 	}
 
 	private void addEverythingToSummary(BaseElement theTarget) {
@@ -56,7 +58,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		for (String next : theBaseResourceNames) {
 			String resName = "/res/" + getVersion() + "/" + next.toLowerCase() + "-spreadsheet.xml";
 			resName = resName.replace("/dev/", "/dstu2/");
-
+			
 			InputStream nextRes = getClass().getResourceAsStream(resName);
 			myInputStreams.add(nextRes);
 			if (nextRes == null) {
@@ -91,4 +93,5 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected boolean isSpreadsheet(String theFileName) {
 		return theFileName.endsWith("spreadsheet.xml");
 	}
+
 }

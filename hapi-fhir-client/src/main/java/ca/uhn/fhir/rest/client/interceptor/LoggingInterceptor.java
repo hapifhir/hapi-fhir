@@ -94,8 +94,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 					myLog.debug("Client request body:\n{}", content);
 				}
 			} catch (IllegalStateException | IOException e) {
-				myLog.warn(
-						"Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
+				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
 	}
@@ -241,4 +240,5 @@ public class LoggingInterceptor implements IClientInterceptor {
 		myLogResponseSummary = theValue;
 		return this;
 	}
+
 }

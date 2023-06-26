@@ -64,12 +64,14 @@ public class DropTableTask extends BaseTableTask {
 
 		DropIndexTask theIndexTask = new DropIndexTask(getProductVersion(), getSchemaVersion());
 		theIndexTask
-				.setTableName(getTableName())
-				.setConnectionProperties(getConnectionProperties())
-				.setDriverType(getDriverType())
-				.setDryRun(isDryRun());
+			.setTableName(getTableName())
+			.setConnectionProperties(getConnectionProperties())
+			.setDriverType(getDriverType())
+			.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
-			theIndexTask.setIndexName(nextIndex).execute();
+			theIndexTask
+				.setIndexName(nextIndex)
+				.execute();
 		}
 
 		logInfo(ourLog, "Dropping table: {}", getTableName());
@@ -77,5 +79,8 @@ public class DropTableTask extends BaseTableTask {
 		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
+
 	}
+
+
 }

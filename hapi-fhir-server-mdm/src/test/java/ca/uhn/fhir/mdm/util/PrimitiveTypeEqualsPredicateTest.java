@@ -93,4 +93,5 @@ class PrimitiveTypeEqualsPredicateTest {
 		assertTrue(cut.test(myPositiveTest1, myPositiveTest2));
 		assertTrue(cut.test(myPositiveTest1, myPositiveTest1));
 	}
+
 }

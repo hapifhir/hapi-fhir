@@ -20,6 +20,7 @@
 package ca.uhn.fhir.rest.annotation;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -31,7 +32,7 @@ import java.lang.annotation.Target;
  * method
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = ElementType.METHOD)
+@Target(value= ElementType.METHOD)
 public @interface GraphQL {
 	RequestTypeEnum type() default RequestTypeEnum.GET;
 }

@@ -38,10 +38,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.
@@ -74,10 +74,8 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@Autowired
 	private Environment myEnvironment;
-
 	@Autowired
 	private ApplicationContext myApplicationContext;
-
 	@Autowired
 	protected AutowiringSpringBeanJobFactory mySchedulerJobFactory;
 
@@ -171,8 +169,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	private void scheduleJobs() {
-		Collection<IHasScheduledJobs> values =
-				myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
+		Collection<IHasScheduledJobs> values = myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
 		ourLog.info("Scheduling {} jobs in {}", values.size(), myApplicationContext.getId());
 		values.forEach(t -> t.scheduleJobs(this));
 	}
@@ -208,11 +205,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		scheduleJob("clustered", myClusteredScheduler, theIntervalMillis, theJobDefinition);
 	}
 
-	private void scheduleJob(
-			String theInstanceName,
-			IHapiScheduler theScheduler,
-			long theIntervalMillis,
-			ScheduledJobDefinition theJobDefinition) {
+	private void scheduleJob(String theInstanceName, IHapiScheduler theScheduler, long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		if (isSchedulingDisabled()) {
 			return;
 		}
@@ -220,11 +213,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		assert theJobDefinition.getId() != null;
 		assert theJobDefinition.getJobClass() != null;
 
-		ourLog.info(
-				"Scheduling {} job {} with interval {}",
-				theInstanceName,
-				theJobDefinition.getId(),
-				StopWatch.formatMillis(theIntervalMillis));
+		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
 		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}

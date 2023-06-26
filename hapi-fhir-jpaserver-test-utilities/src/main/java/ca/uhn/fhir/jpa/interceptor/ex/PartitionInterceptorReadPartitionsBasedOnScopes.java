@@ -26,8 +26,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 // This class is replicated in PartitionExamples.java -- Keep it up to date there too!!
 @Interceptor
@@ -37,14 +37,16 @@ public class PartitionInterceptorReadPartitionsBasedOnScopes {
 	public RequestPartitionId readPartition(ServletRequestDetails theRequest) {
 
 		HttpServletRequest servletRequest = theRequest.getServletRequest();
-		Set<String> approvedScopes =
-				(Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
+		Set<String> approvedScopes = (Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
 
-		String partition = approvedScopes.stream()
-				.filter(t -> t.startsWith("partition-"))
-				.map(t -> t.substring("partition-".length()))
-				.findFirst()
-				.orElseThrow(() -> new InvalidRequestException("No partition scopes found in request"));
+		String partition = approvedScopes
+			.stream()
+			.filter(t->t.startsWith("partition-"))
+			.map(t->t.substring("partition-".length()))
+			.findFirst()
+			.orElseThrow(()->new InvalidRequestException("No partition scopes found in request"));
 		return RequestPartitionId.fromPartitionName(partition);
+
 	}
+
 }

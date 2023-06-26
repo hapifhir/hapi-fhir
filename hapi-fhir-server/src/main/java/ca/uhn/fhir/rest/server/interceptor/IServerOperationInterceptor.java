@@ -131,4 +131,5 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 */
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource);
+
 }

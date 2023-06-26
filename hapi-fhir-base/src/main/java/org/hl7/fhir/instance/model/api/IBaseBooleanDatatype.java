@@ -19,4 +19,7 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-public interface IBaseBooleanDatatype extends IPrimitiveType<Boolean> {}
+
+public interface IBaseBooleanDatatype extends IPrimitiveType<Boolean> {
+
+}

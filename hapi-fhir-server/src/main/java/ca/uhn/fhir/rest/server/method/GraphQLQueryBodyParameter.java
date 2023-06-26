@@ -46,9 +46,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
 
@@ -83,21 +81,14 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(358) + "Method '" + theMethod.getName() + "' in type '"
-					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
-					+ " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(358) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
 		}
 		if (!String.class.equals(theParameterType)) {
-			throw new ConfigurationException(Msg.code(359) + "Method '" + theMethod.getName() + "' in type '"
-					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
-					+ " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(359) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}
+
 }

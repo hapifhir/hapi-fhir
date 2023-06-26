@@ -25,6 +25,9 @@ import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,9 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
-import javax.annotation.Nonnull;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 
@@ -52,10 +52,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 	@Nonnull
 	@Override
-	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength)
-			throws IOException {
-		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times");
-		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()");
+	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) throws IOException {
+		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times" );
+		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()" );
 
 		addHeaders();
 		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
@@ -71,9 +70,8 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip)
-			throws IOException {
-		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()");
+	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
+		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()" );
 
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
@@ -121,4 +119,5 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	static String sanitizeHeaderField(String theKey) {
 		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
+
 }

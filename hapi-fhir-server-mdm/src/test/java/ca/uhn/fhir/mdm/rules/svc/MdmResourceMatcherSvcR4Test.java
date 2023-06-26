@@ -20,16 +20,11 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	public void before() {
 		super.before();
 
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier"))
-				.thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active"))
-				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		myMdmResourceMatcherSvc = buildMatcher(buildActiveBirthdateIdRules());
 
@@ -53,31 +48,13 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 
 	@Test
 	public void testMatchResult() {
-		assertMatchResult(
-				MdmMatchResultEnum.POSSIBLE_MATCH,
-				1L,
-				0.816,
-				false,
-				false,
-				myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny));
+		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 0.816, false, false, myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny));
 		myJohn.addName().setFamily("Smith");
 		myJohny.addName().setFamily("Smith");
-		assertMatchResult(
-				MdmMatchResultEnum.MATCH,
-				3L,
-				1.816,
-				false,
-				false,
-				myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny));
+		assertMatchResult(MdmMatchResultEnum.MATCH, 3L, 1.816, false, false, myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny));
 		Patient patient3 = new Patient();
 		patient3.setId("Patient/3");
 		patient3.addName().addGiven("Henry");
-		assertMatchResult(
-				MdmMatchResultEnum.NO_MATCH,
-				0L,
-				0.0,
-				false,
-				false,
-				myMdmResourceMatcherSvc.getMatchResult(myJohn, patient3));
+		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 0L, 0.0, false, false, myMdmResourceMatcherSvc.getMatchResult(myJohn, patient3));
 	}
 }

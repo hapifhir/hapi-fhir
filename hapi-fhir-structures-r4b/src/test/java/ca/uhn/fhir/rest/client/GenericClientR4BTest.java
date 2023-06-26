@@ -68,27 +68,21 @@ public class GenericClientR4BTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {
-					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
-				};
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
-					return new ReaderInputStream(
-							new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 				} else {
-					return new ReaderInputStream(
-							new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 				}
 			}
 		});
@@ -98,37 +92,20 @@ public class GenericClientR4BTest {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create()
-				.resource(pt)
-				.prefer(PreferReturnEnum.REPRESENTATION)
-				.execute();
+		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals(2, myAnswerCount);
 		assertNotNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
-				((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
-				((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals(
-				"http://example.com/fhir/Patient",
-				capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW,
-				capt.getAllValues()
-						.get(0)
-						.getFirstHeader("content-type")
-						.getValue()
-						.replaceAll(";.*", ""));
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
-		assertEquals(
-				"http://foo.com/base/Patient/222/_history/3",
-				capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
 	}
 
 	@Test
@@ -138,46 +115,28 @@ public class GenericClientR4BTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
-		Header[] headers = new Header[] {
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
-		};
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+		Header[] headers = new Header[]{new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Patient response = client.read()
-				.resource(Patient.class)
-				.withId(new IdType("Patient/1234"))
-				.execute();
+		Patient response = client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
 
-		assertEquals(
-				"http://foo.com/Patient/123/_history/2333",
-				response.getIdElement().getValue());
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
 
 		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+
 	}
 
 	private String getResourceResult() {
-		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">"
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>";
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>" + "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>" + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>" + "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>" + "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>" + "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>" + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />" + "</Patient>";
 		return msg;
 	}
 
@@ -185,4 +144,5 @@ public class GenericClientR4BTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

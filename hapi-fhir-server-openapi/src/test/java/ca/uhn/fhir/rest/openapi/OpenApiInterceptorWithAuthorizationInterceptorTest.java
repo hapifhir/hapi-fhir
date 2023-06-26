@@ -34,19 +34,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 
-	private static final Logger ourLog =
-			LoggerFactory.getLogger(OpenApiInterceptorWithAuthorizationInterceptorTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorWithAuthorizationInterceptorTest.class);
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@RegisterExtension
 	@Order(0)
 	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
-			.withServletPath("/fhir/*")
-			.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
-			.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))
-			.withServer(t -> t.registerProvider(new OpenApiInterceptorTest.MyLastNProvider()))
-			.withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
-
+		.withServletPath("/fhir/*")
+		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
+		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))
+		.withServer(t -> t.registerProvider(new OpenApiInterceptorTest.MyLastNProvider()))
+		.withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
 	private CloseableHttpClient myClient;
 	private AuthorizationInterceptor myAuthorizationInterceptor;
 	private List<IAuthRule> myRules;
@@ -73,7 +70,9 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 		myServer.getRestfulServer().registerInterceptor(myAuthorizationInterceptor);
 
-		myRules = new RuleBuilder().allowAll().build();
+		myRules = new RuleBuilder()
+			.allowAll()
+			.build();
 
 		String resp;
 		HttpGet get;

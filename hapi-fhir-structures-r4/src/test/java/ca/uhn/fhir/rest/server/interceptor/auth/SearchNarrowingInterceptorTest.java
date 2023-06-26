@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -43,11 +44,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static java.util.Collections.singletonList;
@@ -77,18 +78,15 @@ public class SearchNarrowingInterceptorTest {
 	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
 	private IGenericClient myClient;
-
 	@Mock
 	private IValidationSupport myValidationSupport;
-
 	private MySearchNarrowingInterceptor myInterceptor;
-
 	@RegisterExtension
 	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
-			.registerProvider(new DummyObservationResourceProvider())
-			.registerProvider(new DummyPatientResourceProvider())
-			.registerProvider(new DummySystemProvider())
-			.withPagingProvider(new FifoMemoryPagingProvider(100));
+		.registerProvider(new DummyObservationResourceProvider())
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummySystemProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100));
 
 	@BeforeEach
 	public void before() {
@@ -118,7 +116,10 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = null;
 
-		myClient.search().forResource("Patient").execute();
+		myClient
+			.search()
+			.forResource("Patient")
+			.execute();
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastCodeParam);
@@ -130,37 +131,20 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCode_NotInSelected_ClientRequestedNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addCodeNotInValueSet("Observation", "code", "http://myvs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeNotInValueSet("Observation", "code", "http://myvs");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertEquals(1, ourLastCodeParam.size());
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
-		assertEquals(
-				TokenParamModifier.NOT_IN,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getModifier());
-		assertEquals(
-				"http://myvs",
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValue());
-		assertEquals(
-				null,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getSystem());
+		assertEquals(TokenParamModifier.NOT_IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -169,37 +153,20 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCode_InSelected_ClientRequestedNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addCodeInValueSet("Observation", "code", "http://myvs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertEquals(1, ourLastCodeParam.size());
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
-		assertEquals(
-				TokenParamModifier.IN,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getModifier());
-		assertEquals(
-				"http://myvs",
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValue());
-		assertEquals(
-				null,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getSystem());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -212,11 +179,15 @@ public class SearchNarrowingInterceptorTest {
 		myInterceptor.setValidationSupport(myValidationSupport);
 		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		when(myValidationSupport.expandValueSet(any(), any(), eq("http://large-vs")))
-				.thenReturn(createValueSetWithCodeCount(100));
+			.thenReturn(createValueSetWithCodeCount(100));
 
-		ourNextAuthorizedList = new AuthorizedList().addCodeInValueSet("Observation", "code", "http://large-vs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://large-vs");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastCodeParam);
@@ -228,87 +199,52 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCode_InSelected_ClientRequestedBundleWithNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addCodeInValueSet("Observation", "code", "http://myvs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Observation?subject=Patient/123");
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		myClient.transaction().withBundle(bundle).execute();
+		myClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
 
 		assertEquals("transaction", ourLastHitMethod);
-		String expectedUrl = "Observation?" + escapeUrlParam("code:in")
-				+ "="
-				+ escapeUrlParam("http://myvs")
-				+ "&subject="
-				+ escapeUrlParam("Patient/123");
+		String expectedUrl = "Observation?" +
+			escapeUrlParam("code:in") +
+			"=" +
+			escapeUrlParam("http://myvs") +
+			"&subject=" +
+			escapeUrlParam("Patient/123");
 		assertEquals(expectedUrl, ourLastBundleRequest.getUrl());
+
 	}
 
 	@Test
 	public void testNarrowCode_InSelected_ClientRequestedOtherInParam() {
-		ourNextAuthorizedList = new AuthorizedList().addCodeInValueSet("Observation", "code", "http://myvs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
 
 		myClient.registerInterceptor(new LoggingInterceptor(false));
-		myClient.search()
-				.forResource("Observation")
-				.where(singletonMap(
-						"code", singletonList(new TokenParam("http://othervs").setModifier(TokenParamModifier.IN))))
-				.execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.where(singletonMap("code", singletonList(new TokenParam("http://othervs").setModifier(TokenParamModifier.IN))))
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertEquals(2, ourLastCodeParam.size());
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
-		assertEquals(
-				TokenParamModifier.IN,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getModifier());
-		assertEquals(
-				"http://othervs",
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValue());
-		assertEquals(
-				null,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getSystem());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://othervs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(1).size());
-		assertEquals(
-				TokenParamModifier.IN,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getModifier());
-		assertEquals(
-				"http://myvs",
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getValue());
-		assertEquals(
-				null,
-				ourLastCodeParam
-						.getValuesAsQueryTokens()
-						.get(1)
-						.getValuesAsQueryTokens()
-						.get(0)
-						.getSystem());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
@@ -317,9 +253,13 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCode_InSelected_DifferentResource() {
-		ourNextAuthorizedList = new AuthorizedList().addCodeInValueSet("Procedure", "code", "http://myvs");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Procedure", "code", "http://myvs");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertEquals(null, ourLastCodeParam);
@@ -327,9 +267,13 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCompartments("Patient/123", "Patient/456");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
@@ -349,21 +293,24 @@ public class SearchNarrowingInterceptorTest {
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient");
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		myClient.transaction().withBundle(bundle).execute();
+		myClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
 
 		assertEquals("transaction", ourLastHitMethod);
 		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
 	}
-
 	@Test
 	public void testNarrow_OnlyAppliesToSearches() {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123");
+
 
 		Observation o = new Observation();
 		o.setSubject(new Reference("Patient/456"));
 
 		{
-			// Create a resource outside of the referenced compartment
+			//Create a resource outside of the referenced compartment
 			Bundle bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
@@ -375,7 +322,7 @@ public class SearchNarrowingInterceptorTest {
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("Observation");
 
-			// Update a resource outside of the referenced compartment
+			//Update a resource outside of the referenced compartment
 			myClient.transaction().withBundle(bundle).execute();
 		}
 	}
@@ -385,7 +332,10 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		myClient.search().forResource("Patient").execute();
+		myClient
+			.search()
+			.forResource("Patient")
+			.execute();
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
@@ -397,10 +347,11 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		myClient.search()
-				.forResource("Patient")
-				.where(IAnyResource.RES_ID.exactly().codes("Patient/123", "Patient/999"))
-				.execute();
+		myClient
+			.search()
+			.forResource("Patient")
+			.where(IAnyResource.RES_ID.exactly().codes("Patient/123", "Patient/999"))
+			.execute();
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastNameParam);
@@ -412,11 +363,12 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		myClient.search()
-				.forResource("Observation")
-				.where(Observation.PATIENT.hasAnyOfIds("Patient/456", "Patient/777"))
-				.and(Observation.PATIENT.hasAnyOfIds("Patient/456", "Patient/888"))
-				.execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.where(Observation.PATIENT.hasAnyOfIds("Patient/456", "Patient/777"))
+			.and(Observation.PATIENT.hasAnyOfIds("Patient/456", "Patient/888"))
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
@@ -431,11 +383,12 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		myClient.search()
-				.forResource("Observation")
-				.where(Observation.PATIENT.hasAnyOfIds("456", "777"))
-				.and(Observation.PATIENT.hasAnyOfIds("456", "888"))
-				.execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.where(Observation.PATIENT.hasAnyOfIds("456", "777"))
+			.and(Observation.PATIENT.hasAnyOfIds("456", "888"))
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
@@ -450,11 +403,12 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		myClient.search()
-				.forResource("Observation")
-				.where(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/777"))
-				.and(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/888"))
-				.execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.where(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/777"))
+			.and(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/888"))
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
@@ -470,11 +424,12 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			myClient.search()
-					.forResource("Observation")
-					.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
-					.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
-					.execute();
+			myClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.and(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/888"))
+				.execute();
 
 			fail("Expected a 403 error");
 		} catch (ForbiddenOperationException e) {
@@ -490,11 +445,12 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			myClient.search()
-					.forResource("Observation")
-					.where(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/777"))
-					.and(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/888"))
-					.execute();
+			myClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.and(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/888"))
+				.execute();
 
 			fail("Expected a 403 error");
 		} catch (ForbiddenOperationException e) {
@@ -510,10 +466,11 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			myClient.search()
-					.forResource("Observation")
-					.where(Observation.PATIENT.hasAnyOfIds("Patient/"))
-					.execute();
+			myClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/"))
+				.execute();
 
 			fail("Expected a 403 error");
 		} catch (ForbiddenOperationException e) {
@@ -529,10 +486,11 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/");
 
 		try {
-			myClient.search()
-					.forResource("Observation")
-					.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
-					.execute();
+			myClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
+				.execute();
 
 			fail("Expected a 403 error");
 		} catch (ForbiddenOperationException e) {
@@ -547,9 +505,13 @@ public class SearchNarrowingInterceptorTest {
 	 */
 	@Test
 	public void testNarrowResources_ObservationsByPatientResources_ClientRequestedNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addResources("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addResources("Patient/123", "Patient/456");
 
-		myClient.search().forResource("Observation").execute();
+		myClient
+			.search()
+			.forResource("Observation")
+			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
 		assertNull(ourLastIdParam);
@@ -561,9 +523,13 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowResources_PatientByPatientResources_ClientRequestedNoParams() {
-		ourNextAuthorizedList = new AuthorizedList().addResources("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList()
+			.addResources("Patient/123", "Patient/456");
 
-		myClient.search().forResource("Patient").execute();
+		myClient
+			.search()
+			.forResource("Patient")
+			.execute();
 
 		assertEquals("Patient.search", ourLastHitMethod);
 		assertNull(ourLastCodeParam);
@@ -574,13 +540,16 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
-		List<? extends IQueryParameterOr<? extends IQueryParameterType>> valuesAsQueryTokens =
-				theParams.getValuesAsQueryTokens();
+		List<? extends IQueryParameterOr<? extends IQueryParameterType>> valuesAsQueryTokens = theParams.getValuesAsQueryTokens();
 
-		return valuesAsQueryTokens.stream()
-				.map(IQueryParameterOr::getValuesAsQueryTokens)
-				.map(t -> t.stream().map(j -> j.getValueAsQueryToken(ourCtx)).collect(Collectors.joining(",")))
-				.collect(Collectors.toList());
+		return valuesAsQueryTokens
+			.stream()
+			.map(IQueryParameterOr::getValuesAsQueryTokens)
+			.map(t -> t
+				.stream()
+				.map(j -> j.getValueAsQueryToken(ourCtx))
+				.collect(Collectors.joining(",")))
+			.collect(Collectors.toList());
 	}
 
 	@Nonnull
@@ -588,7 +557,11 @@ public class SearchNarrowingInterceptorTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.getExpansion().setTotal(theCount);
 		for (int i = 0; i < theCount; i++) {
-			valueSet.getExpansion().addContains().setSystem(FOO_CS_URL).setCode(CODE_PREFIX + i);
+			valueSet
+				.getExpansion()
+				.addContains()
+				.setSystem(FOO_CS_URL)
+				.setCode(CODE_PREFIX + i);
 		}
 
 		return new IValidationSupport.ValueSetExpansionOutcome(valueSet);
@@ -608,13 +581,15 @@ public class SearchNarrowingInterceptorTest {
 
 		@Search()
 		public List<Resource> search(
-				@OptionalParam(name = "_id") TokenAndListParam theIdParam,
-				@OptionalParam(name = "name") StringAndListParam theNameParam) {
+			@OptionalParam(name = "_id") TokenAndListParam theIdParam,
+			@OptionalParam(name = "name") StringAndListParam theNameParam
+		) {
 			ourLastHitMethod = "Patient.search";
 			ourLastIdParam = theIdParam;
 			ourLastNameParam = theNameParam;
 			return ourReturn;
 		}
+
 	}
 
 	public static class DummyObservationResourceProvider implements IResourceProvider {
@@ -624,13 +599,15 @@ public class SearchNarrowingInterceptorTest {
 			return Observation.class;
 		}
 
+
 		@Search()
 		public List<Resource> search(
-				@OptionalParam(name = "_id") TokenAndListParam theIdParam,
-				@OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam theSubjectParam,
-				@OptionalParam(name = Observation.SP_PATIENT) ReferenceAndListParam thePatientParam,
-				@OptionalParam(name = Observation.SP_PERFORMER) ReferenceAndListParam thePerformerParam,
-				@OptionalParam(name = Observation.SP_CODE) TokenAndListParam theCodeParam) {
+			@OptionalParam(name = "_id") TokenAndListParam theIdParam,
+			@OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam theSubjectParam,
+			@OptionalParam(name = Observation.SP_PATIENT) ReferenceAndListParam thePatientParam,
+			@OptionalParam(name = Observation.SP_PERFORMER) ReferenceAndListParam thePerformerParam,
+			@OptionalParam(name = Observation.SP_CODE) TokenAndListParam theCodeParam
+		) {
 			ourLastHitMethod = "Observation.search";
 			ourLastIdParam = theIdParam;
 			ourLastSubjectParam = theSubjectParam;
@@ -639,6 +616,7 @@ public class SearchNarrowingInterceptorTest {
 			ourLastCodeParam = theCodeParam;
 			return ourReturn;
 		}
+
 	}
 
 	public static class DummySystemProvider {
@@ -659,4 +637,6 @@ public class SearchNarrowingInterceptorTest {
 			return ourNextAuthorizedList;
 		}
 	}
+
+
 }

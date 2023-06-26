@@ -46,10 +46,10 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.hl7.fhir.dstu2.model.Subscription;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -77,10 +77,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu2(
-			RestfulServer theRestfulServer,
-			IFhirSystemDao<Bundle, MetaDt> theSystemDao,
-			JpaStorageSettings theStorageSettings) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, JpaStorageSettings theStorageSettings) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
@@ -106,18 +103,15 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 			for (RestResource nextResource : nextRest.getResource()) {
 
-				ConditionalDeleteStatusEnum conditionalDelete =
-						nextResource.getConditionalDeleteElement().getValueAsEnum();
-				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED
-						&& myStorageSettings.isAllowMultipleDelete() == false) {
+				ConditionalDeleteStatusEnum conditionalDelete = nextResource.getConditionalDeleteElement().getValueAsEnum();
+				if (conditionalDelete == ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED && myStorageSettings.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
 				}
 
 				// Add resource counts
 				Long count = counts.get(nextResource.getTypeElement().getValueAsString());
 				if (count != null) {
-					nextResource.addUndeclaredExtension(
-							false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
+					nextResource.addUndeclaredExtension(false, ExtensionConstants.CONF_RESOURCE_COUNT, new DecimalDt(count));
 				}
 
 				// Add chained params
@@ -132,12 +126,11 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 						}
 					}
 				}
+
 			}
 		}
 
-		if (myStorageSettings
-				.getSupportedSubscriptionTypes()
-				.contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
 			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
 				ExtensionDt websocketExtension = new ExtensionDt();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);

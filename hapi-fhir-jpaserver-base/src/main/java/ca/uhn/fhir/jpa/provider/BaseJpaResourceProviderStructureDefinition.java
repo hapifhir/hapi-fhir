@@ -35,22 +35,22 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBaseResource>
-		extends BaseJpaResourceProvider<T> {
+public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	/**
 	 * <code>$snapshot</code> operation
 	 */
-	@Operation(name = JpaConstants.OPERATION_SNAPSHOT, idempotent = true)
+	@Operation(name=JpaConstants.OPERATION_SNAPSHOT, idempotent = true)
 	public IBaseResource snapshot(
-			@IdParam(optional = true) IIdType theId,
-			@OperationParam(name = "definition", typeName = "StructureDefinition") IBaseResource theStructureDefinition,
-			@OperationParam(name = "url", typeName = "string") IPrimitiveType<String> theUrl,
-			RequestDetails theRequestDetails) {
+		@IdParam(optional = true) IIdType theId,
+		@OperationParam(name = "definition", typeName = "StructureDefinition") IBaseResource theStructureDefinition,
+		@OperationParam(name = "url", typeName = "string") IPrimitiveType<String> theUrl,
+		RequestDetails theRequestDetails) {
 
 		ValidateUtil.exactlyOneNotNullOrThrowInvalidRequestException(
-				new Object[] {theId, theStructureDefinition, theUrl},
-				"Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)");
+			new Object[]{ theId, theStructureDefinition, theUrl },
+			"Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)"
+		);
 
 		IBaseResource sd;
 		IFhirResourceDaoStructureDefinition dao = getDao();
@@ -66,8 +66,7 @@ public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBase
 			Integer numResults = outcome.size();
 			assert numResults != null;
 			if (numResults == 0) {
-				throw new ResourceNotFoundException(
-						Msg.code(1162) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
+				throw new ResourceNotFoundException(Msg.code(1162) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
 			sd = outcome.getResources(0, 1).get(0);
 		}
@@ -79,4 +78,5 @@ public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBase
 	public IFhirResourceDaoStructureDefinition<T> getDao() {
 		return (IFhirResourceDaoStructureDefinition<T>) super.getDao();
 	}
+
 }

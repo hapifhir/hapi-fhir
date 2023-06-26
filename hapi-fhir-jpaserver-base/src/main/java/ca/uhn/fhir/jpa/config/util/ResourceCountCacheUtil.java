@@ -25,7 +25,6 @@ import org.apache.commons.lang3.time.DateUtils;
 
 public final class ResourceCountCacheUtil {
 	private ResourceCountCacheUtil() {}
-
 	public static ResourceCountCache newResourceCountCache(IFhirSystemDao<?, ?> theSystemDao) {
 		ResourceCountCache retVal = new ResourceCountCache(() -> theSystemDao.getResourceCounts());
 		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);

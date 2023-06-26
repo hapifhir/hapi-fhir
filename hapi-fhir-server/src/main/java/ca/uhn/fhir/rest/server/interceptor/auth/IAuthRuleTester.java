@@ -43,8 +43,7 @@ public interface IAuthRuleTester {
 	class RuleTestRequest {
 		// fake record pattern
 		/** the mode of the calling rule context */
-		@Nonnull
-		public final PolicyEnum mode;
+		@Nonnull public final PolicyEnum mode;
 		/**
 		 * The FHIR operation being performed.
 		 * Note that this is not necessarily the same as the value obtained from invoking
@@ -52,28 +51,14 @@ public interface IAuthRuleTester {
 		 * because multiple operations can be nested within
 		 * an HTTP request using FHIR transaction and batch operations
 		 */
-		@Nonnull
-		public final RestOperationTypeEnum operation;
-
-		@Nonnull
-		public final RequestDetails requestDetails;
-
-		@Nullable
-		public final IIdType resourceId;
-
-		@Nullable
-		public final IBaseResource resource;
+		@Nonnull public final RestOperationTypeEnum operation;
+		@Nonnull public final RequestDetails requestDetails;
+		@Nullable public final IIdType resourceId;
+		@Nullable public final IBaseResource resource;
 		/** supplier for support services */
-		@Nonnull
-		public final IRuleApplier ruleApplier;
+		@Nonnull public final IRuleApplier ruleApplier;
 
-		public RuleTestRequest(
-				PolicyEnum theMode,
-				@Nonnull RestOperationTypeEnum theOperation,
-				@Nonnull RequestDetails theRequestDetails,
-				@Nullable IIdType theResourceId,
-				@Nullable IBaseResource theResource,
-				@Nonnull IRuleApplier theRuleApplier) {
+		public RuleTestRequest(PolicyEnum theMode, @Nonnull RestOperationTypeEnum theOperation, @Nonnull RequestDetails theRequestDetails, @Nullable IIdType theResourceId, @Nullable IBaseResource theResource, @Nonnull IRuleApplier theRuleApplier) {
 			Validate.notNull(theMode);
 			Validate.notNull(theOperation);
 			Validate.notNull(theRequestDetails);
@@ -107,20 +92,16 @@ public interface IAuthRuleTester {
 	 * @since 6.1.0
 	 */
 	default boolean matches(RuleTestRequest theRequest) {
-		return this.matches(
-				theRequest.operation, theRequest.requestDetails, theRequest.resourceId, theRequest.resource);
+		return this.matches(theRequest.operation, theRequest.requestDetails, theRequest.resourceId, theRequest.resource);
 	}
+
 
 	/**
 	 * DO NOT IMPLEMENT - Old api.  {@link #matches(RuleTestRequest)} instead.
 	 * @deprecated
 	 */
 	@Deprecated(since = "6.1.0")
-	default boolean matches(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IIdType theInputResourceId,
-			IBaseResource theInputResource) {
+	default boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
 		return true;
 	}
 
@@ -146,8 +127,8 @@ public interface IAuthRuleTester {
 	 * @deprecated
 	 */
 	@Deprecated(since = "6.1.0")
-	default boolean matchesOutput(
-			RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theOutputResource) {
+	default boolean matchesOutput(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theOutputResource) {
 		return true;
 	}
+
 }

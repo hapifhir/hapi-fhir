@@ -29,12 +29,9 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testFilteredTopicSubscription() throws Exception {
-		// setup
+		//setup
 		// WIP SR4B test update, delete, etc
-		createEncounterSubscriptionTopic(
-				Enumerations.EncounterStatus.PLANNED,
-				Enumerations.EncounterStatus.COMPLETED,
-				SubscriptionTopic.InteractionTrigger.CREATE);
+		createEncounterSubscriptionTopic(Enumerations.EncounterStatus.PLANNED, Enumerations.EncounterStatus.COMPLETED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
 		Subscription subscription = createTopicSubscription("Encounter?participant-type=PRPF");
@@ -45,8 +42,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 		// execute
 		Encounter badSentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
-		Encounter goodSentEncounter =
-				sendEncounterWithStatusAndParticipationType(Enumerations.EncounterStatus.COMPLETED, "PRPF", true);
+		Encounter goodSentEncounter = sendEncounterWithStatusAndParticipationType(Enumerations.EncounterStatus.COMPLETED, "PRPF", true);
 
 		// verify
 		Bundle receivedBundle = getLastSystemProviderBundle();
@@ -62,16 +58,11 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 	}
 
 	private Subscription createTopicSubscription(String... theFilters) throws InterruptedException {
-		Subscription subscription = newTopicSubscription(
-				BaseSubscriptionsR5Test.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW, theFilters);
+		Subscription subscription = newTopicSubscription(BaseSubscriptionsR5Test.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW, theFilters);
 		return postSubscription(subscription);
 	}
 
-	private SubscriptionTopic createEncounterSubscriptionTopic(
-			Enumerations.EncounterStatus theFrom,
-			Enumerations.EncounterStatus theCurrent,
-			SubscriptionTopic.InteractionTrigger... theInteractionTriggers)
-			throws InterruptedException {
+	private SubscriptionTopic createEncounterSubscriptionTopic(Enumerations.EncounterStatus theFrom, Enumerations.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -80,8 +71,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		for (SubscriptionTopic.InteractionTrigger interactionTrigger : theInteractionTriggers) {
 			trigger.addSupportedInteraction(interactionTrigger);
 		}
-		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
-				trigger.getQueryCriteria();
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
 		queryCriteria.setPrevious("Encounter?status=" + theFrom.toCode());
 		queryCriteria.setCurrent("Encounter?status=" + theCurrent.toCode());
 		queryCriteria.setRequireBoth(true);
@@ -89,8 +79,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		return retval;
 	}
 
-	private Encounter sendEncounterWithStatus(Enumerations.EncounterStatus theStatus, boolean theExpectDelivery)
-			throws InterruptedException {
+	private Encounter sendEncounterWithStatus(Enumerations.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 
@@ -99,9 +88,8 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		return encounter;
 	}
 
-	private Encounter sendEncounterWithStatusAndParticipationType(
-			Enumerations.EncounterStatus theStatus, String theParticipantType, boolean theExpectDelivery)
-			throws InterruptedException {
+
+	private Encounter sendEncounterWithStatusAndParticipationType(Enumerations.EncounterStatus theStatus, String theParticipantType, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 		encounter.addParticipant().addType().addCoding().setCode(theParticipantType);
@@ -110,4 +98,6 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		encounter.setId(id);
 		return encounter;
 	}
+
+
 }

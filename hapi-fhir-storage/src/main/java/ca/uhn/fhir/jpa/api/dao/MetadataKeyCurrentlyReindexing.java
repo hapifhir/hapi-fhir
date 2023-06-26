@@ -27,4 +27,5 @@ public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeyEnu
 	MetadataKeyCurrentlyReindexing(String theValue) {
 		super(theValue, Boolean.class);
 	}
+
 }

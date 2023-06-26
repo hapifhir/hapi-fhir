@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QuantityParamTest {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-
+	
 	@Test
 	public void testFull() {
 		QuantityParam p = new QuantityParam();
@@ -44,7 +44,7 @@ public class QuantityParamTest {
 		assertEquals("mg", p.getUnits());
 		assertEquals("ap5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
-
+	
 	@Test
 	public void testNoQualifier() {
 		QuantityParam p = new QuantityParam();
@@ -56,6 +56,7 @@ public class QuantityParamTest {
 		assertEquals("5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 
+	
 	@Test
 	public void testNoUnits() {
 		QuantityParam p = new QuantityParam();
@@ -66,7 +67,7 @@ public class QuantityParamTest {
 		assertEquals(null, p.getUnits());
 		assertEquals("5.4||", p.getValueAsQueryToken(ourCtx));
 	}
-
+ 
 	@Test
 	public void testNoSystem() {
 		// http://hl7.org/fhir/2017Jan/search.html#quantity
@@ -80,7 +81,7 @@ public class QuantityParamTest {
 		assertEquals("5.5", param.getValue().toPlainString());
 		assertEquals(null, param.getSystem());
 		assertEquals("mg", param.getUnits());
-
+		
 		// Make sure we don't break on this one...
 		query = "5.5| |mg";
 		param = new QuantityParam();
@@ -141,4 +142,5 @@ public class QuantityParamTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

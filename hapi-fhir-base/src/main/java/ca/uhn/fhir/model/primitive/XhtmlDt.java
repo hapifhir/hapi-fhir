@@ -84,6 +84,7 @@ public class XhtmlDt extends BasePrimitive<String> {
 		return theValue;
 	}
 
+
 	/**
 	 * Note that as of HAPI FHIR 3.1.0, this method no longer uses
 	 * the StAX XMLEvent type as the XML representation, and uses a
@@ -152,4 +153,5 @@ public class XhtmlDt extends BasePrimitive<String> {
 		}
 		return value;
 	}
+
 }

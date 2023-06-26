@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -130,8 +131,9 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
 		int workerCount = TestR4Config.ourMaxThreads - 1; // apply a little connection hunger, but not starvation.
-		ExecutorService executorService =
-				new ThreadPoolExecutor(workerCount, workerCount, 0L, TimeUnit.MILLISECONDS, workQueue);
+		ExecutorService executorService = new ThreadPoolExecutor(workerCount, workerCount,
+			0L, TimeUnit.MILLISECONDS,
+			workQueue);
 
 		ourLog.info("Starting task creation");
 
@@ -145,16 +147,12 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 					// Run a scheduled pass to build the export
 					myBatch2JobHelper.awaitJobCompletion(instanceId, 60);
 
-					verifyBulkExportResults(
-							instanceId,
-							List.of("Patient/PING1", "Patient/PING2"),
-							Collections.singletonList("Patient/PNING3"));
+					verifyBulkExportResults(instanceId, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
 
 					return true;
 				} catch (Throwable theError) {
 					ourLog.error("Caught an error during processing instance {}", instanceId, theError);
-					throw new InternalErrorException(
-							"Caught an error during processing instance " + instanceId, theError);
+					throw new InternalErrorException("Caught an error during processing instance " + instanceId, theError);
 				}
 			}));
 
@@ -183,8 +181,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.info("Finished task execution");
 	}
 
-	private void verifyBulkExportResults(
-			String theInstanceId, List<String> theContainedList, List<String> theExcludedList) {
+
+	private void verifyBulkExportResults(String theInstanceId, List<String> theContainedList, List<String> theExcludedList) {
 		// Iterate over the files
 		Batch2JobInfo jobInfo = myJobRunner.getJobInfo(theInstanceId);
 		String report = jobInfo.getReport();
@@ -195,8 +193,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
-		for (Map.Entry<String, List<String>> file :
-				results.getResourceTypeToBinaryIds().entrySet()) {
+		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
@@ -208,23 +205,21 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 				ourLog.trace("Export job {} file {} contents: {}", theInstanceId, nextBinaryId, nextNdJsonFileContent);
 
 				List<String> lines = new BufferedReader(new StringReader(nextNdJsonFileContent))
-						.lines()
-						.toList();
+					.lines().toList();
 				ourLog.debug("Export job {} file {} line-count: {}", theInstanceId, nextBinaryId, lines.size());
 
 				lines.stream()
-						.map(line -> myFhirContext.newJsonParser().parseResource(line))
-						.map(r -> r.getIdElement().toUnqualifiedVersionless())
-						.forEach(nextId -> {
-							if (!resourceType.equals(nextId.getResourceType())) {
-								fail("Found resource of type " + nextId.getResourceType() + " in file for type "
-										+ resourceType);
-							} else {
-								if (!foundIds.add(nextId.getValue())) {
-									fail("Found duplicate ID: " + nextId.getValue());
-								}
+					.map(line -> myFhirContext.newJsonParser().parseResource(line))
+					.map(r -> r.getIdElement().toUnqualifiedVersionless())
+					.forEach(nextId -> {
+						if (!resourceType.equals(nextId.getResourceType())) {
+							fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
+						} else {
+							if (!foundIds.add(nextId.getValue())) {
+								fail("Found duplicate ID: " + nextId.getValue());
 							}
-						});
+						}
+					});
 			}
 		}
 
@@ -249,4 +244,5 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		assertNotNull(startResponse);
 		return startResponse.getInstanceId();
 	}
+
 }

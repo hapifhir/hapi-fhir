@@ -54,11 +54,7 @@ public class SubscriptionTopicDispatcher {
 	private final SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 	private final SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 
-	public SubscriptionTopicDispatcher(
-			FhirContext theFhirContext,
-			SubscriptionRegistry theSubscriptionRegistry,
-			SubscriptionMatchDeliverer theSubscriptionMatchDeliverer,
-			SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
+	public SubscriptionTopicDispatcher(FhirContext theFhirContext, SubscriptionRegistry theSubscriptionRegistry, SubscriptionMatchDeliverer theSubscriptionMatchDeliverer, SubscriptionTopicPayloadBuilder theSubscriptionTopicPayloadBuilder) {
 		myFhirContext = theFhirContext;
 		mySubscriptionRegistry = theSubscriptionRegistry;
 		mySubscriptionMatchDeliverer = theSubscriptionMatchDeliverer;
@@ -76,15 +72,9 @@ public class SubscriptionTopicDispatcher {
 	 * @param theRequestType The type of request that led to this dispatch.  This determines the request type of the bundle entries
 	 * @return The number of subscription notifications that were successfully queued for delivery
 	 */
+
 	public int dispatch(String theTopicUrl, List<IBaseResource> theResources, RestOperationTypeEnum theRequestType) {
-		SubscriptionTopicDispatchRequest subscriptionTopicDispatchRequest = new SubscriptionTopicDispatchRequest(
-				theTopicUrl,
-				theResources,
-				(f, r) -> InMemoryMatchResult.successfulMatch(),
-				theRequestType,
-				null,
-				null,
-				null);
+		SubscriptionTopicDispatchRequest subscriptionTopicDispatchRequest = new SubscriptionTopicDispatchRequest(theTopicUrl, theResources, (f, r) -> InMemoryMatchResult.successfulMatch(), theRequestType, null, null, null);
 		return dispatch(subscriptionTopicDispatchRequest);
 	}
 
@@ -97,8 +87,7 @@ public class SubscriptionTopicDispatcher {
 	public int dispatch(SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest) {
 		int count = 0;
 
-		List<ActiveSubscription> topicSubscriptions =
-				mySubscriptionRegistry.getTopicSubscriptionsByTopic(theSubscriptionTopicDispatchRequest.getTopicUrl());
+		List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(theSubscriptionTopicDispatchRequest.getTopicUrl());
 		if (!topicSubscriptions.isEmpty()) {
 			for (ActiveSubscription activeSubscription : topicSubscriptions) {
 				boolean success = matchFiltersAndDeliver(theSubscriptionTopicDispatchRequest, activeSubscription);
@@ -110,14 +99,12 @@ public class SubscriptionTopicDispatcher {
 		return count;
 	}
 
-	private boolean matchFiltersAndDeliver(
-			SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest,
-			ActiveSubscription theActiveSubscription) {
+
+	private boolean matchFiltersAndDeliver(SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest, ActiveSubscription theActiveSubscription) {
 
 		String topicUrl = theSubscriptionTopicDispatchRequest.getTopicUrl();
 		List<IBaseResource> resources = theSubscriptionTopicDispatchRequest.getResources();
-		ISubscriptionTopicFilterMatcher subscriptionTopicFilterMatcher =
-				theSubscriptionTopicDispatchRequest.getSubscriptionTopicFilterMatcher();
+		ISubscriptionTopicFilterMatcher subscriptionTopicFilterMatcher = theSubscriptionTopicDispatchRequest.getSubscriptionTopicFilterMatcher();
 
 		if (resources.size() > 0) {
 			IBaseResource firstResource = resources.get(0);
@@ -125,28 +112,19 @@ public class SubscriptionTopicDispatcher {
 			CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 			CanonicalTopicSubscription topicSubscription = subscription.getTopicSubscription();
 			if (topicSubscription.hasFilters()) {
-				ourLog.debug(
-						"Checking if resource {} matches {} subscription filters on {}",
-						firstResource.getIdElement().toUnqualifiedVersionless().getValue(),
-						topicSubscription.getFilters().size(),
-						subscription
-								.getIdElement(myFhirContext)
-								.toUnqualifiedVersionless()
-								.getValue());
+				ourLog.debug("Checking if resource {} matches {} subscription filters on {}", firstResource.getIdElement().toUnqualifiedVersionless().getValue(),
+					topicSubscription.getFilters().size(),
+					subscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 
-				if (!SubscriptionTopicFilterUtil.matchFilters(
-						firstResource, resourceType, subscriptionTopicFilterMatcher, topicSubscription)) {
+				if (!SubscriptionTopicFilterUtil.matchFilters(firstResource, resourceType, subscriptionTopicFilterMatcher, topicSubscription)) {
 					return false;
 				}
 			}
 		}
 		theActiveSubscription.incrementDeliveriesCount();
-		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(
-				resources, theActiveSubscription, topicUrl, theSubscriptionTopicDispatchRequest.getRequestType());
+		IBaseBundle bundlePayload = mySubscriptionTopicPayloadBuilder.buildPayload(resources, theActiveSubscription, topicUrl, theSubscriptionTopicDispatchRequest.getRequestType());
 		bundlePayload.setId(UUID.randomUUID().toString());
-		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(
-				bundlePayload, theActiveSubscription, theSubscriptionTopicDispatchRequest);
-		return mySubscriptionMatchDeliverer.deliverPayload(
-				subscriptionDeliveryRequest, theSubscriptionTopicDispatchRequest.getInMemoryMatchResult());
+		SubscriptionDeliveryRequest subscriptionDeliveryRequest = new SubscriptionDeliveryRequest(bundlePayload, theActiveSubscription, theSubscriptionTopicDispatchRequest);
+		return mySubscriptionMatchDeliverer.deliverPayload(subscriptionDeliveryRequest, theSubscriptionTopicDispatchRequest.getInMemoryMatchResult());
 	}
 }

@@ -78,6 +78,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 
 	private final ServletRequestDetails myRequestDetails = new ServletRequestDetails();
@@ -108,7 +109,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		String firstCurrentVer = "2.67";
 		uploadLoincCodeSystem(firstCurrentVer, true);
 
-		long[] termCodeSystemPidVect = new long[1]; // bypass final restriction
+		long[] termCodeSystemPidVect = new long[1];  //bypass final restriction
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 
@@ -138,6 +139,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		});
 	}
 
+
 	@Test
 	public void runWithParameterZeroFailsValidation() {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -157,11 +159,8 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), Boolean.toString(theMakeItCurrent));
 
 		assertTrue(
-				theVersion == null
-						|| theVersion.equals("2.67")
-						|| theVersion.equals("2.68")
-						|| theVersion.equals("2.69"),
-				"Version supported are: 2.67, 2.68, 2.69 and null");
+			theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69"),
+			"Version supported are: 2.67, 2.68, 2.69 and null" );
 
 		if (StringUtils.isBlank(theVersion)) {
 			uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
@@ -177,6 +176,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		return stats.getTarget();
 	}
 
+
 	public void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theVersion) throws IOException {
 		String theClassPathPrefix = getClassPathPrefix(theVersion);
 		addBaseLoincMandatoryFilesToZip(theFiles, true, theClassPathPrefix);
@@ -185,8 +185,9 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
+
 	private static void addBaseLoincMandatoryFilesToZip(
-			ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
+		ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
@@ -211,12 +212,13 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		}
 	}
 
+
 	private String getClassPathPrefix(String theVersion) {
 		String theClassPathPrefix = "/loinc-ver/v-no-version/";
 
-		if (StringUtils.isBlank(theVersion)) return theClassPathPrefix;
+		if (StringUtils.isBlank(theVersion))   return theClassPathPrefix;
 
-		switch (theVersion) {
+		switch(theVersion) {
 			case "2.67":
 				return "/loinc-ver/v267/";
 			case "2.68":

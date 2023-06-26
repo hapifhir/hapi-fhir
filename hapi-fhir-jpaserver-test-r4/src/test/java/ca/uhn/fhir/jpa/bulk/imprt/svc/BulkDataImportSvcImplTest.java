@@ -28,10 +28,8 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IBulkDataImportSvc mySvc;
-
 	@Autowired
 	private IBulkImportJobDao myBulkImportJobDao;
-
 	@Autowired
 	private IBulkImportJobFileDao myBulkImportJobFileDao;
 
@@ -63,6 +61,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 
 			List<BulkImportJobFileEntity> files = myBulkImportJobFileDao.findAllForJob(jobId);
 			assertEquals(3, files.size());
+
 		});
 	}
 
@@ -120,8 +119,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(1769) + "bijob id ABCDEFG has status RUNNING and can not be added to", e.getMessage());
+			assertEquals(Msg.code(1769) + "bijob id ABCDEFG has status RUNNING and can not be added to", e.getMessage());
 		}
 	}
 
@@ -144,4 +142,5 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 			assertEquals(BulkImportJobStatusEnum.READY, jobs.get(0).getStatus());
 		});
 	}
+
 }

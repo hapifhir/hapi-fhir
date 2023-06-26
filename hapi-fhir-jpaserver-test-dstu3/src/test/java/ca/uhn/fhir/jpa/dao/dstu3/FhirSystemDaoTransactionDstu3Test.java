@@ -34,11 +34,12 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		for (int i = 0; i < theSize; ++i) {
 			Observation obs = new Observation();
 			obs.setStatus(Observation.ObservationStatus.FINAL);
-			retval.addEntry()
-					.setFullUrl("urn:uuid:000" + i)
-					.setResource(obs)
-					.getRequest()
-					.setMethod(HTTPVerb.POST);
+			retval
+				.addEntry()
+				.setFullUrl("urn:uuid:000" + i)
+				.setResource(obs)
+				.getRequest()
+				.setMethod(HTTPVerb.POST);
 		}
 
 		return retval;
@@ -52,12 +53,9 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(null, bundle);
 			fail();
 		} catch (PayloadTooLargeException e) {
-			assertThat(
-					e.getMessage(),
-					containsString("Transaction Bundle Too large.  Transaction bundle contains "
-							+ (TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1)
-							+ " which exceedes the maximum permitted transaction bundle size of "
-							+ TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE));
+			assertThat(e.getMessage(), containsString("Transaction Bundle Too large.  Transaction bundle contains " +
+				(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1) +
+				" which exceedes the maximum permitted transaction bundle size of " + TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE));
 		}
 	}
 
@@ -74,8 +72,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 
 		assertEquals(theSize, response.getEntry().size());
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertEquals(
-				"201 Created",
-				response.getEntry().get(theSize - 1).getResponse().getStatus());
+		assertEquals("201 Created", response.getEntry().get(theSize - 1).getResponse().getStatus());
 	}
+
 }

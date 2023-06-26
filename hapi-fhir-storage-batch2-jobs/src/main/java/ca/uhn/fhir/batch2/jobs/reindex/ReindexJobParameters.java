@@ -33,24 +33,13 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 	public static final String REINDEX_SEARCH_PARAMETERS = "reindexSearchParameters";
 	public static final String OPTIMISTIC_LOCK = "optimisticLock";
 
-	@JsonProperty(
-			value = OPTIMIZE_STORAGE,
-			defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING,
-			required = false)
+	@JsonProperty(value = OPTIMIZE_STORAGE, defaultValue = ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING, required = false)
 	@Nullable
 	private ReindexParameters.OptimizeStorageModeEnum myOptimizeStorage;
-
-	@JsonProperty(
-			value = REINDEX_SEARCH_PARAMETERS,
-			defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING,
-			required = false)
+	@JsonProperty(value = REINDEX_SEARCH_PARAMETERS, defaultValue = ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING, required = false)
 	@Nullable
 	private ReindexParameters.ReindexSearchParametersEnum myReindexSearchParameters;
-
-	@JsonProperty(
-			value = OPTIMISTIC_LOCK,
-			defaultValue = ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + "",
-			required = false)
+	@JsonProperty(value = OPTIMISTIC_LOCK, defaultValue = ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + "", required = false)
 	@Nullable
 	private Boolean myOptimisticLock;
 
@@ -76,9 +65,11 @@ public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 		return defaultIfNull(myReindexSearchParameters, ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT);
 	}
 
-	public ReindexJobParameters setReindexSearchParameters(
-			ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
+	public ReindexJobParameters setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		this.myReindexSearchParameters = theReindexSearchParameters;
 		return this;
 	}
+
+
+
 }

@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.empty;
 
 public class AddForeignKeyTaskTest extends BaseTest {
 
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testAddForeignKey(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -32,12 +33,12 @@ public class AddForeignKeyTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(
-				JdbcUtils.getForeignKeys(getConnectionProperties(), "HOME", "FOREIGNTBL"),
-				Matchers.contains("FK_HOME_FOREIGN"));
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "HOME", "FOREIGNTBL"), Matchers.contains("FK_HOME_FOREIGN"));
 
 		// Make sure additional calls don't crash
 		getMigrator().migrate();
 		getMigrator().migrate();
 	}
+
+
 }

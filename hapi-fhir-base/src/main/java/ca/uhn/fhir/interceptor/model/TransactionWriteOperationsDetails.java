@@ -44,4 +44,5 @@ public class TransactionWriteOperationsDetails {
 	public void setUpdateRequestUrls(List<String> theUpdateRequestUrls) {
 		myUpdateRequestUrls = theUpdateRequestUrls;
 	}
+
 }

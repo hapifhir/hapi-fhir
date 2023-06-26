@@ -23,9 +23,9 @@ import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Date;
 
 /**
  * A service that produces pages of resource pids based on the data provided by a previous batch step.  Typically the
@@ -44,10 +44,5 @@ public interface IIdChunkProducer<IT extends ChunkRangeJson> {
 	 * @param theData defines the query we are using
 	 * @return a list of Resource pids
 	 */
-	IResourcePidList fetchResourceIdsPage(
-			Date theNextStart,
-			Date theEnd,
-			@Nonnull Integer thePageSize,
-			@Nullable RequestPartitionId theRequestPartitionId,
-			IT theData);
+	IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, IT theData);
 }

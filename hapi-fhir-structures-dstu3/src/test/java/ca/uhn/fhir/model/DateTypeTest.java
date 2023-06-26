@@ -91,4 +91,5 @@ public class DateTypeTest {
 		dateDt = new DateType(1990, 0, 5);
 		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
+
 }

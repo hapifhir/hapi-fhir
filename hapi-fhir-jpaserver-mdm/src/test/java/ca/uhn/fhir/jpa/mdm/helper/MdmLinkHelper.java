@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MdmTestLinkExpression;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -16,7 +17,6 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
@@ -45,18 +45,14 @@ public class MdmLinkHelper {
 	}
 
 	@Autowired
-	private IMdmLinkDao myMdmLinkRepo;
-
+   private IMdmLinkDao myMdmLinkRepo;
 	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
-
 	@Autowired
 	private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
-
 	@SuppressWarnings("rawtypes")
 	@Autowired
 	private IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
-
 	@Autowired
 	private IdHelperService myIdHelperService;
 
@@ -67,13 +63,7 @@ public class MdmLinkHelper {
 		for (MdmLink link : links) {
 			IdDt goldenResourceId = link.getGoldenResource().getIdDt().toVersionless();
 			IdDt targetId = link.getSource().getIdDt().toVersionless();
-			ourLog.info(
-					"{}: {}, {}, {}, {}",
-					link.getId(),
-					goldenResourceId,
-					targetId,
-					link.getMatchResult(),
-					link.getLinkSource());
+			ourLog.info("{}: {}, {}, {}, {}", link.getId(), goldenResourceId, targetId, link.getMatchResult(), link.getLinkSource());
 		}
 	}
 
@@ -112,16 +102,19 @@ public class MdmLinkHelper {
 			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(inputExpression.getMdmLinkSource());
 			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(inputExpression.getMdmMatchResult());
 
-			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(null, null);
+			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(
+				null,
+				null
+			);
 			matchOutcome.setMatchResultEnum(matchResultType);
 
 			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-					goldenResource, // golden
-					targetResource, // source
-					matchOutcome, // match outcome
-					matchSourceType, // link source
-					createContextForCreate("Patient") // context
-					);
+				goldenResource, // golden
+				targetResource, // source
+				matchOutcome, // match outcome
+				matchSourceType, // link source
+				createContextForCreate("Patient") // context
+			);
 
 			results.addResult(link);
 		}
@@ -154,7 +147,8 @@ public class MdmLinkHelper {
 		}
 		MdmResourceUtil.setMdmManaged(patient);
 
-		DaoMethodOutcome outcome = myPatientDao.update(patient, SystemRequestDetails.forAllPartitions());
+		DaoMethodOutcome outcome = myPatientDao.update(patient,
+			SystemRequestDetails.forAllPartitions());
 		Patient outputPatient = (Patient) outcome.getResource();
 		theState.addPID(theId, (JpaPid) outcome.getPersistentId());
 		return outputPatient;
@@ -166,8 +160,7 @@ public class MdmLinkHelper {
 		StringBuilder outputStateSB = new StringBuilder();
 
 		// for every parameter, we'll get all links
-		for (Map.Entry<String, Patient> entrySet :
-				theState.getParameterToValue().entrySet()) {
+		for (Map.Entry<String, Patient> entrySet : theState.getParameterToValue().entrySet()) {
 			Patient patient = entrySet.getValue();
 			List<MdmLink> links = getAllMdmLinks(patient);
 			for (MdmLink link : links) {
@@ -186,11 +179,10 @@ public class MdmLinkHelper {
 		int totalExpectedLinks = expectedOutputStates.size();
 		int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
 
-		assertEquals(
-				totalExpectedLinks,
-				totalActualLinks,
-				String.format(
-						"Invalid number of links. Expected %d, Actual %d.", totalExpectedLinks, totalActualLinks));
+		assertEquals(totalExpectedLinks, totalActualLinks,
+			String.format("Invalid number of links. Expected %d, Actual %d.",
+				totalExpectedLinks, totalActualLinks)
+		);
 
 		for (MdmTestLinkExpression stateExpression : expectedOutputStates) {
 			ourLog.info(stateExpression.getLinkExpression());
@@ -207,9 +199,10 @@ public class MdmLinkHelper {
 			boolean foundLink = false;
 			for (MdmLink link : links) {
 				if (isResourcePartOfLink(link, leftSideResource, Side.LHS, theState)
-						&& isResourcePartOfLink(link, rightSideResource, Side.RHS, theState)
-						&& link.getMatchResult() == matchResultType
-						&& link.getLinkSource() == matchSourceType) {
+					&& isResourcePartOfLink(link, rightSideResource, Side.RHS, theState)
+					&& link.getMatchResult() == matchResultType
+					&& link.getLinkSource() == matchSourceType
+				) {
 					foundLink = true;
 					break;
 				}
@@ -221,12 +214,16 @@ public class MdmLinkHelper {
 
 	public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
 		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-				.map(link -> (MdmLink) link)
-				.collect(Collectors.toList());
+			.map( link -> (MdmLink) link)
+			.collect(Collectors.toList());
 	}
 
 	private boolean isResourcePartOfLink(
-			MdmLink theLink, Patient theResource, Side theSide, MDMState<Patient, JpaPid> theState) {
+		MdmLink theLink,
+		Patient theResource,
+		Side theSide,
+		MDMState<Patient, JpaPid> theState
+	) {
 		JpaPid resourcePid = theState.getPID(theResource.getIdElement().getIdPart());
 
 		long linkPid;
@@ -257,9 +254,9 @@ public class MdmLinkHelper {
 				boolean selfReferential = LHS.equals(RHS);
 
 				String link = LHS + ", "
-						+ theLink.getLinkSource().name() + ", "
-						+ theLink.getMatchResult().name() + ", "
-						+ RHS;
+					+ theLink.getLinkSource().name() + ", "
+					+ theLink.getMatchResult().name() + ", "
+					+ RHS;
 				if (selfReferential) {
 					link += " <- Invalid Self Referencing link!";
 				}

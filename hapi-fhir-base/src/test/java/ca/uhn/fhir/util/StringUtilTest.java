@@ -53,6 +53,7 @@ public class StringUtilTest {
 		assertEquals("help i'm a bug", output);
 	}
 
+
 	@Test
 	public void testChompCharacter() {
 		assertEquals(null, StringUtil.chompCharacter(null, '/'));
@@ -67,4 +68,5 @@ public class StringUtilTest {
 	public void testPrependLineNumbers() {
 		assertEquals("0: A\n1: B\n", StringUtil.prependLineNumbers("A\nB"));
 	}
+
 }

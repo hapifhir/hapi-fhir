@@ -68,7 +68,9 @@ public class ServerExceptionDstu3Test {
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
 
-		ourException = new ResourceNotFoundException("SOME MESSAGE").addResponseHeader("X-Foo", "BAR BAR");
+		ourException = new ResourceNotFoundException("SOME MESSAGE")
+			.addResponseHeader("X-Foo", "BAR BAR");
+
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -83,6 +85,7 @@ public class ServerExceptionDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -90,10 +93,10 @@ public class ServerExceptionDstu3Test {
 
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome
-				.addIssue()
-				.setCode(IssueType.PROCESSING)
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setDiagnostics("El nombre está vacío");
+			.addIssue()
+			.setCode(IssueType.PROCESSING)
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics("El nombre está vacío");
 
 		ourException = new InternalErrorException("Error", operationOutcome);
 
@@ -105,6 +108,7 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(responseContent);
 			assertThat(responseContent, containsString("El nombre está vacío"));
 		}
+
 	}
 
 	@Test
@@ -119,11 +123,9 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(
-					responseContent,
-					containsString("\"diagnostics\":\"" + Msg.code(389)
-							+ "Failed to call access method: java.lang.NullPointerException: Hello\""));
+			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\""));
 		}
+
 	}
 
 	@Test
@@ -138,25 +140,20 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(
-					responseContent,
-					containsString("\"diagnostics\":\"" + Msg.code(389)
-							+ "Failed to call access method: java.io.IOException: Hello\""));
+			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\""));
 		}
+
 	}
 
 	@Test
 	public void testInterceptorThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
 
-		ourServlet
-				.getInterceptorService()
-				.registerAnonymousInterceptor(
-						Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
-							@Override
-							public void invoke(IPointcut thePointcut, HookParams theArgs) {
-								throw new NullPointerException("Hello");
-							}
-						});
+		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				throw new NullPointerException("Hello");
+			}
+		});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
@@ -169,7 +166,9 @@ public class ServerExceptionDstu3Test {
 		}
 
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
+
 	}
+
 
 	@Test
 	public void testPostWithNoBody() throws IOException {
@@ -183,7 +182,9 @@ public class ServerExceptionDstu3Test {
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("Location").getValue(), containsString("Patient/123"));
 		}
+
 	}
+
 
 	@Test
 	public void testAuthorize() throws Exception {
@@ -200,10 +201,9 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(responseContent);
 
 			assertEquals(401, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"Basic realm=\"REALM\"",
-					status.getFirstHeader("WWW-Authenticate").getValue());
+			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
 		}
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -226,6 +226,7 @@ public class ServerExceptionDstu3Test {
 			Validate.isTrue(thePatient == null);
 			return new MethodOutcome().setId(new IdType("Patient/123"));
 		}
+
 	}
 
 	@AfterAll
@@ -251,10 +252,11 @@ public class ServerExceptionDstu3Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

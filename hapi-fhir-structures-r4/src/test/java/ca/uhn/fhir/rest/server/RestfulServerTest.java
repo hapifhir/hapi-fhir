@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.Serializable;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,20 +59,19 @@ public class RestfulServerTest {
 
 	@Test
 	public void testRegisterProviders() {
-		// test register Plain Provider
+		//test register Plain Provider
 		myRestfulServer.registerProvider(new MyClassWithRestInterface());
 		assertEquals(1, myRestfulServer.getResourceProviders().size());
 		Object plainProvider = myRestfulServer.getResourceProviders().get(0);
 		assertTrue(plainProvider instanceof MyClassWithRestInterface);
 
-		// test register Resource Provider
+		//test register Resource Provider
 		myRestfulServer.registerProvider(new MyResourceProvider());
 		assertEquals(2, myRestfulServer.getResourceProviders().size());
-		IResourceProvider resourceProvider =
-				myRestfulServer.getResourceProviders().get(1);
+		IResourceProvider resourceProvider = myRestfulServer.getResourceProviders().get(1);
 		assertTrue(resourceProvider instanceof MyResourceProvider);
 
-		// test unregister providers
+		//test unregister providers
 		myRestfulServer.unregisterProvider(plainProvider);
 		assertFalse(myRestfulServer.getResourceProviders().isEmpty());
 		myRestfulServer.unregisterProvider(resourceProvider);
@@ -85,15 +84,14 @@ public class RestfulServerTest {
 			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(
-					Msg.code(289)
-							+ "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface",
-					e.getMessage());
+			assertEquals(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
 		}
 	}
 
-	// --------- Scaffolding ---------//
-	private static class MyClassWithoutRestInterface implements Serializable {}
+
+	//--------- Scaffolding ---------//
+	private static class MyClassWithoutRestInterface implements Serializable {
+	}
 
 	private static class MyClassWithRestInterface implements MyRestInterface, IResourceProvider {
 		@Override
@@ -108,25 +106,26 @@ public class RestfulServerTest {
 		default MethodOutcome create(@ResourceParam IBaseResource theResource) {
 			return mock(MethodOutcome.class);
 		}
+
 	}
 
 	private static class MyFhirVersionServer implements IFhirVersionServer {
 		@Override
-		public IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(
-				RestfulServer theRestfulServer) {
+		public IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer) {
 			return new IServerConformanceProvider<IBaseResource>() {
 
 				@Override
 				@Metadata
-				public IBaseConformance getServerConformance(
-						HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 					return mock(IBaseConformance.class);
 				}
 
 				@Override
-				public void setRestfulServer(RestfulServer theRestfulServer) {}
+				public void setRestfulServer(RestfulServer theRestfulServer) {
+				}
 			};
 		}
+
 	}
 
 	@SuppressWarnings("unused")
@@ -166,7 +165,7 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name = "MyResource")
+	@ResourceDef(name="MyResource")
 	public static class MyResource implements IBaseResource {
 
 		@Override
@@ -195,7 +194,9 @@ public class RestfulServerTest {
 		}
 
 		@Override
-		public void setUserData(String theName, Object theValue) {}
+		public void setUserData(String theName, Object theValue) {
+
+		}
 
 		@Override
 		public IBaseMetaType getMeta() {
@@ -223,6 +224,8 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name = "MyResource2")
-	public static class MyResource2 extends MyResource {}
+	@ResourceDef(name="MyResource2")
+	public static class MyResource2 extends MyResource {
+	}
+
 }

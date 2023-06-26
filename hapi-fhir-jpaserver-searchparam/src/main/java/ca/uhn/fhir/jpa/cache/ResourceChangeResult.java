@@ -47,23 +47,19 @@ public class ResourceChangeResult {
 	}
 
 	public static ResourceChangeResult fromResourceChangeEvent(IResourceChangeEvent theResourceChangeEvent) {
-		return new ResourceChangeResult(
-				theResourceChangeEvent.getCreatedResourceIds().size(),
-				theResourceChangeEvent.getUpdatedResourceIds().size(),
-				theResourceChangeEvent.getDeletedResourceIds().size());
+		return new ResourceChangeResult(theResourceChangeEvent.getCreatedResourceIds().size(), theResourceChangeEvent.getUpdatedResourceIds().size(), theResourceChangeEvent.getDeletedResourceIds().size());
 	}
 
 	public ResourceChangeResult plus(ResourceChangeResult theResult) {
-		return new ResourceChangeResult(
-				created + theResult.created, updated + theResult.updated, deleted + theResult.deleted);
+		return new ResourceChangeResult(created + theResult.created, updated + theResult.updated, deleted + theResult.deleted);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("created", created)
-				.append("updated", updated)
-				.append("deleted", deleted)
-				.toString();
+			.append("created", created)
+			.append("updated", updated)
+			.append("deleted", deleted)
+			.toString();
 	}
 }

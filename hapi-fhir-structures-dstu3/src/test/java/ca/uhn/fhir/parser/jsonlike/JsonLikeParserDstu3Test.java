@@ -36,25 +36,25 @@ public class JsonLikeParserDstu3Test {
 	 */
 	@Test
 	public void testJsonLikeParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content =
-				IOUtils.toString(JsonLikeParserDstu3Test.class.getResourceAsStream("/bundle_with_woven_obs.xml"));
+		String content = IOUtils.toString(JsonLikeParserDstu3Test.class.getResourceAsStream("/bundle_with_woven_obs.xml"));
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
-
+		
 		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
 		jsonLikeStructure.load(new StringReader(encoded));
-
-		IJsonLikeParser jsonLikeparser = (IJsonLikeParser) ourCtx.newJsonParser();
-
+		
+		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
+		
 		Bundle bundle = jsonLikeparser.parseResource(Bundle.class, jsonLikeStructure);
+		
 	}
 
 	/**
 	 * Test JSON-Like writer using custom stream writer
-	 *
+	 * 
 	 */
 	@Test
 	public void testJsonLikeParseWithCustomJSONStreamWriter() throws Exception {
@@ -63,102 +63,86 @@ public class JsonLikeParserDstu3Test {
 		Patient fhirPat = new Patient();
 		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
 
-		IJsonLikeParser jsonLikeParser = (IJsonLikeParser) ourCtx.newJsonParser();
+		IJsonLikeParser jsonLikeParser = (IJsonLikeParser)ourCtx.newJsonParser();
 		JsonLikeMapWriter jsonLikeWriter = new JsonLikeMapWriter();
 
 		jsonLikeParser.encodeResourceToJsonLikeWriter(fhirPat, jsonLikeWriter);
-		Map<String, Object> jsonLikeMap = jsonLikeWriter.getResultMap();
-
+		Map<String,Object> jsonLikeMap = jsonLikeWriter.getResultMap();
+		
 		System.out.println("encoded map: " + jsonLikeMap.toString());
 
 		assertNotNull(jsonLikeMap.get("resourceType"), "Encoded resource missing 'resourceType' element");
-		assertEquals(
-				jsonLikeMap.get("resourceType"),
-				"Patient",
-				"Expecting 'resourceType'='Patient'; found '" + jsonLikeMap.get("resourceType") + "'");
+		assertEquals(jsonLikeMap.get("resourceType"), "Patient", "Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'");
 
 		assertNotNull(jsonLikeMap.get("extension"), "Encoded resource missing 'extension' element");
 		assertTrue((jsonLikeMap.get("extension") instanceof List), "'extension' element is not a List");
-
-		List<Object> extensions = (List<Object>) jsonLikeMap.get("extension");
+		
+		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
 		assertEquals(1, extensions.size(), "'extnesion' array has more than one entry");
 		assertTrue((extensions.get(0) instanceof Map), "'extension' array entry is not a Map");
-
-		Map<String, Object> extension = (Map<String, Object>) extensions.get(0);
+		
+		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
 		assertNotNull(extension.get("url"), "'extension' entry missing 'url' member");
 		assertTrue((extension.get("url") instanceof String), "'extension' entry 'url' member is not a String");
-		assertEquals(
-				"x1",
-				extension.get("url"),
-				"Expecting '/extension[]/url' = 'x1'; found '" + extension.get("url") + "'");
+		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
+	
 	}
-
+	
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
+	
+	
+	
 	public static class JsonLikeMapWriter extends BaseJsonLikeWriter {
 
-		private Map<String, Object> target;
-
+		private Map<String,Object> target;
+		
 		private static class Block {
 			private BlockType type;
 			private String name;
-			private Map<String, Object> object;
+			private Map<String,Object> object;
 			private List<Object> array;
-
 			public Block(BlockType type) {
 				this.type = type;
 			}
-
 			public BlockType getType() {
 				return type;
 			}
-
 			public String getName() {
 				return name;
 			}
-
 			public void setName(String currentName) {
 				this.name = currentName;
 			}
-
 			public Map<String, Object> getObject() {
 				return object;
 			}
-
 			public void setObject(Map<String, Object> currentObject) {
 				this.object = currentObject;
 			}
-
 			public List<Object> getArray() {
 				return array;
 			}
-
 			public void setArray(List<Object> currentArray) {
 				this.array = currentArray;
 			}
 		}
-
 		private enum BlockType {
-			NONE,
-			OBJECT,
-			ARRAY
+			NONE, OBJECT, ARRAY
 		}
-
 		private Block currentBlock = new Block(BlockType.NONE);
 		private Stack<Block> blockStack = new Stack<>();
 
-		public JsonLikeMapWriter() {
+		public JsonLikeMapWriter () {
 			super();
 		}
-
-		public Map<String, Object> getResultMap() {
+		
+		public Map<String,Object> getResultMap() {
 			return target;
 		}
-
-		public void setResultMap(Map<String, Object> target) {
+		public void setResultMap(Map<String,Object> target) {
 			this.target = target;
 		}
 
@@ -190,18 +174,18 @@ public class JsonLikeParserDstu3Test {
 			if (currentBlock.getType() == BlockType.OBJECT) {
 				throw new IOException("Unnamed JSON elements can only be created in JSON arrays");
 			}
-			Map<String, Object> newObject = null;
+			Map<String,Object> newObject = null;
 			if (currentBlock.getType() == BlockType.NONE) {
 				if (null == target) {
 					// for this test, we don't care about ordering of map elements
 					// target = new EntryOrderedMap<String,Object>();
-					target = new HashMap<String, Object>();
+					target = new HashMap<String,Object>();
 				}
 				newObject = target;
 			} else {
 				// for this test, we don't care about ordering of map elements
 				// newObject = new EntryOrderedMap<String,Object>();
-				newObject = new HashMap<String, Object>();
+				newObject = new HashMap<String,Object>();
 			}
 			blockStack.push(currentBlock);
 			currentBlock = new Block(BlockType.OBJECT);
@@ -219,7 +203,7 @@ public class JsonLikeParserDstu3Test {
 			currentBlock.setName(name);
 			// for this test, we don't care about ordering of map elements
 			// currentBlock.setObject(new EntryOrderedMap<String,Object>());
-			currentBlock.setObject(new HashMap<String, Object>());
+			currentBlock.setObject(new HashMap<String,Object>());
 			return this;
 		}
 
@@ -252,7 +236,7 @@ public class JsonLikeParserDstu3Test {
 			currentBlock.getArray().add(value);
 			return this;
 		}
-
+		
 		@Override
 		public BaseJsonLikeWriter write(BigDecimal value) throws IOException {
 			if (currentBlock.getType() == BlockType.OBJECT) {
@@ -324,7 +308,6 @@ public class JsonLikeParserDstu3Test {
 			currentBlock.getObject().put(name, value);
 			return this;
 		}
-
 		@Override
 		public BaseJsonLikeWriter write(String name, BigDecimal value) throws IOException {
 			if (currentBlock.getType() == BlockType.ARRAY) {
@@ -376,8 +359,7 @@ public class JsonLikeParserDstu3Test {
 				ourLog.error("JsonLikeStreamWriter.endObject(); called with no active JSON document");
 			} else {
 				if (currentBlock.getType() != BlockType.OBJECT) {
-					ourLog.error(
-							"JsonLikeStreamWriter.endObject(); called outside a JSON object. (Use endArray() instead?)");
+					ourLog.error("JsonLikeStreamWriter.endObject(); called outside a JSON object. (Use endArray() instead?)");
 				}
 				endBlock();
 			}
@@ -390,8 +372,7 @@ public class JsonLikeParserDstu3Test {
 				ourLog.error("JsonLikeStreamWriter.endArray(); called with no active JSON document");
 			} else {
 				if (currentBlock.getType() != BlockType.ARRAY) {
-					ourLog.error(
-							"JsonLikeStreamWriter.endArray(); called outside a JSON array. (Use endObject() instead?)");
+					ourLog.error("JsonLikeStreamWriter.endArray(); called outside a JSON array. (Use endObject() instead?)");
 				}
 				endBlock();
 			}
@@ -409,15 +390,18 @@ public class JsonLikeParserDstu3Test {
 				} else {
 					toPut = currentBlock.getObject();
 				}
-				Block parentBlock = blockStack.pop();
+				Block parentBlock = blockStack.pop(); 
 				if (parentBlock.getType() == BlockType.OBJECT) {
 					parentBlock.getObject().put(currentBlock.getName(), toPut);
-				} else if (parentBlock.getType() == BlockType.ARRAY) {
+				} else 
+				if (parentBlock.getType() == BlockType.ARRAY) {
 					parentBlock.getArray().add(toPut);
-				}
+				} 
 				currentBlock = parentBlock;
 			}
 			return this;
 		}
+
 	}
+	
 }

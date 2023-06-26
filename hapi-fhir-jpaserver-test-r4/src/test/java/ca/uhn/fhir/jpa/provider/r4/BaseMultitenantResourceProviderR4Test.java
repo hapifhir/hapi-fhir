@@ -29,17 +29,14 @@ import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
 
-public abstract class BaseMultitenantResourceProviderR4Test extends BaseResourceProviderR4Test
-		implements ITestDataBuilder {
+public abstract class BaseMultitenantResourceProviderR4Test extends BaseResourceProviderR4Test implements ITestDataBuilder {
 
 	public static final int TENANT_A_ID = 1;
 	public static final int TENANT_B_ID = 2;
 	public static final String TENANT_B = "TENANT-B";
 	public static final String TENANT_A = "TENANT-A";
-
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
-
 	@Autowired
 	private PartitionManagementProvider myPartitionManagementProvider;
 
@@ -90,32 +87,29 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		return true;
 	}
 
+
 	private void createTenants() {
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
 
-		myClient.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-				.withParameter(
-						Parameters.class,
-						ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
-						new IntegerType(TENANT_A_ID))
-				.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_A))
-				.execute();
+		myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_A_ID))
+			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_A))
+			.execute();
 
-		myClient.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-				.withParameter(
-						Parameters.class,
-						ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID,
-						new IntegerType(TENANT_B_ID))
-				.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_B))
-				.execute();
+		myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(TENANT_B_ID))
+			.andParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, new CodeType(TENANT_B))
+			.execute();
 	}
 
 	public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
-		if (myAuthorizationInterceptor != null) {
+		if(myAuthorizationInterceptor != null) {
 			myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
 		}
 		myAuthorizationInterceptor = new AuthorizationInterceptor() {
@@ -126,6 +120,8 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		}.setDefaultPolicy(PolicyEnum.DENY);
 		myServer.getRestfulServer().registerInterceptor(myAuthorizationInterceptor);
 	}
+
+
 
 	protected ICreationArgument withTenant(String theTenantId) {
 		return t -> myTenantClientInterceptor.setTenantId(theTenantId);
@@ -145,4 +141,5 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
+
 }

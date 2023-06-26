@@ -94,8 +94,7 @@ public class NoiseCharacters {
 		int upper = toInt(theUpperBound);
 
 		if (lower > upper) {
-			throw new IllegalArgumentException(
-					Msg.code(352) + String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
+			throw new IllegalArgumentException(Msg.code(352) + String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
 		}
 
 		if (upper - lower >= RANGE_THRESHOLD) {
@@ -116,4 +115,5 @@ public class NoiseCharacters {
 
 		return Integer.parseInt(theLiteral.substring(2), 16);
 	}
+
 }

@@ -9,13 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PrimititeTest {
 
-	@Test
-	public void testHasValue() {
-		StringType type = new StringType();
-		assertFalse(type.hasValue());
-		type.addExtension().setUrl("http://foo").setValue(new DecimalType(123));
-		assertFalse(type.hasValue());
-		type.setValue("Hello");
-		assertTrue(type.hasValue());
-	}
+  @Test
+  public void testHasValue() {
+    StringType type = new StringType();
+    assertFalse(type.hasValue());
+    type.addExtension().setUrl("http://foo").setValue(new DecimalType(123));
+    assertFalse(type.hasValue());
+    type.setValue("Hello");
+    assertTrue(type.hasValue());
+  }
+  
 }

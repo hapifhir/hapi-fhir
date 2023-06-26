@@ -19,22 +19,20 @@ public class ValidationSupportChainCreatorTest {
 
 	@Test
 	public void getR4Chain_shouldProvideExpectedValidationSupport() throws ParseException {
-		String patientJson = ValidateCommandTest.class
-				.getResource("/validate/Patient-no-identifier.json")
-				.getFile();
-		String patientProfile = ValidateCommandTest.class
-				.getResource("/validate/PatientIn-Profile.json")
-				.getFile();
+		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient-no-identifier.json").getFile();
+		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 
-		String[] args = new String[] {
-			"validate", "--fhir-version", "r4", "--profile", "--file", patientJson, "-l", patientProfile
+		String[] args = new String[]{
+			"validate",
+			"--fhir-version", "r4",
+			"--profile",
+			"--file", patientJson,
+			"-l", patientProfile
 		};
 
 		CommandLine commandLine = new DefaultParser().parse(myValidateCommand.getOptions(), args);
-		ValidationSupportChain chain =
-				ValidationSupportChainCreator.getValidationSupportChainR4(myContextR4, commandLine);
-		StructureDefinition structureDefinition = (StructureDefinition) chain.fetchStructureDefinition(
-				"https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
+		ValidationSupportChain chain = ValidationSupportChainCreator.getValidationSupportChainR4(myContextR4, commandLine);
+		StructureDefinition structureDefinition = (StructureDefinition) chain.fetchStructureDefinition("https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
 
 		assertEquals(structureDefinition.getName(), "Profile_MII_Patient_PatientIn");
 	}

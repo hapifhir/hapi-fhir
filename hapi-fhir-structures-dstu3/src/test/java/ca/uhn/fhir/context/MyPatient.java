@@ -1,15 +1,16 @@
 package ca.uhn.fhir.context;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.Patient;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import org.hl7.fhir.dstu3.model.Patient;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ResourceDef()
 public class MyPatient extends Patient {
@@ -49,4 +50,5 @@ public class MyPatient extends Patient {
 	public void setPetName(StringDt thePetName) {
 		myPetName = thePetName;
 	}
+
 }

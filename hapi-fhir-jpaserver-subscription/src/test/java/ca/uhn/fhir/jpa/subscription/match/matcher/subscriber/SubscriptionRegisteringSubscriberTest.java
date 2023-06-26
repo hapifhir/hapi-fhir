@@ -47,22 +47,16 @@ public class SubscriptionRegisteringSubscriberTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
-
 	@Spy
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext);
-
 	@Mock
 	private DaoRegistry myDaoRegistry;
-
 	@Mock
 	private IFhirResourceDao<Subscription> mySubscriptionDao;
-
 	@InjectMocks
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
-
 	@Captor
 	private ArgumentCaptor<RequestDetails> requestDetailsCaptor;
 
@@ -82,7 +76,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageNonResourceModifiedJsonMessage(CapturedOutput output) {
+	public void testHandleMessageNonResourceModifiedJsonMessage(CapturedOutput output){
 		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
@@ -90,9 +84,8 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageSubscriptionResourceGone() {
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+	public void testHandleMessageSubscriptionResourceGone(){
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
@@ -106,15 +99,13 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageSubscriptionActiveStatus() {
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+	public void testHandleMessageSubscriptionActiveStatus(){
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
 		when(mySubscriptionDao.read(any(), any(), eq(true))).thenReturn(mySubscription);
-		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription))
-				.thenReturn(SubscriptionStatus.ACTIVE.toCode());
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
@@ -122,15 +113,13 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageSubscriptionErrorStatus() {
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+	public void testHandleMessageSubscriptionErrorStatus(){
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
 		when(mySubscriptionDao.read(any(), any(), eq(true))).thenReturn(mySubscription);
-		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription))
-				.thenReturn(SubscriptionStatus.ERROR.toCode());
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ERROR.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		verify(mySubscriptionRegistry, times(1)).unregisterSubscriptionIfRegistered(any());
@@ -138,26 +127,22 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessagePartitionWithNullPartitionName() {
-		List<Integer> partitionIds = Arrays.asList((Integer) null);
-		List<String> partitionNames = Arrays.asList((String) null);
+	public void testHandleMessagePartitionWithNullPartitionName(){
+		List<Integer> partitionIds = Arrays.asList((Integer)null);
+		List<String> partitionNames = Arrays.asList((String)null);
 		LocalDate localDate = null;
 
-		RequestPartitionId requestPartitionId =
-				RequestPartitionId.forPartitionIdsAndNames(partitionNames, partitionIds, localDate);
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		RequestPartitionId requestPartitionId = RequestPartitionId.forPartitionIdsAndNames(partitionNames, partitionIds, localDate);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		resourceModifiedMessage.setPartitionId(requestPartitionId);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true)))
-				.thenReturn(mySubscription);
-		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription))
-				.thenReturn(SubscriptionStatus.ACTIVE.toCode());
+		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true))).thenReturn(mySubscription);
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
-		SystemRequestDetails details = (SystemRequestDetails) requestDetailsCaptor.getValue();
+		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions with list of names containing null use the default partition
 		assertNull(details.getRequestPartitionId().getPartitionNames());
@@ -167,21 +152,18 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessageWithNullPartition() {
+	public void testHandleMessageWithNullPartition(){
 		RequestPartitionId requestPartitionId = null;
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		resourceModifiedMessage.setPartitionId(requestPartitionId);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true)))
-				.thenReturn(mySubscription);
-		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription))
-				.thenReturn(SubscriptionStatus.ACTIVE.toCode());
+		when(mySubscriptionDao.read(any(), requestDetailsCaptor.capture(), eq(true))).thenReturn(mySubscription);
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
-		SystemRequestDetails details = (SystemRequestDetails) requestDetailsCaptor.getValue();
+		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions that are null use the default partition
 		assertNull(details.getRequestPartitionId().getPartitionNames());

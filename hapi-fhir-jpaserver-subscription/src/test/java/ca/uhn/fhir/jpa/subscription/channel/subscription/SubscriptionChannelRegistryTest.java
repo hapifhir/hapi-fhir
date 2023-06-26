@@ -61,20 +61,23 @@ public class SubscriptionChannelRegistryTest {
 		IChannelProducer producer = mock(IChannelProducer.class);
 
 		// when
-		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(anyString(), any(ChannelConsumerSettings.class)))
-				.thenReturn(receiver);
-		when(mySubscriptionChannelFactory.newDeliverySendingChannel(anyString(), any(ChannelProducerSettings.class)))
-				.thenReturn(producer);
+		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(
+			anyString(),
+			any(ChannelConsumerSettings.class)
+		)).thenReturn(receiver);
+		when(mySubscriptionChannelFactory.newDeliverySendingChannel(
+			anyString(),
+			any(ChannelProducerSettings.class)
+		)).thenReturn(producer);
 		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(CanonicalSubscriptionChannelType.class)))
-				.thenReturn(Optional.of(messageHandler));
+			.thenReturn(Optional.of(messageHandler));
 
 		// test
 		mySubscriptionChannelRegistry.add(activeSubscription);
 
 		// verify
 		// the receiver and sender should've been added to the maps
-		SubscriptionChannelWithHandlers receiverChannel =
-				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(channelName);
+		SubscriptionChannelWithHandlers receiverChannel = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(channelName);
 		MessageChannel senderChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(channelName);
 
 		Assertions.assertEquals(producer, senderChannel);
@@ -83,12 +86,16 @@ public class SubscriptionChannelRegistryTest {
 		// verify the creation of the sender/receiver
 		// both have retry values provided
 		ArgumentCaptor<ChannelConsumerSettings> consumerCaptor = ArgumentCaptor.forClass(ChannelConsumerSettings.class);
-		verify(mySubscriptionChannelFactory).newDeliveryReceivingChannel(anyString(), consumerCaptor.capture());
+		verify(mySubscriptionChannelFactory)
+			.newDeliveryReceivingChannel(anyString(),
+				consumerCaptor.capture());
 		ChannelConsumerSettings consumerSettings = consumerCaptor.getValue();
 		verifySettingsHaveRetryConfig(consumerSettings, retryCount);
 
 		ArgumentCaptor<ChannelProducerSettings> producerCaptor = ArgumentCaptor.forClass(ChannelProducerSettings.class);
-		verify(mySubscriptionChannelFactory).newDeliverySendingChannel(anyString(), producerCaptor.capture());
+		verify(mySubscriptionChannelFactory)
+			.newDeliverySendingChannel(anyString(),
+				producerCaptor.capture());
 		verifySettingsHaveRetryConfig(producerCaptor.getValue(), retryCount);
 	}
 
@@ -100,7 +107,6 @@ public class SubscriptionChannelRegistryTest {
 	private void verifySettingsHaveRetryConfig(BaseChannelSettings theSettings, int theRetryCount) {
 		Assertions.assertNotNull(theSettings);
 		Assertions.assertNotNull(theSettings.getRetryConfigurationParameters());
-		Assertions.assertEquals(
-				theRetryCount, theSettings.getRetryConfigurationParameters().getRetryCount());
+		Assertions.assertEquals(theRetryCount, theSettings.getRetryConfigurationParameters().getRetryCount());
 	}
 }

@@ -29,6 +29,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 		myRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
+
 	/**
 	 * See #519
 	 */
@@ -45,14 +46,12 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 
 			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
-			for (CapabilityStatementRestResourceComponent nextResource :
-					cs.getRest().get(0).getResource()) {
+			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
 				ourLog.info("Testing resource: " + nextResource.getType());
 				Set<String> sps = new HashSet<String>();
 				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
 					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource "
-								+ nextResource.getType());
+						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 					}
 				}
 
@@ -64,6 +63,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
 	}
+
 
 	@Test
 	public void testFetchOpenApi() throws IOException {
@@ -77,4 +77,6 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 	}
+
+
 }

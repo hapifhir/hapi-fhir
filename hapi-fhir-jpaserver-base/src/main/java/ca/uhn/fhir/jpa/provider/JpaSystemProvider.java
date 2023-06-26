@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -36,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -44,19 +46,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT> {
 
-	@Description(
-			"Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
-	@Operation(
-			name = MARK_ALL_RESOURCES_FOR_REINDEXING,
-			idempotent = false,
-			returnParameters = {@OperationParam(name = "status")})
+
+	@Description("Marks all currently existing resources of a given type, or all resources of all types, for reindexing.")
+	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = false, returnParameters = {
+		@OperationParam(name = "status")
+	})
 	/**
 	 * @deprecated
 	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
 	 */
 	@Deprecated
 	public IBaseResource markAllResourcesForReindexing(
-			@OperationParam(name = "type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType) {
+		@OperationParam(name = "type", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theType
+	) {
 
 		if (theType != null && isNotBlank(theType.getValueAsString())) {
 			getResourceReindexingSvc().markAllResourcesForReindexing(theType.getValueAsString());
@@ -73,10 +75,9 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	}
 
 	@Description("Forces a single pass of the resource reindexing processor")
-	@Operation(
-			name = PERFORM_REINDEXING_PASS,
-			idempotent = false,
-			returnParameters = {@OperationParam(name = "status")})
+	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = false, returnParameters = {
+		@OperationParam(name = "status")
+	})
 	/**
 	 * @deprecated
 	 * @see ReindexProvider#Reindex(List, IPrimitiveType, RequestDetails)
@@ -99,9 +100,7 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 	}
 
 	@Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)
-	@Description(
-			shortDefinition =
-					"Provides the number of resources currently stored on the server, broken down by resource type")
+	@Description(shortDefinition = "Provides the number of resources currently stored on the server, broken down by resource type")
 	public IBaseParameters getResourceCounts() {
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
@@ -109,24 +108,18 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		counts = defaultIfNull(counts, Collections.emptyMap());
 		counts = new TreeMap<>(counts);
 		for (Map.Entry<String, Long> nextEntry : counts.entrySet()) {
-			ParametersUtil.addParameterToParametersInteger(
-					getContext(),
-					retVal,
-					nextEntry.getKey(),
-					nextEntry.getValue().intValue());
+			ParametersUtil.addParameterToParametersInteger(getContext(), retVal, nextEntry.getKey(), nextEntry.getValue().intValue());
 		}
 
 		return retVal;
 	}
 
-	@Operation(
-			name = ProviderConstants.OPERATION_META,
-			idempotent = true,
-			returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
+	@Operation(name = ProviderConstants.OPERATION_META, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", typeName = "Meta")
+	})
 	public IBaseParameters meta(RequestDetails theRequestDetails) {
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParameters(
-				getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "return", getDao().metaGetOperation(theRequestDetails));
 		return retVal;
 	}
 
@@ -141,4 +134,6 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
 	}
+
+
 }

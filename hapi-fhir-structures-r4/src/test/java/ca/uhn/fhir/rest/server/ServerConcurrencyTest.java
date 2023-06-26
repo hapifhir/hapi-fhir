@@ -23,6 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import javax.annotation.Nonnull;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -31,11 +36,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
-import javax.annotation.Nonnull;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,23 +47,18 @@ public class ServerConcurrencyTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerConcurrencyTest.class);
-
 	@RegisterExtension
-	private static final RestfulServerExtension ourServer =
-			new RestfulServerExtension(ourCtx).registerProvider(new MyPatientProvider());
-
+	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new MyPatientProvider());
 	@RegisterExtension
 	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Mock
 	private HttpServletRequest myRequest;
-
 	@Mock
 	private HttpServletResponse myResponse;
-
 	@Mock
 	private PrintWriter myWriter;
-
 	private HashMap<String, String> myHeaders;
 
 	@Test
@@ -74,8 +69,9 @@ public class ServerConcurrencyTest {
 		when(myRequest.getInputStream()).thenReturn(inputStream);
 		when(myResponse.getWriter()).thenReturn(myWriter);
 
-		assertDoesNotThrow(
-				() -> ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse));
+		assertDoesNotThrow(() ->
+			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
+		);
 	}
 
 	@Test
@@ -87,8 +83,9 @@ public class ServerConcurrencyTest {
 		// Throw an exception when the stream is closed
 		doThrow(new EOFException()).when(myWriter).close();
 
-		assertDoesNotThrow(
-				() -> ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse));
+		assertDoesNotThrow(() ->
+			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
+		);
 	}
 
 	private void initRequestMocks() {
@@ -179,8 +176,11 @@ public class ServerConcurrencyTest {
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics(RandomStringUtils.randomAlphanumeric(1000));
 
-			return new MethodOutcome().setId(new IdType("Patient/A")).setOperationOutcome(oo);
+			return new MethodOutcome()
+				.setId(new IdType("Patient/A"))
+				.setOperationOutcome(oo);
 		}
+
 
 		@Override
 		public Class<Patient> getResourceType() {

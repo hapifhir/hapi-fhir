@@ -36,10 +36,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	public static FhirContext ourCtx = FhirContext.forDstu3Cached();
-
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
 
@@ -55,89 +53,84 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(
-				myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
 
 		runInTransaction(() -> {
-			ourLog.info("Code system versions:\n * "
-					+ myTermCodeSystemVersionDao.findAll().stream()
-							.map(t -> t.toString())
-							.collect(Collectors.joining("\n * ")));
+			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		Parameters respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("ParentA"))
-				.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ParentA"))
+			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(
-				("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(
-				("SYSTEM VERSION"),
-				((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals(("SYSTEM VERSION"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("ParentA"))
-				.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
-				.useHttpGet()
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ParentA"))
+			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
+			.useHttpGet()
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(
-				("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(
-				"SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+
 	}
 
 	@Test
 	public void testDeleteCodeSystemComplete2() {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 
-		String input = "{\n" + "    \"resourceType\": \"CodeSystem\",\n"
-				+ "    \"id\": \"CDRTestCodeSystem\",\n"
-				+ "    \"url\": \"http://fkcfhir.org/fhir/cs/CDRTestCodeSystem\",\n"
-				+ "    \"identifier\": {\n"
-				+ "        \"value\": \"CDRTestCodeSystem\"\n"
-				+ "    },\n"
-				+ "    \"name\": \"CDRTestCodeSystem\",\n"
-				+ "    \"status\": \"retired\",\n"
-				+ "    \"publisher\": \"FMCNA\",\n"
-				+ "    \"description\": \"Smile CDR Test Code System \",\n"
-				+ "    \"hierarchyMeaning\": \"grouped-by\",\n"
-				+ "    \"content\": \"complete\",\n"
-				+ "    \"concept\": [\n"
-				+ "        {\n"
-				+ "            \"code\": \"IHD\",\n"
-				+ "            \"display\": \"IHD\"\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"code\": \"HHD\",\n"
-				+ "            \"display\": \"HHD\"\n"
-				+ "        }\n"
-				+ "    ]\n"
-				+ "}";
+		String input = "{\n" +
+			"    \"resourceType\": \"CodeSystem\",\n" +
+			"    \"id\": \"CDRTestCodeSystem\",\n" +
+			"    \"url\": \"http://fkcfhir.org/fhir/cs/CDRTestCodeSystem\",\n" +
+			"    \"identifier\": {\n" +
+			"        \"value\": \"CDRTestCodeSystem\"\n" +
+			"    },\n" +
+			"    \"name\": \"CDRTestCodeSystem\",\n" +
+			"    \"status\": \"retired\",\n" +
+			"    \"publisher\": \"FMCNA\",\n" +
+			"    \"description\": \"Smile CDR Test Code System \",\n" +
+			"    \"hierarchyMeaning\": \"grouped-by\",\n" +
+			"    \"content\": \"complete\",\n" +
+			"    \"concept\": [\n" +
+			"        {\n" +
+			"            \"code\": \"IHD\",\n" +
+			"            \"display\": \"IHD\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"code\": \"HHD\",\n" +
+			"            \"display\": \"HHD\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
 
 		// Create the code system
 		CodeSystem cs = (CodeSystem) myFhirContext.newJsonParser().parseResource(input);
@@ -156,54 +149,54 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-		Parameters respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(
-				("v2 Identifier Type"),
-				((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("v2 Identifier Type"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
 		assertEquals(("2.8.2"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(
-				"Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
-		// @formatter:off
+		//@formatter:off
 		try {
-			myClient.operation()
-					.onType(CodeSystem.class)
-					.named("lookup")
-					.withParameter(Parameters.class, "code", new CodeType("ACSNAAAAAA"))
-					.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
-					.execute();
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ACSNAAAAAA"))
+				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
+				.execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
-		Parameters respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -211,140 +204,118 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals("ACME Codes", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(
-				("Systolic blood pressure--expiration"),
-				((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistantCode() {
-		// @formatter:off
+		//@formatter:off
 		try {
-			myClient.operation()
-					.onType(CodeSystem.class)
-					.named("lookup")
-					.withParameter(Parameters.class, "code", new CodeType("8450-9AAAAA"))
-					.andParameter("system", new UriType("http://acme.org"))
-					.execute();
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8450-9AAAAA"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByCoding() {
-		Parameters respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(
-						Parameters.class,
-						"coding",
-						new Coding().setSystem("http://acme.org").setCode("8450-9"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(
-				("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(
-				("Systolic blood pressure--expiration"),
-				((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
 	public void testLookupOperationByInvalidCombination() {
-		// @formatter:off
+		//@formatter:off
 		try {
-			myClient.operation()
-					.onType(CodeSystem.class)
-					.named("lookup")
-					.withParameter(
-							Parameters.class,
-							"coding",
-							new Coding().setSystem("http://acme.org").setCode("8450-9"))
-					.andParameter("code", new CodeType("8450-9"))
-					.andParameter("system", new UriType("http://acme.org"))
-					.execute();
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+				.andParameter("code", new CodeType("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1127)
-							+ "$lookup can only validate (system AND code) OR (coding.system AND coding.code)",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByInvalidCombination2() {
-		// @formatter:off
+		//@formatter:off
 		try {
-			myClient.operation()
-					.onType(CodeSystem.class)
-					.named("lookup")
-					.withParameter(
-							Parameters.class,
-							"coding",
-							new Coding().setSystem("http://acme.org").setCode("8450-9"))
-					.andParameter("system", new UriType("http://acme.org"))
-					.execute();
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1127)
-							+ "$lookup can only validate (system AND code) OR (coding.system AND coding.code)",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationByInvalidCombination3() {
-		// @formatter:off
+		//@formatter:off
 		try {
-			myClient.operation()
-					.onType(CodeSystem.class)
-					.named("lookup")
-					.withParameter(
-							Parameters.class,
-							"coding",
-							new Coding().setSystem("http://acme.org").setCode(null))
-					.execute();
+			myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode(null))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1126)
-							+ "No code, coding, or codeableConcept provided to validate",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
-		// @formatter:on
+		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationForBuiltInCode() {
-		Parameters respParam = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("M"))
-				.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("M"))
+			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(
-				"v3 Code System MaritalStatus",
-				((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("v3 Code System MaritalStatus", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("version", respParam.getParameter().get(1).getName());
 		assertEquals("2016-11-11", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(2).getName());
@@ -388,18 +359,17 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("url").setValue(new UriType("https://url"));
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
-		Parameters outcome = myClient.operation()
-				.onType(CodeSystem.class)
-				.named("validate-code")
-				.withParameters(inParams)
-				.execute();
+		Parameters outcome = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
-		String message = outcome.getParameter().stream()
-				.filter(t -> t.getName().equals("message"))
-				.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
-				.findFirst()
-				.orElseThrow(IllegalArgumentException::new);
+		String message = outcome
+			.getParameter()
+			.stream()
+			.filter(t -> t.getName().equals("message"))
+			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
+			.findFirst()
+			.orElseThrow(IllegalArgumentException::new);
 		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
 	}
+
 }

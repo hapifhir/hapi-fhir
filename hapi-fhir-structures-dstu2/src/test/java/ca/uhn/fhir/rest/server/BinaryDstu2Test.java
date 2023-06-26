@@ -78,7 +78,7 @@ public class BinaryDstu2Test {
 
 			Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
@@ -96,7 +96,7 @@ public class BinaryDstu2Test {
 
 			Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
@@ -104,13 +104,13 @@ public class BinaryDstu2Test {
 	@Test
 	public void testPostBinary() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		http.setEntity(new ByteArrayEntity(new byte[] {1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
+		http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
 		try (CloseableHttpResponse response = ourClient.execute(http)) {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 
 			assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, ourLast.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
 		}
 	}
 
@@ -118,7 +118,7 @@ public class BinaryDstu2Test {
 	@Test
 	public void testPostFhirBinary() throws Exception {
 		Binary res = new Binary();
-		res.setContent(new byte[] {1, 2, 3, 4});
+		res.setContent(new byte[]{1, 2, 3, 4});
 		res.setContentType("text/plain");
 		String stringContent = ourCtx.newJsonParser().encodeResourceToString(res);
 
@@ -154,10 +154,8 @@ public class BinaryDstu2Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("foo", status.getFirstHeader("content-type").getValue());
-			assertEquals(
-					"Attachment;",
-					status.getFirstHeader("Content-Disposition").getValue()); // This is a security requirement!
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, responseContent);
+			assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue()); // This is a security requirement!
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
 		}
 	}
 
@@ -171,16 +169,9 @@ public class BinaryDstu2Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(
-					Constants.CT_FHIR_JSON + ";charset=utf-8",
-					status.getFirstHeader("content-type")
-							.getValue()
-							.replace(" ", "")
-							.toLowerCase());
+			assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 			assertNull(status.getFirstHeader("Content-Disposition"));
-			assertEquals(
-					"{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}",
-					responseContent);
+			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
 		}
 	}
 
@@ -191,12 +182,7 @@ public class BinaryDstu2Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(
-					Constants.CT_FHIR_JSON + ";charset=utf-8",
-					response.getFirstHeader("content-type")
-							.getValue()
-							.replace(" ", "")
-							.replace("UTF", "utf"));
+			assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 			ourLog.info(responseContent);
 
@@ -204,7 +190,7 @@ public class BinaryDstu2Test {
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
@@ -215,12 +201,7 @@ public class BinaryDstu2Test {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(
-					Constants.CT_FHIR_XML + ";charset=utf-8",
-					response.getFirstHeader("content-type")
-							.getValue()
-							.replace(" ", "")
-							.replace("UTF", "utf"));
+			assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
 
 			ourLog.info(responseContent);
 
@@ -228,7 +209,7 @@ public class BinaryDstu2Test {
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
@@ -249,7 +230,7 @@ public class BinaryDstu2Test {
 		public Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] {1, 2, 3, 4});
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
@@ -258,7 +239,7 @@ public class BinaryDstu2Test {
 		public List<Binary> search() {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] {1, 2, 3, 4});
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType("text/plain");
 			return Collections.singletonList(retVal);
 		}
@@ -287,18 +268,17 @@ public class BinaryDstu2Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
 		int timeout = 60;
 		RequestConfig config = RequestConfig.custom()
-				.setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000)
-				.setSocketTimeout(timeout * 1000)
-				.build();
+			.setConnectTimeout(timeout * 1000)
+			.setConnectionRequestTimeout(timeout * 1000)
+			.setSocketTimeout(timeout * 1000).build();
 
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.setDefaultRequestConfig(config).build();
+
 	}
 }

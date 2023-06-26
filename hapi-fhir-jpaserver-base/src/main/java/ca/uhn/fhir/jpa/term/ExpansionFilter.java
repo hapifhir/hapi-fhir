@@ -24,10 +24,10 @@ import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.Collections;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -49,21 +49,14 @@ class ExpansionFilter {
 	/**
 	 * Constructor
 	 */
-	ExpansionFilter(
-			ExpansionFilter theExpansionFilter,
-			List<ValueSet.ConceptSetFilterComponent> theFilters,
-			Integer theMaxCount) {
+	ExpansionFilter(ExpansionFilter theExpansionFilter, List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
 		this(theExpansionFilter.getSystem(), theExpansionFilter.getCode(), theFilters, theMaxCount);
 	}
 
 	/**
 	 * Constructor
 	 */
-	ExpansionFilter(
-			@Nullable String theSystem,
-			@Nullable String theCode,
-			@Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters,
-			Integer theMaxCount) {
+	ExpansionFilter(@Nullable String theSystem, @Nullable String theCode, @Nonnull List<ValueSet.ConceptSetFilterComponent> theFilters, Integer theMaxCount) {
 		Validate.isTrue(isNotBlank(theSystem) == isNotBlank(theCode));
 		Validate.notNull(theFilters);
 
@@ -108,11 +101,10 @@ class ExpansionFilter {
 	public static ExpansionFilter fromFilterString(@Nullable String theFilter) {
 		ExpansionFilter filter;
 		if (isNoneBlank(theFilter)) {
-			List<ValueSet.ConceptSetFilterComponent> filters =
-					Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
-							.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
-							.setOp(ValueSet.FilterOperator.EQUAL)
-							.setValue(theFilter));
+			List<ValueSet.ConceptSetFilterComponent> filters = Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
+				.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue(theFilter));
 			filter = new ExpansionFilter(null, null, filters, null);
 		} else {
 			filter = ExpansionFilter.NO_FILTER;

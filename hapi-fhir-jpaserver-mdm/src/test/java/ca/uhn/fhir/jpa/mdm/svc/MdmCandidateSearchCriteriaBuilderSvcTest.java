@@ -29,8 +29,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		Patient patient = new Patient();
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("family");
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), searchParamJson);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertFalse(result.isPresent());
 	}
 
@@ -40,8 +39,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		patient.addName().setFamily("Fernandez");
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("family");
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), searchParamJson);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
 		assertEquals("Patient?family=Fernandez", result.get());
 	}
@@ -56,14 +54,9 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("given");
 		searchParamJson.addSearchParam("family");
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), searchParamJson);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
-		assertThat(
-				result.get(),
-				anyOf(
-						equalTo("Patient?given=Jose,Martin&family=Fernandez"),
-						equalTo("Patient?given=Martin,Jose&family=Fernandez")));
+		assertThat(result.get(), anyOf(equalTo("Patient?given=Jose,Martin&family=Fernandez"), equalTo("Patient?given=Martin,Jose&family=Fernandez")));
 	}
 
 	@Test
@@ -72,8 +65,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		patient.addIdentifier().setSystem("urn:oid:1.2.36.146.595.217.0.1").setValue("12345");
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("identifier");
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), searchParamJson);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
 		assertEquals(result.get(), "Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7C12345");
 	}
@@ -84,8 +76,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		patient.addIdentifier().setSystem("urn:oid:1.2.36.146.595.217.0.1").setValue("abc def");
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("identifier");
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), searchParamJson);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
 		assertEquals("Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7Cabc%20def", result.get());
 	}
@@ -93,8 +84,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testOmittingCandidateSearchParamsIsAllowed() {
 		Patient patient = new Patient();
-		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				"Patient", patient, Collections.emptyList(), null);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), null);
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), is(equalTo("Patient?")));
 	}
@@ -103,8 +93,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 	public void testEmptyCandidateSearchParamsWorksInConjunctionWithFilterParams() {
 		Patient patient = new Patient();
 		List<String> filterParams = Collections.singletonList("active=true");
-		Optional<String> result =
-				myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, filterParams, null);
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, filterParams, null);
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), is(equalTo("Patient?active=true")));
 	}

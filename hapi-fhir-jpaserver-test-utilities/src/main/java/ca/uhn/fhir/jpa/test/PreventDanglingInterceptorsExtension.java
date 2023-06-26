@@ -52,8 +52,7 @@ public class PreventDanglingInterceptorsExtension implements BeforeEachCallback,
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
 		myBeforeInterceptors = myInterceptorServiceSuplier.get().getAllRegisteredInterceptors();
 
-		ourLog.info("Registered interceptors:\n * "
-				+ myBeforeInterceptors.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		ourLog.info("Registered interceptors:\n * " + myBeforeInterceptors.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 	}
 
 	@Override
@@ -62,10 +61,8 @@ public class PreventDanglingInterceptorsExtension implements BeforeEachCallback,
 		Map<Object, Object> delta = new IdentityHashMap<>();
 		afterInterceptors.forEach(t -> delta.put(t, t));
 		myBeforeInterceptors.forEach(t -> delta.remove(t));
-		delta.keySet().forEach(t -> myInterceptorServiceSuplier.get().unregisterInterceptor(t));
-		assertTrue(
-				delta.isEmpty(),
-				() -> "Test added interceptor(s) and did not clean them up:\n * "
-						+ delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		delta.keySet().forEach(t->myInterceptorServiceSuplier.get().unregisterInterceptor(t));
+		assertTrue(delta.isEmpty(), () -> "Test added interceptor(s) and did not clean them up:\n * " + delta.keySet().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+
 	}
 }

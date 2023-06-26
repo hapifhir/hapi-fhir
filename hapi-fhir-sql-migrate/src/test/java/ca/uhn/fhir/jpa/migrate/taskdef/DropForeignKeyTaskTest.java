@@ -13,6 +13,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 public class DropForeignKeyTaskTest extends BaseTest {
 
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testDropForeignKey(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -38,4 +39,6 @@ public class DropForeignKeyTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 	}
+
+
 }

@@ -35,9 +35,9 @@ public class TermReadSvcUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReadSvcUtil.class);
 
 	public static Optional<String> getValueSetId(String theUrl) {
-		if (!theUrl.startsWith(LOINC_GENERIC_VALUESET_URL)) return Optional.empty();
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL))   return Optional.empty();
 
-		if (!theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
+		if (! theUrl.startsWith(LOINC_GENERIC_VALUESET_URL_PLUS_SLASH)) {
 			if (theUrl.equals(LOINC_GENERIC_VALUESET_URL)) {
 				// the request is for the loinc all valueset which when loading was given the name: 'loinc-all'
 				return Optional.of(LOINC_ALL_VALUESET_ID);
@@ -51,17 +51,22 @@ public class TermReadSvcUtil {
 		return isBlank(forcedId) ? Optional.empty() : Optional.of(forcedId);
 	}
 
+
 	public static boolean isLoincUnversionedValueSet(String theUrl) {
 		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
-		boolean isNoVersion = !theUrl.contains("|");
+		boolean isNoVersion = ! theUrl.contains("|");
 
 		return isLoincCodeSystem && isNoVersion;
 	}
+
 
 	public static boolean isLoincUnversionedCodeSystem(String theUrl) {
 		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
-		boolean isNoVersion = !theUrl.contains("|");
+		boolean isNoVersion = ! theUrl.contains("|");
 
 		return isLoincCodeSystem && isNoVersion;
 	}
+
+
+
 }

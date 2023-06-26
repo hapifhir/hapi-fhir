@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ImportCsvToConceptMapCommandDstu3Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandDstu3Test.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
 	private static final String VS_URL_1 = "http://example.com/valueset/1";
 	private static final String VS_URL_2 = "http://example.com/valueset/2";
@@ -47,17 +46,16 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 	@RegisterExtension
 	public final RestServerDstu3Helper myRestServerDstu3Helper = RestServerDstu3Helper.newInitialized();
-
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	@BeforeEach
-	public void before() {
+	public void before(){
 		myRestServerDstu3Helper.setConceptMapResourceProvider(new HashMapResourceProviderConceptMapDstu3(myCtx));
 	}
 
 	@AfterAll
-	public static void afterAll() {
+	public static void afterAll(){
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -67,13 +65,12 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = myRestServerDstu3Helper
-				.getClient()
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMapUrl))
+			.execute();
 
 		assertEquals(Boolean.TRUE, methodOutcome.getCreated());
 	}
@@ -85,13 +82,12 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = myRestServerDstu3Helper
-				.getClient()
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMapUrl))
+			.execute();
 
 		assertNull(methodOutcome.getCreated());
 	}
@@ -101,22 +97,20 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
 		myRestServerDstu3Helper.getClient().create().resource(conceptMap).execute();
 
-		Bundle response = myRestServerDstu3Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myRestServerDstu3Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ConceptMap resultConceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		MethodOutcome methodOutcome = myRestServerDstu3Helper
-				.getClient()
-				.update()
-				.resource(resultConceptMap)
-				.withId(resultConceptMap.getIdElement())
-				.execute();
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
+			.update()
+			.resource(resultConceptMap)
+			.withId(resultConceptMap.getIdElement())
+			.execute();
 
 		assertNull(methodOutcome.getCreated());
 	}
@@ -129,33 +123,25 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		myFile = fileToImport.getAbsolutePath();
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					CM_URL,
-					"-i",
-					VS_URL_1,
-					"-o",
-					VS_URL_2,
-					"-f",
-					myFile,
-					"-s",
-					Enumerations.PublicationStatus.ACTIVE.toCode(),
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerDstu3Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFile,
+				"-s", Enumerations.PublicationStatus.ACTIVE.toCode(),
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerDstu3Helper
+		));
 
-		Bundle response = myRestServerDstu3Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myRestServerDstu3Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
@@ -338,36 +324,29 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals("3d This is a comment.", target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					CM_URL,
-					"-i",
-					VS_URL_1,
-					"-o",
-					VS_URL_2,
-					"-f",
-					myFile,
-					"-s",
-					Enumerations.PublicationStatus.ACTIVE.toCode(),
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerDstu3Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFile,
+				"-s", Enumerations.PublicationStatus.ACTIVE.toCode(),
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerDstu3Helper
+		));
 
-		response = myRestServerDstu3Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		response = myRestServerDstu3Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
 		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/2", conceptMap.getId());
 	}
+
 }

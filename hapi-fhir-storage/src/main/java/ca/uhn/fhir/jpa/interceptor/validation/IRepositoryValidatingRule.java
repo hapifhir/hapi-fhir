@@ -44,11 +44,7 @@ public interface IRepositoryValidatingRule {
 		private boolean myPasses;
 		private String myFailureDescription;
 
-		private RuleEvaluation(
-				IRepositoryValidatingRule theRule,
-				boolean thePasses,
-				String theFailureDescription,
-				IBaseOperationOutcome theOperationOutcome) {
+		private RuleEvaluation(IRepositoryValidatingRule theRule, boolean thePasses, String theFailureDescription, IBaseOperationOutcome theOperationOutcome) {
 			myRule = theRule;
 			myPasses = thePasses;
 			myFailureDescription = theFailureDescription;
@@ -87,5 +83,6 @@ public interface IRepositoryValidatingRule {
 		public String getFailureDescription() {
 			return myFailureDescription;
 		}
+
 	}
 }

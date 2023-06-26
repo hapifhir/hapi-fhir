@@ -6,10 +6,10 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.util.Enumeration;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,4 +39,5 @@ public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
 		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
 		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}
+
 }

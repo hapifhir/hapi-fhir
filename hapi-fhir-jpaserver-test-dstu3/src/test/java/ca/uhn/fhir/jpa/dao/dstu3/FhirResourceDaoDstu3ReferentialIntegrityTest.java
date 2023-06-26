@@ -19,10 +19,8 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@AfterEach
 	public void afterResetConfig() {
-		myStorageSettings.setEnforceReferentialIntegrityOnWrite(
-				new JpaStorageSettings().isEnforceReferentialIntegrityOnWrite());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(
-				new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(new JpaStorageSettings().isEnforceReferentialIntegrityOnWrite());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 	}
 
 	@Test
@@ -34,11 +32,9 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 			myPatientDao.create(p);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(1094)
-							+ "Resource Organization/AAA not found, specified in path: Patient.managingOrganization",
-					e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
+
 	}
 
 	@Test
@@ -51,6 +47,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 		p = myPatientDao.read(id);
 		assertEquals("Organization/AAA", p.getManagingOrganization().getReference());
+
 	}
 
 	@Test
@@ -67,15 +64,12 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 			myOrganizationDao.delete(oid);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(
-					Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart()
-							+ " because at least one resource has a reference to this resource. First reference found was resource Patient/"
-							+ pid.getIdPart() + " in path Patient.managingOrganization",
-					e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
 
 		myPatientDao.delete(pid);
 		myOrganizationDao.delete(oid);
+
 	}
 
 	@Test
@@ -92,5 +86,8 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 		myOrganizationDao.delete(oid);
 		myPatientDao.delete(pid);
+
 	}
+
+
 }

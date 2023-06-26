@@ -52,7 +52,7 @@ public class LogbackLevelOverrideExtension implements AfterEachCallback {
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
-		mySavedLevels.forEach((name, level) -> {
+		mySavedLevels.forEach((name,level) ->{
 			getClassicLogger(name).setLevel(level);
 		});
 		mySavedLevels.clear();

@@ -14,7 +14,6 @@ public class MockProvider {
 	public void setBundleProvider(IBundleProvider theBundleProvider) {
 		myBundleProvider = theBundleProvider;
 	}
-
 	public void setReadResource(IBaseResource theReadResource) {
 		myReadResource = theReadResource;
 	}

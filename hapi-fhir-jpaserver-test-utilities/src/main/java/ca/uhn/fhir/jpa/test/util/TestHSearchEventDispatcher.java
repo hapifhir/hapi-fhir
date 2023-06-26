@@ -31,8 +31,9 @@ public class TestHSearchEventDispatcher implements IHSearchEventListener {
 
 	private final List<IHSearchEventListener> listeners = new ArrayList<>();
 
+
 	public void register(IHSearchEventListener theListener) {
-		if (theListener.equals(this)) {
+		if ( theListener.equals(this) ) {
 			ourLog.error("Dispatcher is not supposed to register itself as a listener. Ignored.");
 			return;
 		}
@@ -40,11 +41,12 @@ public class TestHSearchEventDispatcher implements IHSearchEventListener {
 		listeners.add(theListener);
 	}
 
+
 	/**
 	 * Dispatch event to registered listeners
 	 */
 	@Override
 	public void hsearchEvent(HSearchEventType theEventType) {
-		listeners.forEach(l -> l.hsearchEvent(theEventType));
+		listeners.forEach( l -> l.hsearchEvent(theEventType) );
 	}
 }

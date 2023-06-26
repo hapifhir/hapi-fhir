@@ -26,42 +26,22 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 import java.util.*;
 
-public abstract class BaseElement implements /*IElement, */ ISupportsUndeclaredExtensions {
+public abstract class BaseElement implements /*IElement, */ISupportsUndeclaredExtensions {
 
 	private static final long serialVersionUID = -3092659584634499332L;
 	private List<String> myFormatCommentsPost;
 	private List<String> myFormatCommentsPre;
 	private Map<String, Object> userData;
 
-	@Child(
-			name = "extension",
-			type = {ExtensionDt.class},
-			order = 0,
-			min = 0,
-			max = Child.MAX_UNLIMITED,
-			modifier = false,
-			summary = false)
-	@Description(
-			shortDefinition = "Additional Content defined by implementations",
-			formalDefinition =
-					"May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.")
+	@Child(name = "extension", type = {ExtensionDt.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED, modifier = false, summary = false)
+	@Description(shortDefinition = "Additional Content defined by implementations", formalDefinition = "May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.")
 	private List<ExtensionDt> myUndeclaredExtensions;
 
 	/**
 	 * May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.
 	 */
-	@Child(
-			name = "modifierExtension",
-			type = {ExtensionDt.class},
-			order = 1,
-			min = 0,
-			max = Child.MAX_UNLIMITED,
-			modifier = true,
-			summary = false)
-	@Description(
-			shortDefinition = "Extensions that cannot be ignored",
-			formalDefinition =
-					"May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.")
+	@Child(name = "modifierExtension", type = {ExtensionDt.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED, modifier = true, summary = false)
+	@Description(shortDefinition = "Extensions that cannot be ignored", formalDefinition = "May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.")
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
@@ -120,13 +100,15 @@ public abstract class BaseElement implements /*IElement, */ ISupportsUndeclaredE
 
 	@Override
 	public List<String> getFormatCommentsPost() {
-		if (myFormatCommentsPost == null) myFormatCommentsPost = new ArrayList<String>();
+		if (myFormatCommentsPost == null)
+			myFormatCommentsPost = new ArrayList<String>();
 		return myFormatCommentsPost;
 	}
 
 	@Override
 	public List<String> getFormatCommentsPre() {
-		if (myFormatCommentsPre == null) myFormatCommentsPre = new ArrayList<String>();
+		if (myFormatCommentsPre == null)
+			myFormatCommentsPre = new ArrayList<String>();
 		return myFormatCommentsPre;
 	}
 
@@ -160,13 +142,13 @@ public abstract class BaseElement implements /*IElement, */ ISupportsUndeclaredE
 
 	@Override
 	public boolean hasFormatComment() {
-		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty())
-				|| (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
+		return (myFormatCommentsPre != null && !myFormatCommentsPre.isEmpty()) || (myFormatCommentsPost != null && !myFormatCommentsPost.isEmpty());
 	}
 
 	@Override
 	public Object getUserData(String name) {
-		if (userData == null) return null;
+		if (userData == null)
+			return null;
 		return userData.get(name);
 	}
 
@@ -205,4 +187,5 @@ public abstract class BaseElement implements /*IElement, */ ISupportsUndeclaredE
 		}
 		return true;
 	}
+
 }

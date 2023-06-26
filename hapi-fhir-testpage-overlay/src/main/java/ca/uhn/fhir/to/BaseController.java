@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.ITemplateEngine;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -42,25 +44,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class BaseController {
 	static final String PARAM_RESOURCE = "resource";
-	static final String RESOURCE_COUNT_EXT_URL =
-			"http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
+	static final String RESOURCE_COUNT_EXT_URL = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseController.class);
-
 	@Autowired
 	protected TesterConfig myConfig;
-
 	private final Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<>();
 	private final Map<FhirVersionEnum, VersionCanonicalizer> myCanonicalizers = new HashMap<>();
 	private List<String> myFilterHeaders;
-
 	@Autowired
 	private ITemplateEngine myTemplateEngine;
 
@@ -68,8 +64,7 @@ public class BaseController {
 		super();
 	}
 
-	protected CapabilityStatement addCommonParams(
-			HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	protected CapabilityStatement addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
 		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);
@@ -123,13 +118,7 @@ public class BaseController {
 				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
 				if (inQuote) {
 					b.append(nextChar);
-					if (prevChar != '\\'
-							&& nextChar == '&'
-							&& nextChar2 == 'q'
-							&& nextChar3 == 'u'
-							&& nextChar4 == 'o'
-							&& nextChar5 == 't'
-							&& nextChar6 == ';') {
+					if (prevChar != '\\' && nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						b.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -152,12 +141,7 @@ public class BaseController {
 						b.append(nextChar);
 						b.append("</span>");
 						inValue = false;
-					} else if (nextChar == '&'
-							&& nextChar2 == 'q'
-							&& nextChar3 == 'u'
-							&& nextChar4 == 'o'
-							&& nextChar5 == 't'
-							&& nextChar6 == ';') {
+					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						if (inValue) {
 							b.append("<span class='hlQuot'>&quot;");
 						} else {
@@ -188,12 +172,7 @@ public class BaseController {
 				char nextChar6 = (i + 5) < str.length() ? str.charAt(i + 5) : ' ';
 				if (inQuote) {
 					b.append(nextChar);
-					if (nextChar == '&'
-							&& nextChar2 == 'q'
-							&& nextChar3 == 'u'
-							&& nextChar4 == 'o'
-							&& nextChar5 == 't'
-							&& nextChar6 == ';') {
+					if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						b.append("quot;</span>");
 						i += 5;
 						inQuote = false;
@@ -206,12 +185,7 @@ public class BaseController {
 					} else if (nextChar == ' ') {
 						b.append("</span><span class='hlAttr'>");
 						b.append(nextChar);
-					} else if (nextChar == '&'
-							&& nextChar2 == 'q'
-							&& nextChar3 == 'u'
-							&& nextChar4 == 'o'
-							&& nextChar5 == 't'
-							&& nextChar6 == ';') {
+					} else if (nextChar == '&' && nextChar2 == 'q' && nextChar3 == 'u' && nextChar4 == 'o' && nextChar5 == 't' && nextChar6 == ';') {
 						b.append("<span class='hlQuot'>&quot;");
 						inQuote = true;
 						i += 5;
@@ -268,8 +242,7 @@ public class BaseController {
 					b.append("</span><wbr /><span class='hlControl'>&amp;</span><span class='hlTagName'>");
 				} else if (nextChar == '=') {
 					b.append("</span><span class='hlControl'>=</span><span class='hlAttr'>");
-					// }else if (nextChar=='%' && Character.isLetterOrDigit(nextChar2)&&
-					// Character.isLetterOrDigit(nextChar3)) {
+					// }else if (nextChar=='%' && Character.isLetterOrDigit(nextChar2)&& Character.isLetterOrDigit(nextChar3)) {
 					// URLDecoder.decode(s, enc)
 				} else {
 					b.append(nextChar);
@@ -303,8 +276,7 @@ public class BaseController {
 		return retVal;
 	}
 
-	protected RuntimeResourceDefinition getResourceType(HomeRequest theRequest, HttpServletRequest theReq)
-			throws ServletException {
+	protected RuntimeResourceDefinition getResourceType(HomeRequest theRequest, HttpServletRequest theReq) throws ServletException {
 		String resourceName = sanitizeUrlPart(defaultString(theReq.getParameter(PARAM_RESOURCE)));
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(resourceName);
 		if (def == null) {
@@ -325,8 +297,7 @@ public class BaseController {
 		return returnsResource;
 	}
 
-	private CapabilityStatement loadAndAddConf(
-			HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private CapabilityStatement loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
@@ -337,8 +308,7 @@ public class BaseController {
 			name = "Conformance";
 		}
 		try {
-			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>)
-					ctx.getResourceDefinition(name).getImplementingClass();
+			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>) ctx.getResourceDefinition(name).getImplementingClass();
 			fetchedCapabilityStatement = client.fetchConformance().ofType(type).execute();
 		} catch (Exception ex) {
 			ourLog.warn("Failed to load conformance statement, error was: {}", ex.toString());
@@ -346,24 +316,18 @@ public class BaseController {
 			fetchedCapabilityStatement = ctx.getResourceDefinition(name).newInstance();
 		}
 
-		theModel.put(
-				"jsonEncodedConf",
-				getContext(theRequest).newJsonParser().encodeResourceToString(fetchedCapabilityStatement));
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(fetchedCapabilityStatement));
 
-		org.hl7.fhir.r5.model.CapabilityStatement capabilityStatement =
-				getVersionCanonicalizer(theRequest).capabilityStatementToCanonical(fetchedCapabilityStatement);
+		org.hl7.fhir.r5.model.CapabilityStatement capabilityStatement = getVersionCanonicalizer(theRequest).capabilityStatementToCanonical(fetchedCapabilityStatement);
 
 		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
 
-		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest :
-				capabilityStatement.getRest()) {
-			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextResource :
-					nextRest.getResource()) {
+		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
+			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
 				List<org.hl7.fhir.r5.model.Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
 				if (exts != null && exts.size() > 0) {
-					Number nextCount =
-							((org.hl7.fhir.r5.model.DecimalType) (exts.get(0).getValue())).getValueAsNumber();
+					Number nextCount = ((org.hl7.fhir.r5.model.DecimalType) (exts.get(0).getValue())).getValueAsNumber();
 					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
 					total += nextCount.longValue();
 				}
@@ -373,26 +337,21 @@ public class BaseController {
 		theModel.put("resourceCounts", resourceCounts);
 
 		if (total > 0) {
-			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest :
-					capabilityStatement.getRest()) {
+			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
 				Collections.sort(nextRest.getResource(), (theO1, theO2) -> {
 					org.hl7.fhir.r5.model.DecimalType count1 = new org.hl7.fhir.r5.model.DecimalType();
 					List<org.hl7.fhir.r5.model.Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
 					if (count1exts != null && count1exts.size() > 0) {
-						count1 = (org.hl7.fhir.r5.model.DecimalType)
-								count1exts.get(0).getValue();
+						count1 = (org.hl7.fhir.r5.model.DecimalType) count1exts.get(0).getValue();
 					}
 					org.hl7.fhir.r5.model.DecimalType count2 = new org.hl7.fhir.r5.model.DecimalType();
 					List<org.hl7.fhir.r5.model.Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
 					if (count2exts != null && count2exts.size() > 0) {
-						count2 = (org.hl7.fhir.r5.model.DecimalType)
-								count2exts.get(0).getValue();
+						count2 = (org.hl7.fhir.r5.model.DecimalType) count2exts.get(0).getValue();
 					}
 					int retVal = count2.compareTo(count1);
 					if (retVal == 0) {
-						retVal = theO1.getTypeElement()
-								.getValue()
-								.compareTo(theO2.getTypeElement().getValue());
+						retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
 					}
 					return retVal;
 				});
@@ -404,6 +363,7 @@ public class BaseController {
 		theModel.put("conf", capabilityStatement);
 		return capabilityStatement;
 	}
+
 
 	protected String logPrefix(ModelMap theModel) {
 		return "[server=" + theModel.get("serverId") + "] - ";
@@ -437,12 +397,9 @@ public class BaseController {
 			// If this is a document, we'll pull the narrative from the Composition
 			IBaseBundle bundle = (IBaseBundle) theResult;
 			if ("document".equals(BundleUtil.getBundleType(theContext, bundle))) {
-				IBaseResource firstResource = theContext
-						.newTerser()
-						.getSingleValueOrNull(bundle, "Bundle.entry.resource", IBaseResource.class);
+				IBaseResource firstResource = theContext.newTerser().getSingleValueOrNull(bundle, "Bundle.entry.resource", IBaseResource.class);
 				if (firstResource != null && "Composition".equals(theContext.getResourceType(firstResource))) {
-					IBaseXhtml html =
-							theContext.newTerser().getSingleValueOrNull(firstResource, "text.div", IBaseXhtml.class);
+					IBaseXhtml html = theContext.newTerser().getSingleValueOrNull(firstResource, "text.div", IBaseXhtml.class);
 					if (html != null) {
 						retVal = html.getValueAsString();
 					}
@@ -480,14 +437,8 @@ public class BaseController {
 		return retVal;
 	}
 
-	protected void processAndAddLastClientInvocation(
-			GenericClient theClient,
-			ResultType theResultType,
-			ModelMap theModelMap,
-			long theLatency,
-			String outcomeDescription,
-			CaptureInterceptor theInterceptor,
-			HomeRequest theRequest) {
+	protected void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription,
+																	 CaptureInterceptor theInterceptor, HomeRequest theRequest) {
 		try {
 			IHttpRequest lastRequest = theInterceptor.getLastRequest();
 			IHttpResponse lastResponse = theInterceptor.getLastResponse();
@@ -555,10 +506,8 @@ public class BaseController {
 
 			resultDescription.append(" (").append(defaultString(resultBody).length() + " bytes)");
 
-			Header[] requestHeaders =
-					lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
-			Header[] responseHeaders =
-					lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
+			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
+			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
@@ -588,6 +537,7 @@ public class BaseController {
 			ourLog.error("Failure during processing", e);
 			theModelMap.put("errorMsg", toDisplayError("Error during processing: " + e.getMessage(), e));
 		}
+
 	}
 
 	/**
@@ -603,18 +553,14 @@ public class BaseController {
 	}
 
 	protected enum ResultType {
-		BUNDLE,
-		NONE,
-		RESOURCE,
-		TAGLIST,
-		PARAMETERS
+		BUNDLE, NONE, RESOURCE, TAGLIST, PARAMETERS
 	}
 
 	public static class CaptureInterceptor implements IClientInterceptor {
 
 		private IHttpRequest myLastRequest;
 		private IHttpResponse myLastResponse;
-		//		private String myResponseBody;
+//		private String myResponseBody;
 
 		public IHttpRequest getLastRequest() {
 			return myLastRequest;
@@ -624,9 +570,9 @@ public class BaseController {
 			return myLastResponse;
 		}
 
-		//		public String getLastResponseBody() {
-		//			return myResponseBody;
-		//		}
+//		public String getLastResponseBody() {
+//			return myResponseBody;
+//		}
 
 		@Override
 		public void interceptRequest(IHttpRequest theRequest) {
@@ -639,42 +585,42 @@ public class BaseController {
 		public void interceptResponse(IHttpResponse theResponse) throws IOException {
 			assert myLastResponse == null;
 			myLastResponse = theResponse;
-			//			myLastResponse = ((ApacheHttpResponse) theResponse).getResponse();
-			//
-			//			HttpEntity respEntity = myLastResponse.getEntity();
-			//			if (respEntity != null) {
-			//				final byte[] bytes;
-			//				try {
-			//					bytes = IOUtils.toByteArray(respEntity.getContent());
-			//				} catch (IllegalStateException e) {
-			//					throw new InternalErrorException(Msg.code(194) + e);
-			//				}
-			//
-			//				myResponseBody = new String(bytes, "UTF-8");
-			//				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
-			//			}
+//			myLastResponse = ((ApacheHttpResponse) theResponse).getResponse();
+//
+//			HttpEntity respEntity = myLastResponse.getEntity();
+//			if (respEntity != null) {
+//				final byte[] bytes;
+//				try {
+//					bytes = IOUtils.toByteArray(respEntity.getContent());
+//				} catch (IllegalStateException e) {
+//					throw new InternalErrorException(Msg.code(194) + e);
+//				}
+//
+//				myResponseBody = new String(bytes, "UTF-8");
+//				myLastResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+//			}
 		}
 
-		//		private static class MyEntityWrapper extends HttpEntityWrapper {
-		//
-		//			private byte[] myBytes;
-		//
-		//			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
-		//				super(theWrappedEntity);
-		//				myBytes = theBytes;
-		//			}
-		//
-		//			@Override
-		//			public InputStream getContent() throws IOException {
-		//				return new ByteArrayInputStream(myBytes);
-		//			}
-		//
-		//			@Override
-		//			public void writeTo(OutputStream theOutstream) throws IOException {
-		//				theOutstream.write(myBytes);
-		//			}
-		//
-		//		}
+//		private static class MyEntityWrapper extends HttpEntityWrapper {
+//
+//			private byte[] myBytes;
+//
+//			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
+//				super(theWrappedEntity);
+//				myBytes = theBytes;
+//			}
+//
+//			@Override
+//			public InputStream getContent() throws IOException {
+//				return new ByteArrayInputStream(myBytes);
+//			}
+//
+//			@Override
+//			public void writeTo(OutputStream theOutstream) throws IOException {
+//				theOutstream.write(myBytes);
+//			}
+//
+//		}
 
 	}
 
@@ -696,4 +642,5 @@ public class BaseController {
 		}
 		return retVal;
 	}
+
 }

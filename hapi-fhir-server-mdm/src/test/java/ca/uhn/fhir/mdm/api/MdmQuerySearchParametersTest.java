@@ -15,7 +15,7 @@ class MdmQuerySearchParametersTest {
 	public static final MdmMatchResultEnum MATCH_RESULT = MdmMatchResultEnum.MATCH;
 	public static final MdmLinkSourceEnum LINK_SOURCE = MdmLinkSourceEnum.MANUAL;
 	public static final List<Integer> PARTITION_ID = Collections.singletonList(1);
-	public static final MdmPageRequest PAGE_REQUEST = new MdmPageRequest(0, 1, 1, 5);
+	public static final MdmPageRequest PAGE_REQUEST = new MdmPageRequest(0,1,1,5);
 	public static final String RESOURCE_TYPE = "Patient";
 
 	@Test

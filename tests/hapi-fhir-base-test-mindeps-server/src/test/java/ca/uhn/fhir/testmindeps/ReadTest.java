@@ -1,5 +1,22 @@
 package ca.uhn.fhir.testmindeps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.util.concurrent.TimeUnit;
+
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -9,26 +26,10 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.jupiter.api.*;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -49,19 +50,20 @@ public class ReadTest {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser()
-					.parseResource(Patient.class, responseContent)
-					.getIdentifierFirstRep();
-
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
+			
 			assertEquals("1", dt.getSystemElement().getValueAsString());
 			assertEquals(null, dt.getValueElement().getValueAsString());
-
+			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+			
 		}
+		
 	}
-
+	
+	
 	@Test
 	public void testBinaryRead() throws Exception {
 		{
@@ -70,23 +72,25 @@ public class ReadTest {
 			byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
+			
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"application/x-foo", status.getEntity().getContentType().getValue());
-
+			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
+			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Binary/1/_history/1", cl.getValue());
-
+			
 			org.apache.http.Header cd = status.getFirstHeader("content-disposition");
 			assertNotNull(cd);
 			assertEquals("Attachment;", cd.getValue());
-
-			assertEquals(4, responseContent.length);
+			
+			assertEquals(4,responseContent.length);
 			for (int i = 0; i < 4; i++) {
-				assertEquals(i + 1, responseContent[i]); // should be 1,2,3,4
+				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
 			}
+			
 		}
+		
 	}
 
 	@Test
@@ -98,9 +102,7 @@ public class ReadTest {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser()
-					.parseResource(Patient.class, responseContent)
-					.getIdentifierFirstRep();
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 			assertEquals("1", dt.getSystemElement().getValueAsString());
 			assertEquals("2", dt.getValueElement().getValueAsString());
 
@@ -130,15 +132,15 @@ public class ReadTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
-		Connector[] connectors = ourServer.getConnectors();
-		assert connectors.length == 1;
-		ourPort = ((SocketConnector) (connectors[0])).getLocalPort();
+        Connector[] connectors = ourServer.getConnectors();
+        assert connectors.length == 1;
+        ourPort = ((SocketConnector) (connectors[0])).getLocalPort();
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	/**
@@ -158,8 +160,10 @@ public class ReadTest {
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
 
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -169,7 +173,7 @@ public class ReadTest {
 		public Binary findPatient(@IdParam IdDt theId) {
 			Binary bin = new Binary();
 			bin.setContentType("application/x-foo");
-			bin.setContent(new byte[] {1, 2, 3, 4});
+			bin.setContent(new byte[] {1,2,3,4});
 			bin.setId("Binary/1/_history/1");
 			return bin;
 		}
@@ -178,5 +182,8 @@ public class ReadTest {
 		public Class<? extends IResource> getResourceType() {
 			return Binary.class;
 		}
+
 	}
+
+	
 }

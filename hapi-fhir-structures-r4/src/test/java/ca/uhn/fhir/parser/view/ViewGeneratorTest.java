@@ -112,4 +112,5 @@ public class ViewGeneratorTest {
 
 		assertEquals(0, va.getExtension().size());
 	}
+
 }

@@ -32,6 +32,7 @@ public class DropColumnTest extends BaseTest {
 		// Do it again to make sure there is no error
 		getMigrator().migrate();
 		getMigrator().migrate();
+
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -48,12 +49,8 @@ public class DropColumnTest extends BaseTest {
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD"), hasSize(1));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"),
-				containsInAnyOrder("FK_BROTHER"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"), containsInAnyOrder("FK_BROTHER"));
 
 		DropColumnTask task = new DropColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -62,19 +59,18 @@ public class DropColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(
-				JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "SIBLINGREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "SIBLINGREF"));
 
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(0));
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "SIBLING", "CHILD"), hasSize(1));
 
 		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), hasSize(0));
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"),
-				containsInAnyOrder("FK_BROTHER"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "SIBLINGREF", "CHILD"), containsInAnyOrder("FK_BROTHER"));
 
 		// Do it again to make sure there is no error
 		getMigrator().migrate();
 		getMigrator().migrate();
+
 	}
+
 }

@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * indicating the server's base URL, with NO trailing '/'.
  * </p>
  */
-@Target(value = ElementType.PARAMETER)
+@Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ServerBase {
 	// nothing

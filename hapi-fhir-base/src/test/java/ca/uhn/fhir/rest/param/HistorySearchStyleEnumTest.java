@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HistorySearchStyleEnumTest {
 	@Test
-	public void testParse() {
+	public void testParse(){
 		assertNull(HistorySearchStyleEnum.parse(""));
 		assertNull(HistorySearchStyleEnum.parse(null));
 		assertNull(HistorySearchStyleEnum.parse("Anything"));
@@ -19,7 +19,7 @@ class HistorySearchStyleEnumTest {
 	}
 
 	@Test
-	public void testIsAt() {
+	public void testIsAt(){
 		assertTrue(HistorySearchStyleEnum.AT.isAt());
 		assertFalse(HistorySearchStyleEnum.SINCE.isAt());
 	}

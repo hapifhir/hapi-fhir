@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Exception for use when a response is received or being sent that does not correspond to any other exception type. An HTTP status code must be provided, and will be provided to the caller in the
@@ -31,7 +32,7 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theStatusCode
 	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
 	 * @param theMessage
@@ -43,17 +44,17 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theStatusCode
 	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
 	 * @param theMessage
 	 *            The message to add to the status line
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public UnclassifiedServerFailureException(
-			int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
+	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 
 	private static final long serialVersionUID = 1L;
+
 }

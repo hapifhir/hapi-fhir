@@ -1,13 +1,14 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu2016may.model.BooleanType;
+import org.hl7.fhir.dstu2016may.model.Observation;
+import org.hl7.fhir.dstu2016may.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu2016may.model.BooleanType;
-import org.hl7.fhir.dstu2016may.model.Observation;
-import org.hl7.fhir.dstu2016may.model.StringType;
 
 @ResourceDef(name = "Observation", id = "reportobservation")
 public class ReportObservationDstu2_1 extends Observation {
@@ -107,4 +108,5 @@ public class ReportObservationDstu2_1 extends Observation {
 		this.sectionContentId = new StringType(sectionContentId);
 		return this;
 	}
+
 }

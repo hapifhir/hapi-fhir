@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
 
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
@@ -45,38 +45,25 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	@Order(0)
 	@RegisterExtension
 	protected static RestfulServerExtension ourRestfulServer = new RestfulServerExtension(FhirContext.forR4Cached());
-
 	@Order(1)
 	@RegisterExtension
-	protected static HashMapResourceProviderExtension<Patient> ourPatientProvider =
-			new HashMapResourceProviderExtension<>(ourRestfulServer, Patient.class);
-
+	protected static HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Patient.class);
 	@Order(1)
 	@RegisterExtension
-	protected static HashMapResourceProviderExtension<Observation> ourObservationProvider =
-			new HashMapResourceProviderExtension<>(ourRestfulServer, Observation.class);
-
+	protected static HashMapResourceProviderExtension<Observation> ourObservationProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Observation.class);
 	@Order(1)
 	@RegisterExtension
-	protected static TransactionCapturingProviderExtension<Bundle> ourTransactionProvider =
-			new TransactionCapturingProviderExtension<>(ourRestfulServer, Bundle.class);
-
+	protected static TransactionCapturingProviderExtension<Bundle> ourTransactionProvider = new TransactionCapturingProviderExtension<>(ourRestfulServer, Bundle.class);
 	protected static SingleQueryCountHolder ourCountHolder;
-
 	@Order(1)
 	@RegisterExtension
-	protected static HashMapResourceProviderExtension<Organization> ourOrganizationProvider =
-			new HashMapResourceProviderExtension<>(ourRestfulServer, Organization.class);
-
+	protected static HashMapResourceProviderExtension<Organization> ourOrganizationProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Organization.class);
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
-
 	@Autowired
 	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
 	@Autowired
 	private SingleQueryCountHolder myCountHolder;
 
@@ -92,9 +79,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete()
-				.resourceConditionalByUrl("Observation?code:missing=false")
-				.execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
@@ -110,10 +95,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public void beforeReset() throws Exception {
 		// Delete all Subscriptions
 		if (myClient != null) {
-			Bundle allSubscriptions = myClient.search()
-					.forResource(Subscription.class)
-					.returnBundle(Bundle.class)
-					.execute();
+			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
 			for (IBaseResource next : BundleUtil.toListOfResources(myFhirContext, allSubscriptions)) {
 				myClient.delete().resource(next).execute();
 			}
@@ -130,6 +112,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 	}
 
+
 	protected Subscription createSubscription(String theCriteria, String thePayload) {
 		return createSubscription(theCriteria, thePayload, null);
 	}
@@ -141,8 +124,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 	@NotNull
-	protected Subscription createSubscription(
-			String theCriteria, String thePayload, Extension theExtension, String id) {
+	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
@@ -158,9 +140,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected Subscription postOrPutSubscription(IBaseResource theSubscription) {
 		MethodOutcome methodOutcome;
 		if (theSubscription.getIdElement().isEmpty()) {
-			methodOutcome = myClient.create().resource(theSubscription).execute();
+			 methodOutcome = myClient.create().resource(theSubscription).execute();
 		} else {
-			methodOutcome = myClient.update().resource(theSubscription).execute();
+			 methodOutcome =  myClient.update().resource(theSubscription).execute();
 		}
 		theSubscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
@@ -180,6 +162,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		return subscription;
 	}
 
+
 	protected void waitForQueueToDrain() throws InterruptedException {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
@@ -188,6 +171,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	public void initializeOurCountHolder() {
 		ourCountHolder = myCountHolder;
 	}
+
 
 	protected Observation sendObservation(String theCode, String theSystem) {
 		return sendObservation(theCode, theSystem, null, null);
@@ -249,4 +233,5 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	private static QueryCount getQueryCount() {
 		return ourCountHolder.getQueryCountMap().get("");
 	}
+
 }

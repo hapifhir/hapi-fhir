@@ -2,12 +2,14 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TokenParamTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -30,6 +32,7 @@ public class TokenParamTest {
 		assertEquals(4716638, tokenParam1.hashCode());
 	}
 
+
 	@Test
 	public void testIsEmpty() {
 		assertFalse(new TokenParam("foo", "bar").isEmpty());
@@ -41,11 +44,7 @@ public class TokenParamTest {
 	@Test
 	public void testOfType() {
 		TokenParam param = new TokenParam();
-		param.setValueAsQueryToken(
-				ourCtx,
-				"identifier",
-				Constants.PARAMQUALIFIER_TOKEN_OF_TYPE,
-				"http://type-system|type-value|identifier-value");
+		param.setValueAsQueryToken(ourCtx, "identifier", Constants.PARAMQUALIFIER_TOKEN_OF_TYPE, "http://type-system|type-value|identifier-value");
 		assertEquals(TokenParamModifier.OF_TYPE, param.getModifier());
 		assertEquals("http://type-system", param.getSystem());
 		assertEquals("type-value|identifier-value", param.getValue());
@@ -66,4 +65,5 @@ public class TokenParamTest {
 		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
 		assertTrue(param.isNicknameExpand());
 	}
+
 }

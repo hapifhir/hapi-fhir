@@ -28,13 +28,9 @@ public class Meal extends DomainResource {
 
 	@Child(name = "identifier", min = 0, max = Child.MAX_UNLIMITED)
 	private List<Identifier> myIdentifier;
-
 	@Child(name = "name")
 	private StringType myName;
-
-	@Child(
-			name = "chef",
-			type = {Patient.class})
+	@Child(name = "chef", type = {Patient.class})
 	private Reference myChef;
 
 	/**
@@ -96,9 +92,9 @@ public class Meal extends DomainResource {
 			case "identifier":
 				return myIdentifier != null ? myIdentifier.toArray(EMPTY_BASE_ARRAY) : EMPTY_BASE_ARRAY;
 			case "chef":
-				return myChef != null ? new Base[] {myChef} : EMPTY_BASE_ARRAY;
+				return myChef != null ? new Base[]{myChef} : EMPTY_BASE_ARRAY;
 			case "name":
-				return myName != null ? new Base[] {myName} : EMPTY_BASE_ARRAY;
+				return myName != null ? new Base[]{myName} : EMPTY_BASE_ARRAY;
 			default:
 				return super.getProperty(theHash, theName, theCheckValid);
 		}

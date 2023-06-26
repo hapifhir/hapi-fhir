@@ -40,8 +40,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(BanUnsupprtedHttpMethodsInterceptorDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BanUnsupprtedHttpMethodsInterceptorDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -58,29 +57,29 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 	}
-
-	@Test
-	public void testHeadJsonWithInvalidPatient() throws Exception {
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");
-		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(null, status.getEntity());
-		ourLog.info(status.toString());
-
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+	
+	@Test	
+	public void testHeadJsonWithInvalidPatient() throws Exception {	
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");	
+		HttpResponse status = ourClient.execute(httpGet);	
+		assertEquals(null, status.getEntity());	
+ 		ourLog.info(status.toString());	
+			
+		assertEquals(404, status.getStatusLine().getStatusCode());	
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
 	}
-
-	@Test
-	public void testHeadJsonWithValidPatient() throws Exception {
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(null, status.getEntity());
-		ourLog.info(status.toString());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
+	
+	@Test	
+	public void testHeadJsonWithValidPatient() throws Exception {	
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/1");	
+		HttpResponse status = ourClient.execute(httpGet);	
+		assertEquals(null, status.getEntity());	
+ 		ourLog.info(status.toString());	
+			
+		assertEquals(200, status.getStatusLine().getStatusCode());	
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
 	}
-
+	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpRequestBase req = new HttpRequestBase() {
@@ -125,10 +124,10 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
+		
 		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
-
+	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -149,13 +148,13 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -179,7 +178,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 *
+		 * 
 		 * @param theId
 		 *           The resource identity
 		 * @return The resource
@@ -198,5 +197,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
+
 	}
+
 }

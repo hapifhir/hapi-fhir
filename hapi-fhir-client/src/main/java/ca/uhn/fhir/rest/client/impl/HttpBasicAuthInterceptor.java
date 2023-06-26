@@ -19,9 +19,8 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import java.io.IOException;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -32,18 +31,21 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HttpContext;
 
-import java.io.IOException;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that BasicAuthInterceptor class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead
+ * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that BasicAuthInterceptor class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead 
  */
 @Deprecated
-public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {
+public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 
 	private String myUsername;
 	private String myPassword;
-
-	public HttpBasicAuthInterceptor(String theUsername, String thePassword) {
+	
+    public HttpBasicAuthInterceptor(String theUsername, String thePassword) {
 		super();
 		myUsername = theUsername;
 		myPassword = thePassword;
@@ -51,11 +53,13 @@ public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {
 
 	@Override
 	public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-		AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+        AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
 
-		if (authState.getAuthScheme() == null) {
-			Credentials creds = new UsernamePasswordCredentials(myUsername, myPassword);
-			authState.update(new BasicScheme(), creds);
-		}
-	}
+        if (authState.getAuthScheme() == null) {
+            Credentials creds = new UsernamePasswordCredentials(myUsername, myPassword);
+            authState.update(new BasicScheme(), creds);
+        }
+
+    }
+
 }

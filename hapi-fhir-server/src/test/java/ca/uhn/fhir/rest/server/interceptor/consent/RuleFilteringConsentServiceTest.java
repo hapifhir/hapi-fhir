@@ -24,7 +24,6 @@ class RuleFilteringConsentServiceTest {
 
 	@Mock
 	IRuleApplier myRuleApplier;
-
 	RuleFilteringConsentService myRuleFilteringConsentService;
 	ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 
@@ -37,17 +36,18 @@ class RuleFilteringConsentServiceTest {
 	@Test
 	void allowPasses() {
 		when(myRuleApplier.applyRulesAndReturnDecision(any(), any(), any(), any(), any(), any()))
-				.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, null));
+			.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, null));
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
 		assertThat(consentDecision.getStatus(), equalTo(ConsentOperationStatusEnum.PROCEED));
+
 	}
 
 	@Test
 	void denyIsRejected() {
 		when(myRuleApplier.applyRulesAndReturnDecision(any(), any(), any(), any(), any(), any()))
-				.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, null));
+			.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, null));
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 

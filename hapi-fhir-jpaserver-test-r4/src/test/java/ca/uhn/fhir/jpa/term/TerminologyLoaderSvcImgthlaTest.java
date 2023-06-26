@@ -22,6 +22,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 
 	private ZipCollectionBuilder myFiles;
 
+
 	@BeforeEach
 	public void before() {
 		mySvc = TermLoaderSvcImpl.withoutProxyCheck(null, myTermStorageSvc);
@@ -37,7 +38,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 		try {
 			mySvc.loadImgthla(myFiles.getFiles(), mySrd);
 			fail("Expected \"not yet fully implemented\" InternalErrorException");
-		} catch (InternalErrorException e) {
+		} catch(InternalErrorException e) {
 			// for now, expect "not yet fully implemented" exception
 			assertThat(e.getMessage(), containsString("HLA nomenclature terminology upload not yet fully implemented"));
 		}
@@ -53,8 +54,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadImgthla(myFiles.getFiles(), mySrd);
 
-		// TODO:  verify the code system was loaded correctly (similarly to
-		// TerminologyLoaderSvcLoincTest.testLoadLoincMandatoryFilesOnly)
+		// TODO:  verify the code system was loaded correctly (similarly to TerminologyLoaderSvcLoincTest.testLoadLoincMandatoryFilesOnly)
 	}
 
 	@Test
@@ -69,13 +69,15 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
 			assertThat(e.getMessage(), containsString("hla_nom.txt"));
 			assertThat(e.getMessage(), containsString("hla.xml"));
-		} catch (Throwable t) {
+		} catch(Throwable t) {
 			fail("Expected UnprocessableEntityException");
 		}
 	}
+
 
 	public static void addImgthlaMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
 		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_NOM_TXT);
 		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_XML);
 	}
+
 }

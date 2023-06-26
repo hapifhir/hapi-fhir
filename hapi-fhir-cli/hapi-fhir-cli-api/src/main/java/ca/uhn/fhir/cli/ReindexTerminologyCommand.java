@@ -30,9 +30,9 @@ import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 
@@ -40,6 +40,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	public static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReindexTerminologyCommand.class);
 
 	static final String REINDEX_TERMINOLOGY = "reindex-terminology";
+
 
 	@Override
 	public String getCommandDescription() {
@@ -50,6 +51,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	public String getCommandName() {
 		return REINDEX_TERMINOLOGY;
 	}
+
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
@@ -64,6 +66,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		invokeOperation(client);
 	}
 
+
 	private void invokeOperation(IGenericClient theClient) {
 		ourLog.info("Beginning freetext indexing - This may take a while...");
 
@@ -72,11 +75,11 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		String errorMessage = null;
 		try {
 			response = theClient
-					.operation()
-					.onServer()
-					.named(REINDEX_TERMINOLOGY)
-					.withNoParameters(Parameters.class)
-					.execute();
+				.operation()
+				.onServer()
+				.named(REINDEX_TERMINOLOGY)
+				.withNoParameters(Parameters.class)
+				.execute();
 
 		} catch (BaseServerResponseException e) {
 			int statusCode = e.getStatusCode();
@@ -85,17 +88,17 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			if (e.getOperationOutcome() != null) {
 				errorMessage += " : " + e.getOperationOutcome().getFormatCommentsPre();
 			}
-			throw new CommandFailureException(
-					Msg.code(2228) + "FAILURE: Received HTTP " + statusCode + ": " + errorMessage);
+			throw new CommandFailureException(Msg.code(2228) + "FAILURE: Received HTTP " + statusCode + ": " + errorMessage);
+
 		}
 
-		Optional<String> isSuccessResponse =
-				ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
-		if (!isSuccessResponse.isPresent()) {
+
+		Optional<String> isSuccessResponse = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
+		if ( ! isSuccessResponse.isPresent() ) {
 			errorMessage = "Internal error. Command result unknown. Check system logs for details.";
 		} else {
-			boolean succeeded = Boolean.parseBoolean(isSuccessResponse.get());
-			if (!succeeded) {
+			boolean succeeded = Boolean.parseBoolean( isSuccessResponse.get() );
+			if ( ! succeeded) {
 				errorMessage = getResponseMessage(response);
 			}
 		}
@@ -106,6 +109,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			ourLog.info("Recreation of terminology freetext indexes complete!");
 			ourLog.info("Response:{}{}", NL, getResponseMessage(response));
 		}
+
 	}
 
 	@Nonnull
@@ -114,5 +118,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		return Strings.join(message, NL);
 	}
 
+
 	public static final String NL = System.getProperty("line.separator");
+
 }

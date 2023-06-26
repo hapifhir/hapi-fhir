@@ -35,19 +35,19 @@ public class SubmitDataServiceR4Test extends BaseCrR4Test {
 	}
 
 	@Test
-	public void submitDataTest() {
+	public void submitDataTest(){
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		MeasureReport mr = newResource(MeasureReport.class).setMeasure("Measure/A123");
 		Observation obs = newResource(Observation.class).setValue(new StringType("ABC"));
-		mySubmitDataServiceFunction
-				.apply(requestDetails)
-				.submitData(new IdType("Measure", "A123"), mr, Lists.newArrayList(obs));
+		mySubmitDataServiceFunction.apply(requestDetails)
+			.submitData(new IdType("Measure", "A123"), mr,
+				Lists.newArrayList(obs));
 
 		Iterable<IBaseResource> resourcesResult = search(Observation.class, Searches.all());
 		Observation savedObs = null;
 		Iterator<IBaseResource> iterator = resourcesResult.iterator();
-		while (iterator.hasNext()) {
+		while(iterator.hasNext()){
 			savedObs = (Observation) iterator.next();
 			break;
 		}
@@ -57,11 +57,12 @@ public class SubmitDataServiceR4Test extends BaseCrR4Test {
 		resourcesResult = search(MeasureReport.class, Searches.all());
 		MeasureReport savedMr = null;
 		iterator = resourcesResult.iterator();
-		while (iterator.hasNext()) {
+		while(iterator.hasNext()){
 			savedMr = (MeasureReport) iterator.next();
 			break;
 		}
 		assertNotNull(savedMr);
 		assertEquals("Measure/A123", savedMr.getMeasure());
 	}
+
 }

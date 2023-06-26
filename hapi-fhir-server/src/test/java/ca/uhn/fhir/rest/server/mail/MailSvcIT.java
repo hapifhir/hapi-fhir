@@ -10,10 +10,10 @@ import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.mail.internet.MimeMessage;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,18 +86,20 @@ public class MailSvcIT {
 		// setup
 		final Email email = withEmail("xyz");
 		// execute
-		fixture.sendMail(email, () -> fail("Should not execute on Success"), (e) -> {
-			assertTrue(e instanceof MailException);
-			assertEquals("Invalid TO address: " + email, e.getMessage());
-		});
+		fixture.sendMail(email,
+			() -> fail("Should not execute on Success"),
+			(e) -> {
+				assertTrue(e instanceof MailException);
+				assertEquals("Invalid TO address: " + email, e.getMessage());
+			});
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
 	}
 
 	private MailConfig withMailConfig() {
 		return new MailConfig()
-				.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-				.setSmtpPort(ServerSetupTest.SMTP.getPort());
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ServerSetupTest.SMTP.getPort());
 	}
 
 	private Email withEmail() {
@@ -106,10 +108,11 @@ public class MailSvcIT {
 
 	private Email withEmail(@Nonnull String toAddress) {
 		return EmailBuilder.startingBlank()
-				.from(FROM_ADDRESS)
-				.to(toAddress)
-				.withSubject(SUBJECT)
-				.withPlainText(BODY)
-				.buildEmail();
+			.from(FROM_ADDRESS)
+			.to(toAddress)
+			.withSubject(SUBJECT)
+			.withPlainText(BODY)
+			.buildEmail();
 	}
+
 }

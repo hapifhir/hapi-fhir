@@ -12,12 +12,12 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
+
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -41,10 +42,7 @@ public class SchemaMigratorTest extends BaseTest {
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), startsWith(Msg.code(27) + "The database schema for "));
-			assertThat(
-					e.getMessage(),
-					endsWith(
-							" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
+			assertThat(e.getMessage(), endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
 		}
 
 		schemaMigrator.migrate();
@@ -52,19 +50,17 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator.validate();
 	}
 
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testRepairFailedMigration(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
-		SchemaMigrator schemaMigrator = createSchemaMigrator(
-				"SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(
-					org.springframework.jdbc.BadSqlGrammarException.class,
-					e.getCause().getCause().getClass());
+			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 			MigrationResult failedResult = e.getResult();
 			assertEquals(0, failedResult.changes);
 			assertEquals(0, failedResult.succeededTasks.size());
@@ -112,30 +108,19 @@ public class SchemaMigratorTest extends BaseTest {
 
 		MigrationTaskList taskList = new MigrationTaskList(ImmutableList.of(taskA, taskB, taskC, taskD));
 		taskList.setDoNothingOnSkippedTasks("4.1.0.20191214.2, 4.1.0.20191214.4");
-		SchemaMigrator schemaMigrator = new SchemaMigrator(
-				getUrl(),
-				SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME,
-				getDataSource(),
-				new Properties(),
-				taskList,
-				myHapiMigrationStorageSvc);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(getDriverType());
 
 		schemaMigrator.migrate();
 
-		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType()
-				.newConnectionProperties(
-						getDataSource().getUrl(),
-						getDataSource().getUsername(),
-						getDataSource().getPassword());
+		DriverTypeEnum.ConnectionProperties connectionProperties = super.getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
 		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
 		assertThat(tableNames, Matchers.containsInAnyOrder("SOMETABLE_A", "SOMETABLE_C"));
 	}
 
 	@Nonnull
 	private SchemaMigrator createTableMigrator() {
-		return createSchemaMigrator(
-				"SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		return createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 	}
 
 	@Nonnull
@@ -147,13 +132,7 @@ public class SchemaMigratorTest extends BaseTest {
 	@Nonnull
 	private SchemaMigrator createSchemaMigrator(BaseTask... tasks) {
 		MigrationTaskList taskList = new MigrationTaskList(Lists.newArrayList(tasks));
-		SchemaMigrator retVal = new SchemaMigrator(
-				getUrl(),
-				SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME,
-				getDataSource(),
-				new Properties(),
-				taskList,
-				myHapiMigrationStorageSvc);
+		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
 		retVal.setDriverType(getDriverType());
 		return retVal;
 	}

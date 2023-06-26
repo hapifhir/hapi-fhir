@@ -112,8 +112,7 @@ class ValidatorWrapper {
 		return this;
 	}
 
-	public List<ValidationMessage> validate(
-			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
+	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
@@ -198,30 +197,21 @@ class ValidatorWrapper {
 		}
 		// TODO: are these still needed?
 		messages = messages.stream()
-				.filter(m -> m.getMessageId() == null
-						|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
-								|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
-								|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND)
-										&& m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
-				.collect(Collectors.toList());
+			.filter(m -> m.getMessageId() == null
+				|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
+				|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
+				|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND) && m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
+			.collect(Collectors.toList());
 
 		if (myErrorForUnknownProfiles) {
-			messages.stream()
-					.filter(m -> m.getMessageId() != null
-							&& (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN)
-									|| m.getMessageId()
-											.equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
-					.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
-					.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
+			messages.stream().filter(m -> m.getMessageId() != null && (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN) || m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
+				.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
+				.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
 		}
 		return messages;
 	}
 
-	private void fetchAndAddProfile(
-			IWorkerContext theWorkerContext,
-			List<StructureDefinition> theProfileStructureDefinitions,
-			String theUrl,
-			List<ValidationMessage> theMessages) {
+	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl, List<ValidationMessage> theMessages) {
 		try {
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
@@ -232,6 +222,7 @@ class ValidatorWrapper {
 		}
 	}
 
+
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<>();
 		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
@@ -240,8 +231,7 @@ class ValidatorWrapper {
 				NodeList metaList = list.item(i).getChildNodes();
 				for (int j = 0; j < metaList.getLength(); j++) {
 					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0) {
-						profileNames.add(
-								metaList.item(j).getAttributes().item(0).getNodeValue());
+						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
 					}
 				}
 				break;
@@ -249,4 +239,5 @@ class ValidatorWrapper {
 		}
 		return profileNames;
 	}
+
 }

@@ -40,18 +40,11 @@ public class ModelDstu2Test {
 	public void testModelBindings() {
 		FhirTerser t = ourCtx.newTerser();
 		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
-		assertEquals(
-				"http://hl7.org/fhir/ValueSet/administrative-gender",
-				((BaseRuntimeDeclaredChildDefinition) def.getChildByName("gender")).getBindingValueSet());
-		assertEquals(
-				"http://hl7.org/fhir/ValueSet/link-type",
-				((BaseRuntimeDeclaredChildDefinition) t.getDefinition(Patient.class, "Patient.link.type"))
-						.getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("gender")).getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition)t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
 
 		def = ourCtx.getResourceDefinition(Appointment.class);
-		assertEquals(
-				"http://hl7.org/fhir/ValueSet/appointmentstatus",
-				((BaseRuntimeDeclaredChildDefinition) def.getChildByName("status")).getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("status")).getBindingValueSet());
 	}
 
 	/**
@@ -68,7 +61,7 @@ public class ModelDstu2Test {
 	/**
 	 * See #304
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testPopulateWrongGenericType() {
 		Patient p = new Patient();
@@ -78,12 +71,10 @@ public class ModelDstu2Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals(
-					Msg.code(1748)
-							+ "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase",
-					e.getMessage());
+			assertEquals(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
+
 
 	@Test
 	public void testInstantPrecision() {
@@ -98,6 +89,7 @@ public class ModelDstu2Test {
 		}
 	}
 
+
 	/**
 	 * See #354
 	 */
@@ -106,9 +98,11 @@ public class ModelDstu2Test {
 		Claim claim = new Claim();
 		claim.setIdentifier(new ArrayList<IdentifierDt>()).setCondition(new ArrayList<CodingDt>());
 	}
-
+	
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
+
 }

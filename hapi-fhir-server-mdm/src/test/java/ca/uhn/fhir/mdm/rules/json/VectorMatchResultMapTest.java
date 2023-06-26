@@ -28,21 +28,9 @@ public class VectorMatchResultMapTest {
 	public void testMatchBeforePossibleMatch() {
 		MdmRulesJson mdmRulesJson = new MdmRulesJson();
 		MdmMatcherJson matcherJson = new MdmMatcherJson().setAlgorithm(MatchTypeEnum.STRING);
-		mdmRulesJson.addMatchField(new MdmFieldMatchJson()
-				.setName("given")
-				.setResourceType("Patient")
-				.setResourcePath("name.given")
-				.setMatcher(matcherJson));
-		mdmRulesJson.addMatchField(new MdmFieldMatchJson()
-				.setName("family")
-				.setResourceType("Patient")
-				.setResourcePath("name.family")
-				.setMatcher(matcherJson));
-		mdmRulesJson.addMatchField(new MdmFieldMatchJson()
-				.setName("prefix")
-				.setResourceType("Patient")
-				.setResourcePath("name.prefix")
-				.setMatcher(matcherJson));
+		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("given").setResourceType("Patient").setResourcePath("name.given").setMatcher(matcherJson));
+		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("family").setResourceType("Patient").setResourcePath("name.family").setMatcher(matcherJson));
+		mdmRulesJson.addMatchField(new MdmFieldMatchJson().setName("prefix").setResourceType("Patient").setResourcePath("name.prefix").setMatcher(matcherJson));
 		mdmRulesJson.putMatchResult("given,family", MdmMatchResultEnum.MATCH);
 		mdmRulesJson.putMatchResult("given", MdmMatchResultEnum.POSSIBLE_MATCH);
 

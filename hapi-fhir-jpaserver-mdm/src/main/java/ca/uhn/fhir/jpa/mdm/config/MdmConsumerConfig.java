@@ -94,8 +94,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader(
-			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+	MdmQueueConsumerLoader mdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
 	}
 
@@ -169,6 +168,7 @@ public class MdmConsumerConfig {
 		return new MdmProviderLoader();
 	}
 
+
 	@Bean
 	IMdmMatchFinderSvc mdmMatchFinderSvc() {
 		return new MdmMatchFinderSvcImpl();
@@ -178,6 +178,7 @@ public class MdmConsumerConfig {
 	IGoldenResourceMergerSvc mdmGoldenResourceMergerSvc() {
 		return new GoldenResourceMergerSvcImpl();
 	}
+
 
 	@Bean
 	IMdmLinkQuerySvc mdmLinkQuerySvc() {
@@ -189,14 +190,14 @@ public class MdmConsumerConfig {
 		return new MdmModelConverterSvcImpl();
 	}
 
+
 	@Bean
 	MdmCandidateSearchSvc mdmCandidateSearchSvc() {
 		return new MdmCandidateSearchSvc();
 	}
 
 	@Bean
-	CandidateSearcher candidateSearcher(
-			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
+	CandidateSearcher candidateSearcher(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
 		return new CandidateSearcher(theDaoRegistry, theMdmSettings, theMdmSearchParamSvc);
 	}
 
@@ -230,6 +231,7 @@ public class MdmConsumerConfig {
 		return new MdmLinkCreateSvcImpl();
 	}
 
+
 	@Bean
 	MdmLoader mdmLoader() {
 		return new MdmLoader();
@@ -241,20 +243,18 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmControllerHelper mdmProviderHelper(
-			FhirContext theFhirContext,
-			IResourceLoader theResourceLoader,
-			IMdmSettings theMdmSettings,
-			IMdmMatchFinderSvc theMdmMatchFinderSvc,
-			MessageHelper messageHelper,
-			IRequestPartitionHelperSvc partitionHelperSvc) {
-		return new MdmControllerHelper(
-				theFhirContext,
-				theResourceLoader,
-				theMdmMatchFinderSvc,
-				theMdmSettings,
-				messageHelper,
-				partitionHelperSvc);
+	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext,
+													  IResourceLoader theResourceLoader,
+													  IMdmSettings theMdmSettings,
+													  IMdmMatchFinderSvc theMdmMatchFinderSvc,
+													  MessageHelper messageHelper,
+													  IRequestPartitionHelperSvc partitionHelperSvc) {
+		return new MdmControllerHelper(theFhirContext,
+			theResourceLoader,
+			theMdmMatchFinderSvc,
+			theMdmSettings,
+			messageHelper,
+			partitionHelperSvc);
 	}
 
 	@Bean
@@ -263,7 +263,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmPartitionHelper mdmPartitionHelper(MessageHelper theMessageHelper, IMdmSettings theMdmSettings) {
+	MdmPartitionHelper mdmPartitionHelper(MessageHelper theMessageHelper,
+													  IMdmSettings theMdmSettings) {
 		return new MdmPartitionHelper(theMessageHelper, theMdmSettings);
 	}
 

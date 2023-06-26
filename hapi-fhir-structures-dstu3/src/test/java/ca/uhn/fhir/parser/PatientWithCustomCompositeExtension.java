@@ -1,13 +1,14 @@
 package ca.uhn.fhir.parser;
 
+import org.hl7.fhir.dstu3.model.BackboneElement;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
-import org.hl7.fhir.dstu3.model.BackboneElement;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
 
 @ResourceDef(name = "Patient")
 public class PatientWithCustomCompositeExtension extends Patient {
@@ -18,7 +19,7 @@ public class PatientWithCustomCompositeExtension extends Patient {
 	 * A custom extension
 	 */
 	@Child(name = "foo")
-	@Extension(url = "http://acme.org/fooParent", definedLocally = false, isModifier = false)
+	@Extension(url="http://acme.org/fooParent", definedLocally = false, isModifier = false)
 	protected FooParentExtension fooParentExtension;
 
 	public FooParentExtension getFooParentExtension() {
@@ -75,5 +76,7 @@ public class PatientWithCustomCompositeExtension extends Patient {
 		public void setChildB(StringType theChildB) {
 			myChildB = theChildB;
 		}
+
 	}
+
 }

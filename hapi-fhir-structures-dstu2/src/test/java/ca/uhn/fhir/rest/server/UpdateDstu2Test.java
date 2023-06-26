@@ -53,6 +53,7 @@ public class UpdateDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static InstantDt ourSetLastUpdated;
+	
 
 	@BeforeEach
 	public void before() {
@@ -62,6 +63,8 @@ public class UpdateDstu2Test {
 		ourLastRequestWasSearch = false;
 	}
 
+
+	
 	@Test
 	public void testSearchStillWorks() throws Exception {
 
@@ -81,6 +84,7 @@ public class UpdateDstu2Test {
 		assertNull(ourLastId);
 		assertNull(ourLastIdParam);
 		assertNull(ourLastConditionalUrl);
+
 	}
 
 	@Test
@@ -90,9 +94,7 @@ public class UpdateDstu2Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -103,14 +105,14 @@ public class UpdateDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
-
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+
 	}
+
 
 	@Test
 	public void testUpdateWithoutConditionalUrl() throws Exception {
@@ -120,9 +122,7 @@ public class UpdateDstu2Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -133,21 +133,22 @@ public class UpdateDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
-
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		
 		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
+
 	}
 
+	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
+		
+	
 	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -161,15 +162,15 @@ public class UpdateDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-	}
 
+	}
+	
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -178,25 +179,24 @@ public class UpdateDstu2Test {
 		}
 
 		@Search
-		public List<IResource> search(@OptionalParam(name = "foo") StringDt theString) {
+		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<IResource>();
 		}
-
+		
 		@Update()
-		public MethodOutcome updatePatient(
-				@ResourceParam Patient thePatient,
-				@ConditionalUrlParam String theConditional,
-				@IdParam IdDt theIdParam) {
+		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;
 			MethodOutcome retVal = new MethodOutcome(new IdDt("Patient/001/_history/002"));
-
+			
 			ResourceMetadataKeyEnum.UPDATED.put(thePatient, ourSetLastUpdated);
-
+			
 			retVal.setResource(thePatient);
 			return retVal;
 		}
+
 	}
+
 }

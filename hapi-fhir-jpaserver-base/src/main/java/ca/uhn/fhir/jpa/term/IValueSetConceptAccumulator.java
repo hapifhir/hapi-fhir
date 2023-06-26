@@ -21,29 +21,16 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 
-import java.util.Collection;
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
-	void includeConcept(
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			@Nullable String theSystemVersion);
+	void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
 
-	void includeConceptWithDesignations(
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			@Nullable Collection<TermConceptDesignation> theDesignations,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			@Nullable String theSystemVersion);
+	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
 
 	/**
 	 * @return Returns <code>true</code> if the code was actually present and was removed
@@ -80,4 +67,5 @@ public interface IValueSetConceptAccumulator {
 	default void incrementOrDecrementTotalConcepts(boolean theAdd, int theDelta) {
 		// nothing
 	}
+
 }

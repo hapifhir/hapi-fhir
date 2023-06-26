@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -35,17 +35,13 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
-	public LoincGroupTermsFileHandler(
-			Map<String, TermConcept> theCode2concept,
-			List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps,
-			Properties theUploadProperties) {
+	public LoincGroupTermsFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		// "Category","GroupId","Archetype","LoincNumber","LongCommonName"
+		//"Category","GroupId","Archetype","LoincNumber","LongCommonName"
 		String groupId = trim(theRecord.get("GroupId"));
 		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		String valueSetId;
@@ -59,4 +55,6 @@ public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IZip
 		ValueSet valueSet = getValueSet(valueSetId, LoincGroupFileHandler.VS_URI_PREFIX + groupId, null, null);
 		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 	}
+
+
 }

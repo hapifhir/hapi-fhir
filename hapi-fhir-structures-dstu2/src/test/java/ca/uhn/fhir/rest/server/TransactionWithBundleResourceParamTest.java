@@ -39,11 +39,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransactionWithBundleResourceParamTest {
 
+
 	private static CloseableHttpClient ourClient;
 
+	
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(TransactionWithBundleResourceParamTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionWithBundleResourceParamTest.class);
 	private static int ourPort;
 	private static boolean ourReturnOperationOutcome;
 	private static Server ourServer;
@@ -64,7 +65,7 @@ public class TransactionWithBundleResourceParamTest {
 				supportsTransaction = true;
 			}
 		}
-
+		
 		assertTrue(supportsTransaction);
 	}
 
@@ -93,7 +94,7 @@ public class TransactionWithBundleResourceParamTest {
 		ourLog.info(bundleString);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
-		//		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
+//		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
 		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -110,12 +111,12 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(2);
 		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
-
+	
 	@Test
 	public void testTransactionWithOperationOutcome() throws Exception {
 		ourReturnOperationOutcome = true;
@@ -157,8 +158,7 @@ public class TransactionWithBundleResourceParamTest {
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(4, bundle.getEntry().size());
 
-		assertEquals(
-				OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
+		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
 
 		Entry entry0 = bundle.getEntry().get(1);
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
@@ -167,7 +167,7 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(3);
-		assertEquals("Patient/3/_history/93", entry2.getResponse().getLocation());
+		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -211,11 +211,12 @@ public class TransactionWithBundleResourceParamTest {
 		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		Entry entry2 = bundle.getEntry().get(2);
 		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -231,8 +232,7 @@ public class TransactionWithBundleResourceParamTest {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler =
-				new org.eclipse.jetty.servlet.ServletContextHandler();
+		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();
@@ -241,13 +241,13 @@ public class TransactionWithBundleResourceParamTest {
 
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	/**
@@ -278,5 +278,7 @@ public class TransactionWithBundleResourceParamTest {
 
 			return retVal;
 		}
+
 	}
+
 }

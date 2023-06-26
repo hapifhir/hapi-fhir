@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +12,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceIndexedSearchParamsTest {
@@ -36,49 +36,41 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference(
-				"organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		boolean result = myParams.matchResourceLinks(
-				myStorageSettings, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference(
-				"organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		boolean result = myParams.matchResourceLinks(
-				myStorageSettings, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference(
-				"organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		boolean result = myParams.matchResourceLinks(
-				myStorageSettings, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference(
-				"organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		boolean result = myParams.matchResourceLinks(
-				myStorageSettings, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 
@@ -93,24 +85,24 @@ public class ResourceIndexedSearchParamsTest {
 		List<List<String>> partsChoices;
 		Set<String> values;
 
-		partsChoices =
-				Lists.newArrayList(Lists.newArrayList("gender=male"), Lists.newArrayList("name=SMITH", "name=JOHN"));
+		partsChoices = Lists.newArrayList(
+			Lists.newArrayList("gender=male"),
+			Lists.newArrayList("name=SMITH", "name=JOHN")
+		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(
-				values.toString(),
-				values,
-				containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
 
 		partsChoices = Lists.newArrayList(
-				Lists.newArrayList("gender=male", ""), Lists.newArrayList("name=SMITH", "name=JOHN", ""));
+			Lists.newArrayList("gender=male", ""),
+			Lists.newArrayList("name=SMITH", "name=JOHN", "")
+		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
-		assertThat(
-				values.toString(),
-				values,
-				containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN", "Patient?gender=male&name=SMITH"));
 
-		partsChoices = Lists.newArrayList();
+		partsChoices = Lists.newArrayList(
+		);
 		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
 		assertThat(values.toString(), values, empty());
 	}
+
 }

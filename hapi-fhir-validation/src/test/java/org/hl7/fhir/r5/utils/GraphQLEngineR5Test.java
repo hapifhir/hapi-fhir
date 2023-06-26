@@ -42,29 +42,24 @@ public class GraphQLEngineR5Test {
 
 	private IGraphQLStorageServices createStorageServices() throws FHIRException {
 		IGraphQLStorageServices retVal = mock(IGraphQLStorageServices.class);
-		when(retVal.lookup(nullable(Object.class), nullable(Resource.class), nullable(Reference.class)))
-				.thenAnswer(new Answer<Object>() {
-					@Override
-					public Object answer(InvocationOnMock invocation) {
-						Object appInfo = invocation.getArguments()[0];
-						Resource context = (Resource) invocation.getArguments()[1];
-						Reference reference = (Reference) invocation.getArguments()[2];
-						ourLog.info(
-								"AppInfo: {} / Context: {} / Reference: {}",
-								appInfo,
-								context.getId(),
-								reference.getReference());
+		when(retVal.lookup(nullable(Object.class), nullable(Resource.class), nullable(Reference.class))).thenAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) {
+				Object appInfo = invocation.getArguments()[0];
+				Resource context = (Resource) invocation.getArguments()[1];
+				Reference reference = (Reference) invocation.getArguments()[2];
+				ourLog.info("AppInfo: {} / Context: {} / Reference: {}", appInfo, context.getId(), reference.getReference());
 
-						if (reference.getReference().equalsIgnoreCase("Patient/123")) {
-							Patient p = new Patient();
-							p.getBirthDateElement().setValueAsString("2011-02-22");
-							return new IGraphQLStorageServices.ReferenceResolution(context, p);
-						}
+				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
+					Patient p = new Patient();
+					p.getBirthDateElement().setValueAsString("2011-02-22");
+					return new IGraphQLStorageServices.ReferenceResolution(context, p);
+				}
 
-						ourLog.info("Not found!");
-						return null;
-					}
-				});
+				ourLog.info("Not found!");
+				return null;
+			}
+		});
 
 		return retVal;
 	}
@@ -84,18 +79,22 @@ public class GraphQLEngineR5Test {
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
-		String expected =
-				"{\n" + "  \"valueQuantity\":{\n" + "    \"value\":123,\n" + "    \"unit\":\"cm\"\n" + "  }\n" + "}";
+		String expected = "{\n" +
+			"  \"valueQuantity\":{\n" +
+			"    \"value\":123,\n" +
+			"    \"unit\":\"cm\"\n" +
+			"  }\n" +
+			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+
 	}
+
 
 	@Test
 	public void testChoiceType_SelectDifferentType() throws EGraphEngine, EGraphQLException, IOException {
 		Observation obs = new Observation();
 		obs.setId("http://foo.com/Patient/PATA");
-		obs.setEffective(new Period()
-				.setStartElement(new DateTimeType("2022-01-01T00:00:00Z"))
-				.setEndElement(new DateTimeType("2022-01-01T05:00:00Z")));
+		obs.setEffective(new Period().setStartElement(new DateTimeType("2022-01-01T00:00:00Z")).setEndElement(new DateTimeType("2022-01-01T05:00:00Z")));
 
 		GraphQLEngine engine = new GraphQLEngine(ourWorkerCtx);
 		engine.setFocus(obs);
@@ -107,7 +106,9 @@ public class GraphQLEngineR5Test {
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
-		String expected = "{\n" + "  \"id\":\"PATA\"\n" + "}";
+		String expected = "{\n" +
+			"  \"id\":\"PATA\"\n" +
+			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
 
@@ -127,22 +128,27 @@ public class GraphQLEngineR5Test {
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
-		String expected = "{\n" + "  \"id\":\"PATA\",\n" + "  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" + "}";
+		String expected = "{\n" +
+			"  \"id\":\"PATA\",\n" +
+			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
+			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
+
 
 	@Test
 	public void testReferences() throws EGraphQLException, EGraphEngine, IOException, FHIRException {
 
-		String graph = " { \n" + "  id\n"
-				+ "  subject { \n"
-				+ "   reference\n"
-				+ "    resource(type : Patient) { birthDate }\n"
-				+ "    resource(type : Practioner) { practitionerRole {  speciality } }\n"
-				+ "  }  \n"
-				+ "  code {coding {system code} }\n"
-				+ " }\n"
-				+ " ";
+		String graph = " { \n" +
+			"  id\n" +
+			"  subject { \n" +
+			"   reference\n" +
+			"    resource(type : Patient) { birthDate }\n" +
+			"    resource(type : Practioner) { practitionerRole {  speciality } }\n" +
+			"  }  \n" +
+			"  code {coding {system code} }\n" +
+			" }\n" +
+			" ";
 
 		GraphQLEngine engine = new GraphQLEngine(ourWorkerCtx);
 		engine.setFocus(createObservation());
@@ -155,14 +161,17 @@ public class GraphQLEngineR5Test {
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
-		String expected = "{\n" + "  \"id\":\"PATA\",\n"
-				+ "  \"subject\":{\n"
-				+ "    \"reference\":\"Patient/123\",\n"
-				+ "    \"resource\":{\n"
-				+ "      \"birthDate\":\"2011-02-22\"\n"
-				+ "    }\n"
-				+ "  }\n"
-				+ "}";
+		String expected = "{\n" +
+			"  \"id\":\"PATA\",\n" +
+			"  \"subject\":{\n" +
+			"    \"reference\":\"Patient/123\",\n" +
+			"    \"resource\":{\n" +
+			"      \"birthDate\":\"2011-02-22\"\n" +
+			"    }\n" +
+			"  }\n" +
+			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+
 	}
+
 }

@@ -34,9 +34,9 @@ public class MdmHelperConfig {
 
 		// Set Enabled to true, and set strict mode.
 		return new MdmSettings(theMdmRuleValidator)
-				.setEnabled(true)
-				.setScriptText(json)
-				.setPreventEidUpdates(myPreventEidUpdates)
-				.setPreventMultipleEids(myPreventMultipleEids);
+			.setEnabled(true)
+			.setScriptText(json)
+			.setPreventEidUpdates(myPreventEidUpdates)
+			.setPreventMultipleEids(myPreventMultipleEids);
 	}
 }

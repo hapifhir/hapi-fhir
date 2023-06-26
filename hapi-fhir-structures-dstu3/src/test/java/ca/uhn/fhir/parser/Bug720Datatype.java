@@ -22,6 +22,7 @@ public class Bug720Datatype extends Type implements ICompositeType {
 		return contact;
 	}
 
+
 	@Override
 	protected Type typedCopy() {
 		throw new InternalErrorException("");

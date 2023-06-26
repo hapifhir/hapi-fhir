@@ -47,7 +47,11 @@ public class MdmMatcherFactory implements IMatcherFactory {
 
 	private final INicknameSvc myNicknameSvc;
 
-	public MdmMatcherFactory(FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
+	public MdmMatcherFactory(
+		FhirContext theFhirContext,
+		IMdmSettings theSettings,
+		INicknameSvc theNicknameSvc
+	) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theSettings;
 		myNicknameSvc = theNicknameSvc;

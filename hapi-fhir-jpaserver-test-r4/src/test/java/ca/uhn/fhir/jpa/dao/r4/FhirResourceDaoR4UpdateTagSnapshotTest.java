@@ -64,11 +64,8 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		assertEquals(true, p.getActive());
 		assertEquals(2, p.getMeta().getTag().size());
 		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
-		assertThat(
-				p.getMeta().getTag().get(0).getCode(),
-				Matchers.anyOf(Matchers.equalTo("bar"), Matchers.equalTo("bar2")));
+		assertThat(p.getMeta().getTag().get(0).getCode(), Matchers.anyOf(Matchers.equalTo("bar"), Matchers.equalTo("bar2")));
 	}
-
 	@Test
 	public void testUpdateWithFewerTagsWithHeader() {
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(Lists.newArrayList("TAG"));
@@ -137,4 +134,6 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		assertEquals(0, p.getMeta().getTag().size());
 		assertEquals("1", p.getIdElement().getVersionIdPart());
 	}
+
+
 }

@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.cache.*;
+import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -36,10 +36,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -53,8 +53,7 @@ import static org.mockito.Mockito.*;
 public class SearchParamRegistryImplTest {
 	public static final int TEST_SEARCH_PARAMS = 3;
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
-	private static final ReadOnlySearchParamCache ourBuiltInSearchParams =
-			ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext));
+	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext));
 	private static final List<ResourceTable> ourEntities;
 	private static final ResourceVersionMap ourResourceVersionMap;
 	private static final int ourBuiltinPatientSearchParamCount;
@@ -66,39 +65,28 @@ public class SearchParamRegistryImplTest {
 			ourEntities.add(createEntity(ourLastId, 1));
 		}
 		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
-		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(
-						ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext))
-				.getSearchParamMap("Patient")
-				.size();
+		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext, new SearchParameterCanonicalizer(ourFhirContext)).getSearchParamMap("Patient").size();
 	}
 
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
-
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
-
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
-
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
-
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
-
 	@MockBean
 	private MatchUrlService myMatchUrlService;
-
 	@MockBean
 	private SearchParamExtractorService mySearchParamExtractorService;
-
 	@MockBean
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
-
 	private int myAnswerCount = 0;
 
 	@Nonnull
@@ -120,9 +108,7 @@ public class SearchParamRegistryImplTest {
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
-		assertEquals(
-				ourBuiltInSearchParams.size(),
-				mySearchParamRegistry.getActiveSearchParams().size());
+		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 	}
 
@@ -204,8 +190,7 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testSearchParamUpdate() {
 		// Requesting a refresh after adding a new search parameter calls the database and adds one
-		List<ResourceTable> newEntities =
-				resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
+		List<ResourceTable> newEntities = resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
 		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
@@ -224,13 +209,10 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
-		assertEquals(
-				theExpectedSize,
-				mySearchParamRegistry.getActiveSearchParams("Patient").size());
+		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
-	private void assertResult(
-			ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
+	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
 		assertEquals(theExpectedAdded, theResult.created, "added results");
 		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
 		assertEquals(theExpectedRemoved, theResult.deleted, "removed results");
@@ -259,16 +241,14 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
-		RuntimeSearchParam patientLanguageSp =
-				mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language");
+		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language");
 		assertNotNull(patientLanguageSp);
 		assertEquals(patientLanguageSp.getId().getIdPart(), "Patient-language");
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
-		RuntimeSearchParam nonExistingSp =
-				mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp");
+		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp");
 		assertNull(nonExistingSp);
 	}
 
@@ -306,8 +286,7 @@ public class SearchParamRegistryImplTest {
 		assertNotNull(converted);
 
 		assertEquals(1, converted.getExtensions("http://foo").size());
-		IPrimitiveType<?> value =
-				(IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
+		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertEquals("FOO", value.getValueAsString());
 	}
 
@@ -315,13 +294,10 @@ public class SearchParamRegistryImplTest {
 	public void testUpliftRefchains() {
 		SearchParameter sp = new SearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name1"));
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
 		Extension upliftRefChain2 = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain2.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name2"));
+		upliftRefChain2.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name2"));
 		sp.setCode("subject");
 		sp.setName("subject");
 		sp.setDescription("Modified Subject");
@@ -346,8 +322,7 @@ public class SearchParamRegistryImplTest {
 		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
 	}
 
-	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(
-			Enumerations.PublicationStatus theStatus) {
+	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
@@ -406,12 +381,8 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		IResourceChangeListenerRegistry resourceChangeListenerRegistry(
-				FhirContext theFhirContext,
-				ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-				InMemoryResourceMatcher theInMemoryResourceMatcher) {
-			return new ResourceChangeListenerRegistryImpl(
-					theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean
@@ -430,5 +401,7 @@ public class SearchParamRegistryImplTest {
 		IValidationSupport validationSupport() {
 			return mock(IValidationSupport.class);
 		}
+
 	}
+
 }

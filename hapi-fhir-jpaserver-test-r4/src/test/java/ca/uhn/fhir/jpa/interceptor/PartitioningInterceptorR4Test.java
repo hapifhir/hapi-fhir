@@ -39,12 +39,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,21 +58,17 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(PartitioningInterceptorR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningInterceptorR4Test.class);
 
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
-
 	private MyWriteInterceptor myPartitionInterceptor;
 
 	@AfterEach
 	public void after() {
-		myPartitionSettings.setIncludePartitionInSearchHashes(
-				new PartitionSettings().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(
-				new PartitionSettings().getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 
 		myPartitionInterceptor.assertNoRemainingIds();
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
@@ -112,12 +108,15 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/" + id);
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType(true));
+		subscription.addExtension(
+			HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION,
+			new BooleanType(true)
+		);
 		subscription.setCriteria("[*]");
 		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-				new Subscription.SubscriptionChannelComponent()
-						.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-						.setEndpoint("https://tinyurl.com/2p95e27r");
+			new Subscription.SubscriptionChannelComponent()
+				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+				.setEndpoint("https://tinyurl.com/2p95e27r");
 		subscription.setChannel(subscriptionChannelComponent);
 
 		// set up partitioning for subscriptions
@@ -160,8 +159,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			LocalDate expectedDate = LocalDate.of(2021, 2, 22);
 			assertEquals(1, resources.size());
 			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(
-					expectedDate, resources.get(0).getPartitionId().getPartitionDate());
+			assertLocalDateFromDbMatches(expectedDate, resources.get(0).getPartitionId().getPartitionDate());
 		});
 	}
 
@@ -205,9 +203,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myPatientDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(
-					Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ",
-					e.getMessage());
+			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
 		}
 	}
 
@@ -216,6 +212,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
 		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
 		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+
 
 		PartitionInterceptorReadAllPartitions interceptor = new PartitionInterceptorReadAllPartitions();
 		myInterceptorRegistry.registerInterceptor(interceptor);
@@ -227,10 +224,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, Matchers.contains(patientIdNull, patientId1, patientId2));
 
-			String searchSql = myCaptureQueriesListener
-					.getSelectQueriesForCurrentThread()
-					.get(0)
-					.getSql(true, true);
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
@@ -238,6 +232,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
+
 
 	@Test
 	public void testSearch_InterceptorWithScopes() {
@@ -248,11 +243,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
 		when(mySrd.getServletRequest()).thenReturn(servletRequest);
 
-		when(servletRequest.getAttribute(eq("ca.cdr.servletattribute.session.oidc.approved_scopes")))
-				.thenReturn(Sets.newHashSet("partition-PART-1"));
+		when(servletRequest.getAttribute(eq("ca.cdr.servletattribute.session.oidc.approved_scopes"))).thenReturn(Sets.newHashSet("partition-PART-1"));
 
-		PartitionInterceptorReadPartitionsBasedOnScopes interceptor =
-				new PartitionInterceptorReadPartitionsBasedOnScopes();
+		PartitionInterceptorReadPartitionsBasedOnScopes interceptor = new PartitionInterceptorReadPartitionsBasedOnScopes();
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
 			// Load once to ensure that the partition name is resolved
@@ -266,10 +259,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, Matchers.contains(patientId1));
 
-			String searchSql = myCaptureQueriesListener
-					.getSelectQueriesForCurrentThread()
-					.get(0)
-					.getSql(true, true);
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
 			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
@@ -277,6 +267,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
+
 
 	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
 		Validate.notNull(thePartitionId);
@@ -305,6 +296,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 	@Interceptor
 	public static class MyWriteInterceptor {
 
+
 		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 
 		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
@@ -312,8 +304,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId PartitionIdentifyCreate(
-				IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for create: {}", retVal);
@@ -323,6 +314,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		public void assertNoRemainingIds() {
 			assertEquals(0, myCreateRequestPartitionIds.size());
 		}
+
 	}
 
 	@Interceptor
@@ -335,13 +327,13 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId identifyForRead(
-				ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+		public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
 			if (myObjectConsumer != null) {
 				myObjectConsumer.accept(theReadDetails);
 			}
 			return RequestPartitionId.allPartitions();
 		}
+
 	}
 
 	@Interceptor
@@ -353,8 +345,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId PartitionIdentifyCreate(
-				IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
 			if (myObjectConsumer != null) {
 				myObjectConsumer.accept(theResource);

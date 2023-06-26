@@ -8,7 +8,8 @@ public class TestJobStep2InputType implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public TestJobStep2InputType() {}
+	public TestJobStep2InputType() {
+	}
 
 	/**
 	 * Constructor
@@ -20,7 +21,6 @@ public class TestJobStep2InputType implements IModelJson {
 
 	@JsonProperty("data1")
 	private String myData1;
-
 	@JsonProperty("data2")
 	private String myData2;
 
@@ -39,4 +39,5 @@ public class TestJobStep2InputType implements IModelJson {
 	public void setData2(String theData2) {
 		myData2 = theData2;
 	}
+
 }

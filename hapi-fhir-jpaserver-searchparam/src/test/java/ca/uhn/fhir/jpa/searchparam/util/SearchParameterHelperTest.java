@@ -24,10 +24,8 @@ class SearchParameterHelperTest {
 
 	@Mock
 	private SearchParameterCanonicalizer mockedCanonicalizer;
-
 	@Mock
 	private IBaseResource mockedSearchParam;
-
 	@Mock
 	private RuntimeSearchParam mockedRuntimeSearchParam;
 

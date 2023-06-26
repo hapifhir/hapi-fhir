@@ -55,6 +55,7 @@ public class FhirPatchDiffR4Test {
 		Patient newValue = new Patient();
 		newValue.setDeceased(new DateTimeType("2020-05-16"));
 
+
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
@@ -75,6 +76,7 @@ public class FhirPatchDiffR4Test {
 
 		Patient newValue = new Patient();
 		newValue.setDeceased(new BooleanType(true));
+
 
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
@@ -107,14 +109,8 @@ public class FhirPatchDiffR4Test {
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.active.extension", extractPartValuePrimitive(diff, 0, "operation", "path"));
 		assertEquals("0", extractPartValuePrimitive(diff, 0, "operation", "index"));
-		assertEquals(
-				"http://foo",
-				extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
-		assertEquals(
-				"a value",
-				extractPartValue(diff, 0, "operation", "value", Extension.class)
-						.getValueAsPrimitive()
-						.getValueAsString());
+		assertEquals("http://foo", extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
+		assertEquals("a value", extractPartValue(diff, 0, "operation", "value", Extension.class).getValueAsPrimitive().getValueAsString());
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
@@ -161,6 +157,7 @@ public class FhirPatchDiffR4Test {
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
 
+
 	@Test
 	public void testAddExtensionOnComposite() {
 		Patient oldValue = new Patient();
@@ -179,14 +176,8 @@ public class FhirPatchDiffR4Test {
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.name[0].extension", extractPartValuePrimitive(diff, 0, "operation", "path"));
 		assertEquals("0", extractPartValuePrimitive(diff, 0, "operation", "index"));
-		assertEquals(
-				"http://foo",
-				extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
-		assertEquals(
-				"a value",
-				extractPartValue(diff, 0, "operation", "value", Extension.class)
-						.getValueAsPrimitive()
-						.getValueAsString());
+		assertEquals("http://foo", extractPartValue(diff, 0, "operation", "value", Extension.class).getUrl());
+		assertEquals("a value", extractPartValue(diff, 0, "operation", "value", Extension.class).getValueAsPrimitive().getValueAsString());
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
@@ -301,9 +292,7 @@ public class FhirPatchDiffR4Test {
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.text.div", extractPartValuePrimitive(diff, 0, "operation", "path"));
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">456</div>",
-				extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">456</div>", extractPartValuePrimitive(diff, 0, "operation", "value"));
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
@@ -326,14 +315,8 @@ public class FhirPatchDiffR4Test {
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("1", extractPartValuePrimitive(diff, 0, "operation", "index"));
 		assertEquals("Patient.identifier", extractPartValuePrimitive(diff, 0, "operation", "path"));
-		assertEquals(
-				"system-1",
-				extractPartValue(diff, 0, "operation", "value", Identifier.class)
-						.getSystem());
-		assertEquals(
-				"value-1",
-				extractPartValue(diff, 0, "operation", "value", Identifier.class)
-						.getValue());
+		assertEquals("system-1", extractPartValue(diff, 0, "operation", "value", Identifier.class).getSystem());
+		assertEquals("value-1", extractPartValue(diff, 0, "operation", "value", Identifier.class).getValue());
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
@@ -356,12 +339,11 @@ public class FhirPatchDiffR4Test {
 		assertEquals(null, extractPartValue(diff, 0, "operation", "value", IBase.class));
 		assertEquals("insert", extractPartValuePrimitive(diff, 1, "operation", "type"));
 		assertEquals("Patient.contact[0].name", extractPartValuePrimitive(diff, 1, "operation", "path"));
-		assertEquals(
-				"My Family",
-				extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily());
+		assertEquals("My Family", extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily());
 
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
+
 
 	@Test
 	public void testIgnoreElementComposite_Resource() {
@@ -472,8 +454,7 @@ public class FhirPatchDiffR4Test {
 		validateDiffProducesSameResults(oldValue, newValue, svc, diff);
 	}
 
-	public void validateDiffProducesSameResults(
-			Patient theOldValue, Patient theNewValue, FhirPatch theSvc, Parameters theDiff) {
+	public void validateDiffProducesSameResults(Patient theOldValue, Patient theNewValue, FhirPatch theSvc, Parameters theDiff) {
 		theSvc.apply(theOldValue, theDiff);
 		String expected = ourCtx.newJsonParser().encodeResourceToString(theNewValue);
 		String actual = ourCtx.newJsonParser().encodeResourceToString(theOldValue);
@@ -483,4 +464,6 @@ public class FhirPatchDiffR4Test {
 		actual = ourCtx.newXmlParser().encodeResourceToString(theOldValue);
 		assertEquals(expected, actual);
 	}
+
+
 }

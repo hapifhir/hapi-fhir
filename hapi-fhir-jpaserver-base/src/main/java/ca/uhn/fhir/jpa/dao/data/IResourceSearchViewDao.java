@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import java.util.Collection;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 
 public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
 

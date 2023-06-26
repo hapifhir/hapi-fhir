@@ -29,8 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ImportCsvToConceptMapCommandR4Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandR4Test.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
 	private static final String VS_URL_1 = "http://example.com/valueset/1";
 	private static final String VS_URL_2 = "http://example.com/valueset/2";
@@ -49,19 +48,19 @@ public class ImportCsvToConceptMapCommandR4Test {
 	private String myFilePath;
 	private final String myStatus = Enumerations.PublicationStatus.ACTIVE.toCode();
 
+
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
-
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	@BeforeEach
-	public void before() {
+	public void before(){
 		myRestServerR4Helper.setConceptMapResourceProvider(new HashMapResourceProviderConceptMapR4(myFhirContext));
 	}
 
 	@AfterAll
-	public static void afterAll() {
+	public static void afterAll(){
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -71,13 +70,12 @@ public class ImportCsvToConceptMapCommandR4Test {
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = myRestServerR4Helper
-				.getClient()
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+		MethodOutcome methodOutcome = myRestServerR4Helper.getClient()
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMapUrl))
+			.execute();
 
 		// Do not simplify to assertEquals(...)
 		assertTrue(Boolean.TRUE.equals(methodOutcome.getCreated()));
@@ -90,13 +88,12 @@ public class ImportCsvToConceptMapCommandR4Test {
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = myRestServerR4Helper
-				.getClient()
-				.update()
-				.resource(conceptMap)
-				.conditional()
-				.where(ConceptMap.URL.matches().value(conceptMapUrl))
-				.execute();
+		MethodOutcome methodOutcome = myRestServerR4Helper.getClient()
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMapUrl))
+			.execute();
 
 		// Do not simplify to assertEquals(...)
 		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
@@ -107,22 +104,20 @@ public class ImportCsvToConceptMapCommandR4Test {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandR4Test.createConceptMap();
 		myRestServerR4Helper.getClient().create().resource(conceptMap).execute();
 
-		Bundle response = myRestServerR4Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myRestServerR4Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ConceptMap resultConceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		MethodOutcome methodOutcome = myRestServerR4Helper
-				.getClient()
-				.update()
-				.resource(resultConceptMap)
-				.withId(resultConceptMap.getIdElement())
-				.execute();
+		MethodOutcome methodOutcome = myRestServerR4Helper.getClient()
+			.update()
+			.resource(resultConceptMap)
+			.withId(resultConceptMap.getIdElement())
+			.execute();
 
 		assertNull(methodOutcome.getCreated());
 
@@ -138,33 +133,25 @@ public class ImportCsvToConceptMapCommandR4Test {
 		myFilePath = fileToImport.getAbsolutePath();
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					CM_URL,
-					"-i",
-					VS_URL_1,
-					"-o",
-					VS_URL_2,
-					"-f",
-					myFilePath,
-					"-s",
-					myStatus,
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFilePath,
+				"-s", myStatus,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		));
 
-		Bundle response = myRestServerR4Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myRestServerR4Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
@@ -348,33 +335,25 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("3d This is a comment.", target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					CM_URL,
-					"-i",
-					VS_URL_1,
-					"-o",
-					VS_URL_2,
-					"-f",
-					myFilePath,
-					"-s",
-					myStatus,
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFilePath,
+				"-s", myStatus,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		));
 
-		response = myRestServerR4Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value(CM_URL))
-				.returnBundle(Bundle.class)
-				.execute();
+		response = myRestServerR4Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
@@ -385,38 +364,29 @@ public class ImportCsvToConceptMapCommandR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testImportCsvToConceptMapCommandWithByteOrderMark(boolean theIncludeTls) throws FHIRException {
 		ClassLoader classLoader = getClass().getClassLoader();
-		File fileToImport =
-				new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
+		File fileToImport = new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
 		myFilePath = fileToImport.getAbsolutePath();
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					"http://loinc.org/cm/loinc-to-phenx",
-					"-i",
-					"http://loinc.org",
-					"-o",
-					"http://phenxtoolkit.org",
-					"-f",
-					myFilePath,
-					"-s",
-					myStatus,
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", "http://loinc.org/cm/loinc-to-phenx",
+				"-i", "http://loinc.org",
+				"-o", "http://phenxtoolkit.org",
+				"-f", myFilePath,
+				"-s", myStatus,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		));
 
-		Bundle response = myRestServerR4Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myRestServerR4Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
@@ -441,9 +411,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		SourceElementComponent source = group.getElement().get(0);
 		assertEquals("65191-9", source.getCode());
-		assertEquals(
-				"During the past 30 days, about how often did you feel restless or fidgety [Kessler 6 Distress]",
-				source.getDisplay());
+		assertEquals("During the past 30 days, about how often did you feel restless or fidgety [Kessler 6 Distress]", source.getDisplay());
 
 		assertEquals(1, source.getTarget().size());
 
@@ -454,33 +422,25 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertNull(target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ImportCsvToConceptMapCommand.COMMAND,
-					"-v",
-					myVersion,
-					"-u",
-					"http://loinc.org/cm/loinc-to-phenx",
-					"-i",
-					"http://loinc.org",
-					"-o",
-					"http://phenxtoolkit.org",
-					"-f",
-					myFilePath,
-					"-s",
-					myStatus,
-					"-l"
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper));
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", "http://loinc.org/cm/loinc-to-phenx",
+				"-i", "http://loinc.org",
+				"-o", "http://phenxtoolkit.org",
+				"-f", myFilePath,
+				"-s", myStatus,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		));
 
-		response = myRestServerR4Helper
-				.getClient()
-				.search()
-				.forResource(ConceptMap.class)
-				.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
-				.returnBundle(Bundle.class)
-				.execute();
+		response = myRestServerR4Helper.getClient()
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
@@ -490,29 +450,22 @@ public class ImportCsvToConceptMapCommandR4Test {
 	@Test
 	public void testImportCsvToConceptMapCommand_withNoStatus_Fails() throws FHIRException {
 		ClassLoader classLoader = getClass().getClassLoader();
-		File fileToImport =
-				new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
+		File fileToImport = new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
 		myFilePath = fileToImport.getAbsolutePath();
 
 		try {
 			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-					new String[] {
-						ImportCsvToConceptMapCommand.COMMAND,
-						"-v",
-						myVersion,
-						"-u",
-						"http://loinc.org/cm/loinc-to-phenx",
-						"-i",
-						"http://loinc.org",
-						"-o",
-						"http://phenxtoolkit.org",
-						"-f",
-						myFilePath,
-						"-l"
-					},
-					"-t",
-					true,
-					myRestServerR4Helper));
+				new String[]{
+					ImportCsvToConceptMapCommand.COMMAND,
+					"-v", myVersion,
+					"-u", "http://loinc.org/cm/loinc-to-phenx",
+					"-i", "http://loinc.org",
+					"-o", "http://phenxtoolkit.org",
+					"-f", myFilePath,
+					"-l"
+				},
+				"-t", true, myRestServerR4Helper
+			));
 			fail();
 		} catch (Error e) {
 			assertTrue(e.getMessage().contains("Missing required option: s"));

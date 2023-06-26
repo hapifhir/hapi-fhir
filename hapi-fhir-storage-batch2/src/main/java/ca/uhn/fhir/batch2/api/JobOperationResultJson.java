@@ -25,10 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class JobOperationResultJson implements IModelJson {
 	@JsonProperty("operation")
 	private String myOperation;
-
 	@JsonProperty("success")
 	private Boolean mySuccess;
-
 	@JsonProperty("message")
 	private String myMessage;
 

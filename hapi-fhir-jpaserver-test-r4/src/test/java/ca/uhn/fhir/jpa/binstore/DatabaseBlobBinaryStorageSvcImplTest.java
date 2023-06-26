@@ -53,17 +53,13 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome =
-				mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertEquals(
-				0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(
-				1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(
-				0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 
 		myCaptureQueriesListener.clear();
 
@@ -98,6 +94,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		testStoreAndRetrieve();
 	}
 
+
 	@Test
 	public void testStoreAndRetrieveWithManualId() throws IOException {
 
@@ -109,18 +106,14 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome =
-				mySvc.storeBlob(resourceId, "ABCDEFG", contentType, inputStream, new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(resourceId, "ABCDEFG", contentType, inputStream, new ServletRequestDetails());
 		assertEquals("ABCDEFG", outcome.getBlobId());
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertEquals(
-				0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(
-				1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(
-				0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 
 		myCaptureQueriesListener.clear();
 
@@ -161,6 +154,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		assertNull(details);
 	}
 
+
 	@Test
 	public void testExpunge() throws IOException {
 
@@ -170,8 +164,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome =
-				mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
 		String blobId = outcome.getBlobId();
 
 		// Expunge
@@ -180,7 +173,9 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		assertFalse(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
 		assertEquals(0, capture.size());
+
 	}
+
 
 	@Test
 	public void testWrongResourceId() throws IOException {
@@ -191,8 +186,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome =
-				mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream, new ServletRequestDetails());
 
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
@@ -203,6 +197,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		capture = new ByteArrayOutputStream();
 		assertFalse(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture));
 		assertEquals(0, capture.size());
+
 	}
 
 	@Test
@@ -247,5 +242,6 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		public IBinaryStorageSvc databaseBlobBinaryStorageSvc() {
 			return new DatabaseBlobBinaryStorageSvcImpl();
 		}
+
 	}
 }

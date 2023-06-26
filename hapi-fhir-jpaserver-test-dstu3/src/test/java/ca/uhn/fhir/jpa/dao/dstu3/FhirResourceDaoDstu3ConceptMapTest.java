@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -27,16 +28,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ConceptMapTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ConceptMapTest.class);
 
 	private IIdType myConceptMapId;
 
 	@BeforeEach
 	@Transactional
 	public void before02() {
-		myConceptMapId =
-				myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
+		myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
 	}
 
 	@Test
@@ -47,11 +46,9 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest
-						.getCodeableConcept()
-						.addCoding()
-						.setSystem(CS_URL)
-						.setCode("12345");
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -59,25 +56,23 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				assertFalse(translationResult.getResult());
 			}
 		});
+
 	}
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				// <editor-fold desc="Map one source code to multiple target codes">
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest
-						.getCodeableConcept()
-						.addCoding()
-						.setSystem(CS_URL)
-						.setCode("12345");
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -87,8 +82,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 				assertEquals(2, translationResult.getResults().size());
 
-				TranslateConceptResult translationMatch =
-						translationResult.getResults().get(0);
+				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
 				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
 				assertEquals("56789", translationMatch.getCode());
 				assertEquals("Target Code 56789", translationMatch.getDisplay());
@@ -112,10 +106,10 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 	public void testConceptMapFindTermConceptMapByUrl() {
 
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpConceptMapList = runInTransaction(
-				() -> myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL));
+		List<TermConceptMap> theExpConceptMapList = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL));
 		assertEquals(1, theExpConceptMapList.size());
 		assertEquals(CM_URL, theExpConceptMapList.get(0).getUrl());
+
 	}
 
 	@Test
@@ -125,24 +119,14 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		ConceptMap theConceptMap1 = new ConceptMap();
 		ConceptMap theConceptMap2 = new ConceptMap();
 
-		theConceptMap1
-				.setUrl(theUrl)
-				.setStatus(PublicationStatus.ACTIVE)
-				.setName("name1")
-				.setVersion("v1");
-		theConceptMap2
-				.setUrl(theUrl)
-				.setStatus(PublicationStatus.ACTIVE)
-				.setName("name2")
-				.setVersion("v2");
+		theConceptMap1.setUrl(theUrl).setStatus(PublicationStatus.ACTIVE).setName("name1").setVersion("v1");
+		theConceptMap2.setUrl(theUrl).setStatus(PublicationStatus.ACTIVE).setName("name2").setVersion("v2");
 
 		myConceptMapDao.create(theConceptMap1);
 		myConceptMapDao.create(theConceptMap2);
 
-		Optional<TermConceptMap> theExpConceptMapV1 =
-				runInTransaction(() -> myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1"));
-		Optional<TermConceptMap> theExpConceptMapV2 =
-				runInTransaction(() -> myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v2"));
+		Optional<TermConceptMap> theExpConceptMapV1 = runInTransaction(()->myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1"));
+		Optional<TermConceptMap> theExpConceptMapV2 = runInTransaction(()->myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v2"));
 
 		assertTrue(theExpConceptMapV1.isPresent());
 		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
@@ -154,8 +138,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 		// should return the latest one which is v2
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = runInTransaction(
-				() -> myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
+		List<TermConceptMap> theExpSecondOne = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
 
 		assertEquals(1, theExpSecondOne.size());
 		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
@@ -169,18 +152,13 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		ConceptMap theConceptMap1 = new ConceptMap();
 		ConceptMap theConceptMap2 = new ConceptMap();
 
-		theConceptMap1
-				.setUrl(theUrl)
-				.setStatus(PublicationStatus.ACTIVE)
-				.setName("name1")
-				.setVersion("v1");
+		theConceptMap1.setUrl(theUrl).setStatus(PublicationStatus.ACTIVE).setName("name1").setVersion("v1");
 		theConceptMap2.setUrl(theUrl).setStatus(PublicationStatus.ACTIVE).setName("name2");
 
 		myConceptMapDao.create(theConceptMap1);
 		myConceptMapDao.create(theConceptMap2);
 
-		Optional<TermConceptMap> theExpConceptMapV1 =
-				runInTransaction(() -> myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1"));
+		Optional<TermConceptMap> theExpConceptMapV1 = runInTransaction(()->myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1"));
 
 		assertTrue(theExpConceptMapV1.isPresent());
 		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
@@ -188,8 +166,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 		// should return the latest one which in this case is not versioned
 		Pageable page = PageRequest.of(0, 1);
-		List<TermConceptMap> theExpSecondOne = runInTransaction(
-				() -> myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
+		List<TermConceptMap> theExpSecondOne = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
 
 		assertEquals(1, theExpSecondOne.size());
 		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());

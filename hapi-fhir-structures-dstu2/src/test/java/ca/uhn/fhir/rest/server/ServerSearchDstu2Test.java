@@ -144,22 +144,23 @@ public class ServerSearchDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider {
 
-		@Search(allowUnknownParams = true)
-		public List<IBaseResource> searchParam1(@RequiredParam(name = "param1") StringParam theParam) {
+		@Search(allowUnknownParams=true)
+		public List<IBaseResource> searchParam1(
+				@RequiredParam(name = "param1") StringParam theParam) {
 			ourLastMethod = "searchParam1";
 			ourLastRef = theParam;
-
+			
 			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
@@ -168,11 +169,12 @@ public class ServerSearchDstu2Test {
 			return retVal;
 		}
 
-		@Search(allowUnknownParams = true)
-		public List<IBaseResource> searchParam2(@RequiredParam(name = "param2") StringParam theParam) {
+		@Search(allowUnknownParams=true)
+		public List<IBaseResource> searchParam2(
+				@RequiredParam(name = "param2") StringParam theParam) {
 			ourLastMethod = "searchParam2";
 			ourLastRef = theParam;
-
+			
 			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
@@ -181,11 +183,12 @@ public class ServerSearchDstu2Test {
 			return retVal;
 		}
 
-		@Search(allowUnknownParams = true)
-		public List<IBaseResource> searchParam3(@RequiredParam(name = "param3") ReferenceParam theParam) {
+		@Search(allowUnknownParams=true)
+		public List<IBaseResource> searchParam3(
+				@RequiredParam(name = "param3") ReferenceParam theParam) {
 			ourLastMethod = "searchParam3";
 			ourLastRef2 = theParam;
-
+			
 			List<IBaseResource> retVal = new ArrayList<>();
 			Patient patient = new Patient();
 			patient.setId("123");
@@ -193,5 +196,7 @@ public class ServerSearchDstu2Test {
 			retVal.add(patient);
 			return retVal;
 		}
+
 	}
+
 }

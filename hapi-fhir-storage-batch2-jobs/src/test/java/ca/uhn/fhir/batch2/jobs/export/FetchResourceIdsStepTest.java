@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -47,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class FetchResourceIdsStepTest {
@@ -60,7 +60,6 @@ public class FetchResourceIdsStepTest {
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
-
 	@Mock
 	private JpaStorageSettings myStorageSettings;
 
@@ -88,9 +87,14 @@ public class FetchResourceIdsStepTest {
 		return jobParameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(
-			BulkExportJobParameters theParameters, JobInstance theInstance) {
-		return new StepExecutionDetails<>(theParameters, null, theInstance, "1");
+	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters,
+																										  JobInstance theInstance) {
+		return new StepExecutionDetails<>(
+			theParameters,
+			null,
+			theInstance,
+			"1"
+		);
 	}
 
 	@ParameterizedTest
@@ -120,9 +124,10 @@ public class FetchResourceIdsStepTest {
 		}
 
 		// when
-		when(myBulkExportProcessor.getResourcePidIterator(any(ExportPIDIteratorParameters.class)))
-				.thenReturn(patientIds.iterator())
-				.thenReturn(observationIds.iterator());
+		when(myBulkExportProcessor.getResourcePidIterator(
+			any(ExportPIDIteratorParameters.class)
+		)).thenReturn(patientIds.iterator())
+			.thenReturn(observationIds.iterator());
 		int maxFileCapacity = 1000;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
@@ -132,19 +137,22 @@ public class FetchResourceIdsStepTest {
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
 		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
-		verify(sink, times(parameters.getResourceTypes().size())).accept(resultCaptor.capture());
+		verify(sink, times(parameters.getResourceTypes().size()))
+			.accept(resultCaptor.capture());
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
 		assertEquals(parameters.getResourceTypes().size(), results.size());
-		for (ResourceIdList idList : results) {
+		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
 			assertTrue(parameters.getResourceTypes().contains(resourceType));
 
 			if (resourceType.equals("Patient")) {
 				assertEquals(patientIds.size(), idList.getIds().size());
-			} else if (resourceType.equals("Observation")) {
+			}
+			else if (resourceType.equals("Observation")) {
 				assertEquals(observationIds.size(), idList.getIds().size());
-			} else {
+			}
+			else {
 				// we shouldn't have others
 				fail();
 			}
@@ -156,12 +164,12 @@ public class FetchResourceIdsStepTest {
 		assertThat(events.get(0).getMessage(), containsString("Fetching resource IDs for bulk export job instance"));
 		assertThat(events.get(1).getMessage(), containsString("Running FetchResource"));
 		assertThat(events.get(2).getMessage(), containsString("Running FetchResource"));
-		assertThat(
-				events.get(3).getFormattedMessage(),
-				containsString("Submitted " + parameters.getResourceTypes().size() + " groups of ids for processing"));
+		assertThat(events.get(3).getFormattedMessage(), containsString("Submitted "
+			+ parameters.getResourceTypes().size()
+			+ " groups of ids for processing"
+		));
 
-		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor =
-				ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
+		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
 		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
 		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
@@ -190,8 +198,9 @@ public class FetchResourceIdsStepTest {
 		}
 
 		// when
-		when(myBulkExportProcessor.getResourcePidIterator(any(ExportPIDIteratorParameters.class)))
-				.thenReturn(patientIds.iterator());
+		when(myBulkExportProcessor.getResourcePidIterator(
+			any(ExportPIDIteratorParameters.class)
+		)).thenReturn(patientIds.iterator());
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -200,7 +209,8 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
-		verify(sink, times(2)).accept(captor.capture());
+		verify(sink, times(2))
+			.accept(captor.capture());
 		List<ResourceIdList> listIds = captor.getAllValues();
 
 		// verify all submitted ids are there

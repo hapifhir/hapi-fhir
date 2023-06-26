@@ -60,12 +60,12 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 	}
 
+
 	public void setDao(IFhirResourceDao<Subscription> theDao) {
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(
-			RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
+	private void verifyStatusOk(RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
 		Subscription subscription = (Subscription) theResource;
 		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
@@ -75,16 +75,13 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException(Msg.code(800) + "Can not " + theOperation.getCode()
-					+ " resource: Subscription.status must be populated on this server"
-					+ ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException(Msg.code(800) + "Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
 			try {
 				Subscription existing = (Subscription) theOldResourceOrNull;
-				SubscriptionStatusEnum existingStatus =
-						existing.getStatusElement().getValueAsEnum();
+				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
 					verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
 				}
@@ -96,13 +93,8 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 	}
 
-	private void verifyActiveStatus(
-			RestOperationTypeEnum theOperation,
-			Subscription theSubscription,
-			SubscriptionStatusEnum newStatus,
-			SubscriptionStatusEnum theExistingStatus) {
-		SubscriptionChannelTypeEnum channelType =
-				theSubscription.getChannel().getTypeElement().getValueAsEnum();
+	private void verifyActiveStatus(RestOperationTypeEnum theOperation, Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
+		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
 
 		if (channelType == null) {
 			throw new UnprocessableEntityException(Msg.code(801) + "Subscription.channel.type must be populated");
@@ -113,19 +105,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 
 		if (theExistingStatus != null) {
-			throw new UnprocessableEntityException(Msg.code(802) + "Subscription.status can not be changed from "
-					+ describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+			throw new UnprocessableEntityException(Msg.code(802) + "Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException(
-					Msg.code(803) + "Can not " + theOperation.getCode().toLowerCase()
-							+ " resource: Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException(Msg.code(803) + "Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
 		}
 
-		throw new UnprocessableEntityException(
-				Msg.code(804) + "Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '"
-						+ SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
+		throw new UnprocessableEntityException(Msg.code(804) + "Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
 	}
 
 	private String describeStatus(SubscriptionStatusEnum existingStatus) {
@@ -137,4 +124,5 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 		return existingStatusString;
 	}
+
 }

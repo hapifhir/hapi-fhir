@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -50,23 +51,20 @@ public class BulkExportHelperService {
 	 *
 	 * The input boolean theConsiderSince determines whether to consider the lastUpdated date in the search parameter map.
 	 */
-	public List<SearchParameterMap> createSearchParameterMapsForResourceType(
-			RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
+	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
 		spMaps = typeFilters.stream()
-				.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-				.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
-				.collect(Collectors.toList());
+			.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
+			.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
+			.collect(Collectors.toList());
 
 		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
-			ourLog.warn(
-					"Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .",
-					filter);
+			ourLog.warn("Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .", filter);
 		});
 
-		// None of the _typeFilters applied to the current resource type, so just make a simple one.
+		//None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
 			if (theConsiderSince) {
@@ -78,8 +76,7 @@ public class BulkExportHelperService {
 		return spMaps;
 	}
 
-	private SearchParameterMap buildSearchParameterMapForTypeFilter(
-			String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
+	private SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
 		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
 		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theSinceDate);
 		return searchParameterMap;

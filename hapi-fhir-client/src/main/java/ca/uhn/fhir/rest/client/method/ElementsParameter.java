@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -33,17 +28,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class ElementsParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void translateClientArgumentIntoQueryArgument(
-			FhirContext theContext,
-			Object theSourceClientArgument,
-			Map<String, List<String>> theTargetQueryArguments,
-			IBaseResource theTargetResource)
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
 			throws InternalErrorException {
 		if (theSourceClientArgument instanceof Collection) {
 			StringBuilder values = new StringBuilder();
@@ -65,15 +62,11 @@ public class ElementsParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(1445) + "Method '" + theMethod.getName() + "' in type '"
-					+ theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
+			throw new ConfigurationException(Msg.code(1445) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
 					+ " but can not be a collection of collections");
 		}
 	}
+
 }

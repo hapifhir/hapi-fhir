@@ -87,7 +87,9 @@ public class PackageLoaderSvcIT {
 		List<IBaseResource> resources = new ArrayList<>();
 		List<String> resourcesToParse = PackageUtils.DEFAULT_INSTALL_TYPES;
 		for (String resourceType : resourcesToParse) {
-			resources.addAll(myResourceParsingSvc.parseResourcesOfType(resourceType, npmPackage));
+			resources.addAll(
+				myResourceParsingSvc.parseResourcesOfType(resourceType, npmPackage)
+			);
 		}
 
 		// verify fetched resources
@@ -120,8 +122,7 @@ public class PackageLoaderSvcIT {
 
 		// addPackageToCache
 		try {
-			myPackageLoaderSvc.addPackageToCache(
-					"id", "version", Mockito.mock(InputStream.class), "description or url");
+			myPackageLoaderSvc.addPackageToCache("id", "version", Mockito.mock(InputStream.class), "description or url");
 			fail();
 		} catch (UnsupportedOperationException ex) {
 			assertTrue(ex.getMessage().contains("Cannot add to cache."));

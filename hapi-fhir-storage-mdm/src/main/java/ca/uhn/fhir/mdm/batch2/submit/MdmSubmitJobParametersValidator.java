@@ -28,9 +28,10 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
+
 
 public class MdmSubmitJobParametersValidator implements IJobParametersValidator<MdmSubmitJobParameters> {
 
@@ -38,8 +39,7 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 	private MatchUrlService myMatchUrlService;
 	private FhirContext myFhirContext;
 
-	public MdmSubmitJobParametersValidator(
-			IMdmSettings theMdmSettings, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+	public MdmSubmitJobParametersValidator(IMdmSettings theMdmSettings, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
 		myMdmSettings = theMdmSettings;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
@@ -59,17 +59,11 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 		return errorMsgs;
 	}
 
-	private void validateAllSearchParametersApplyToResourceType(
-			List<String> errorMsgs,
-			PartitionedUrl partitionedUrl,
-			String resourceType,
-			RuntimeResourceDefinition resourceDefinition) {
+	private void validateAllSearchParametersApplyToResourceType(List<String> errorMsgs, PartitionedUrl partitionedUrl, String resourceType, RuntimeResourceDefinition resourceDefinition) {
 		try {
 			myMatchUrlService.translateMatchUrl(partitionedUrl.getUrl(), resourceDefinition);
 		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
-			String errorMsg = String.format(
-					"Search parameter %s is not recognized for resource type %s. Source error is %s",
-					e.getParamName(), resourceType, e.getMessage());
+			String errorMsg = String.format("Search parameter %s is not recognized for resource type %s. Source error is %s", e.getParamName(), resourceType, e.getMessage());
 			errorMsgs.add(errorMsg);
 		} catch (InvalidRequestException e) {
 			errorMsgs.add("Invalid request detected: " + e.getMessage());

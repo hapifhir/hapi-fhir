@@ -15,5 +15,6 @@ class BaseSearchParamExtractorTest {
 	public void testSplitPathsR4() {
 		List<String> tokens = Arrays.asList(BaseSearchParamExtractor.splitPathsR4("  aaa | bbb + '|' |   ccc  ddd  "));
 		assertThat(tokens, contains("aaa", "bbb + '|'", "ccc  ddd"));
+
 	}
 }

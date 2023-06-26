@@ -9,4 +9,5 @@ public class CustomDiagnosticReportDstu2 extends DiagnosticReport {
 	public static final String PROFILE = "http://custom_DiagnosticReport";
 
 	private static final long serialVersionUID = 1L;
+
 }

@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
  * @param <OT> Output Job Report Type
  */
 public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-		extends IJobStepWorker<PT, IT, OT> {
+	extends IJobStepWorker<PT, IT, OT> {
 
 	/**
 	 *

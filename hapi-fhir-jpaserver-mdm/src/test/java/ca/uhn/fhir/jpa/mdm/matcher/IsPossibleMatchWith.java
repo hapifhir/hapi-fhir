@@ -18,29 +18,28 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 
-	protected IsPossibleMatchWith(
-			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsPossibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		List<? extends IMdmLink> mdmLinks =
-				getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
+		List<? extends IMdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 
 		List<IResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
-				.map(this::getMatchedResourcePidFromResource)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
+			.map(this::getMatchedResourcePidFromResource)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 
 		if (goldenResourcePidsToMatch.isEmpty()) {
 			goldenResourcePidsToMatch = myBaseResources.stream()
-					.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
-					.collect(Collectors.toList());
+				.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
+				.collect(Collectors.toList());
 		}
 
-		List<IResourcePersistentId> mdmLinkGoldenResourcePids =
-				mdmLinks.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toList());
+		List<IResourcePersistentId> mdmLinkGoldenResourcePids = mdmLinks
+			.stream().map(IMdmLink::getGoldenResourcePersistenceId)
+			.collect(Collectors.toList());
 
 		return mdmLinkGoldenResourcePids.containsAll(goldenResourcePidsToMatch);
 	}
@@ -56,8 +55,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText("No MDM Link With POSSIBLE_MATCH was found");
 	}
 
-	public static Matcher<IAnyResource> possibleMatchWith(
-			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleMatchWith(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

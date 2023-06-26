@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
 
@@ -60,13 +59,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				2,
-				myDiagnosticReportDao
-						.search(SearchParameterMap.newSynchronous())
-						.size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
@@ -80,15 +74,10 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
-		assertEquals(
-				1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 		assertDocumentCountMatchesResourceCount(myObservationDao);
 
-		assertEquals(
-				1,
-				myDiagnosticReportDao
-						.search(SearchParameterMap.newSynchronous())
-						.size());
+		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 		assertDocumentCountMatchesResourceCount(myDiagnosticReportDao);
 
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
@@ -104,8 +93,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -119,9 +107,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// Validate
 		JobInstance failure = myBatch2JobHelper.awaitJobFailure(startResponse);
-		assertThat(
-				failure.getErrorMessage(),
-				containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
+		assertThat(failure.getErrorMessage(), containsString("Unable to delete " + p1.getValue() + " because " + o1.getValue() + " refers to it"));
 	}
 
 	@Test
@@ -135,8 +121,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -158,6 +143,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		assertNotGone(o2);
 	}
 
+
 	@Test
 	public void testCascade_MultiLevel_Success() {
 		// Setup
@@ -170,8 +156,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -206,8 +191,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
 		jobParameters.addUrl("Patient?_id=" + p1.getIdPart());
@@ -249,14 +233,16 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 			// validate
 			assertThat(e.getMessage(), containsString("Delete expunge URLs must be in the format"));
 		}
+
 	}
+
 
 	public void assertDocumentCountMatchesResourceCount(IFhirResourceDao dao) {
 		String resourceType = myFhirContext.getResourceType(dao.getResourceType());
-		long resourceCount =
-				dao.search(new SearchParameterMap().setLoadSynchronous(true)).size();
+		long resourceCount = dao.search(new SearchParameterMap().setLoadSynchronous(true)).size();
 		runInTransaction(() -> {
 			assertEquals(resourceCount, myFulltestSearchSvc.count(resourceType, new SearchParameterMap()));
 		});
+
 	}
 }

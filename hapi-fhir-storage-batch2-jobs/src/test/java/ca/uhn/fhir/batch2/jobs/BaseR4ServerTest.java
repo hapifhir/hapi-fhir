@@ -41,4 +41,5 @@ public class BaseR4ServerTest {
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myClient = myCtx.newRestfulGenericClient(myBaseUrl);
 	}
+
 }

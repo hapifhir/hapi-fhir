@@ -22,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3BundleTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3BundleTest.class);
 
 	@Test
 	public void testProcessMessage() {
@@ -32,13 +31,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		bundle.setType(Bundle.BundleType.MESSAGE);
 
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("content").setResource(bundle);
+		parameters.addParameter()
+			.setName("content")
+			.setResource(bundle);
 		try {
-			myClient.operation()
-					.onServer()
-					.named(JpaConstants.OPERATION_PROCESS_MESSAGE)
-					.withParameters(parameters)
-					.execute();
+			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
@@ -47,26 +44,18 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testConformanceContainsIncludesAndRevIncludes() {
-		CapabilityStatement execute =
-				myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		Optional<CapabilityStatement.CapabilityStatementRestResourceComponent> patient =
-				execute.getRestFirstRep().getResource().stream()
-						.filter(resource -> resource.getType().equalsIgnoreCase("Patient"))
-						.findFirst();
+		CapabilityStatement execute = myClient.capabilities().ofType(CapabilityStatement.class).execute();
+		Optional<CapabilityStatement.CapabilityStatementRestResourceComponent> patient = execute.getRestFirstRep().getResource().stream().filter(resource -> resource.getType().equalsIgnoreCase("Patient")).findFirst();
 		if (patient.isEmpty()) {
 			fail("No Patient resource found in conformance statement");
 		} else {
 			List<StringType> searchInclude = patient.get().getSearchInclude();
 			List<StringType> searchRevInclude = patient.get().getSearchRevInclude();
 
-			assertTrue(searchRevInclude.stream()
-					.map(PrimitiveType::getValue)
-					.anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject")));
+			assertTrue(searchRevInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject")));
 			assertEquals(searchRevInclude.size(), 152);
 
-			assertTrue(searchInclude.stream()
-					.map(PrimitiveType::getValue)
-					.anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
+			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
 			assertEquals(searchInclude.size(), 4);
 		}
 	}
@@ -80,9 +69,8 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-				.byUrl(myServerBase + "/CarePlan")
-				.returnBundle(Bundle.class)
-				.execute();
+			.byUrl(myServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans
 		List<CarePlan> carePlans = new ArrayList<>();
@@ -91,4 +79,6 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
 		myClient.transaction().withResources(carePlans).execute();
 	}
+
+
 }

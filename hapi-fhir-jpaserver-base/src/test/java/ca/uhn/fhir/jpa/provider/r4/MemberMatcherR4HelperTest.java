@@ -63,18 +63,13 @@ import static org.mockito.Mockito.when;
 public class MemberMatcherR4HelperTest {
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture =
-			new LogbackCaptureTestExtension((Logger) MemberMatcherR4Helper.ourLog, Level.TRACE);
-
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) MemberMatcherR4Helper.ourLog, Level.TRACE);
 	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@Mock
 	private IFhirResourceDao<Coverage> myCoverageDao;
-
 	@Mock
 	private IFhirResourceDao<Patient> myPatientDao;
-
 	@Mock
 	private IFhirResourceDao<Consent> myConsentDao;
 
@@ -84,19 +79,21 @@ public class MemberMatcherR4HelperTest {
 	@BeforeEach
 	public void before() {
 		myHelper = new MemberMatcherR4Helper(
-				myFhirContext, myCoverageDao, myPatientDao, myConsentDao, null // extension provider
-				);
+			myFhirContext,
+			myCoverageDao,
+			myPatientDao,
+			myConsentDao,
+			null // extension provider
+		);
 	}
 
-	@Mock
-	private Coverage myCoverageToMatch;
+	@Mock private Coverage myCoverageToMatch;
+	@Mock private IBundleProvider myBundleProvider;
 
-	@Mock
-	private IBundleProvider myBundleProvider;
-
-	private final Coverage myMatchedCoverage = new Coverage().setBeneficiary(new Reference("Patient/123"));
-	private final Identifier myMatchingIdentifier =
-			new Identifier().setSystem("identifier-system").setValue("identifier-value");
+	private final Coverage myMatchedCoverage = new Coverage()
+		.setBeneficiary(new Reference("Patient/123"));
+	private final Identifier myMatchingIdentifier = new Identifier()
+		.setSystem("identifier-system").setValue("identifier-value");
 
 	@Captor
 	ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
@@ -104,8 +101,7 @@ public class MemberMatcherR4HelperTest {
 	@Test
 	void findMatchingCoverageMatchByIdReturnsMatched() {
 		when(myCoverageToMatch.getId()).thenReturn("cvg-to-match-id");
-		when(myCoverageDao.search(isA(SearchParameterMap.class), same(myRequestDetails)))
-				.thenReturn(myBundleProvider);
+		when(myCoverageDao.search(isA(SearchParameterMap.class), same(myRequestDetails))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(Collections.singletonList(myMatchedCoverage));
 
 		Optional<Coverage> result = myHelper.findMatchingCoverage(myCoverageToMatch, myRequestDetails);
@@ -121,14 +117,14 @@ public class MemberMatcherR4HelperTest {
 		assertEquals("cvg-to-match-id", param.getValueAsQueryToken(myFhirContext));
 	}
 
+
 	@Test
 	void findMatchingCoverageMatchByIdentifierReturnsMatched() {
 		when(myCoverageToMatch.getId()).thenReturn("non-matching-id");
 		when(myCoverageToMatch.getIdentifier()).thenReturn(Collections.singletonList(myMatchingIdentifier));
-		when(myCoverageDao.search(isA(SearchParameterMap.class), same(myRequestDetails)))
-				.thenReturn(myBundleProvider);
-		when(myBundleProvider.getAllResources())
-				.thenReturn(Collections.emptyList(), Collections.singletonList(myMatchedCoverage));
+		when(myCoverageDao.search(isA(SearchParameterMap.class), same(myRequestDetails))).thenReturn(myBundleProvider);
+		when(myBundleProvider.getAllResources()).thenReturn(
+			Collections.emptyList(), Collections.singletonList(myMatchedCoverage));
 
 		Optional<Coverage> result = myHelper.findMatchingCoverage(myCoverageToMatch, myRequestDetails);
 
@@ -141,23 +137,23 @@ public class MemberMatcherR4HelperTest {
 		assertEquals(1, listListParams.size());
 		assertEquals(1, listListParams.get(0).size());
 		IQueryParameterType param = listListParams.get(0).get(0);
-		assertEquals(
-				myMatchingIdentifier.getSystem() + "|" + myMatchingIdentifier.getValue(),
-				param.getValueAsQueryToken(myFhirContext));
+		assertEquals(myMatchingIdentifier.getSystem() + "|" + myMatchingIdentifier.getValue(),
+			param.getValueAsQueryToken(myFhirContext));
 	}
+
 
 	@Test
 	void findMatchingCoverageNoMatchReturnsEmpty() {
 		when(myCoverageToMatch.getId()).thenReturn("non-matching-id");
 		when(myCoverageToMatch.getIdentifier()).thenReturn(Collections.singletonList(myMatchingIdentifier));
-		when(myCoverageDao.search(any(SearchParameterMap.class), same(myRequestDetails)))
-				.thenReturn(myBundleProvider);
+		when(myCoverageDao.search(any(SearchParameterMap.class), same(myRequestDetails))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(Collections.emptyList(), Collections.emptyList());
 
 		Optional<Coverage> result = myHelper.findMatchingCoverage(myCoverageToMatch, myRequestDetails);
 
 		assertFalse(result.isPresent());
 	}
+
 
 	@Test
 	void buildSuccessReturnParameters() {
@@ -202,11 +198,11 @@ public class MemberMatcherR4HelperTest {
 
 	@Test
 	void addMemberIdentifierToMemberPatient() {
-		Identifier originalIdentifier =
-				new Identifier().setSystem("original-identifier-system").setValue("original-identifier-value");
+		Identifier originalIdentifier = new Identifier()
+			.setSystem("original-identifier-system").setValue("original-identifier-value");
 
-		Identifier newIdentifier =
-				new Identifier().setSystem("new-identifier-system").setValue("new-identifier-value");
+		Identifier newIdentifier = new Identifier()
+			.setSystem("new-identifier-system").setValue("new-identifier-value");
 
 		Patient patient = new Patient().setIdentifier(Lists.newArrayList(originalIdentifier));
 
@@ -214,8 +210,7 @@ public class MemberMatcherR4HelperTest {
 
 		assertEquals(2, patient.getIdentifier().size());
 
-		assertEquals(
-				"original-identifier-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("original-identifier-system", patient.getIdentifier().get(0).getSystem());
 		assertEquals("original-identifier-value", patient.getIdentifier().get(0).getValue());
 
 		assertEquals("new-identifier-system", patient.getIdentifier().get(1).getSystem());
@@ -231,6 +226,7 @@ public class MemberMatcherR4HelperTest {
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private Coverage coverage;
 
+
 		@Test
 		void noBeneficiaryOrBeneficiaryTargetReturnsEmpty() {
 			when(coverage.getBeneficiaryTarget()).thenReturn(null);
@@ -240,6 +236,7 @@ public class MemberMatcherR4HelperTest {
 
 			assertFalse(result.isPresent());
 		}
+
 
 		@Test
 		void beneficiaryTargetWithNoIdentifierReturnsEmpty() {
@@ -251,6 +248,7 @@ public class MemberMatcherR4HelperTest {
 			assertFalse(result.isPresent());
 		}
 
+
 		@Test
 		void beneficiaryTargetWithIdentifierReturnsBeneficiary() {
 			Patient patient = new Patient().setIdentifier(Collections.singletonList(new Identifier()));
@@ -261,6 +259,7 @@ public class MemberMatcherR4HelperTest {
 			assertTrue(result.isPresent());
 			assertEquals(patient, result.get());
 		}
+
 
 		@Test
 		void beneficiaryReferenceResourceReturnsBeneficiary() {
@@ -274,6 +273,7 @@ public class MemberMatcherR4HelperTest {
 			assertEquals(patient, result.get());
 		}
 
+
 		@Test
 		void beneficiaryReferenceNoResourceOrReferenceReturnsEmpty() {
 			when(coverage.getBeneficiaryTarget()).thenReturn(null);
@@ -283,6 +283,7 @@ public class MemberMatcherR4HelperTest {
 
 			assertFalse(result.isPresent());
 		}
+
 
 		@Test
 		void beneficiaryReferenceReferenceReturnsReadPatient() {
@@ -320,29 +321,24 @@ public class MemberMatcherR4HelperTest {
 		void noMatchingFamilyNameReturnsFalse() {
 			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "2020-01-01");
 			Patient patientFromContractFound = getPatientWithIDParm("A123", "Smith", "2020-01-01");
-			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails)))
-					.thenAnswer(t -> {
-						IBundleProvider provider =
-								new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
-						return provider;
-					});
-			boolean result =
-					myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
+			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
 			assertFalse(result);
 		}
+
 
 		@Test
 		void noMatchingBirthdayReturnsFalse() {
 			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "1990-01-01");
 			Patient patientFromContractFound = getPatientWithIDParm("A123", "Person", "2020-01-01");
-			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails)))
-					.thenAnswer(t -> {
-						IBundleProvider provider =
-								new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
-						return provider;
-					});
-			boolean result =
-					myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
+			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
 			assertFalse(result);
 		}
 
@@ -350,14 +346,11 @@ public class MemberMatcherR4HelperTest {
 		void noMatchingFieldsReturnsFalse() {
 			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "1990-01-01");
 			Patient patientFromContractFound = getPatientWithIDParm("A123", "Smith", "2020-01-01");
-			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails)))
-					.thenAnswer(t -> {
-						IBundleProvider provider =
-								new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
-						return provider;
-					});
-			boolean result =
-					myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
+			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
 			assertFalse(result);
 		}
 
@@ -365,22 +358,18 @@ public class MemberMatcherR4HelperTest {
 		void patientMatchingReturnTrue() {
 			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "2020-01-01");
 			Patient patientFromContractFound = getPatientWithIDParm("A123", "Person", "2020-01-01");
-			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails)))
-					.thenAnswer(t -> {
-						IBundleProvider provider =
-								new SimpleBundleProvider(Collections.singletonList(patientFromContractFound));
-						return provider;
-					});
-			boolean result =
-					myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
+			when(myPatientDao.search(any(SearchParameterMap.class), same(myRequestDetails))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(patientFromContractFound));
+				return provider;
+			});
+			boolean result = myHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch, myRequestDetails);
 			assertTrue(result);
 		}
 
 		private Patient getPatientWithNoIDParm(String familyName, String birthdate) {
-			Patient patient = new Patient()
-					.setName(Lists.newArrayList(
-							new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily(familyName)))
-					.setBirthDateElement(new DateType(birthdate));
+			Patient patient = new Patient().setName(Lists.newArrayList(new HumanName()
+					.setUse(HumanName.NameUse.OFFICIAL).setFamily(familyName)))
+				.setBirthDateElement(new DateType(birthdate));
 			return patient;
 		}
 
@@ -389,6 +378,7 @@ public class MemberMatcherR4HelperTest {
 			patient.setId(id);
 			return patient;
 		}
+
 	}
 
 	/**
@@ -534,21 +524,17 @@ public class MemberMatcherR4HelperTest {
 			Consent saved = myDaoCaptor.getValue();
 			// check consent identifier
 			assertEquals(1, saved.getIdentifier().size());
-			assertEquals(
-					MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM,
-					saved.getIdentifier().get(0).getSystem());
+			assertEquals(MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM, saved.getIdentifier().get(0).getSystem());
 			assertNotNull(saved.getIdentifier().get(0).getValue());
-			assertEquals(
-					saved.getIdentifier().get(0).getValue(),
-					memberPatient.getIdentifier().get(0).getValue());
+			assertEquals(saved.getIdentifier().get(0).getValue(), memberPatient.getIdentifier().get(0).getValue());
 
 			// check consent patient info
-			String patientRef =
-					patient.getIdElement().toUnqualifiedVersionless().getValue();
+			String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
 			assertEquals(patientRef, saved.getPatient().getReference());
 			assertEquals(patientRef, saved.getPerformer().get(0).getReference());
 
 			assertThat(myLogCapture.getLogEvents(), empty());
+
 		}
 	}
 
@@ -556,14 +542,18 @@ public class MemberMatcherR4HelperTest {
 	public class MemberMatchWithConsentProvider {
 		@Mock
 		private IConsentExtensionProvider myExtensionProvider;
-
 		@Captor
 		private ArgumentCaptor<Consent> myHookCaptor;
 
 		@BeforeEach
 		public void before() {
 			myHelper = new MemberMatcherR4Helper(
-					myFhirContext, myCoverageDao, myPatientDao, myConsentDao, myExtensionProvider);
+				myFhirContext,
+				myCoverageDao,
+				myPatientDao,
+				myConsentDao,
+				myExtensionProvider
+			);
 		}
 
 		@Test

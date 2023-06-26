@@ -46,6 +46,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 		mySearchParamComposite = theSearchParamComposite;
 	}
 
+
 	/**
 	 * Write a nested index document for this composite.
 	 * We use a nested document to support correlation queries on the same parent element for
@@ -53,42 +54,42 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 	 *
 	 * Example for component-code-value-quantity, which composes
 	 * component-code and component-value-quantity:
-	 * <pre>
-	 * { "nsp: {
-	 * "component-code-value-quantity": [
-	 * {
-	 * "component-code": {
-	 * "token": {
-	 * "code": "8480-6",
-	 * "system": "http://loinc.org",
-	 * "code-system": "http://loinc.org|8480-6"
-	 * }
-	 * },
-	 * "component-value-quantity": {
-	 * "quantity": {
-	 * "code": "mmHg",
-	 * "value": 60.0
-	 * }
-	 * }
-	 * },
-	 * {
-	 * "component-code": {
-	 * "token": {
-	 * "code": "3421-5",
-	 * "system": "http://loinc.org",
-	 * "code-system": "http://loinc.org|3421-5"
-	 * }
-	 * },
-	 * "component-value-quantity": {
-	 * "quantity": {
-	 * "code": "mmHg",
-	 * "value": 100.0
-	 * }
-	 * }
-	 * }
-	 * ]
-	 * }}
-	 * </pre>
+ <pre>
+ { "nsp: {
+	 "component-code-value-quantity": [
+		 {
+			 "component-code": {
+				 "token": {
+					 "code": "8480-6",
+					 "system": "http://loinc.org",
+					 "code-system": "http://loinc.org|8480-6"
+				 }
+			 },
+			 "component-value-quantity": {
+				 "quantity": {
+					 "code": "mmHg",
+					 "value": 60.0
+				 }
+	 		 }
+		 },
+		 {
+			 "component-code": {
+				 "token": {
+					 "code": "3421-5",
+					 "system": "http://loinc.org",
+					 "code-system": "http://loinc.org|3421-5"
+				 }
+			 },
+			 "component-value-quantity": {
+				 "quantity": {
+					 "code": "mmHg",
+					 "value": 100.0
+				 }
+			 }
+		 }
+	 ]
+ }}
+ </pre>
 	 *
 	 * @param theRoot our cache wrapper around the root HSearch DocumentElement
 	 */
@@ -96,8 +97,9 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 	public void writeIndexEntry(HSearchIndexWriter theHSearchIndexWriter, HSearchElementCache theRoot) {
 		// optimization - An empty sub-component will never match.
 		// Storing the rest only wastes resources
-		boolean hasAnEmptyComponent = mySearchParamComposite.getComponents().stream()
-				.anyMatch(c -> c.getParamIndexValues().isEmpty());
+		boolean hasAnEmptyComponent =
+			mySearchParamComposite.getComponents().stream()
+				.anyMatch(c->c.getParamIndexValues().isEmpty());
 
 		if (hasAnEmptyComponent) {
 			return;
@@ -108,6 +110,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 		// we want to re-use the `token`, `quantity` nodes for multiple values.
 		DocumentElement compositeRoot = nestedParamRoot.addObject(mySearchParamComposite.getSearchParamName());
 
+
 		for (ResourceIndexedSearchParamComposite.Component subParam : mySearchParamComposite.getComponents()) {
 			// Write the various index nodes.
 			// Note: we don't support modifiers with composites, so we don't bother to index :of-type, :text, etc.
@@ -116,64 +119,58 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 				case DATE:
 					DocumentElement dateElement = subParamElement.addObject("dt");
 					subParam.getParamIndexValues().stream()
-							.flatMap(o -> ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamDate.class).stream())
-							.map(ExtendedHSearchIndexExtractor::convertDate)
-							.forEach(d -> theHSearchIndexWriter.writeDateFields(dateElement, d));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamDate.class).stream())
+						.map(ExtendedHSearchIndexExtractor::convertDate)
+						.forEach(d-> theHSearchIndexWriter.writeDateFields(dateElement, d));
 					break;
 
 				case QUANTITY:
-					DocumentElement quantityElement = subParamElement.addObject(HSearchIndexWriter.INDEX_TYPE_QUANTITY);
+					DocumentElement quantityElement =  subParamElement.addObject(HSearchIndexWriter.INDEX_TYPE_QUANTITY);
 					subParam.getParamIndexValues().stream()
-							.flatMap(o ->
-									ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamQuantity.class).stream())
-							.map(ExtendedHSearchIndexExtractor::convertQuantity)
-							.forEach(q -> theHSearchIndexWriter.writeQuantityFields(quantityElement, q));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamQuantity.class).stream())
+						.map(ExtendedHSearchIndexExtractor::convertQuantity)
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(quantityElement, q));
 					break;
 
 				case STRING:
-					DocumentElement stringElement = subParamElement.addObject("string");
+					DocumentElement stringElement =  subParamElement.addObject("string");
 					subParam.getParamIndexValues().stream()
-							.flatMap(o ->
-									ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamString.class).stream())
-							.forEach(risps ->
-									theHSearchIndexWriter.writeBasicStringFields(stringElement, risps.getValueExact()));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamString.class).stream())
+						.forEach(risps-> theHSearchIndexWriter.writeBasicStringFields(stringElement, risps.getValueExact()));
 					break;
 
 				case TOKEN:
-					DocumentElement tokenElement = subParamElement.addObject("token");
+					DocumentElement tokenElement =  subParamElement.addObject("token");
 					subParam.getParamIndexValues().stream()
-							.flatMap(
-									o -> ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamToken.class).stream())
-							.forEach(rispt -> theHSearchIndexWriter.writeTokenFields(
-									tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamToken.class).stream())
+						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
 					break;
 
 				case URI:
 					subParam.getParamIndexValues().stream()
-							.flatMap(o -> ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamUri.class).stream())
-							.forEach(rispu -> theHSearchIndexWriter.writeUriFields(subParamElement, rispu.getUri()));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamUri.class).stream())
+						.forEach(rispu->theHSearchIndexWriter.writeUriFields(subParamElement, rispu.getUri()));
 					break;
 
 				case NUMBER:
 					subParam.getParamIndexValues().stream()
-							.flatMap(o ->
-									ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamNumber.class).stream())
-							.forEach(rispn ->
-									theHSearchIndexWriter.writeNumberFields(subParamElement, rispn.getValue()));
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamNumber.class).stream())
+						.forEach(rispn->theHSearchIndexWriter.writeNumberFields(subParamElement, rispn.getValue()));
 					break;
 
 				case COMPOSITE:
-					assert false : "composite components can't be composite";
+					assert false: "composite components can't be composite";
 					break;
 
 				case REFERENCE:
 					break;
 
-					// unsupported
+				// unsupported
 				case SPECIAL:
 				case HAS:
 					break;
 			}
 		}
 	}
+
 }

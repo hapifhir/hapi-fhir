@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import javax.measure.quantity.Force;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ResourceTableTest {
@@ -21,13 +24,11 @@ public class ResourceTableTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource(
-			value = {
-				"123, 123, Patient/123/_history/1",
-				", 123, Patient/123/_history/1",
-				"null, 456, Patient/456/_history/1"
-			},
-			nullValues = {"null"})
+	@CsvSource(value={
+		"123, 123, Patient/123/_history/1",
+		", 123, Patient/123/_history/1",
+		"null, 456, Patient/456/_history/1"
+	},nullValues={"null"})
 	public void testPopulateId(String theFhirId, String theForcedId, String theExpected) {
 		// Given
 		ResourceTable t = new ResourceTable();

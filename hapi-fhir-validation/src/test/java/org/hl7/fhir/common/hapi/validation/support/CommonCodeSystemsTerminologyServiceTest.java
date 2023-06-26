@@ -31,24 +31,21 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testUcum_LookupCode_Good() {
-		IValidationSupport.LookupCodeResult outcome =
-				mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "Cel");
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Good2() {
-		IValidationSupport.LookupCodeResult outcome =
-				mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "kg/m2");
 		assert outcome != null;
 		assertEquals(true, outcome.isFound());
 	}
 
 	@Test
 	public void testUcum_LookupCode_Bad() {
-		IValidationSupport.LookupCodeResult outcome =
-				mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://unitsofmeasure.org", "AAAAA");
 		assert outcome != null;
 		assertEquals(false, outcome.isFound());
 	}
@@ -61,10 +58,8 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void lookupCode_languageOnlyLookup_isCaseInsensitive() {
-		IValidationSupport.LookupCodeResult outcomeUpper =
-				mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "SGN", "Sign Languages");
-		IValidationSupport.LookupCodeResult outcomeLower =
-				mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "sgn", "Sign Languages");
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "SGN", "Sign Languages");
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "sgn", "Sign Languages");
 		assertNotNull(outcomeUpper);
 		assertNotNull(outcomeLower);
 		assertTrue(outcomeLower.isFound());
@@ -73,10 +68,8 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void lookupCode_languageAndRegionLookup_isCaseInsensitive() {
-		IValidationSupport.LookupCodeResult outcomeUpper =
-				mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "EN-US", "English");
-		IValidationSupport.LookupCodeResult outcomeLower =
-				mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-us", "English");
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "EN-US", "English");
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-us", "English");
 		assertNotNull(outcomeUpper);
 		assertNotNull(outcomeLower);
 		assertTrue(outcomeLower.isFound());
@@ -87,8 +80,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testUcum_ValidateCode_Good() {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCodeInValueSet(newSupport(), newOptions(), "http://unitsofmeasure.org", "mg", null, vs);
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), "http://unitsofmeasure.org", "mg", null, vs);
 		assert outcome != null;
 		assertEquals(true, outcome.isOk());
 		assertEquals("(milligram)", outcome.getDisplay());
@@ -98,8 +90,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testUcum_ValidateCode_Good_SystemInferred() {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCodeInValueSet(newSupport(), newOptions().setInferSystem(true), null, "mg", null, vs);
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions().setInferSystem(true), null, "mg", null, vs);
 		assert outcome != null;
 		assertEquals(true, outcome.isOk());
 		assertEquals("(milligram)", outcome.getDisplay());
@@ -109,15 +100,13 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testUcum_ValidateCode_Bad() {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://hl7.org/fhir/ValueSet/ucum-units");
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(
-				newSupport(), newOptions(), "http://unitsofmeasure.org", "aaaaa", null, vs);
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(newSupport(), newOptions(), "http://unitsofmeasure.org", "aaaaa", null, vs);
 		assertNull(outcome);
 	}
 
 	@Test
 	public void testLanguagesLanguagesCs_GoodCode() {
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateLookupCode(newSupport(), "en-CA", "urn:ietf:bcp:47");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateLookupCode(newSupport(), "en-CA", "urn:ietf:bcp:47");
 		assert outcome != null;
 		assertTrue(outcome.isOk());
 		assertEquals("English Canada", outcome.getDisplay());
@@ -125,15 +114,13 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testLanguagesLanguagesCs_BadCode() {
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateLookupCode(newSupport(), "en-FOO", "urn:ietf:bcp:47");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateLookupCode(newSupport(), "en-FOO", "urn:ietf:bcp:47");
 		assertNull(outcome);
 	}
 
 	@Test
 	public void testLanguages_CommonLanguagesVs_GoodCode() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(), newOptions(), "urn:ietf:bcp:47", "en-US", null, "http://hl7.org/fhir/ValueSet/languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "urn:ietf:bcp:47", "en-US", null, "http://hl7.org/fhir/ValueSet/languages");
 		assert outcome != null;
 		assertTrue(outcome.isOk());
 		assertEquals("English (United States)", outcome.getDisplay());
@@ -155,8 +142,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testLanguages_CommonLanguagesVs_BadCode() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(), newOptions(), "urn:ietf:bcp:47", "FOO", null, "http://hl7.org/fhir/ValueSet/languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "urn:ietf:bcp:47", "FOO", null, "http://hl7.org/fhir/ValueSet/languages");
 		assert outcome != null;
 		assertFalse(outcome.isOk());
 		assertEquals("Code \"FOO\" is not in valueset: http://hl7.org/fhir/ValueSet/languages", outcome.getMessage());
@@ -164,24 +150,15 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testLanguages_CommonLanguagesVs_BadSystem() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(), newOptions(), "FOO", "en-US", null, "http://hl7.org/fhir/ValueSet/languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "FOO", "en-US", null, "http://hl7.org/fhir/ValueSet/languages");
 		assert outcome != null;
 		assertFalse(outcome.isOk());
-		assertEquals(
-				"Inappropriate CodeSystem URL \"FOO\" for ValueSet: http://hl7.org/fhir/ValueSet/languages",
-				outcome.getMessage());
+		assertEquals("Inappropriate CodeSystem URL \"FOO\" for ValueSet: http://hl7.org/fhir/ValueSet/languages", outcome.getMessage());
 	}
 
 	@Test
 	public void testLanguages_AllLanguagesVs_GoodCode() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(),
-				newOptions(),
-				"urn:ietf:bcp:47",
-				"en-US",
-				null,
-				"http://hl7.org/fhir/ValueSet/all-languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "urn:ietf:bcp:47", "en-US", null, "http://hl7.org/fhir/ValueSet/all-languages");
 		assert outcome != null;
 		assertTrue(outcome.isOk());
 		assertEquals("English United States", outcome.getDisplay());
@@ -189,34 +166,23 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testLanguages_AllLanguagesVs_BadCode() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(),
-				newOptions(),
-				"urn:ietf:bcp:47",
-				"FOO",
-				null,
-				"http://hl7.org/fhir/ValueSet/all-languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "urn:ietf:bcp:47", "FOO", null, "http://hl7.org/fhir/ValueSet/all-languages");
 		assert outcome != null;
 		assertFalse(outcome.isOk());
-		assertEquals(
-				"Code \"FOO\" is not in valueset: http://hl7.org/fhir/ValueSet/all-languages", outcome.getMessage());
+		assertEquals("Code \"FOO\" is not in valueset: http://hl7.org/fhir/ValueSet/all-languages", outcome.getMessage());
 	}
 
 	@Test
 	public void testLanguages_AllLanguagesVs_BadSystem() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-				newSupport(), newOptions(), "FOO", "en-US", null, "http://hl7.org/fhir/ValueSet/all-languages");
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(newSupport(), newOptions(), "FOO", "en-US", null, "http://hl7.org/fhir/ValueSet/all-languages");
 		assert outcome != null;
 		assertFalse(outcome.isOk());
-		assertEquals(
-				"Inappropriate CodeSystem URL \"FOO\" for ValueSet: http://hl7.org/fhir/ValueSet/all-languages",
-				outcome.getMessage());
+		assertEquals("Inappropriate CodeSystem URL \"FOO\" for ValueSet: http://hl7.org/fhir/ValueSet/all-languages", outcome.getMessage());
 	}
 
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_R4() {
-		CodeSystem cs =
-				(CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
+		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(498, cs.getConcept().size());
 	}
@@ -224,8 +190,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_DSTU3() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu3Cached());
-		org.hl7.fhir.dstu3.model.CodeSystem cs = (org.hl7.fhir.dstu3.model.CodeSystem)
-				svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
+		org.hl7.fhir.dstu3.model.CodeSystem cs = (org.hl7.fhir.dstu3.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(498, cs.getConcept().size());
 	}
@@ -233,8 +198,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso3166_R5() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forR5Cached());
-		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem)
-				svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
+		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(498, cs.getConcept().size());
 	}
@@ -248,8 +212,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 	@Test
 	public void testFetchCodeSystemBuiltIn_Iso_R4() {
-		CodeSystem cs =
-				(CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL);
+		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL);
 		assert cs != null;
 		assertEquals(182, cs.getConcept().size());
 	}
@@ -278,4 +241,6 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	private ConceptValidationOptions newOptions() {
 		return new ConceptValidationOptions();
 	}
+
+
 }

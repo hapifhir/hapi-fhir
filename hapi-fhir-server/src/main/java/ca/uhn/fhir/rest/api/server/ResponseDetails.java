@@ -64,4 +64,5 @@ public class ResponseDetails {
 	public void setResponseResource(IBaseResource theResponseResource) {
 		myResponseResource = theResponseResource;
 	}
+
 }

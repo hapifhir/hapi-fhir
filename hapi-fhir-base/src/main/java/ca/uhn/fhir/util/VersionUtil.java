@@ -92,4 +92,5 @@ public class VersionUtil {
 	public static String getBuildDate() {
 		return ourBuildTime.substring(0, 10);
 	}
+
 }

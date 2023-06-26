@@ -40,32 +40,26 @@ public class SubscriptionChannelFactory {
 		myChannelFactory = theChannelFactory;
 	}
 
-	public IChannelProducer newDeliverySendingChannel(
-			String theChannelName, ChannelProducerSettings theChannelSettings) {
+	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
 		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newDeliveryReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelReceiver newDeliveryReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForDeliveryChannel(theChannelSettings);
-		IChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceDeliveryJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
-	public IChannelProducer newMatchingSendingChannel(
-			String theChannelName, ChannelProducerSettings theChannelSettings) {
+	public IChannelProducer newMatchingSendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForMatchingChannel(theChannelSettings);
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceModifiedJsonMessage.class, config);
 	}
 
-	public IChannelReceiver newMatchingReceivingChannel(
-			String theChannelName, ChannelConsumerSettings theChannelSettings) {
+	public IChannelReceiver newMatchingReceivingChannel(String theChannelName, ChannelConsumerSettings theChannelSettings) {
 		ChannelConsumerSettings config = newConsumerConfigForMatchingChannel(theChannelSettings);
-		IChannelReceiver channel =
-				myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
+		IChannelReceiver channel = myChannelFactory.getOrCreateReceiver(theChannelName, ResourceModifiedJsonMessage.class, config);
 		return new BroadcastingSubscribableChannelWrapper(channel);
 	}
 
@@ -116,4 +110,5 @@ public class SubscriptionChannelFactory {
 	public IChannelFactory getChannelFactory() {
 		return myChannelFactory;
 	}
+
 }

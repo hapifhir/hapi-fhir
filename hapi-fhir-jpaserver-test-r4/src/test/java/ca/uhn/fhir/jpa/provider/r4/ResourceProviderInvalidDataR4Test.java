@@ -19,8 +19,7 @@ import static org.hamcrest.Matchers.containsString;
 
 public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderInvalidDataR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderInvalidDataR4Test.class);
 
 	@Override
 	@AfterEach
@@ -55,4 +54,5 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 			assertThat(responseContent, containsString("\"value\":-0.100"));
 		}
 	}
+
 }

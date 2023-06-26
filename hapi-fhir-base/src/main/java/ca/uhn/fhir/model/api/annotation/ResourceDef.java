@@ -30,13 +30,13 @@ import java.lang.annotation.Target;
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE})
+@Target(value= {ElementType.TYPE})
 public @interface ResourceDef {
 
 	/**
 	 * The name of the resource (e.g. "Patient" or "DiagnosticReport"). If you are defining your
 	 * own custom extension to a built-in FHIR resource definition type (e.g. you are extending
-	 * the built-in Patient class) you do not need to supply a value for this property, as it
+	 * the built-in Patient class) you do not need to supply a value for this property, as it 
 	 * will be inferred from the parent class.
 	 */
 	String name() default "";
@@ -50,7 +50,7 @@ public @interface ResourceDef {
 	 * your server uses, not necessarily "http://localhost:8080/fhir")
 	 */
 	String id() default "";
-
+	
 	/**
 	 * The URL indicating the profile for this resource definition. If specified, this URL will be
 	 * automatically added to the meta tag when the resource is serialized.
@@ -60,4 +60,5 @@ public @interface ResourceDef {
 	 * </p>
 	 */
 	String profile() default "";
+	
 }

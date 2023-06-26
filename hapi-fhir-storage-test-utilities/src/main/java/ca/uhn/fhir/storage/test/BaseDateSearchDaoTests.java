@@ -31,6 +31,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +57,13 @@ public abstract class BaseDateSearchDaoTests {
 
 	Fixture myFixture;
 
-	// time zone set to EST
+	//time zone set to EST
 	@BeforeEach
 	public void setTimeZoneEST() {
 		TimeZone.setDefault(TimeZone.getTimeZone("EST"));
 	}
 
-	// reset time zone back to match the system
+	//reset time zone back to match the system
 	@AfterEach
 	public void resetTimeZone() {
 		TimeZone.setDefault(null);
@@ -72,7 +73,6 @@ public abstract class BaseDateSearchDaoTests {
 	public void setupFixture() {
 		myFixture = constructFixture();
 	}
-
 	@AfterEach
 	public void cleanup() {
 		myFixture.cleanup();
@@ -95,10 +95,9 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//	@CsvSource("2020-01-01,eb2021-01-01, True, eb == ends-before")
+//	@CsvSource("2020-01-01,eb2021-01-01, True, eb == ends-before")
 	@MethodSource("dateSearchCases")
-	public void testDateSearchMatching(
-			String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
+	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
 		if (isShouldSkip(theResourceDate, theQuery)) {
 			return;
 		}
@@ -111,30 +110,27 @@ public abstract class BaseDateSearchDaoTests {
 		assertExpectedMatch(theResourceDate, theQuery, theExpectedMatch, matched, theFileName, theLineNumber);
 	}
 
+
 	protected boolean isShouldSkip(String theResourceDate, String theQuery) {
 		return false;
 	}
 
-	protected static void assertExpectedMatch(
-			String theResourceDate,
-			String theQuery,
-			boolean theExpectedMatch,
-			boolean matched,
-			String theFileName,
-			int theLineNumber) {
-		String message = "Expected " + theQuery + " to " + (theExpectedMatch ? "" : "not ")
-				+ "match " + theResourceDate + " ("
-				+ theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
+	protected static void assertExpectedMatch(String theResourceDate, String theQuery, boolean theExpectedMatch, boolean matched, String theFileName, int theLineNumber) {
+		String message =
+			"Expected " + theQuery + " to " +
+				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +
+				" (" + theFileName + ":" + theLineNumber + ")"; // wrap this in () so tools recognize the line reference.
 		assertEquals(theExpectedMatch, matched, message);
 	}
+
 
 	/**
 	 * Turn the cases into expanded arguments for better reporting output and debugging
 	 */
 	public static List<Arguments> dateSearchCases() {
 		return DateSearchTestCase.ourCases.stream()
-				.map(DateSearchTestCase::toArguments)
-				.collect(Collectors.toList());
+			.map(DateSearchTestCase::toArguments)
+			.collect(Collectors.toList());
 	}
 
 	/**

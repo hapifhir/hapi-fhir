@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -45,12 +46,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.ServletException;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
@@ -74,13 +75,10 @@ import static org.mockito.Mockito.verify;
 
 public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderInterceptorR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderInterceptorR4Test.class);
 	private List<Object> myInterceptors = new ArrayList<>();
-
 	@Mock
 	private IAnonymousInterceptor myHook;
-
 	@Captor
 	private ArgumentCaptor<HookParams> myParamsCaptor;
 
@@ -107,42 +105,24 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		}
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
 		myInterceptors.add(interceptor);
 
 		myInterceptors.add(new PerformanceTracingLoggingInterceptor());
 
 		ourLog.info("About to perform search...");
 
-		Bundle results = myClient.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(0))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(0))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
 
 		SearchRuntimeDetails details = myParamsCaptor.getAllValues().get(0).get(SearchRuntimeDetails.class);
 		assertEquals(SearchStatusEnum.PASSCMPLET, details.getSearchStatus());
@@ -151,17 +131,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		reset(interceptor);
 		results = myClient.loadPage().next(results).execute();
 		assertNotNull(results);
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(1))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(0))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, timeout(10000).times(0))
-				.invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
+
 	}
+
 
 	@Test
 	public void testCreateConditionalNoOpResourceInTransaction() throws Exception {
@@ -183,18 +160,10 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		// Do it again but with a conditional create that shouldn't actually create
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
 
 		entry.getRequest().setIfNoneExist("Patient?name=" + methodName);
 		transaction(bundle);
@@ -203,18 +172,13 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		 * Server Interceptor
 		 */
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(
-				RestOperationTypeEnum.TRANSACTION,
-				myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
 
-		verify(interceptor, times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
-		verify(interceptor, times(0))
-				.invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), myParamsCaptor.capture());
-		verify(interceptor, times(0))
-				.invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), myParamsCaptor.capture());
+
 	}
 
 	@Test
@@ -226,9 +190,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -236,22 +198,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString =
-					response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 		}
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
-		assertEquals(
-				"Patient",
-				myParamsCaptor
-						.getValue()
-						.get(RequestDetails.class)
-						.getResource()
-						.getIdElement()
-						.getResourceType());
+		assertEquals("Patient", myParamsCaptor.getValue().get(RequestDetails.class).getResource().getIdElement().getResourceType());
+
 	}
 
 	@Test
@@ -270,27 +224,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		entry.getRequest().setUrl("Patient");
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
 
 		transaction(bundle);
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(
-				RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), myParamsCaptor.capture());
 	}
 
 	@Test
@@ -304,27 +248,27 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			p.setActive(true);
 			IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-			await().atMost(60, TimeUnit.SECONDS)
-					.pollInterval(1, TimeUnit.SECONDS)
-					.until(
-							() -> {
-								Bundle observations = myClient.search()
-										.forResource("Observation")
-										.where(Observation.SUBJECT.hasId(pid))
-										.returnBundle(Bundle.class)
-										.cacheControl(CacheControlDirective.noCache())
-										.execute();
-								ourLog.info(
-										"Have {} observations",
-										observations.getEntry().size());
-								return observations.getEntry().size();
-							},
-							equalTo(1));
+			await()
+				.atMost(60, TimeUnit.SECONDS)
+				.pollInterval(1, TimeUnit.SECONDS)
+				.until(()->{
+						Bundle observations = myClient
+							.search()
+							.forResource("Observation")
+							.where(Observation.SUBJECT.hasId(pid))
+							.returnBundle(Bundle.class)
+							.cacheControl(CacheControlDirective.noCache())
+							.execute();
+						ourLog.info("Have {} observations", observations.getEntry().size());
+						return observations.getEntry().size();
+					},
+					equalTo(1));
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
 	}
+
 
 	@Test
 	public void testCreateResourceWithVersionedReference() throws IOException, ServletException {
@@ -347,9 +291,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(resource);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -357,18 +299,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString =
-					response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 		}
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
 
-		Patient patient =
-				(Patient) myParamsCaptor.getValue().get(RequestDetails.class).getResource();
+		Patient patient = (Patient) myParamsCaptor.getValue().get(RequestDetails.class).getResource();
 		assertEquals(orgId.getValue(), patient.getManagingOrganization().getReference());
+
 	}
 
 	@Test
@@ -392,27 +332,20 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		// Do it again but with an update that shouldn't actually create
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
 
 		entry.getRequest().setIfNoneExist("Patient?name=" + methodName);
 		transaction(bundle);
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1))
-				.invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(
-				RestOperationTypeEnum.TRANSACTION,
-				myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
+
 	}
+
 
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
@@ -442,7 +375,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 						}
 					}
 				}
+
 			}
+
 		}
 
 		Patient p1 = new Patient();
@@ -479,69 +414,81 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try {
 			myServer.getRestfulServer().registerInterceptor(interceptor);
 
-			Bundle bundle = myClient.search()
-					.forResource(Observation.class)
-					.where(Observation.SUBJECT.hasId("Patient/p1"))
-					.returnBundle(Bundle.class)
-					.execute();
+			Bundle bundle = myClient
+				.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/p1"))
+				.returnBundle(Bundle.class)
+				.execute();
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, containsInAnyOrder("Observation/o1", "Observation/o2"));
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
+
 	}
 
 	@Test
-	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreate() {
+	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreate(){
 		registerSearchParameterValidatingInterceptor();
 
 		// let's make sure we don't already have a matching SearchParameter
-		Bundle bundle = myClient.search()
-				.byUrl("SearchParameter?base=AllergyIntolerance&code=patient")
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle bundle = myClient
+			.search()
+			.byUrl("SearchParameter?base=AllergyIntolerance&code=patient")
+			.returnBundle(Bundle.class)
+			.execute();
 
 		assertTrue(bundle.getEntry().isEmpty());
 
 		SearchParameter searchParameter = createSearchParameter();
 
 		// now, create a SearchParameter
-		MethodOutcome methodOutcome =
-				myClient.create().resource(searchParameter).execute();
+		MethodOutcome methodOutcome = myClient
+			.create()
+			.resource(searchParameter)
+			.execute();
 
 		assertTrue(methodOutcome.getCreated());
 
 		// attempting to create an overlapping SearchParameter should fail
 		try {
-			methodOutcome = myClient.create().resource(searchParameter).execute();
+			methodOutcome = myClient
+				.create()
+				.resource(searchParameter)
+				.execute();
 
 			fail();
-		} catch (UnprocessableEntityException e) {
+		}catch (UnprocessableEntityException e){
 			// all is good
 			assertThat(e.getMessage(), containsString("2196"));
 		}
 	}
 
 	@Test
-	public void testSearchParamValidatingInterceptorAllowsResourceUpdate() {
+	public void testSearchParamValidatingInterceptorAllowsResourceUpdate(){
 		registerSearchParameterValidatingInterceptor();
 
 		SearchParameter searchParameter = createSearchParameter();
 
 		// now, create a SearchParameter
-		MethodOutcome methodOutcome =
-				myClient.create().resource(searchParameter).execute();
+		MethodOutcome methodOutcome = myClient
+			.create()
+			.resource(searchParameter)
+			.execute();
 
 		assertTrue(methodOutcome.getCreated());
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
-		methodOutcome = myClient.update().resource(createdSearchParameter).execute();
+		methodOutcome = myClient
+			.update()
+			.resource(createdSearchParameter)
+			.execute();
 
 		assertNotNull(methodOutcome);
 	}
-
 	@Test
 	public void testSearchParamValidationOnUpdateWithClientAssignedId() {
 		registerSearchParameterValidatingInterceptor();
@@ -550,20 +497,25 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		searchParameter.setId("my-custom-id");
 
 		// now, create a SearchParameter
-		MethodOutcome methodOutcome =
-				myClient.update().resource(searchParameter).execute();
+		MethodOutcome methodOutcome = myClient
+			.update()
+			.resource(searchParameter)
+			.execute();
 
 		assertTrue(methodOutcome.getCreated());
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
-		methodOutcome = myClient.update().resource(createdSearchParameter).execute();
+		methodOutcome = myClient
+			.update()
+			.resource(createdSearchParameter)
+			.execute();
 
 		assertNotNull(methodOutcome);
 	}
 
 	@Test
-	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreateWithUpdate() {
+	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreateWithUpdate(){
 		registerSearchParameterValidatingInterceptor();
 
 		String defaultSearchParamId = "clinical-patient";
@@ -573,7 +525,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		defaultSearchParameter.setId(defaultSearchParamId);
 
 		// now, create a SearchParameter with a PUT operation
-		MethodOutcome methodOutcome = myClient.update(defaultSearchParamId, defaultSearchParameter);
+		MethodOutcome methodOutcome = myClient
+			.update(defaultSearchParamId, defaultSearchParameter);
 
 		assertTrue(methodOutcome.getCreated());
 
@@ -584,30 +537,29 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try {
 			myClient.update(overlappingSearchParamId, overlappingSearchParameter);
 			fail();
-		} catch (UnprocessableEntityException e) {
+		} catch (UnprocessableEntityException e){
 			// this is good
 			assertThat(e.getMessage(), containsString("2196"));
 		}
+
 	}
 
-	private void registerSearchParameterValidatingInterceptor() {
+	private void registerSearchParameterValidatingInterceptor(){
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(mySearchParamValidatingInterceptor);
 	}
 
-	private SearchParameter createSearchParameter() {
+	private SearchParameter createSearchParameter(){
 		SearchParameter retVal = new SearchParameter()
-				.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient")
-				.setStatus(Enumerations.PublicationStatus.ACTIVE)
-				.setDescription("someDescription")
-				.setCode("patient")
-				.addBase("DiagnosticReport")
-				.addBase("ImagingStudy")
-				.addBase("DocumentManifest")
-				.addBase("AllergyIntolerance")
-				.setType(Enumerations.SearchParamType.REFERENCE)
-				.setExpression("someExpression");
+			.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient")
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setDescription("someDescription")
+			.setCode("patient")
+			.addBase("DiagnosticReport").addBase("ImagingStudy").addBase("DocumentManifest").addBase("AllergyIntolerance")
+			.setType(Enumerations.SearchParamType.REFERENCE)
+			.setExpression("someExpression");
 
 		return retVal;
+
 	}
 
 	@Interceptor
@@ -623,8 +575,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 		public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
-			Patient createdPatient =
-					(Patient) theRequestDetails.getServletRequest().getAttribute("CREATED_PATIENT");
+			Patient createdPatient = (Patient) theRequestDetails.getServletRequest().getAttribute("CREATED_PATIENT");
 			ourLog.info("processingCompletedNormally with {}", createdPatient);
 			if (createdPatient != null) {
 				Observation observation = new Observation();
@@ -635,4 +586,5 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			}
 		}
 	}
+
 }

@@ -23,6 +23,7 @@ public class ClientMockingTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testMockingDeepStubs() {
@@ -34,20 +35,22 @@ public class ClientMockingTest {
 
 		Bundle retVal = new Bundle();
 
-		// @formatter:off
-		Object when = client.search()
-				.forResource(eq(Condition.class))
-				.where(any(ICriterion.class))
-				.returnBundle((Class<IBaseBundle>) any())
-				.execute();
-		when((Object) when).thenReturn(retVal);
-		// @formatter:off
-
-		Bundle actual = client.search()
-				.forResource(Condition.class)
-				.where(Condition.ASSERTER.hasId("123"))
-				.returnBundle(Bundle.class)
-				.execute();
+		//@formatter:off
+		Object when = client
+			 .search()
+			 .forResource(eq(Condition.class))
+			 .where(any(ICriterion.class))
+			 .returnBundle((Class<IBaseBundle>)any())
+			 .execute();
+		when((Object)when)
+			 .thenReturn(retVal);
+		//@formatter:off
+		
+		Bundle actual = client.search().forResource(Condition.class).where(Condition.ASSERTER.hasId("123")).returnBundle(Bundle.class).execute();
 		assertSame(retVal, actual);
+		
 	}
+	
+	
+
 }

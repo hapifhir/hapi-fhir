@@ -30,7 +30,10 @@ public class ChunkExecutionDetails<PT extends IModelJson, IT extends IModelJson>
 
 	private final String myChunkId;
 
-	public ChunkExecutionDetails(IT theData, PT theParameters, String theInstanceId, String theChunkId) {
+	public ChunkExecutionDetails(IT theData,
+										  PT theParameters,
+										  String theInstanceId,
+										  String theChunkId) {
 		myData = theData;
 		myParameters = theParameters;
 		myInstanceId = theInstanceId;

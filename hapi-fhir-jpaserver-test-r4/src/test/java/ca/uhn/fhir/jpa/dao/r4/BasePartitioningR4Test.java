@@ -46,7 +46,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected int myPartitionId;
 	protected int myPartitionId2;
 	private boolean myHaveDroppedForcedIdUniqueConstraint;
-
 	@Autowired
 	private IPartitionLookupSvc myPartitionConfigSvc;
 
@@ -54,11 +53,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myPartitionInterceptor.assertNoRemainingIds();
 
-		myPartitionSettings.setIncludePartitionInSearchHashes(
-				new PartitionSettings().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(
-				new PartitionSettings().getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
@@ -66,14 +63,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		if (myHaveDroppedForcedIdUniqueConstraint) {
 			runInTransaction(() -> {
 				myEntityManager.createNativeQuery("delete from HFJ_FORCED_ID").executeUpdate();
-				myEntityManager.createNativeQuery(
-						"alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
+				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
 			});
 		}
 
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(
-				new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
 		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 	}
@@ -83,8 +78,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setIncludePartitionInSearchHashes(
-				new PartitionSettings().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
 		myStorageSettings.setUniqueIndexesEnabled(true);
 
@@ -106,9 +100,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		// Ensure the partition names are resolved
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(
-				JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
+		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
 		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), mySrd);
+
 	}
 
 	protected void createUniqueCompositeSp() {
@@ -129,8 +123,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		sp.addComponent().setExpression("Patient").setDefinition("SearchParameter/patient-birthdate");
-		sp.addExtension().setUrl(HapiExtensions.EXT_SP_UNIQUE).setValue(new BooleanType(true));
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
@@ -138,10 +136,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void dropForcedIdUniqueConstraint() {
 		runInTransaction(() -> {
-			myEntityManager
-					.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint "
-							+ ForcedId.IDX_FORCEDID_TYPE_FID)
-					.executeUpdate();
+			myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
 		});
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}
@@ -201,14 +196,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	@Interceptor
 	public static class MyReadWriteInterceptor extends MyWriteInterceptor {
 
+
 		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
 
 		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
-			ourLog.info(
-					"Adding partition {} for read (not have {})",
-					theRequestPartitionId,
-					myReadRequestPartitionIds.size());
+			ourLog.info("Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
@@ -223,11 +216,11 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			} catch (Exception e) {
 				stack = StackTraceHelper.getStackAsString(e);
 				stack = Arrays.stream(stack.split("\\n"))
-						.filter(t -> t.contains("ca.uhn.fhir"))
-						.filter(t -> !t.toLowerCase().contains("interceptor"))
-						.filter(t -> !t.toLowerCase().contains("partitionhelper"))
-						.findFirst()
-						.orElse("UNKNOWN");
+					.filter(t->t.contains("ca.uhn.fhir"))
+					.filter(t->!t.toLowerCase().contains("interceptor"))
+					.filter(t->!t.toLowerCase().contains("partitionhelper"))
+					.findFirst()
+					.orElse("UNKNOWN");
 			}
 
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
@@ -238,15 +231,14 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Override
 		public void assertNoRemainingIds() {
 			super.assertNoRemainingIds();
-			assertEquals(
-					0,
-					myReadRequestPartitionIds.size(),
-					() -> "Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor");
+			assertEquals(0, myReadRequestPartitionIds.size(), () -> "Found " + myReadRequestPartitionIds.size() + " READ partitions remaining in interceptor");
 		}
+
 	}
 
 	@Interceptor
 	public static class MyWriteInterceptor {
+
 
 		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
 
@@ -255,25 +247,17 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId PartitionIdentifyCreate(
-				IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
 			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
-			ourLog.debug(
-					"Returning partition [{}] for create of resource {} with date {}",
-					retVal,
-					theResource,
-					retVal.getPartitionDate());
+			ourLog.debug("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(
-					0,
-					myCreateRequestPartitionIds.size(),
-					() -> "Still have " + myCreateRequestPartitionIds.size()
-							+ " CREATE partitions remaining in interceptor");
+			assertEquals(0, myCreateRequestPartitionIds.size(), () -> "Still have " + myCreateRequestPartitionIds.size() + " CREATE partitions remaining in interceptor");
 		}
+
 	}
 }

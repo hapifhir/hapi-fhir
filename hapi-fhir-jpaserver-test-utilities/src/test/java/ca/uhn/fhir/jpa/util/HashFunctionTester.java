@@ -22,9 +22,10 @@ public class HashFunctionTester {
 	public void testHashBenchmark() {
 
 		test(Hashing.murmur3_128(), "murmur3_128 ");
-		test(Hashing.sha256(), "sha256      ");
-		test(Hashing.sha384(), "sha384      ");
-		test(Hashing.sha512(), "sha512      ");
+		test(Hashing.sha256()     , "sha256      ");
+		test(Hashing.sha384()     , "sha384      ");
+		test(Hashing.sha512()     , "sha512      ");
+
 	}
 
 	public void test(HashFunction theHashFunction, String theName) {
@@ -39,14 +40,7 @@ public class HashFunctionTester {
 			hasher.putBytes(bytes4);
 			output = Base64.encodeBytes(hasher.hash().asBytes());
 		}
-		ourLog.info(
-				"{} took {}ms for {} or {}/second to generate {} chars: {}",
-				theName,
-				sw.getMillis(),
-				loops,
-				sw.getThroughput(loops, TimeUnit.SECONDS),
-				output.length(),
-				output);
+		ourLog.info("{} took {}ms for {} or {}/second to generate {} chars: {}", theName, sw.getMillis(), loops, sw.getThroughput(loops, TimeUnit.SECONDS), output.length(), output);
 	}
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HashFunctionTester.class);

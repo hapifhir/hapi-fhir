@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.StringType;
 public class CustomObservationR4 extends Observation {
 
 	public static final String PROFILE = "http://custom_ObservationR4";
-
+	
 	private static final long serialVersionUID = 1L;
 
 	@Extension(definedLocally = false, isModifier = false, url = "http://eyeColour")
@@ -44,4 +44,5 @@ public class CustomObservationR4 extends Observation {
 	public void setEyeColour(StringType theEyeColour) {
 		myEyeColour = theEyeColour;
 	}
+	
 }

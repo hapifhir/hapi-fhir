@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
@@ -33,23 +33,21 @@ public class RuleBuilderTest {
 
 		assertEquals(RuleImplOp.class, list.get(0).getClass());
 		RuleImplOp allowRead = (RuleImplOp) list.get(0);
-		assertThat(
-				allowRead.getAppliesToInstances(),
-				contains(
-						new IdDt("Patient/READ-1"),
-						new IdDt("Patient/READ-2"),
-						new IdDt("Patient/READ-3"),
-						new IdDt("Patient/READ-4")));
+		assertThat(allowRead.getAppliesToInstances(), contains(
+			new IdDt("Patient/READ-1"),
+			new IdDt("Patient/READ-2"),
+			new IdDt("Patient/READ-3"),
+			new IdDt("Patient/READ-4")
+		));
 
 		assertEquals(RuleImplOp.class, list.get(1).getClass());
 		RuleImplOp allowWrite = (RuleImplOp) list.get(1);
-		assertThat(
-				allowWrite.getAppliesToInstances(),
-				contains(
-						new IdDt("Patient/WRITE-1"),
-						new IdDt("Patient/WRITE-2"),
-						new IdDt("Patient/WRITE-3"),
-						new IdDt("Patient/WRITE-4")));
+		assertThat(allowWrite.getAppliesToInstances(), contains(
+			new IdDt("Patient/WRITE-1"),
+			new IdDt("Patient/WRITE-2"),
+			new IdDt("Patient/WRITE-3"),
+			new IdDt("Patient/WRITE-4")
+		));
 	}
 
 	@Test
@@ -67,14 +65,8 @@ public class RuleBuilderTest {
 	@Test
 	public void testInCompartmentWithFilter_withMultipleReadInstances_doesNotCollapseRules() {
 		RuleBuilder builder = new RuleBuilder();
-		builder.allow()
-				.read()
-				.allResources()
-				.inCompartmentWithFilter("Patient", new IdDt("Patient/lob1patient"), "code=foo");
-		builder.allow()
-				.read()
-				.allResources()
-				.inCompartmentWithFilter("Patient", new IdDt("Patient/lob2patient"), "code=bar");
+		builder.allow().read().allResources().inCompartmentWithFilter("Patient", new IdDt("Patient/lob1patient"), "code=foo");
+		builder.allow().read().allResources().inCompartmentWithFilter("Patient", new IdDt("Patient/lob2patient"), "code=bar");
 		List<IAuthRule> list = builder.build();
 
 		assertEquals(2, list.size());
@@ -92,17 +84,14 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().groupExportOnGroup("group1").withResourceTypes(resourceTypes);
 		builder.allow().bulkExport().groupExportOnGroup("group2").withResourceTypes(resourceTypes);
 		List<IAuthRule> build = builder.build();
+
 	}
 
 	@Test
 	public void testNullConditional() {
 		IAuthRuleBuilder ruleBuilder = new RuleBuilder().allow().metadata().andThen();
 		IAuthRuleTester writeAccessTester = mock(IAuthRuleTester.class);
-		ruleBuilder
-				.allow()
-				.createConditional()
-				.resourcesOfType("anystring")
-				.withTester(writeAccessTester)
-				.andThen();
+		ruleBuilder.allow().createConditional().resourcesOfType("anystring").withTester(writeAccessTester).andThen();
 	}
+
 }

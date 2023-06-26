@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
+
 	/**
 	 * Server method with no _include
 	 * Client request with _include
@@ -41,17 +42,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 		startServer(provider);
 
 		try {
-			myClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("foo"))
-					.include(Patient.INCLUDE_ORGANIZATION)
-					.execute();
+			myClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("foo"))
+				.include(Patient.INCLUDE_ORGANIZATION)
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]"));
+			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]"));
 		}
 	}
 
@@ -66,8 +65,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		class MyProvider extends MyBaseProvider {
 			@Search
-			public List<IBaseResource> search(
-					@OptionalParam(name = "name") StringType theName, @IncludeParam Set<Include> theIncludes) {
+			public List<IBaseResource> search(@OptionalParam(name = "name") StringType theName, @IncludeParam Set<Include> theIncludes) {
 				return Lists.newArrayList(new Patient().setActive(true).setId("Patient/123"));
 			}
 		}
@@ -75,12 +73,13 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		startServer(provider);
 
-		Bundle results = myClient.search()
-				.forResource(Patient.class)
-				.where(Patient.NAME.matches().value("foo"))
-				.include(Patient.INCLUDE_ORGANIZATION)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.NAME.matches().value("foo"))
+			.include(Patient.INCLUDE_ORGANIZATION)
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(1, results.getEntry().size());
 	}
 
@@ -104,17 +103,15 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 		startServer(provider);
 
 		try {
-			myClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("foo"))
-					.revInclude(Patient.INCLUDE_ORGANIZATION)
-					.execute();
+			myClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("foo"))
+				.revInclude(Patient.INCLUDE_ORGANIZATION)
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]"));
+			assertThat(e.getMessage(), containsString("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]"));
 		}
 	}
 
@@ -129,9 +126,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		class MyProvider extends MyBaseProvider {
 			@Search
-			public List<IBaseResource> search(
-					@OptionalParam(name = "name") StringType theName,
-					@IncludeParam(reverse = true) Set<Include> theRevIncludes) {
+			public List<IBaseResource> search(@OptionalParam(name = "name") StringType theName, @IncludeParam(reverse = true) Set<Include> theRevIncludes) {
 				return Lists.newArrayList(new Patient().setActive(true).setId("Patient/123"));
 			}
 		}
@@ -139,14 +134,17 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
 		startServer(provider);
 
-		Bundle results = myClient.search()
-				.forResource(Patient.class)
-				.where(Patient.NAME.matches().value("foo"))
-				.revInclude(Patient.INCLUDE_ORGANIZATION)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results = myClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.NAME.matches().value("foo"))
+			.revInclude(Patient.INCLUDE_ORGANIZATION)
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(1, results.getEntry().size());
 	}
+
+
 
 	public static class MyBaseProvider implements IResourceProvider {
 
@@ -154,5 +152,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
+
 }

@@ -25,4 +25,5 @@ public class CustomPatient extends Patient {
 	public boolean isEmpty() {
 		return super.isEmpty() && ElementUtil.isEmpty(myFavouritePizza);
 	}
+
 }

@@ -53,8 +53,7 @@ public class NicknameMatcher implements IMdmFieldMatcher {
 	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
 			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theParams.getExact());
-			String rightString =
-					StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
+			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theParams.getExact());
 
 			return matches(leftString, rightString);
 		}

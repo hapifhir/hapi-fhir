@@ -63,9 +63,7 @@ public interface IBalpAuditContextServices {
 	default String getNetworkAddress(RequestDetails theRequestDetails) {
 		String remoteAddr = null;
 		if (theRequestDetails instanceof ServletRequestDetails) {
-			remoteAddr = ((ServletRequestDetails) theRequestDetails)
-					.getServletRequest()
-					.getRemoteAddr();
+			remoteAddr = ((ServletRequestDetails) theRequestDetails).getServletRequest().getRemoteAddr();
 		}
 		return remoteAddr;
 	}
@@ -91,10 +89,7 @@ public interface IBalpAuditContextServices {
 	 * references within BALP events.
 	 */
 	@Nonnull
-	default String massageResourceIdForStorage(
-			@Nonnull RequestDetails theRequestDetails,
-			@Nonnull IBaseResource theResource,
-			@Nonnull IIdType theResourceId) {
+	default String massageResourceIdForStorage(@Nonnull RequestDetails theRequestDetails, @Nonnull IBaseResource theResource, @Nonnull IIdType theResourceId) {
 		String serverBaseUrl = theRequestDetails.getServerBaseForRequest();
 		String resourceName = theResourceId.getResourceType();
 		return theResourceId.withServerBase(serverBaseUrl, resourceName).getValue();

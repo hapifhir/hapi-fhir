@@ -21,10 +21,10 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public abstract non-sealed class AbstractJsonParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
+abstract public non-sealed class AbstractJsonParserErrorHandlerTest extends AbstractParserErrorHandlerTest {
 
-	private static String PATIENT_DUPLICATE_CHOICE =
-			"""
+	private static String PATIENT_DUPLICATE_CHOICE = 
+			""" 
 			{
 				"resourceType": "Patient",
 				"deceasedBoolean": "true",
@@ -33,7 +33,7 @@ public abstract non-sealed class AbstractJsonParserErrorHandlerTest extends Abst
 			""";
 
 	protected abstract FhirContext getFhirContext();
-
+	
 	@Override
 	protected IParser createParser() {
 		return getFhirContext().newJsonParser();
@@ -43,4 +43,5 @@ public abstract non-sealed class AbstractJsonParserErrorHandlerTest extends Abst
 	protected String createResourceWithRepeatingChoice() {
 		return PATIENT_DUPLICATE_CHOICE;
 	}
+
 }

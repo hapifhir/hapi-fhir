@@ -52,7 +52,9 @@ public class HapiFhirCodeSystemGeneratorTest {
 		cs.setCaseSensitive(true);
 		cs.setCopyright("Licensed under the terms of the Apache Software License 2.0.");
 		for (var next : StorageResponseCodeEnum.values()) {
-			cs.addConcept().setCode(next.getCode()).setDisplay(next.getDisplay());
+			cs.addConcept()
+				.setCode(next.getCode())
+				.setDisplay(next.getDisplay());
 		}
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
@@ -73,5 +75,7 @@ public class HapiFhirCodeSystemGeneratorTest {
 		} else {
 			ourLog.info("Content of file is up to date: {}", path);
 		}
+
 	}
+
 }

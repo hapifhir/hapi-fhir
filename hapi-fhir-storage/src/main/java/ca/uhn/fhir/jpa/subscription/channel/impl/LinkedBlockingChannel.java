@@ -24,11 +24,11 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -58,9 +58,10 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean hasSubscription(@Nonnull MessageHandler handler) {
-		return getSubscribers().stream()
-				.map(t -> (RetryingMessageHandlerWrapper) t)
-				.anyMatch(t -> t.getWrappedHandler() == handler);
+		return getSubscribers()
+			.stream()
+			.map(t -> (RetryingMessageHandlerWrapper) t)
+			.anyMatch(t -> t.getWrappedHandler() == handler);
 	}
 
 	@Override
@@ -70,10 +71,11 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 
 	@Override
 	public boolean unsubscribe(@Nonnull MessageHandler handler) {
-		Optional<RetryingMessageHandlerWrapper> match = getSubscribers().stream()
-				.map(t -> (RetryingMessageHandlerWrapper) t)
-				.filter(t -> t.getWrappedHandler() == handler)
-				.findFirst();
+		Optional<RetryingMessageHandlerWrapper> match = getSubscribers()
+			.stream()
+			.map(t -> (RetryingMessageHandlerWrapper) t)
+			.filter(t -> t.getWrappedHandler() == handler)
+			.findFirst();
 		match.ifPresent(super::unsubscribe);
 		return match.isPresent();
 	}

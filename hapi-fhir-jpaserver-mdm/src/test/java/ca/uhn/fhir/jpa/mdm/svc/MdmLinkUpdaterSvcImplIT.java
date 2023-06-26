@@ -45,6 +45,8 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	@Autowired
 	private MessageHelper myMessageHelper;
 
+
+
 	@Test
 	void testUpdateLinkToMatchWhenAnotherLinkToDifferentGoldenExistsMustFail() throws Exception {
 		// create Patient A -> MATCH GR A
@@ -56,20 +58,17 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient goldenB = getGoldenFor(patientB);
 
 		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B and
-		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches(List.of(goldenA, goldenB));
+		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
 
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
 		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
 		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
 
 		// update POSSIBLE_MATCH Patient C -> GR B to MATCH (should throw exception)
-		InvalidRequestException thrown = assertThrows(
-				InvalidRequestException.class,
-				() -> myMdmLinkUpdaterSvc.updateLink(
-						goldenB, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext));
+		InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
+			() -> myMdmLinkUpdaterSvc.updateLink(goldenB, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext));
 
-		String expectedExceptionMessage =
-				Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
+		String expectedExceptionMessage = Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
 		assertEquals(expectedExceptionMessage, thrown.getMessage());
 	}
 
@@ -84,7 +83,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient goldenB = getGoldenFor(patientB);
 
 		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B
-		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches(List.of(goldenA, goldenB));
+		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
 
 		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
@@ -97,15 +96,11 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	private Patient createPatientFromJsonInputFileWithPossibleMatches(List<Patient> theGoldens) throws Exception {
 		Patient patient = createPatientFromJsonInputFile(Patient_C_JSON_PATH, false);
 		for (Patient golden : theGoldens) {
-			myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-					golden,
-					patient,
-					MdmMatchOutcome.POSSIBLE_MATCH,
-					MdmLinkSourceEnum.AUTO,
-					new MdmTransactionContext());
+			myMdmLinkDaoSvc.createOrUpdateLinkEntity(golden, patient, MdmMatchOutcome.POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, new MdmTransactionContext());
 		}
 		return patient;
 	}
+
 
 	private MdmTransactionContext getPatientUpdateLinkContext() {
 		MdmTransactionContext ctx = new MdmTransactionContext();
@@ -117,17 +112,17 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	private Patient getGoldenFor(Patient thePatient) {
 		Optional<? extends IMdmLink> patientALink = myMdmLinkDaoSvc.findMdmLinkBySource(thePatient);
 		assertTrue(patientALink.isPresent());
-		Patient golden = (Patient) myMdmResourceDaoSvc.readGoldenResourceByPid(
-				patientALink.get().getGoldenResourcePersistenceId(), "Patient");
+		Patient golden = (Patient) myMdmResourceDaoSvc.readGoldenResourceByPid(patientALink.get().getGoldenResourcePersistenceId(), "Patient");
 		assertNotNull(golden);
 		return golden;
 	}
 
-	private Patient createPatientFromJsonInputFile(String thePath) throws Exception {
+
+	private Patient createPatientFromJsonInputFile(String thePath)  throws Exception {
 		return createPatientFromJsonInputFile(thePath, true);
 	}
 
-	private Patient createPatientFromJsonInputFile(String thePath, boolean theCreateGolden) throws Exception {
+	private Patient createPatientFromJsonInputFile(String thePath, boolean theCreateGolden)  throws Exception {
 		File jsonInputUrl = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + thePath);
 		String jsonPatient = Files.readString(Paths.get(jsonInputUrl.toURI()), StandardCharsets.UTF_8);
 

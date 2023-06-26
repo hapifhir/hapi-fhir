@@ -131,10 +131,10 @@ import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -144,355 +144,255 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
-
 	@Autowired
 	protected IInstanceReindexService myInstanceReindexService;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	protected IFhirResourceDao<ClinicalUseDefinition> myClinicalUseDefinitionDao;
-
 	@Autowired
 	protected IFhirResourceDao<ObservationDefinition> myObservationDefinitionDao;
-
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
-
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
-
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
-
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoR5")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
-
 	@Autowired
 	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
-
 	@Autowired
 	protected ApplicationContext myAppCtx;
-
 	@Autowired
 	@Qualifier("myAppointmentDaoR5")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
-
 	@Autowired
 	@Qualifier("myAuditEventDaoR5")
 	protected IFhirResourceDao<AuditEvent> myAuditEventDao;
-
 	@Autowired
 	@Qualifier("myBundleDaoR5")
 	protected IFhirResourceDao<Bundle> myBundleDao;
-
 	@Autowired
 	@Qualifier("myCommunicationDaoR5")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
-
 	@Autowired
 	@Qualifier("myCommunicationRequestDaoR5")
 	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
-
 	@Autowired
 	@Qualifier("myCarePlanDaoR5")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
-
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
-
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR5")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConceptMapDaoR5")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
-
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
-
 	@Autowired
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
-
 	@Autowired
 	@Qualifier("myConditionDaoR5")
 	protected IFhirResourceDao<Condition> myConditionDao;
-
 	@Autowired
 	@Qualifier("myDeviceDaoR5")
 	protected IFhirResourceDao<Device> myDeviceDao;
-
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR5")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-
 	@Autowired
 	@Qualifier("myEncounterDaoR5")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
 	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	protected FhirContext myFhirCtx;
-
 	@Autowired
 	@Qualifier("myGroupDaoR5")
 	protected IFhirResourceDao<Group> myGroupDao;
-
 	@Autowired
 	@Qualifier("myMolecularSequenceDaoR5")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
-
 	@Autowired
 	@Qualifier("myImmunizationDaoR5")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
-
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoR5")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
-
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR5")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
-
 	@Autowired
 	@Qualifier("myLocationDaoR5")
 	protected IFhirResourceDao<Location> myLocationDao;
-
 	@Autowired
 	@Qualifier("myMedicationAdministrationDaoR5")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
-
 	@Autowired
 	@Qualifier("myMedicationDaoR5")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-
 	@Autowired
 	@Qualifier("myMedicationRequestDaoR5")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
-
 	@Autowired
 	@Qualifier("myProcedureDaoR5")
 	protected IFhirResourceDao<Procedure> myProcedureDao;
-
 	@Autowired
 	@Qualifier("myNamingSystemDaoR5")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-
 	@Autowired
 	@Qualifier("myChargeItemDaoR5")
 	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
-
 	@Autowired
 	@Qualifier("myObservationDaoR5")
 	protected IFhirResourceDao<Observation> myObservationDao;
-
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoR5")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
-
 	@Autowired
 	@Qualifier("myOrganizationDaoR5")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
-
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
-
 	@Autowired
 	@Qualifier("myBinaryDaoR5")
 	protected IFhirResourceDao<Binary> myBinaryDao;
-
 	@Autowired
 	@Qualifier("myPatientDaoR5")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-
 	@Autowired
 	@Qualifier("myCoverageDaoR5")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
-
 	@Autowired
 	@Qualifier("myPractitionerDaoR5")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
-
 	@Autowired
 	@Qualifier("myPractitionerRoleDaoR5")
 	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
-
 	@Autowired
 	@Qualifier("myServiceRequestDaoR5")
 	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR5")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoR5")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-
 	@Autowired
 	@Qualifier("myResourceProvidersR5")
 	protected ResourceProviderFactory myResourceProviders;
-
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
-
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
-
 	@Autowired(required = false)
 	protected ISearchDao mySearchEntityDao;
-
 	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
-
 	@Autowired
 	@Qualifier("mySearchParameterDaoR5")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
-
 	@Autowired
 	protected SearchParamRegistryImpl mySearchParamRegistry;
-
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
-
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR5")
 	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConsentDaoR5")
 	protected IFhirResourceDao<Consent> myConsentDao;
-
 	@Autowired
 	@Qualifier("mySubscriptionDaoR5")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-
 	@Autowired
 	@Qualifier("mySubstanceDaoR5")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
-
 	@Autowired
 	@Qualifier("mySystemDaoR5")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
-
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
-
 	@Autowired
 	@Qualifier("mySystemProviderR5")
 	protected JpaSystemProvider mySystemProvider;
-
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
-
 	@Autowired
 	@Qualifier("myTaskDaoR5")
 	protected IFhirResourceDao<Task> myTaskDao;
-
 	@Autowired
 	protected ITermReadSvc myTermSvc;
-
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
-
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
-
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
-
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
-
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
-
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
-
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
-
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-
 	protected IServerInterceptor myInterceptor;
-
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
-
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChain;
-
 	@RegisterExtension
-	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
-			new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
+	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
 
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
 
@@ -516,12 +416,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach()
 	public void afterCleanupDao() {
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(
-				new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setExpireSearchResultsAfterMillis(
-				new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
@@ -543,15 +440,15 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected void afterResetInterceptors() {
 		super.afterResetInterceptors();
-		//		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 
-		//		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
-		//		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
+//		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+//		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach
@@ -564,13 +461,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(
-				myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataSchedulerHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach
@@ -597,4 +488,5 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChain.invalidateCaches();
 	}
+
 }

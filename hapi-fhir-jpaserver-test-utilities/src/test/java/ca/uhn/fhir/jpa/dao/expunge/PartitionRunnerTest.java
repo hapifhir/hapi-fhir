@@ -71,11 +71,11 @@ public class PartitionRunnerTest {
 		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
-		PartitionCall partitionCall =
-				(PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
+		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
 	}
+
 
 	@Test
 	public void twoItems() throws InterruptedException {
@@ -84,8 +84,7 @@ public class PartitionRunnerTest {
 		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
-		PartitionCall partitionCall =
-				(PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
+		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals("main", partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
 	}
@@ -164,9 +163,9 @@ public class PartitionRunnerTest {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this)
-					.append("myThreadName", threadName)
-					.append("mySize", size)
-					.toString();
+				.append("myThreadName", threadName)
+				.append("mySize", size)
+				.toString();
 		}
 	}
 }

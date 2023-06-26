@@ -38,9 +38,9 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -71,41 +71,17 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		myValueSetUrl = theValueSetUrl;
 	}
 
+
 	@Override
-	protected AuthorizationInterceptor.Verdict applyRuleLogic(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			Set<AuthorizationFlagsEnum> theFlags,
-			FhirContext theFhirContext,
-			RuleTarget theRuleTarget,
-			IRuleApplier theRuleApplier) {
+	protected AuthorizationInterceptor.Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
 		// Sanity check
 		Validate.isTrue(theInputResource == null || theOutputResource == null);
 
 		if (theInputResource != null) {
-			return applyRuleLogic(
-					theFhirContext,
-					theRequestDetails,
-					theInputResource,
-					theOperation,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
+			return applyRuleLogic(theFhirContext, theRequestDetails, theInputResource, theOperation, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		}
 		if (theOutputResource != null) {
-			return applyRuleLogic(
-					theFhirContext,
-					theRequestDetails,
-					theOutputResource,
-					theOperation,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
+			return applyRuleLogic(theFhirContext, theRequestDetails, theOutputResource, theOperation, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		}
 
 		// No resource present
@@ -116,15 +92,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		return null;
 	}
 
-	private AuthorizationInterceptor.Verdict applyRuleLogic(
-			FhirContext theFhirContext,
-			RequestDetails theRequestDetails,
-			IBaseResource theResource,
-			RestOperationTypeEnum theOperation,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			IRuleApplier theRuleApplier) {
+	private AuthorizationInterceptor.Verdict applyRuleLogic(FhirContext theFhirContext, RequestDetails theRequestDetails, IBaseResource theResource, RestOperationTypeEnum theOperation, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		IValidationSupport validationSupport = theRuleApplier.getValidationSupport();
 		if (validationSupport == null) {
 			validationSupport = theFhirContext.getValidationSupport();
@@ -135,46 +103,27 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		boolean wantCode = myWantCode;
 
 		ISearchParamRegistry searchParamRegistry = null;
-		CodeMatchCount codeMatchCount = countMatchingCodesInValueSetForSearchParameter(
-				theResource,
-				validationSupport,
-				searchParamRegistry,
-				wantCode,
-				mySearchParameterName,
-				myValueSetUrl,
-				troubleshootingLog,
-				operationDescription);
+		CodeMatchCount codeMatchCount = countMatchingCodesInValueSetForSearchParameter(theResource, validationSupport, searchParamRegistry, wantCode, mySearchParameterName, myValueSetUrl, troubleshootingLog, operationDescription);
 
 		if (codeMatchCount.isAtLeastOneUnableToValidate()) {
-			troubleshootingLog.warn(
-					"ValueSet {} could not be validated by terminology service - Assuming DENY", myValueSetUrl);
+			troubleshootingLog
+				.warn("ValueSet {} could not be validated by terminology service - Assuming DENY", myValueSetUrl);
 			return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 		}
 
 		if (myWantCode && codeMatchCount.getMatchingCodeCount() > 0) {
-			return newVerdict(
-					theOperation,
-					theRequestDetails,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		} else if (!myWantCode) {
 			boolean notFound = getMode() == PolicyEnum.ALLOW && codeMatchCount.getMatchingCodeCount() == 0;
-			boolean othersFound = getMode() == PolicyEnum.DENY
-					&& codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
+			boolean othersFound = getMode() == PolicyEnum.DENY && codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
 			if (notFound || othersFound) {
-				AuthorizationInterceptor.Verdict verdict = newVerdict(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						theRuleApplier);
+				AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				if (notFound) {
-					troubleshootingLog.debug("Code was not found in VS - Verdict: {}", verdict);
+					troubleshootingLog
+						.debug("Code was not found in VS - Verdict: {}", verdict);
 				} else {
-					troubleshootingLog.debug("Code(s) found that are not in VS - Verdict: {}", verdict);
+					troubleshootingLog
+						.debug("Code(s) found that are not in VS - Verdict: {}", verdict);
 				}
 				return verdict;
 			}
@@ -196,21 +145,8 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	 * @param theOperationDescription   A description of the operation being peformed (for logging)
 	 */
 	@Nonnull
-	static CodeMatchCount countMatchingCodesInValueSetForSearchParameter(
-			IBaseResource theResource,
-			IValidationSupport theValidationSupport,
-			ISearchParamRegistry theSearchParamRegistry,
-			boolean theReturnOnFirstMatch,
-			String theSearchParameterName,
-			String theValueSetUrl,
-			Logger theTroubleshootingLog,
-			String theOperationDescription) {
-		theTroubleshootingLog.debug(
-				"Applying {} {}:{} for valueSet: {}",
-				theOperationDescription,
-				theSearchParameterName,
-				theReturnOnFirstMatch ? "in" : "not-in",
-				theValueSetUrl);
+	static CodeMatchCount countMatchingCodesInValueSetForSearchParameter(IBaseResource theResource, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, boolean theReturnOnFirstMatch, String theSearchParameterName, String theValueSetUrl, Logger theTroubleshootingLog, String theOperationDescription) {
+		theTroubleshootingLog.debug("Applying {} {}:{} for valueSet: {}", theOperationDescription, theSearchParameterName, theReturnOnFirstMatch ? "in" : "not-in", theValueSetUrl);
 
 		FhirContext fhirContext = theValidationSupport.getFhirContext();
 		FhirTerser terser = fhirContext.newTerser();
@@ -220,58 +156,43 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		RuntimeResourceDefinition resourceDefinition = fhirContext.getResourceDefinition(theResource);
 		RuntimeSearchParam searchParameter = resourceDefinition.getSearchParam(theSearchParameterName);
 		if (searchParameter == null) {
-			throw new InternalErrorException(Msg.code(2025) + "Unknown SearchParameter for resource "
-					+ resourceDefinition.getName() + ": " + theSearchParameterName);
+			throw new InternalErrorException(Msg.code(2025) + "Unknown SearchParameter for resource " + resourceDefinition.getName() + ": " + theSearchParameterName);
 		}
 
 		List<String> paths = searchParameter.getPathsSplitForResourceType(resourceDefinition.getName());
 
 		CodeMatchCount codeMatchCount = new CodeMatchCount();
 		for (String nextPath : paths) {
-			List<ICompositeType> foundCodeableConcepts =
-					fhirContext.newFhirPath().evaluate(theResource, nextPath, ICompositeType.class);
+			List<ICompositeType> foundCodeableConcepts = fhirContext.newFhirPath().evaluate(theResource, nextPath, ICompositeType.class);
 			for (ICompositeType nextCodeableConcept : foundCodeableConcepts) {
 				for (IBase nextCoding : terser.getValues(nextCodeableConcept, "coding")) {
 					String system = terser.getSinglePrimitiveValueOrNull(nextCoding, "system");
 					String code = terser.getSinglePrimitiveValueOrNull(nextCoding, "code");
 					if (isNotBlank(system) && isNotBlank(code)) {
-						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(
-								validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
+						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
 						if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
 								codeMatchCount.addMatchingCode();
-								theTroubleshootingLog.debug(
-										"Code {}#{} was found in ValueSet[{}] - {}",
-										system,
-										code,
-										theValueSetUrl,
-										validateCodeResult.getMessage());
+								theTroubleshootingLog.debug("Code {}#{} was found in ValueSet[{}] - {}", system, code, theValueSetUrl, validateCodeResult.getMessage());
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
 							} else {
 								codeMatchCount.addNonMatchingCode();
-								theTroubleshootingLog.debug(
-										"Code {}#{} was not found in ValueSet[{}]: {}",
-										system,
-										code,
-										theValueSetUrl,
-										validateCodeResult.getMessage());
+								theTroubleshootingLog.debug("Code {}#{} was not found in ValueSet[{}]: {}", system, code, theValueSetUrl, validateCodeResult.getMessage());
 							}
 						} else {
-							theTroubleshootingLog.debug(
-									"Terminology service was unable to validate code {}#{} in ValueSet[{}] - No service was able to handle this request",
-									system,
-									code,
-									theValueSetUrl);
+							theTroubleshootingLog.debug("Terminology service was unable to validate code {}#{} in ValueSet[{}] - No service was able to handle this request", system, code, theValueSetUrl);
 							codeMatchCount.addUnableToValidate();
 						}
 					}
 				}
 			}
+
 		}
 		return codeMatchCount;
 	}
+
 
 	static class CodeMatchCount {
 
@@ -304,4 +225,5 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			return myOverallCodeCount;
 		}
 	}
+
 }

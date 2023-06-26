@@ -84,8 +84,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -93,23 +91,20 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ExpungeEverythingService implements IExpungeEverythingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeEverythingService.class);
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
 	@Autowired
 	private HapiTransactionService myTxService;
-
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -122,126 +117,76 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
-				.add(AtomicInteger.class, counter)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		CompositeInterceptorBroadcaster.doCallHooks(
-				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+			.add(AtomicInteger.class, counter)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPUNGE);
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPUNGE);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
 
-		myTxService
-				.withRequest(theRequest)
-				.withPropagation(propagation)
-				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> {
-					counter.addAndGet(doExpungeEverythingQuery(
-							"UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
-				});
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, NpmPackageVersionEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, NpmPackageEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, SearchParamPresentEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobFileEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobEntity.class, requestPartitionId));
+		myTxService.withRequest(theRequest).withPropagation(propagation).withRequestPartitionId(requestPartitionId).execute(() -> {
+			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
+		});
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, NpmPackageVersionResourceEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, NpmPackageVersionEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, NpmPackageEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SearchParamPresentEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobFileEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, BulkImportJobEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ForcedId.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamDate.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamNumber.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamQuantity.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamQuantityNormalized.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamString.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamToken.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamUri.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedSearchParamCoords.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedComboStringUnique.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceIndexedComboTokenNonUnique.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamDate.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamNumber.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamQuantity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamQuantityNormalized.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamString.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamToken.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamUri.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedSearchParamCoords.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedComboStringUnique.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceIndexedComboTokenNonUnique.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceLink.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SearchResult.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SearchInclude.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, TermValueSetConceptDesignation.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, TermValueSetConcept.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermValueSetConceptDesignation.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermValueSetConcept.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermValueSet.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, TermConceptParentChildLink.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, TermConceptMapGroupElementTarget.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, TermConceptMapGroupElement.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, TermConceptMapGroup.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptParentChildLink.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptMapGroupElementTarget.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptMapGroupElement.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptMapGroup.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptMap.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, TermConceptProperty.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, TermConceptDesignation.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptProperty.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptDesignation.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConcept.class, requestPartitionId));
-		myTxService
-				.withRequest(theRequest)
-				.withPropagation(propagation)
-				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> {
-					for (TermCodeSystem next : myEntityManager
-							.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class)
-							.getResultList()) {
-						next.setCurrentVersion(null);
-						myEntityManager.merge(next);
-					}
-				});
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystemVersion.class, requestPartitionId));
+		myTxService.withRequest(theRequest).withPropagation(propagation).withRequestPartitionId(requestPartitionId).execute(() -> {
+			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
+				next.setCurrentVersion(null);
+				myEntityManager.merge(next);
+			}
+		});
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystemVersion.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystem.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, SubscriptionTable.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTag.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, SubscriptionTable.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTag.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceTag.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TagDefinition.class, requestPartitionId));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(
-				theRequest, ResourceHistoryProvenanceEntity.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTable.class, requestPartitionId));
-		counter.addAndGet(
-				expungeEverythingByTypeWithoutPurging(theRequest, ResourceSearchUrlEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryProvenanceEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTable.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceSearchUrlEntity.class, requestPartitionId));
 		int counterBefore = counter.get();
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceTable.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, PartitionEntity.class, requestPartitionId));
 
 		deletedResourceEntityCount = counter.get() - counterBefore;
 
-		myTxService
-				.withRequest(theRequest)
-				.withPropagation(propagation)
-				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> {
-					counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
-				});
+		myTxService.withRequest(theRequest).withPropagation(propagation).withRequestPartitionId(requestPartitionId).execute(() -> {
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
+		});
 
 		purgeAllCaches();
 
@@ -257,28 +202,23 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		myMemoryCacheService.invalidateAllCaches();
 	}
 
-	private int expungeEverythingByTypeWithoutPurging(
-			RequestDetails theRequest, Class<?> theEntityType, RequestPartitionId theRequestPartitionId) {
+	private int expungeEverythingByTypeWithoutPurging(RequestDetails theRequest, Class<?> theEntityType, RequestPartitionId theRequestPartitionId) {
 		int outcome = 0;
 		while (true) {
 			StopWatch sw = new StopWatch();
 
-			int count = myTxService
-					.withRequest(theRequest)
-					.withPropagation(Propagation.REQUIRES_NEW)
-					.withRequestPartitionId(theRequestPartitionId)
-					.execute(() -> {
-						CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-						CriteriaQuery<?> cq = cb.createQuery(theEntityType);
-						cq.from(theEntityType);
-						TypedQuery<?> query = myEntityManager.createQuery(cq);
-						query.setMaxResults(1000);
-						List<?> results = query.getResultList();
-						for (Object result : results) {
-							myEntityManager.remove(result);
-						}
-						return results.size();
-					});
+			int count = myTxService.withRequest(theRequest).withPropagation(Propagation.REQUIRES_NEW).withRequestPartitionId(theRequestPartitionId).execute(() -> {
+				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+				CriteriaQuery<?> cq = cb.createQuery(theEntityType);
+				cq.from(theEntityType);
+				TypedQuery<?> query = myEntityManager.createQuery(cq);
+				query.setMaxResults(1000);
+				List<?> results = query.getResultList();
+				for (Object result : results) {
+					myEntityManager.remove(result);
+				}
+				return results.size();
+			});
 
 			outcome += count;
 			if (count == 0) {

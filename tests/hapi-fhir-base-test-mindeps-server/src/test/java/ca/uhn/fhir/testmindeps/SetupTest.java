@@ -11,4 +11,5 @@ public class SetupTest {
 	public void testValidateEnvironment() throws ClassNotFoundException {
 		Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
 	}
+	
 }

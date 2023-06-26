@@ -60,18 +60,14 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryData() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_XML
-						+ Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(),
-				status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -80,19 +76,17 @@ public class SummaryParamDstu2Test {
 		assertEquals(SummaryEnum.DATA, ourLastSummary);
 	}
 
+
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(),
-				status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, not(containsString("<Medic")));
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
@@ -102,17 +96,14 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet(
-				"http://localhost:" + ourPort + "/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(),
-				status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, not(containsString("<Patien")));
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
@@ -122,18 +113,14 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_XML
-						+ Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(),
-				status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent, not(containsString("<Bundle")));
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
@@ -144,8 +131,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryCount() throws Exception {
-		HttpGet httpGet = new HttpGet(
-				"http://localhost:" + ourPort + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -162,8 +148,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.DATA.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.DATA.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -195,8 +180,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TEXT.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -213,8 +197,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationOrder?_summary="
-				+ SummaryEnum.TEXT.getCode() + "&_pretty=true");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationOrder?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -230,8 +213,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextMulti() throws Exception {
-		HttpGet httpGet = new HttpGet(
-				"http://localhost:" + ourPort + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -248,8 +230,7 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTrue() throws Exception {
-		HttpGet httpGet =
-				new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TRUE.getCode());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=" + SummaryEnum.TRUE.getCode());
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -296,6 +277,7 @@ public class SummaryParamDstu2Test {
 		public List<MedicationOrder> read() {
 			return Arrays.asList(read(new IdDt("999")));
 		}
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -337,6 +319,7 @@ public class SummaryParamDstu2Test {
 			patient.setMaritalStatus(MaritalStatusCodesEnum.D);
 			return patient;
 		}
+
 	}
 
 	@AfterAll
@@ -361,10 +344,11 @@ public class SummaryParamDstu2Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

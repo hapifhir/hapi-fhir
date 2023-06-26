@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -25,10 +26,8 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 
 	@Autowired
 	IInterceptorService myInterceptorService;
-
 	@Autowired
-	IMdmStorageInterceptor myMdmStorageInterceptor;
-
+    IMdmStorageInterceptor myMdmStorageInterceptor;
 	private ResourceTable myTargetEntity;
 	private ResourceTable mySourceEntity;
 	private IdDt myTargetId;
@@ -50,6 +49,8 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		mdmLink.setSourcePid(myTargetEntity.getId());
 		saveLink(mdmLink);
 	}
+
+
 
 	@Test
 	public void testUninterceptedDeleteRemovesMdmReference() {
@@ -74,4 +75,5 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	public void afterUnregisterInterceptor() {
 		myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
 	}
+
 }

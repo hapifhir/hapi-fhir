@@ -45,4 +45,5 @@ public class UrlPathTokenizer {
 	public String nextTokenUnescapedAndSanitized() {
 		return UrlUtil.sanitizeUrlPart(UrlUtil.unescape(myTok.nextToken()));
 	}
+
 }

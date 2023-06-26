@@ -24,6 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * This annotation should be added to any {@link ca.uhn.fhir.model.api.IModelJson}
  * model fields
@@ -35,4 +36,5 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface PasswordField {}
+public @interface PasswordField {
+}

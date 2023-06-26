@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 /**
  * This Represents an <b>HTTP 413 Payload Too Large</b> response, which means the request body
  * was too big for the server to accept
- *
+ * 
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
@@ -53,4 +53,5 @@ public class PayloadTooLargeException extends BaseServerResponseException {
 	public PayloadTooLargeException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
+
 }

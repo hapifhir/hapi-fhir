@@ -11,32 +11,33 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.Conversions.replace;
 
 public class XmlUtilDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private Patient myPatient;
-
+	
 	@AfterEach
 	public void after() {
 		XmlUtil.setThrowExceptionForUnitTest(null);
 	}
-
+	
 	@BeforeEach
 	public void before() {
 		myPatient = new Patient();
 		myPatient.setId("1");
 	}
-
+	
 	@Test
 	public void testParseMalformed() {
 		try {
@@ -50,7 +51,7 @@ public class XmlUtilDstu3Test {
 	@Test
 	public void testXmlFactoryThrowsXmlStreamException() {
 		XmlUtil.setThrowExceptionForUnitTest(new XMLStreamException("FOO"));
-
+		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
 			fail();
@@ -68,7 +69,7 @@ public class XmlUtilDstu3Test {
 	@Test
 	public void testXmlFactoryThrowsFactoryConfigurationError() {
 		XmlUtil.setThrowExceptionForUnitTest(new FactoryConfigurationError("FOO"));
-
+		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
 			fail();
@@ -81,13 +82,16 @@ public class XmlUtilDstu3Test {
 	public void testEncodePrettyPrint() throws IOException, SAXException, TransformerException {
 		String input = "<document><tag id=\"1\"/></document>";
 		Document parsed = XmlUtil.parseDocument(input);
-		String output = XmlUtil.encodeDocument(parsed, true).replace("\r\n", "\n");
+		String output = XmlUtil.encodeDocument(parsed, true)
+			.replace("\r\n", "\n");
 		int initialLen;
 		do {
 			initialLen = output.length();
 			output = output.replace("\n ", "\n");
 		} while (output.length() != initialLen);
-		assertEquals("<document>\n" + "<tag id=\"1\"/>\n" + "</document>\n", output);
+		assertEquals("<document>\n" +
+			"<tag id=\"1\"/>\n" +
+			"</document>\n", output);
 	}
 
 	@Test
@@ -102,4 +106,5 @@ public class XmlUtilDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+	
 }

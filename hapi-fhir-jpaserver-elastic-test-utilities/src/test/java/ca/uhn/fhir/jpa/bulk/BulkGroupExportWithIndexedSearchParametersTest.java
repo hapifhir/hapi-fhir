@@ -37,26 +37,20 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(
-		classes = {
-			TestR4Config.class
-			// pick up elastic or lucene engine:
-			,
-			TestHSearchAddInConfig.LuceneFilesystem.class
-		})
+@ContextConfiguration(classes = {
+	 TestR4Config.class
+	// pick up elastic or lucene engine:
+	,TestHSearchAddInConfig.LuceneFilesystem.class
+})
 public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-
-	@Autowired
-	private IBatch2JobRunner myJobRunner;
-
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-
+	@Autowired private IBatch2JobRunner myJobRunner;
+	@Autowired private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
+
 
 	@BeforeEach
 	void setUp() {
@@ -68,11 +62,11 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
+
 	@Test
 	public void groupBulkExportWithIndexedSearchParametersTest() throws Exception {
 		// Create Group and associated resources from json input
-		File jsonInputUrl = ResourceUtils.getFile(
-				ResourceUtils.CLASSPATH_URL_PREFIX + "bulk-group-export/bundle-group-upload.json");
+		File jsonInputUrl = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "bulk-group-export/bundle-group-upload.json");
 		String jsonBundle = Files.readString(Paths.get(jsonInputUrl.toURI()), StandardCharsets.UTF_8);
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, jsonBundle);
 		mySystemDao.transaction(mySrd, inputBundle);
@@ -85,35 +79,31 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BulkExportJobResults jobResults = getBulkExportJobResults(options);
-		assertThat(
-				jobResults.getResourceTypeToBinaryIds().keySet(),
-				containsInAnyOrder("Patient", "Observation", "Group"));
+		assertThat(jobResults.getResourceTypeToBinaryIds().keySet(), containsInAnyOrder("Patient", "Observation", "Group"));
 	}
 
 	private BulkExportJobResults getBulkExportJobResults(BulkDataExportOptions theOptions) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(
-				mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() ->
-				myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
-		return JsonUtil.deserialize(report, BulkExportJobResults.class);
+		return  JsonUtil.deserialize(report, BulkExportJobResults.class);
 	}
 
-	@Override
-	protected FhirContext getFhirContext() {
-		return myCtx;
-	}
 
 	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
-	}
+	protected FhirContext getFhirContext() { return myCtx; }
+
+	@Override
+	protected PlatformTransactionManager getTxManager() { return myTxManager; }
+
+
 }
+

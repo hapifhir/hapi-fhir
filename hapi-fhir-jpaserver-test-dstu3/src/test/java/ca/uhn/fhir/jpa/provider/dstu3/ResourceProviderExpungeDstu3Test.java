@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -100,6 +101,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
+
 	}
 
 	@BeforeEach
@@ -133,10 +135,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		p.addName().setFamily("FOO");
 		myPatientDao.update(p).getId();
 
-		myPatientDao.expunge(
-				myTwoVersionPatientId.toUnqualifiedVersionless(),
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true),
-				null);
+		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -156,16 +157,12 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeInstanceVersionCurrentVersion() {
 
 		try {
-			myPatientDao.expunge(
-					myTwoVersionPatientId.withVersion("2"),
-					new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true),
-					null);
+			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
+				.setExpungeDeletedResources(true)
+				.setExpungeOldVersions(true), null);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(
-					Msg.code(969)
-							+ "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version",
-					e.getMessage());
+			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}
 	}
 
@@ -178,10 +175,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		p.addName().setFamily("FOO");
 		myPatientDao.update(p).getId();
 
-		myPatientDao.expunge(
-				myTwoVersionPatientId.withVersion("2"),
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true),
-				null);
+		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -199,7 +195,8 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@Test
 	public void testExpungeSystemEverything() {
-		mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true), null);
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -217,8 +214,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@Test
 	public void testExpungeSystemOldVersionsAndDeleted() {
-		mySystemDao.expunge(
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), null);
+		mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -235,8 +233,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@Test
 	public void testExpungeTypeDeletedResources() {
-		myPatientDao.expunge(
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(false), null);
+		myPatientDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(false), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -253,8 +252,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@Test
 	public void testExpungeTypeOldVersions() {
-		myPatientDao.expunge(
-				new ExpungeOptions().setExpungeDeletedResources(false).setExpungeOldVersions(true), null);
+		myPatientDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(false)
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -272,8 +272,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
-		myPatientDao.expunge(
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), null);
+		myPatientDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -291,17 +292,13 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@Test
 	public void testExpungeLimitZero() {
 		try {
-			myPatientDao.expunge(
-					new ExpungeOptions()
-							.setExpungeDeletedResources(true)
-							.setExpungeOldVersions(true)
-							.setLimit(0),
-					null);
+			myPatientDao.expunge(new ExpungeOptions()
+				.setExpungeDeletedResources(true)
+				.setExpungeOldVersions(true)
+				.setLimit(0), null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.",
-					e.getMessage());
+			assertEquals(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
 		}
 	}
 
@@ -309,13 +306,10 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeInstanceOldVersionsAndDeletedBoundaryLimit() {
 		myPatientDao.delete(myTwoVersionPatientId);
 
-		myPatientDao.expunge(
-				myTwoVersionPatientId.toUnqualifiedVersionless(),
-				new ExpungeOptions()
-						.setExpungeDeletedResources(true)
-						.setExpungeOldVersions(true)
-						.setLimit(2),
-				null);
+		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true)
+			.setLimit(2), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -333,10 +327,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@Test
 	public void testExpungeNothing() {
 
-		myPatientDao.expunge(
-				myOneVersionPatientId.toUnqualifiedVersionless(),
-				new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true),
-				null);
+		myPatientDao.expunge(myOneVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -355,14 +348,16 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testParameters() {
 		Parameters p = new Parameters();
 		p.addParameter()
-				.setName(JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT)
-				.setValue(new IntegerType(1000));
+			.setName(JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT)
+			.setValue(new IntegerType(1000));
 		p.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 		p.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		ourLog.debug(myFhirContext.newJsonParser().encodeResourceToString(p));
 	}
+
+
 }

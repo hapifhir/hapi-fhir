@@ -32,12 +32,9 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	private ZipCollectionBuilder myFiles;
-
 	@Captor
 	private ArgumentCaptor<CustomTerminologySet> myCustomTerminologySetCaptor;
-
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
@@ -57,20 +54,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1))
-				.storeNewCodeSystemVersion(
-						mySystemCaptor.capture(),
-						myCsvCaptor.capture(),
-						any(RequestDetails.class),
-						myValueSetsCaptor.capture(),
-						myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
 		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
-		assertEquals(
-				CodeSystem.CodeSystemContentMode.NOTPRESENT,
-				mySystemCaptor.getValue().getContent());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
 		assertEquals("Example Lab Codes", mySystemCaptor.getValue().getName());
 
 		// Root code
@@ -85,6 +74,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		assertEquals("Hemoglobin", code.getChildren().get(0).getChild().getDisplay());
 		assertEquals("NEUT", code.getChildren().get(1).getChild().getCode());
 		assertEquals("Neutrophils", code.getChildren().get(1).getChild().getDisplay());
+
 	}
 
 	@Test
@@ -94,20 +84,13 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1))
-				.storeNewCodeSystemVersion(
-						mySystemCaptor.capture(),
-						myCsvCaptor.capture(),
-						any(RequestDetails.class),
-						myValueSetsCaptor.capture(),
-						myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
 		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
-		assertEquals(
-				CodeSystem.CodeSystemContentMode.NOTPRESENT,
-				mySystemCaptor.getValue().getContent());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
+
 	}
 
 	/**
@@ -120,13 +103,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1))
-				.storeNewCodeSystemVersion(
-						mySystemCaptor.capture(),
-						myCsvCaptor.capture(),
-						any(RequestDetails.class),
-						myValueSetsCaptor.capture(),
-						myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		TermConcept code;
@@ -136,6 +113,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		code = concepts.get("CHEM");
 		assertEquals("CHEM", code.getCode());
 		assertEquals("Chemistry", code.getDisplay());
+
 	}
 
 	@Test
@@ -145,14 +123,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
 		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any()))
-				.thenReturn(stats);
+		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
 
 		UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermCodeSystemStorageSvc, times(1))
-				.applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
@@ -164,21 +140,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 		// Child concepts
 		assertEquals(2, set.getRootConcepts().get(0).getChildren().size());
-		assertEquals(
-				"HB",
-				set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode());
-		assertEquals(
-				"Hemoglobin",
-				set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay());
-		assertEquals(
-				null,
-				set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
-		assertEquals(
-				"NEUT",
-				set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
-		assertEquals(
-				"Neutrophils",
-				set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
+		assertEquals("HB", set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode());
+		assertEquals("Hemoglobin", set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay());
+		assertEquals(null, set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
+		assertEquals("NEUT", set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
+		assertEquals("Neutrophils", set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
+
 	}
 
 	@Test
@@ -191,14 +158,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
 		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any()))
-				.thenReturn(stats);
+		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
 
 		UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermCodeSystemStorageSvc, times(1))
-				.applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
@@ -209,5 +174,8 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		assertEquals("Hemoglobin", set.getRootConcepts().get(1).getDisplay());
 		assertEquals("NEUT", set.getRootConcepts().get(2).getCode());
 		assertEquals("Neutrophils", set.getRootConcepts().get(2).getDisplay());
+
 	}
+
+
 }

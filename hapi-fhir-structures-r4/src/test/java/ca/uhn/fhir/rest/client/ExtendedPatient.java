@@ -1,16 +1,17 @@
 package ca.uhn.fhir.rest.client;
 
-import ca.uhn.fhir.model.api.annotation.*;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+
+import ca.uhn.fhir.model.api.annotation.*;
 
 @ResourceDef(name = "Patient", profile = ExtendedPatient.HTTP_FOO_PROFILES_PROFILE)
 public class ExtendedPatient extends Patient {
 
 	static final String HTTP_FOO_PROFILES_PROFILE = "http://foo/profiles/Profile";
-	/**
-	 *
-	 */
+  /**
+	* 
+	*/
 	private static final long serialVersionUID = 1L;
 	/**
 	 * Each extension is defined in a field. Any valid HAPI Data Type
@@ -33,4 +34,5 @@ public class ExtendedPatient extends Patient {
 	public void setPetName(StringType thePetName) {
 		myPetName = thePetName;
 	}
+
 }

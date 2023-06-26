@@ -22,14 +22,15 @@ public class ExtensionsDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+
 	@Test
 	public void testParseExtensions() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/smart-conf.xml"));
 		Conformance conf = (Conformance) ourCtx.newXmlParser().parseResource(input);
-
+		
 		RestSecurity sec = conf.getRest().get(0).getSecurity();
-		List<ExtensionDt> uris = sec.getUndeclaredExtensionsByUrl(
-				"http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
+		List<ExtensionDt> uris = sec.getUndeclaredExtensionsByUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
 		assertEquals(1, uris.size());
 	}
+	
 }

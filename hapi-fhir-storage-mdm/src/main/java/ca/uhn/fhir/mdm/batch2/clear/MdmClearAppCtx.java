@@ -36,35 +36,34 @@ public class MdmClearAppCtx {
 	public static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
 
 	@Bean(name = MDM_CLEAR_JOB_BEAN_NAME)
-	public JobDefinition<MdmClearJobParameters> mdmClearJobDefinition(
-			DaoRegistry theDaoRegistry,
-			IGoldenResourceSearchSvc theGoldenResourceSearchSvc,
-			IMdmSettings theMdmSettings) {
-		return JobDefinition.newBuilder()
-				.setJobDefinitionId(JOB_MDM_CLEAR)
-				.setJobDescription("Clear mdm links and golden resrouces")
-				.setJobDefinitionVersion(1)
-				.setParametersType(MdmClearJobParameters.class)
-				.setParametersValidator(MdmJobParametersValidator(theDaoRegistry, theMdmSettings))
-				.gatedExecution()
-				.addFirstStep(
-						"generate-ranges",
-						"Generate date ranges to Mdm Clear",
-						MdmChunkRangeJson.class,
-						mdmGenerateRangeChunksStep())
-				.addIntermediateStep(
-						"find-golden-resource-ids",
-						"Load ids of golden resources to be cleared",
-						ResourceIdListWorkChunkJson.class,
-						loadGoldenIdsStep(theGoldenResourceSearchSvc))
-				.addLastStep(
-						"remove-golden-resources-and-links", "Remove golden resources and mdm links", mdmClearStep())
-				.build();
+	public JobDefinition<MdmClearJobParameters> mdmClearJobDefinition(DaoRegistry theDaoRegistry, IGoldenResourceSearchSvc theGoldenResourceSearchSvc, IMdmSettings theMdmSettings) {
+		return JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(JOB_MDM_CLEAR)
+			.setJobDescription("Clear mdm links and golden resrouces")
+			.setJobDefinitionVersion(1)
+			.setParametersType(MdmClearJobParameters.class)
+			.setParametersValidator(MdmJobParametersValidator(theDaoRegistry, theMdmSettings))
+			.gatedExecution()
+			.addFirstStep(
+				"generate-ranges",
+				"Generate date ranges to Mdm Clear",
+				MdmChunkRangeJson.class,
+				mdmGenerateRangeChunksStep())
+			.addIntermediateStep(
+				"find-golden-resource-ids",
+				"Load ids of golden resources to be cleared",
+				ResourceIdListWorkChunkJson.class,
+				loadGoldenIdsStep(theGoldenResourceSearchSvc))
+			.addLastStep("remove-golden-resources-and-links",
+				"Remove golden resources and mdm links",
+				mdmClearStep()
+			)
+			.build();
 	}
 
 	@Bean
-	public MdmClearJobParametersValidator MdmJobParametersValidator(
-			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+	public MdmClearJobParametersValidator MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
 		return new MdmClearJobParametersValidator(theDaoRegistry, theMdmSettings);
 	}
 
@@ -82,4 +81,5 @@ public class MdmClearAppCtx {
 	public LoadGoldenIdsStep loadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
 		return new LoadGoldenIdsStep(theGoldenResourceSearchSvc);
 	}
+
 }

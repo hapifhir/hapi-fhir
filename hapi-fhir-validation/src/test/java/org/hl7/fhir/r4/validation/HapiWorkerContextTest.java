@@ -1,13 +1,13 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang.Validate;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -40,17 +40,15 @@ public class HapiWorkerContextTest extends BaseTest {
 		getResources("/r4/carin/carin/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem(t));
 		getResources("/r4/carin/uscore/codesystem/").forEach(t -> prePopulatedValidationSupport.addCodeSystem(t));
 		getResources("/r4/carin/carin/valueset/").forEach(t -> prePopulatedValidationSupport.addValueSet((ValueSet) t));
-		getResources("/r4/carin/uscore/valueset/")
-				.forEach(t -> prePopulatedValidationSupport.addValueSet((ValueSet) t));
-		getResources("/r4/carin/carin/structuredefinition/")
-				.forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
-		getResources("/r4/carin/uscore/structuredefinition/")
-				.forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
+		getResources("/r4/carin/uscore/valueset/").forEach(t -> prePopulatedValidationSupport.addValueSet((ValueSet) t));
+		getResources("/r4/carin/carin/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
+		getResources("/r4/carin/uscore/structuredefinition/").forEach(t -> prePopulatedValidationSupport.addStructureDefinition(t));
 
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
-				new DefaultProfileValidationSupport(myCtx),
-				prePopulatedValidationSupport,
-				new InMemoryTerminologyServerValidationSupport(myCtx));
+			new DefaultProfileValidationSupport(myCtx),
+			prePopulatedValidationSupport,
+			new InMemoryTerminologyServerValidationSupport(myCtx)
+		);
 		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, validationSupportChain);
 
 		ValueSet vs = new ValueSet();
@@ -76,11 +74,12 @@ public class HapiWorkerContextTest extends BaseTest {
 		outcome = workerCtx.validateCode(options, "F2", vs);
 		assertEquals(false, outcome.isOk(), outcome.getMessage());
 		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
+
 	}
 
+
 	private List<IBaseResource> getResources(String theDirectory) throws IOException {
-		ResourcePatternResolver resolver =
-				new PathMatchingResourcePatternResolver(HapiWorkerContext.class.getClassLoader());
+		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(HapiWorkerContext.class.getClassLoader());
 		List<Resource> resources;
 		String path = "classpath*:" + theDirectory + "*.json";
 		try {
@@ -101,4 +100,5 @@ public class HapiWorkerContextTest extends BaseTest {
 
 		return retVal;
 	}
+
 }

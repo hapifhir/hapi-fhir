@@ -104,8 +104,7 @@ public class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability)
-			throws SQLException {
+	public Statement createStatement(int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability) throws SQLException {
 		return myWrap.createStatement(theResultSetType, theResultSetConcurrency, theResultSetHoldability);
 	}
 
@@ -200,15 +199,12 @@ public class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public CallableStatement prepareCall(String theSql, int theResultSetType, int theResultSetConcurrency)
-			throws SQLException {
+	public CallableStatement prepareCall(String theSql, int theResultSetType, int theResultSetConcurrency) throws SQLException {
 		return myWrap.prepareCall(theSql, theResultSetType, theResultSetConcurrency);
 	}
 
 	@Override
-	public CallableStatement prepareCall(
-			String theSql, int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability)
-			throws SQLException {
+	public CallableStatement prepareCall(String theSql, int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability) throws SQLException {
 		return myWrap.prepareCall(theSql, theResultSetType, theResultSetConcurrency, theResultSetHoldability);
 	}
 
@@ -223,15 +219,12 @@ public class ConnectionWrapper implements Connection {
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String theSql, int theResultSetType, int theResultSetConcurrency)
-			throws SQLException {
+	public PreparedStatement prepareStatement(String theSql, int theResultSetType, int theResultSetConcurrency) throws SQLException {
 		return myWrap.prepareStatement(theSql, theResultSetType, theResultSetConcurrency);
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(
-			String theSql, int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability)
-			throws SQLException {
+	public PreparedStatement prepareStatement(String theSql, int theResultSetType, int theResultSetConcurrency, int theResultSetHoldability) throws SQLException {
 		return myWrap.prepareStatement(theSql, theResultSetType, theResultSetConcurrency, theResultSetHoldability);
 	}
 
@@ -325,4 +318,5 @@ public class ConnectionWrapper implements Connection {
 	public <T> T unwrap(Class<T> theIface) throws SQLException {
 		return myWrap.unwrap(theIface);
 	}
+
 }

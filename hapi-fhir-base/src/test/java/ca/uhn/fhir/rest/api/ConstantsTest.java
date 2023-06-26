@@ -8,4 +8,5 @@ public class ConstantsTest {
 	public void testConstants() {
 		new Constants();
 	}
+
 }

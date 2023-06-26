@@ -23,22 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class NpmSearchR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmSearchR4Test.class);
-
 	@Autowired
 	public IPackageInstallerSvc igInstaller;
-
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
-
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
-
 	@Autowired
 	private INpmPackageDao myPackageDao;
-
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
-
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 
@@ -54,27 +48,15 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.11.1")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.12.0")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("nictiz.fhir.nl.stu3.questionnaires")
-				.setVersion("1.0.2")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		NpmPackageSearchResultJson search = myPackageCacheManager.search(new PackageSearchSpec());
@@ -82,41 +64,25 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		assertEquals(2, search.getTotal());
 
 		assertEquals(2, search.getObjects().size());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals(
-				"Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)",
-				search.getObjects().get(0).getPackage().getDescription());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
 		assertEquals(3115, search.getObjects().get(0).getPackage().getBytes());
-		assertThat(
-				search.getObjects().get(0).getPackage().getFhirVersion().toString(),
-				search.getObjects().get(0).getPackage().getFhirVersion(),
-				Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
-		assertEquals(
-				"nictiz.fhir.nl.stu3.questionnaires",
-				search.getObjects().get(1).getPackage().getName());
-		assertEquals(
-				"Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)",
-				search.getObjects().get(1).getPackage().getDescription());
+		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
 		assertEquals("1.0.2", search.getObjects().get(1).getPackage().getVersion());
-		assertThat(
-				search.getObjects().get(1).getPackage().getFhirVersion().toString(),
-				search.getObjects().get(0).getPackage().getFhirVersion(),
-				Matchers.contains("4.0.1"));
+		assertThat(search.getObjects().get(1).getPackage().getFhirVersion().toString(), search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
+
 	}
 
 	@Test
-	public void testUninstall() {
+	public void testUninstall(){
 
 		// Arrange
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		PackageInstallationSpec spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.11.1")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 
 		// Act
 		igInstaller.install(spec);
@@ -124,7 +90,9 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 
 		// Assert
 		assertEquals(0, myPackageCacheManager.search(new PackageSearchSpec()).getTotal());
+
 	}
+
 
 	@Test
 	public void testSearchByResourceUrl() throws IOException {
@@ -132,19 +100,11 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.11.1")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.12.0")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;
@@ -160,12 +120,9 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
 		assertEquals(1, search.getObjects().size());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
-		assertEquals(
-				"Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)",
-				search.getObjects().get(0).getPackage().getDescription());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
 		// Non Matching URL
@@ -176,18 +133,16 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(0, search.getTotal());
 		assertEquals(0, search.getObjects().size());
+
 	}
+
 
 	@Test
 	public void testSearchByFhirVersion() throws IOException {
 		PackageInstallationSpec spec;
 		byte[] bytes;
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.12.0")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;
@@ -202,11 +157,8 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals(
-				"4.0.1",
-				search.getObjects().get(0).getPackage().getFhirVersion().get(0));
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("4.0.1", search.getObjects().get(0).getPackage().getFhirVersion().get(0));
 
 		// Matching FHIR version
 		myCaptureQueriesListener.clear();
@@ -217,8 +169,7 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 
 		// Partial Matching FHIR version
 		myCaptureQueriesListener.clear();
@@ -229,8 +180,7 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 
 		// Non Matching URL
 		searchSpec = new PackageSearchSpec();
@@ -240,7 +190,9 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(0, search.getTotal());
 		assertEquals(0, search.getObjects().size());
+
 	}
+
 
 	@Test
 	public void testSearchByDescription() throws IOException {
@@ -248,19 +200,11 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		byte[] bytes;
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.11.1")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
-		spec = new PackageInstallationSpec()
-				.setName("hl7.fhir.uv.shorthand")
-				.setVersion("0.12.0")
-				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-				.setPackageContents(bytes);
+		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
 		PackageSearchSpec searchSpec;
@@ -273,23 +217,17 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		search = myPackageCacheManager.search(searchSpec);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
+
 		runInTransaction(() -> {
-			ourLog.info(
-					"Versions:\n * {}",
-					myPackageVersionDao.findAll().stream()
-							.map(t -> t.toString())
-							.collect(Collectors.joining("\n * ")));
+			ourLog.info("Versions:\n * {}", myPackageVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(1, search.getTotal());
 		assertEquals(1, search.getObjects().size());
-		assertEquals(
-				"hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
 		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
-		assertEquals(
-				"Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)",
-				search.getObjects().get(0).getPackage().getDescription());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion(), Matchers.contains("4.0.1"));
 
 		// Non Matching URL
@@ -300,5 +238,7 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertEquals(0, search.getTotal());
 		assertEquals(0, search.getObjects().size());
+
 	}
+
 }

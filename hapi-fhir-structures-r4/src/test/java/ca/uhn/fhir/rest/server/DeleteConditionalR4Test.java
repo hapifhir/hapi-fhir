@@ -39,12 +39,14 @@ public class DeleteConditionalR4Test {
 	private static int ourPort;
 	private static Server ourServer;
 
+
 	@BeforeEach
 	public void before() {
 		ourLastConditionalUrl = null;
 		ourLastIdParam = null;
 		ourLastRequestWasDelete = false;
 	}
+
 
 	@Test
 	public void testSearchStillWorks() {
@@ -53,14 +55,14 @@ public class DeleteConditionalR4Test {
 		patient.addIdentifier().setValue("002");
 
 		ourHapiClient
-				.delete()
-				.resourceConditionalByType(Patient.class)
-				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS", "SOMEID"))
-				.execute();
+			.delete()
+			.resourceConditionalByType(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS", "SOMEID")).execute();
 
 		assertTrue(ourLastRequestWasDelete);
 		assertEquals(null, ourLastIdParam);
 		assertEquals("Patient?identifier=SOMESYS%7CSOMEID", ourLastConditionalUrl);
+
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -77,6 +79,7 @@ public class DeleteConditionalR4Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
 
 	@AfterAll
@@ -98,10 +101,9 @@ public class DeleteConditionalR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -110,4 +112,5 @@ public class DeleteConditionalR4Test {
 		ourHapiClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
 		ourHapiClient.registerInterceptor(new LoggingInterceptor());
 	}
+
 }

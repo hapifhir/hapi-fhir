@@ -28,8 +28,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import javax.annotation.Nullable;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
-	private static final ObjectMapper ourObjectMapper =
-			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
 	@JsonProperty("payload")
 	private ResourceDeliveryMessage myPayload;
@@ -77,7 +76,9 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
+		return new ToStringBuilder(this)
+			.append("myPayload", myPayload)
+			.toString();
 	}
 
 	public static ResourceDeliveryJsonMessage fromJson(String theJson) throws JsonProcessingException {

@@ -42,13 +42,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
@@ -65,19 +65,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	public static final int TEST_JOB_VERSION = 1;
 	public static final String FIRST_STEP_ID = "first-step";
 	public static final String LAST_STEP_ID = "last-step";
-
 	@Autowired
 	JobDefinitionRegistry myJobDefinitionRegistry;
-
 	@Autowired
 	IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	IJobMaintenanceService myJobMaintenanceService;
-
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
-
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
@@ -100,8 +95,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		super.before();
 
 		myCompletionHandler = details -> {};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(
-				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
@@ -122,14 +116,23 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// job definition
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-				.setJobDefinitionId(jobId)
-				.setJobDescription("test job")
-				.setJobDefinitionVersion(TEST_JOB_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.gatedExecution()
-				.addFirstStep(FIRST_STEP_ID, "Test first step", FirstStepOutput.class, first)
-				.addLastStep(LAST_STEP_ID, "Test last step", last)
-				.build();
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				last
+			)
+			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 
 		// start a number of jobs
@@ -174,8 +177,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	public void testFirstStepNoSink() throws InterruptedException {
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep =
-				(step, sink) -> callLatch(myFirstStepLatch, step);
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
@@ -199,8 +201,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			callLatch(myFirstStepLatch, step);
 			return RunOutcome.SUCCESS;
 		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep =
-				(step, sink) -> callLatch(myLastStepLatch, step);
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobDefId = "test-job-2";
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
@@ -231,26 +232,40 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	private void createThreeStepReductionJob(
-			String theJobId,
-			IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
-			IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep,
-			IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> theReductionsStep) {
+		String theJobId,
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
+		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep,
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> theReductionsStep
+	) {
 		// create job definition (it's the test method's name)
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-				.setJobDefinitionId(theJobId)
-				.setJobDescription("test job")
-				.setJobDefinitionVersion(TEST_JOB_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.gatedExecution()
-				.addFirstStep(FIRST_STEP_ID, "Test first step", FirstStepOutput.class, theFirstStep)
-				.addIntermediateStep("SECOND", "Second step", SecondStepOutput.class, theSecondStep)
-				.addFinalReducerStep(LAST_STEP_ID, "Test last step", ReductionStepOutput.class, theReductionsStep)
-				.build();
+			.setJobDefinitionId(theJobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				theFirstStep
+			)
+			.addIntermediateStep("SECOND",
+				"Second step",
+				SecondStepOutput.class,
+				theSecondStep)
+			.addFinalReducerStep(
+				LAST_STEP_ID,
+				"Test last step",
+				ReductionStepOutput.class,
+				theReductionsStep
+			)
+			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
+	@ValueSource(booleans = { true, false })
 	public void testJobDefinitionWithReductionStepIT(boolean theDelayReductionStepBool) throws InterruptedException {
 		// setup
 		String jobId = new Exception().getStackTrace()[0].getMethodName() + "_" + theDelayReductionStepBool;
@@ -275,51 +290,50 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 
 		// step 3
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last =
-				new IReductionStepWorker<>() {
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<>() {
 
-					private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
+			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
 
-					private final AtomicBoolean myBoolean = new AtomicBoolean();
+			private final AtomicBoolean myBoolean = new AtomicBoolean();
 
-					private final AtomicInteger mySecondGate = new AtomicInteger();
+			private final AtomicInteger mySecondGate = new AtomicInteger();
 
-					@Nonnull
-					@Override
-					public ChunkOutcome consume(
-							ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
-						myOutput.add(theChunkDetails.getData());
-						// 1 because we know 2 packets are coming.
-						// we'll fire the second maintenance run on the second packet
-						// which should cause multiple maintenance runs to run simultaneously
-						if (theDelayReductionStepBool && mySecondGate.getAndIncrement() == 1) {
-							ourLog.info("SECOND FORCED MAINTENANCE PASS FORCED");
-							myBatch2JobHelper.forceRunMaintenancePass();
-						}
-						return ChunkOutcome.SUCCESS();
-					}
+			@Nonnull
+			@Override
+			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
+				myOutput.add(theChunkDetails.getData());
+				// 1 because we know 2 packets are coming.
+				// we'll fire the second maintenance run on the second packet
+				// which should cause multiple maintenance runs to run simultaneously
+				if (theDelayReductionStepBool && mySecondGate.getAndIncrement() == 1) {
+					ourLog.info("SECOND FORCED MAINTENANCE PASS FORCED");
+					myBatch2JobHelper.forceRunMaintenancePass();
+				}
+				return ChunkOutcome.SUCCESS();
+			}
 
-					@Nonnull
-					@Override
-					public RunOutcome run(
-							@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
-							@Nonnull IJobDataSink<ReductionStepOutput> theDataSink)
-							throws JobExecutionFailedException {
-						boolean isRunAlready = myBoolean.getAndSet(true);
-						assertFalse(isRunAlready, "Reduction step should only be called once!");
+			@Nonnull
+			@Override
+			public RunOutcome run(
+				@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+				@Nonnull IJobDataSink<ReductionStepOutput> theDataSink
+			) throws JobExecutionFailedException {
+				boolean isRunAlready = myBoolean.getAndSet(true);
+				assertFalse(isRunAlready, "Reduction step should only be called once!");
 
-						complete(theStepExecutionDetails, theDataSink);
-						return RunOutcome.SUCCESS;
-					}
+				complete(theStepExecutionDetails, theDataSink);
+				return RunOutcome.SUCCESS;
+			}
 
-					private void complete(
-							@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
-							@Nonnull IJobDataSink<ReductionStepOutput> theDataSink) {
-						assertTrue(myBoolean.get());
-						theDataSink.accept(new ReductionStepOutput(myOutput));
-						callLatch(myLastStepLatch, theStepExecutionDetails);
-					}
-				};
+			private void complete(
+				@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+				@Nonnull IJobDataSink<ReductionStepOutput> theDataSink
+			) {
+				assertTrue(myBoolean.get());
+				theDataSink.accept(new ReductionStepOutput(myOutput));
+				callLatch(myLastStepLatch, theStepExecutionDetails);
+			}
+		};
 		createThreeStepReductionJob(jobId, first, second, last);
 
 		// run test
@@ -352,7 +366,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertNotNull(instance.getReport());
 
 		for (int i = 0; i < secondStepInt.get(); i++) {
-			assertTrue(instance.getReport().contains(testInfo + i));
+			assertTrue(instance.getReport().contains(
+				testInfo + i
+			));
 		}
 
 		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
@@ -372,8 +388,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			sink.accept(new FirstStepOutput());
 			return callLatch(myFirstStepLatch, step);
 		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep =
-				(step, sink) -> callLatch(myLastStepLatch, step);
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
@@ -394,6 +409,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// Now we've processed 2 chunks so we are no longer fast tracking
 		myBatch2JobHelper.assertNotFastTracking(instanceId);
 	}
+
 
 	@Test
 	public void JobExecutionFailedException_CausesInstanceFailure() {
@@ -471,23 +487,32 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// job definition
 		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-				.setJobDefinitionId(jobDefId)
-				.setJobDescription("test job")
-				.setJobDefinitionVersion(TEST_JOB_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.gatedExecution()
-				.addFirstStep(FIRST_STEP_ID, "Test first step", FirstStepOutput.class, first)
-				.addLastStep(LAST_STEP_ID, "Test last step", last)
-				.build();
+			.setJobDefinitionId(jobDefId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				last
+			)
+			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 		// test
 		JobInstanceStartRequest request = buildRequest(jobDefId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(
-				response.getInstanceId(),
-				30, // we want to wait a long time (2 min here) cause backoff is incremental
-				StatusEnum.FAILED);
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getInstanceId(),
+			30, // we want to wait a long time (2 min here) cause backoff is incremental
+			StatusEnum.FAILED
+		);
 
 		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
 
@@ -504,35 +529,44 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(
-			String theJobId,
-			IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
-			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
+	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
-				.setJobDefinitionId(theJobId)
-				.setJobDescription("test job")
-				.setJobDefinitionVersion(TEST_JOB_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.gatedExecution()
-				.addFirstStep(FIRST_STEP_ID, "Test first step", FirstStepOutput.class, theFirstStep)
-				.addLastStep(LAST_STEP_ID, "Test last step", theLastStep)
-				.completionHandler(myCompletionHandler)
-				.build();
+			.setJobDefinitionId(theJobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				theFirstStep
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				theLastStep
+			)
+			.completionHandler(myCompletionHandler)
+			.build();
 	}
 
 	static class TestJobParameters implements IModelJson {
-		TestJobParameters() {}
+		TestJobParameters() {
+		}
 	}
 
 	static class FirstStepOutput implements IModelJson {
-		FirstStepOutput() {}
+		FirstStepOutput() {
+		}
 	}
 
 	static class SecondStepOutput implements IModelJson {
 		@JsonProperty("test")
 		private String myTestValue;
 
-		SecondStepOutput() {}
+		SecondStepOutput() {
+		}
 
 		public void setValue(String theV) {
 			myTestValue = theV;

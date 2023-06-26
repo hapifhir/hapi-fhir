@@ -31,11 +31,11 @@ import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static com.google.common.base.Ascii.toLowerCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,15 +52,11 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 
 	@Autowired
 	private FhirContext myFhirContext;
-
 	private final IValidationSupport myValidationSupport;
-
 	@Autowired
 	private ValidatorResourceFetcher myValidatorResourceFetcher;
-
 	@Autowired
 	private ValidatorPolicyAdvisor myValidationPolicyAdvisor;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -184,13 +180,8 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		 * @see ValidationResultEnrichingInterceptor
 		 */
 		public FinalizedRequireValidationRule requireValidationToDeclaredProfiles() {
-			RequireValidationRule rule = new RequireValidationRule(
-					myFhirContext,
-					myType,
-					myValidationSupport,
-					myValidatorResourceFetcher,
-					myValidationPolicyAdvisor,
-					myInterceptorBroadcaster);
+			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport,
+				myValidatorResourceFetcher, myValidationPolicyAdvisor, myInterceptorBroadcaster);
 			myRules.add(rule);
 			return new FinalizedRequireValidationRule(rule);
 		}
@@ -201,6 +192,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			myRules.add(new RuleDisallowProfile(myFhirContext, myType, theProfileUrls));
 			return new FinalizedTypedRule(myType);
 		}
+
 
 		public class FinalizedRequireValidationRule extends FinalizedTypedRule {
 
@@ -221,8 +213,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			public FinalizedRequireValidationRule withBestPracticeWarningLevel(String theBestPracticeWarningLevel) {
 				BestPracticeWarningLevel level = null;
 				if (isNotBlank(theBestPracticeWarningLevel)) {
-					level = BestPracticeWarningLevel.valueOf(
-							WordUtils.capitalize(theBestPracticeWarningLevel.toLowerCase()));
+					level = BestPracticeWarningLevel.valueOf(WordUtils.capitalize(theBestPracticeWarningLevel.toLowerCase()));
 				}
 				return withBestPracticeWarningLevel(level);
 			}
@@ -236,8 +227,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * to not include any best practice notifications.
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule withBestPracticeWarningLevel(
-					BestPracticeWarningLevel bestPracticeWarningLevel) {
+			public FinalizedRequireValidationRule withBestPracticeWarningLevel(BestPracticeWarningLevel bestPracticeWarningLevel) {
 				myRule.setBestPracticeWarningLevel(bestPracticeWarningLevel);
 				return this;
 			}
@@ -293,8 +283,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * @return
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule tagOnSeverity(
-					@Nonnull String theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull String theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				ResultSeverityEnum severity = ResultSeverityEnum.fromCode(toLowerCase(theSeverity));
 				return tagOnSeverity(severity, theTagSystem, theTagCode);
 			}
@@ -309,8 +298,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * @return
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule tagOnSeverity(
-					@Nonnull ResultSeverityEnum theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				myRule.tagOnSeverity(theSeverity, theTagSystem, theTagCode);
 				return this;
 			}
@@ -374,6 +362,9 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 				myRule.getValidator().setNoExtensibleWarnings(true);
 				return this;
 			}
+
 		}
+
 	}
+
 }

@@ -38,4 +38,5 @@ public class ExtPatient extends Patient {
 	public void setModExt(IntegerType theModExt) {
 		myModExt = theModExt;
 	}
+
 }

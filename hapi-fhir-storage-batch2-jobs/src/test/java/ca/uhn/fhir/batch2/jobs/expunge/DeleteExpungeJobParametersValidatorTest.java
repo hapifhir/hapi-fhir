@@ -22,13 +22,10 @@ public class DeleteExpungeJobParametersValidatorTest {
 
 	@Mock
 	private IDeleteExpungeSvc<?> myDeleteExpungeSvc;
-
 	@Mock
 	private IUrlListValidator myUrlListValidator;
-
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	@InjectMocks
 	private DeleteExpungeJobParametersValidator mySvc;
 
@@ -63,4 +60,5 @@ public class DeleteExpungeJobParametersValidatorTest {
 		// Verify
 		assertThat(outcome, empty());
 	}
+
 }

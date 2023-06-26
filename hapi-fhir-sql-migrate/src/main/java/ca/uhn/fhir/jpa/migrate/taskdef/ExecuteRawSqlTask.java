@@ -83,6 +83,7 @@ public class ExecuteRawSqlTask extends BaseTask {
 		for (String nextSql : sqlStatements) {
 			executeSql(null, nextSql);
 		}
+
 	}
 
 	@Override

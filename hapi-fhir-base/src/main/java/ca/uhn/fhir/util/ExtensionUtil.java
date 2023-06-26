@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.util;
 
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
@@ -29,11 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 /**
  * Utility for modifying with extensions in a FHIR version-independent approach.
@@ -57,7 +58,7 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> getOrCreateExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension<?, ?> extension = getExtensionByUrl(baseHasExtensions, theUrl);
+		IBaseExtension<?,?> extension = getExtensionByUrl(baseHasExtensions, theUrl);
 		if (extension == null) {
 			extension = baseHasExtensions.addExtension();
 			extension.setUrl(theUrl);
@@ -86,7 +87,7 @@ public class ExtensionUtil {
 	 */
 	public static IBaseExtension<?, ?> addExtension(IBase theBase, String theUrl) {
 		IBaseHasExtensions baseHasExtensions = validateExtensionSupport(theBase);
-		IBaseExtension<?, ?> extension = baseHasExtensions.addExtension();
+		IBaseExtension<?,?> extension = baseHasExtensions.addExtension();
 		if (theUrl != null) {
 			extension.setUrl(theUrl);
 		}
@@ -102,16 +103,14 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void addExtension(
-			FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
-		IBaseExtension<?, ?> ext = addExtension(theBase, theUrl);
+	public static void addExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
+		IBaseExtension<?,?> ext = addExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
 	private static IBaseHasExtensions validateExtensionSupport(IBase theBase) {
 		if (!(theBase instanceof IBaseHasExtensions)) {
-			throw new IllegalArgumentException(
-					Msg.code(1747) + String.format("Expected instance that supports extensions, but got %s", theBase));
+			throw new IllegalArgumentException(Msg.code(1747) + String.format("Expected instance that supports extensions, but got %s", theBase));
 		}
 		return (IBaseHasExtensions) theBase;
 	}
@@ -160,16 +159,17 @@ public class ExtensionUtil {
 	 * @return Returns the first available extension with the specified URL, or null if such extension doesn't exist
 	 */
 	public static IBaseExtension<?, ?> getExtensionByUrl(IBase theBase, String theExtensionUrl) {
-		Predicate<IBaseExtension<?, ?>> filter;
+		Predicate<IBaseExtension<?,?>> filter;
 		if (theExtensionUrl == null) {
 			filter = (e -> true);
 		} else {
 			filter = (e -> theExtensionUrl.equals(e.getUrl()));
 		}
 
-		return getExtensionsMatchingPredicate(theBase, filter).stream()
-				.findFirst()
-				.orElse(null);
+		return getExtensionsMatchingPredicate(theBase, filter)
+			.stream()
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
@@ -178,15 +178,18 @@ public class ExtensionUtil {
 	 * and returns a list of the string version of the extension values.
 	 */
 	public static List<String> getExtensionPrimitiveValues(IBaseHasExtensions theBase, String theExtensionUrl) {
-		List<String> values = theBase.getExtension().stream()
-				.filter(t -> theExtensionUrl.equals(t.getUrl()))
-				.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
-				.map(t -> (IPrimitiveType<?>) t.getValue())
-				.map(IPrimitiveType::getValueAsString)
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toList());
+		List<String> values = theBase
+			.getExtension()
+			.stream()
+			.filter(t -> theExtensionUrl.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType<?>)
+			.map(t->(IPrimitiveType<?>)t.getValue())
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
 		return values;
 	}
+
 
 	/**
 	 * Gets all extensions that match the specified filter predicate
@@ -195,11 +198,12 @@ public class ExtensionUtil {
 	 * @param theFilter Predicate to match the extension against
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
-	public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(
-			IBase theBase, Predicate<? super IBaseExtension<?, ?>> theFilter) {
-		return validateExtensionSupport(theBase).getExtension().stream()
-				.filter(theFilter)
-				.collect(Collectors.toList());
+	public static List<IBaseExtension<?, ?>> getExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension<?,?>> theFilter) {
+		return validateExtensionSupport(theBase)
+			.getExtension()
+			.stream()
+			.filter(theFilter)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -230,10 +234,11 @@ public class ExtensionUtil {
 	 * @param theFilter Defines which extensions should be cleared
 	 * @return Returns all extension that were removed
 	 */
-	private static List<IBaseExtension<?, ?>> clearExtensionsMatchingPredicate(
-			IBase theBase, Predicate<? super IBaseExtension<?, ?>> theFilter) {
+	private static List<IBaseExtension<?, ?>> clearExtensionsMatchingPredicate(IBase theBase, Predicate<? super IBaseExtension<?,?>> theFilter) {
 		List<IBaseExtension<?, ?>> retVal = getExtensionsMatchingPredicate(theBase, theFilter);
-		validateExtensionSupport(theBase).getExtension().removeIf(theFilter);
+		validateExtensionSupport(theBase)
+			.getExtension()
+			.removeIf(theFilter);
 		return retVal;
 	}
 
@@ -245,7 +250,7 @@ public class ExtensionUtil {
 	 * @return Returns all extension with the specified URL, or an empty list if such extensions do not exist
 	 */
 	public static List<IBaseExtension<?, ?>> getExtensionsByUrl(IBaseHasExtensions theBase, String theExtensionUrl) {
-		Predicate<IBaseExtension<?, ?>> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
+		Predicate<IBaseExtension<?,?>> urlEqualityPredicate = e -> theExtensionUrl.equals(e.getUrl());
 		return getExtensionsMatchingPredicate(theBase, urlEqualityPredicate);
 	}
 
@@ -256,7 +261,7 @@ public class ExtensionUtil {
 	 * @param theValue       The value to set
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?, ?> theExtension, String theValue) {
+	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?,?> theExtension, String theValue) {
 		setExtension(theFhirContext, theExtension, "string", theValue);
 	}
 
@@ -268,8 +273,7 @@ public class ExtensionUtil {
 	 * @param theValue         The value to set
 	 * @param theFhirContext   The context containing FHIR resource definitions
 	 */
-	public static void setExtension(
-			FhirContext theFhirContext, IBaseExtension<?, ?> theExtension, String theExtensionType, Object theValue) {
+	public static void setExtension(FhirContext theFhirContext, IBaseExtension<?,?> theExtension, String theExtensionType, Object theValue) {
 		theExtension.setValue(TerserUtil.newElement(theFhirContext, theExtensionType, theValue));
 	}
 
@@ -282,7 +286,7 @@ public class ExtensionUtil {
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
 	public static void setExtensionAsString(FhirContext theFhirContext, IBase theBase, String theUrl, String theValue) {
-		IBaseExtension<?, ?> ext = getOrCreateExtension(theBase, theUrl);
+		IBaseExtension<?,?> ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValue);
 	}
 
@@ -295,9 +299,8 @@ public class ExtensionUtil {
 	 * @param theValue       Extension value
 	 * @param theFhirContext The context containing FHIR resource definitions
 	 */
-	public static void setExtension(
-			FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
-		IBaseExtension<?, ?> ext = getOrCreateExtension(theBase, theUrl);
+	public static void setExtension(FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
+		IBaseExtension<?,?> ext = getOrCreateExtension(theBase, theUrl);
 		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
@@ -308,7 +311,7 @@ public class ExtensionUtil {
 	 * @param theRightExtension : Extension to be evaluated #2
 	 * @return Result of the comparison
 	 */
-	public static boolean equals(IBaseExtension<?, ?> theLeftExtension, IBaseExtension<?, ?> theRightExtension) {
+	public static boolean equals(IBaseExtension<?,?> theLeftExtension, IBaseExtension<?,?> theRightExtension) {
 		return TerserUtil.equals(theLeftExtension, theRightExtension);
 	}
 
@@ -323,18 +326,18 @@ public class ExtensionUtil {
 	 * @param theChildExtensionUrl The child extension URL. Must not be null or blank.
 	 * @since 6.6.0
 	 */
-	public static <D, T extends IBaseExtension<T, D>> String extractChildPrimitiveExtensionValue(
-			@Nonnull IBaseExtension<T, D> theExtension, @Nonnull String theChildExtensionUrl) {
+	public static <D, T extends IBaseExtension<T, D>> String extractChildPrimitiveExtensionValue(@Nonnull IBaseExtension<T, D> theExtension, @Nonnull String theChildExtensionUrl) {
 		Validate.notNull(theExtension, "theExtension must not be null");
 		Validate.notBlank(theChildExtensionUrl, "theChildExtensionUrl must not be null or blank");
 
-		Optional<T> codeExtension = theExtension.getExtension().stream()
-				.filter(t -> theChildExtensionUrl.equals(t.getUrl()))
-				.findFirst();
+		Optional<T> codeExtension = theExtension
+			.getExtension()
+			.stream()
+			.filter(t -> theChildExtensionUrl.equals(t.getUrl()))
+			.findFirst();
 		String retVal = null;
 		if (codeExtension.isPresent() && codeExtension.get().getValue() instanceof IPrimitiveType) {
-			IPrimitiveType<?> codeValue =
-					(IPrimitiveType<?>) codeExtension.get().getValue();
+			IPrimitiveType<?> codeValue = (IPrimitiveType<?>) codeExtension.get().getValue();
 			retVal = codeValue.getValueAsString();
 		}
 		return retVal;

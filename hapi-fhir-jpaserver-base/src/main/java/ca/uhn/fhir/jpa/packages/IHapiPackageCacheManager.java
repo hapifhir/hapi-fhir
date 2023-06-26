@@ -45,6 +45,7 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 
 	List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType);
 
+
 	class PackageContents {
 
 		private byte[] myBytes;
@@ -95,4 +96,5 @@ public interface IHapiPackageCacheManager extends IPackageCacheManager {
 			return this;
 		}
 	}
+
 }

@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -49,7 +49,6 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnHashNormPrefix;
 	private final DbColumn myColumnHashIdentity;
 	private final DbColumn myColumnHashExact;
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -75,21 +74,19 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return myColumnResId;
 	}
 
-	public Condition createPredicateString(
-			IQueryParameterType theParameter,
-			String theResourceName,
-			String theSpnamePrefix,
-			RuntimeSearchParam theSearchParam,
-			StringPredicateBuilder theFrom,
-			SearchFilterParser.CompareOperation operation) {
+	public Condition createPredicateString(IQueryParameterType theParameter,
+														String theResourceName,
+														String theSpnamePrefix,
+														RuntimeSearchParam theSearchParam,
+														StringPredicateBuilder theFrom,
+														SearchFilterParser.CompareOperation operation) {
 		String rawSearchTerm;
 		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
-
+		
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			if (!id.isText()) {
-				throw new IllegalStateException(
-						Msg.code(1257) + "Trying to process a text search on a non-text token parameter");
+				throw new IllegalStateException(Msg.code(1257) + "Trying to process a text search on a non-text token parameter");
 			}
 			rawSearchTerm = id.getValue();
 		} else if (theParameter instanceof StringParam) {
@@ -97,8 +94,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
 				if (!myStorageSettings.isAllowContainsSearches()) {
-					throw new MethodNotAllowedException(
-							Msg.code(1258) + ":contains modifier is disabled on this server");
+					throw new MethodNotAllowedException(Msg.code(1258) + ":contains modifier is disabled on this server");
 				}
 			} else {
 				rawSearchTerm = theSearchParam.encode(rawSearchTerm);
@@ -111,9 +107,8 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException(Msg.code(1260) + "Parameter[" + paramName + "] has length ("
-					+ rawSearchTerm.length() + ") that is longer than maximum allowed ("
-					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException(Msg.code(1260) + "Parameter[" + paramName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+				+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
@@ -124,15 +119,16 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			// Normalized Match
 			String normalizedString = StringUtil.normalizeStringForSearchIndexing(rawSearchTerm);
 			String likeExpression;
-			if ((theParameter instanceof StringParam)
-					&& (((((StringParam) theParameter).isContains()) && (myStorageSettings.isAllowContainsSearches()))
-							|| (operation == SearchFilterParser.CompareOperation.co))) {
+			if ((theParameter instanceof StringParam) &&
+				(((((StringParam) theParameter).isContains()) &&
+					(myStorageSettings.isAllowContainsSearches())) ||
+					(operation == SearchFilterParser.CompareOperation.co))) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
-			} else if ((operation != SearchFilterParser.CompareOperation.ne)
-					&& (operation != SearchFilterParser.CompareOperation.gt)
-					&& (operation != SearchFilterParser.CompareOperation.lt)
-					&& (operation != SearchFilterParser.CompareOperation.ge)
-					&& (operation != SearchFilterParser.CompareOperation.le)) {
+			} else if ((operation != SearchFilterParser.CompareOperation.ne) &&
+				(operation != SearchFilterParser.CompareOperation.gt) &&
+				(operation != SearchFilterParser.CompareOperation.lt) &&
+				(operation != SearchFilterParser.CompareOperation.ge) &&
+				(operation != SearchFilterParser.CompareOperation.le)) {
 				if (operation == SearchFilterParser.CompareOperation.ew) {
 					likeExpression = createRightMatchLikeExpression(normalizedString);
 				} else {
@@ -143,13 +139,11 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			}
 
 			Condition predicate;
-			if ((operation == null) || (operation == SearchFilterParser.CompareOperation.sw)) {
-				predicate =
-						theFrom.createPredicateNormalLike(theResourceName, paramName, normalizedString, likeExpression);
-			} else if ((operation == SearchFilterParser.CompareOperation.ew)
-					|| (operation == SearchFilterParser.CompareOperation.co)) {
-				predicate =
-						theFrom.createPredicateLikeExpressionOnly(theResourceName, paramName, likeExpression, false);
+			if ((operation == null) ||
+				(operation == SearchFilterParser.CompareOperation.sw)) {
+				predicate = theFrom.createPredicateNormalLike(theResourceName, paramName, normalizedString, likeExpression);
+			} else if ((operation == SearchFilterParser.CompareOperation.ew) || (operation == SearchFilterParser.CompareOperation.co)) {
+				predicate = theFrom.createPredicateLikeExpressionOnly(theResourceName, paramName, likeExpression, false);
 			} else if (operation == SearchFilterParser.CompareOperation.eq) {
 				predicate = theFrom.createPredicateNormal(theResourceName, paramName, normalizedString);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
@@ -163,8 +157,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			} else if (operation == SearchFilterParser.CompareOperation.le) {
 				predicate = theFrom.createPredicateNormalLessThanOrEqual(theResourceName, paramName, likeExpression);
 			} else {
-				throw new IllegalArgumentException(
-						Msg.code(1261) + "Don't yet know how to handle operation " + operation + " on a string");
+				throw new IllegalArgumentException(Msg.code(1261) + "Don't yet know how to handle operation " + operation + " on a string");
 			}
 
 			return predicate;
@@ -173,82 +166,55 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateExact(String theResourceType, String theParamName, String theTheValueExact) {
-		long hash = ResourceIndexedSearchParamString.calculateHashExact(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName, theTheValueExact);
+		long hash = ResourceIndexedSearchParamString.calculateHashExact(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName, theTheValueExact);
 		String placeholderValue = generatePlaceholder(hash);
 		return BinaryCondition.equalTo(myColumnHashExact, placeholderValue);
 	}
 
 	@Nonnull
-	public Condition createPredicateNormalLike(
-			String theResourceType, String theParamName, String theNormalizedString, String theLikeExpression) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(
-				getPartitionSettings(),
-				getRequestPartitionId(),
-				getStorageSettings(),
-				theResourceType,
-				theParamName,
-				theNormalizedString);
+	public Condition createPredicateNormalLike(String theResourceType, String theParamName, String theNormalizedString, String theLikeExpression) {
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getStorageSettings(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
-		Condition valuePredicate =
-				BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
+		Condition valuePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
 	@Nonnull
 	public Condition createPredicateNormal(String theResourceType, String theParamName, String theNormalizedString) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(
-				getPartitionSettings(),
-				getRequestPartitionId(),
-				getStorageSettings(),
-				theResourceType,
-				theParamName,
-				theNormalizedString);
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getStorageSettings(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
-		Condition valuePredicate =
-				BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		Condition valuePredicate = BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
-	private Condition createPredicateNormalGreaterThanOrEqual(
-			String theResourceType, String theParamName, String theNormalizedString) {
+	private Condition createPredicateNormalGreaterThanOrEqual(String theResourceType, String theParamName, String theNormalizedString) {
 		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
-		Condition valuePredicate =
-				BinaryCondition.greaterThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		Condition valuePredicate = BinaryCondition.greaterThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
-	private Condition createPredicateNormalGreaterThan(
-			String theResourceType, String theParamName, String theNormalizedString) {
+	private Condition createPredicateNormalGreaterThan(String theResourceType, String theParamName, String theNormalizedString) {
 		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
-		Condition valuePredicate =
-				BinaryCondition.greaterThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		Condition valuePredicate = BinaryCondition.greaterThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
-	private Condition createPredicateNormalLessThanOrEqual(
-			String theResourceType, String theParamName, String theNormalizedString) {
+	private Condition createPredicateNormalLessThanOrEqual(String theResourceType, String theParamName, String theNormalizedString) {
 		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
-		Condition valuePredicate =
-				BinaryCondition.lessThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		Condition valuePredicate = BinaryCondition.lessThanOrEq(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
-	private Condition createPredicateNormalLessThan(
-			String theResourceType, String theParamName, String theNormalizedString) {
+	private Condition createPredicateNormalLessThan(String theResourceType, String theParamName, String theNormalizedString) {
 		Condition hashPredicate = createHashIdentityPredicate(theResourceType, theParamName);
-		Condition valuePredicate =
-				BinaryCondition.lessThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
+		Condition valuePredicate = BinaryCondition.lessThan(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);
 	}
 
 	@Nonnull
-	public Condition createPredicateLikeExpressionOnly(
-			String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
-		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
-		BinaryCondition identityPredicate =
-				BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
+	public Condition createPredicateLikeExpressionOnly(String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
+		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		BinaryCondition identityPredicate = BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
 		BinaryCondition likePredicate;
 		if (theInverse) {
 			likePredicate = BinaryCondition.notLike(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
@@ -269,4 +235,6 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	public static String createRightMatchLikeExpression(String likeExpression) {
 		return "%" + likeExpression.replace("%", "\\%");
 	}
+
+
 }

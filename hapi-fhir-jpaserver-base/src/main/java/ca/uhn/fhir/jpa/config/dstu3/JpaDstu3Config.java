@@ -48,7 +48,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Import({FhirContextDstu3Config.class, GeneratedDaoAndResourceProviderConfigDstu3.class, JpaConfig.class})
+@Import({
+	FhirContextDstu3Config.class,
+	GeneratedDaoAndResourceProviderConfigDstu3.class,
+	JpaConfig.class
+})
 public class JpaDstu3Config {
 	@Bean
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
@@ -57,18 +61,8 @@ public class JpaDstu3Config {
 
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider(
-			FhirContext theFhirContext,
-			IGraphQLStorageServices theGraphqlStorageServices,
-			IValidationSupport theValidationSupport,
-			ISearchParamRegistry theSearchParamRegistry,
-			IDaoRegistry theDaoRegistry) {
-		return new GraphQLProviderWithIntrospection(
-				theFhirContext,
-				theValidationSupport,
-				theGraphqlStorageServices,
-				theSearchParamRegistry,
-				theDaoRegistry);
+	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Bean
@@ -90,8 +84,8 @@ public class JpaDstu3Config {
 	}
 
 	@Bean
-	public ITermLoaderSvc termLoaderService(
-			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
+
 }

@@ -40,17 +40,11 @@ public abstract class AbstractGeneratorMojo extends AbstractMojo {
 
 	@Override
 	public final void execute() throws MojoExecutionException, MojoFailureException {
-		doExecute(new Configuration(
-				this.version,
-				baseDir,
-				getTargetDirectory(),
-				this.packageBase,
-				this.baseResourceNames,
-				this.excludeResourceNames));
+		doExecute(new Configuration(this.version, baseDir, getTargetDirectory(), this.packageBase, this.baseResourceNames, this.excludeResourceNames));
 	}
 
-	protected abstract void doExecute(Configuration mavenGeneratorConfiguration)
-			throws MojoExecutionException, MojoFailureException;
+	protected abstract void doExecute(Configuration mavenGeneratorConfiguration) throws MojoExecutionException, MojoFailureException;
 
 	protected abstract File getTargetDirectory();
+
 }

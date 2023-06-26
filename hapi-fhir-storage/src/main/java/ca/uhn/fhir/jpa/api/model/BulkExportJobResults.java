@@ -37,7 +37,8 @@ public class BulkExportJobResults implements IModelJson {
 	@JsonProperty("originalRequestUrl")
 	private String myOriginalRequestUrl;
 
-	public BulkExportJobResults() {}
+	public BulkExportJobResults() {
+	}
 
 	public Map<String, List<String>> getResourceTypeToBinaryIds() {
 		if (myResourceTypeToBinaryIds == null) {

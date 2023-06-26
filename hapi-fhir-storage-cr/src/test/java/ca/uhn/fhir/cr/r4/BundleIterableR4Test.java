@@ -15,20 +15,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 public class BundleIterableR4Test extends BaseCrR4Test {
 	private static final RequestDetails theRequestDetails = null;
-	private static final String MY_TEST_DATA =
-			"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
+	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	@Test
 	public void searchAllPatients() {
 		// load bundle
-		loadBundle(MY_TEST_DATA); // 63 patients
-		var bundle1 = searchPatient(); // return BundleIterable
-		var firstCount = Iterables.size(bundle1); // count Patients
+		loadBundle(MY_TEST_DATA); //63 patients
+		var bundle1 = searchPatient(); //return BundleIterable
+		var firstCount = Iterables.size(bundle1); //count Patients
 		assertEquals(63, firstCount);
 	}
 
 	public Iterable<IBaseResource> searchPatient() {
-		var b = this.myDaoRegistry.getResourceDao("Patient").search(new SearchParameterMap(), theRequestDetails);
+		var b = this.myDaoRegistry.getResourceDao("Patient")
+			.search(new SearchParameterMap(), theRequestDetails);
 		return new BundleIterable(theRequestDetails, b);
 	}
 }

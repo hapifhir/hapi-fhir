@@ -42,8 +42,7 @@ public class SubscriptionTopicMatcher {
 		List<SubscriptionTopic.SubscriptionTopicResourceTriggerComponent> triggers = myTopic.getResourceTrigger();
 		for (SubscriptionTopic.SubscriptionTopicResourceTriggerComponent next : triggers) {
 			if (resourceName.equals(next.getResource())) {
-				SubscriptionTriggerMatcher matcher =
-						new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next);
+				SubscriptionTriggerMatcher matcher = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next);
 				InMemoryMatchResult result = matcher.match();
 				if (result.matched()) {
 					// as soon as one trigger matches, we're done

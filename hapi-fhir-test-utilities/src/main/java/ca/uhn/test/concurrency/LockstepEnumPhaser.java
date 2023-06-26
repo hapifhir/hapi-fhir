@@ -100,6 +100,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		return result;
 	}
 
+
 	private E doAwait(E thePhase) {
 		ourLog.debug("Start doAwait - {}", thePhase);
 		E phase = phaseToEnum(myPhaser.awaitAdvance(thePhase.ordinal()));
@@ -121,11 +122,13 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		}
 	}
 
+
 	private E phaseToEnum(int resultOrdinal) {
 		if (resultOrdinal >= myEnumConstants.length) {
-			throw new IllegalStateException("Enum " + myEnumClass.getName()
-					+ " should declare one more enum value for post-completion reporting of phase " + resultOrdinal);
+			throw new IllegalStateException("Enum " + myEnumClass.getName() + " should declare one more enum value for post-completion reporting of phase " + resultOrdinal);
 		}
 		return myEnumConstants[resultOrdinal];
 	}
+
+
 }

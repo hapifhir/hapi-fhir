@@ -47,8 +47,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5SearchNoFtTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5SearchNoFtTest.class);
 
 	@AfterEach
 	public void after() {
@@ -75,13 +74,11 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		HasAndListParam value = new HasAndListParam();
-		value.addAnd(
-				new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "ORG")));
+		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "ORG")));
 		params.add("_has", value);
 		IBundleProvider outcome = myPractitionerDao.search(params);
 		assertEquals(1, outcome.getResources(0, 1).size());
 	}
-
 	@Test
 	public void testHasWithTargetReferenceQualified() {
 		Organization org = new Organization();
@@ -102,8 +99,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		HasAndListParam value = new HasAndListParam();
-		value.addAnd(new HasOrListParam()
-				.addOr(new HasParam("PractitionerRole", "practitioner", "organization", "Organization/ORG")));
+		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "Organization/ORG")));
 		params.add("_has", value);
 		IBundleProvider outcome = myPractitionerDao.search(params);
 		assertEquals(1, outcome.getResources(0, 1).size());
@@ -128,9 +124,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		myPractitionerRoleDao.update(role);
 
 		runInTransaction(() -> {
-			ourLog.info(
-					"Links:\n * {}",
-					myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -182,36 +176,22 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 		ObservationDefinition obs = new ObservationDefinition();
 		obs.setApprovalDate(new Date());
-		String obsId = myObservationDefinitionDao
-				.create(obs, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myObservationDefinitionDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		ClinicalUseDefinition def = new ClinicalUseDefinition();
 		def.getContraindication().getDiseaseSymptomProcedure().setReference(new Reference(obsId));
-		String id = myClinicalUseDefinitionDao
-				.create(def, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String id = myClinicalUseDefinitionDao.create(def, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		ClinicalUseDefinition def2 = new ClinicalUseDefinition();
-		def2.getContraindication()
-				.getDiseaseSymptomProcedure()
-				.setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
-		myClinicalUseDefinitionDao
-				.create(def2, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		def2.getContraindication().getDiseaseSymptomProcedure().setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
+		myClinicalUseDefinitionDao.create(def2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous(
-				ClinicalUseDefinition.SP_CONTRAINDICATION_REFERENCE, new ReferenceParam(obsId));
+		SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION_REFERENCE, new ReferenceParam(obsId));
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
 		assertThat(outcome, Matchers.contains(id));
+
 	}
 
 	@Test
@@ -220,56 +200,45 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 		ObservationDefinition obs = new ObservationDefinition();
 		obs.setApprovalDate(new Date());
-		String obsId = myObservationDefinitionDao
-				.create(obs, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myObservationDefinitionDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		ClinicalUseDefinition def = new ClinicalUseDefinition();
 		def.getContraindication().getDiseaseSymptomProcedure().setReference(new Reference(obsId));
-		myClinicalUseDefinitionDao
-				.create(def, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		myClinicalUseDefinitionDao.create(def, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		ClinicalUseDefinition def2 = new ClinicalUseDefinition();
-		def2.getContraindication()
-				.getDiseaseSymptomProcedure()
-				.setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
-		String id = myClinicalUseDefinitionDao
-				.create(def2, mySrd)
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		def2.getContraindication().getDiseaseSymptomProcedure().setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
+		String id =myClinicalUseDefinitionDao.create(def2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		// Test
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous(
-				ClinicalUseDefinition.SP_CONTRAINDICATION, new TokenParam("http://foo", "bar"));
+		SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION, new TokenParam("http://foo", "bar"));
 		List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
 		assertThat(outcome, Matchers.contains(id));
+
 	}
+
 
 	@Test
 	public void testIndexAddressDistrict() {
 		// Setup
 		Patient p = new Patient();
-		p.addAddress().setDistrict("DISTRICT123");
-		String id =
-				myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+		p.addAddress()
+			.setDistrict("DISTRICT123");
+		String id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		logAllStringIndexes();
 
 		// Test
-		SearchParameterMap params =
-				SearchParameterMap.newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
 		// Verify
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), Matchers.contains(id));
+
 	}
+
 
 	/**
 	 * Index for
@@ -320,44 +289,50 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		runInTransaction(() -> {
 			logAllTokenIndexes();
 
-			List<String> params = myResourceIndexedSearchParamTokenDao.findAll().stream()
-					.filter(t -> t.getParamName().contains("."))
-					.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
-					.toList();
-			assertThat(params.toString(), params, containsInAnyOrder("composition.patient.identifier http://foo|bar"));
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.patient.identifier http://foo|bar"
+			));
 		});
 
 		// Test 2
 		IBundleProvider outcome;
 
-		SearchParameterMap map = SearchParameterMap.newSynchronous(
-				"composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
 		outcome = myBundleDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 
-		map = SearchParameterMap.newSynchronous(
-				"composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		map = SearchParameterMap
+			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
 		outcome = myBundleDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 	}
 
-	@Test
-	public void testHasWithNonExistentReferenceField() {
-		String targetResource = "Encounter";
-		String referenceFieldName = "non_existent_reference";
-		String parameterValue = "123";
-		HasParam hasParam = new HasParam(targetResource, referenceFieldName, Constants.PARAM_ID, parameterValue);
+    @Test
+    public void testHasWithNonExistentReferenceField() {
+        String targetResource = "Encounter";
+        String referenceFieldName = "non_existent_reference";
+        String parameterValue = "123";
+        HasParam hasParam = new HasParam(targetResource, referenceFieldName, Constants.PARAM_ID, parameterValue);
 
-		HasAndListParam hasAnd = new HasAndListParam();
-		hasAnd.addValue(new HasOrListParam().add(hasParam));
-		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add(Constants.PARAM_HAS, hasAnd);
+        HasAndListParam hasAnd = new HasAndListParam();
+        hasAnd.addValue(new HasOrListParam().add(hasParam));
+        SearchParameterMap params = SearchParameterMap.newSynchronous();
+        params.add(Constants.PARAM_HAS, hasAnd);
 
-		try {
-			myObservationDao.search(params, new SystemRequestDetails());
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
-		}
-	}
+        try {
+            myObservationDao.search(params, new SystemRequestDetails());
+            fail();
+        } catch (InvalidRequestException e) {
+            assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
+        }
+    }
+
+
 }

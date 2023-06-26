@@ -99,8 +99,7 @@ public class CanonicalTopicSubscriptionFilter {
 				CanonicalTopicSubscriptionFilter filter = new CanonicalTopicSubscriptionFilter();
 				filter.setResourceType(resourceName);
 				filter.setFilterParameter(key);
-				// WIP STR5 set modifier and comparator properly.  This may be tricky without access to
-				// searchparameters,
+				// WIP STR5 set modifier and comparator properly.  This may be tricky without access to searchparameters,
 				// But this method cannot assume searchparameters exist on the server.
 				filter.setComparator(Enumerations.SearchComparator.EQ);
 				filter.setValue(value);

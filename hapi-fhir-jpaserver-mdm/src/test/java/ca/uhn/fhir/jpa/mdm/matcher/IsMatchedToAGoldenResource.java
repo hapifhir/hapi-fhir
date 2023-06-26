@@ -23,8 +23,7 @@ public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theIncomingResource));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theIncomingResource));
 		return matchedLinkForTargetPid.isPresent();
 	}
 
@@ -33,8 +32,7 @@ public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 		theDescription.appendText("target was not linked to a Golden Resource.");
 	}
 
-	public static Matcher<IAnyResource> matchedToAGoldenResource(
-			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+	public static Matcher<IAnyResource> matchedToAGoldenResource(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
 		return new IsMatchedToAGoldenResource(theIdHelperService, theMdmLinkDaoSvc);
 	}
 }

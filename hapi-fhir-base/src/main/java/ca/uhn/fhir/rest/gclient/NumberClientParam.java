@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 /**
  * Token parameter type for use in fluent client interfaces
  */
-public class NumberClientParam extends BaseClientParam implements IParam {
+public class NumberClientParam extends BaseClientParam  implements IParam {
 
 	private final String myParamName;
 
@@ -69,8 +69,7 @@ public class NumberClientParam extends BaseClientParam implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<>(
-						getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
@@ -98,8 +97,7 @@ public class NumberClientParam extends BaseClientParam implements IParam {
 		return new IMatches<ICriterion<NumberClientParam>>() {
 			@Override
 			public ICriterion<NumberClientParam> number(long theNumber) {
-				return new StringCriterion<>(
-						getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
+				return new StringCriterion<>(getParamName(), ParamPrefixEnum.LESSTHAN_OR_EQUALS, Long.toString(theNumber));
 			}
 
 			@Override
@@ -126,7 +124,7 @@ public class NumberClientParam extends BaseClientParam implements IParam {
 	public interface IMatches<T> {
 		/**
 		 * Creates a search criterion that matches against the given number
-		 *
+		 * 
 		 * @param theNumber
 		 *            The number
 		 * @return A criterion
@@ -135,11 +133,12 @@ public class NumberClientParam extends BaseClientParam implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given number
-		 *
+		 * 
 		 * @param theNumber
 		 *            The number
 		 * @return A criterion
 		 */
 		T number(String theNumber);
 	}
+
 }

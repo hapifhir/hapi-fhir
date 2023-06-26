@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 
 public class AddIdGeneratorTaskTest extends BaseTest {
 
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testAddIdGenerator(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -35,7 +36,9 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
+
 	}
+
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
@@ -43,5 +46,8 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 			v.addIdGenerator(theVersion, "SEQ_FOO");
 		}
+
+
 	}
+
 }

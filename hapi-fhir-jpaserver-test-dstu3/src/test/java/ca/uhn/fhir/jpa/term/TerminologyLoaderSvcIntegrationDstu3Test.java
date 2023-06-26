@@ -45,8 +45,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(
-				new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 	}
 
 	@BeforeEach
@@ -56,13 +55,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@SuppressWarnings("unchecked")
 	private <T extends Type> Optional<T> findProperty(Parameters theParameters, String thePropertyName) {
-		return theParameters.getParameter().stream()
-				.filter(t -> t.getName().equals("property"))
-				.filter(t -> ((PrimitiveType<?>) t.getPart().get(0).getValue())
-						.getValueAsString()
-						.equals(thePropertyName))
-				.map(t -> (T) t.getPart().get(1).getValue())
-				.findFirst();
+		return theParameters
+			.getParameter()
+			.stream()
+			.filter(t -> t.getName().equals("property"))
+			.filter(t -> ((PrimitiveType<?>) t.getPart().get(0).getValue()).getValueAsString().equals(thePropertyName))
+			.map(t -> (T) t.getPart().get(1).getValue())
+			.findFirst();
 	}
 
 	@Test
@@ -73,13 +72,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		// Search by code
 		ValueSet input = new ValueSet();
-		input.getCompose()
-				.addInclude()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.addFilter()
-				.setProperty("SCALE_TYP")
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue("LP7753-9");
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.addFilter()
+			.setProperty("SCALE_TYP")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("LP7753-9");
 		ValueSet expanded = myValueSetDao.expand(input, null);
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
@@ -88,13 +88,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		// Search by display name
 		input = new ValueSet();
-		input.getCompose()
-				.addInclude()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.addFilter()
-				.setProperty("SCALE_TYP")
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue("Qn");
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.addFilter()
+			.setProperty("SCALE_TYP")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Qn");
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
@@ -102,13 +103,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		// Search by something that doesn't match
 		input = new ValueSet();
-		input.getCompose()
-				.addInclude()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.addFilter()
-				.setProperty("SCALE_TYP")
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue("Qn999");
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.addFilter()
+			.setProperty("SCALE_TYP")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Qn999");
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
@@ -133,13 +135,14 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		ValueSet input = new ValueSet();
-		input.getCompose()
-				.addInclude()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.addFilter()
-				.setProperty("CLASS")
-				.setOp(ValueSet.FilterOperator.EQUAL)
-				.setValue("EKG.MEAS");
+		input
+			.getCompose()
+			.addInclude()
+			.setSystem(ITermLoaderSvc.LOINC_URI)
+			.addFilter()
+			.setProperty("CLASS")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("EKG.MEAS");
 		ValueSet expanded = myValueSetDao.expand(input, null);
 		Set<String> codes = toExpandedCodes(expanded);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
@@ -153,8 +156,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TermTestUtil.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(
-				new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -175,6 +177,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		propertyValueString = findProperty(parameters, "CLASSTYPE");
 		assertTrue(propertyValueString.isPresent());
 		assertEquals("2", propertyValueString.get().getValue());
+
 	}
 
 	@Test
@@ -183,8 +186,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TermTestUtil.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(
-				new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
@@ -202,8 +204,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		TermTestUtil.addLoincMandatoryFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
-		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(
-				new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
+		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, properties);
 
@@ -217,6 +218,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		propertyValueCoding = findProperty(parameters, "COMPONENT");
 		assertFalse(propertyValueCoding.isPresent());
+
 	}
 
 	@Test
@@ -227,15 +229,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(
-				new UriType("http://loinc.org/vs"),
-				null,
-				new StringType("10013-1"),
-				new StringType(ITermLoaderSvc.LOINC_URI),
-				null,
-				null,
-				null,
-				mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isOk());
 		assertEquals("R' wave amplitude in lead I", result.getDisplay());
@@ -249,24 +243,19 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(
-				new UriType("http://loinc.org/vs"),
-				null,
-				new StringType("10013-1-9999999999"),
-				new StringType(ITermLoaderSvc.LOINC_URI),
-				null,
-				null,
-				null,
-				mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
-		assertEquals(
-				"Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'",
-				result.getMessage());
+		assertEquals("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {
-		return theExpanded.getExpansion().getContains().stream()
-				.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
-				.collect(Collectors.toSet());
+		return theExpanded
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toSet());
 	}
+
+
 }

@@ -24,9 +24,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -48,13 +48,10 @@ class JobDataSinkTest {
 
 	@Mock
 	private BatchJobSender myBatchJobSender;
-
 	@Mock
 	private IJobPersistence myJobPersistence;
-
 	@Captor
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
-
 	@Captor
 	private ArgumentCaptor<WorkChunkCreateEvent> myBatchWorkChunkCaptor;
 
@@ -65,10 +62,7 @@ class JobDataSinkTest {
 		IJobStepWorker<TestJobParameters, VoidModel, Step1Output> firstStepWorker = new IJobStepWorker<>() {
 			@Nonnull
 			@Override
-			public RunOutcome run(
-					@Nonnull StepExecutionDetails<TestJobParameters, VoidModel> theStepExecutionDetails,
-					@Nonnull IJobDataSink<Step1Output> theDataSink)
-					throws JobExecutionFailedException {
+			public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<Step1Output> theDataSink) throws JobExecutionFailedException {
 				TestJobParameters params = theStepExecutionDetails.getParameters();
 				int numPidsToGenerate = Integer.parseInt(params.getParam1());
 				Step1Output output = new Step1Output();
@@ -87,32 +81,24 @@ class JobDataSinkTest {
 		};
 
 		JobDefinition<TestJobParameters> job = JobDefinition.newBuilder()
-				.setJobDefinitionId(JOB_DEF_ID)
-				.setJobDescription(JOB_DESC)
-				.setJobDefinitionVersion(JOB_DEF_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.addFirstStep(FIRST_STEP_ID, "s1desc", Step1Output.class, firstStepWorker)
-				.addLastStep(LAST_STEP_ID, "s2desc", lastStepWorker)
-				.build();
+			.setJobDefinitionId(JOB_DEF_ID)
+			.setJobDescription(JOB_DESC)
+			.setJobDefinitionVersion(JOB_DEF_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(FIRST_STEP_ID, "s1desc", Step1Output.class, firstStepWorker)
+			.addLastStep(LAST_STEP_ID, "s2desc", lastStepWorker)
+			.build();
 
-		JobDefinitionStep<TestJobParameters, VoidModel, Step1Output> firstStep =
-				(JobDefinitionStep<TestJobParameters, VoidModel, Step1Output>)
-						job.getSteps().get(0);
-		JobDefinitionStep<TestJobParameters, Step1Output, VoidModel> lastStep =
-				(JobDefinitionStep<TestJobParameters, Step1Output, VoidModel>)
-						job.getSteps().get(1);
+		JobDefinitionStep<TestJobParameters, VoidModel, Step1Output> firstStep = (JobDefinitionStep<TestJobParameters, VoidModel, Step1Output>) job.getSteps().get(0);
+		JobDefinitionStep<TestJobParameters, Step1Output, VoidModel> lastStep = (JobDefinitionStep<TestJobParameters, Step1Output, VoidModel>) job.getSteps().get(1);
 
 		// execute
 		// Let's test our first step worker by calling run on it:
-		when(myJobPersistence.onWorkChunkCreate(myBatchWorkChunkCaptor.capture()))
-				.thenReturn(CHUNK_ID);
+		when(myJobPersistence.onWorkChunkCreate(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
-		StepExecutionDetails<TestJobParameters, VoidModel> details =
-				new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, CHUNK_ID);
-		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor =
-				new JobWorkCursor<>(job, true, firstStep, lastStep);
-		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink =
-				new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor);
+		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, CHUNK_ID);
+		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
+		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor);
 
 		RunOutcome result = firstStepWorker.run(details, sink);
 

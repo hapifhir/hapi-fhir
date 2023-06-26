@@ -32,4 +32,5 @@ public abstract class BaseHttpRequest implements IHttpRequest {
 	public void setUrlSource(UrlSourceEnum theUrlSource) {
 		myUrlSource = theUrlSource;
 	}
+
 }

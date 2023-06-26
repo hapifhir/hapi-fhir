@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import java.util.Collection;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 
 public interface IAuthRuleBuilderRuleOpClassifier {
@@ -34,9 +35,9 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * <code>inCompartment("Patient", new IdType("Patient", "123"))</code>
 	 * </p>
 	 * <p>
-	 * This call completes the rule and adds the rule to the chain.
+	 * This call completes the rule and adds the rule to the chain. 
 	 * </p>
-	 *
+	 * 
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwner The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
 	 */
@@ -63,10 +64,8 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theOwner The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
 	 * @param theAdditionalTypeSearchParamNames A list of strings for additional resource types and search parameters which count as being in the compartment, in the form "resourcetype:search-parameter-name".
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
-			String theCompartmentName,
-			IIdType theOwner,
-			AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, IIdType theOwner, AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+
 
 	/**
 	 * Rule applies to resources in the given compartment.
@@ -76,14 +75,14 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * <code>inCompartment("Patient", new IdType("Patient", "123"))</code>
 	 * </p>
 	 * <p>
-	 * This call completes the rule and adds the rule to the chain.
+	 * This call completes the rule and adds the rule to the chain. 
 	 * </p>
-	 *
+	 * 
 	 * @param theCompartmentName The name of the compartment (must not be null or blank)
 	 * @param theOwners The owner of the compartment. Note that both the resource type and ID must be populated in this ID.
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartment(
-			String theCompartmentName, Collection<? extends IIdType> theOwners);
+	IAuthRuleBuilderRuleOpClassifierFinished inCompartment(String theCompartmentName, Collection<? extends IIdType> theOwners);
+
 
 	/**
 	 * Rule applies to resources in the given compartment.
@@ -107,15 +106,13 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theAdditionalTypeSearchParamNames A {@link AdditionalCompartmentSearchParameters} which allows you to expand the search space for what is considered "in" the compartment.
 	 *
 	 **/
-	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(
-			String theCompartmentName,
-			Collection<? extends IIdType> theOwners,
-			AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+	IAuthRuleBuilderRuleOpClassifierFinished inCompartmentWithAdditionalSearchParams(String theCompartmentName, Collection<? extends IIdType> theOwners, AdditionalCompartmentSearchParameters theAdditionalTypeSearchParamNames);
+
 
 	/**
 	 * Rule applies to any resource instances
 	 * <p>
-	 * This call completes the rule and adds the rule to the chain.
+	 * This call completes the rule and adds the rule to the chain. 
 	 * </p>
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished withAnyId();
@@ -126,8 +123,7 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @param theValueSetUrl The valueset URL, e.g. <code>"http://my-value-set"</code>
 	 * @since 6.0.0
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished withCodeInValueSet(
-			@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
+	IAuthRuleBuilderRuleOpClassifierFinished withCodeInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
 
 	/**
 	 * Rule applies to resources where the given search parameter would be satisfied by a code not in the given ValueSet

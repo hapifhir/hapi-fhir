@@ -31,11 +31,13 @@ import java.util.Collections;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(
-		classes = {SearchParamConfig.class, SubscriptionProcessorConfig.class, BaseSubscriptionTest.MyConfig.class})
+@ContextConfiguration(classes = {
+	SearchParamConfig.class,
+	SubscriptionProcessorConfig.class,
+	BaseSubscriptionTest.MyConfig.class
+})
 public abstract class BaseSubscriptionTest {
-	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor =
-			new SubscriptionDebugLogInterceptor();
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	static {
 		HapiSystemProperties.enableUnitTestMode();
@@ -102,7 +104,7 @@ public abstract class BaseSubscriptionTest {
 		}
 
 		@Bean
-		public IEmailSender emailSender() {
+		public IEmailSender emailSender(){
 			return mock(IEmailSender.class);
 		}
 	}

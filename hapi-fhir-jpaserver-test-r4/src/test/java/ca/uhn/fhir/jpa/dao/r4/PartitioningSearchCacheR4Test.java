@@ -32,8 +32,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
@@ -50,8 +49,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(2);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
@@ -68,8 +66,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(2);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
@@ -81,6 +78,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids, containsInAnyOrder(patientId21, patientId22));
 		}
+
 	}
 
 	@Test
@@ -95,8 +93,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(1, null);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
@@ -113,8 +110,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(2, 1);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
@@ -131,8 +127,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 		{
 			myCaptureQueriesListener.clear();
 			addReadPartition(1, null);
-			PersistedJpaBundleProvider outcome =
-					(PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
+			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
 			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
@@ -144,5 +139,7 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
 			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
 		}
+
 	}
+
 }

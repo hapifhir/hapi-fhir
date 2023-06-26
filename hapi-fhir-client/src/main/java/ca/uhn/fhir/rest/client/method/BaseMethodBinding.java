@@ -19,8 +19,18 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.IParser;
@@ -30,14 +40,8 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
 
@@ -67,17 +71,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				break;
 			}
 		}
+
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(
-			String theResponseMimeType,
-			InputStream theResponseInputStream,
-			int theResponseStatusCode,
-			List<Class<? extends IBaseResource>> thePreferTypes) {
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
 		if (encoding == null) {
-			NonFhirResponseException ex = NonFhirResponseException.newInstance(
-					theResponseStatusCode, theResponseMimeType, theResponseInputStream);
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
 			populateException(ex, theResponseInputStream);
 			throw ex;
 		}
@@ -142,37 +142,33 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return mySupportsConditionalMultiple;
 	}
 
-	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(
-			int theStatusCode, String theResponseMimeType, InputStream theResponseInputStream) {
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, InputStream theResponseInputStream) {
 		BaseServerResponseException ex;
 		switch (theStatusCode) {
-			case Constants.STATUS_HTTP_400_BAD_REQUEST:
-				ex = new InvalidRequestException("Server responded with HTTP 400");
-				break;
-			case Constants.STATUS_HTTP_404_NOT_FOUND:
-				ex = new ResourceNotFoundException("Server responded with HTTP 404");
-				break;
-			case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
-				ex = new MethodNotAllowedException("Server responded with HTTP 405");
-				break;
-			case Constants.STATUS_HTTP_409_CONFLICT:
-				ex = new ResourceVersionConflictException("Server responded with HTTP 409");
-				break;
-			case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
-				ex = new PreconditionFailedException("Server responded with HTTP 412");
-				break;
-			case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-				IParser parser = createAppropriateParserForParsingResponse(
-						theResponseMimeType, theResponseInputStream, theStatusCode, null);
-				// TODO: handle if something other than OO comes back
-				BaseOperationOutcome operationOutcome =
-						(BaseOperationOutcome) parser.parseResource(theResponseInputStream);
-				ex = new UnprocessableEntityException(myContext, operationOutcome);
-				break;
-			default:
-				ex = new UnclassifiedServerFailureException(
-						theStatusCode, "Server responded with HTTP " + theStatusCode);
-				break;
+		case Constants.STATUS_HTTP_400_BAD_REQUEST:
+			ex = new InvalidRequestException("Server responded with HTTP 400");
+			break;
+		case Constants.STATUS_HTTP_404_NOT_FOUND:
+			ex = new ResourceNotFoundException("Server responded with HTTP 404");
+			break;
+		case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
+			ex = new MethodNotAllowedException("Server responded with HTTP 405");
+			break;
+		case Constants.STATUS_HTTP_409_CONFLICT:
+			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
+			break;
+		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
+			ex = new PreconditionFailedException("Server responded with HTTP 412");
+			break;
+		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseInputStream, theStatusCode, null);
+			// TODO: handle if something other than OO comes back
+			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseInputStream);
+			ex = new UnprocessableEntityException(myContext, operationOutcome);
+			break;
+		default:
+			ex = new UnclassifiedServerFailureException(theStatusCode, "Server responded with HTTP " + theStatusCode);
+			break;
 		}
 
 		populateException(ex, theResponseInputStream);
@@ -202,21 +198,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		Patch patch = theMethod.getAnnotation(Patch.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(
-				theMethod,
-				read,
-				search,
-				conformance,
-				create,
-				update,
-				delete,
-				history,
-				validate,
-				addTags,
-				deleteTags,
-				transaction,
-				operation,
-				getPage,
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, addTags, deleteTags, transaction, operation, getPage,
 				patch)) {
 			return null;
 		}
@@ -238,20 +220,15 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (returnTypeFromMethod == null) {
 				ourLog.trace("Method {} returns a non-typed list, can't verify return type", theMethod);
-			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod)
-					&& !isResourceInterface(returnTypeFromMethod)) {
-				throw new ConfigurationException(
-						Msg.code(1427) + "Method '" + theMethod.getName() + "' from client type "
-								+ theMethod.getDeclaringClass().getCanonicalName()
-								+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
-								+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
+			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
+				throw new ConfigurationException(Msg.code(1427) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
+						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
-				throw new ConfigurationException(Msg.code(1428) + "Method '" + theMethod.getName()
-						+ "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns " + toLogString(returnTypeFromMethod)
-						+ " - Must return a resource type (eg Patient, Bundle"
+				throw new ConfigurationException(Msg.code(1428) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle"
 						+ ", etc., see the documentation for more details)");
 			}
 		}
@@ -281,10 +258,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 		if (!isResourceInterface(returnTypeFromAnnotation)) {
 			if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
-				throw new ConfigurationException(Msg.code(1429) + "Method '" + theMethod.getName()
-						+ "' from client type " + theMethod.getDeclaringClass().getCanonicalName() + " returns "
-						+ toLogString(returnTypeFromAnnotation)
-						+ " according to annotation - Must return a resource type");
+				throw new ConfigurationException(Msg.code(1429) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+						+ " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
 			}
 			returnType = returnTypeFromAnnotation;
 		} else {
@@ -315,17 +290,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
-			return new ValidateMethodBindingDstu2Plus(
-					returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
+			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else if (operation != null) {
-			return new OperationMethodBinding(
-					returnType, returnTypeFromRp, theMethod, theContext, theProvider, operation);
+			return new OperationMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider, operation);
 		} else {
-			throw new ConfigurationException(
-					Msg.code(1430) + "Did not detect any FHIR annotations on method '" + theMethod.getName()
-							+ "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(1430) + "Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		// // each operation name must have a request type annotation and be
@@ -351,9 +322,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	public static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
-		return theReturnTypeFromMethod.equals(IBaseResource.class)
-				|| theReturnTypeFromMethod.equals(IResource.class)
-				|| theReturnTypeFromMethod.equals(IAnyResource.class);
+		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 
 	private static void populateException(BaseServerResponseException theEx, InputStream theResponseInputStream) {
@@ -391,11 +360,10 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException(Msg.code(1431) + "Method " + theNextMethod.getName() + " on type '"
-							+ theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
-							+ obj1.getClass().getSimpleName() + " and @"
-							+ object.getClass().getSimpleName() + ". Can not have both.");
+					throw new ConfigurationException(Msg.code(1431) + "Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
+							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
 				}
+
 			}
 		}
 		if (obj1 == null) {
@@ -407,4 +375,5 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 		return true;
 	}
+
 }

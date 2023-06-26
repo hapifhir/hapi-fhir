@@ -51,18 +51,11 @@ public interface IAuthRule {
 	 * @param thePointcut        The pointcut hook that triggered this call
 	 * @return Returns a policy decision, or <code>null</code> if the rule does not apply
 	 */
-	Verdict applyRule(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			IRuleApplier theRuleApplier,
-			Set<AuthorizationFlagsEnum> theFlags,
-			Pointcut thePointcut);
+	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut);
 
 	/**
 	 * Returns a name for this rule, to be used in logs and error messages
 	 */
 	String getName();
+
 }

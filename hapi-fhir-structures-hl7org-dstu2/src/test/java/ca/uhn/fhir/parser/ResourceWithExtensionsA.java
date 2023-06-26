@@ -15,35 +15,36 @@ import org.hl7.fhir.dstu2.model.StringType;
 
 import java.util.List;
 
-@ResourceDef(name = "ResourceWithExtensionsA", id = "0001")
+@ResourceDef(name = "ResourceWithExtensionsA", id="0001")
 public class ResourceWithExtensionsA extends DomainResource {
 
 	/*
 	 * NB: several unit tests depend on the structure here
-	 * so check the unit tests immediately after any changes
+	 * so check the unit tests immediately after any changes 
 	 */
+	
 
 	private static final long serialVersionUID = 1L;
 
 	@Child(name = "foo1", type = StringType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://foo/#f1", definedLocally = true, isModifier = false)
+	@Extension(url = "http://foo/#f1", definedLocally=true, isModifier=false)
 	private List<StringType> myFoo1;
 
 	@Child(name = "foo2", type = StringType.class, order = 1, min = 0, max = 1)
-	@Extension(url = "http://foo/#f2", definedLocally = true, isModifier = true)
+	@Extension(url = "http://foo/#f2", definedLocally=true, isModifier=true)
 	private StringType myFoo2;
 
 	@Child(name = "bar1", type = Bar1.class, order = 2, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/#b1", definedLocally = true, isModifier = false)
+	@Extension(url = "http://bar/#b1", definedLocally=true, isModifier=false)
 	private List<Bar1> myBar1;
-
+	
 	@Child(name = "bar2", type = Bar1.class, order = 3, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/#b2", definedLocally = true, isModifier = false)
+	@Extension(url = "http://bar/#b2", definedLocally=true, isModifier=false)
 	private Bar1 myBar2;
-
-	@Child(name = "baz", type = CodeableConcept.class, order = 4)
-	@Extension(url = "http://baz/#baz", definedLocally = true, isModifier = false)
-	@Description(shortDefinition = "Contains a codeable concept")
+	
+	@Child(name="baz", type = CodeableConcept.class, order = 4)
+    @Extension(url= "http://baz/#baz", definedLocally=true, isModifier=false)
+    @Description(shortDefinition = "Contains a codeable concept")
 	private CodeableConcept myBaz;
 
 	@Child(name = "identifier", type = Identifier.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
@@ -65,9 +66,7 @@ public class ResourceWithExtensionsA extends DomainResource {
 		return myFoo2;
 	}
 
-	public CodeableConcept getBaz() {
-		return myBaz;
-	}
+	public CodeableConcept getBaz() { return myBaz; }
 
 	public List<Identifier> getIdentifier() {
 		return myIdentifier;
@@ -89,9 +88,7 @@ public class ResourceWithExtensionsA extends DomainResource {
 		myFoo2 = theFoo2;
 	}
 
-	public void setBaz(CodeableConcept myBaz) {
-		this.myBaz = myBaz;
-	}
+	public void setBaz(CodeableConcept myBaz) { this.myBaz = myBaz; }
 
 	public void setIdentifier(List<Identifier> theValue) {
 		myIdentifier = theValue;
@@ -103,13 +100,13 @@ public class ResourceWithExtensionsA extends DomainResource {
 		public Bar1() {
 			super();
 		}
-
+		
 		@Child(name = "bar11", type = DateType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/#b1/1", definedLocally = true, isModifier = false)
+		@Extension(url = "http://bar/#b1/1", definedLocally=true, isModifier=false)
 		private List<DateType> myBar11;
 
 		@Child(name = "bar12", type = DateType.class, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/#b1/2", definedLocally = true, isModifier = false)
+		@Extension(url = "http://bar/#b1/2", definedLocally=true, isModifier=false)
 		private List<Bar2> myBar12;
 
 		@Override
@@ -132,29 +129,34 @@ public class ResourceWithExtensionsA extends DomainResource {
 		public void setBar12(List<Bar2> theBar12) {
 			myBar12 = theBar12;
 		}
+		
 
 		@Override
 		public BackboneElement copy() {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+
+
 	}
 
 	@Block(name = "Bar2")
 	public static class Bar2 extends BackboneElement {
 
 		@Child(name = "bar121", type = DateType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/#b1/2/1", definedLocally = true, isModifier = false)
+		@Extension(url = "http://bar/#b1/2/1", definedLocally=true, isModifier=false)
 		private List<DateType> myBar121;
 
 		@Child(name = "bar122", type = DateType.class, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-		@Extension(url = "http://bar/#b1/2/2", definedLocally = true, isModifier = false)
+		@Extension(url = "http://bar/#b1/2/2", definedLocally=true, isModifier=false)
 		private List<DateType> myBar122;
 
 		@Override
 		public boolean isEmpty() {
 			return false; // not implemented
 		}
+
 
 		public List<DateType> getBar121() {
 			return myBar121;
@@ -177,12 +179,16 @@ public class ResourceWithExtensionsA extends DomainResource {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+
+
 	}
 
 	@Override
 	public boolean isEmpty() {
 		return false; // not implemented
 	}
+
 
 	@Override
 	public DomainResource copy() {
@@ -195,4 +201,7 @@ public class ResourceWithExtensionsA extends DomainResource {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+
 }

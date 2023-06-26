@@ -41,8 +41,7 @@ public class IncludeAndRevincludeParameterTest {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 	private static Set<Include> ourIncludes;
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(IncludeAndRevincludeParameterTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeAndRevincludeParameterTest.class);
 	private static int ourPort;
 	private static Set<Include> ourReverseIncludes;
 	private static Server ourServer;
@@ -53,6 +52,7 @@ public class IncludeAndRevincludeParameterTest {
 		ourReverseIncludes = null;
 	}
 
+
 	@Test
 	public void testNoIncludes() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude");
@@ -60,25 +60,25 @@ public class IncludeAndRevincludeParameterTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-
+		
 		assertThat(ourIncludes, hasSize(0));
 		assertThat(ourReverseIncludes, hasSize(0));
 	}
-
+	
 	@Test
 	public void testWithBoth() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
-				+ "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-
+		
 		assertThat(ourIncludes, hasSize(2));
 		assertThat(ourReverseIncludes, hasSize(2));
 		assertThat(ourIncludes, containsInAnyOrder(new Include("A.a"), new Include("B.b")));
 		assertThat(ourReverseIncludes, containsInAnyOrder(new Include("C.c"), new Include("D.d")));
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -95,18 +95,18 @@ public class IncludeAndRevincludeParameterTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
+        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -118,10 +118,14 @@ public class IncludeAndRevincludeParameterTest {
 
 		@Search(queryName = "normalInclude")
 		public List<Patient> normalInclude(
-				@IncludeParam() Set<Include> theIncludes, @IncludeParam(reverse = true) Set<Include> theRevincludes) {
+				@IncludeParam() Set<Include> theIncludes,
+				@IncludeParam(reverse=true) Set<Include> theRevincludes
+				) {
 			ourIncludes = theIncludes;
 			ourReverseIncludes = theRevincludes;
 			return new ArrayList<Patient>();
 		}
+
 	}
+
 }

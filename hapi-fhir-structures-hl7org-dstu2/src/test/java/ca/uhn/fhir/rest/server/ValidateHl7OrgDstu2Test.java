@@ -26,10 +26,10 @@ import org.hl7.fhir.dstu2.model.Organization;
 import org.hl7.fhir.dstu2.model.Parameters;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.StringType;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +50,7 @@ public class ValidateHl7OrgDstu2Test {
 	private static ValidationModeEnum ourLastMode;
 	private static String ourLastProfile;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-
+	
 	@BeforeEach()
 	public void before() {
 		ourLastResourceBody = null;
@@ -73,9 +73,7 @@ public class ValidateHl7OrgDstu2Test {
 		params.addParameter().setName("mode").setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -99,9 +97,7 @@ public class ValidateHl7OrgDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -126,9 +122,7 @@ public class ValidateHl7OrgDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -150,17 +144,14 @@ public class ValidateHl7OrgDstu2Test {
 		params.addParameter().setName("resource").setResource(org);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newJsonParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(
-				ourLastResourceBody,
-				stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+
 	}
 
 	@AfterAll
@@ -181,22 +172,19 @@ public class ValidateHl7OrgDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class PatientProvider implements IResourceProvider {
 
 		@Validate()
-		public MethodOutcome validatePatient(
-				@ResourceParam Patient thePatient,
-				@Validate.Mode ValidationModeEnum theMode,
-				@Validate.Profile String theProfile) {
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
 			IdType id = new IdType(thePatient.getIdentifier().get(0).getValue());
 			if (thePatient.getIdElement().isEmpty() == false) {
 				id = thePatient.getIdElement();
@@ -214,6 +202,7 @@ public class ValidateHl7OrgDstu2Test {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
+
 	}
 
 	public static class OrganizationProvider implements IResourceProvider {
@@ -230,5 +219,7 @@ public class ValidateHl7OrgDstu2Test {
 		public Class<Organization> getResourceType() {
 			return Organization.class;
 		}
+
 	}
+
 }

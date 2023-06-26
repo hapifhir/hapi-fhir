@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -7,21 +8,22 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskChunkerTest {
 
 	@Mock
 	private Consumer<List<Integer>> myConsumer;
-
 	@Captor
 	private ArgumentCaptor<List<Integer>> myConsumerCaptor;
 
@@ -39,12 +41,13 @@ public class TaskChunkerTest {
 		assertEquals(newIntRangeList(10, 20), myConsumerCaptor.getAllValues().get(1));
 		assertEquals(newIntRangeList(20, 30), myConsumerCaptor.getAllValues().get(2));
 		assertEquals(newIntRangeList(30, 35), myConsumerCaptor.getAllValues().get(3));
+
 	}
 
 	@Nonnull
 	private static List<Integer> newIntRangeList(int startInclusive, int endExclusive) {
-		List<Integer> input =
-				IntStream.range(startInclusive, endExclusive).boxed().toList();
+		List<Integer> input = IntStream.range(startInclusive, endExclusive).boxed().toList();
 		return input;
 	}
+
 }

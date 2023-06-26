@@ -28,11 +28,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -86,6 +86,7 @@ public class DropForeignKeyTask extends BaseTableTask {
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myParentTableName));
 		setDescription("Drop foreign key " + myConstraintName + " from table " + getTableName());
+
 	}
 
 	@Override
@@ -102,6 +103,7 @@ public class DropForeignKeyTask extends BaseTableTask {
 		for (String next : sqls) {
 			executeSql(getTableName(), next);
 		}
+
 	}
 
 	@Override

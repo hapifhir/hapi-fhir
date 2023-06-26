@@ -51,7 +51,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 			if (oLink.isPresent()) {
 				IResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
 				ourLog.debug("Resource previously linked. Using existing link.");
-				retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
+					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}
 		}
 		return retval;

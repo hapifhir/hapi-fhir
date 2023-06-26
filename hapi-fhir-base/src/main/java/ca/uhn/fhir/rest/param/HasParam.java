@@ -43,11 +43,8 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		super();
 	}
 
-	public HasParam(
-			String theTargetResourceType,
-			String theReferenceFieldName,
-			String theParameterName,
-			String theParameterValue) {
+
+	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
 		this();
 		myTargetResourceType = theTargetResourceType;
 		myReferenceFieldName = theReferenceFieldName;
@@ -55,11 +52,12 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		myParameterValue = theParameterValue;
 	}
 
+
 	@Override
 	String doGetQueryParameterQualifier() {
 		return ':' + myTargetResourceType + ':' + myReferenceFieldName + ':' + myParameterName;
 	}
-
+	
 	@Override
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		return myParameterValue;
@@ -75,7 +73,7 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		validateColon(qualifier, colonIndex0);
 		int colonIndex1 = qualifier.indexOf(':', colonIndex0 + 1);
 		validateColon(qualifier, colonIndex1);
-
+		
 		myTargetResourceType = qualifier.substring(1, colonIndex0);
 		myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
 		myParameterName = qualifier.substring(colonIndex1 + 1);
@@ -104,7 +102,9 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		}
 	}
 
+
 	private static void throwInvalidSyntaxException(String theParameterName) {
 		throw new InvalidRequestException(Msg.code(1942) + "Invalid _has parameter syntax: " + theParameterName);
 	}
+
 }

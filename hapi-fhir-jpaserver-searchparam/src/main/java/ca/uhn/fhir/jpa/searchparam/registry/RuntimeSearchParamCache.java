@@ -32,7 +32,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
 
-	protected RuntimeSearchParamCache() {}
+	protected RuntimeSearchParamCache() {
+	}
 
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		ResourceSearchParams resourceSearchParams = getSearchParamMap(theResourceName);
@@ -64,8 +65,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	}
 
 	private void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
-		Set<Map.Entry<String, ResourceSearchParams>> builtInSps =
-				theReadOnlySearchParamCache.myResourceNameToSpNameToSp.entrySet();
+		Set<Map.Entry<String, ResourceSearchParams>> builtInSps = theReadOnlySearchParamCache.myResourceNameToSpNameToSp.entrySet();
 		for (Map.Entry<String, ResourceSearchParams> nextBuiltInEntry : builtInSps) {
 			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 				String nextResourceName = nextBuiltInEntry.getKey();
@@ -73,8 +73,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 				add(nextResourceName, nextParamName, nextParam);
 			}
 
-			ourLog.trace(
-					"Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
+			ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
 		}
 	}
 
@@ -93,12 +92,10 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 
 	@Override
 	protected ResourceSearchParams getSearchParamMap(String theResourceName) {
-		return myResourceNameToSpNameToSp.computeIfAbsent(
-				theResourceName, k -> new ResourceSearchParams(theResourceName));
+		return myResourceNameToSpNameToSp.computeIfAbsent(theResourceName, k -> new ResourceSearchParams(theResourceName));
 	}
 
-	public static RuntimeSearchParamCache fromReadOnlySearchParamCache(
-			ReadOnlySearchParamCache theBuiltInSearchParams) {
+	public static RuntimeSearchParamCache fromReadOnlySearchParamCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
 		RuntimeSearchParamCache retVal = new RuntimeSearchParamCache();
 		retVal.putAll(theBuiltInSearchParams);
 		return retVal;

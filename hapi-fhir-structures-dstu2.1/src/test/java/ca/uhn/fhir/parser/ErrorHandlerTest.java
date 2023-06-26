@@ -66,9 +66,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unexpectedRepeatingElement(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse",
-					e.getMessage());
+			assertEquals(Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -118,26 +116,20 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR",
-					e.getMessage());
+			assertEquals(Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testStrictMethods8() {
 		try {
-			new StrictErrorHandler()
-					.incorrectJsonType(
-							null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
+			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1820)
-							+ "Found incorrect type for element null - Expected SCALAR (BOOLEAN) and found SCALAR (STRING)",
-					e.getMessage());
+			assertEquals(Msg.code(1820) + "Found incorrect type for element null - Expected SCALAR (BOOLEAN) and found SCALAR (STRING)", e.getMessage());
 		}
 	}
+
 
 	@Test
 	public void testStrictMethods7() {
@@ -149,10 +141,10 @@ public class ErrorHandlerTest {
 		}
 	}
 
+
 	@Test()
 	public void testLenientMethods8() {
-		new LenientErrorHandler()
-				.incorrectJsonType(
-						null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
+		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
 	}
+
 }

@@ -20,8 +20,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("Duplicates")
-@ContextConfiguration(
-		classes = {ResourceProviderOnlySomeResourcesProvidedR4Test.OnlySomeResourcesProvidedCtxConfig.class})
+@ContextConfiguration(classes = {ResourceProviderOnlySomeResourcesProvidedR4Test.OnlySomeResourcesProvidedCtxConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourceProviderR4Test {
 
@@ -37,20 +36,19 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 			myClient.create().resource(pract).execute();
 		} catch (ResourceNotFoundException e) {
 			String errorMessage = e.getMessage();
-			assertThat(
-					errorMessage,
-					CoreMatchers.allOf(
-							containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"),
+			assertThat(errorMessage, CoreMatchers.allOf(
+				containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"),
 
-							// Error message should contain all resources providers
-							containsString("Patient"),
-							containsString("Practitioner"),
-							containsString("SearchParameter"),
+				// Error message should contain all resources providers
+				containsString("Patient"),
+				containsString("Practitioner"),
+				containsString("SearchParameter"),
 
-							// Error message should not contain the registered plain providers
-							Matchers.not(containsString("ValueSet")),
-							Matchers.not(containsString("CodeSystem")),
-							Matchers.not(containsString("OperationDefinition"))));
+				// Error message should not contain the registered plain providers
+				Matchers.not(containsString("ValueSet")),
+				Matchers.not(containsString("CodeSystem")),
+				Matchers.not(containsString("OperationDefinition"))
+			));
 		}
 	}
 
@@ -65,6 +63,7 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 			return new RegistryConfigurer(myDaoRegistry);
 		}
 
+
 		public static class RegistryConfigurer {
 			private final DaoRegistry myDaoRegistry;
 
@@ -76,11 +75,15 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 			public void start() {
 				myDaoRegistry.setSupportedResourceTypes("Patient", "Person", "SearchParameter");
 			}
+
 		}
 
 		@PreDestroy
 		public void stop() {
 			myDaoRegistry.setSupportedResourceTypes();
 		}
+
+
 	}
+
 }

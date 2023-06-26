@@ -76,6 +76,7 @@ public class BundleUtilTest {
 		assertEquals("transaction", b.getTypeElement().getValueAsString());
 	}
 
+
 	@Test
 	public void toListOfResourcesOfTypeTest() {
 		Bundle bundle = new Bundle();
@@ -106,8 +107,7 @@ public class BundleUtilTest {
 
 		Consumer<ModifiableBundleEntry> consumer = e -> e.setRequestUrl(ourCtx, e.getRequestUrl() + "?foo=bar");
 		BundleUtil.processEntries(ourCtx, bundle, consumer);
-		assertEquals(
-				"Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());
+		assertEquals("Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());
 	}
 
 	@Test
@@ -175,14 +175,14 @@ public class BundleUtilTest {
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(4));
 		obs2.setId("Observation/O2/_history/1");
-		// We use a random history version here to ensure cycles are counted without versions.
+		//We use a random history version here to ensure cycles are counted without versions.
 		obs2.setHasMember(Collections.singletonList(new Reference("Observation/O1/_history/300")));
 		bundleEntryComponent.setResource(obs2);
 		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 		try {
 			BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
 			fail();
-		} catch (IllegalStateException e) {
+		} catch (IllegalStateException e ) {
 
 		}
 	}
@@ -192,15 +192,15 @@ public class BundleUtilTest {
 
 		Bundle b = new Bundle();
 
-		// UPDATE patient
-		Bundle.BundleEntryComponent patientUpdateComponent = b.addEntry();
+		//UPDATE patient
+		Bundle.BundleEntryComponent patientUpdateComponent= b.addEntry();
 		final Patient p2 = new Patient();
 		p2.setId("Patient/P2");
 		p2.getNameFirstRep().setFamily("Test!");
 		patientUpdateComponent.setResource(p2);
 		patientUpdateComponent.getRequest().setMethod(PUT).setUrl("Patient/P2");
 
-		// CREATE observation
+		//CREATE observation
 		Bundle.BundleEntryComponent bundleEntryComponent = b.addEntry();
 		final Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -210,18 +210,18 @@ public class BundleUtilTest {
 		bundleEntryComponent.setResource(obs1);
 		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 
-		// DELETE medication
-		Bundle.BundleEntryComponent medicationComponent = b.addEntry();
+		//DELETE medication
+		Bundle.BundleEntryComponent medicationComponent= b.addEntry();
 		final Medication med1 = new Medication();
 		med1.setId("Medication/M1");
 		medicationComponent.setResource(med1);
 		medicationComponent.getRequest().setMethod(DELETE).setUrl("Medication");
 
-		// GET medication
+		//GET medication
 		Bundle.BundleEntryComponent searchComponent = b.addEntry();
 		searchComponent.getRequest().setMethod(GET).setUrl("Medication?code=123");
 
-		// CREATE patient
+		//CREATE patient
 		Bundle.BundleEntryComponent patientComponent = b.addEntry();
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
@@ -229,15 +229,15 @@ public class BundleUtilTest {
 		patientComponent.setResource(pat1);
 		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
 
-		// CREATE organization
+		//CREATE organization
 		Bundle.BundleEntryComponent organizationComponent = b.addEntry();
 		Organization org1 = new Organization();
 		org1.setId("Organization/Org1");
 		organizationComponent.setResource(org1);
 		organizationComponent.getRequest().setMethod(POST).setUrl("Organization");
 
-		// DELETE ExplanationOfBenefit
-		Bundle.BundleEntryComponent explanationOfBenefitComponent = b.addEntry();
+		//DELETE ExplanationOfBenefit
+		Bundle.BundleEntryComponent explanationOfBenefitComponent= b.addEntry();
 		final ExplanationOfBenefit eob1 = new ExplanationOfBenefit();
 		eob1.setId("ExplanationOfBenefit/E1");
 		explanationOfBenefitComponent.setResource(eob1);
@@ -273,78 +273,79 @@ public class BundleUtilTest {
 
 	@Test
 	public void testBundleToSearchBundleEntryParts() {
-		// Given
-		String bundleString = "{\n" + "  \"resourceType\": \"Bundle\",\n"
-				+ "  \"id\": \"bd194b7f-ac1e-429a-a206-ee2c470f23b5\",\n"
-				+ "  \"meta\": {\n"
-				+ "    \"lastUpdated\": \"2021-10-18T16:25:55.330-07:00\"\n"
-				+ "  },\n"
-				+ "  \"type\": \"searchset\",\n"
-				+ "  \"total\": 1,\n"
-				+ "  \"link\": [\n"
-				+ "    {\n"
-				+ "      \"relation\": \"self\",\n"
-				+ "      \"url\": \"http://localhost:8000/Patient?_count=1&_id=pata&_revinclude=Condition%3Asubject%3APatient\"\n"
-				+ "    }\n"
-				+ "  ],\n"
-				+ "  \"entry\": [\n"
-				+ "    {\n"
-				+ "      \"fullUrl\": \"http://localhost:8000/Patient/pata\",\n"
-				+ "      \"resource\": {\n"
-				+ "        \"resourceType\": \"Patient\",\n"
-				+ "        \"id\": \"pata\",\n"
-				+ "        \"meta\": {\n"
-				+ "          \"versionId\": \"1\",\n"
-				+ "          \"lastUpdated\": \"2021-10-18T16:25:48.954-07:00\",\n"
-				+ "          \"source\": \"#rnEjIucr8LR6Ze3x\"\n"
-				+ "        },\n"
-				+ "        \"name\": [\n"
-				+ "          {\n"
-				+ "            \"family\": \"Simpson\",\n"
-				+ "            \"given\": [\n"
-				+ "              \"Homer\",\n"
-				+ "              \"J\"\n"
-				+ "            ]\n"
-				+ "          }\n"
-				+ "        ]\n"
-				+ "      },\n"
-				+ "      \"search\": {\n"
-				+ "        \"mode\": \"match\"\n"
-				+ "      }\n"
-				+ "    },\n"
-				+ "    {\n"
-				+ "      \"fullUrl\": \"http://localhost:8000/Condition/1626\",\n"
-				+ "      \"resource\": {\n"
-				+ "        \"resourceType\": \"Condition\",\n"
-				+ "        \"id\": \"1626\",\n"
-				+ "        \"meta\": {\n"
-				+ "          \"versionId\": \"1\",\n"
-				+ "          \"lastUpdated\": \"2021-10-18T16:25:51.672-07:00\",\n"
-				+ "          \"source\": \"#gSOcGAdA3acaaNq1\"\n"
-				+ "        },\n"
-				+ "        \"identifier\": [\n"
-				+ "          {\n"
-				+ "            \"system\": \"urn:hssc:musc:conditionid\",\n"
-				+ "            \"value\": \"1064115000.1.5\"\n"
-				+ "          }\n"
-				+ "        ],\n"
-				+ "        \"subject\": {\n"
-				+ "          \"reference\": \"Patient/pata\"\n"
-				+ "        }\n"
-				+ "      },\n"
-				+ "      \"search\": {\n"
-				+ "        \"mode\": \"include\"\n"
-				+ "      }\n"
-				+ "    }\n"
-				+ "  ]\n"
-				+ "}";
+		//Given
+		String bundleString = "{\n" +
+			"  \"resourceType\": \"Bundle\",\n" +
+			"  \"id\": \"bd194b7f-ac1e-429a-a206-ee2c470f23b5\",\n" +
+			"  \"meta\": {\n" +
+			"    \"lastUpdated\": \"2021-10-18T16:25:55.330-07:00\"\n" +
+			"  },\n" +
+			"  \"type\": \"searchset\",\n" +
+			"  \"total\": 1,\n" +
+			"  \"link\": [\n" +
+			"    {\n" +
+			"      \"relation\": \"self\",\n" +
+			"      \"url\": \"http://localhost:8000/Patient?_count=1&_id=pata&_revinclude=Condition%3Asubject%3APatient\"\n" +
+			"    }\n" +
+			"  ],\n" +
+			"  \"entry\": [\n" +
+			"    {\n" +
+			"      \"fullUrl\": \"http://localhost:8000/Patient/pata\",\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Patient\",\n" +
+			"        \"id\": \"pata\",\n" +
+			"        \"meta\": {\n" +
+			"          \"versionId\": \"1\",\n" +
+			"          \"lastUpdated\": \"2021-10-18T16:25:48.954-07:00\",\n" +
+			"          \"source\": \"#rnEjIucr8LR6Ze3x\"\n" +
+			"        },\n" +
+			"        \"name\": [\n" +
+			"          {\n" +
+			"            \"family\": \"Simpson\",\n" +
+			"            \"given\": [\n" +
+			"              \"Homer\",\n" +
+			"              \"J\"\n" +
+			"            ]\n" +
+			"          }\n" +
+			"        ]\n" +
+			"      },\n" +
+			"      \"search\": {\n" +
+			"        \"mode\": \"match\"\n" +
+			"      }\n" +
+			"    },\n" +
+			"    {\n" +
+			"      \"fullUrl\": \"http://localhost:8000/Condition/1626\",\n" +
+			"      \"resource\": {\n" +
+			"        \"resourceType\": \"Condition\",\n" +
+			"        \"id\": \"1626\",\n" +
+			"        \"meta\": {\n" +
+			"          \"versionId\": \"1\",\n" +
+			"          \"lastUpdated\": \"2021-10-18T16:25:51.672-07:00\",\n" +
+			"          \"source\": \"#gSOcGAdA3acaaNq1\"\n" +
+			"        },\n" +
+			"        \"identifier\": [\n" +
+			"          {\n" +
+			"            \"system\": \"urn:hssc:musc:conditionid\",\n" +
+			"            \"value\": \"1064115000.1.5\"\n" +
+			"          }\n" +
+			"        ],\n" +
+			"        \"subject\": {\n" +
+			"          \"reference\": \"Patient/pata\"\n" +
+			"        }\n" +
+			"      },\n" +
+			"      \"search\": {\n" +
+			"        \"mode\": \"include\"\n" +
+			"      }\n" +
+			"    }\n" +
+			"  ]\n" +
+			"}";
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
 
-		// When
+		//When
 		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
 
-		// Then
+		//Then
 		assertThat(searchBundleEntryParts, hasSize(2));
 		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.MATCH)));
 		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Patient/pata")));
@@ -403,27 +404,18 @@ public class BundleUtilTest {
 	public void testCreateNewBundleEntryWithSingleField() {
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
-		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx, "resource", pat1);
-		assertThat(
-				((Bundle.BundleEntryComponent) bundleEntry)
-						.getResource()
-						.getIdElement()
-						.getValue(),
-				is(equalTo(pat1.getId())));
+		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"resource", pat1);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getResource().getIdElement().getValue(), is(equalTo(pat1.getId())));
 
 		UriType testUri = new UriType("http://foo");
-		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx, "fullUrl", testUri);
-		assertThat(((Bundle.BundleEntryComponent) bundleEntry).getFullUrl(), is(equalTo(testUri.getValue())));
+		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"fullUrl", testUri);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getFullUrl(), is(equalTo(testUri.getValue())));
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
 		for (int i = 0; i < entries.size(); i++) {
-			String id = entries.get(i)
-					.getResource()
-					.getIdElement()
-					.toUnqualifiedVersionless()
-					.toString();
+			String id = entries.get(i).getResource().getIdElement().toUnqualifiedVersionless().toString();
 			if (id.equals(theResourceId)) {
 				return i;
 			}
@@ -436,4 +428,5 @@ public class BundleUtilTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

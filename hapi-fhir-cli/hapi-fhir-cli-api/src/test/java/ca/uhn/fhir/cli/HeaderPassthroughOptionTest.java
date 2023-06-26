@@ -55,11 +55,10 @@ public class HeaderPassthroughOptionTest {
 	private static final String ourHierarchyFileName = "target/hierarchy.csv";
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
-			new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
+		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
-
 	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
 
 	@BeforeEach
@@ -75,7 +74,7 @@ public class HeaderPassthroughOptionTest {
 		JettyUtil.startServer(myServer);
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
-				.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
 
 	@Test
@@ -83,29 +82,21 @@ public class HeaderPassthroughOptionTest {
 		int filenameCounter = ourFilenameCounter.incrementAndGet();
 		writeConceptAndHierarchyFiles(filenameCounter);
 
-		String[] args = new String[] {
-			"-v",
-			FHIR_VERSION,
-			"-m",
-			"SNAPSHOT",
-			"-t",
-			"http://localhost:" + myPort,
-			"-u",
-			"http://foo",
-			"-d",
-			getConceptFilename(filenameCounter),
-			"-d",
-			getHierarchyFilename(filenameCounter),
-			"-hp",
-			"\"" + headerKey1 + ":" + headerValue1 + "\""
+		String[] args = new String[]{
+			"-v", FHIR_VERSION,
+			"-m", "SNAPSHOT",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
+			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
 		};
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
 		assertNotNull(myCapturingInterceptor.getLastRequest());
-		Map<String, List<String>> allHeaders =
-				myCapturingInterceptor.getLastRequest().getAllHeaders();
+		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
 		assertTrue(allHeaders.containsKey(headerKey1));
@@ -121,31 +112,22 @@ public class HeaderPassthroughOptionTest {
 
 		final String headerValue2 = "test header value-2";
 
-		String[] args = new String[] {
-			"-v",
-			FHIR_VERSION,
-			"-m",
-			"SNAPSHOT",
-			"-t",
-			"http://localhost:" + myPort,
-			"-u",
-			"http://foo",
-			"-d",
-			getConceptFilename(filenameCounter),
-			"-d",
-			getHierarchyFilename(filenameCounter),
-			"-hp",
-			"\"" + headerKey1 + ":" + headerValue1 + "\"",
-			"-hp",
-			"\"" + headerKey1 + ":" + headerValue2 + "\""
+		String[] args = new String[]{
+			"-v", FHIR_VERSION,
+			"-m", "SNAPSHOT",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
+			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+			"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
 		};
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
 		assertNotNull(myCapturingInterceptor.getLastRequest());
-		Map<String, List<String>> allHeaders =
-				myCapturingInterceptor.getLastRequest().getAllHeaders();
+		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 		assertEquals(2, allHeaders.get(headerKey1).size());
 
@@ -164,31 +146,22 @@ public class HeaderPassthroughOptionTest {
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 
-		String[] args = new String[] {
-			"-v",
-			FHIR_VERSION,
-			"-m",
-			"SNAPSHOT",
-			"-t",
-			"http://localhost:" + myPort,
-			"-u",
-			"http://foo",
-			"-d",
-			getConceptFilename(filenameCounter),
-			"-d",
-			getHierarchyFilename(filenameCounter),
-			"-hp",
-			"\"" + headerKey1 + ":" + headerValue1 + "\"",
-			"-hp",
-			"\"" + headerKey2 + ":" + headerValue2 + "\""
+		String[] args = new String[]{
+			"-v", FHIR_VERSION,
+			"-m", "SNAPSHOT",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
+			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
+			"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
 		};
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
 		assertNotNull(myCapturingInterceptor.getLastRequest());
-		Map<String, List<String>> allHeaders =
-				myCapturingInterceptor.getLastRequest().getAllHeaders();
+		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
 		assertTrue(allHeaders.containsKey(headerKey1));

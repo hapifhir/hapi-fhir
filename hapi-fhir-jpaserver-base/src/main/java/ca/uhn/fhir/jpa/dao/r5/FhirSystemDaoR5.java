@@ -27,9 +27,9 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Meta;
 
+import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
-import javax.persistence.TypedQuery;
 
 public class FhirSystemDaoR5 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
@@ -49,6 +49,7 @@ public class FhirSystemDaoR5 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return JpaResourceDao.throwProcessMessageNotImplemented();
 	}
 
+
 	protected Meta toMeta(Collection<TagDefinition> tagDefinitions) {
 		Meta retVal = new Meta();
 		for (TagDefinition next : tagDefinitions) {
@@ -57,19 +58,15 @@ public class FhirSystemDaoR5 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 					retVal.addProfile(next.getCode());
 					break;
 				case SECURITY_LABEL:
-					retVal.addSecurity()
-							.setSystem(next.getSystem())
-							.setCode(next.getCode())
-							.setDisplay(next.getDisplay());
+					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
 					break;
 				case TAG:
-					retVal.addTag()
-							.setSystem(next.getSystem())
-							.setCode(next.getCode())
-							.setDisplay(next.getDisplay());
+					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
 					break;
 			}
 		}
 		return retVal;
 	}
+
+
 }

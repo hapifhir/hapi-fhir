@@ -30,8 +30,7 @@ import java.util.Optional;
 public interface IBinaryStorageEntityDao extends JpaRepository<BinaryStorageEntity, String>, IHapiFhirJpaRepository {
 
 	@Query("SELECT e FROM BinaryStorageEntity e WHERE e.myBlobId = :blob_id AND e.myResourceId = :resource_id")
-	Optional<BinaryStorageEntity> findByIdAndResourceId(
-			@Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);
+	Optional<BinaryStorageEntity> findByIdAndResourceId(@Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);
 
 	@Modifying
 	@Query("DELETE FROM BinaryStorageEntity t WHERE t.myBlobId = :pid")

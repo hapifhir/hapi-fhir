@@ -47,7 +47,10 @@ public class FhirVersionIndependentConcept implements Comparable<FhirVersionInde
 		mySystemVersion = theSystemVersion;
 		myCode = theCode;
 		myDisplay = theDisplay;
-		myHashCode = new HashCodeBuilder(17, 37).append(mySystem).append(myCode).toHashCode();
+		myHashCode = new HashCodeBuilder(17, 37)
+			.append(mySystem)
+			.append(myCode)
+			.toHashCode();
 	}
 
 	public String getDisplay() {
@@ -79,9 +82,9 @@ public class FhirVersionIndependentConcept implements Comparable<FhirVersionInde
 		FhirVersionIndependentConcept that = (FhirVersionIndependentConcept) theO;
 
 		return new EqualsBuilder()
-				.append(mySystem, that.mySystem)
-				.append(myCode, that.myCode)
-				.isEquals();
+			.append(mySystem, that.mySystem)
+			.append(myCode, that.myCode)
+			.isEquals();
 	}
 
 	@Override

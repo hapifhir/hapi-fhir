@@ -30,12 +30,12 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 	protected static final FhirContext ourFhirContext = FhirContext.forDstu3Cached();
 	private static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
 	private static final String TEST_ADDRESS = "test-address.com";
-
 	@ClassRule
-	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(service(TEST_ADDRESS)
+	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
+		service(TEST_ADDRESS)
 			.get("/fhir/metadata")
-			.willReturn(success(getCapabilityStatement().toString(), "application/json"))));
-
+			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
+	));
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 
@@ -58,10 +58,7 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 	public StubServiceBuilder mockNotFound(String theResource) {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getText().setStatusAsString("generated");
-		outcome.getIssueFirstRep()
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setCode(OperationOutcome.IssueType.PROCESSING)
-				.setDiagnostics(theResource);
+		outcome.getIssueFirstRep().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING).setDiagnostics(theResource);
 
 		return mockFhirRead(theResource, outcome, 404);
 	}
@@ -76,34 +73,29 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 	}
 
 	public StubServiceBuilder mockFhirRead(String thePath, Resource theResource, int theStatusCode) {
-		return service(TEST_ADDRESS)
-				.get(thePath)
-				.willReturn(HoverflyDsl.response()
-						.status(theStatusCode)
-						.body(ourParser.encodeResourceToString(theResource))
-						.header("Content-Type", "application/json"));
+		return service(TEST_ADDRESS).get(thePath)
+			.willReturn(HoverflyDsl.response()
+				.status(theStatusCode)
+				.body(ourParser.encodeResourceToString(theResource))
+				.header("Content-Type", "application/json"));
 	}
 
-	public StubServiceBuilder mockFhirSearch(
-			String thePath, String theQuery, String theValue, Resource... theResources) {
-		return service(TEST_ADDRESS)
-				.get(thePath)
-				.queryParam(theQuery, theValue)
-				.willReturn(success(ourParser.encodeResourceToString(makeBundle(theResources)), "application/json"));
+	public StubServiceBuilder mockFhirSearch(String thePath, String theQuery, String theValue, Resource... theResources) {
+		return service(TEST_ADDRESS).get(thePath).queryParam(theQuery, theValue)
+			.willReturn(success(ourParser.encodeResourceToString(makeBundle(theResources)), "application/json"));
 	}
 
 	public List<StubServiceBuilder> mockValueSet(String theId, String theUrl) {
 		var valueSet = (ValueSet) read(new IdType("ValueSet", theId));
 		return Arrays.asList(
-				mockFhirSearch("/fhir/ValueSet", "url", String.format("%s/%s", theUrl, theId), valueSet),
-				mockFhirRead(String.format("/fhir/ValueSet/%s/$expand", theId), valueSet));
+			mockFhirSearch("/fhir/ValueSet", "url", String.format("%s/%s", theUrl, theId), valueSet),
+			mockFhirRead(String.format("/fhir/ValueSet/%s/$expand", theId), valueSet)
+		);
 	}
 
 	public StubServiceBuilder mockFhirPost(String thePath, Resource theResource) {
-		return service(TEST_ADDRESS)
-				.post(thePath)
-				.body(ourParser.encodeResourceToString(theResource))
-				.willReturn(success());
+		return service(TEST_ADDRESS).post(thePath).body(ourParser.encodeResourceToString(theResource))
+			.willReturn(success());
 	}
 
 	public Bundle makeBundle(Resource... theResources) {

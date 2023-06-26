@@ -46,8 +46,7 @@ public class NonFhirResponseException extends BaseServerResponseException {
 		super(theStatusCode, theMessage);
 	}
 
-	public static NonFhirResponseException newInstance(
-			int theStatusCode, String theContentType, InputStream theInputStream) {
+	public static NonFhirResponseException newInstance(int theStatusCode, String theContentType, InputStream theInputStream) {
 		return newInstance(theStatusCode, theContentType, new InputStreamReader(theInputStream, Charsets.UTF_8));
 	}
 
@@ -69,15 +68,13 @@ public class NonFhirResponseException extends BaseServerResponseException {
 		if (isBlank(theContentType)) {
 			retVal = new NonFhirResponseException(theStatusCode, "Response contains no Content-Type");
 		} else if (theContentType.contains("text")) {
-			retVal = new NonFhirResponseException(
-					theStatusCode,
-					"Response contains non FHIR Content-Type '" + theContentType + "' : " + responseBody);
+			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "' : " + responseBody);
 		} else {
-			retVal = new NonFhirResponseException(
-					theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "'");
+			retVal = new NonFhirResponseException(theStatusCode, "Response contains non FHIR Content-Type '" + theContentType + "'");
 		}
 
 		retVal.setResponseBody(responseBody);
 		return retVal;
 	}
+
 }

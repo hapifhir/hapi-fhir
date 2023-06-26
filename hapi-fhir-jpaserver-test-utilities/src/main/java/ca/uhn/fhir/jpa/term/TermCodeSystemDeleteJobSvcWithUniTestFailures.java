@@ -26,8 +26,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSystemDeleteJobSvc
-		implements ITermCodeSystemDeleteJobSvc {
+public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
+
 
 	private static final AtomicBoolean ourFailNextDeleteCodeSystemVersion = new AtomicBoolean(false);
 
@@ -39,6 +39,7 @@ public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSyste
 		ourFailNextDeleteCodeSystemVersion.set(theFailNextDeleteCodeSystemVersion);
 	}
 
+
 	@Override
 	public void deleteCodeSystemVersion(long theVersionPid) {
 		// Force a failure for unit tests
@@ -48,4 +49,6 @@ public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSyste
 
 		super.deleteCodeSystemVersion(theVersionPid);
 	}
-}
+
+
+	}

@@ -59,17 +59,14 @@ public class PreferTest {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
-
+		
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
 		ourReturnOperationOutcome = oo;
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.addHeader(
-				Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -82,12 +79,9 @@ public class PreferTest {
 		assertThat(responseContent, is(emptyOrNullString()));
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), not(containsString("fhir")));
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("location").getValue());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 	}
 
 	@Test
@@ -101,12 +95,8 @@ public class PreferTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -117,18 +107,10 @@ public class PreferTest {
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("DIAG"));
-		assertEquals(
-				"application/xml+fhir;charset=utf-8",
-				status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)
-						.getValue()
-						.toLowerCase()
-						.replace(" ", ""));
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("location").getValue());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
+		assertEquals("application/xml+fhir;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toLowerCase().replace(" ", ""));
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 	}
 
 	@Test
@@ -138,12 +120,8 @@ public class PreferTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -153,17 +131,11 @@ public class PreferTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(
-				status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertEquals(
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>",
-				responseContent);
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("location").getValue());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), containsString(Constants.CT_FHIR_XML));
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 	}
 
 	@Test
@@ -173,9 +145,7 @@ public class PreferTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -185,12 +155,9 @@ public class PreferTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("location").getValue());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+
 	}
 
 	@AfterAll
@@ -212,13 +179,13 @@ public class PreferTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -251,5 +218,7 @@ public class PreferTest {
 
 			return retVal;
 		}
+
 	}
+
 }

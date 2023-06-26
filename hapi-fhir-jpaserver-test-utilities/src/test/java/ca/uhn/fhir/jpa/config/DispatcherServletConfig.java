@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.config;
 
-import org.springframework.context.annotation.Configuration;
-
 import javax.el.ExpressionFactory;
+
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DispatcherServletConfig {
-	// nothing
-
+	//nothing
+	
 	ExpressionFactory myFacg;
 }

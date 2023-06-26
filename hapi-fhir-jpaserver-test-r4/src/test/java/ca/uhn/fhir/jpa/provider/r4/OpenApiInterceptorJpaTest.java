@@ -21,9 +21,7 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myServer.getRestfulServer()
-				.getInterceptorService()
-				.unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 	@Test
@@ -46,4 +44,6 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 	}
+
+
 }

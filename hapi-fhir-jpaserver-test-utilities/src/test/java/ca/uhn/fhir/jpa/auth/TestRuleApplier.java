@@ -28,13 +28,7 @@ public class TestRuleApplier implements IRuleApplier {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict applyRulesAndReturnDecision(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			Pointcut thePointcut) {
+	public AuthorizationInterceptor.Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut) {
 		return null;
 	}
 

@@ -27,8 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -49,8 +49,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension =
-			new RestfulServerExtension(ourCtx, myCodeSystemProvider, myValueSetProvider);
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx, myCodeSystemProvider,
+		myValueSetProvider);
 
 	private RemoteTerminologyServiceValidationSupport mySvc;
 
@@ -58,8 +58,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void before_ConfigureService() {
 		String myBaseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, myBaseUrl);
-		mySvc.addClientInterceptor(
-				new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
+		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
 	}
 
 	@AfterEach
@@ -70,8 +69,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 	@Test
 	public void testValidateCodeInCodeSystem_BlankCode_ReturnsNull() {
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCode(null, null, CODE_SYSTEM, null, DISPLAY, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, null, DISPLAY, null);
 		assertNull(outcome);
 	}
 
@@ -79,7 +78,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_ProvidingMinimalInputs_ReturnsSuccess() {
 		createNextCodeSystemReturnParameters(true, null, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(null, outcome.getSeverity());
 		assertEquals(null, outcome.getMessage());
@@ -92,8 +92,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_WithMessageValue_ReturnsMessage() {
 		createNextCodeSystemReturnParameters(true, DISPLAY, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -102,33 +102,27 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myCodeSystemProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertEquals(
-				SAMPLE_MESSAGE,
-				myCodeSystemProvider
-						.myNextReturnParams
-						.getParameterValue("message")
-						.toString());
+		assertEquals(SAMPLE_MESSAGE, myCodeSystemProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	@Test
 	public void testValidateCodeInCodeSystem_AssumeFailure_ReturnsFailureCodeAndFailureMessage() {
 		createNextCodeSystemReturnParameters(false, null, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(SAMPLE_MESSAGE, outcome.getMessage());
 
-		assertEquals(
-				false,
-				((BooleanType) myCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
+		assertEquals(false, ((BooleanType)myCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
 	}
 
 	@Test
 	public void testValidateCodeInValueSet_ProvidingMinimalInputs_ReturnsSuccess() {
 		createNextValueSetReturnParameters(true, null, null);
 
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(null, outcome.getSeverity());
 		assertEquals(null, outcome.getMessage());
@@ -141,8 +135,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInValueSet_WithMessageValue_ReturnsMessage() {
 		createNextValueSetReturnParameters(true, DISPLAY, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome =
-				mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -151,12 +145,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
-		assertEquals(
-				SAMPLE_MESSAGE,
-				myValueSetProvider
-						.myNextReturnParams
-						.getParameterValue("message")
-						.toString());
+		assertEquals(SAMPLE_MESSAGE, myValueSetProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
@@ -186,25 +175,24 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		private StringType myLastDisplay;
 		private Parameters myNextReturnParams;
 
-		@Operation(
-				name = "validate-code",
-				idempotent = true,
-				returnParameters = {
-					@OperationParam(name = "result", type = BooleanType.class, min = 1),
-					@OperationParam(name = "message", type = StringType.class),
-					@OperationParam(name = "display", type = StringType.class)
-				})
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1),
+			@OperationParam(name = "message", type = StringType.class),
+			@OperationParam(name = "display", type = StringType.class)
+		})
 		public Parameters validateCode(
-				HttpServletRequest theServletRequest,
-				@IdParam(optional = true) IdType theId,
-				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
-				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay) {
+			HttpServletRequest theServletRequest,
+			@IdParam(optional = true) IdType theId,
+			@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
+		) {
 			myInvocationCount++;
 			myLastUrl = theCodeSystemUrl;
 			myLastCode = theCode;
 			myLastDisplay = theDisplay;
 			return myNextReturnParams;
+
 		}
 
 		@Search
@@ -220,6 +208,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		}
 	}
 
+
 	private static class MyValueSetProvider implements IResourceProvider {
 		private Parameters myNextReturnParams;
 		private List<ValueSet> myNextReturnValueSets;
@@ -231,22 +220,20 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		private ValueSet myLastValueSet;
 		private UriParam myLastUrlParam;
 
-		@Operation(
-				name = "validate-code",
-				idempotent = true,
-				returnParameters = {
-					@OperationParam(name = "result", type = BooleanType.class, min = 1),
-					@OperationParam(name = "message", type = StringType.class),
-					@OperationParam(name = "display", type = StringType.class)
-				})
+		@Operation(name = "validate-code", idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1),
+			@OperationParam(name = "message", type = StringType.class),
+			@OperationParam(name = "display", type = StringType.class)
+		})
 		public Parameters validateCode(
-				HttpServletRequest theServletRequest,
-				@IdParam(optional = true) IdType theId,
-				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
-				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
-				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
-				@OperationParam(name = "valueSet") ValueSet theValueSet) {
+			HttpServletRequest theServletRequest,
+			@IdParam(optional = true) IdType theId,
+			@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
+			@OperationParam(name = "valueSet") ValueSet theValueSet
+		) {
 			myInvocationCount++;
 			myLastUrl = theValueSetUrl;
 			myLastCode = theCode;
@@ -267,5 +254,6 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return ValueSet.class;
 		}
+
 	}
 }

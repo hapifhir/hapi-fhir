@@ -53,23 +53,17 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportR4Test.class);
 	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
-
 	@RegisterExtension
-	private final HttpServletExtension myHttpServletExtension =
-			new HttpServletExtension().withServlet(myBulkImportFileServlet);
-
+	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
+		.withServlet(myBulkImportFileServlet);
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	private IJobMaintenanceService myJobCleanerService;
-
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
-
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
-
 	@Qualifier("batch2ProcessingChannelReceiver")
 	@Autowired
 	private IChannelReceiver myChannelReceiver;
@@ -108,14 +102,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Verify
 
-		await().atMost(120, TimeUnit.SECONDS)
-				.until(
-						() -> {
-							myJobCleanerService.runMaintenancePass();
-							JobInstance instance = myJobCoordinator.getInstance(instanceId);
-							return instance.getStatus();
-						},
-						equalTo(StatusEnum.COMPLETED));
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
+			myJobCleanerService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			return instance.getStatus();
+		}, equalTo(StatusEnum.COMPLETED));
 
 		runInTransaction(() -> {
 			assertEquals(200, myResourceTableDao.count());
@@ -153,8 +144,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
 			throw new NullPointerException("This is an exception");
 		};
-		myInterceptorRegistry.registerAnonymousInterceptor(
-				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, anonymousInterceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, anonymousInterceptor);
 		try {
 
 			// Execute
@@ -166,46 +156,41 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Verify
 
-			await().until(
-							() -> {
-								myJobCleanerService.runMaintenancePass();
-								JobInstance instance = myJobCoordinator.getInstance(instanceId);
-								StatusEnum status = instance.getStatus();
-								ourLog.info("Job status for instance[{}]: {}", instanceId, status);
+			await().until(() -> {
+				myJobCleanerService.runMaintenancePass();
+				JobInstance instance = myJobCoordinator.getInstance(instanceId);
+				StatusEnum status = instance.getStatus();
+				ourLog.info("Job status for instance[{}]: {}", instanceId, status);
 
-								runInTransaction(() -> {
-									List<Batch2WorkChunkEntity> allChunks =
-											myWorkChunkRepository.fetchChunks(Pageable.ofSize(1000), instanceId);
-									ourLog.info("Chunks:\n * "
-											+ allChunks.stream()
-													.map(t -> t.toString())
-													.collect(Collectors.joining("\n * ")));
-								});
+				runInTransaction(()->{
+					List<Batch2WorkChunkEntity> allChunks = myWorkChunkRepository.fetchChunks(Pageable.ofSize(1000), instanceId);
+					ourLog.info("Chunks:\n * " + allChunks.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+				});
 
-								return status;
-							},
-							equalTo(StatusEnum.ERRORED));
+				return status;
+			}, equalTo(StatusEnum.ERRORED));
 
 			String storageDescription = runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
-				String storage = myJobInstanceRepository.findAll().stream()
-						.map(t -> "\n * " + t.toString())
-						.collect(Collectors.joining(""));
-				storage += myWorkChunkRepository.findAll().stream()
-						.map(t -> "\n * " + t.toString())
-						.collect(Collectors.joining(""));
+				String storage = myJobInstanceRepository
+					.findAll()
+					.stream()
+					.map(t -> "\n * " + t.toString())
+					.collect(Collectors.joining(""));
+				storage += myWorkChunkRepository
+					.findAll()
+					.stream()
+					.map(t -> "\n * " + t.toString())
+					.collect(Collectors.joining(""));
 				ourLog.info("Stored entities:{}", storage);
 				return storage;
 			});
 
-			await().atMost(120, TimeUnit.SECONDS)
-					.until(
-							() -> {
-								myJobCleanerService.runMaintenancePass();
-								JobInstance instance = myJobCoordinator.getInstance(instanceId);
-								return instance.getErrorCount();
-							},
-							greaterThan(0)); // This should hit 3, but concurrency can lead it to only hitting 1-2
+			await().atMost(120, TimeUnit.SECONDS).until(() -> {
+				myJobCleanerService.runMaintenancePass();
+				JobInstance instance = myJobCoordinator.getInstance(instanceId);
+				return instance.getErrorCount();
+			}, greaterThan(0)); // This should hit 3, but concurrency can lead it to only hitting 1-2
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
@@ -220,8 +205,10 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} finally {
 
 			myInterceptorRegistry.unregisterInterceptor(anonymousInterceptor);
+
 		}
 	}
+
 
 	@Test
 	public void testRunBulkImport_InvalidFileContents() {
@@ -249,13 +236,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Verify
 
-		await().until(
-						() -> {
-							myJobCleanerService.runMaintenancePass();
-							JobInstance instance = myJobCoordinator.getInstance(instanceId);
-							return instance.getStatus();
-						},
-						equalTo(StatusEnum.FAILED));
+		await().until(() -> {
+			myJobCleanerService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			return instance.getStatus();
+		}, equalTo(StatusEnum.FAILED));
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
@@ -266,6 +251,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		assertNotNull(instance.getEndTime());
 		assertThat(instance.getErrorMessage(), containsString("Unknown resource name \"Foo\""));
 	}
+
 
 	@Test
 	public void testRunBulkImport_UnknownTargetFile() {
@@ -282,8 +268,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
 			throw new NullPointerException("This is an exception");
 		};
-		myInterceptorRegistry.registerAnonymousInterceptor(
-				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, anonymousInterceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, anonymousInterceptor);
 		try {
 
 			// Execute
@@ -294,13 +279,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Verify
 
-			await().until(
-							() -> {
-								myJobCleanerService.runMaintenancePass();
-								JobInstance instance = myJobCoordinator.getInstance(instanceId);
-								return instance.getStatus();
-							},
-							equalTo(StatusEnum.FAILED));
+			await().until(() -> {
+				myJobCleanerService.runMaintenancePass();
+				JobInstance instance = myJobCoordinator.getInstance(instanceId);
+				return instance.getStatus();
+			}, equalTo(StatusEnum.FAILED));
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
@@ -315,6 +298,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} finally {
 
 			myInterceptorRegistry.unregisterInterceptor(anonymousInterceptor);
+
 		}
 	}
 
@@ -334,6 +318,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Verify
 			assertEquals("HAPI-2065: No parameters supplied", e.getMessage());
+
 		}
 	}
 
@@ -353,11 +338,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			String expected =
-					"""
+			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls - At least one NDJSON URL must be provided""";
 			assertEquals(expected, e.getMessage());
+
 		}
 	}
 
@@ -380,11 +365,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			String expected =
-					"""
+			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls[0].<list element> - Must be a valid URL""";
 			assertEquals(expected, e.getMessage());
+
 		}
 	}
 

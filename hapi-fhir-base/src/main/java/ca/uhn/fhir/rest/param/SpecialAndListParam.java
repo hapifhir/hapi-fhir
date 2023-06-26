@@ -21,17 +21,19 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
+
 public class SpecialAndListParam extends BaseAndListParam<SpecialOrListParam> {
 
 	@Override
 	SpecialOrListParam newInstance() {
 		return new SpecialOrListParam();
 	}
-
+	
 	@CoverageIgnore
 	@Override
 	public SpecialAndListParam addAnd(SpecialOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
+
 }

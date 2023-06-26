@@ -43,8 +43,7 @@ public class BaseDateTimeTypeDstu3Test {
 	@BeforeEach
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		myDateInstantZoneParser =
-				FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
+		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
 
 	@Test
@@ -77,9 +76,7 @@ public class BaseDateTimeTypeDstu3Test {
 			dt.setValueAsString("2013-02-03T11:22");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					e.getMessage(),
-					"Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22");
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22");
 		}
 	}
 
@@ -91,9 +88,7 @@ public class BaseDateTimeTypeDstu3Test {
 			dt.setValueAsString("2013-02-03T11:22Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					e.getMessage(),
-					"Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22Z");
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22Z");
 		}
 	}
 
@@ -109,9 +104,7 @@ public class BaseDateTimeTypeDstu3Test {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType()));
 			fail();
 		} catch (NullPointerException e) {
-			assertEquals(
-					"The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)",
-					e.getMessage());
+			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(null));
@@ -133,9 +126,7 @@ public class BaseDateTimeTypeDstu3Test {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType()));
 			fail();
 		} catch (NullPointerException e) {
-			assertEquals(
-					"The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)",
-					e.getMessage());
+			assertEquals("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)", e.getMessage());
 		}
 		try {
 			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(null));
@@ -215,8 +206,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
 
 		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
-		String outcomeStr =
-				ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
+		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeStr);
 
 		assertThat(outcomeStr, containsString("date-primitive"));
@@ -274,9 +264,7 @@ public class BaseDateTimeTypeDstu3Test {
 
 	@Test
 	public void testEncodeOffset() throws Exception {
-		String offset = InstantType.withCurrentTime()
-				.setTimeZone(TimeZone.getTimeZone("America/Toronto"))
-				.getValueAsString();
+		String offset = InstantType.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
 		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
 	}
 
@@ -309,6 +297,7 @@ public class BaseDateTimeTypeDstu3Test {
 		millis = 1466022208000L;
 		expected = "2016-06-15T20:23:28.000Z";
 		validate(millis, expected);
+
 	}
 
 	@Test
@@ -412,6 +401,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(44, type.getMinute().intValue());
 		assertEquals(25, type.getSecond().intValue());
 		assertEquals(12, type.getMillis().intValue());
+
 	}
 
 	@Test
@@ -442,6 +432,7 @@ public class BaseDateTimeTypeDstu3Test {
 		} catch (DataFormatException e) {
 			// good
 		}
+
 	}
 
 	@Test
@@ -489,9 +480,7 @@ public class BaseDateTimeTypeDstu3Test {
 			dt.setValueAsString("1974-12-25+10:00");
 			fail();
 		} catch (ca.uhn.fhir.parser.DataFormatException e) {
-			assertEquals(
-					"Invalid date/time format: \"1974-12-25+10:00\": Expected character 'T' at index 10 but found +",
-					e.getMessage());
+			assertEquals("Invalid date/time format: \"1974-12-25+10:00\": Expected character 'T' at index 10 but found +", e.getMessage());
 		}
 		try {
 			DateTimeType dt = new DateTimeType();
@@ -518,9 +507,7 @@ public class BaseDateTimeTypeDstu3Test {
 			new DateTimeType("20120102");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					"Invalid date/time format: \"20120102\": Expected character '-' at index 4 but found 0",
-					e.getMessage());
+			assertEquals("Invalid date/time format: \"20120102\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
 
@@ -529,9 +516,7 @@ public class BaseDateTimeTypeDstu3Test {
 		InstantType dt = new InstantType();
 		dt.setValueAsString("2013-02-03T11:22:33.234");
 
-		assertEquals(
-				"2013-02-03 11:22:33.234",
-				myDateInstantParser.format(dt.getValue()).substring(0, 23));
+		assertEquals("2013-02-03 11:22:33.234", myDateInstantParser.format(dt.getValue()).substring(0, 23));
 		assertEquals("2013-02-03T11:22:33.234", dt.getValueAsString());
 		assertEquals(false, dt.isTimeZoneZulu());
 		assertNull(dt.getTimeZone());
@@ -580,12 +565,10 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testParseMonthNoDashes() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
 		try {
-			dt.setValueAsString("201302");
+		dt.setValueAsString("201302");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					"Invalid date/time format: \"201302\": Expected character '-' at index 4 but found 0",
-					e.getMessage());
+			assertEquals("Invalid date/time format: \"201302\": Expected character '-' at index 4 but found 0", e.getMessage());
 		}
 	}
 
@@ -595,9 +578,7 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			dt.setValueAsString("2013-02-03T11:22");
 		} catch (DataFormatException e) {
-			assertEquals(
-					"Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22",
-					e.getMessage());
+			assertEquals("Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22", e.getMessage());
 		}
 	}
 
@@ -607,9 +588,7 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			dt.setValueAsString("2013-02-03T11:22Z");
 		} catch (Exception e) {
-			assertEquals(
-					"Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22Z",
-					e.getMessage());
+			assertEquals("Invalid date/time string (datatype DateTimeType does not support MINUTE precision): 2013-02-03T11:22Z", e.getMessage());
 		}
 	}
 
@@ -618,8 +597,7 @@ public class BaseDateTimeTypeDstu3Test {
 		DateTimeType dt = new DateTimeType();
 		dt.setValueAsString("2013-02-03T11:22:33");
 
-		assertEquals(
-				"2013-02-03 11:22:33", myDateInstantParser.format(dt.getValue()).substring(0, 19));
+		assertEquals("2013-02-03 11:22:33", myDateInstantParser.format(dt.getValue()).substring(0, 19));
 		assertEquals("2013-02-03T11:22:33", dt.getValueAsString());
 		assertEquals(false, dt.isTimeZoneZulu());
 		assertNull(dt.getTimeZone());
@@ -919,9 +897,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertEquals(expected, dt.getValueAsString());
 
 		assertEquals(millis % 1000, dt.getMillis().longValue());
-		assertEquals(
-				(millis % 1000) * BaseDateTimeType.NANOS_PER_MILLIS,
-				dt.getNanos().longValue());
+		assertEquals((millis % 1000) * BaseDateTimeType.NANOS_PER_MILLIS, dt.getNanos().longValue());
 
 		dt = new InstantType();
 		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
@@ -964,10 +940,11 @@ public class BaseDateTimeTypeDstu3Test {
 		 */
 		ourDefaultLocale = Locale.getDefault();
 
-		Locale[] available = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
 		Locale newLocale = available[(int) (Math.random() * available.length)];
 		Locale.setDefault(newLocale);
 
 		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
 	}
+
 }

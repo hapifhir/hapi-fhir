@@ -66,8 +66,9 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("456");
 
 		// test
-		Map<String, JpaPid> idToPid =
-				myHelperService.resolveResourcePersistentIds(partitionId, resourceType, patientIdsToResolve);
+		Map<String, JpaPid> idToPid = myHelperService.resolveResourcePersistentIds(partitionId,
+			resourceType,
+			patientIdsToResolve);
 
 		Assertions.assertFalse(idToPid.isEmpty());
 		for (String pid : patientIdsToResolve) {
@@ -83,19 +84,32 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("RED");
 		patientIdsToResolve.add("BLUE");
 
-		Object[] redView = new Object[] {"Patient", 123l, "RED", new Date()};
-		Object[] blueView = new Object[] {"Patient", 456l, "BLUE", new Date()};
+		Object[] redView = new Object[] {
+			"Patient",
+			123l,
+			"RED",
+			new Date()
+		};
+		Object[] blueView = new Object[] {
+			"Patient",
+			456l,
+			"BLUE",
+			new Date()
+		};
 
 		// when
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoType(
-						Mockito.anyString(), Mockito.anyList(), Mockito.anyBoolean()))
-				.thenReturn(Collections.singletonList(redView))
-				.thenReturn(Collections.singletonList(blueView));
+		when(myStorageSettings.isDeleteEnabled())
+			.thenReturn(true);
+		when(myForcedIdDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
+			Mockito.anyList(), Mockito.anyBoolean()))
+			.thenReturn(Collections.singletonList(redView))
+			.thenReturn(Collections.singletonList(blueView));
 
 		// test
-		Map<String, JpaPid> map =
-				myHelperService.resolveResourcePersistentIds(partitionId, resourceType, patientIdsToResolve);
+		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
+			partitionId,
+			resourceType,
+			patientIdsToResolve);
 
 		Assertions.assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
@@ -115,14 +129,18 @@ public class IdHelperServiceTest {
 		JpaPid blue = JpaPid.fromIdAndVersion(456L, 456L);
 
 		// we will pretend the lookup value is in the cache
-		when(myMemoryCacheService.getThenPutAfterCommit(
-						any(MemoryCacheService.CacheEnum.class), Mockito.anyString(), any(Function.class)))
-				.thenReturn(red)
-				.thenReturn(blue);
+		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
+			Mockito.anyString(),
+			any(Function.class)))
+			.thenReturn(red)
+			.thenReturn(blue);
 
 		// test
-		Map<String, JpaPid> map =
-				myHelperService.resolveResourcePersistentIds(partitionId, resourceType, patientIdsToResolve);
+		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
+			partitionId,
+			resourceType,
+			patientIdsToResolve
+		);
 
 		Assertions.assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
@@ -133,7 +151,7 @@ public class IdHelperServiceTest {
 	}
 
 	@Test
-	public void testResolveResourceIdentity_defaultFunctionality() {
+	public void testResolveResourceIdentity_defaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
 		String resourceForcedId = "AAA";
@@ -146,18 +164,16 @@ public class IdHelperServiceTest {
 
 		Collection<Object[]> testForcedIdViews = new ArrayList<>();
 		testForcedIdViews.add(forcedIdView);
-		when(myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean()))
-				.thenReturn(testForcedIdViews);
+		when(myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
-		IResourceLookup<JpaPid> result =
-				myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
+		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
 		assertEquals(forcedIdView[0], result.getResourceType());
 		assertEquals(forcedIdView[1], result.getPersistentId().getId());
 		assertEquals(forcedIdView[3], result.getDeleted());
 	}
 
 	@Test
-	public void testResolveResourcePersistentIds_mapDefaultFunctionality() {
+	public void testResolveResourcePersistentIds_mapDefaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
 		List<String> ids = Arrays.asList("A", "B", "C");
@@ -166,12 +182,11 @@ public class IdHelperServiceTest {
 		JpaPid resourcePersistentId2 = JpaPid.fromId(2L);
 		JpaPid resourcePersistentId3 = JpaPid.fromId(3L);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
-				.thenReturn(resourcePersistentId1)
-				.thenReturn(resourcePersistentId2)
-				.thenReturn(resourcePersistentId3);
-		Map<String, JpaPid> result =
-				myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids).entrySet().stream()
-						.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
+			.thenReturn(resourcePersistentId1)
+			.thenReturn(resourcePersistentId2)
+			.thenReturn(resourcePersistentId3);
+		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
+			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
 		assertThat(result.keySet(), hasSize(3));
 		assertEquals(1L, result.get("A").getId());
 		assertEquals(2L, result.get("B").getId());
@@ -179,7 +194,7 @@ public class IdHelperServiceTest {
 	}
 
 	@Test
-	public void testResolveResourcePersistentIds_resourcePidDefaultFunctionality() {
+	public void testResolveResourcePersistentIds_resourcePidDefaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
 		Long id = 1L;

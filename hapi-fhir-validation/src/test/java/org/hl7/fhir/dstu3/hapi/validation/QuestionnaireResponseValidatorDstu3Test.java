@@ -75,14 +75,12 @@ import static org.mockito.Mockito.when;
 public class QuestionnaireResponseValidatorDstu3Test {
 	private static final String QUESTIONNAIRE_URL = "http://example.com/Questionnaire/q1";
 	private static final IdType ID_ICC_QUESTIONNAIRE_SETUP = new IdType("Questionnaire/profile");
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final IdType ID_VS_SCHOOLTYPE = new IdType("ValueSet/schooltype");
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static DefaultProfileValidationSupport myDefaultValidationSupport =
-			new DefaultProfileValidationSupport(ourCtx);
+	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
@@ -96,14 +94,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(
-				myDefaultValidationSupport,
-				myValSupport,
-				new InMemoryTerminologyServerValidationSupport(ourCtx),
-				new CommonCodeSystemsTerminologyService(ourCtx));
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
+
 	}
 
 	private ValidationResult stripBindingHasNoSourceMessage(ValidationResult theErrors) {
@@ -126,11 +121,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.addConcept().setCode("code0");
 
 		ValueSet options = new ValueSet();
-		options.getCompose()
-				.addInclude()
-				.setSystem("http://codesystems.com/system")
-				.addConcept()
-				.setCode("code0");
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 
 		int itemCnt = 16;
 		QuestionnaireItemType[] questionnaireItemTypes = new QuestionnaireItemType[itemCnt];
@@ -162,10 +153,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		answerValues[7] = new StringType("some text");
 		answerValues[8] = new MarkdownType("some text");
 		answerValues[9] = new UriType("http://example.com");
-		answerValues[10] =
-				new Coding().setSystem("http://codesystems.com/system").setCode("code0");
-		answerValues[11] =
-				new Coding().setSystem("http://codesystems.com/system").setCode("code0");
+		answerValues[10] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
+		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[12] = new StringType("some value");
 		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType("txt");
 		answerValues[14] = new Reference(QUESTIONNAIRE_URL);
@@ -179,29 +168,21 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 			reset(myValSupport);
 			Questionnaire q = new Questionnaire();
-			when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL)))
-					.thenReturn(q);
-			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system")))
-					.thenReturn(codeSystem);
-			when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset")))
-					.thenReturn(options);
-			when(myValSupport.validateCodeInValueSet(
-							any(),
-							any(),
-							eq("http://codesystems.com/system"),
-							eq("code0"),
-							any(),
-							nullable(ValueSet.class)))
-					.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
+			when(myValSupport.fetchResource(eq(Questionnaire.class),
+				eq(QUESTIONNAIRE_URL))).thenReturn(q);
+			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+			when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+			when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
+				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 			q.getItem().clear();
 			QuestionnaireItemComponent questionnaireItemComponent =
-					q.addItem().setLinkId(linkId).setRequired(true).setType(questionnaireItemTypes[i]);
+				q.addItem().setLinkId(linkId).setRequired(true).setType(questionnaireItemTypes[i]);
 			if (i == 10 || i == 11) {
 				questionnaireItemComponent.setOptions(new Reference("http://somevalueset"));
 			} else if (i == 12) {
 				questionnaireItemComponent.setOption(
-						Collections.singletonList(new QuestionnaireItemOptionComponent(new StringType("some value"))));
+					Collections.singletonList(new QuestionnaireItemOptionComponent(new StringType("some value"))));
 			}
 
 			QuestionnaireResponse qa = new QuestionnaireResponse();
@@ -225,9 +206,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
@@ -240,36 +219,15 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		String questionnaireRef = QUESTIONNAIRE_URL;
 
 		Questionnaire q = new Questionnaire();
-		q.addItem()
-				.setLinkId("link0")
-				.setRequired(false)
-				.setType(QuestionnaireItemType.CHOICE)
-				.setOptions(new Reference("http://somevalueset"));
-		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL)))
-				.thenReturn(q);
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system")))
-				.thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2")))
-				.thenReturn(true);
-		when(myValSupport.validateCodeInValueSet(
-						any(),
-						any(),
-						eq("http://codesystems.com/system"),
-						eq("code0"),
-						any(),
-						nullable(ValueSet.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCodeInValueSet(
-						any(),
-						any(),
-						eq("http://codesystems.com/system"),
-						eq("code1"),
-						any(),
-						nullable(ValueSet.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode())
-						.setMessage("Unknown code"));
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
+		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -284,27 +242,15 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
-		options.getCompose()
-				.addInclude()
-				.setSystem("http://codesystems.com/system")
-				.addConcept()
-				.setCode("code0");
-		options.getCompose()
-				.addInclude()
-				.setSystem("http://codesystems.com/system2")
-				.addConcept()
-				.setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset")))
-				.thenReturn(options);
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(
-						any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
-		when(myValSupport.validateCode(
-						any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverityCode("warning")
-						.setMessage("Unknown code: http://codesystems.com/system / code1"));
+		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode("warning").setMessage("Unknown code: http://codesystems.com/system / code1"));
+
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
@@ -314,11 +260,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(
-						new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		assertEquals(0, errors.getMessages().size(), errors.toString());
@@ -328,18 +270,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(
-						new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(
-				errors.toString(),
-				containsString(
-						"Unknown code: http://codesystems.com/system / code1 for 'http://codesystems.com/system#code1'"));
+		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system / code1 for 'http://codesystems.com/system#code1'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Unhandled system
@@ -347,16 +282,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(
-						new Coding().setSystem("http://codesystems.com/system2").setCode("code3"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system2").setCode("code3"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+
 	}
 
 	@Test
@@ -371,38 +303,25 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponseItemComponent qaGroup = qa.addItem();
 		qaGroup.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(
-				errors.toString(),
-				containsString("QuestionnaireResponse.item.linkId: minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.linkId: minimum required = 1, but only found 0"));
 	}
 
 	@Test
 	public void testMissingAnswerInNestedStructureIsReported() {
 		Questionnaire q = new Questionnaire();
-		q.addItem()
-				.setType(QuestionnaireItemType.GROUP)
-				.setRequired(true)
-				.addItem()
-				.setType(QuestionnaireItemType.GROUP)
-				.setRequired(true)
-				.addItem()
-				.setType(QuestionnaireItemType.BOOLEAN)
-				.setLinkId("link0")
-				.setRequired(true);
+		q.addItem().setType(QuestionnaireItemType.GROUP).setRequired(true)
+			.addItem().setType(QuestionnaireItemType.GROUP).setRequired(true)
+			.addItem().setType(QuestionnaireItemType.BOOLEAN).setLinkId("link0").setRequired(true);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
@@ -412,23 +331,16 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	@Test
 	public void testGroupMarkedAsRequiredIsOk() {
 		Questionnaire q = new Questionnaire();
-		q.addItem()
-				.setType(QuestionnaireItemType.GROUP)
-				.setRequired(true)
-				.setLinkId("group")
-				.addItem()
-				.setType(QuestionnaireItemType.BOOLEAN)
-				.setLinkId("child")
-				.setRequired(true);
+		q.addItem().setType(QuestionnaireItemType.GROUP).setRequired(true).setLinkId("group")
+			.addItem().setType(QuestionnaireItemType.BOOLEAN).setLinkId("child").setRequired(true);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
-		qa.addItem().setLinkId("group").addItem().setLinkId("child").addAnswer().setValue(new BooleanType(true));
+		qa.addItem().setLinkId("group")
+			.addItem().setLinkId("child").addAnswer().setValue(new BooleanType(true));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 
 		ValidationResult errors = myVal.validateWithResult(qa);
 
@@ -447,9 +359,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponseItemComponent qaItem = qa.addItem().setLinkId("link0");
 		qaItem.addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -481,13 +391,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	public void testEnableWhenWithHasAnswerTrueDisablesQuestionWhenNoAnswerIsPresent() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
-		q.addItem()
-				.setLinkId("link1")
-				.setRequired(true)
-				.setType(QuestionnaireItemType.STRING)
-				.addEnableWhen()
-				.setQuestion("link0")
-				.setHasAnswer(true);
+		q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -509,12 +414,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
-		item1.setLinkId("link1")
-				.setRequired(true)
-				.setType(QuestionnaireItemType.STRING)
-				.addEnableWhen()
-				.setQuestion("link0")
-				.setHasAnswer(true);
+		item1.setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
 		q.addItem(item1);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
@@ -564,7 +464,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 
-		// link1 question is enabled when link0 has answer
+		//link1 question is enabled when link0 has answer
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
 		q.addItem(item1);
@@ -591,7 +491,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 
-		// link1 question is enabled when link0 has answer
+		//link1 question is enabled when link0 has answer
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1").setType(QuestionnaireItemType.STRING).setRequired(true);
 		q.addItem(item1);
@@ -617,24 +517,21 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	public void testRequiredQuestionCodingWithEnableWhenEnablesQuestionValue() {
 		Questionnaire q = new Questionnaire();
 		q.addItem()
-				.setLinkId("link0")
-				.setRequired(false)
-				.setType(CHOICE)
-				.addOption(new Questionnaire.QuestionnaireItemOptionComponent()
-						.setValue(new Coding("http://foo", "YES", null)))
-				.addOption(new Questionnaire.QuestionnaireItemOptionComponent()
-						.setValue(new Coding("http://foo", "NO", null)));
+			.setLinkId("link0")
+			.setRequired(false)
+			.setType(CHOICE)
+			.addOption(new Questionnaire.QuestionnaireItemOptionComponent().setValue(new Coding("http://foo", "YES", null)))
+			.addOption(new Questionnaire.QuestionnaireItemOptionComponent().setValue(new Coding("http://foo", "NO", null)));
 
 		q.addItem()
-				.setLinkId("link1")
-				.setType(QuestionnaireItemType.STRING)
-				.setRequired(true)
-				.addEnableWhen()
-				.setQuestion("link0")
-				.setAnswer(new Coding("http://foo", "YES", null));
+			.setLinkId("link1")
+			.setType(QuestionnaireItemType.STRING)
+			.setRequired(true)
+			.addEnableWhen()
+			.setQuestion("link0")
+			.setAnswer(new Coding("http://foo", "YES", null));
 
-		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL)))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 		QuestionnaireResponse qa;
 		ValidationResult errors;
 
@@ -655,9 +552,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("HELLO"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(
-				errors.toString(),
-				containsString("Item has answer, even though it is not enabled (item id = 'link1')"));
+		assertThat(errors.toString(), containsString("Item has answer, even though it is not enabled (item id = 'link1')"));
 
 		// link0 has an answer, and it's the right one
 		qa = new QuestionnaireResponse();
@@ -732,13 +627,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	public void testGivenQuestionIsNotEnabledWithEnableWhenAnswersAreReportedAsErrors() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
-		q.addItem()
-				.setLinkId("link2")
-				.setRequired(false)
-				.setType(QuestionnaireItemType.STRING)
-				.addEnableWhen()
-				.setQuestion("link0")
-				.setHasAnswer(true);
+		q.addItem().setLinkId("link2").setRequired(false).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -758,13 +647,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	public void testGivenQuestionIsNotEnabledWithEnableWhenButHasItemsWithoutAnswersAreOk() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
-		q.addItem()
-				.setLinkId("link2")
-				.setRequired(false)
-				.setType(QuestionnaireItemType.STRING)
-				.addEnableWhen()
-				.setQuestion("link0")
-				.setHasAnswer(true);
+		q.addItem().setLinkId("link2").setRequired(false).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -787,12 +670,10 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		q.addItem().setLinkId("link1").setRequired(false).setType(QuestionnaireItemType.STRING);
 
 		q.addItem()
-				.setLinkId("link2")
-				.setRequired(true)
-				.setType(QuestionnaireItemType.STRING)
-				.addEnableWhen()
-				.setQuestion("link1")
-				.setHasAnswer(true);
+			.setLinkId("link2")
+			.setRequired(true)
+			.setType(QuestionnaireItemType.STRING)
+			.addEnableWhen().setQuestion("link1").setHasAnswer(true);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -819,8 +700,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	@Test
 	public void testGivenQuestionnaireResponseHasSiblingItemsWhenTheyShouldBeChildItems() {
 		Questionnaire q = new Questionnaire();
-		QuestionnaireItemComponent item =
-				q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.GROUP);
+		QuestionnaireItemComponent item = q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.GROUP);
 		item.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
@@ -834,10 +714,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
 		assertTrue(
-				errors.getMessages().stream()
-						.filter(vm -> vm.getMessage().contains("Structural Error"))
-						.anyMatch(vm -> vm.getMessage().contains("link1")),
-				"Must contain structural error about misplaced link1 item");
+			errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
+				.anyMatch(vm -> vm.getMessage().contains("link1")), "Must contain structural error about misplaced link1 item");
 	}
 
 	@Test
@@ -846,18 +724,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Coding qcoding = new Coding();
 		qcoding.setSystem("http://foo");
 		qcoding.setCode("1293");
-		q.addItem()
-				.setLinkId("1B")
-				.setRequired(true)
-				.setType(CHOICE)
-				.addOption()
-				.setValue(qcoding);
-		q.addItem()
-				.setLinkId("2B")
-				.setType(BOOLEAN)
-				.addEnableWhen()
-				.setQuestion("1B")
-				.setAnswer(qcoding);
+		q.addItem().setLinkId("1B").setRequired(true).setType(CHOICE).addOption().setValue(qcoding);
+		q.addItem().setLinkId("2B").setType(BOOLEAN).addEnableWhen().setQuestion("1B").setAnswer(qcoding);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(COMPLETED);
@@ -876,6 +744,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), containsString("No issues"));
+
 	}
 
 	@Test
@@ -884,20 +753,10 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Coding qcoding = new Coding();
 		qcoding.setCode("male");
 		qcoding.setSystem("http://hl7.org/fhir/administrative-gender");
-		q.addItem()
-				.setLinkId("1B")
-				.setRequired(true)
-				.setType(CHOICE)
-				.addOption()
-				.setValue(qcoding);
+		q.addItem().setLinkId("1B").setRequired(true).setType(CHOICE).addOption().setValue(qcoding);
 		Coding enablewhenCoding = new Coding();
 		enablewhenCoding.setCode("male");
-		q.addItem()
-				.setLinkId("2B")
-				.setType(BOOLEAN)
-				.addEnableWhen()
-				.setQuestion("1B")
-				.setAnswer(enablewhenCoding);
+		q.addItem().setLinkId("2B").setType(BOOLEAN).addEnableWhen().setQuestion("1B").setAnswer(enablewhenCoding);
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(COMPLETED);
@@ -926,14 +785,17 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
-		item1.setLinkId("link1").setType(QuestionnaireItemType.CHOICE).setOptions(new Reference(valueSetRef));
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.CHOICE)
+			.setOptions(new Reference(valueSetRef));
 
-		item1.addItem().setLinkId("link11").setType(QuestionnaireItemType.TEXT);
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
-				.thenReturn(q);
+			.thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -943,9 +805,10 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef))).thenReturn(options);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -955,7 +818,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem().setLinkId("link1").addAnswer().addItem().setLinkId("link11");
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -975,26 +840,31 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
-		item1.setLinkId("link1").setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference(valueSetRef));
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.OPENCHOICE)
+			.setOptions(new Reference(valueSetRef));
 
-		item1.addItem().setLinkId("link11").setType(QuestionnaireItemType.TEXT);
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
-				.thenReturn(q);
+			.thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(codeSystemUrl);
 		codeSystem.addConcept().setCode(codeValue);
-		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl)))
+			.thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef))).thenReturn(options);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(valueSetRef)))
+			.thenReturn(options);
 		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), eq(codeValue), any(String.class), anyString()))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -1004,7 +874,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem().setLinkId("link1").addAnswer().addItem().setLinkId("link11");
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -1021,14 +893,16 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
-		item1.setLinkId("link1").setType(QuestionnaireItemType.TEXT);
+		item1.setLinkId("link1")
+			.setType(QuestionnaireItemType.TEXT);
 
-		item1.addItem().setLinkId("link11").setType(QuestionnaireItemType.TEXT);
+		item1.addItem().setLinkId("link11")
+			.setType(QuestionnaireItemType.TEXT);
 
 		Questionnaire q = new Questionnaire();
 		q.addItem(item1);
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
-				.thenReturn(q);
+			.thenReturn(q);
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String qXml = xmlParser.encodeResourceToString(q);
@@ -1038,7 +912,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem().setLinkId("link1").addAnswer().addItem().setLinkId("link11");
+		qa.addItem().setLinkId("link1")
+			.addAnswer()
+			.addItem().setLinkId("link11");
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -1066,11 +942,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		iccSchoolTypeVs.setId(ID_VS_SCHOOLTYPE);
 		iccSchoolTypeVs.getCompose().getIncludeFirstRep().setSystem(SYSTEMURI_ICC_SCHOOLTYPE);
 		iccSchoolTypeVs
-				.getCompose()
-				.getIncludeFirstRep()
-				.addConcept()
-				.setCode(CODE_ICC_SCHOOLTYPE_PT)
-				.setDisplay("Part Time");
+			.getCompose()
+			.getIncludeFirstRep()
+			.addConcept()
+			.setCode(CODE_ICC_SCHOOLTYPE_PT)
+			.setDisplay("Part Time");
 
 		/*
 		 * Create Questionnaire
@@ -1083,11 +959,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			basicGroup.setLinkId("basic");
 			basicGroup.setType(Questionnaire.QuestionnaireItemType.GROUP);
 			basicGroup
-					.addItem()
-					.setLinkId("schoolType")
-					.setType(Questionnaire.QuestionnaireItemType.CHOICE)
-					.setOptions(new Reference(ID_VS_SCHOOLTYPE))
-					.setRequired(true);
+				.addItem()
+				.setLinkId("schoolType")
+				.setType(Questionnaire.QuestionnaireItemType.CHOICE)
+				.setOptions(new Reference(ID_VS_SCHOOLTYPE))
+				.setRequired(true);
 		}
 
 		/*
@@ -1098,28 +974,19 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		questionnaireResponse.setQuestionnaire(new Reference(ID_ICC_QUESTIONNAIRE_SETUP));
 		questionnaireResponse.getSubject().setReference("Patient/123");
 
-		QuestionnaireResponse.QuestionnaireResponseItemComponent basicGroup = questionnaireResponse.addItem();
+		QuestionnaireResponse.QuestionnaireResponseItemComponent basicGroup = questionnaireResponse
+			.addItem();
 		basicGroup.setLinkId("basic");
 		basicGroup
-				.addItem()
-				.setLinkId("schoolType")
-				.addAnswer()
-				.setValue(new Coding(SYSTEMURI_ICC_SCHOOLTYPE, CODE_ICC_SCHOOLTYPE_PT, ""));
+			.addItem()
+			.setLinkId("schoolType")
+			.addAnswer()
+			.setValue(new Coding(SYSTEMURI_ICC_SCHOOLTYPE, CODE_ICC_SCHOOLTYPE_PT, ""));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class),
-						eq(questionnaireResponse.getQuestionnaire().getReference())))
-				.thenReturn(questionnaire);
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue())))
-				.thenReturn(iccSchoolTypeVs);
-		when(myValSupport.validateCodeInValueSet(
-						any(),
-						any(),
-						eq(SYSTEMURI_ICC_SCHOOLTYPE),
-						eq(CODE_ICC_SCHOOLTYPE_PT),
-						any(),
-						nullable(ValueSet.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireResponse.getQuestionnaire().getReference()))).thenReturn(questionnaire);
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
+		when(myValSupport.validateCodeInValueSet(any(), any(), eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT), any(), nullable(ValueSet.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
 		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
 
 		ValidationResult errors = myVal.validateWithResult(questionnaireResponse);
@@ -1131,10 +998,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	@Test
 	public void testMissingRequiredAnswer() {
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setType(QuestionnaireItemType.STRING).setRequired(true);
+		q.addItem().setLinkId("link0")
+			.setType(QuestionnaireItemType.STRING)
+			.setRequired(true);
 
 		String reference = QUESTIONNAIRE_URL;
-		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(reference)))
+			.thenReturn(q);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(reference);
@@ -1160,25 +1030,15 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
-		item.setLinkId("link0")
-				.setRequired(true)
-				.setType(QuestionnaireItemType.OPENCHOICE)
-				.setOptions(new Reference("http://somevalueset"));
-		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef)))
-				.thenReturn(q);
+		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference("http://somevalueset"));
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system")))
-				.thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2")))
-				.thenReturn(true);
-		when(myValSupport.validateCode(
-						any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCode(
-						any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult()
-						.setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode())
-						.setMessage("Unknown code"));
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(String.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
+		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(String.class)))
+			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -1194,29 +1054,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValueSet options = new ValueSet();
 		options.setUrl("http://somevalueset");
-		options.getCompose()
-				.addInclude()
-				.setSystem("http://codesystems.com/system")
-				.addConcept()
-				.setCode("code0");
-		options.getCompose()
-				.addInclude()
-				.setSystem("http://codesystems.com/system2")
-				.addConcept()
-				.setCode("code2");
-		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset")))
-				.thenReturn(options);
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
+		when(myValSupport.fetchResource(eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		when(myValSupport.isValueSetSupported(any(), eq("http://somevalueset"))).thenReturn(true);
 
-		when(myValSupport.validateCodeInValueSet(
-						any(),
-						any(),
-						eq("http://codesystems.com/system"),
-						eq("code0"),
-						any(),
-						any(IBaseResource.class)))
-				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
+		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;
@@ -1226,11 +1070,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(
-						new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		assertEquals(0, errors.getMessages().size(), errors.toString());
@@ -1240,11 +1080,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(
-						new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
@@ -1256,63 +1092,35 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(new Coding().setSystem(null).setCode("code1"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		assertEquals(2, errors.getMessages().size());
-		assertThat(
-				errors.getMessages().get(0).getMessage(),
-				containsString("A code with no system has no defined meaning. A system should be provided"));
-		assertThat(
-				errors.getMessages().get(0).getLocationString(),
-				containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(
-				errors.getMessages().get(1).getMessage(),
-				containsString(
-						"The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
-		assertThat(
-				errors.getMessages().get(1).getLocationString(),
-				containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
+		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(new Coding().setSystem("").setCode("code1"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("").setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
 		assertEquals(2, errors.getMessages().size());
-		assertThat(
-				errors.getMessages().get(0).getMessage(),
-				containsString("A code with no system has no defined meaning. A system should be provided"));
-		assertThat(
-				errors.getMessages().get(0).getLocationString(),
-				containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(
-				errors.getMessages().get(1).getMessage(),
-				containsString(
-						"The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
-		assertThat(
-				errors.getMessages().get(1).getLocationString(),
-				containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
+		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
+		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference(questionnaireRef);
-		qa.addItem()
-				.setLinkId("link0")
-				.addAnswer()
-				.setValue(new Coding().setSystem("http://system").setCode(null));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://system").setCode(null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(
-				errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
+		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type
@@ -1323,9 +1131,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new IntegerType(123));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(
-				errors.toString(),
-				containsString("Cannot validate integer answer option because no option list is provided"));
+		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// String answer
@@ -1336,9 +1142,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		List<SingleValidationMessage> warningsAndErrors = errors.getMessages().stream()
-				.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
-				.collect(Collectors.toList());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
 		assertThat(warningsAndErrors, is(empty()));
 
 		// Missing String answer
@@ -1362,9 +1170,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -1382,9 +1188,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addItem().setLinkId("link2");
 
-		when(myValSupport.fetchResource(
-						eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference())))
-				.thenReturn(q);
+		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
@@ -1403,4 +1207,5 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

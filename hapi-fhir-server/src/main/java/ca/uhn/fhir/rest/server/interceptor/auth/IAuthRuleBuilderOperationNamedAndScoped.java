@@ -33,4 +33,6 @@ public interface IAuthRuleBuilderOperationNamedAndScoped {
 	 * resources being returned
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished andRequireExplicitResponseAuthorization();
+
+
 }

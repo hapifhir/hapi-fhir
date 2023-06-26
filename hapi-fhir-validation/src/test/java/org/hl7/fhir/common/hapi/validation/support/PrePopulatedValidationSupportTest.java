@@ -33,19 +33,21 @@ public class PrePopulatedValidationSupportTest {
 		assertSame(cs, mySvc.fetchCodeSystem("http://cs"));
 		assertSame(vs, mySvc.fetchValueSet("http://vs"));
 		assertSame(sd, mySvc.fetchStructureDefinition("http://sd"));
+
 	}
 
 	@Test
 	public void testAddBinary() {
 		final Map<String, byte[]> EXPECTED_BINARIES_MAP = Map.of(
-				"dummyBinary1.txt", "myDummyContent1".getBytes(),
-				"dummyBinary2.txt", "myDummyContent2".getBytes());
+			"dummyBinary1.txt", "myDummyContent1".getBytes(),
+			"dummyBinary2.txt", "myDummyContent2".getBytes()
+		);
 
-		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
-			mySvc.addBinary(entry.getValue(), entry.getKey());
+		for (Map.Entry<String,byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
+			mySvc.addBinary(entry.getValue(),entry.getKey());
 		}
 
-		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
+		for (Map.Entry<String,byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			assertArrayEquals(entry.getValue(), mySvc.fetchBinary(entry.getKey()));
 		}
 	}

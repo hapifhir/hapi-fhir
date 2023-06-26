@@ -22,7 +22,7 @@ public class FluentPathTest {
 		Patient p = new Patient();
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
-
+		
 		IFhirPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.name", HumanName.class);
 		assertEquals(2, names.size());
@@ -31,24 +31,24 @@ public class FluentPathTest {
 		assertEquals("N2F1", names.get(1).getFamily());
 		assertEquals("N2G1 N2G2", names.get(1).getGivenAsSingleString());
 	}
-
+	
 	@Test
 	public void testEvaluateUnknownPath() {
 		Patient p = new Patient();
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
-
+		
 		IFhirPath fp = ourCtx.newFluentPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.nameFOO", HumanName.class);
 		assertEquals(0, names.size());
 	}
-
+	
 	@Test
 	public void testEvaluateInvalidPath() {
 		Patient p = new Patient();
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
-
+		
 		IFhirPath fp = ourCtx.newFluentPath();
 		try {
 			fp.evaluate(p, "Patient....nameFOO", HumanName.class);
@@ -62,15 +62,12 @@ public class FluentPathTest {
 		Patient p = new Patient();
 		p.addName().setFamily("N1F1").addGiven("N1G1").addGiven("N1G2");
 		p.addName().setFamily("N2F1").addGiven("N2G1").addGiven("N2G2");
-
+		
 		IFhirPath fp = ourCtx.newFluentPath();
 		try {
 			fp.evaluate(p, "Patient.name", StringType.class);
 		} catch (FhirPathExecutionException e) {
-			assertEquals(
-					Msg.code(608)
-							+ "FluentPath expression \"Patient.name\" returned unexpected type HumanName - Expected org.hl7.fhir.dstu3.model.StringType",
-					e.getMessage());
+			assertEquals(Msg.code(608) + "FluentPath expression \"Patient.name\" returned unexpected type HumanName - Expected org.hl7.fhir.dstu3.model.StringType", e.getMessage());
 		}
 	}
 
@@ -80,4 +77,5 @@ public class FluentPathTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Length;
 
@@ -48,4 +48,5 @@ public class TestJobParameters implements IModelJson {
 		myParam2 = theParam2;
 		return this;
 	}
+
 }

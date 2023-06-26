@@ -143,6 +143,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map.setSort(new SortSpec("_lastUpdated", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(ids, contains(id1, id2, "Patient/AB", "Patient/AA"));
+
 	}
 
 	@Test
@@ -200,9 +201,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
 
 		map = new SearchParameterMap();
-		map.setSort(new SortSpec("gender")
-				.setChain(
-						new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
+		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
@@ -255,12 +254,12 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		List<IIdType> ids;
 
 		map = new SearchParameterMap();
-		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC)
-				.setChain(new SortSpec(Patient.SP_GIVEN, SortOrderEnum.ASC)));
+		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC).setChain(new SortSpec(Patient.SP_GIVEN, SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
 		ourLog.info("** Got IDs: {}", ids);
 		assertThat(ids.toString(), ids, contains(pid2, pid4, pid5, pid3, pid1));
 		assertEquals(5, ids.size());
+
 	}
 
 	@Test
@@ -313,9 +312,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		assertThat(ids, containsInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
 
 		map = new SearchParameterMap();
-		map.setSort(new SortSpec("gender")
-				.setChain(
-						new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
+		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
 		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
@@ -352,11 +349,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		List<String> ids;
 
 		runInTransaction(() -> {
-			ourLog.info(
-					"Dates:\n * {}",
-					myResourceIndexedSearchParamDateDao.findAll().stream()
-							.map(t -> t.toString())
-							.collect(Collectors.joining("\n * ")));
+			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		map = new SearchParameterMap();
@@ -368,5 +361,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		ourLog.info("IDS: {}", ids);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids.toString(), ids, contains("Observation/OBS2", "Observation/OBS1"));
+
 	}
+
 }

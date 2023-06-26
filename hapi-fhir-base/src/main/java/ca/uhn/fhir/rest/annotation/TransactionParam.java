@@ -24,9 +24,11 @@ import java.util.List;
 
 /**
  * Parameter annotation for the "transaction" operation. The parameter annotated with this
- * annotation must be a Bundle resource type, or a type that implements
+ * annotation must be a Bundle resource type, or a type that implements 
  * <code>{@link List}&lt;IBaseResource&gt;</code>
  */
-@Target(value = ElementType.PARAMETER)
+@Target(value=ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TransactionParam {}
+public @interface TransactionParam {
+
+}

@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
+import java.util.function.Supplier;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.when;
@@ -45,33 +45,23 @@ import static org.mockito.Mockito.when;
 public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCallback {
 	@Mock
 	protected ServletRequestDetails myMockSrd;
-
 	@Mock
 	protected HttpServletRequest myMockServletRequest;
-
 	@Mock
 	protected RestfulServer myMockRestfulServer;
-
 	@Mock
 	protected FhirContext myMockFhirContext;
-
 	protected PointcutLatch myAfterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
-
 	@Autowired
 	MdmQueueConsumerLoader myMdmQueueConsumerLoader;
-
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
-
 	@Autowired
 	SubscriptionLoader mySubscriptionLoader;
-
 	@Autowired
 	MdmSubscriptionLoader myMdmSubscriptionLoader;
-
 	@Mock
 	private IInterceptorBroadcaster myMockInterceptorBroadcaster;
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
@@ -84,8 +74,8 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		// This sets up mock servlet request details, which allows our DAO requests to appear as though
-		// they are coming from an external HTTP Request.
+		//This sets up mock servlet request details, which allows our DAO requests to appear as though
+		//they are coming from an external HTTP Request.
 		MockitoAnnotations.initMocks(this);
 		when(myMockSrd.getInterceptorBroadcaster()).thenReturn(myMockInterceptorBroadcaster);
 		when(myMockSrd.getServletRequest()).thenReturn(myMockServletRequest);
@@ -93,15 +83,15 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 		when(myMockSrd.getRequestId()).thenReturn("MOCK_REQUEST");
 		when(myMockRestfulServer.getFhirContext()).thenReturn(myMockFhirContext);
 
-		// This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterMdmLatch);
+		//This sets up our basic interceptor, and also attached the latch so we can await the hook calls.
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, myAfterMdmLatch);
 
 		// We need to call this because subscriptions will get deleted in @After cleanup
 		waitForActivatedSubscriptionCount(0);
 		myMdmSubscriptionLoader.daoUpdateMdmSubscriptions();
 		waitForActivatedSubscriptionCount(2);
 	}
+
 
 	protected void waitForActivatedSubscriptionCount(int theSize) {
 		await("Active Subscription Count has reached " + theSize).until(() -> mySubscriptionRegistry.size() >= theSize);

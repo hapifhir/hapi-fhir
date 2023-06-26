@@ -33,8 +33,7 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
 import javax.annotation.Nonnull;
 
-public class DeleteCodeSystemStep
-		implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
+public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
@@ -45,11 +44,9 @@ public class DeleteCodeSystemStep
 	@Nonnull
 	@Override
 	public RunOutcome run(
-			@Nonnull
-					StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
-							theStepExecutionDetails,
-			@Nonnull IJobDataSink<VoidModel> theDataSink)
-			throws JobExecutionFailedException {
+		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
+		@Nonnull IJobDataSink<VoidModel> theDataSink
+	) throws JobExecutionFailedException {
 		// final step
 		long codeId = theStepExecutionDetails.getParameters().getTermPid();
 		myITermCodeSystemSvc.deleteCodeSystem(codeId);
@@ -61,8 +58,7 @@ public class DeleteCodeSystemStep
 
 	@Nonnull
 	@Override
-	public ChunkOutcome consume(
-			ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theChunkDetails) {
+	public ChunkOutcome consume(ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theChunkDetails) {
 		/*
 		 * A single code system can have multiple versions.
 		 * We don't want to call delete on all these systems

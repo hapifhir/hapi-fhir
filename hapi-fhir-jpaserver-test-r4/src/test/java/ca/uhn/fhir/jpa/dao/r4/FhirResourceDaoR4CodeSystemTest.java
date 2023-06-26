@@ -23,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
-	@Autowired
-	private Batch2JobHelper myBatchJobHelper;
+	@Autowired private Batch2JobHelper myBatchJobHelper;
 
 	@Test
 	public void testIndexContained() throws Exception {
@@ -39,6 +38,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		assertNotEquals(-1, outcome); // -1 means there was a failure
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
+
 	}
 
 	@Test
@@ -70,6 +70,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(0, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermConceptDao.count());
 		});
+
 	}
 
 	@Test
@@ -97,8 +98,9 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(444, myTermConceptDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
 			assertEquals(2, resourceList.size());
-			long active =
-					resourceList.stream().filter(t -> t.getDeleted() == null).count();
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
 			assertEquals(2, active);
 		});
 
@@ -113,8 +115,9 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(444, myTermConceptDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
 			assertEquals(2, resourceList.size());
-			long active =
-					resourceList.stream().filter(t -> t.getDeleted() == null).count();
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
 			assertEquals(1, active);
 		});
 
@@ -130,25 +133,26 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(222, myTermConceptDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
 			assertEquals(2, resourceList.size());
-			long active =
-					resourceList.stream().filter(t -> t.getDeleted() == null).count();
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
 			assertEquals(1, active);
 		});
 
 		// Attempt to delete second version
 		myCodeSystemDao.delete(id_second, mySrd);
 
-		// Only the resource will be deleted initially, but the URL for the TermCodeSystem will be cleared and not
-		// searchable.
+		// Only the resource will be deleted initially, but the URL for the TermCodeSystem will be cleared and not searchable.
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
 			assertEquals(1, myTermCodeSystemVersionDao.count());
-			assertEquals(222, myTermConceptDao.count());
+			assertEquals(222,  myTermConceptDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
 			assertEquals(2, resourceList.size());
-			long active =
-					resourceList.stream().filter(t -> t.getDeleted() == null).count();
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
 			assertEquals(0, active);
 		});
 
@@ -163,10 +167,12 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(0, myTermCodeSystemVersionDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
 			assertEquals(2, resourceList.size());
-			long active =
-					resourceList.stream().filter(t -> t.getDeleted() == null).count();
+			long active = resourceList
+				.stream()
+				.filter(t -> t.getDeleted() == null).count();
 			assertEquals(0, active);
 		});
+
 	}
 
 	private IIdType createLargeCodeSystem(String theVersion) {
@@ -189,4 +195,6 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	public static void afterClassClearContext() {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
+
+
 }

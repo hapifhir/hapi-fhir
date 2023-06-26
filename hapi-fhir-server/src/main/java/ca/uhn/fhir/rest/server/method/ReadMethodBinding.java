@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -46,12 +46,12 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -63,11 +63,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private Class<? extends IIdType> myIdParameterType;
 
 	@SuppressWarnings("unchecked")
-	public ReadMethodBinding(
-			Class<? extends IBaseResource> theAnnotatedResourceType,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider) {
+	public ReadMethodBinding(Class<? extends IBaseResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
 		Validate.notNull(theMethod, "Method must not be null");
@@ -80,17 +76,14 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		myIdIndex = idIndex;
 
 		if (myIdIndex == null) {
-			throw new ConfigurationException(
-					Msg.code(382) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \""
-							+ theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @"
-							+ IdParam.class.getSimpleName());
+			throw new ConfigurationException(Msg.code(382) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
 		}
 		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
-			throw new ConfigurationException(
-					Msg.code(383) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
+			throw new ConfigurationException(Msg.code(383) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
 		}
+
 	}
 
 	@Override
@@ -141,11 +134,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		if (isNotBlank(theRequest.getCompartmentName())) {
 			return MethodMatchEnum.NONE;
 		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.HEAD) {
-			ourLog.trace(
-					"Method {} doesn't match because request type is not GET or HEAD: {}",
-					theRequest.getId(),
-					theRequest.getRequestType());
+		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.HEAD ) {
+			ourLog.trace("Method {} doesn't match because request type is not GET or HEAD: {}", theRequest.getId(), theRequest.getRequestType());
 			return MethodMatchEnum.NONE;
 		}
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
@@ -160,21 +150,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		return MethodMatchEnum.EXACT;
 	}
 
+
 	@Override
-	public IBundleProvider invokeServer(
-			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
-			throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		IIdType requestId = theRequest.getId();
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
-		String[] invalidQueryStringParams = new String[] {
-			Constants.PARAM_CONTAINED,
-			Constants.PARAM_COUNT,
-			Constants.PARAM_INCLUDE,
-			Constants.PARAM_REVINCLUDE,
-			Constants.PARAM_SORT,
-			Constants.PARAM_SEARCH_TOTAL_MODE
-		};
+		String[] invalidQueryStringParams = new String[]{Constants.PARAM_CONTAINED, Constants.PARAM_COUNT, Constants.PARAM_INCLUDE, Constants.PARAM_REVINCLUDE, Constants.PARAM_SORT, Constants.PARAM_SEARCH_TOTAL_MODE};
 		List<String> invalidQueryStringParamsInRequest = new ArrayList<>();
 		Set<String> queryStringParamsInRequest = theRequest.getParameters().keySet();
 
@@ -186,18 +168,14 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (!invalidQueryStringParamsInRequest.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(384)
-					+ ctx.getLocalizer()
-							.getMessage(
-									ReadMethodBinding.class,
-									"invalidParamsInRequest",
-									invalidQueryStringParamsInRequest));
+			throw new InvalidRequestException(Msg.code(384) + ctx.getLocalizer().getMessage(ReadMethodBinding.class, "invalidParamsInRequest", invalidQueryStringParamsInRequest));
 		}
 
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
 
 		Object response = invokeServerMethod(theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
+
 
 		if (Integer.valueOf(1).equals(retVal.size())) {
 			List<IBaseResource> responseResources = retVal.getResources(0, 1);
@@ -213,15 +191,12 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 						versionIdPart = responseResource.getMeta().getVersionId();
 					}
 					if (ifNoneMatch.equals(versionIdPart)) {
-						ourLog.debug(
-								"Returning HTTP 304 because request specified {}={}",
-								Constants.HEADER_IF_NONE_MATCH,
-								ifNoneMatch);
+						ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
 						throw new NotModifiedException(Msg.code(385) + "Not Modified");
 					}
 				}
 			}
-
+				
 			// If-Modified-Since
 			String ifModifiedSince = theRequest.getHeader(Constants.HEADER_IF_MODIFIED_SINCE_LC);
 			if (isNotBlank(ifModifiedSince)) {
@@ -235,14 +210,16 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 				} else {
 					lastModified = responseResource.getMeta().getLastUpdated();
 				}
-
+				
 				if (lastModified != null && lastModified.getTime() <= ifModifiedSinceDate.getTime()) {
 					ourLog.debug("Returning HTTP 304 because If-Modified-Since does not match");
 					throw new NotModifiedException(Msg.code(386) + "Not Modified");
 				}
 			}
+				
 		} // if we have at least 1 result
 
+		
 		return retVal;
 	}
 
@@ -254,4 +231,5 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
 	}
+
 }

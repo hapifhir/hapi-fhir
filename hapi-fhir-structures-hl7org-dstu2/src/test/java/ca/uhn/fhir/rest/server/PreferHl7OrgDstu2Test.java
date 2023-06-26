@@ -21,9 +21,9 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,12 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class PreferHl7OrgDstu2Test {
 	private static CloseableHttpClient ourClient;
-
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PreferHl7OrgDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-
+	
+	
 	@Test
 	public void testCreateWithNoPrefer() throws Exception {
 
@@ -47,9 +48,7 @@ public class PreferHl7OrgDstu2Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -59,19 +58,20 @@ public class PreferHl7OrgDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("location").getValue());
-		assertEquals(
-				"http://localhost:" + ourPort + "/Patient/001/_history/002",
-				status.getFirstHeader("content-location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		
 	}
 
+	
+
+	
 	@AfterAll
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
-
+		
+	
 	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -85,15 +85,15 @@ public class PreferHl7OrgDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-	}
 
+	}
+	
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -111,5 +111,7 @@ public class PreferHl7OrgDstu2Test {
 		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
 			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
+
 	}
+
 }

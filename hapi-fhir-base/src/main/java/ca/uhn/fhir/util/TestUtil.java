@@ -56,7 +56,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void doRandomizeLocaleAndTimezone() {
-		//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+//		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale[] availableLocales = {Locale.US};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
@@ -78,6 +78,7 @@ public class TestUtil {
 
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 	}
+
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
@@ -138,6 +139,7 @@ public class TestUtil {
 	public static void sleepAtLeast(long theMillis) {
 		sleepAtLeast(theMillis, true);
 	}
+
 
 	@SuppressWarnings("BusyWait")
 	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {

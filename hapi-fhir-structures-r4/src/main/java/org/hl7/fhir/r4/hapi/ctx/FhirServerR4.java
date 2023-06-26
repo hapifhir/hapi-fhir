@@ -6,8 +6,9 @@ import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 
 public class FhirServerR4 implements IFhirVersionServer {
 
-	@Override
-	public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerCapabilityStatementProvider(theServer);
-	}
+  @Override
+  public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
+    return new ServerCapabilityStatementProvider(theServer);
+  }
+
 }

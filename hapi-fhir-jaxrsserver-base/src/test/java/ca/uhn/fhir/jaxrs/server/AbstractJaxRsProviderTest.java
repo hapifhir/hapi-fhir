@@ -14,13 +14,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 public class AbstractJaxRsProviderTest {
 
 	private AbstractJaxRsProviderMock provider;
-
 	@Mock
 	private JaxRsRequest theRequest;
 
@@ -84,4 +83,5 @@ public class AbstractJaxRsProviderTest {
 		assertNotNull(result);
 		assertEquals(Constants.STATUS_HTTP_500_INTERNAL_ERROR, result.getStatus());
 	}
+
 }

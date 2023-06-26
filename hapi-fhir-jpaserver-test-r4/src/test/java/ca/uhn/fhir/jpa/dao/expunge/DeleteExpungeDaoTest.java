@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -26,6 +28,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
@@ -61,16 +64,16 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		// execute
-		String url = "Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
-		when(mySrd.getParameters())
-				.thenReturn(Map.of(
-						Constants.PARAMETER_CASCADE_DELETE, new String[] {Constants.CASCADE_DELETE},
-						JpaConstants.PARAM_DELETE_EXPUNGE, new String[] {"true"},
-						Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[] {"10"}));
+		String url = "Patient?" +
+			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
+			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"10"}
+		));
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl(url, mySrd);
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
@@ -95,15 +98,15 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// validate precondition
 		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
-		assertEquals(
-				3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
-		String url = "Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
-		when(mySrd.getParameters())
-				.thenReturn(Map.of(
-						Constants.PARAMETER_CASCADE_DELETE, new String[] {Constants.CASCADE_DELETE},
-						JpaConstants.PARAM_DELETE_EXPUNGE, new String[] {"true"},
-						Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[] {"2"}));
+		String url = "Patient?" +
+			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
+		when(mySrd.getParameters()).thenReturn(Map.of(
+			Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE},
+			JpaConstants.PARAM_DELETE_EXPUNGE, new String[]{"true"},
+			Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{"2"}
+		));
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl(url, mySrd);
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
@@ -115,6 +118,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertNotGone(o1b);
 		assertNotGone(o1c);
 	}
+
 
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
@@ -128,18 +132,13 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// execute
-		DeleteMethodOutcome outcome =
-				myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		String jobExecutionId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobExecutionId);
 
 		// validate
 		assertEquals(StatusEnum.ERRORED, job.getStatus());
-		assertThat(
-				job.getErrorMessage(),
-				containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless()
-						+ " because " + patientId.toVersionless()
-						+ " refers to it via the path Patient.managingOrganization"));
+		assertThat(job.getErrorMessage(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
 	}
 
 	private String jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
@@ -151,7 +150,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteWithExpungeFailsIfConflictsAreGeneratedByMultiplePartitions() {
-		// See https://github.com/hapifhir/hapi-fhir/issues/2661
+		//See https://github.com/hapifhir/hapi-fhir/issues/2661
 
 		// setup
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
@@ -168,8 +167,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myStorageSettings.setExpungeBatchSize(10);
 
 		// execute
-		DeleteMethodOutcome outcome =
-				myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
 
@@ -188,8 +186,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		}
 
 		// execute
-		DeleteMethodOutcome outcome =
-				myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
 		// validate
 		String jobId = jobExecutionIdFromOutcome(outcome);
@@ -198,8 +195,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
-		//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 	@Test
@@ -211,8 +208,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		}
 
 		// execute
-		DeleteMethodOutcome outcome =
-				myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
 		// validate
 		String jobId = jobExecutionIdFromOutcome(outcome);
@@ -220,8 +216,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
-		//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 	@Test
@@ -235,9 +231,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		child.addLink().setOther(new Reference(mom));
 		IIdType childId = myPatientDao.create(child).getId().toUnqualifiedVersionless();
 
-		// execute
-		DeleteMethodOutcome outcome =
-				myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		//execute
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -245,7 +240,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(2, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
-		//		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		//		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+//		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
+
 }

@@ -24,13 +24,14 @@ public class SearchParamFinder {
 		process(FhirContext.forDstu3(), type);
 		process(FhirContext.forR4(), type);
 		process(FhirContext.forR5(), type);
+
 	}
 
 	public static void process(FhirContext theCtx, RestSearchParameterTypeEnum theWantType) {
 		for (String nextResourceName : theCtx.getResourceTypes()) {
 			RuntimeResourceDefinition nextResDef = theCtx.getResourceDefinition(nextResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				if (nextSp.getName().equals("_id")) {
+				if (nextSp.getName().equals("_id")){
 					continue;
 				}
 
@@ -41,12 +42,13 @@ public class SearchParamFinder {
 						}
 
 						if (nextPath.startsWith("(") && nextPath.endsWith(")")) {
-							nextPath = nextPath.substring(1, nextPath.length() - 1);
+							nextPath = nextPath.substring(1, nextPath.length()-1);
 						}
 						if (nextPath.startsWith("(")) {
 							ourLog.warn("Skipping unparseable path: " + nextPath);
 							continue;
 						}
+
 
 						if (Character.isLowerCase(nextPath.charAt(0))) {
 							nextPath = nextResourceName + "." + nextPath;
@@ -61,22 +63,11 @@ public class SearchParamFinder {
 		}
 	}
 
-	private static void traverse(
-			FhirContext theCtx,
-			RuntimeSearchParam theSearchParam,
-			List<String> theFullPath,
-			FhirContext theContext,
-			List<String> thePathsPart,
-			BaseRuntimeElementCompositeDefinition theDef) {
+	private static void traverse(FhirContext theCtx, RuntimeSearchParam theSearchParam, List<String> theFullPath, FhirContext theContext, List<String> thePathsPart, BaseRuntimeElementCompositeDefinition theDef) {
 		Validate.notNull(theSearchParam);
 
 		if (thePathsPart.size() == 0) {
-			ourLog.info(
-					"Found {} - {} - {} - {}",
-					theCtx.getVersion().getVersion(),
-					theSearchParam.getName(),
-					String.join(".", theFullPath),
-					theDef.getName());
+			ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), theDef.getName());
 			handle(theCtx, theSearchParam, theDef.getName());
 			return;
 		}
@@ -94,8 +85,7 @@ public class SearchParamFinder {
 			} catch (DataFormatException e) {
 				throw new IllegalArgumentException("Unknown resource: " + theFullPath + " for " + theSearchParam);
 			}
-			traverse(
-					theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
+			traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 		} else {
 			BaseRuntimeChildDefinition child = theDef.getChildByName(nextName);
 			if (child != null) {
@@ -103,51 +93,28 @@ public class SearchParamFinder {
 				Validate.notNull(subChild, "Unknown child: " + nextName + " in path: " + theFullPath);
 				if (subChild instanceof RuntimePrimitiveDatatypeDefinition) {
 					assert thePathsPart.size() == 1;
-					ourLog.info(
-							"Found {} - {} - {} - {}",
-							theCtx.getVersion().getVersion(),
-							theSearchParam.getName(),
-							String.join(".", theFullPath),
-							subChild.getName());
+					ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), subChild.getName());
 					handle(theCtx, theSearchParam, subChild.getName());
 					return;
 				}
 
 				BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) subChild;
-				traverse(
-						theCtx,
-						theSearchParam,
-						theFullPath,
-						theContext,
-						thePathsPart.subList(1, thePathsPart.size()),
-						def);
+				traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 			}
 
-			RuntimeChildChoiceDefinition choiceChild =
-					(RuntimeChildChoiceDefinition) theDef.getChildByName(nextName + "[x]");
-			if (choiceChild != null) {
+			RuntimeChildChoiceDefinition choiceChild = (RuntimeChildChoiceDefinition) theDef.getChildByName(nextName + "[x]");
+			if (choiceChild != null){
 				for (String nextChildName : choiceChild.getValidChildNames()) {
 					if (nextChildName.startsWith(nextName)) {
 						BaseRuntimeElementDefinition<?> subChild = choiceChild.getChildByName(nextChildName);
 						if (subChild instanceof RuntimePrimitiveDatatypeDefinition) {
 							assert thePathsPart.size() == 1;
-							ourLog.info(
-									"Found {} - {} - {} - {}",
-									theCtx.getVersion().getVersion(),
-									theSearchParam.getName(),
-									String.join(".", theFullPath),
-									subChild.getName());
+							ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), subChild.getName());
 							handle(theCtx, theSearchParam, subChild.getName());
 							return;
 						}
 						BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) subChild;
-						traverse(
-								theCtx,
-								theSearchParam,
-								theFullPath,
-								theContext,
-								thePathsPart.subList(1, thePathsPart.size()),
-								def);
+						traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 					}
 				}
 			}
@@ -164,8 +131,11 @@ public class SearchParamFinder {
 				return;
 		}
 
+
 		IBase element = theCtx.getElementDefinition(theName).newInstance();
-		//		extractor.extractSearchParamDates()
+//		extractor.extractSearchParamDates()
 
 	}
+
+
 }

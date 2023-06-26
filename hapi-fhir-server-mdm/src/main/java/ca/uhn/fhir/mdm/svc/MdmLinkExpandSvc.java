@@ -35,10 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 @Service
 @Transactional
@@ -47,11 +47,11 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
-
 	@Autowired
 	private IIdHelperService myIdHelperService;
 
-	public MdmLinkExpandSvc() {}
+	public MdmLinkExpandSvc() {
+	}
 
 	/**
 	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
@@ -76,8 +76,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmBySourceResourceId(IIdType theId) {
 		ourLog.debug("About to expand source resource with resource id {}", theId);
-		return expandMdmBySourceResourcePid(
-				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId));
+		return expandMdmBySourceResourcePid(myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId));
 	}
 
 	/**
@@ -90,8 +89,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmBySourceResourcePid(IResourcePersistentId theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples =
-				myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
 	}
 
@@ -105,10 +103,10 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
-				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
+
 
 	/**
 	 *  Given a resource ID of a golden resource, perform MDM expansion and return all the resource IDs of all resources that are
@@ -120,22 +118,19 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	@Override
 	public Set<String> expandMdmByGoldenResourcePid(IResourcePersistentId theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(
-				theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
 	@Override
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
-		IResourcePersistentId pidOrThrowException =
-				myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
+		IResourcePersistentId pidOrThrowException = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
 		return expandMdmByGoldenResourcePid(pidOrThrowException);
 	}
 
 	@Nonnull
-	public Set<String> flattenPidTuplesToSet(
-			IResourcePersistentId initialPid, List<MdmPidTuple> goldenPidSourcePidTuples) {
+	public Set<String> flattenPidTuplesToSet(IResourcePersistentId initialPid, List<MdmPidTuple> goldenPidSourcePidTuples) {
 		Set<IResourcePersistentId> flattenedPids = new HashSet<>();
 		goldenPidSourcePidTuples.forEach(tuple -> {
 			flattenedPids.add(tuple.getSourcePid());

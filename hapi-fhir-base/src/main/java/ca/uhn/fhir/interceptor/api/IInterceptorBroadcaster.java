@@ -19,4 +19,6 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
-public interface IInterceptorBroadcaster extends IBaseInterceptorBroadcaster<Pointcut> {}
+public interface IInterceptorBroadcaster extends IBaseInterceptorBroadcaster<Pointcut> {
+
+}

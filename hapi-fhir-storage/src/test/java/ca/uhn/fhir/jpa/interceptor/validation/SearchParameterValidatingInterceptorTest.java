@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
@@ -23,11 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -45,19 +46,14 @@ public class SearchParameterValidatingInterceptorTest {
 	static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	static String ID1 = "ID1";
 	static String ID2 = "ID2";
-
 	@Mock
 	RequestDetails myRequestDetails;
-
 	@Mock
 	IFhirResourceDao myIFhirResourceDao;
-
 	@Mock
 	DaoRegistry myDaoRegistry;
-
 	@Mock
 	IIdHelperService myIdHelperService;
-
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 	SearchParameter myExistingSearchParameter;
 
@@ -66,12 +62,12 @@ public class SearchParameterValidatingInterceptorTest {
 
 		mySearchParamValidatingInterceptor = new SearchParamValidatingInterceptor();
 		mySearchParamValidatingInterceptor.setFhirContext(ourFhirContext);
-		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(
-				new SearchParameterCanonicalizer(ourFhirContext));
+		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
 
 		myExistingSearchParameter = buildSearchParameterWithId(ID1);
+
 	}
 
 	@Test
@@ -84,20 +80,19 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	public void whenCreatingNonOverlappingSearchParam_thenIsAllowed() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM)))
-				.thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameterIds(emptyList());
 
 		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
+
 	}
 
 	@Test
 	public void whenCreatingOverlappingSearchParam_thenExceptionIsThrown() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM)))
-				.thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
@@ -109,36 +104,35 @@ public class SearchParameterValidatingInterceptorTest {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("2196"));
 		}
-	}
 
+	}
 	@Test
 	public void whenCreateSpWithUpliftRefchains_Bad_WrongCodeDatatype() {
 		SearchParameter sp = buildReferenceSearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new SimpleQuantity().setValue(123L));
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new SimpleQuantity().setValue(123L));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("2284"));
 		}
+
 	}
 
 	@Test
 	public void whenCreateSpWithUpliftRefchains_Bad_NoCode() {
 		SearchParameter sp = buildReferenceSearchParameter();
 		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(
-				HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(sp, myRequestDetails);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("2283"));
 		}
+
 	}
 
 	@Nonnull
@@ -157,8 +151,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	public void whenUsingPutOperationToCreateNonOverlappingSearchParam_thenIsAllowed() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM)))
-				.thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameterIds(emptyList());
 
@@ -169,8 +162,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	public void whenUsingPutOperationToCreateOverlappingSearchParam_thenExceptionIsThrown() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM)))
-				.thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
@@ -186,26 +178,28 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	public void whenUpdateSearchParam_thenIsAllowed() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM)))
-				.thenReturn(myIFhirResourceDao);
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
-		when(myIdHelperService.translatePidsToFhirResourceIds(any()))
-				.thenReturn(Set.of(myExistingSearchParameter.getId()));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(myExistingSearchParameter.getId()));
+
 
 		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+
 	}
 
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
 		final AtomicLong counter = new AtomicLong();
-		List<IResourcePersistentId> resourcePersistentIds = theSearchParams.stream()
-				.map(SearchParameter::getId)
-				.map(s -> JpaPid.fromId(counter.incrementAndGet()))
-				.collect(Collectors.toList());
+		List<IResourcePersistentId> resourcePersistentIds = theSearchParams
+			.stream()
+			.map(SearchParameter::getId)
+			.map(s -> JpaPid.fromId(counter.incrementAndGet()))
+			.collect(Collectors.toList());
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
+
 
 	private SearchParameter buildSearchParameterWithId(String id) {
 		SearchParameter retVal = new SearchParameter();
@@ -218,4 +212,5 @@ public class SearchParameterValidatingInterceptorTest {
 
 		return retVal;
 	}
+
 }

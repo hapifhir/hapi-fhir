@@ -41,16 +41,16 @@ import java.util.function.Function;
  **/
 public class CodeCacheResourceChangeListener implements IResourceChangeListener {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(CodeCacheResourceChangeListener.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
+		.getLogger(CodeCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myValueSetDao;
 	private final Map<VersionedIdentifier, List<Code>> myGlobalCodeCache;
 	private final Function<IBaseResource, String> myUrlFunction;
 	private final Function<IBaseResource, String> myVersionFunction;
 
-	public CodeCacheResourceChangeListener(
-			DaoRegistry theDaoRegistry, Map<VersionedIdentifier, List<Code>> theGlobalCodeCache) {
+	public CodeCacheResourceChangeListener(DaoRegistry theDaoRegistry,
+														Map<VersionedIdentifier, List<Code>> theGlobalCodeCache) {
 		this.myValueSetDao = theDaoRegistry.getResourceDao("ValueSet");
 		this.myGlobalCodeCache = theGlobalCodeCache;
 		this.myUrlFunction = Reflections.getUrlFunction(myValueSetDao.getResourceType());
@@ -94,9 +94,8 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 		// This happens when a Library is deleted entirely, so it's impossible to look up
 		// name and version.
 		catch (ResourceGoneException | ResourceNotFoundException e) {
-			ourLog.debug(
-					"Failed to locate resource {} to look up url and version. Clearing all codes from cache.",
-					theId.getValueAsString());
+			ourLog.debug("Failed to locate resource {} to look up url and version. Clearing all codes from cache.",
+				theId.getValueAsString());
 			this.myGlobalCodeCache.clear();
 			return;
 		}
@@ -104,6 +103,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 		String url = this.myUrlFunction.apply(valueSet);
 		String version = this.myVersionFunction.apply(valueSet);
 
-		this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url).withVersion(version));
+		this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url)
+			.withVersion(version));
 	}
 }

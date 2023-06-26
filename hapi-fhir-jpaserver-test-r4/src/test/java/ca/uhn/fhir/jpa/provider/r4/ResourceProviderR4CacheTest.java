@@ -38,7 +38,6 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4CacheTest.class);
 	private CapturingInterceptor myCapturingInterceptor;
-
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
@@ -46,10 +45,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setCacheControlNoStoreMaxResultsUpperLimit(
-				new JpaStorageSettings().getCacheControlNoStoreMaxResultsUpperLimit());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCacheControlNoStoreMaxResultsUpperLimit(new JpaStorageSettings().getCacheControlNoStoreMaxResultsUpperLimit());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -71,29 +68,32 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		pt1.addName().setFamily("FAM");
 		myClient.create().resource(pt1).execute();
 
-		Bundle results = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.cacheControl(new CacheControlDirective().setNoStore(true))
-				.execute();
+		Bundle results = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.FAMILY.matches().value("FAM"))
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoStore(true))
+			.execute();
 		assertEquals(1, results.getEntry().size());
-		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");
 		myClient.create().resource(pt2).execute();
 
-		results = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.cacheControl(new CacheControlDirective().setNoStore(true))
-				.execute();
+		results = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.FAMILY.matches().value("FAM"))
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoStore(true))
+			.execute();
 		assertEquals(2, results.getEntry().size());
-		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+
 	}
 
 	@Test
@@ -105,33 +105,33 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			myClient.create().resource(pt1).execute();
 		}
 
-		Bundle results = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5))
-				.execute();
+		Bundle results = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.FAMILY.matches().value("FAM"))
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5))
+			.execute();
 		assertEquals(5, results.getEntry().size());
-		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+
 	}
 
 	@Test
 	public void testCacheNoStoreMaxResultsWithIllegalValue() {
 		myStorageSettings.setCacheControlNoStoreMaxResultsUpperLimit(123);
 		try {
-			myClient.search()
-					.forResource("Patient")
-					.where(Patient.FAMILY.matches().value("FAM"))
-					.returnBundle(Bundle.class)
-					.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5000))
-					.execute();
+			myClient
+				.search()
+				.forResource("Patient")
+				.where(Patient.FAMILY.matches().value("FAM"))
+				.returnBundle(Bundle.class)
+				.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(5000))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1165)
-							+ "Cache-Control header max-results value must not exceed 123",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1165) + "Cache-Control header max-results value must not exceed 123", e.getMessage());
 		}
 	}
 
@@ -142,11 +142,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		pt1.addName().setFamily("FAM");
 		myClient.create().resource(pt1).execute();
 
-		Bundle results = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results.getEntry().size());
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
@@ -155,15 +151,17 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		pt2.addName().setFamily("FAM");
 		myClient.create().resource(pt2).execute();
 
-		results = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.cacheControl(new CacheControlDirective().setNoCache(true))
-				.execute();
+		results = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.FAMILY.matches().value("FAM"))
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoCache(true))
+			.execute();
 		assertEquals(2, results.getEntry().size());
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
+
 	}
 
 	@Test
@@ -177,11 +175,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		TestUtil.sleepOneClick();
 
-		Bundle results1 = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results1 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 
 		TestUtil.sleepOneClick();
 
@@ -197,19 +191,10 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		pt2.addName().setFamily("FAM");
 		myClient.create().resource(pt2).execute();
 
-		Bundle results2 = myClient.search()
-				.forResource("Patient")
-				.where(Patient.FAMILY.matches().value("FAM"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertEquals(1, results2.getEntry().size());
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertEquals(
-				"HIT from " + myServerBase,
-				myCapturingInterceptor
-						.getLastResponse()
-						.getHeaders(Constants.HEADER_X_CACHE)
-						.get(0));
+		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
 		assertEquals(results1.getId(), results2.getId());
 	}
@@ -224,20 +209,22 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		p.addName().setFamily("Foo");
 		myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
-		Bundle resp1 = myClient.search()
-				.forResource("Patient")
-				.where(Patient.NAME.matches().value("foo"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle resp1 = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("foo"))
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(2, resp1.getEntry().size());
 
 		myClient.delete().resourceById(new IdType(p1Id)).execute();
 
-		Bundle resp2 = myClient.search()
-				.forResource("Patient")
-				.where(Patient.NAME.matches().value("foo"))
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle resp2 = myClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("foo"))
+			.returnBundle(Bundle.class)
+			.execute();
 
 		assertEquals(resp1.getId(), resp2.getId());
 
@@ -246,33 +233,36 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testParamWithNoValueIsConsideredForCacheResults() {
+	public void testParamWithNoValueIsConsideredForCacheResults(){
 		// Given: We populate the cache by searching
-		myClient.search().byUrl("Procedure").returnBundle(Bundle.class).execute();
+		myClient
+			.search()
+			.byUrl("Procedure")
+			.returnBundle(Bundle.class)
+			.execute();
 
 		// When: We search Procedure?patient=
-		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {
-			myClient.search()
-					.byUrl("Procedure?patient=")
-					.returnBundle(Bundle.class)
-					.execute();
-		});
+		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
+			.search()
+			.byUrl("Procedure?patient=")
+			.returnBundle(Bundle.class)
+			.execute();});
 
 		// Then: We do not get a cache hit
 		assertNotEquals(Constants.STATUS_HTTP_200_OK, exception.getStatusCode());
 	}
 
 	@Test
-	public void testReturn400ForParameterWithNoValue() {
+	public void testReturn400ForParameterWithNoValue(){
 		// When: We search Procedure?patient=
-		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {
-			myClient.search()
-					.byUrl("Procedure?patient=")
-					.returnBundle(Bundle.class)
-					.execute();
-		});
+		BaseServerResponseException exception = assertThrows(BaseServerResponseException.class, () -> {myClient
+			.search()
+			.byUrl("Procedure?patient=")
+			.returnBundle(Bundle.class)
+			.execute();});
 
 		// Then: We get a HTTP 400 Bad Request
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, exception.getStatusCode());
 	}
+
 }

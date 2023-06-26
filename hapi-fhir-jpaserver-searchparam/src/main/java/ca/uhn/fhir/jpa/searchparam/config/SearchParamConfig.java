@@ -59,6 +59,7 @@ public class SearchParamConfig {
 	@Bean
 	public ISearchParamExtractor searchParamExtractor() {
 		switch (myFhirContext.getVersion().getVersion()) {
+
 			case DSTU2:
 				return new SearchParamExtractorDstu2();
 			case DSTU3:
@@ -72,8 +73,7 @@ public class SearchParamConfig {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
-				throw new IllegalStateException(Msg.code(501) + "Can not handle version: "
-						+ myFhirContext.getVersion().getVersion());
+				throw new IllegalStateException(Msg.code(501) + "Can not handle version: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -115,12 +115,8 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	IResourceChangeListenerRegistry resourceChangeListenerRegistry(
-			FhirContext theFhirContext,
-			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
-			InMemoryResourceMatcher theInMemoryResourceMatcher) {
-		return new ResourceChangeListenerRegistryImpl(
-				theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 	}
 
 	@Bean
@@ -135,13 +131,8 @@ public class SearchParamConfig {
 
 	@Bean
 	@Scope("prototype")
-	ResourceChangeListenerCache registeredResourceChangeListener(
-			String theResourceName,
-			IResourceChangeListener theResourceChangeListener,
-			SearchParameterMap theSearchParameterMap,
-			long theRemoteRefreshIntervalMs) {
-		return new ResourceChangeListenerCache(
-				theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+	ResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
 
 	@Bean
@@ -149,4 +140,5 @@ public class SearchParamConfig {
 	SearchParameterHelper searchParameterHelper(FhirContext theFhirContext) {
 		return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
 	}
+
 }

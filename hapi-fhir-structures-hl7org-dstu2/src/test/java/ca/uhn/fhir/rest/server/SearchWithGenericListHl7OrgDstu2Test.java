@@ -34,84 +34,85 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithGenericListHl7OrgDstu2Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchWithGenericListHl7OrgDstu2Test.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static int ourPort;
-	private static Server ourServer;
-	private static String ourLastMethod;
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithGenericListHl7OrgDstu2Test.class);
+  private static CloseableHttpClient ourClient;
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  private static int ourPort;
+  private static Server ourServer;
+  private static String ourLastMethod;
 
-	@BeforeEach
-	public void before() {
-		ourLastMethod = null;
-	}
+  @BeforeEach
+  public void before() {
+    ourLastMethod = null;
+  }
 
-	/**
-	 * See #291
-	 */
-	@Test
-	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("searchByIdentifier", ourLastMethod);
-		assertThat(responseContent, containsString("<family value=\"FAMILY\""));
-		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
-	}
+  /**
+   * See #291
+   */
+  @Test
+  public void testSearch() throws Exception {
+    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo&_pretty=true");
+    HttpResponse status = ourClient.execute(httpGet);
+    String responseContent = IOUtils.toString(status.getEntity().getContent());
+    IOUtils.closeQuietly(status.getEntity().getContent());
+    ourLog.info(responseContent);
+    assertEquals(200, status.getStatusLine().getStatusCode());
+    assertEquals("searchByIdentifier", ourLastMethod);
+    assertThat(responseContent, containsString("<family value=\"FAMILY\""));
+    assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
+  }
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+  public static class DummyPatientResourceProvider implements IResourceProvider {
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
+    }
 
-		// @formatter:off
-		@SuppressWarnings("rawtypes")
-		@Search()
-		public List searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
-			ourLastMethod = "searchByIdentifier";
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
-			return retVal;
-		}
-		// @formatter:on
+    //@formatter:off
+    @SuppressWarnings("rawtypes")
+    @Search()
+    public List searchByIdentifier(
+      @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+      ourLastMethod = "searchByIdentifier";
+      ArrayList<Patient> retVal = new ArrayList<Patient>();
+      retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
+      return retVal;
+    }
+    //@formatter:on
 
-	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+  }
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+  @AfterAll
+  public static void afterClassClearContext() throws Exception {
+    JettyUtil.closeServer(ourServer);
+    TestUtil.randomizeLocaleAndTimezone();
+  }
 
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+  @BeforeAll
+  public static void beforeClass() throws Exception {
+    ourServer = new Server(0);
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.setResourceProviders(patientProvider);
+    DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+    ServletHandler proxyHandler = new ServletHandler();
+    RestfulServer servlet = new RestfulServer(ourCtx);
+    servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+    servlet.setResourceProviders(patientProvider);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-	}
+    ServletHolder servletHolder = new ServletHolder(servlet);
+    proxyHandler.addServletWithMapping(servletHolder, "/*");
+    ourServer.setHandler(proxyHandler);
+    JettyUtil.startServer(ourServer);
+    ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+    HttpClientBuilder builder = HttpClientBuilder.create();
+    builder.setConnectionManager(connectionManager);
+    ourClient = builder.build();
+
+  }
+
 }

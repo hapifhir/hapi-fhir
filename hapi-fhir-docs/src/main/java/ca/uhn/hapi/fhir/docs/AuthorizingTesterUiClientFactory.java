@@ -28,15 +28,15 @@ import javax.servlet.http.HttpServletRequest;
 
 public class AuthorizingTesterUiClientFactory implements ITestingUiClientFactory {
 
-	@Override
-	public IGenericClient newClient(
-			FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl) {
-		// Create a client
-		IGenericClient client = theFhirContext.newRestfulGenericClient(theServerBaseUrl);
+   @Override
+   public IGenericClient newClient(FhirContext theFhirContext, HttpServletRequest theRequest, String theServerBaseUrl) {
+      // Create a client
+      IGenericClient client = theFhirContext.newRestfulGenericClient(theServerBaseUrl);
+      
+      // Register an interceptor which adds credentials
+      client.registerInterceptor(new BasicAuthInterceptor("someusername", "somepassword"));
+      
+      return client;
+   }
 
-		// Register an interceptor which adds credentials
-		client.registerInterceptor(new BasicAuthInterceptor("someusername", "somepassword"));
-
-		return client;
-	}
 }

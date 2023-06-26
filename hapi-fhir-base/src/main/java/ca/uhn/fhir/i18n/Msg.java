@@ -26,6 +26,7 @@ public final class Msg {
 	 * IMPORTANT: Please update the table in the following link after you add a new code:
 	 * https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code
 	 */
+
 	private Msg() {}
 
 	public static String code(int theCode) {

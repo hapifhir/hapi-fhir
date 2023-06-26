@@ -25,7 +25,7 @@ http://hapi.fhir.org/
 
 This project is Open Source, licensed under the Apache Software License 2.0.
 
-Please see [this wiki page][Link-wiki] for information on where to get help with HAPI FHIR.
+Please see [this wiki page][Link-wiki] for information on where to get help with HAPI FHIR. 
 
 Please see [Smile CDR][Link-SmileCDR] for information on commercial support.
 
@@ -43,3 +43,5 @@ Please see [Smile CDR][Link-SmileCDR] for information on commercial support.
 [Badge-MavenCentral]: https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg
 [Badge-CodeCov]: https://codecov.io/gh/hapifhir/hapi-fhir/branch/master/graph/badge.svg?token=zHfnKfQB9X
 [Badge-License]: https://img.shields.io/badge/license-apache%202.0-60C060.svg
+
+

@@ -22,16 +22,17 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 
 	@Test
 	public void testAddSortNumericNoNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithNumericSort(true, null);
+		GeneratedSql generatedSql = buildSqlWithNumericSort(true,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY -t1.SP_VALUE_LOW DESC limit ?"));
 
-		generatedSql = buildSqlWithNumericSort(false, null);
+		generatedSql =  buildSqlWithNumericSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
+
 	}
 
 	@Test
 	public void testAddSortNumericWithNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithNumericSort(true, OrderObject.NullOrder.FIRST);
+		GeneratedSql generatedSql =  buildSqlWithNumericSort(true, OrderObject.NullOrder.FIRST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithNumericSort(false, OrderObject.NullOrder.FIRST);
@@ -42,17 +43,18 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 
 		generatedSql = buildSqlWithNumericSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
+
 	}
 
 	@Test
 	public void testAddSortStringNoNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithStringSort(true, null);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0
-		// END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
+		GeneratedSql generatedSql = buildSqlWithStringSort(true,null);
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
-		generatedSql = buildSqlWithStringSort(false, null);
+		generatedSql = buildSqlWithStringSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
+
 	}
 
 	private GeneratedSql buildSqlWithStringSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
@@ -61,49 +63,47 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		when(mySqlObjectFactory.stringIndexTable(any())).thenReturn(new StringPredicateBuilder(searchQueryBuilder));
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		StringPredicateBuilder sortPredicateBuilder =
-				searchQueryBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		StringPredicateBuilder sortPredicateBuilder = searchQueryBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("patient", "family");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);
 		if (theNullOrder == null) {
 			searchQueryBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending);
 		} else {
-			searchQueryBuilder.addSortString(
-					sortPredicateBuilder.getColumnValueNormalized(), theAscending, theNullOrder, false);
+			searchQueryBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending, theNullOrder, false);
 		}
 
-		return searchQueryBuilder.generate(0, 500);
+		return searchQueryBuilder.generate(0,500);
+
 	}
 
 	@Test
 	public void testAddSortStringWithNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithStringSort(true, OrderObject.NullOrder.FIRST);
+		GeneratedSql generatedSql =  buildSqlWithStringSort(true, OrderObject.NullOrder.FIRST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(false, OrderObject.NullOrder.FIRST);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0
-		// END DESC, t1.SP_VALUE_NORMALIZED DESC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END DESC, t1.SP_VALUE_NORMALIZED DESC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(true, OrderObject.NullOrder.LAST);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0
-		// END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
+
 	}
 
 	@Test
 	public void testAddSortDateNoNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithDateSort(true, null);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC,
-		// t1.SP_VALUE_LOW ASC limit ?"));
+		GeneratedSql generatedSql = buildSqlWithDateSort(true,null);
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_LOW ASC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
-		generatedSql = buildSqlWithDateSort(false, null);
+		generatedSql = buildSqlWithDateSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
+
 	}
 
 	private GeneratedSql buildSqlWithDateSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
@@ -112,8 +112,7 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder =
-				searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("patient", "birthdate");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);
@@ -123,26 +122,26 @@ public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDi
 			searchQueryBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder, false);
 		}
 
-		return searchQueryBuilder.generate(0, 500);
+		return searchQueryBuilder.generate(0,500);
+
 	}
 
 	@Test
 	public void testAddSortDateWithNullOrder() {
-		GeneratedSql generatedSql = buildSqlWithDateSort(true, OrderObject.NullOrder.FIRST);
+		GeneratedSql generatedSql =  buildSqlWithDateSort(true, OrderObject.NullOrder.FIRST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(false, OrderObject.NullOrder.FIRST);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END
-		// DESC, t1.SP_VALUE_LOW DESC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END DESC, t1.SP_VALUE_LOW DESC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(true, OrderObject.NullOrder.LAST);
-		//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC,
-		// t1.SP_VALUE_LOW ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_LOW ASC limit ?"));
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
+
 	}
 
 	@Nonnull

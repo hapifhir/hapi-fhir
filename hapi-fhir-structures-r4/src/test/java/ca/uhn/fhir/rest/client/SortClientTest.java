@@ -54,16 +54,15 @@ public class SortClientTest {
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+	
+
 	@Test
 	public void testSort() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"), new SortSpec("given"));
@@ -77,38 +76,34 @@ public class SortClientTest {
 	public void testSortWithChain() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
-		client.searchWithParam(
-				new StringParam("hello"),
-				new SortSpec("given", SortOrderEnum.DESC, new SortSpec("family", SortOrderEnum.ASC)));
+		client.searchWithParam(new StringParam("hello"), new SortSpec("given", SortOrderEnum.DESC, new SortSpec("family", SortOrderEnum.ASC)));
 
 		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals(
-				"http://foo/Patient?name=hello&_sort=-given%2Cfamily",
-				get.getURI().toString());
+		assertEquals("http://foo/Patient?name=hello&_sort=-given%2Cfamily", get.getURI().toString());
 	}
 
 	private String createBundle() {
 		return ctx.newXmlParser().encodeResourceToString(new Bundle());
 	}
 
+
 	private interface IClient extends IBasicClient {
 
-		@Search(type = Patient.class)
-		List<Patient> searchWithParam(
-				@RequiredParam(name = Patient.SP_NAME) StringParam theString, @Sort SortSpec theSort);
+		@Search(type=Patient.class)
+		List<Patient> searchWithParam(@RequiredParam(name = Patient.SP_NAME) StringParam theString, @Sort SortSpec theSort);
+
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

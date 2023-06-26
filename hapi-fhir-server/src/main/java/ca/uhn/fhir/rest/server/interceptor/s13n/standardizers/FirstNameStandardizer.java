@@ -53,9 +53,9 @@ public class FirstNameStandardizer extends TextStandardizer {
 		theString = replaceTranslates(theString);
 
 		return Arrays.stream(theString.split("\\s+"))
-				.map(this::standardizeNameToken)
-				.filter(s -> !StringUtils.isEmpty(s))
-				.collect(Collectors.joining(" "));
+			.map(this::standardizeNameToken)
+			.filter(s -> !StringUtils.isEmpty(s))
+			.collect(Collectors.joining(" "));
 	}
 
 	protected String capitalize(String theString) {
@@ -127,15 +127,14 @@ public class FirstNameStandardizer extends TextStandardizer {
 				buf.append(theDelimiter);
 			}
 			buf.append(s);
+
 		}
 		return buf.toString();
 	}
 
 	protected String checkForRegexp(String theExpression) {
-		if (theExpression.equals(".")
-				|| theExpression.equals("|")
-				|| theExpression.equals("(")
-				|| theExpression.equals(")")) {
+		if (theExpression.equals(".") || theExpression.equals("|")
+			|| theExpression.equals("(") || theExpression.equals(")")) {
 			return "\\".concat(theExpression);
 		}
 		return theExpression;

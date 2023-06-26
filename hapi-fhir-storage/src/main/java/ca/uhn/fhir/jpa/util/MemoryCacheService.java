@@ -29,11 +29,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -66,8 +66,7 @@ public class MemoryCacheService {
 			switch (next) {
 				case CONCEPT_TRANSLATION:
 				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds =
-							SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
+					timeoutSeconds = SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
 					maximumSize = 10000;
 					break;
 				case PID_TO_FORCED_ID:
@@ -92,6 +91,7 @@ public class MemoryCacheService {
 			myCaches.put(next, nextCache);
 		}
 	}
+
 
 	public <K, T> T get(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
 		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
@@ -184,6 +184,7 @@ public class MemoryCacheService {
 	}
 
 	public enum CacheEnum {
+
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
@@ -209,29 +210,29 @@ public class MemoryCacheService {
 		}
 	}
 
+
 	public static class TagDefinitionCacheKey {
 
 		private final TagTypeEnum myType;
 		private final String mySystem;
 		private final String myCode;
 		private final String myVersion;
-		private Boolean myUserSelected;
+		private Boolean  myUserSelected;
 		private final int myHashCode;
 
-		public TagDefinitionCacheKey(
-				TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
+		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
 			myType = theType;
 			mySystem = theSystem;
 			myCode = theCode;
 			myVersion = theVersion;
 			myUserSelected = theUserSelected;
 			myHashCode = new HashCodeBuilder(17, 37)
-					.append(myType)
-					.append(mySystem)
-					.append(myCode)
-					.append(myVersion)
-					.append(myUserSelected)
-					.toHashCode();
+				.append(myType)
+				.append(mySystem)
+				.append(myCode)
+				.append(myVersion)
+				.append(myUserSelected)
+				.toHashCode();
 		}
 
 		@Override
@@ -241,10 +242,10 @@ public class MemoryCacheService {
 				TagDefinitionCacheKey that = (TagDefinitionCacheKey) theO;
 
 				retVal = new EqualsBuilder()
-						.append(myType, that.myType)
-						.append(mySystem, that.mySystem)
-						.append(myCode, that.myCode)
-						.isEquals();
+					.append(myType, that.myType)
+					.append(mySystem, that.mySystem)
+					.append(myCode, that.myCode)
+					.isEquals();
 			}
 			return retVal;
 		}
@@ -255,6 +256,7 @@ public class MemoryCacheService {
 		}
 	}
 
+
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
@@ -263,10 +265,7 @@ public class MemoryCacheService {
 		private HistoryCountKey(String theTypeName, Long theInstanceId) {
 			myTypeName = theTypeName;
 			myInstanceId = theInstanceId;
-			myHashCode = new HashCodeBuilder()
-					.append(myTypeName)
-					.append(myInstanceId)
-					.toHashCode();
+			myHashCode = new HashCodeBuilder().append(myTypeName).append(myInstanceId).toHashCode();
 		}
 
 		public static HistoryCountKey forSystem() {
@@ -288,10 +287,7 @@ public class MemoryCacheService {
 			boolean retVal = false;
 			if (theO instanceof HistoryCountKey) {
 				HistoryCountKey that = (HistoryCountKey) theO;
-				retVal = new EqualsBuilder()
-						.append(myTypeName, that.myTypeName)
-						.append(myInstanceId, that.myInstanceId)
-						.isEquals();
+				retVal = new EqualsBuilder().append(myTypeName, that.myTypeName).append(myInstanceId, that.myInstanceId).isEquals();
 			}
 			return retVal;
 		}
@@ -300,5 +296,7 @@ public class MemoryCacheService {
 		public int hashCode() {
 			return myHashCode;
 		}
+
 	}
+
 }

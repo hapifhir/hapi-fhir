@@ -46,14 +46,17 @@ public class WarmCacheEntry {
 		WarmCacheEntry that = (WarmCacheEntry) theO;
 
 		return new EqualsBuilder()
-				.append(myPeriodMillis, that.myPeriodMillis)
-				.append(myUrl, that.myUrl)
-				.isEquals();
+			.append(myPeriodMillis, that.myPeriodMillis)
+			.append(myUrl, that.myUrl)
+			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myPeriodMillis).append(myUrl).toHashCode();
+		return new HashCodeBuilder(17, 37)
+			.append(myPeriodMillis)
+			.append(myUrl)
+			.toHashCode();
 	}
 
 	public long getPeriodMillis() {
@@ -73,4 +76,5 @@ public class WarmCacheEntry {
 		myUrl = theUrl;
 		return this;
 	}
+
 }

@@ -41,10 +41,10 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,10 +73,8 @@ public class CascadingDeleteInterceptor {
 	public static final int CASCADING_DELETE_INTERCEPTOR_ORDER = 1;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CascadingDeleteInterceptor.class);
-	private static final String CASCADED_DELETES_KEY =
-			CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_KEY";
-	private static final String CASCADED_DELETES_FAILED_KEY =
-			CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_FAILED_KEY";
+	private static final String CASCADED_DELETES_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_KEY";
+	private static final String CASCADED_DELETES_FAILED_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_FAILED_KEY";
 
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -88,11 +86,7 @@ public class CascadingDeleteInterceptor {
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull DaoRegistry theDaoRegistry,
-			@Nonnull IInterceptorBroadcaster theInterceptorBroadcaster,
-			@Nonnull ThreadSafeResourceDeleterSvc theThreadSafeResourceDeleterSvc) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull ThreadSafeResourceDeleterSvc theThreadSafeResourceDeleterSvc) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
@@ -105,8 +99,7 @@ public class CascadingDeleteInterceptor {
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
-	public DeleteConflictOutcome handleDeleteConflicts(
-			DeleteConflictList theConflictList, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
 		if (shouldCascade(theRequest) == DeleteCascadeModeEnum.NONE) {
@@ -140,8 +133,7 @@ public class CascadingDeleteInterceptor {
 	public void outgoingFailureOperationOutcome(RequestDetails theRequestDetails, IBaseOperationOutcome theResponse) {
 		if (theRequestDetails != null) {
 
-			String failedDeleteMessage =
-					(String) theRequestDetails.getUserData().get(CASCADED_DELETES_FAILED_KEY);
+			String failedDeleteMessage = (String) theRequestDetails.getUserData().get(CASCADED_DELETES_FAILED_KEY);
 			if (isNotBlank(failedDeleteMessage)) {
 				FhirContext ctx = theRequestDetails.getFhirContext();
 				String severity = OperationOutcome.IssueSeverity.INFORMATION.toCode();
@@ -149,12 +141,13 @@ public class CascadingDeleteInterceptor {
 				String details = failedDeleteMessage;
 				OperationOutcomeUtil.addIssue(ctx, theResponse, severity, details, null, code);
 			}
+
 		}
 	}
 
+
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void outgoingResponse(
-			RequestDetails theRequestDetails, ResponseDetails theResponseDetails, IBaseResource theResponse) {
+	public void outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, IBaseResource theResponse) {
 		if (theRequestDetails != null) {
 
 			// Successful delete list
@@ -166,15 +159,15 @@ public class CascadingDeleteInterceptor {
 						IBaseOperationOutcome oo = (IBaseOperationOutcome) theResponse;
 						String severity = OperationOutcome.IssueSeverity.INFORMATION.toCode();
 						String code = OperationOutcome.IssueType.INFORMATIONAL.toCode();
-						String details = ctx.getLocalizer()
-								.getMessage(
-										CascadingDeleteInterceptor.class, "successMsg", deleteList.size(), deleteList);
+						String details = ctx.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "successMsg", deleteList.size(), deleteList);
 						OperationOutcomeUtil.addIssue(ctx, oo, severity, details, null, code);
 					}
 				}
 			}
+
 		}
 	}
+
 
 	/**
 	 * Subclasses may override

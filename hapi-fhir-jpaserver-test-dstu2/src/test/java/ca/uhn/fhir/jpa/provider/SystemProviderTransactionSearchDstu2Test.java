@@ -36,8 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu2Test.class);
 	private static RestfulServer myRestServer;
 	private IGenericClient myClient;
 	private static FhirContext ourCtx;
@@ -45,12 +44,12 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	private static String ourServerBase;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setMaximumSearchResultCountInTransaction(
-				new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
+		myStorageSettings.setMaximumSearchResultCountInTransaction(new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
 	}
 
 	@BeforeEach
@@ -110,11 +109,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 			patient.setGender(AdministrativeGenderEnum.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
 			patient.addName().addFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i + 1));
-			String id = myPatientDao
-					.create(patient)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getValue();
+			String id = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;
@@ -126,7 +121,11 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_count=5&_sort=name");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerbEnum.GET)
+			.setUrl("Patient?_count=5&_sort=name");
 
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
@@ -147,7 +146,11 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_count=5&_sort=name");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerbEnum.GET)
+			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -159,10 +162,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = myClient.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = myClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
@@ -176,13 +176,15 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	public void testBatchWithManyGets() {
 		List<String> ids = create20Patients();
 
+
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.BATCH);
 		for (int i = 0; i < 30; i++) {
-			input.addEntry()
-					.getRequest()
-					.setMethod(HTTPVerbEnum.GET)
-					.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerbEnum.GET)
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
@@ -204,7 +206,11 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_count=5&_sort=_id");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerbEnum.GET)
+			.setUrl("Patient?_count=5&_sort=_id");
 
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
@@ -225,7 +231,11 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_count=5&_sort=name");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerbEnum.GET)
+			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -237,10 +247,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = myClient.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = myClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
@@ -254,13 +261,15 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	public void testTransactionWithManyGets() {
 		List<String> ids = create20Patients();
 
+
 		Bundle input = new Bundle();
 		input.setType(BundleTypeEnum.TRANSACTION);
 		for (int i = 0; i < 30; i++) {
-			input.addEntry()
-					.getRequest()
-					.setMethod(HTTPVerbEnum.GET)
-					.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerbEnum.GET)
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
@@ -279,8 +288,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	private List<String> toIds(Bundle theRespBundle) {
 		ArrayList<String> retVal = new ArrayList<>();
 		for (Entry next : theRespBundle.getEntry()) {
-			retVal.add(
-					next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}
@@ -289,4 +297,5 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
+
 }

@@ -30,8 +30,7 @@ import org.springframework.context.annotation.Bean;
 
 public class BatchCommonCtx {
 	@Bean
-	UrlPartitioner urlPartitioner(
-			MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	UrlPartitioner urlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new UrlPartitioner(theMatchUrlService, theRequestPartitionHelperSvc);
 	}
 

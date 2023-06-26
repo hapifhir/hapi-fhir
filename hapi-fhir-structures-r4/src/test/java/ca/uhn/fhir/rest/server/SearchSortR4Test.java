@@ -63,18 +63,15 @@ public class SearchSortR4Test {
 			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
 
 			assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
-			assertEquals(
-					SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
+			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
 
-			assertEquals(
-					"param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
-			assertEquals(
-					SortOrderEnum.DESC,
-					ourLastSortSpec.getChain().getChain().getChain().getOrder());
+			assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
+			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@AfterAll
@@ -98,13 +95,13 @@ public class SearchSortR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -114,21 +111,22 @@ public class SearchSortR4Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(@Sort SortSpec theSortSpec) {
+		public List search(
+				@Sort SortSpec theSortSpec
+				) {
 			ourLastMethod = "search";
 			ourLastSortSpec = theSortSpec;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient()
-						.addName(new HumanName().setFamily("FAMILY"))
-						.setId("" + i));
+				retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("" + i));
 			}
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
 	}
+
 }

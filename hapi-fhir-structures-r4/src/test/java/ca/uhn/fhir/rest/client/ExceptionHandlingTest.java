@@ -65,25 +65,20 @@ public class ExceptionHandlingTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read()
-					.resource(Patient.class)
-					.withId(new IdType("Patient/1234"))
-					.execute();
+			client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 		}
+
 	}
 
 	@Test
@@ -95,25 +90,20 @@ public class ExceptionHandlingTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read()
-					.resource(Patient.class)
-					.withId(new IdType("Patient/1234"))
-					.execute();
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 		}
+
 	}
 
 	@Test
@@ -125,25 +115,20 @@ public class ExceptionHandlingTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read()
-					.resource(Patient.class)
-					.withId(new IdType("Patient/1234"))
-					.execute();
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("HTTP 500 Internal Error", e.getMessage());
 			assertThat(e.getResponseBody(), StringContains.containsString("value=\"foo\""));
 		}
+
 	}
 
 	@Test
@@ -155,31 +140,21 @@ public class ExceptionHandlingTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
-			client.read()
-					.resource(Patient.class)
-					.withId(new IdType("Patient/1234"))
-					.execute();
+        client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals(
-					"Help I'm a bug",
-					((OperationOutcome) e.getOperationOutcome())
-							.getIssueFirstRep()
-							.getDiagnosticsElement()
-							.getValue());
+			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
+
 	}
 
 	@Test
@@ -191,12 +166,9 @@ public class ExceptionHandlingTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 500, "Internal Error"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		IMyClient client = ourCtx.newRestfulClient(IMyClient.class, "http://example.com/fhir");
 		try {
@@ -206,13 +178,9 @@ public class ExceptionHandlingTest {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals(
-					"Help I'm a bug",
-					((OperationOutcome) e.getOperationOutcome())
-							.getIssueFirstRep()
-							.getDiagnosticsElement()
-							.getValue());
+			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 		}
+
 	}
 
 	public interface IMyClient extends IRestfulClient {
@@ -220,8 +188,10 @@ public class ExceptionHandlingTest {
 		Patient read(@IdParam IdType theId);
 	}
 
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

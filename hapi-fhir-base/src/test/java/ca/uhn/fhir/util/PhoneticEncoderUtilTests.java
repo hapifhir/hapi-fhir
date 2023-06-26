@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PhoneticEncoderUtilTests {
 
-	private final Logger myLogger = (Logger) LoggerFactory.getLogger(PhoneticEncoderUtil.class);
+	private final Logger myLogger  = (Logger) LoggerFactory.getLogger(PhoneticEncoderUtil.class);
 
 	private ListAppender<ILoggingEvent> myListAppender;
 
@@ -59,8 +59,9 @@ public class PhoneticEncoderUtilTests {
 		String num = "A";
 
 		// test
-		IPhoneticEncoder encoder =
-				PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(
+			PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")"
+		);
 
 		// verify
 		assertNull(encoder);
@@ -68,7 +69,8 @@ public class PhoneticEncoderUtilTests {
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertEquals(1, loggingCaptor.getAllValues().size());
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + num, event.getMessage());
+		assertEquals("Invalid encoder max character length: " + num,
+			event.getMessage());
 	}
 
 	@Test
@@ -82,10 +84,12 @@ public class PhoneticEncoderUtilTests {
 		// verify
 		assertNull(encoder);
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		Mockito.verify(myListAppender).doAppend(captor.capture());
+		Mockito.verify(myListAppender)
+			.doAppend(captor.capture());
 		assertEquals(1, captor.getAllValues().size());
 		ILoggingEvent event = captor.getValue();
-		assertEquals("Invalid phonetic param string " + theString, event.getMessage());
+		assertEquals("Invalid phonetic param string " + theString,
+			event.getMessage());
 	}
 
 	@Test
@@ -104,8 +108,7 @@ public class PhoneticEncoderUtilTests {
 
 		// test
 		String num = "-1";
-		IPhoneticEncoder encoder =
-				PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
 
 		verifyOutcome_getEncoder_NumberParseFailure(encoder, num);
 	}
@@ -116,8 +119,7 @@ public class PhoneticEncoderUtilTests {
 
 		// test
 		String num = "(";
-		IPhoneticEncoder encoder =
-				PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
 
 		verifyOutcome_getEncoder_NumberParseFailure(encoder, num);
 	}
@@ -125,8 +127,9 @@ public class PhoneticEncoderUtilTests {
 	@Test
 	public void getEncoder_maxInt_returnsWrapper() {
 		// test
-		IPhoneticEncoder encoder =
-				PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + Integer.MAX_VALUE + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(
+			PhoneticEncoderEnum.METAPHONE.name() + "(" + Integer.MAX_VALUE + ")"
+		);
 
 		assertNotNull(encoder);
 		assertEquals(PhoneticEncoderEnum.METAPHONE.name(), encoder.name());
@@ -141,6 +144,7 @@ public class PhoneticEncoderUtilTests {
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertEquals(1, loggingCaptor.getAllValues().size());
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + theNumberParam, event.getMessage());
+		assertEquals("Invalid encoder max character length: " + theNumberParam,
+			event.getMessage());
 	}
 }

@@ -56,6 +56,7 @@ public class ReindexParameters {
 		return this;
 	}
 
+
 	public enum ReindexSearchParametersEnum {
 		ALL,
 		NONE
@@ -66,4 +67,5 @@ public class ReindexParameters {
 		CURRENT_VERSION,
 		ALL_VERSIONS
 	}
+
 }

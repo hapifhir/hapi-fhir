@@ -36,20 +36,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
-
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
-
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private static final TestSystemProvider ourTestSystemProvider = new TestSystemProvider();
 
-	private final PointcutLatch mySubscriptionTopicsCheckedLatch =
-			new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
-	private final PointcutLatch mySubscriptionDeliveredLatch =
-			new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
+	private final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	private final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@Override
 	@BeforeEach
@@ -58,10 +53,8 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		ourRestfulServer.unregisterProvider(mySystemProvider);
 		ourRestfulServer.registerProvider(ourTestSystemProvider);
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
 	}
 
 	@Override
@@ -111,8 +104,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testUpdate() throws Exception {
 		// WIP SR4B test update, delete, etc
-		createEncounterSubscriptionTopic(
-				SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
+		createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
 		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
 		waitForRegisteredSubscriptionTopicCount();
 
@@ -140,30 +132,24 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
-	private static void validateSubscriptionStatus(
-			Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
+
+	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
 		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
 		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
-		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents =
-				ss.getNotificationEvent();
+		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
 		assertEquals(1, notificationEvents.size());
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals("1", notificationEvent.getEventNumber());
-		assertEquals(
-				sentEncounter.getIdElement().toUnqualifiedVersionless(),
-				notificationEvent.getFocus().getReferenceElement());
+		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
-		assertEquals(
-				subscription.getIdElement().toUnqualifiedVersionless(),
-				ss.getSubscription().getReferenceElement());
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
 		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
 	}
 
 	private Subscription createTopicSubscription() throws InterruptedException {
-		Subscription subscription =
-				newSubscription(SubscriptionTopicR4BTest.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
+		Subscription subscription = newSubscription(SubscriptionTopicR4BTest.SUBSCRIPTION_TOPIC_TEST_URL, Constants.CT_FHIR_JSON_NEW);
 		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
 
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
@@ -186,8 +172,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		return mySubscriptionTopicRegistry.size() == 1;
 	}
 
-	private void createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger... theInteractionTriggers)
-			throws InterruptedException {
+	private void createEncounterSubscriptionTopic(SubscriptionTopic.InteractionTrigger... theInteractionTriggers) throws InterruptedException {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -196,8 +181,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		for (SubscriptionTopic.InteractionTrigger interactionTrigger : theInteractionTriggers) {
 			trigger.addSupportedInteraction(interactionTrigger);
 		}
-		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria =
-				trigger.getQueryCriteria();
+		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
 		queryCriteria.setPrevious("Encounter?status=" + Encounter.EncounterStatus.PLANNED.toCode());
 		queryCriteria.setCurrent("Encounter?status=" + Encounter.EncounterStatus.FINISHED.toCode());
 		queryCriteria.setRequireBoth(true);
@@ -206,8 +190,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 	}
 
-	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery)
-			throws InterruptedException {
+	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 

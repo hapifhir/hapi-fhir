@@ -22,33 +22,36 @@ public class ModelInstantiationTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+
 	@Test
 	public void testBinaryIsBaseBinary() {
 		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testInstantiateAllTypes() throws Exception {
 		FhirContext ctx = FhirContext.forDstu2();
-
+		
 		Properties p = new Properties();
 		p.load(ctx.getVersion().getFhirVersionPropertiesFile());
-
+		
 		for (Object next : p.keySet()) {
-			String nextStr = (String) next;
+			String nextStr = (String)next;
 			if (nextStr.startsWith("resource.")) {
 				nextStr = nextStr.substring("resource.".length());
 			} else {
 				continue;
 			}
-
+			
 			String className = p.getProperty((String) next);
 			ourLog.info("Loading class: {}", className);
 			Class<? extends IResource> clazz = (Class<? extends IResource>) Class.forName(className);
-
+			
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(clazz);
 			def.newInstance();
 		}
+		
 	}
+	
 }

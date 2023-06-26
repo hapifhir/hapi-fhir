@@ -30,10 +30,8 @@ public class JpaResourceDaoSearchParameterTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceDaoSearchParameterTest.class);
 	private FhirContext myCtx;
 	private JpaResourceDaoSearchParameter<SearchParameter> myDao;
-
 	@Mock
 	private ApplicationContext myApplicationContext;
-
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
 
@@ -50,8 +48,7 @@ public class JpaResourceDaoSearchParameterTest {
 		myDao.setResourceType(SearchParameter.class);
 		myDao.setApplicationContext(myApplicationContext);
 		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
-		SearchParameterDaoValidator validator =
-				new SearchParameterDaoValidator(myCtx, defaultConfig, mySearchParamRegistry);
+		SearchParameterDaoValidator validator = new SearchParameterDaoValidator(myCtx, defaultConfig, mySearchParamRegistry);
 		myDao.setSearchParameterDaoValidatorForUnitTest(validator);
 		myDao.start();
 	}
@@ -72,15 +69,17 @@ public class JpaResourceDaoSearchParameterTest {
 				SearchParameter nextSearchParameter = new SearchParameter();
 				nextSearchParameter.setExpression(nextp.getPath());
 				nextSearchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-				nextSearchParameter.setType(Enumerations.SearchParamType.fromCode(
-						nextp.getParamType().getCode()));
+				nextSearchParameter.setType(Enumerations.SearchParamType.fromCode(nextp.getParamType().getCode()));
 				nextp.getBase().forEach(nextSearchParameter::addBase);
 
 				ourLog.info("Validating {}.{}", nextResource, nextp.getName());
 				myDao.validateResourceForStorage(nextSearchParameter, null);
 			}
 		}
+
+
 	}
+
 
 	@Test
 	public void testValidateInvalidExpression() {
@@ -94,10 +93,9 @@ public class JpaResourceDaoSearchParameterTest {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(
-					Msg.code(1121)
-							+ "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name",
-					e.getMessage());
+			assertEquals(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
 		}
 	}
+
+
 }

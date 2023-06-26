@@ -17,23 +17,16 @@ public class TitleStandardizerTest {
 		assertEquals("20 / 20", myStandardizer.standardize("20 / 20"));
 		assertEquals("20/20", myStandardizer.standardize("20/20"));
 		assertEquals("L.L.P.", myStandardizer.standardize("L.L.P."));
-		assertEquals(
-				"Green Tractors Clow Farm Equipment/",
-				myStandardizer.standardize("GREEN TRACTORS CLOW FARM EQUIPMENT/"));
+		assertEquals("Green Tractors Clow Farm Equipment/", myStandardizer.standardize("GREEN TRACTORS CLOW FARM EQUIPMENT/"));
 		assertEquals("Agilec - Barrie/Orillia (EPS)", myStandardizer.standardize("Agilec - Barrie/Orillia (EPS)"));
-		assertEquals(
-				"Clement's/Callander Ida Pharmacies", myStandardizer.standardize("CLEMENT'S/CALLANDER IDA PHARMACIES"));
-		assertEquals(
-				"Longley/Vickar L.L.P. Barristers & Solicitors",
-				myStandardizer.standardize("LONGLEY/VICKAR L.L.P. BARRISTERS & SOLICITORS"));
+		assertEquals("Clement's/Callander Ida Pharmacies", myStandardizer.standardize("CLEMENT'S/CALLANDER IDA PHARMACIES"));
+		assertEquals("Longley/Vickar L.L.P. Barristers & Solicitors", myStandardizer.standardize("LONGLEY/VICKAR L.L.P. BARRISTERS & SOLICITORS"));
 		assertEquals("-Blan", myStandardizer.standardize("~Blan"));
 		assertEquals("The (C/O Dr Mary Cooke)", myStandardizer.standardize("THE (C/O DR MARY COOKE)"));
 		assertEquals("Sarah Ann Mary Pollock", myStandardizer.standardize("SARAH ANN MARY POLLOCK"));
 		assertEquals("Voir...Être Vu! Opticiens", myStandardizer.standardize("VOIR...ÊTRE VU! OPTICIENS"));
 		assertEquals("Back in Sync: Wellness Centre", myStandardizer.standardize("BACK IN SYNC: WELLNESS CENTRE"));
-		assertEquals(
-				"Pearle Vision 9861 (Orchard Park S/C)",
-				myStandardizer.standardize("PEARLE VISION 9861 (ORCHARD PARK S/C)"));
+		assertEquals("Pearle Vision 9861 (Orchard Park S/C)", myStandardizer.standardize("PEARLE VISION 9861 (ORCHARD PARK S/C)"));
 	}
 
 	@ParameterizedTest
@@ -42,4 +35,5 @@ public class TitleStandardizerTest {
 		String standardizedTitle = myStandardizer.standardize(theInput);
 		assertEquals(theExpected, standardizedTitle);
 	}
+
 }

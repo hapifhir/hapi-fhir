@@ -13,22 +13,19 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class RuntimeResourceDefinitionDstu3Test {
 
 	private FhirContext ourCtx = FhirContext.forDstu3();
-
+	
 	@Test
 	public void testAsClass() {
 		assertEquals(Bundle.class, ourCtx.getResourceDefinition("Bundle").getImplementingClass(Bundle.class));
 	}
-
+	
 	@Test()
 	public void testAsClassWrong() {
 		try {
 			ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(
-					Msg.code(1732)
-							+ "Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient",
-					e.getMessage());
+			assertEquals(Msg.code(1732) + "Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
 		}
 	}
 
@@ -36,4 +33,6 @@ public class RuntimeResourceDefinitionDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
+
 }

@@ -9,10 +9,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 class MdmResourceUtilTest {
 
-	// See https://github.com/hapifhir/hapi-fhir/issues/2876
+	//See https://github.com/hapifhir/hapi-fhir/issues/2876
 	@Test
 	public void testNoNpeOnTagWithNoSystem() {
-		// Given
+		//Given
 		Organization organization = new Organization();
 		organization.getMeta().addTag(null, "Some Code", "Some Display");
 

@@ -31,4 +31,5 @@ public class RuntimeElementDirectResource extends BaseRuntimeElementDefinition<I
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.RESOURCE;
 	}
+
 }

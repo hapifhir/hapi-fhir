@@ -75,19 +75,14 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	ElasticsearchSvcImpl elasticsearchSvc;
 
 	@Container
-	public static ElasticsearchContainer elasticsearchContainer =
-			TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+
 
 	@BeforeEach
 	public void before() {
 		PartitionSettings partitionSettings = new PartitionSettings();
 		partitionSettings.setPartitioningEnabled(false);
-		elasticsearchSvc = new ElasticsearchSvcImpl(
-				partitionSettings,
-				"http",
-				elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200),
-				"",
-				"");
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, "http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach
@@ -103,27 +98,20 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		// Create test observation
 		ObservationJson indexedObservation = LastNTestDataGenerator.createSingleObservationJson();
-		assertTrue(
-				elasticsearchSvc.createOrUpdateObservationIndex(SINGLE_OBSERVATION_RESOURCE_PID, indexedObservation));
-		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(
-				OBSERVATIONSINGLECODEID, indexedObservation.getCode()));
+		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(SINGLE_OBSERVATION_RESOURCE_PID, indexedObservation));
+		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, indexedObservation.getCode()));
 
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_OBSERVATION_SUBJECT_ID);
-		searchParameterMap.add(
-				Observation.SP_SUBJECT,
-				new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
+		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		searchParameterMap.add(
-				Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, new Date(TEST_BASELINE_TIMESTAMP)));
+		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
+		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, new Date(TEST_BASELINE_TIMESTAMP)));
 
 		searchParameterMap.setLastNMax(3);
 
@@ -134,8 +122,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(SINGLE_OBSERVATION_RESOURCE_PID, observationIdsOnly.get(0));
 
 		// execute Observation search for all search fields
-		List<ObservationJson> observations =
-				elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
+		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
 
 		validateFullObservationSearch(observations);
 	}
@@ -213,40 +200,19 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		List<List<String>> category_codings_code_system_hashes = observation.getCategory_coding_code_system_hash();
 		assertEquals(3, category_codings_code_system_hashes.size());
 		List<String> category_coding_code_system_hashes = category_codings_code_system_hashes.get(0);
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE)),
-				category_coding_code_system_hashes.get(0));
-		assertEquals(
-				String.valueOf(
-						CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE)),
-				category_coding_code_system_hashes.get(1));
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE)),
-				category_coding_code_system_hashes.get(2));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE)), category_coding_code_system_hashes.get(0));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE)), category_coding_code_system_hashes.get(1));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE)), category_coding_code_system_hashes.get(2));
 		category_coding_code_system_hashes = category_codings_code_system_hashes.get(1);
 		assertEquals(3, category_coding_code_system_hashes.size());
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE)),
-				category_coding_code_system_hashes.get(0));
-		assertEquals(
-				String.valueOf(
-						CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE)),
-				category_coding_code_system_hashes.get(1));
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE)),
-				category_coding_code_system_hashes.get(2));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE)), category_coding_code_system_hashes.get(0));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE)), category_coding_code_system_hashes.get(1));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE)), category_coding_code_system_hashes.get(2));
 		category_coding_code_system_hashes = category_codings_code_system_hashes.get(2);
 		assertEquals(3, category_coding_code_system_hashes.size());
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE)),
-				category_coding_code_system_hashes.get(0));
-		assertEquals(
-				String.valueOf(
-						CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE)),
-				category_coding_code_system_hashes.get(1));
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE)),
-				category_coding_code_system_hashes.get(2));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE)), category_coding_code_system_hashes.get(0));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE)), category_coding_code_system_hashes.get(1));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE)), category_coding_code_system_hashes.get(2));
 
 		String code_concept_text_values = observation.getCode_concept_text();
 		assertEquals(OBSERVATION_CODE_CONCEPT_TEXT_1, code_concept_text_values);
@@ -261,9 +227,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display);
 
 		String code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)),
-				code_coding_code_system_hash);
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
 		// Retrieve all Observation codes
 		List<CodeJson> codes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
@@ -289,8 +253,10 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		List<String> persistedCodeCodingCodeSystemHashes = persistedObservationCode.getCoding_code_system_hash();
 		assertEquals(1, persistedCodeCodingCodeSystemHashes.size());
-		assertEquals(
-				String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)),
-				persistedCodeCodingCodeSystemHashes.get(0));
+		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(0));
+
+
 	}
+
 }
+

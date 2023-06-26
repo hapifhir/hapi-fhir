@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -52,8 +52,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
-		Extension matchGradeExtension =
-				searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
 	}
@@ -62,12 +61,12 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 	public void testMedicationMatch() throws Exception {
 		createDummyOrganization();
 
+
 		Medication medication = buildMedication("Organization/mfr");
 		Medication createdMedication = createMedication(medication);
 		Medication newMedication = buildMedication("Organization/mfr");
 
-		Bundle result = (Bundle)
-				myMdmProvider.serverMatch(newMedication, new StringType("Medication"), new SystemRequestDetails());
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newMedication, new StringType("Medication"), new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -76,13 +75,14 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
-		// Since there is only
+		//Since there is only
 		assertEquals(1.0 / 1.0, searchComponent.getScore().doubleValue(), 0.01);
-		Extension matchGradeExtension =
-				searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+
 	}
+
 
 	@Test
 	public void testServerLevelMatch() throws Exception {
@@ -91,8 +91,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result =
-				(Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"), new SystemRequestDetails());
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"), new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -102,8 +101,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
-		Extension matchGradeExtension =
-				searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
 	}
@@ -127,9 +125,10 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntryComponent entry1 = result.getEntry().get(1);
 		assertTrue(jane1.getId().equals(((Patient) entry1.getResource()).getId()), "Second match should be Janet");
 
-		List<Double> scores = result.getEntry().stream()
-				.map(bec -> bec.getSearch().getScore().doubleValue())
-				.collect(Collectors.toList());
+		List<Double> scores = result.getEntry()
+			.stream()
+			.map(bec -> bec.getSearch().getScore().doubleValue())
+			.collect(Collectors.toList());
 		assertTrue(Ordering.<Double>natural().reverse().isOrdered(scores), "Match scores must be descending");
 	}
 
@@ -156,76 +155,73 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
-		assertEquals(
-				createdJane.getId(), result.getEntryFirstRep().getResource().getId());
+		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
 
 	@Test
 	public void testMatchWithCoarseDateGranularity() throws Exception {
 		setMdmRuleJson("mdm/coarse-birthdate-mdm-rules.json");
 
-		String granularPatient =
-				"""
+		String granularPatient = """
 			{
-				"resourceType": "Patient",
-				"active": true,
-				"name": [
-					{
-						"family": "PETERSON",
-						"given": [
-							"GARY",
-							"D"
-						]
-					}
-				],
-				"telecom": [
-					{
-						"system": "phone",
-						"value": "100100100",
-						"use": "home"
-					}
-				],
-				"gender": "male",
-				"birthDate": "1991-10-10",
-				"address": [
-					{
-						"state": "NY",
-						"postalCode": "12313"
-					}
-				]
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "GARY",
+			                "D"
+			            ]
+			        }
+			    ],
+			    "telecom": [
+			        {
+			            "system": "phone",
+			            "value": "100100100",
+			            "use": "home"
+			        }
+			    ],
+			    "gender": "male",
+			    "birthDate": "1991-10-10",
+			    "address": [
+			        {
+			            "state": "NY",
+			            "postalCode": "12313"
+			        }
+			    ]
 			}""";
 		IBaseResource iBaseResource = myFhirContext.newJsonParser().parseResource(granularPatient);
 		createPatient((Patient) iBaseResource);
 
-		String coarsePatient =
-				"""
+		String coarsePatient = """
 			{
-				"resourceType": "Patient",
-				"active": true,
-				"name": [
-					{
-						"family": "PETERSON",
-						"given": [
-							"GARY",
-							"D"
-						]
-					}
-				],
-				"telecom": [
-					{
-						"system": "phone",
-						"value": "100100100",
-						"use": "home"
-					}
-				],
-				"gender": "male",
-				"birthDate": "1991-10",
-				"address": [
-					{
-						"state": "NY",
-						"postalCode": "12313"
-					}
-				]
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "GARY",
+			                "D"
+			            ]
+			        }
+			    ],
+			    "telecom": [
+			        {
+			            "system": "phone",
+			            "value": "100100100",
+			            "use": "home"
+			        }
+			    ],
+			    "gender": "male",
+			    "birthDate": "1991-10",
+			    "address": [
+			        {
+			            "state": "NY",
+			            "postalCode": "12313"
+			        }
+			    ]
 			}""";
 
 		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
@@ -237,38 +233,36 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 	public void testNicknameMatch() throws IOException {
 		setMdmRuleJson("mdm/nickname-mdm-rules.json");
 
-		String formalPatientJson =
-				"""
+		String formalPatientJson = """
 			{
-				"resourceType": "Patient",
-				"active": true,
-				"name": [
-					{
-						"family": "PETERSON",
-						"given": [
-							"Gregory"
-						]
-					}
-				],
-				"gender": "male"
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Gregory"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
 			}""";
 		Patient formalPatient = (Patient) myFhirContext.newJsonParser().parseResource(formalPatientJson);
 		createPatient(formalPatient);
 
-		String noMatchPatientJson =
-				"""
+		String noMatchPatientJson = """
 			{
-				"resourceType": "Patient",
-				"active": true,
-				"name": [
-					{
-						"family": "PETERSON",
-						"given": [
-							"Bob"
-						]
-					}
-				],
-				"gender": "male"
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Bob"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
 			}""";
 		Patient noMatchPatient = (Patient) myFhirContext.newJsonParser().parseResource(noMatchPatientJson);
 		createPatient(noMatchPatient);
@@ -277,20 +271,19 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 			assertEquals(0, result.getEntry().size());
 		}
 
-		String nickPatientJson =
-				"""
+		String nickPatientJson = """
 			{
-				"resourceType": "Patient",
-				"active": true,
-				"name": [
-					{
-						"family": "PETERSON",
-						"given": [
-							"Greg"
-						]
-					}
-				],
-				"gender": "male"
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Greg"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
 			}""";
 
 		{

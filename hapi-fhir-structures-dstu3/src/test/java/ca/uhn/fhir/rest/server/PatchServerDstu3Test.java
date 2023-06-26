@@ -61,9 +61,7 @@ public class PatchServerDstu3Test {
 	public void testPatchValidJson() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -71,9 +69,7 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>",
-					responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -88,9 +84,7 @@ public class PatchServerDstu3Test {
 	public void testPatchUsingConditional() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient?_id=123");
-		httpPatch.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -98,9 +92,7 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>",
-					responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -116,9 +108,7 @@ public class PatchServerDstu3Test {
 	public void testPatchValidXml() throws Exception {
 		String requestContents = "<root/>";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_XML_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -126,9 +116,7 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>",
-					responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -143,8 +131,7 @@ public class PatchServerDstu3Test {
 	public void testPatchValidJsonWithCharset() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
-		httpPatch.setEntity(new StringEntity(
-				requestContents, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
 		try {
@@ -171,14 +158,11 @@ public class PatchServerDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals(
-					"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""
-							+ Msg.code(1965)
-							+ "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>",
-					responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(1965)+"Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -190,10 +174,11 @@ public class PatchServerDstu3Test {
 
 		@Patch
 		public OperationOutcome patientPatch(
-				@IdParam IdType theId,
-				PatchTypeEnum thePatchType,
-				@ResourceParam String theBody,
-				@ConditionalUrlParam String theConditional) {
+			@IdParam IdType theId,
+			PatchTypeEnum thePatchType,
+			@ResourceParam String theBody,
+			@ConditionalUrlParam String theConditional
+		) {
 			ourLastMethod = "patientPatch";
 			ourLastBody = theBody;
 			ourLastId = theId;
@@ -203,6 +188,7 @@ public class PatchServerDstu3Test {
 			retVal.getText().setDivAsString("<div>OK</div>");
 			return retVal;
 		}
+
 	}
 
 	@AfterAll
@@ -229,10 +215,11 @@ public class PatchServerDstu3Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

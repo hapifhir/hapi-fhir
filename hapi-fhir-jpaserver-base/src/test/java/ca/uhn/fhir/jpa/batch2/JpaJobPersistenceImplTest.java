@@ -36,25 +36,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JpaJobPersistenceImplTest {
 	private static final String TEST_INSTANCE_ID = "test-instance-id";
-
 	@Mock
 	IBatch2JobInstanceRepository myJobInstanceRepository;
-
 	@Mock
 	IBatch2WorkChunkRepository myWorkChunkRepository;
-
 	@SuppressWarnings("unused") // injected into mySvc
 	@Spy
 	IHapiTransactionService myTxManager = new NonTransactionalHapiTransactionService();
-
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
+
 
 	@Test
 	void cancelSuccess() {
 		// setup
-		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true))
-				.thenReturn(1);
+		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true)).thenReturn(1);
 
 		// execute
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
@@ -67,8 +63,7 @@ class JpaJobPersistenceImplTest {
 	@Test
 	void cancelNotFound() {
 		// setup
-		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true))
-				.thenReturn(0);
+		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true)).thenReturn(0);
 		when(myJobInstanceRepository.findById(TEST_INSTANCE_ID)).thenReturn(Optional.empty());
 
 		// execute
@@ -82,8 +77,7 @@ class JpaJobPersistenceImplTest {
 	@Test
 	void cancelAlreadyCancelled() {
 		// setup
-		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true))
-				.thenReturn(0);
+		when(myJobInstanceRepository.updateInstanceCancelled(TEST_INSTANCE_ID, true)).thenReturn(0);
 		when(myJobInstanceRepository.findById(TEST_INSTANCE_ID)).thenReturn(Optional.of(new Batch2JobInstanceEntity()));
 
 		// execute
@@ -103,7 +97,8 @@ class JpaJobPersistenceImplTest {
 		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(jobId);
 
 		// verify
-		verify(myWorkChunkRepository).deleteAllForInstance(jobId);
+		verify(myWorkChunkRepository)
+			.deleteAllForInstance(jobId);
 	}
 
 	@Test
@@ -115,8 +110,10 @@ class JpaJobPersistenceImplTest {
 		mySvc.deleteInstanceAndChunks(jobid);
 
 		// verify
-		verify(myWorkChunkRepository).deleteAllForInstance(jobid);
-		verify(myJobInstanceRepository).deleteById(jobid);
+		verify(myWorkChunkRepository)
+			.deleteAllForInstance(jobid);
+		verify(myJobInstanceRepository)
+			.deleteById(jobid);
 	}
 
 	@Test
@@ -131,22 +128,27 @@ class JpaJobPersistenceImplTest {
 		List<Batch2JobInstanceEntity> instances = Arrays.asList(job1, job2);
 
 		// when
-		when(myJobInstanceRepository.findInstancesByJobIdAndParams(
-						eq(req.getJobDefinition()), eq(req.getParameters()), any(Pageable.class)))
-				.thenReturn(instances);
+		when(myJobInstanceRepository
+			.findInstancesByJobIdAndParams(eq(req.getJobDefinition()),
+				eq(req.getParameters()),
+				any(Pageable.class)))
+			.thenReturn(instances);
 
 		// test
 		List<JobInstance> retInstances = mySvc.fetchInstances(req, pageStart, pageSize);
 
 		// verify
 		assertEquals(instances.size(), retInstances.size());
-		assertEquals(instances.get(0).getId(), retInstances.get(0).getInstanceId());
-		assertEquals(instances.get(1).getId(), retInstances.get(1).getInstanceId());
+		assertEquals(instances.get(0).getId(),  retInstances.get(0).getInstanceId());
+		assertEquals(instances.get(1).getId(),  retInstances.get(1).getInstanceId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)
-				.findInstancesByJobIdAndParams(
-						eq(req.getJobDefinition()), eq(req.getParameters()), pageableCaptor.capture());
+			.findInstancesByJobIdAndParams(
+				eq(req.getJobDefinition()),
+				eq(req.getParameters()),
+				pageableCaptor.capture()
+			);
 
 		Pageable pageable = pageableCaptor.getValue();
 		assertEquals(pageStart, pageable.getPageNumber());
@@ -160,7 +162,8 @@ class JpaJobPersistenceImplTest {
 		JobInstance instance = createJobInstanceFromEntity(entity);
 
 		// when
-		when(myJobInstanceRepository.findById(instance.getInstanceId())).thenReturn(Optional.of(entity));
+		when(myJobInstanceRepository.findById(instance.getInstanceId()))
+			.thenReturn(Optional.of(entity));
 
 		// test
 		Optional<JobInstance> retInstance = mySvc.fetchInstance(entity.getId());

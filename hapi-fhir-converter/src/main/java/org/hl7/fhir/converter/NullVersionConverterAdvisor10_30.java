@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 public class NullVersionConverterAdvisor10_30 extends BaseAdvisor_10_30 {
 
+
 	@Nullable
 	@Override
 	public CodeSystem getCodeSystem(@Nullable ValueSet theValueSet) throws FHIRException {
@@ -35,8 +36,7 @@ public class NullVersionConverterAdvisor10_30 extends BaseAdvisor_10_30 {
 	}
 
 	@Override
-	public void handleCodeSystem(@Nullable CodeSystem theCodeSystem, @Nullable ValueSet theValueSet)
-			throws FHIRException {
+	public void handleCodeSystem(@Nullable CodeSystem theCodeSystem, @Nullable ValueSet theValueSet) throws FHIRException {
 		// nothing
 	}
 }

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +53,7 @@ class FieldValidatingInterceptorTest {
 	@Test
 	public void testDisablingValidationViaHeader() {
 		RequestDetails request = newRequestDetails();
-		when(request.getHeaders(eq(VALIDATION_DISABLED_HEADER))).thenReturn(Arrays.asList(new String[] {"True"}));
+		when(request.getHeaders(eq(VALIDATION_DISABLED_HEADER))).thenReturn(Arrays.asList(new String[]{"True"}));
 
 		Person person = new Person();
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("EMAIL");
@@ -84,9 +86,7 @@ class FieldValidatingInterceptorTest {
 			fail();
 		}
 
-		ourLog.debug(
-				"Resource looks like {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
+		ourLog.debug("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
 
 		ContactPoint invalidEmail = person.getTelecomFirstRep();
 		assertTrue(invalidEmail.hasExtension());
@@ -142,4 +142,5 @@ class FieldValidatingInterceptorTest {
 			return !StringUtils.isBlank(theString);
 		}
 	}
+
 }

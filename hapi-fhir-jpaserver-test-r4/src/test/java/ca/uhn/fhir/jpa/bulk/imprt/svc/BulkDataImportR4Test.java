@@ -44,12 +44,12 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
@@ -86,8 +86,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(
-				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 	}
 
 	@AfterEach
@@ -107,11 +106,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	private void setupRetryFailures() {
 		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
 			@Override
-			public void afterMessageHandled(
-					@Nonnull Message<?> message,
-					@Nonnull MessageChannel channel,
-					@Nonnull MessageHandler handler,
-					Exception ex) {
+			public void afterMessageHandled(@Nonnull Message<?> message, @Nonnull MessageChannel channel, @Nonnull MessageHandler handler, Exception ex) {
 				if (ex != null) {
 					ourLog.info("Work channel received exception {}", ex.getMessage());
 					channel.send(message);
@@ -142,7 +137,9 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 			assertTrue(activateJobOutcome.isActivated);
 
-			JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(activateJobOutcome.jobId, 60, StatusEnum.FAILED);
+			JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(activateJobOutcome.jobId,
+				60,
+				StatusEnum.FAILED);
 
 			HashSet<StatusEnum> failed = new HashSet<>();
 			failed.add(StatusEnum.FAILED);
@@ -207,16 +204,16 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 			verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
-			List<String> tenantNames = paramsCaptor.getAllValues().stream()
-					.map(t -> t.get(RequestDetails.class).getTenantId())
-					.distinct()
-					.sorted()
-					.collect(Collectors.toList());
-			assertThat(
-					tenantNames,
-					containsInAnyOrder(
-							"TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7",
-							"TENANT8", "TENANT9"));
+			List<String> tenantNames = paramsCaptor
+				.getAllValues()
+				.stream()
+				.map(t -> t.get(RequestDetails.class).getTenantId())
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
+			assertThat(tenantNames, containsInAnyOrder(
+				"TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7", "TENANT8", "TENANT9"
+			));
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -231,14 +228,9 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 			for (int transactionIdx = 0; transactionIdx < transactionsPerFile; transactionIdx++) {
 				BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-				IBaseResource patient = buildPatient(
-						withFamily("FAM " + fileIndex + " " + transactionIdx),
-						withIdentifier(null, "patient" + counter++));
+				IBaseResource patient = buildPatient(withFamily("FAM " + fileIndex + " " + transactionIdx), withIdentifier(null, "patient" + counter++));
 				bundleBuilder.addTransactionCreateEntry(patient);
-				fileContents.append(myFhirContext
-						.newJsonParser()
-						.setPrettyPrint(false)
-						.encodeResourceToString(bundleBuilder.getBundle()));
+				fileContents.append(myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(bundleBuilder.getBundle()));
 				fileContents.append("\n");
 			}
 
@@ -252,8 +244,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 	@Test
 	public void testJobsAreRegisteredWithJobRegistry() {
-		Optional<JobDefinition<?>> jobDefinitionOp =
-				myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
+		Optional<JobDefinition<?>> jobDefinitionOp = myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
 
 		assertTrue(jobDefinitionOp.isPresent());
 	}

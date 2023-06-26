@@ -37,8 +37,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 	private static final String VALUE_REFERENCE = "valueReference";
 	private static final String VALUE_RESOURCE = "valueResource";
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildUndeclaredExtensionDefinition.class);
 	private Map<String, BaseRuntimeElementDefinition<?>> myAttributeNameToDefinition;
 	private Map<Class<? extends IBase>, String> myDatatypeToAttributeName;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToDefinition;
@@ -47,10 +46,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		// nothing
 	}
 
-	private void addReferenceBinding(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions,
-			String value) {
+	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
 		BaseRuntimeElementDefinition<?> def = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myAttributeNameToDefinition.put(value, def);
@@ -62,6 +58,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 			myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
 			myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
 		}
+
 	}
 
 	@Override
@@ -75,6 +72,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				}
 				return new ArrayList<>(target.getUndeclaredExtensions());
 			}
+
 		};
 	}
 
@@ -136,9 +134,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
-	void sealAndInitialize(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<>();
 		myDatatypeToAttributeName = new HashMap<>();
 		myDatatypeToDefinition = new HashMap<>();
@@ -152,6 +148,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				if (isSpecialization) {
 					ourLog.trace("Not adding specialization: {}", next.getImplementingClass());
 				}
+
 
 				if (!next.isStandardType()) {
 					continue;
@@ -183,10 +180,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					// CodeType should win. If we aren't in a situation like that, there is a problem with the
 					// model so we should bail.
 					if (!existing.isStandardType()) {
-						throw new ConfigurationException(Msg.code(1734) + "More than one child of " + getElementName()
-								+ " matches attribute name " + attrName + ". Found ["
-								+ existing.getImplementingClass().getName() + "] and ["
-								+ next.getImplementingClass().getName() + "]");
+						throw new ConfigurationException(Msg.code(1734) + "More than one child of " + getElementName() + " matches attribute name " + attrName + ". Found [" + existing.getImplementingClass().getName() + "] and [" + next.getImplementingClass().getName() + "]");
 					}
 				}
 
@@ -198,6 +192,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
+
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1
 		 */
@@ -208,4 +203,5 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {
 		return "value" + WordUtils.capitalize(next.getName());
 	}
+
 }

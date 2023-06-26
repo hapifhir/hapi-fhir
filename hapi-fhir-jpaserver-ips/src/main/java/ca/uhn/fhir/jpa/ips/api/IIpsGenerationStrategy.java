@@ -24,10 +24,10 @@ import ca.uhn.fhir.model.api.Include;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This interface is the primary configuration and strategy provider for the
@@ -111,8 +111,7 @@ public interface IIpsGenerationStrategy {
 	 *                              being searched for.
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
-	void massageResourceSearch(
-			IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
+	void massageResourceSearch(IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
 
 	/**
 	 * Return a set of Include directives to be added to the resource search
@@ -132,4 +131,5 @@ public interface IIpsGenerationStrategy {
 	 * IPS document. The strategy can decide whether to include it or not.
 	 */
 	boolean shouldInclude(IpsContext.IpsSectionContext theIpsSectionContext, IBaseResource theCandidate);
+
 }

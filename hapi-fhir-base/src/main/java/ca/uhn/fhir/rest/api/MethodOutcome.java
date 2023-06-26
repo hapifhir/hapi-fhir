@@ -214,6 +214,7 @@ public class MethodOutcome {
 		}
 	}
 
+
 	/**
 	 * Registers a callback to be invoked before the resource in this object gets
 	 * returned to the client. Note that this is an experimental API and may change.

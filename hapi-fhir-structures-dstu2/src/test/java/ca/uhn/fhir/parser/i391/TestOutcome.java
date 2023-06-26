@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser.i391;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -7,8 +9,6 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.util.ElementUtil;
-
-import java.util.List;
 
 @ResourceDef(profile = "test-outcome", id = "merge-operation-outcome")
 public class TestOutcome extends OperationOutcome {
@@ -36,4 +36,5 @@ public class TestOutcome extends OperationOutcome {
 	public void setElement(BoundCodeDt<OutcomeEnum> theElement) {
 		element = theElement;
 	}
+
 }

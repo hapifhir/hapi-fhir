@@ -65,6 +65,7 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 		return new SqlQueryList(retVal);
 	}
 
+
 	/**
 	 * Starts capturing queries for the current thread.
 	 * <p>
@@ -86,9 +87,10 @@ public class CurrentThreadCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * @return Returns the number of queries captured
 	 */
 	public static int logQueriesForCurrentThreadAndStopCapturing(int... theIndexes) {
-		List<String> queries = getCurrentQueueAndStopCapturing().stream()
-				.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
-				.collect(Collectors.toList());
+		List<String> queries = getCurrentQueueAndStopCapturing()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
 
 		if (theIndexes != null && theIndexes.length > 0) {
 			List<String> newList = new ArrayList<>();

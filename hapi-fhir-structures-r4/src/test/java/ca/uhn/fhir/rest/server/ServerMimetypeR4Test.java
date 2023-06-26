@@ -85,25 +85,19 @@ public class ServerMimetypeR4Test {
 			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			CapabilityStatement conf = ourCtx.newXmlParser().parseResource(CapabilityStatement.class, content);
 			List<String> strings = toStrings(conf.getFormat());
-			assertThat(
-					strings,
-					hasItems(
-							Constants.CT_FHIR_XML_NEW,
-							Constants.CT_FHIR_JSON_NEW,
-							Constants.FORMAT_XML,
-							Constants.FORMAT_JSON));
+			assertThat(strings, hasItems(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON));
 		} finally {
 			status.close();
 		}
 	}
+
 
 	@Test
 	public void testCreateWithJsonLegacyNoAcceptHeader() throws Exception {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
+		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON + "; charset=utf-8")));
@@ -115,9 +109,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_JSON,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -126,14 +118,11 @@ public class ServerMimetypeR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"diagnostics\":\"FAMILY\"}]}";
+		String expectedResponseContent = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"diagnostics\":\"FAMILY\"}]}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")));
-		httpPost.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -142,9 +131,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -153,8 +140,7 @@ public class ServerMimetypeR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
+		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON + "; charset=utf-8")));
@@ -167,9 +153,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -178,14 +162,11 @@ public class ServerMimetypeR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>";
+		String expectedResponseContent = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
-		httpPost.addHeader(
-				Constants.HEADER_PREFER,
-				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -194,9 +175,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_XML,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -205,8 +184,7 @@ public class ServerMimetypeR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
+		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML_NEW + "; charset=utf-8")));
@@ -218,9 +196,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_XML_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -229,8 +205,7 @@ public class ServerMimetypeR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
-		String expectedResponseContent =
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
+		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
@@ -243,9 +218,7 @@ public class ServerMimetypeR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(
-				Constants.CT_FHIR_XML_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -339,9 +312,7 @@ public class ServerMimetypeR4Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("\"resourceType\""));
-		assertEquals(
-				Constants.CT_FHIR_JSON,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -356,9 +327,7 @@ public class ServerMimetypeR4Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, containsString("\"resourceType\""));
-			assertEquals(
-					Constants.CT_FHIR_JSON_NEW,
-					status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		}
 	}
 
@@ -375,9 +344,7 @@ public class ServerMimetypeR4Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("\"resourceType\""));
-		assertEquals(
-				Constants.CT_FHIR_JSON_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -394,9 +361,7 @@ public class ServerMimetypeR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
-		assertEquals(
-				Constants.CT_FHIR_XML,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -413,9 +378,7 @@ public class ServerMimetypeR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
-		assertEquals(
-				Constants.CT_FHIR_XML_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -432,9 +395,7 @@ public class ServerMimetypeR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Patient xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(responseContent, not(containsString("http://hl7.org/fhir/")));
-		assertEquals(
-				Constants.CT_FHIR_XML_NEW,
-				status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	private List<String> toStrings(List<CodeType> theFormat) {
@@ -455,9 +416,7 @@ public class ServerMimetypeR4Test {
 			theIdParam.setId("1");
 			theIdParam.getMeta().setVersionId("1");
 
-			return new MethodOutcome(new IdType("Patient", "1"), true)
-					.setOperationOutcome(oo)
-					.setResource(theIdParam);
+			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(oo).setResource(theIdParam);
 		}
 
 		@Override
@@ -489,6 +448,7 @@ public class ServerMimetypeR4Test {
 
 			return retVal;
 		}
+
 	}
 
 	@AfterAll
@@ -513,10 +473,11 @@ public class ServerMimetypeR4Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

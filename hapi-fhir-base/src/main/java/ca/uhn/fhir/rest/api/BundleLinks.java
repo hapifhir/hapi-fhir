@@ -38,8 +38,7 @@ public class BundleLinks {
 	private String next;
 	private String prev;
 
-	public BundleLinks(
-			String theServerBase, Set<Include> theIncludes, boolean thePrettyPrint, BundleTypeEnum theBundleType) {
+	public BundleLinks(String theServerBase, Set<Include> theIncludes, boolean thePrettyPrint, BundleTypeEnum theBundleType) {
 		serverBase = theServerBase;
 		includes = theIncludes == null ? null : new ArrayList<>(theIncludes);
 		prettyPrint = thePrettyPrint;

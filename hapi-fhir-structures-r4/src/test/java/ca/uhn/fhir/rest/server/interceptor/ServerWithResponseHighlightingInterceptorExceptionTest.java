@@ -35,8 +35,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
@@ -55,6 +54,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		assertThat(responseContent, containsString("<diagnostics value=\"AAABBB\"/>"));
 	}
 
+
 	@Test
 	public void testUnexpectedException() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=123");
@@ -64,10 +64,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(
-				responseContent,
-				containsString("<diagnostics value=\"" + Msg.code(389)
-						+ "Failed to call access method: java.lang.Error: AAABBB\"/>"));
+		assertThat(responseContent, containsString("<diagnostics value=\""+ Msg.code(389) +"Failed to call access method: java.lang.Error: AAABBB\"/>"));
 	}
 
 	@AfterAll
@@ -92,13 +89,13 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -117,5 +114,8 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		public Patient search(@RequiredParam(name = "identifier") TokenParam theToken) {
 			throw new Error("AAABBB");
 		}
+
+
 	}
+
 }

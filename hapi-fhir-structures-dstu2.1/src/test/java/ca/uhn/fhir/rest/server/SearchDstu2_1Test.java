@@ -60,25 +60,12 @@ public class SearchDstu2_1Test {
 
 			assertEquals("search", ourLastMethod);
 
-			assertEquals(
-					"foo",
-					ourIdentifiers
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getSystem());
-			assertEquals(
-					"bar",
-					ourIdentifiers
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -89,15 +76,13 @@ public class SearchDstu2_1Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-
+			
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertEquals(
-					Msg.code(1935)
-							+ "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
-					oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@AfterAll
@@ -122,13 +107,13 @@ public class SearchDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -138,18 +123,20 @@ public class SearchDstu2_1Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+		public List search(
+				@OptionalParam(name=Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers
+				) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
 	}
+
 }

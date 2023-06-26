@@ -198,6 +198,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,7 +206,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -223,447 +223,322 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
-
 	@Autowired
 	protected ITermConceptMappingSvc myConceptMappingSvc;
-
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
-
 	@Autowired
 	protected IPartitionDao myPartitionDao;
-
 	@Autowired
 	protected ITermReadSvc myHapiTerminologySvc;
-
 	@Autowired
 	protected CachingValidationSupport myCachingValidationSupport;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
 
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeEntityDao;
-
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
-
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
-
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityNormalizedDao myResourceIndexedSearchParamQuantityNormalizedDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
-
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
-
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoR4")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
-
 	@Autowired
 	protected BulkDataExportProvider myBulkDataExportProvider;
-
 	@Autowired
 	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
-
 	@Autowired
 	protected ApplicationContext myAppCtx;
-
 	@Autowired
 	@Qualifier("myAppointmentDaoR4")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
-
 	@Autowired
 	@Qualifier("myAuditEventDaoR4")
 	protected IFhirResourceDao<AuditEvent> myAuditEventDao;
-
 	@Autowired
 	@Qualifier("myBundleDaoR4")
 	protected IFhirResourceDao<Bundle> myBundleDao;
-
 	@Autowired
 	@Qualifier("myCommunicationDaoR4")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
-
 	@Autowired
 	@Qualifier("myCommunicationRequestDaoR4")
 	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
-
 	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
-
 	@Autowired
 	@Qualifier("myCareTeamDaoR4")
 	protected IFhirResourceDao<CareTeam> myCareTeamDao;
-
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
-
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
-
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
-
 	@Autowired
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
-
 	@Autowired
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
-
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
-
 	@Autowired
 	@Qualifier("myEpisodeOfCareDaoR4")
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
-
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
-
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;
-
 	@Autowired
 	@Qualifier("myProvenanceDaoR4")
 	protected IFhirResourceDao<Provenance> myProvenanceDao;
-
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR4")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-
 	@Autowired
 	@Qualifier("myEncounterDaoR4")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
 	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
-
 	@Autowired
 	@Qualifier("myMolecularSequenceDaoR4")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
-
 	@Autowired
 	@Qualifier("myImmunizationDaoR4")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
-
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoR4")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
-
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR4")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
-
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
-
 	@Autowired
 	@Qualifier("myPractitionerRoleDaoR4")
 	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
-
 	@Autowired
 	@Qualifier("myMediaDaoR4")
 	protected IFhirResourceDao<Media> myMediaDao;
-
 	@Autowired
 	@Qualifier("myMedicationAdministrationDaoR4")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
-
 	@Autowired
 	@Qualifier("myMedicationDaoR4")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-
 	@Autowired
 	@Qualifier("myMedicationRequestDaoR4")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
-
 	@Autowired
 	@Qualifier("myProcedureDaoR4")
 	protected IFhirResourceDao<Procedure> myProcedureDao;
-
 	@Autowired
 	@Qualifier("myNamingSystemDaoR4")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-
 	@Autowired
 	@Qualifier("myChargeItemDaoR4")
 	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
-
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
-
 	@Autowired
 	@Qualifier("myCompositionDaoR4")
 	protected IFhirResourceDao<Composition> myCompositionDao;
-
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoR4")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
-
 	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
-
 	@Autowired
 	@Qualifier("myOrganizationAffiliationDaoR4")
 	protected IFhirResourceDao<OrganizationAffiliation> myOrganizationAffiliationDao;
-
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
-
 	@Autowired
 	@Qualifier("myBinaryDaoR4")
 	protected IFhirResourceDao<Binary> myBinaryDao;
-
 	@Autowired
 	@Qualifier("myBodyStructureDaoR4")
 	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
-
 	@Autowired
 	@Qualifier("myDocumentReferenceDaoR4")
 	protected IFhirResourceDao<DocumentReference> myDocumentReferenceDao;
-
 	@Autowired
 	@Qualifier("myCapabilityStatementDaoR4")
 	protected IFhirResourceDao<CapabilityStatement> myCapabilityStatementDao;
-
 	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
-
 	@Autowired
 	@Qualifier("myExplanationOfBenefitDaoR4")
 	protected IFhirResourceDao<ExplanationOfBenefit> myExplanationOfBenefitDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Autowired
 	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
-
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-
 	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
-
 	@Autowired
 	@Qualifier("myPractitionerDaoR4")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
-
 	@Autowired
 	@Qualifier("myServiceRequestDaoR4")
 	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR4")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoR4")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	protected ResourceProviderFactory myResourceProviders;
-
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
-
 	@Autowired
 	protected IResourceHistoryTagDao myResourceHistoryTagDao;
-
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
-
 	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
-
 	@Autowired
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
-
 	@Autowired
 	protected SearchParamRegistryImpl mySearchParamRegistry;
-
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
-
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR4")
 	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConsentDaoR4")
 	protected IFhirResourceDao<Consent> myConsentDao;
-
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-
 	@Autowired
 	@Qualifier("mySubstanceDaoR4")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
-
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
-
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
-
 	@Autowired
 	@Qualifier("mySystemProviderR4")
 	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
-
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
-
 	@Autowired
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
-
 	@Autowired
 	protected ITermReadSvc myTermSvc;
-
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
 	@Autowired
 	protected ITermLoaderSvc myTerminologyLoaderSvc;
-
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
-
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
-
 	@Autowired
 	protected IValidationSupport myValidationSupport;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
-
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
-
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
-
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
-
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
-
 	@Autowired
 	protected MemoryCacheService myMemoryCacheService;
-
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
-
 	@Autowired
 	protected IIdHelperService myIdHelperService;
-
 	@Autowired
 	protected ValidationSettings myValidationSettings;
-
 	@Autowired
 	protected IMdmLinkJpaRepository myMdmLinkDao;
-
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainR4;
-
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-
 	@Autowired
 	protected IResourceSearchUrlDao myResourceSearchUrlDao;
 
 	@RegisterExtension
-	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
-			new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(
-				new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setExpireSearchResultsAfterMillis(
-				new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(
-				new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 
@@ -687,8 +562,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
-		TermDeferredStorageSvcImpl termDeferredStorageSvc =
-				AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
+		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
 	}
 
@@ -716,20 +590,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		runInTransaction(() -> {
 			myMdmLinkDao.deleteAll();
 		});
-		purgeDatabase(
-				myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-		myValidationSettings.setLocalReferenceValidationDefaultPolicy(
-				new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
 	@Override
@@ -766,7 +633,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		validatorModule.registerValidatorModule(instanceValidator);
 		return validatorModule.validateWithResult(theResource);
 	}
-
 	protected void validate(IBaseResource theResource) {
 		ValidationResult result = validateWithResult(theResource);
 		if (!result.isSuccessful()) {
@@ -779,8 +645,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String resource = loadResource(theClasspath);
 		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirContext);
 		IBaseResource resourceParsed = parser.parseResource(resource);
-		IFhirResourceDao dao =
-				myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
 	}
 
@@ -790,8 +655,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
 			TermCodeSystemVersion csv = codeSystem.getCurrentVersion();
 			List<TermConcept> codes = myTermConceptDao.findByCodeSystemVersion(csv);
-			List<TermConcept> rootCodes =
-					codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
+			List<TermConcept> rootCodes = codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
 			flattenExpansionHierarchy(hierarchyHolder, rootCodes, "");
 			return hierarchyHolder;
 		});
@@ -802,28 +666,19 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(
-			ValueSet.ValueSetExpansionContainsComponent theConcept,
-			String theLanguage,
-			String theUseSystem,
-			String theUseCode,
-			String theUseDisplay,
-			String theDesignationValue) {
+	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
 		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
 		if (theLanguage != null) {
 			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
 		}
 		if (theUseSystem != null) {
-			stream = stream.filter(designation ->
-					theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
 		}
 		if (theUseCode != null) {
-			stream = stream.filter(designation ->
-					theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
 		}
 		if (theUseDisplay != null) {
-			stream = stream.filter(designation ->
-					theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
 		}
 		if (theDesignationValue != null) {
 			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
@@ -831,9 +686,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String failureMessage = String.format(
-					"Concept %s did not contain designation [%s|%s|%s|%s|%s] ",
-					theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
 			fail(failureMessage);
 			return null;
 		} else {
@@ -841,10 +694,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(
-			ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains =
-				theValueSet.getExpansion().getContains();
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
 
 		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
 		if (theSystem != null) {
@@ -862,11 +713,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String expandedValueSetString =
-					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
-			String failureMessage = String.format(
-					"Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s",
-					theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
+			String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
 			fail(failureMessage);
 			return null;
 		} else {
@@ -885,40 +733,24 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected void createLocalCsAndVs() {
-		// @formatter:off
+		//@formatter:off
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		codeSystem
-				.addConcept()
-				.setCode("A")
-				.setDisplay("Code A")
-				.addDesignation(new CodeSystem.ConceptDefinitionDesignationComponent()
-						.setLanguage("en")
-						.setValue("CodeADesignation"))
-				.addProperty(new CodeSystem.ConceptPropertyComponent()
-						.setCode("CodeAProperty")
-						.setValue(new StringType("CodeAPropertyValue")))
-				.addConcept(new CodeSystem.ConceptDefinitionComponent()
-						.setCode("AA")
-						.setDisplay("Code AA")
-						.addConcept(new CodeSystem.ConceptDefinitionComponent()
-								.setCode("AAA")
-								.setDisplay("Code AAA")))
-				.addConcept(new CodeSystem.ConceptDefinitionComponent()
-						.setCode("AB")
-						.setDisplay("Code AB"));
+			.addConcept().setCode("A").setDisplay("Code A").addDesignation(
+				new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeADesignation")).addProperty(
+				new CodeSystem.ConceptPropertyComponent().setCode("CodeAProperty").setValue(new StringType("CodeAPropertyValue"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
 		codeSystem
-				.addConcept()
-				.setCode("B")
-				.setDisplay("Code B")
-				.addConcept(new CodeSystem.ConceptDefinitionComponent()
-						.setCode("BA")
-						.setDisplay("Code BA"))
-				.addConcept(new CodeSystem.ConceptDefinitionComponent()
-						.setCode("BB")
-						.setDisplay("Code BB"));
-		// @formatter:on
+			.addConcept().setCode("B").setDisplay("Code B")
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+		//@formatter:on
 		myCodeSystemDao.create(codeSystem, mySrd);
 
 		createLocalVs(codeSystem);
@@ -937,8 +769,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 
-	private static void flattenExpansionHierarchy(
-			List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
+	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
 		theCodes.sort((o1, o2) -> {
 			int s1 = o1.getSequence() != null ? o1.getSequence() : o1.getCode().hashCode();
 			int s2 = o2.getSequence() != null ? o2.getSequence() : o2.getCode().hashCode();
@@ -951,6 +782,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 			List<TermConcept> children = nextCode.getChildCodes();
 			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
+
 		}
 	}
 
@@ -1074,33 +906,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
 		@Override
-		public ReferenceValidationPolicy policyForReference(
-				IResourceValidator validator, Object appContext, String path, String url) {
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
 			return ReferenceValidationPolicy.CHECK_VALID;
 		}
 
 		@Override
-		public CodedContentValidationPolicy policyForCodedContent(
-				IResourceValidator iResourceValidator,
-				Object o,
-				String s,
-				ElementDefinition elementDefinition,
-				org.hl7.fhir.r5.model.StructureDefinition structureDefinition,
-				BindingKind bindingKind,
-				org.hl7.fhir.r5.model.ValueSet valueSet,
-				List<String> list) {
+		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
 			return CodedContentValidationPolicy.CODE;
 		}
 
 		@Override
-		public ContainedReferenceValidationPolicy policyForContained(
-				IResourceValidator validator,
-				Object appContext,
-				String containerType,
-				String containerId,
-				Element.SpecialElement containingResourceType,
-				String path,
-				String url) {
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}

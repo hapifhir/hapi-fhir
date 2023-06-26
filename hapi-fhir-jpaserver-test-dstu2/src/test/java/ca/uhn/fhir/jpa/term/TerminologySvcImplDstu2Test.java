@@ -35,9 +35,7 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 		upload.setId(new IdDt("testVs"));
 		upload.setUrl("http://myVs");
 		ValueSet.CodeSystem codeSystem = new ValueSet.CodeSystem().setSystem("http://myCs");
-		codeSystem.addConcept(new ValueSet.CodeSystemConcept()
-				.setCode("codeA")
-				.addConcept(new ValueSet.CodeSystemConcept().setCode("codeAB")));
+		codeSystem.addConcept(new ValueSet.CodeSystemConcept().setCode("codeA").addConcept(new ValueSet.CodeSystemConcept().setCode("codeAB")));
 		upload.setCodeSystem(codeSystem);
 		myValueSetDao.update(upload, mySrd);
 
@@ -69,9 +67,7 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 		upload.setId(new IdDt("testVs"));
 		upload.setUrl("http://myVs");
 		ValueSet.CodeSystem codeSystem = new ValueSet.CodeSystem().setSystem("http://myCs");
-		codeSystem.addConcept(new ValueSet.CodeSystemConcept()
-				.setCode("codeA")
-				.addConcept(new ValueSet.CodeSystemConcept().setCode("codeAB")));
+		codeSystem.addConcept(new ValueSet.CodeSystemConcept().setCode("codeA").addConcept(new ValueSet.CodeSystemConcept().setCode("codeAB")));
 		upload.setCodeSystem(codeSystem);
 		myValueSetDao.update(upload, mySrd);
 
@@ -93,4 +89,6 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 		codes = toCodes(concepts);
 		assertThat(codes, empty());
 	}
+
+
 }

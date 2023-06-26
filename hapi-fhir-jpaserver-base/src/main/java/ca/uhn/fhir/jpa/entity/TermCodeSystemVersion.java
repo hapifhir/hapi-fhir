@@ -26,9 +26,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -44,21 +41,21 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(
-		name = "TRM_CODESYSTEM_VER",
-		// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
-		uniqueConstraints = {
-			@UniqueConstraint(
-					name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER,
-					columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
-		},
-		indexes = {
-			@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
-			@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
-		})
+@Table(name = "TRM_CODESYSTEM_VER",
+	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
+	uniqueConstraints = {
+	@UniqueConstraint(name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER, columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
+},
+indexes = {
+	@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
+	@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
+})
 @Entity()
 public class TermCodeSystemVersion implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
@@ -75,12 +72,7 @@ public class TermCodeSystemVersion implements Serializable {
 	private Long myId;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
@@ -94,11 +86,7 @@ public class TermCodeSystemVersion implements Serializable {
 	 * issued. It should be made non-nullable at some point.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "CODESYSTEM_PID",
-			referencedColumnName = "PID",
-			nullable = true,
-			foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
+	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
@@ -118,6 +106,7 @@ public class TermCodeSystemVersion implements Serializable {
 		super();
 	}
 
+
 	public TermCodeSystem getCodeSystem() {
 		return myCodeSystem;
 	}
@@ -133,9 +122,8 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public TermCodeSystemVersion setCodeSystemVersionId(String theCodeSystemVersionId) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theCodeSystemVersionId,
-				MAX_VERSION_LENGTH,
-				"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
+			theCodeSystemVersionId, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
 		myCodeSystemVersionId = theCodeSystemVersionId;
 		return this;
 	}
@@ -178,9 +166,9 @@ public class TermCodeSystemVersion implements Serializable {
 		TermCodeSystemVersion that = (TermCodeSystemVersion) theO;
 
 		return new EqualsBuilder()
-				.append(myCodeSystemVersionId, that.myCodeSystemVersionId)
-				.append(myCodeSystemPid, that.myCodeSystemPid)
-				.isEquals();
+			.append(myCodeSystemVersionId, that.myCodeSystemVersionId)
+			.append(myCodeSystemPid, that.myCodeSystemPid)
+			.isEquals();
 	}
 
 	@Override
@@ -197,9 +185,8 @@ public class TermCodeSystemVersion implements Serializable {
 
 	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theCodeSystemDisplayName,
-				MAX_VERSION_LENGTH,
-				"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
 		myCodeSystemDisplayName = theCodeSystemDisplayName;
 	}
 

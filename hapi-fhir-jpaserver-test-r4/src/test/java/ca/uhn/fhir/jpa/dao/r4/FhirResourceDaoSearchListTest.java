@@ -27,7 +27,6 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("myListDaoR4")
 	protected IFhirResourceDao<ListResource> myListResourceDao;
-
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -52,9 +51,9 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		testQuery(queryString, patientIds);
 	}
 
+
 	private void testQuery(String theQueryString, IIdType... theExpectedPatientIds) {
-		SearchParameterMap map =
-				myMatchUrlService.translateMatchUrl(theQueryString, myFhirContext.getResourceDefinition("List"));
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(theQueryString, myFhirContext.getResourceDefinition("List"));
 		IBundleProvider bundle = myPatientDao.search(map);
 		List<IBaseResource> resources = bundle.getResources(0, theExpectedPatientIds.length);
 		assertThat(resources, hasSize(theExpectedPatientIds.length));
@@ -62,10 +61,10 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		Set<IIdType> ids = resources.stream().map(IBaseResource::getIdElement).collect(Collectors.toSet());
 		assertThat(ids, hasSize(theExpectedPatientIds.length));
 
-		for (IIdType patientId : theExpectedPatientIds) {
+		for(IIdType patientId: theExpectedPatientIds) {
 			assertTrue(ids.contains(patientId));
 
-			// assertThat(patientId, contains(ids));
+			//assertThat(patientId, contains(ids));
 		}
 		// assert ids equal pid1 and pid2
 	}
@@ -110,8 +109,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		// What we need to emulate
 		// /Patient?_has=List:item:_id=123
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		// 	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String
-		// theParameterValue) {
+		// 	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
 		map.add(PARAM_HAS, new HasParam("List", "item", "_id", listIdString));
 		IBundleProvider bundle = myPatientDao.search(map);
 		List<IBaseResource> resources = bundle.getResources(0, 2);
@@ -120,7 +118,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 
 	private IIdType[] createPatients(int theNumberOfPatientsToCreate) {
 		IIdType[] patientIds = new IIdType[theNumberOfPatientsToCreate];
-		for (int i = 0; i < theNumberOfPatientsToCreate; i++) {
+		for(int i=0; i < theNumberOfPatientsToCreate; i++) {
 			patientIds[i] = myPatientDao.create(new Patient()).getId();
 		}
 		return patientIds;
@@ -128,9 +126,11 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 
 	private String createList(IIdType... thePatientIds) {
 		ListResource list = new ListResource();
-		for (IIdType patientId : thePatientIds) {
+		for(IIdType patientId: thePatientIds) {
 			list.addEntry().getItem().setReferenceElement(patientId);
 		}
 		return myListResourceDao.create(list).getId().getIdPart();
 	}
+
+
 }

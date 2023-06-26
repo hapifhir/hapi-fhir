@@ -52,11 +52,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		if (myCheckForExistingTables) {
 			Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 			if (columnNames.contains(getColumnName())) {
-				logInfo(
-						ourLog,
-						"Column {} already exists on table {} - No action performed",
-						getColumnName(),
-						getTableName());
+				logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
 				return;
 			}
 		}
@@ -99,4 +95,5 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		String space = isNullable() ? "" : " ";
 		return type + space + nullable;
 	}
+
 }

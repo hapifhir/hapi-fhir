@@ -39,13 +39,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient")))
-				.thenReturn(resourceDef.getSearchParam("patient"));
-		SearchParameterMap match = myMatchUrlService.translateMatchUrl(
-				"Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
-		assertEquals(
-				"2011-01-01T11:12:21.0000Z",
-				match.getLastUpdated().getLowerBound().getValueAsString());
+		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
+		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
 		assertEquals("304", ((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart());
 	}
@@ -55,11 +51,10 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		double kmDistance = 123.4;
 
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" + Location.SP_NEAR
-						+ "=1000.0:2000.0" + "&"
-						+ Location.SP_NEAR_DISTANCE
-						+ "=" + kmDistance + "|http://unitsofmeasure.org|km",
-				ourCtx.getResourceDefinition("Location"));
+			"Location?" +
+				Location.SP_NEAR + "=1000.0:2000.0" +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + kmDistance + "|http://unitsofmeasure.org|km", ourCtx.getResourceDefinition("Location"));
 		Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
@@ -72,18 +67,16 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTwoDistancesAnd() {
 		try {
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-					"Location?" + Location.SP_NEAR_DISTANCE
-							+ "=1|http://unitsofmeasure.org|km" + "&"
-							+ Location.SP_NEAR_DISTANCE
-							+ "=2|http://unitsofmeasure.org|km",
-					ourCtx.getResourceDefinition("Location"));
+				"Location?" +
+					Location.SP_NEAR_DISTANCE + "=1|http://unitsofmeasure.org|km" +
+					"&" +
+					Location.SP_NEAR_DISTANCE + "=2|http://unitsofmeasure.org|km",
+				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(
-					Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present",
-					e.getMessage());
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 
@@ -91,17 +84,16 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	public void testTwoDistancesOr() {
 		try {
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-					"Location?" + Location.SP_NEAR_DISTANCE
-							+ "=1|http://unitsofmeasure.org|km" + ","
-							+ "2|http://unitsofmeasure.org|km",
-					ourCtx.getResourceDefinition("Location"));
+				"Location?" +
+					Location.SP_NEAR_DISTANCE + "=1|http://unitsofmeasure.org|km" +
+					"," +
+					"2|http://unitsofmeasure.org|km",
+				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(
-					Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present",
-					e.getMessage());
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 
@@ -114,4 +106,6 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	protected PlatformTransactionManager getTxManager() {
 		return null;
 	}
+
+
 }

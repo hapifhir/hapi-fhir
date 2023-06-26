@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(SpringExtension.class)
 class ResourceChangeListenerCacheRefresherImplTest {
 	public static final String PATIENT_RESOURCE_NAME = "Patient";
@@ -32,13 +33,10 @@ class ResourceChangeListenerCacheRefresherImplTest {
 
 	@Autowired
 	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
-
 	@MockBean
 	private ISchedulerService mySchedulerService;
-
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
-
 	@MockBean
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
@@ -47,17 +45,15 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	static class SpringContext {
 		@Bean
 		IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
-			return new ResourceChangeListenerCacheRefresherImpl();
+		return new ResourceChangeListenerCacheRefresherImpl();
 		}
 	}
 
 	@Test
 	public void testNotifyListenersEmptyEmptyNotInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache =
-				new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
-		ResourceVersionMap newResourceVersionMap =
-				ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		assertFalse(cache.isInitialized());
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
 		assertTrue(cache.isInitialized());
@@ -67,10 +63,8 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	@Test
 	public void testNotifyListenersEmptyEmptyInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache =
-				new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
-		ResourceVersionMap newResourceVersionMap =
-				ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		cache.setInitialized(true);
 		assertTrue(cache.isInitialized());
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
@@ -83,10 +77,10 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		when(mySchedulerService.isStopping()).thenReturn(true);
 
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache cache =
-				new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(cache);
 
 		verify(myResourceVersionSvc, times(0)).getVersionMap(any(), any());
 	}
+
 }

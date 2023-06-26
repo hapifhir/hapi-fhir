@@ -28,10 +28,10 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -53,6 +53,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 */
 	@Nullable
 	Map<String, Long> getResourceCountsFromCache();
+
 
 	IBundleProvider history(Date theDate, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
@@ -90,8 +91,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 *
 	 * @param thePreFetchIndexes Should resource indexes be loaded
 	 */
-	default <P extends IResourcePersistentId> void preFetchResources(
-			List<P> theResolvedIds, boolean thePreFetchIndexes) {
+	default <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		// nothing by default
 	}
 }

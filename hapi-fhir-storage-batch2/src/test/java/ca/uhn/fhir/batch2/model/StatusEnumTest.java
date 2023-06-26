@@ -14,16 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StatusEnumTest {
 	@Test
 	public void testEndedStatuses() {
-		assertThat(
-				StatusEnum.getEndedStatuses(),
-				containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED));
+		assertThat(StatusEnum.getEndedStatuses(), containsInAnyOrder(StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.CANCELLED));
 	}
-
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(
-				StatusEnum.getNotEndedStatuses(),
-				containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE));
+		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.ERRORED, StatusEnum.FINALIZE));
 	}
 
 	@ParameterizedTest
@@ -34,30 +29,35 @@ class StatusEnumTest {
 		"QUEUED, CANCELLED, true",
 		"QUEUED, ERRORED, true",
 		"QUEUED, FAILED, true",
+
 		"IN_PROGRESS, QUEUED, false",
 		"IN_PROGRESS, IN_PROGRESS, true",
 		"IN_PROGRESS, COMPLETED, true",
 		"IN_PROGRESS, CANCELLED, true",
 		"IN_PROGRESS, ERRORED, true",
 		"IN_PROGRESS, FAILED, true",
+
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
 		"COMPLETED, COMPLETED, false",
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
+
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
 		"CANCELLED, COMPLETED, false",
 		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
+
 		"ERRORED, QUEUED, false",
 		"ERRORED, IN_PROGRESS, true",
 		"ERRORED, COMPLETED, true",
 		"ERRORED, CANCELLED, true",
 		"ERRORED, ERRORED, true",
 		"ERRORED, FAILED, true",
+
 		"FAILED, QUEUED, false",
 		"FAILED, IN_PROGRESS, false",
 		"FAILED, COMPLETED, false",

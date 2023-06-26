@@ -14,8 +14,8 @@ public class ExamineTestTrace {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExamineTestTrace.class);
 
 	public static void main(String[] aaa) {
-		String input = "[INFO] Running ca.uhn.fhir.rest.client.RestfulClientFactoryDstu2Test\n"
-				+ "[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.982 s - in ca.uhn.fhir.validation.ResourceValidatorDstu2Test";
+		String input = "[INFO] Running ca.uhn.fhir.rest.client.RestfulClientFactoryDstu2Test\n" +
+			"[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.982 s - in ca.uhn.fhir.validation.ResourceValidatorDstu2Test";
 
 		Set<String> started = new HashSet<>();
 		Set<String> finished = new HashSet<>();
@@ -39,5 +39,8 @@ public class ExamineTestTrace {
 
 		ourLog.info("Started {}", started.size());
 		ourLog.info("Finished {}", finished.size());
+
 	}
+
+
 }

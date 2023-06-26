@@ -49,21 +49,15 @@ import static org.mockito.Mockito.when;
 public class SubscriptionValidatingInterceptorTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-
 	@Mock
 	public DaoRegistry myDaoRegistry;
-
 	private SubscriptionValidatingInterceptor mySvc;
-
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	@Mock
 	private JpaStorageSettings myStorageSettings;
-
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
@@ -119,9 +113,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(
-					e.getMessage(),
-					containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
+			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
 		}
 	}
 
@@ -140,9 +132,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(
-					e.getMessage(),
-					containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
+			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
 		}
 	}
 
@@ -160,11 +150,10 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(
-					e.getMessage(),
-					containsString("Rest-hook subscriptions must have Subscription.channel.endpoint defined"));
+			assertThat(e.getMessage(), containsString("Rest-hook subscriptions must have Subscription.channel.endpoint defined"));
 		}
 	}
+
 
 	@Test
 	public void testValidate_RestHook_NoType() {
@@ -217,9 +206,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
 		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
-		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-						isA(RequestDetails.class), isA(Subscription.class), eq("Subscription")))
-				.thenReturn(RequestPartitionId.defaultPartition());
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -227,31 +214,23 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new BooleanType(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new ServletRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
-		// No asserts here because the function should throw an UnprocessableEntityException exception if the
-		// subscription
+		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		assertDoesNotThrow(() -> mySvc.resourcePreCreate(subscription, requestDetails, null));
 		Mockito.verify(myStorageSettings, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
-		Mockito.verify(myRequestPartitionHelperSvc, times(1))
-				.determineCreatePartitionForRequest(
-						isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
+		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
 	}
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
 		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
-		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-						isA(RequestDetails.class), isA(Subscription.class), eq("Subscription")))
-				.thenReturn(RequestPartitionId.fromPartitionId(1));
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.fromPartitionId(1));
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -259,10 +238,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new BooleanType(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new ServletRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
@@ -271,9 +247,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
-			assertEquals(
-					Msg.code(2010) + "Cross partition subscription must be created on the default partition",
-					theUnprocessableEntityException.getMessage());
+			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
 		}
 	}
 
@@ -287,10 +261,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new BooleanType(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new ServletRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
@@ -299,9 +270,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.resourcePreCreate(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
-			assertEquals(
-					Msg.code(2009) + "Cross partition subscription is not enabled on this server",
-					theUnprocessableEntityException.getMessage());
+			assertEquals(Msg.code(2009) + "Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
 		}
 	}
 
@@ -315,22 +284,17 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new BooleanType(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
-		// No asserts here because the function should throw an UnprocessableEntityException exception if the
-		// subscription
+		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		mySvc.resourcePreCreate(subscription, requestDetails, null);
 		Mockito.verify(myStorageSettings, never()).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
-		Mockito.verify(myRequestPartitionHelperSvc, never())
-				.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
+		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
 	}
 
 	@Test
@@ -339,9 +303,8 @@ public class SubscriptionValidatingInterceptorTest {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
 		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		lenient()
-				.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-						isA(RequestDetails.class), isA(String.class), isA(IIdType.class)))
-				.thenReturn(RequestPartitionId.allPartitions());
+			.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(isA(RequestDetails.class), isA(String.class), isA(IIdType.class)))
+			.thenReturn(RequestPartitionId.allPartitions());
 
 		final Subscription subscription = new Subscription();
 		subscription.setId("customId1");
@@ -350,20 +313,17 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription
-				.addExtension()
-				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
-				.setValue(new BooleanType(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		final RequestDetails requestDetails = mock(RequestDetails.class);
-		lenient().when(requestDetails.getRestOperationType()).thenReturn(RestOperationTypeEnum.UPDATE);
+		lenient()
+			.when(requestDetails.getRestOperationType()).thenReturn(RestOperationTypeEnum.UPDATE);
 
 		// execute
 		mySvc.resourceUpdated(subscription, subscription, requestDetails, null);
 
 		// verify
 		verify(mySubscriptionStrategyEvaluator).determineStrategy(any(CanonicalSubscription.class));
-		verify(mySubscriptionCanonicalizer, times(2))
-				.setMatchingStrategyTag(eq(subscription), nullable(SubscriptionMatchingStrategy.class));
+		verify(mySubscriptionCanonicalizer, times(2)).setMatchingStrategyTag(eq(subscription), nullable(SubscriptionMatchingStrategy.class));
 	}
 }

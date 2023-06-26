@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
-import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
+import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +44,9 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 
 	private Properties myProperties;
 
-	protected abstract AddressValidationResult getValidationResult(
-			AddressValidationResult theResult, JsonNode response, FhirContext theFhirContext) throws Exception;
+	protected abstract AddressValidationResult getValidationResult(AddressValidationResult theResult, JsonNode response, FhirContext theFhirContext) throws Exception;
 
-	protected abstract ResponseEntity<String> getResponseEntity(IBase theAddress, FhirContext theFhirContext)
-			throws Exception;
+	protected abstract ResponseEntity<String> getResponseEntity(IBase theAddress, FhirContext theFhirContext) throws Exception;
 
 	protected RestTemplate newTemplate() {
 		return new RestTemplate();
@@ -58,19 +57,16 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 	}
 
 	@Override
-	public AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext)
-			throws AddressValidationException {
+	public AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext) throws AddressValidationException {
 		ResponseEntity<String> entity;
 		try {
 			entity = getResponseEntity(theAddress, theFhirContext);
 		} catch (Exception e) {
-			throw new AddressValidationException(
-					Msg.code(345) + "Unable to complete address validation web-service call", e);
+			throw new AddressValidationException(Msg.code(345) + "Unable to complete address validation web-service call", e);
 		}
 
 		if (isError(entity)) {
-			throw new AddressValidationException(
-					Msg.code(346) + String.format("Service returned an error code %s", entity.getStatusCode()));
+			throw new AddressValidationException(Msg.code(346) + String.format("Service returned an error code %s", entity.getStatusCode()));
 		}
 
 		String responseBody = entity.getBody();

@@ -40,12 +40,10 @@ public class SpringContextGrabbingTestExecutionListener extends AbstractTestExec
 		ourApplicationContext.remove();
 	}
 
-	public static ApplicationContext getApplicationContext() {
+	public static ApplicationContext getApplicationContext(){
 		ApplicationContext applicationContext = ourApplicationContext.get();
-		Assert.notNull(
-				applicationContext,
-				"No application context saved. Did you remember to register the context grabbing listener by annotating your class with:\n"
-						+ "@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)");
+		Assert.notNull(applicationContext, "No application context saved. Did you remember to register the context grabbing listener by annotating your class with:\n" +
+			"@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)");
 		return applicationContext;
 	}
 }

@@ -34,8 +34,7 @@ public class BulkExportUtils {
 	/**
 	 * Converts the BulkDataExportOptions -> BulkExportParameters
 	 */
-	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(
-			BulkDataExportOptions theOptions) {
+	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 
 		parameters.setSince(theOptions.getSince());
@@ -50,8 +49,7 @@ public class BulkExportUtils {
 			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
 		}
 		if (CollectionUtils.isNotEmpty(theOptions.getPatientIds())) {
-			parameters.setPatientIds(
-					theOptions.getPatientIds().stream().map(IIdType::getValue).collect(Collectors.toList()));
+			parameters.setPatientIds(theOptions.getPatientIds().stream().map(IIdType::getValue).collect(Collectors.toList()));
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 		parameters.setUseExistingJobsFirst(true);

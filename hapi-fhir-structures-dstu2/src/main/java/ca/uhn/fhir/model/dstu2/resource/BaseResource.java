@@ -20,6 +20,19 @@
 package ca.uhn.fhir.model.dstu2.resource;
 
 import ca.uhn.fhir.i18n.Msg;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -37,18 +50,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.util.ElementUtil;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
 public abstract class BaseResource extends BaseElement implements IResource {
 
@@ -61,15 +62,16 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	 * </p>
 	 */
 	public static final StringClientParam RES_ID = new StringClientParam(BaseResource.SP_RES_ID);
-
+	
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
-	@SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "string")
+	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
 	public static final String SP_RES_ID = "_id";
 
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;
+
 
 	private IdDt myId;
 
@@ -204,10 +206,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 					return Collections.emptyList();
 				}
 				for (BaseCodingDt next : labelsList) {
-					retVal.add(new CodingDt(
-									next.getSystemElement().getValue(),
-									next.getCodeElement().getValue())
-							.setDisplay(next.getDisplayElement().getValue()));
+					retVal.add(new CodingDt(next.getSystemElement().getValue(), next.getCodeElement().getValue()).setDisplay(next.getDisplayElement().getValue()));
 				}
 				return Collections.unmodifiableList(retVal);
 			}
@@ -306,7 +305,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	public void setContained(ContainedDt theContained) {
 		myContained = theContained;
 	}
-
+	
 	@Override
 	public void setId(IdDt theId) {
 		myId = theId;
@@ -355,4 +354,5 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		b.append("id", getId().toUnqualified());
 		return b.toString();
 	}
+
 }

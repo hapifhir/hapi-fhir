@@ -124,11 +124,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -138,339 +138,244 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4B;
 	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
-
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
-
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
-
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
-
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoR4B")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
-
 	@Autowired
 	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
-
 	@Autowired
 	protected ApplicationContext myAppCtx;
-
 	@Autowired
 	@Qualifier("myAppointmentDaoR4B")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
-
 	@Autowired
 	@Qualifier("myAuditEventDaoR4B")
 	protected IFhirResourceDao<AuditEvent> myAuditEventDao;
-
 	@Autowired
 	@Qualifier("myBundleDaoR4B")
 	protected IFhirResourceDao<Bundle> myBundleDao;
-
 	@Autowired
 	@Qualifier("myCommunicationDaoR4B")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
-
 	@Autowired
 	@Qualifier("myCommunicationRequestDaoR4B")
 	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
-
 	@Autowired
 	@Qualifier("myCarePlanDaoR4B")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
-
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4B")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
-
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4B")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConceptMapDaoR4B")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
-
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
-
 	@Autowired
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
-
 	@Autowired
 	@Qualifier("myConditionDaoR4B")
 	protected IFhirResourceDao<Condition> myConditionDao;
-
 	@Autowired
 	@Qualifier("myDeviceDaoR4B")
 	protected IFhirResourceDao<Device> myDeviceDao;
-
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoR4B")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-
 	@Autowired
 	@Qualifier("myEncounterDaoR4B")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
 	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	protected FhirContext myFhirCtx;
-
 	@Autowired
 	@Qualifier("myGroupDaoR4B")
 	protected IFhirResourceDao<Group> myGroupDao;
-
 	@Autowired
 	@Qualifier("myMolecularSequenceDaoR4B")
 	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
-
 	@Autowired
 	@Qualifier("myImmunizationDaoR4B")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
-
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoR4B")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
-
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR4B")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
-
 	@Autowired
 	@Qualifier("myLocationDaoR4B")
 	protected IFhirResourceDao<Location> myLocationDao;
-
 	@Autowired
 	@Qualifier("myMedicationAdministrationDaoR4B")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
-
 	@Autowired
 	@Qualifier("myMedicationDaoR4B")
 	protected IFhirResourceDao<Medication> myMedicationDao;
-
 	@Autowired
 	@Qualifier("myMedicationRequestDaoR4B")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
-
 	@Autowired
 	@Qualifier("myProcedureDaoR4B")
 	protected IFhirResourceDao<Procedure> myProcedureDao;
-
 	@Autowired
 	@Qualifier("myNamingSystemDaoR4B")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
-
 	@Autowired
 	@Qualifier("myChargeItemDaoR4B")
 	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
-
 	@Autowired
 	@Qualifier("myObservationDaoR4B")
 	protected IFhirResourceDao<Observation> myObservationDao;
-
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoR4B")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
-
 	@Autowired
 	@Qualifier("myOrganizationDaoR4B")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
-
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
-
 	@Autowired
 	@Qualifier("myBinaryDaoR4B")
 	protected IFhirResourceDao<Binary> myBinaryDao;
-
 	@Autowired
 	@Qualifier("myPatientDaoR4B")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-
 	@Autowired
 	@Qualifier("myCoverageDaoR4B")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
-
 	@Autowired
 	@Qualifier("myPractitionerDaoR4B")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
-
 	@Autowired
 	@Qualifier("myPractitionerRoleDaoR4B")
 	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
-
 	@Autowired
 	@Qualifier("myServiceRequestDaoR4B")
 	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR4B")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoR4B")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-
 	@Autowired
 	@Qualifier("myResourceProvidersR4B")
 	protected ResourceProviderFactory myResourceProviders;
-
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
-
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
-
 	@Autowired(required = false)
 	protected ISearchDao mySearchEntityDao;
-
 	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
-
 	@Autowired
 	@Qualifier("mySearchParameterDaoR4B")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
-
 	@Autowired
 	protected SearchParamRegistryImpl mySearchParamRegistry;
-
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
-
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR4B")
 	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
-
 	@Autowired
 	@Qualifier("myConsentDaoR4B")
 	protected IFhirResourceDao<Consent> myConsentDao;
-
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4B")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-
 	@Autowired
 	@Qualifier("mySubstanceDaoR4B")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
-
 	@Autowired
 	@Qualifier("mySystemDaoR4B")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
-
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
-
 	@Autowired
 	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
-
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
-
 	@Autowired
 	@Qualifier("myTaskDaoR4B")
 	protected IFhirResourceDao<Task> myTaskDao;
-
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
-
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
-
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4B")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
-
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
-
 	@Autowired
 	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
-
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
-
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
-
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-
 	protected IServerInterceptor myInterceptor;
-
 	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
-
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChain;
-
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
 
@@ -494,12 +399,9 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@AfterEach()
 	public void afterCleanupDao() {
 		this.myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		this.myStorageSettings.setEnforceReferentialIntegrityOnDelete(
-				new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		this.myStorageSettings.setExpireSearchResultsAfterMillis(
-				new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		this.myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		this.myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		this.myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		this.myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		this.myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 		this.myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
@@ -541,13 +443,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(
-				this.myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataSchedulerHelper);
+		purgeDatabase(this.myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach
@@ -576,15 +472,12 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 		String resource = loadResource(theClasspath);
 		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
 		IBaseResource resourceParsed = parser.parseResource(resource);
-		IFhirResourceDao dao =
-				myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
 	}
 
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(
-			ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains =
-				theValueSet.getExpansion().getContains();
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
 
 		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
 		if (theSystem != null) {
@@ -602,9 +495,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String failureMessage = String.format(
-					"Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations",
-					theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
 			fail(failureMessage);
 			return null;
 		} else {
@@ -616,4 +507,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChain.invalidateCaches();
 	}
+
+
 }

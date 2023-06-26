@@ -45,10 +45,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(1094)
-							+ "Resource Organization/FOO not found, specified in path: Patient.managingOrganization",
-					e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 	}
 
@@ -65,10 +62,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(507)
-							+ "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references",
-					e.getMessage());
+			assertEquals(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references", e.getMessage());
 		}
 	}
 
@@ -80,7 +74,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		myOrganizationDao.update(org, mySrd);
 
 		myStorageSettings.setAllowExternalReferences(true);
-
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -105,7 +99,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
 		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
-
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -144,7 +138,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
 		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
-
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -159,4 +153,5 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://foo.com/base/Organization/FOO"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
 	}
+
 }

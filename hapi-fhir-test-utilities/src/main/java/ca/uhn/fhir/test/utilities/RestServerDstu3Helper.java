@@ -45,14 +45,13 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.servlet.ServletException;
 
-public class RestServerDstu3Helper extends BaseRestServerHelper
-		implements IPointcutLatch, BeforeEachCallback, AfterEachCallback {
+public class RestServerDstu3Helper extends BaseRestServerHelper implements IPointcutLatch, BeforeEachCallback, AfterEachCallback {
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerDstu3Helper() {
@@ -335,6 +334,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper
 			myConceptMapResourceProvider = theResourceProvider;
 		}
 
+
 		public class MyHashMapResourceProvider<T extends IBaseResource> extends HashMapResourceProvider<T> {
 			public MyHashMapResourceProvider(FhirContext theContext, Class theType) {
 				super(theContext, theType);
@@ -376,6 +376,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper
 	@Override
 	public IIdType createPatient(IBaseResource theBaseResource) {
 		return myRestServer.getPatientResourceProvider().store((Patient) theBaseResource);
+
 	}
 
 	@Override
@@ -383,6 +384,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper
 		Observation observation = new Observation();
 		observation.setSubject(new Reference(theFirstTargetPatientId));
 		return this.createObservation(observation);
+
 	}
 
 	@Override

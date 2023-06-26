@@ -1,19 +1,20 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ValidateUtilTest {
 
 	@Test
 	public void testValidate() {
 		ValidateUtil.isTrueOrThrowInvalidRequest(true, "");
-
+		
 		try {
 			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
 			fail();
@@ -21,7 +22,7 @@ public class ValidateUtilTest {
 			assertEquals(Msg.code(1769) + "The message", e.getMessage());
 		}
 	}
-
+	
 	@Test
 	public void testIsGreaterThan() {
 		ValidateUtil.isGreaterThan(2L, 1L, "");
@@ -47,7 +48,7 @@ public class ValidateUtilTest {
 	@Test
 	public void testIsNotBlank() {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest("aa", "");
-
+		
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest("", "The message");
 			fail();
@@ -70,6 +71,7 @@ public class ValidateUtilTest {
 		}
 	}
 
+
 	@Test
 	public void testIsNotNull() {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity("aa", "");
@@ -81,5 +83,7 @@ public class ValidateUtilTest {
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1767) + "The message 123", e.getMessage());
 		}
+
 	}
+
 }

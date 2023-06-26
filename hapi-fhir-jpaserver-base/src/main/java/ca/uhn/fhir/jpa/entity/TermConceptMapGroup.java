@@ -23,18 +23,19 @@ import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(
-		name = "TRM_CONCEPT_MAP_GROUP",
-		indexes = {@Index(name = "FK_TCMGROUP_CONCEPTMAP", columnList = "CONCEPT_MAP_PID")})
+@Table(name = "TRM_CONCEPT_MAP_GROUP",
+indexes = {
+	@Index(name = "FK_TCMGROUP_CONCEPTMAP", columnList = "CONCEPT_MAP_PID")
+})
 public class TermConceptMapGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -45,11 +46,7 @@ public class TermConceptMapGroup implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(
-			name = "CONCEPT_MAP_PID",
-			nullable = false,
-			referencedColumnName = "PID",
-			foreignKey = @ForeignKey(name = "FK_TCMGROUP_CONCEPTMAP"))
+	@JoinColumn(name = "CONCEPT_MAP_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TCMGROUP_CONCEPTMAP"))
 	private TermConceptMap myConceptMap;
 
 	@Column(name = "SOURCE_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
@@ -67,13 +64,13 @@ public class TermConceptMapGroup implements Serializable {
 	@OneToMany(mappedBy = "myConceptMapGroup")
 	private List<TermConceptMapGroupElement> myConceptMapGroupElements;
 
-	@Column(name = "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
+	@Column(name= "CONCEPT_MAP_URL", nullable = true, length = TermConceptMap.MAX_URL_LENGTH)
 	private String myConceptMapUrl;
 
-	@Column(name = "SOURCE_VS", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
+	@Column(name= "SOURCE_VS", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String mySourceValueSet;
 
-	@Column(name = "TARGET_VS", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
+	@Column(name= "TARGET_VS", nullable = true, length = TermValueSet.MAX_URL_LENGTH)
 	private String myTargetValueSet;
 
 	public TermConceptMap getConceptMap() {
@@ -110,10 +107,8 @@ public class TermConceptMapGroup implements Serializable {
 
 	public TermConceptMapGroup setSource(@Nonnull String theSource) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theSource, "theSource must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theSource,
-				TermCodeSystem.MAX_URL_LENGTH,
-				"Source exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSource));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSource, TermCodeSystem.MAX_URL_LENGTH,
+			"Source exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSource));
 		this.mySource = theSource;
 		return this;
 	}
@@ -130,11 +125,8 @@ public class TermConceptMapGroup implements Serializable {
 	}
 
 	public TermConceptMapGroup setSourceVersion(String theSourceVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theSourceVersion,
-				TermCodeSystemVersion.MAX_VERSION_LENGTH,
-				"Source version ID exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): "
-						+ length(theSourceVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSourceVersion, TermCodeSystemVersion.MAX_VERSION_LENGTH,
+			"Source version ID exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): " + length(theSourceVersion));
 		mySourceVersion = theSourceVersion;
 		return this;
 	}
@@ -145,10 +137,8 @@ public class TermConceptMapGroup implements Serializable {
 
 	public TermConceptMapGroup setTarget(@Nonnull String theTarget) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theTarget, "theTarget must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theTarget,
-				TermCodeSystem.MAX_URL_LENGTH,
-				"Target exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theTarget));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theTarget, TermCodeSystem.MAX_URL_LENGTH,
+			"Target exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theTarget));
 		this.myTarget = theTarget;
 		return this;
 	}
@@ -165,11 +155,8 @@ public class TermConceptMapGroup implements Serializable {
 	}
 
 	public TermConceptMapGroup setTargetVersion(String theTargetVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theTargetVersion,
-				TermCodeSystemVersion.MAX_VERSION_LENGTH,
-				"Target version ID exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): "
-						+ length(theTargetVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theTargetVersion, TermCodeSystemVersion.MAX_VERSION_LENGTH,
+			"Target version ID exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): " + length(theTargetVersion));
 		myTargetVersion = theTargetVersion;
 		return this;
 	}
@@ -177,19 +164,16 @@ public class TermConceptMapGroup implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("myId", myId)
-				.append(myConceptMap != null ? ("myConceptMap - id=" + myConceptMap.getId()) : ("myConceptMap=(null)"))
-				.append("mySource", mySource)
-				.append("mySourceVersion", mySourceVersion)
-				.append("myTarget", myTarget)
-				.append("myTargetVersion", myTargetVersion)
-				.append(
-						myConceptMapGroupElements != null
-								? ("myConceptMapGroupElements - size=" + myConceptMapGroupElements.size())
-								: ("myConceptMapGroupElements=(null)"))
-				.append("myConceptMapUrl", this.getConceptMapUrl())
-				.append("mySourceValueSet", this.getSourceValueSet())
-				.append("myTargetValueSet", this.getTargetValueSet())
-				.toString();
+			.append("myId", myId)
+			.append(myConceptMap != null ? ("myConceptMap - id=" + myConceptMap.getId()) : ("myConceptMap=(null)"))
+			.append("mySource", mySource)
+			.append("mySourceVersion", mySourceVersion)
+			.append("myTarget", myTarget)
+			.append("myTargetVersion", myTargetVersion)
+			.append(myConceptMapGroupElements != null ? ("myConceptMapGroupElements - size=" + myConceptMapGroupElements.size()) : ("myConceptMapGroupElements=(null)"))
+			.append("myConceptMapUrl", this.getConceptMapUrl())
+			.append("mySourceValueSet", this.getSourceValueSet())
+			.append("myTargetValueSet", this.getTargetValueSet())
+			.toString();
 	}
 }

@@ -53,28 +53,24 @@ class JpaPersistedResourceValidationSupportTest {
 
 	private FhirContext theFhirContext = FhirContext.forR4();
 
-	@Mock
-	private ITermReadSvc myTermReadSvc;
-
-	@Mock
-	private DaoRegistry myDaoRegistry;
-
-	@Mock
-	private Cache<String, IBaseResource> myLoadCache;
-
-	@Mock
-	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
+	@Mock private ITermReadSvc myTermReadSvc;
+	@Mock private DaoRegistry myDaoRegistry;
+	@Mock private Cache<String, IBaseResource> myLoadCache;
+	@Mock private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 
 	@InjectMocks
-	private IValidationSupport testedClass = new JpaPersistedResourceValidationSupport(theFhirContext);
+	private IValidationSupport testedClass =
+		new JpaPersistedResourceValidationSupport(theFhirContext);
 
 	private Class<? extends IBaseResource> myCodeSystemType = CodeSystem.class;
 	private Class<? extends IBaseResource> myValueSetType = ValueSet.class;
+
 
 	@BeforeEach
 	public void setup() {
 		ReflectionTestUtils.setField(testedClass, "myValueSetType", myValueSetType);
 	}
+
 
 	@Nested
 	public class FetchCodeSystemTests {
@@ -87,6 +83,7 @@ class JpaPersistedResourceValidationSupportTest {
 			verify(myLoadCache, never()).get(anyString(), isA(Function.class));
 		}
 
+
 		@Test
 		void fetchCodeSystemMustNotUseForcedId() {
 			testedClass.fetchCodeSystem("string-not-containing-l-o-i-n-c");
@@ -94,7 +91,9 @@ class JpaPersistedResourceValidationSupportTest {
 			verify(myTermReadSvc, never()).readCodeSystemByForcedId(LOINC_LOW);
 			verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
 		}
+
 	}
+
 
 	@Nested
 	public class FetchValueSetTests {
@@ -105,11 +104,15 @@ class JpaPersistedResourceValidationSupportTest {
 			assertNull(testedClass.fetchValueSet(valueSetId));
 		}
 
+
 		@Test
 		void fetchValueSetMustNotUseForcedId() {
 			testedClass.fetchValueSet("string-not-containing-l-o-i-n-c");
 
 			verify(myLoadCache, times(1)).get(anyString(), isA(Function.class));
 		}
+
 	}
+
+
 }

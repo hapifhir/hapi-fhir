@@ -48,7 +48,8 @@ public class Searches {
 	/**
 	 * Constructor
 	 */
-	private Searches() {}
+	private Searches() {
+	}
 
 	/**
 	 * Creates and returns Parameter search results

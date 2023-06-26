@@ -41,7 +41,7 @@ public interface IBaseMetaType extends ICompositeType {
 	String getVersionId();
 
 	IBaseMetaType setLastUpdated(Date theHeaderDateValue);
-
+	
 	IBaseMetaType setVersionId(String theVersionId);
 
 	/**
@@ -50,9 +50,11 @@ public interface IBaseMetaType extends ICompositeType {
 	 */
 	IBaseCoding getTag(String theSystem, String theCode);
 
-	/**
-	 * Returns the first security label (if any) that has the given system and code, or returns
-	 * <code>null</code> if none
-	 */
+ 	/**
+ 	 * Returns the first security label (if any) that has the given system and code, or returns
+ 	 * <code>null</code> if none
+ 	 */
 	IBaseCoding getSecurity(String theSystem, String theCode);
+
+
 }

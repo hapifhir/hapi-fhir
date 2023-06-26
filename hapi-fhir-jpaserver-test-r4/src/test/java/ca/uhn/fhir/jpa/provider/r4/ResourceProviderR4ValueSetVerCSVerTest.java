@@ -42,9 +42,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -63,8 +63,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetVerCSVerTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetVerCSVerTest.class);
 	private IIdType myExtensionalCsId_v1;
 	private IIdType myExtensionalCsId_v2;
 	private IIdType myExtensionalVsId_v1;
@@ -75,7 +74,6 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	private Long myExtensionalVsIdOnResourceTable_v2;
 	private ValueSet myLocalVs_v1;
 	private ValueSet myLocalVs_v2;
-
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
@@ -95,8 +93,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	}
 
 	private void loadAndPersistCodeSystemWithDesignations() throws IOException {
-		CodeSystem codeSystem =
-				loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
 		persistCodeSystem(codeSystem);
 	}
 
@@ -106,8 +103,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId_v1 =
-						myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+				myExtensionalCsId_v1 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null);
@@ -120,11 +116,11 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId_v2 =
-						myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+				myExtensionalCsId_v2 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null);
+
 	}
 
 	private void loadAndPersistValueSet() throws IOException {
@@ -133,15 +129,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 =
-				myValueSetDao.readEntity(myExtensionalVsId_v1, null).getIdDt().getIdPartAsLong();
+		myExtensionalVsIdOnResourceTable_v1 = myValueSetDao.readEntity(myExtensionalVsId_v1, null).getIdDt().getIdPartAsLong();
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 =
-				myValueSetDao.readEntity(myExtensionalVsId_v2, null).getIdDt().getIdPartAsLong();
+		myExtensionalVsIdOnResourceTable_v2 = myValueSetDao.readEntity(myExtensionalVsId_v2, null).getIdDt().getIdPartAsLong();
+
 	}
 
 	private IIdType persistSingleValueSet(ValueSet theValueSet, HttpVerb theVerb) {
@@ -154,8 +149,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						vsId[0] =
-								myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						vsId[0] = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -163,8 +157,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						vsId[0] =
-								myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						vsId[0] = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -181,13 +174,11 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		IFhirResourceDao<CodeSystem> codeSystemDao = myCodeSystemDao;
 		IResourceTableDao resourceTableDao = myResourceTableDao;
 
-		return createExternalCs(
-						codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd, theCodeSystemVersion)
-				.getUrl();
+		return createExternalCs(codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd, theCodeSystemVersion).getUrl();
 	}
 
 	private void createExternalCsAndLocalVs() {
-		runInTransaction(() -> {
+		runInTransaction(()-> {
 			String codeSystemUrl = createExternalCs("1");
 			myLocalVs_v1 = createLocalVs(codeSystemUrl, "1");
 			myLocalValueSetId_v1 = persistLocalVs(myLocalVs_v1);
@@ -207,6 +198,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		include.setVersion(theValueSetVersion);
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
 		return myLocalVs;
+
 	}
 
 	private IIdType persistLocalVs(ValueSet theValueSet) {
@@ -218,11 +210,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Test with v1 of ValueSet
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -242,11 +235,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsString("</expansion>"));
 
 		// Test with v2 of ValueSet
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -264,6 +258,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
+
 	}
 
 	@Test
@@ -273,18 +268,18 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		runInTransaction(() -> {
-			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(
-					PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(2, page.getContent().size());
 		});
 
 		// Verify v1 ValueSet
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -304,11 +299,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsString("</expansion>"));
 
 		// Verify v2 ValueSet
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -326,6 +322,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
+
 	}
 
 	@Test
@@ -333,11 +330,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Verify ValueSet v1
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -346,17 +344,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 		// Verify ValueSet v2
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
+
 	}
 
 	@Test
@@ -367,18 +367,18 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(() -> {
-			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(
-					PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(2, page.getContent().size());
 		});
 
 		// Validate ValueSet v1
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -386,17 +386,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Validate ValueSet v2
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
+
 	}
 
 	@Test
@@ -404,64 +406,53 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Check expansion of multi-versioned ValueSet with version 1
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Check expansion of multi-versioned ValueSet with version set to null
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Check expansion of version 2
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
 	}
 
 	@Test
@@ -470,64 +461,53 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Check expansion of multi-versioned ValueSet with version 1
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Check expansion of multi-versioned ValueSet with version set to null
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Check expansion of version 2
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
 	}
 
 	@Test
@@ -535,20 +515,16 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 
 		try {
-			myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withParameter(
-							Parameters.class,
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-					.andParameter("valueSetVersion", new StringType("3"))
-					.execute();
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.andParameter("valueSetVersion", new StringType("3"))
+				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals(
-					"HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3",
-					e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -560,71 +536,59 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(() -> {
-			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(
-					PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(2, page.getContent().size());
 		});
 
 		// Check expansion of multi-versioned ValueSet with version 1
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Check expansion of multi-versioned ValueSet with version set to null
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Check expansion of version 2
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
 	}
 
 	@Test
@@ -635,20 +599,16 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withParameter(
-							Parameters.class,
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-					.andParameter("valueSetVersion", new StringType("3"))
-					.execute();
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.andParameter("valueSetVersion", new StringType("3"))
+				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals(
-					"HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3",
-					e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -659,65 +619,63 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Test with no version specified
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
 		toExpand.setId("ValueSet/vs1");
 		toExpand.getCompose().getInclude().get(0).setVersion("1");
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
 		toExpand.setId("ValueSet/vs2");
 		toExpand.getCompose().getInclude().get(0).setVersion("2");
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
 	}
 
 	@Test
@@ -730,65 +688,64 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Test with no version specified
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
 		toExpand.setId("ValueSet/vs1");
 		toExpand.getCompose().getInclude().get(0).setVersion("1");
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
 		toExpand.setId("ValueSet/vs2");
 		toExpand.getCompose().getInclude().get(0).setVersion("2");
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+
+
 	}
 
 	@Test
@@ -798,11 +755,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertNotNull(myLocalVs_v2);
 
 		myLocalVs_v1.setId("");
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", myLocalVs_v1)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", myLocalVs_v1)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -813,11 +771,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
 
 		myLocalVs_v2.setId("");
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", myLocalVs_v2)
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", myLocalVs_v2)
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -826,6 +785,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+
 	}
 
 	@Test
@@ -835,11 +795,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertNotNull(myLocalValueSetId_v2);
 
 		// Validate ValueSet v1
-		Parameters respParam = myClient.operation()
-				.onInstance(myLocalValueSetId_v1)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myLocalValueSetId_v1)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -850,11 +811,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A1\"/>")));
 
 		// Validate ValueSet v2
-		respParam = myClient.operation()
-				.onInstance(myLocalValueSetId_v2)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myLocalValueSetId_v2)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -863,6 +825,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+
 	}
 
 	@Test
@@ -871,11 +834,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertNotNull(myLocalValueSetId_v1);
 		assertNotNull(myLocalValueSetId_v2);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
+			.execute();
 
 		// Canonical expand should only return most recently updated version, v2.
 		assertEquals(1, respParam.getParameter().size());
@@ -887,6 +851,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAB2\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<display value=\"Parent A2\"/>")));
+
 	}
 
 	@Test
@@ -903,23 +868,17 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ValueSet vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
-		vs.getCompose()
-				.addInclude()
-				.setSystem("http://foo1")
-				.setVersion("1")
-				.addConcept()
-				.setCode("foo1");
+		vs.getCompose().addInclude().setSystem("http://foo1").setVersion("1").addConcept().setCode("foo1");
 		myClient.update().resource(vs).execute();
 
-		ValueSet expanded = myClient.operation()
-				.onInstance(new IdType("ValueSet/VS179789"))
-				.named("$expand")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(ValueSet.class)
-				.execute();
-		ourLog.debug(
-				"Expanded: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ValueSet expanded = myClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem Version and Codes
@@ -934,25 +893,20 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		vs = new ValueSet();
 		vs.setId("ValueSet/VS179789");
 		vs.setUrl("http://bar");
-		vs.getCompose()
-				.addInclude()
-				.setSystem("http://foo2")
-				.setVersion("2")
-				.addConcept()
-				.setCode("foo2");
+		vs.getCompose().addInclude().setSystem("http://foo2").setVersion("2").addConcept().setCode("foo2");
 		myClient.update().resource(vs).execute();
 
-		expanded = myClient.operation()
-				.onInstance(new IdType("ValueSet/VS179789"))
-				.named("$expand")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(ValueSet.class)
-				.execute();
-		ourLog.debug(
-				"Expanded: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		expanded = myClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
+
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
@@ -961,18 +915,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem_v1 = myCodeSystemDao.read(myExtensionalCsId_v1);
-		ourLog.debug("CodeSystem:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
 		CodeSystem codeSystem_v2 = myCodeSystemDao.read(myExtensionalCsId_v2);
-		ourLog.debug("CodeSystem:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
 
 		ValueSet valueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.debug("ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
 		ValueSet valueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.debug("ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
 
 		String initialValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -987,8 +937,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		updatedValueSet_v1.setName(valueSet_v1.getName().concat(" - MODIFIED"));
 		persistSingleValueSet(updatedValueSet_v1, HttpVerb.PUT);
 		updatedValueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
 
 		String updatedValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -997,8 +946,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		updatedValueSet_v2.setName(valueSet_v2.getName().concat(" - MODIFIED"));
 		persistSingleValueSet(updatedValueSet_v2, HttpVerb.PUT);
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
 
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
@@ -1008,6 +956,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		validateTermValueSetExpandedAndChildrenV2(updatedValueSetName_v2, codeSystem_v2);
 	}
 
+
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
 		myStorageSettings.setPreExpandValueSets(true);
@@ -1015,18 +964,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem_v1 = myCodeSystemDao.read(myExtensionalCsId_v1);
-		ourLog.debug("CodeSystem:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
 		CodeSystem codeSystem_v2 = myCodeSystemDao.read(myExtensionalCsId_v2);
-		ourLog.debug("CodeSystem:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
 
 		ValueSet valueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.debug("ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
 		ValueSet valueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.debug("ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
 
 		String initialValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -1043,19 +988,18 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v1.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setFullUrl(url)
-				.setResource(updatedValueSet_v1)
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(myExtensionalVsId_v1.getValueAsString());
-		ourLog.debug("Transaction Bundle:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		bundle
+			.addEntry()
+			.setFullUrl(url)
+			.setResource(updatedValueSet_v1)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl(myExtensionalVsId_v1.getValueAsString());
+		ourLog.debug("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
 
 		String updatedValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -1066,19 +1010,18 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		url = myClient.getServerBase().concat("/").concat(myExtensionalVsId_v2.getValueAsString());
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setFullUrl(url)
-				.setResource(updatedValueSet_v2)
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(myExtensionalVsId_v2.getValueAsString());
-		ourLog.debug("Transaction Bundle:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		bundle
+			.addEntry()
+			.setFullUrl(url)
+			.setResource(updatedValueSet_v2)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl(myExtensionalVsId_v2.getValueAsString());
+		ourLog.debug("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
 
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
@@ -1086,6 +1029,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		validateTermValueSetExpandedAndChildrenV1(updatedValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(updatedValueSetName_v2, codeSystem_v2);
+
 	}
 
 	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
@@ -1093,15 +1037,13 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", theVersion);
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", theVersion);
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertEquals(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
@@ -1110,120 +1052,67 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private void validateTermValueSetExpandedAndChildrenV1(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid =
-					myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "1");
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "1");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertEquals(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
-			assertEquals(
-					theCodeSystem.getConcept().size(),
-					termValueSet.getConcepts().size());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
-			assertTermConceptContainsDesignation(
-					concept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk - expiratie");
-			assertTermConceptContainsDesignation(
-					concept,
-					"sv",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systoliskt blodtryck - utgång");
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
 			// ...
 
-			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-			assertTermConceptContainsDesignation(
-					otherConcept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk minimaal 1 uur");
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+
 		});
 	}
 
 	private void validateTermValueSetExpandedAndChildrenV2(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid =
-					myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "2");
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertEquals(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
-			assertEquals(
-					theCodeSystem.getConcept().size(),
-					termValueSet.getConcepts().size());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
 			assertThat(concept.getSystemVersion(), is(equalTo("2")));
-			assertTermConceptContainsDesignation(
-					concept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk - expiratie");
-			assertTermConceptContainsDesignation(
-					concept,
-					"sv",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systoliskt blodtryck - utgång");
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
+			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
 			assertThat(termValueSetConcept1.getSystemVersion(), is(equalTo("2")));
 
 			// ...
 
-			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
 			assertThat(otherConcept.getSystemVersion(), is(equalTo("2")));
-			assertTermConceptContainsDesignation(
-					otherConcept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk minimaal 1 uur");
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
+			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
 			assertThat(termValueSetConcept.getSystemVersion(), is(equalTo("2")));
 		});
 	}
@@ -1244,32 +1133,32 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	private void testValidateCodeOperationByCodeAndSystem() throws Exception {
 
 		// With correct system version specified. Should pass.
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("1"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("2"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1277,15 +1166,15 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and latest code system version. Should pass.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("2"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1293,14 +1182,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and no code system version. Should pass.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1308,32 +1197,32 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("1"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("2"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1341,20 +1230,21 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and older code system version. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("1"))
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
 	}
 
 	@Test
@@ -1372,26 +1262,28 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private void testValidateCodeOperationOnInstanceByCodeAndSystem() throws Exception {
 		// With correct system version specified. Should pass.
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1401,24 +1293,26 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version specified. Should pass as the code and system exist in both ValueSet versions.
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1426,31 +1320,34 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v1)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v1)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onInstance(myExtensionalVsId_v2)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.andParameter("systemVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId_v2)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
 	}
 
 	@Test
@@ -1470,35 +1367,34 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		Coding codingToValidate_v1 = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum");
 		codingToValidate_v1.setVersion("1");
 
-		Coding codingToValidate_v2 =
-				new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum v2");
+		Coding codingToValidate_v2 = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum v2");
 		codingToValidate_v2.setVersion("2");
 
 		Coding codingToValidate_noV = new Coding("http://acme.org", "8495-4", null);
 
 		// With correct system version specified. Should pass.
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1506,13 +1402,13 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version, and newer CodeSystem version. Should pass.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1520,28 +1416,28 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1549,13 +1445,13 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and older CodeSystem version. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1563,47 +1459,48 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version. Should pass, regardless of ValueSet version.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "coding", codingToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "coding", codingToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 	}
+
 
 	@Test
 	public void testValidateCodeOperationByCodeableConceptBeforeExpand() throws Exception {
@@ -1632,28 +1529,28 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		CodeableConcept codeableConceptToValidate_noV = new CodeableConcept(codingToValidate);
 
 		// With correct system version specified. Should pass.
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1661,13 +1558,13 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and latest CodeSystem version. Should pass.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1675,28 +1572,28 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v2)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1704,13 +1601,13 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and older CodeSystem version. Should fail.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_v1)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1718,46 +1615,47 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version. Should pass for all ValueSet versions.
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("1"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("valueSetVersion", new StringType("2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("validate-code")
-				.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
-				.andParameter(
-						"url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "codeableConcept", codeableConceptToValidate_noV)
+			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+
 	}
 
 	private boolean clearDeferredStorageQueue() {
@@ -1768,6 +1666,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		} else {
 			return true;
 		}
+
 	}
 
 	@Test
@@ -1777,11 +1676,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			persistLocalVs(createLocalVs(URL_MY_CODE_SYSTEM, "1"));
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(
-					e.getMessage(),
-					containsString("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET
-							+ "\" and ValueSet.version \"1\", already have one with resource ID: "));
+			assertThat(e.getMessage(), containsString("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: "));
 		}
+
 	}
 
 	@AfterEach
@@ -1789,20 +1686,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
-	public CodeSystem createExternalCs(
-			IFhirResourceDao<CodeSystem> theCodeSystemDao,
-			IResourceTableDao theResourceTableDao,
-			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
-			ServletRequestDetails theRequestDetails) {
+	public CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id =
-				theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
+		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table =
-				theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1825,26 +1716,18 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 
-	public static CodeSystem createExternalCs(
-			IFhirResourceDao<CodeSystem> theCodeSystemDao,
-			IResourceTableDao theResourceTableDao,
-			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
-			ServletRequestDetails theRequestDetails,
-			String theCodeSystemVersion) {
+	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setVersion(theCodeSystemVersion);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id =
-				theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
+		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table =
-				theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1867,8 +1750,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B" + theCodeSystemVersion);
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", theCodeSystemVersion, cs, table);
 		return codeSystem;
 	}
+
 }

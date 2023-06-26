@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
+
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -33,12 +34,7 @@ import java.util.Date;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@JsonAutoDetect(
-		creatorVisibility = JsonAutoDetect.Visibility.NONE,
-		fieldVisibility = JsonAutoDetect.Visibility.NONE,
-		getterVisibility = JsonAutoDetect.Visibility.NONE,
-		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-		setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BulkExportResponseJson {
 
 	@JsonProperty("transactionTime")
@@ -48,10 +44,8 @@ public class BulkExportResponseJson {
 
 	@JsonProperty("request")
 	private String myRequest;
-
 	@JsonProperty("requiresAccessToken")
 	private Boolean myRequiresAccessToken;
-
 	@JsonProperty("output")
 	private List<Output> myOutput;
 
@@ -124,7 +118,6 @@ public class BulkExportResponseJson {
 
 		@JsonProperty("type")
 		private String myType;
-
 		@JsonProperty("url")
 		private String myUrl;
 
@@ -145,5 +138,7 @@ public class BulkExportResponseJson {
 			myUrl = theUrl;
 			return this;
 		}
+
 	}
+
 }

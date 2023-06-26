@@ -62,11 +62,9 @@ public class CrR4Config {
 	}
 
 	@Bean
-	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(
-			Function<RequestDetails, MeasureService> theR4MeasureServiceFactory,
-			CrProperties theCrProperties,
-			DaoRegistry theDaoRegistry,
-			Executor cqlExecutor) {
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> theR4MeasureServiceFactory,
+																									  CrProperties theCrProperties,
+																									  DaoRegistry theDaoRegistry, Executor cqlExecutor) {
 		return r -> {
 			var ms = theR4MeasureServiceFactory.apply(r);
 			var cs = new CareGapsService(theCrProperties, ms, theDaoRegistry, cqlExecutor, r);
@@ -75,18 +73,18 @@ public class CrR4Config {
 	}
 
 	@Bean
-	public CareGapsOperationProvider r4CareGapsProvider(
-			Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
+	public CareGapsOperationProvider r4CareGapsProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction){
 		return new CareGapsOperationProvider(theCareGapsServiceFunction);
 	}
 
 	@Bean
-	public ISubmitDataService r4SubmitDataService(DaoRegistry theDaoRegistry) {
+	public ISubmitDataService r4SubmitDataService(DaoRegistry theDaoRegistry){
 		return requestDetails -> new SubmitDataService(theDaoRegistry, requestDetails);
 	}
 
 	@Bean
-	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService) {
+	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService){
 		return new SubmitDataProvider(theSubmitDataService);
 	}
+
 }

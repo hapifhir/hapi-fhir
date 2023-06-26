@@ -55,8 +55,8 @@ public class GraphQLR4RawTest {
 
 	@RegisterExtension
 	private final RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
-			.registerProvider(new MyPatientResourceProvider())
-			.registerProvider(new MyGraphQLProvider());
+		.registerProvider(new MyPatientResourceProvider())
+		.registerProvider(new MyGraphQLProvider());
 
 	@BeforeEach
 	public void before() {
@@ -70,8 +70,8 @@ public class GraphQLR4RawTest {
 	public void testGraphInstance_Get() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort()
-				+ "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -86,14 +86,15 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
 	public void testGraphInstance_Get_UnsupportedResourceType() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort()
-				+ "/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -103,14 +104,14 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
 	public void testGraphInstance_Post_ContentTypeJson() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpPost httpPost =
-				new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
+		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
 		StringEntity entity = new StringEntity("{\"query\": \"{name{family,given}}\"}");
 		httpPost.setEntity(entity);
 		httpPost.setHeader("Accept", "application/json");
@@ -130,14 +131,14 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
 	public void testGraphInstance_Post_ContentTypeGraphql() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpPost httpPost =
-				new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
+		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
 		StringEntity entity = new StringEntity("{name{family,given}}");
 		httpPost.setEntity(entity);
 		httpPost.setHeader("Accept", "application/json");
@@ -158,6 +159,7 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -165,8 +167,7 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql");
-		StringEntity entity =
-				new StringEntity("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}");
+		StringEntity entity = new StringEntity("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}");
 		httpPost.setEntity(entity);
 		httpPost.setHeader("Accept", "application/json");
 		httpPost.setHeader("Content-type", "application/json");
@@ -186,14 +187,16 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
+
 
 	@Test
 	public void testGraphSystem() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query="
-				+ UrlUtil.escapeUrlParam("{name{family,given}}"));
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -208,6 +211,7 @@ public class GraphQLR4RawTest {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@AfterAll
@@ -218,8 +222,7 @@ public class GraphQLR4RawTest {
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -235,13 +238,13 @@ public class GraphQLR4RawTest {
 		}
 
 		@GraphQL(type = RequestTypeEnum.POST)
-		public String processPost(
-				RequestDetails theRequestDetails, @IdParam IdType theId, @GraphQLQueryBody String theQuery) {
+		public String processPost(RequestDetails theRequestDetails, @IdParam IdType theId, @GraphQLQueryBody String theQuery) {
 			ourLastId = theId;
 			ourLastResourceType = theRequestDetails.getResourceName();
 			ourLastQuery = theQuery;
 			return ourNextRetVal;
 		}
+
 	}
 
 	public static class MyPatientResourceProvider implements IResourceProvider {
@@ -253,7 +256,8 @@ public class GraphQLR4RawTest {
 
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+		public List search(
+			@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
 			ArrayList<Patient> retVal = new ArrayList<>();
 
 			for (int i = 0; i < 200; i++) {
@@ -264,5 +268,8 @@ public class GraphQLR4RawTest {
 			}
 			return retVal;
 		}
+
 	}
+
+
 }

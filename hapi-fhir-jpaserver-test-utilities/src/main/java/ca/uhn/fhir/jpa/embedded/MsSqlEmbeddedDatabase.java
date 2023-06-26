@@ -40,15 +40,10 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 	private final MSSQLServerContainer myContainer;
 
 	public MsSqlEmbeddedDatabase() {
-		DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest")
-				.asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
+		DockerImageName msSqlImage = DockerImageName.parse("mcr.microsoft.com/azure-sql-edge:latest").asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server");
 		myContainer = new MSSQLServerContainer(msSqlImage).acceptLicense();
 		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.MSSQL_2012,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		super.initialize(DriverTypeEnum.MSSQL_2012, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
 	}
 
 	@Override
@@ -84,8 +79,7 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private void dropForeignKeys() {
 		List<String> sql = new ArrayList<>();
-		List<Map<String, Object>> queryResults =
-				query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
+		List<Map<String, Object>> queryResults = query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
 		for (Map<String, Object> row : queryResults) {
 			String tableName = row.get("TABLE_NAME").toString();
 			String constraintName = row.get("CONSTRAINT_NAME").toString();

@@ -25,6 +25,7 @@ public class BaseCommandTest {
 		} finally {
 			System.setIn(stdin);
 		}
+
 	}
 
 	private static class MyBaseCommand extends BaseCommand {
@@ -48,7 +49,9 @@ public class BaseCommandTest {
 		}
 
 		@Override
-		public void run(CommandLine theCommandLine) {}
+		public void run(CommandLine theCommandLine) {
+
+		}
 	}
 
 	public static void main(String[] theValue) throws ParseException {

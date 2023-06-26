@@ -20,7 +20,8 @@
 package ca.uhn.fhir.rest.param.binder;
 
 public final class StringBinder extends BaseJavaPrimitiveBinder<String> {
-	public StringBinder() {}
+	public StringBinder() {
+	}
 
 	@Override
 	protected String doEncode(String theString) {
@@ -31,4 +32,6 @@ public final class StringBinder extends BaseJavaPrimitiveBinder<String> {
 	protected String doParse(String theString) {
 		return theString;
 	}
+
+
 }

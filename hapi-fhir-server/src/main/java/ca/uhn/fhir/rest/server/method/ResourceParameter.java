@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,6 +39,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -47,7 +48,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,12 +58,7 @@ public class ResourceParameter implements IParameter {
 	private Mode myMode;
 	private Class<? extends IBaseResource> myResourceType;
 
-	public ResourceParameter(
-			Class<? extends IBaseResource> theParameterType,
-			Object theProvider,
-			Mode theMode,
-			boolean theMethodIsOperation,
-			boolean theMethodIsPatch) {
+	public ResourceParameter(Class<? extends IBaseResource> theParameterType, Object theProvider, Mode theMode, boolean theMethodIsOperation, boolean theMethodIsPatch) {
 		Validate.notNull(theParameterType, "theParameterType can not be null");
 		Validate.notNull(theMode, "theMode can not be null");
 
@@ -79,6 +74,7 @@ public class ResourceParameter implements IParameter {
 		if (Modifier.isAbstract(myResourceType.getModifiers()) && providerResourceType != null) {
 			myResourceType = providerResourceType;
 		}
+
 	}
 
 	public Mode getMode() {
@@ -90,18 +86,13 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
 	}
 
+
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 			case BODY:
 				try {
@@ -127,10 +118,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	public enum Mode {
-		BODY,
-		BODY_BYTE_ARRAY,
-		ENCODING,
-		RESOURCE
+		BODY, BODY_BYTE_ARRAY, ENCODING, RESOURCE
 	}
 
 	private static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
@@ -152,30 +140,20 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends IBaseResource> T loadResourceFromRequest(
-			RequestDetails theRequest, @Nonnull BaseMethodBinding theMethodBinding, Class<T> theResourceType) {
+	static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
 		Reader requestReader = createRequestReader(theRequest, charset);
 
-		RestOperationTypeEnum restOperationType =
-				theMethodBinding != null ? theMethodBinding.getRestOperationType() : null;
+		RestOperationTypeEnum restOperationType = theMethodBinding != null ? theMethodBinding.getRestOperationType() : null;
 
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
 		if (encoding == null) {
 			String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
-					String msg = theRequest
-							.getServer()
-							.getFhirContext()
-							.getLocalizer()
-							.getMessage(
-									ResourceParameter.class,
-									"invalidContentTypeInRequest",
-									ctValue,
-									theMethodBinding.getRestOperationType());
+					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(Msg.code(446) + msg);
 				}
 			}
@@ -191,12 +169,10 @@ public class ResourceParameter implements IParameter {
 					return null;
 				}
 
-				String msg = ctx.getLocalizer()
-						.getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
 				throw new InvalidRequestException(Msg.code(448) + msg);
 			} else {
-				String msg = ctx.getLocalizer()
-						.getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
 				throw new InvalidRequestException(Msg.code(449) + msg);
 			}
 		}
@@ -211,18 +187,14 @@ public class ResourceParameter implements IParameter {
 				retVal = (T) parser.parseResource(requestReader);
 			}
 		} catch (DataFormatException e) {
-			String msg = ctx.getLocalizer()
-					.getMessage(ResourceParameter.class, "failedToParseRequest", encoding.name(), e.getMessage());
+			String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "failedToParseRequest", encoding.name(), e.getMessage());
 			throw new InvalidRequestException(Msg.code(450) + msg);
 		}
 
 		return retVal;
 	}
 
-	static IBaseResource parseResourceFromRequest(
-			RequestDetails theRequest,
-			@Nonnull BaseMethodBinding theMethodBinding,
-			Class<? extends IBaseResource> theResourceType) {
+	static IBaseResource parseResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		if (theRequest.getResource() != null) {
 			return theRequest.getResource();
 		}
@@ -268,4 +240,5 @@ public class ResourceParameter implements IParameter {
 
 		return retVal;
 	}
+
 }

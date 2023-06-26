@@ -16,9 +16,9 @@ import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 public class FhirPathR5 implements IFhirPath {
 
@@ -42,9 +42,7 @@ public class FhirPathR5 implements IFhirPath {
 
 		for (Base next : result) {
 			if (!theReturnType.isAssignableFrom(next.getClass())) {
-				throw new FhirPathExecutionException(
-						Msg.code(199) + "FluentPath expression \"" + thePath + "\" returned unexpected type "
-								+ next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+				throw new FhirPathExecutionException(Msg.code(199) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
 			}
 		}
 
@@ -66,8 +64,7 @@ public class FhirPathR5 implements IFhirPath {
 		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
 
 			@Override
-			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext)
-					throws PathEngineException {
+			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 				return null;
 			}
 
@@ -87,14 +84,12 @@ public class FhirPathR5 implements IFhirPath {
 			}
 
 			@Override
-			public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters)
-					throws PathEngineException {
+			public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
 				return null;
 			}
 
 			@Override
-			public List<Base> executeFunction(
-					Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+			public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 				return null;
 			}
 

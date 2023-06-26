@@ -22,10 +22,10 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 
 public interface IMeta {
-
+	
 	/**
 	 * Fetch the current metadata
-	 *
+	 * 
 	 * @param theMetaType The type of the meta datatype for the given FHIR model version (should be <code>MetaDt.class</code> or <code>MetaType.class</code>)
 	 */
 	<T extends IBaseMetaType> IMetaGetUnsourced<T> get(Class<T> theMetaType);
@@ -36,7 +36,8 @@ public interface IMeta {
 	IMetaAddOrDeleteUnsourced add();
 
 	/**
-	 * Delete the elements in the given metadata to the
+	 * Delete the elements in the given metadata to the 
 	 */
 	IMetaAddOrDeleteUnsourced delete();
+
 }

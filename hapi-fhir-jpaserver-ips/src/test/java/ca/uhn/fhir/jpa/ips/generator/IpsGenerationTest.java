@@ -52,32 +52,26 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 	}
 
+
 	@Test
 	public void testGenerateLargePatientSummary() {
-		Bundle sourceData =
-				ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything.json.gz");
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/large-patient-everything.json.gz");
 		sourceData.setType(Bundle.BundleType.TRANSACTION);
 		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
 			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry
-					.getRequest()
-					.setUrl(nextEntry
-							.getResource()
-							.getIdElement()
-							.toUnqualifiedVersionless()
-							.getValue());
+			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
-		Bundle output = myClient.operation()
-				.onInstance("Patient/f15d2419-fbff-464a-826d-0afe8f095771")
-				.named(JpaConstants.OPERATION_SUMMARY)
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
-		ourLog.info(
-				"Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/f15d2419-fbff-464a-826d-0afe8f095771")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
 		validateDocument(outcome);
@@ -93,52 +87,38 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 	public void testGenerateTinyPatientSummary() {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
-		Bundle sourceData =
-				ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
+		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
 		sourceData.setType(Bundle.BundleType.TRANSACTION);
 		for (Bundle.BundleEntryComponent nextEntry : sourceData.getEntry()) {
 			nextEntry.getRequest().setMethod(Bundle.HTTPVerb.PUT);
-			nextEntry
-					.getRequest()
-					.setUrl(nextEntry
-							.getResource()
-							.getIdElement()
-							.toUnqualifiedVersionless()
-							.getValue());
+			nextEntry.getRequest().setUrl(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		Bundle outcome = mySystemDao.transaction(mySrd, sourceData);
 		ourLog.info("Created {} resources", outcome.getEntry().size());
 
-		Bundle output = myClient.operation()
-				.onInstance("Patient/5342998")
-				.named(JpaConstants.OPERATION_SUMMARY)
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
-		ourLog.info(
-				"Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle output = myClient
+			.operation()
+			.onInstance("Patient/5342998")
+			.named(JpaConstants.OPERATION_SUMMARY)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
 		validateDocument(outcome);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId, matchesPattern("urn:uuid:.*"));
-		assertEquals(
-				patientId,
-				findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
-		assertEquals(
-				patientId,
-				findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
+		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
+		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 	}
 
 	private void validateDocument(Bundle theOutcome) {
 		FhirValidator validator = myFhirContext.newValidator();
 		validator.registerValidatorModule(new FhirInstanceValidator(myFhirContext));
 		ValidationResult validation = validator.validateWithResult(theOutcome);
-		assertTrue(validation.isSuccessful(), () -> myFhirContext
-				.newJsonParser()
-				.setPrettyPrint(true)
-				.encodeResourceToString(validation.toOperationOutcome()));
+		assertTrue(validation.isSuccessful(), () -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome()));
 	}
 
 	@Configuration
@@ -150,8 +130,7 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		}
 
 		@Bean
-		public IIpsGeneratorSvc ipsGeneratorSvc(
-				FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
+		public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
 			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy, theDaoRegistry);
 		}
 
@@ -159,22 +138,25 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		public IpsOperationProvider ipsOperationProvider(IIpsGeneratorSvc theIpsGeneratorSvc) {
 			return new IpsOperationProvider(theIpsGeneratorSvc);
 		}
+
+
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T extends IBaseResource> T findFirstEntryResource(
-			Bundle theBundle, Class<T> theType, int theExpectedCount) {
+	private static <T extends IBaseResource> T findFirstEntryResource(Bundle theBundle, Class<T> theType, int theExpectedCount) {
 		return findEntryResource(theBundle, theType, 0, theExpectedCount);
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends IBaseResource> T findEntryResource(
-			Bundle theBundle, Class<T> theType, int index, int theExpectedCount) {
-		List<Resource> resources = theBundle.getEntry().stream()
-				.map(Bundle.BundleEntryComponent::getResource)
-				.filter(r -> theType.isAssignableFrom(r.getClass()))
-				.toList();
+	static <T extends IBaseResource> T findEntryResource(Bundle theBundle, Class<T> theType, int index, int theExpectedCount) {
+		List<Resource> resources = theBundle
+			.getEntry()
+			.stream()
+			.map(Bundle.BundleEntryComponent::getResource)
+			.filter(r -> theType.isAssignableFrom(r.getClass()))
+			.toList();
 		assertEquals(theExpectedCount, resources.size());
 		return (T) resources.get(index);
 	}
+
 }

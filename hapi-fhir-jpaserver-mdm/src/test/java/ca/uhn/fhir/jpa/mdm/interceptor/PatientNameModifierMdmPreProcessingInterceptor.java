@@ -21,9 +21,10 @@ public class PatientNameModifierMdmPreProcessingInterceptor {
 		List<HumanName> nameList = patient.getName();
 
 		List<HumanName> validHumanNameList = nameList.stream()
-				.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
-				.toList();
+			.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
+			.toList();
 
 		patient.setName(validHumanNameList);
 	}
+
 }

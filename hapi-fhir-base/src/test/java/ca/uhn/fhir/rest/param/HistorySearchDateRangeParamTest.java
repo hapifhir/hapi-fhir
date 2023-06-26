@@ -13,33 +13,30 @@ class HistorySearchDateRangeParamTest {
 
 	@Test
 	public void testSearchDateRangeParamWithInvalidSearchType() {
-		HistorySearchDateRangeParam param =
-				new HistorySearchDateRangeParam(Map.of("Some key", new String[] {"value"}), dateRangeParam, theOffset);
+		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("Some key", new String[]{"value"}), dateRangeParam, theOffset);
 		assertNull(param.getHistorySearchType());
 		assertEquals(theOffset, param.getOffset());
 	}
 
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsAt() {
-		HistorySearchDateRangeParam param =
-				new HistorySearchDateRangeParam(Map.of("_at", new String[] {"value"}), dateRangeParam, theOffset);
+		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_at", new String[]{"value"}), dateRangeParam, theOffset);
 		assertEquals(HistorySearchStyleEnum.AT, param.getHistorySearchType());
 		assertEquals(theOffset, param.getOffset());
 	}
-
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsSince() {
-		HistorySearchDateRangeParam param =
-				new HistorySearchDateRangeParam(Map.of("_since", new String[] {"value"}), dateRangeParam, theOffset);
+		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_since", new String[]{"value"}), dateRangeParam, theOffset);
 		assertEquals(HistorySearchStyleEnum.SINCE, param.getHistorySearchType());
 		assertEquals(theOffset, param.getOffset());
 	}
 
+
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsCount() {
-		HistorySearchDateRangeParam param =
-				new HistorySearchDateRangeParam(Map.of("_count", new String[] {"value"}), dateRangeParam, theOffset);
+		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_count", new String[]{"value"}), dateRangeParam, theOffset);
 		assertEquals(HistorySearchStyleEnum.COUNT, param.getHistorySearchType());
 		assertEquals(theOffset, param.getOffset());
+
 	}
 }

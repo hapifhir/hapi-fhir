@@ -26,11 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
+ * 
  * @author james
  *
  */
-public class StringClientParam extends BaseClientParam implements IParam {
+public class  StringClientParam extends BaseClientParam implements IParam {
 
 	private final String myParamName;
 
@@ -90,6 +90,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		 * parameter.
 		 */
 		ICriterion<?> values(String... theValues);
+
 	}
 
 	private class StringExactly implements IStringMatch {
@@ -110,8 +111,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 
 		@Override
 		public ICriterion<?> values(String... theValues) {
-			return new StringCriterion<StringClientParam>(
-					getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, Arrays.asList(theValues));
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, Arrays.asList(theValues));
 		}
 	}
 
@@ -123,8 +123,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 
 		@Override
 		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
-			return new StringCriterion<>(
-					getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
 		}
 
 		@Override
@@ -134,8 +133,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 
 		@Override
 		public ICriterion<?> values(String... theValues) {
-			return new StringCriterion<StringClientParam>(
-					getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, Arrays.asList(theValues));
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, Arrays.asList(theValues));
 		}
 	}
 
@@ -144,6 +142,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		public ICriterion<StringClientParam> value(String theValue) {
 			return new StringCriterion<>(getParamName(), theValue);
 		}
+
 
 		@Override
 		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
@@ -159,5 +158,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		public ICriterion<?> values(String... theValues) {
 			return new StringCriterion<StringClientParam>(getParamName(), Arrays.asList(theValues));
 		}
+
 	}
+
 }

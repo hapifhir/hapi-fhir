@@ -53,57 +53,57 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-			.withServerBeforeAll(s -> {
-				s.registerProviders(myResourceProviders.createProviders());
-				s.setDefaultResponseEncoding(EncodingEnum.XML);
-				s.setDefaultPrettyPrint(false);
+		.withServerBeforeAll(s -> {
+			s.registerProviders(myResourceProviders.createProviders());
+			s.setDefaultResponseEncoding(EncodingEnum.XML);
+			s.setDefaultPrettyPrint(false);
 
-				myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-				s.registerProvider(mySystemProvider);
-				s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-				s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
-				s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
-				s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+			s.registerProvider(mySystemProvider);
+			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
+			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
+			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
-				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-				JpaConformanceProviderDstu3 confProvider =
-						new JpaConformanceProviderDstu3(s, mySystemDao, myStorageSettings, mySearchParamRegistry);
-				confProvider.setImplementationDescription("THIS IS THE DESC");
-				s.setServerConformanceProvider(confProvider);
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myStorageSettings, mySearchParamRegistry);
+			confProvider.setImplementationDescription("THIS IS THE DESC");
+			s.setServerConformanceProvider(confProvider);
 
-				// Register a CORS filter
-				CorsConfiguration config = new CorsConfiguration();
-				CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-				config.addAllowedHeader("Accept");
-				config.addAllowedHeader("Access-Control-Request-Headers");
-				config.addAllowedHeader("Access-Control-Request-Method");
-				config.addAllowedHeader("Cache-Control");
-				config.addAllowedHeader("Content-Type");
-				config.addAllowedHeader("Origin");
-				config.addAllowedHeader("Prefer");
-				config.addAllowedHeader("x-fhir-starter");
-				config.addAllowedHeader("X-Requested-With");
-				config.addAllowedOrigin("*");
-				config.addExposedHeader("Location");
-				config.addExposedHeader("Content-Location");
-				config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-				s.registerInterceptor(corsInterceptor);
-			})
-			.withServerBeforeEach(s -> {
-				myPort = myServer.getPort();
-				myServerBase = myServer.getBaseUrl();
-				myClient = myServer.getFhirClient();
-				myClient.setEncoding(EncodingEnum.JSON);
-				myRestServer = myServer.getRestfulServer();
+			// Register a CORS filter
+			CorsConfiguration config = new CorsConfiguration();
+			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("Access-Control-Request-Headers");
+			config.addAllowedHeader("Access-Control-Request-Method");
+			config.addAllowedHeader("Cache-Control");
+			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader("Origin");
+			config.addAllowedHeader("Prefer");
+			config.addAllowedHeader("x-fhir-starter");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedOrigin("*");
+			config.addExposedHeader("Location");
+			config.addExposedHeader("Content-Location");
+			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+			s.registerInterceptor(corsInterceptor);
 
-				myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
-				if (shouldLogClient()) {
-					myClient.registerInterceptor(new LoggingInterceptor());
-				}
-			});
+		}).withServerBeforeEach(s -> {
+			myPort = myServer.getPort();
+			myServerBase = myServer.getBaseUrl();
+			myClient = myServer.getFhirClient();
+			myClient.setEncoding(EncodingEnum.JSON);
+			myRestServer = myServer.getRestfulServer();
+
+			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+			if (shouldLogClient()) {
+				myClient.registerInterceptor(new LoggingInterceptor());
+			}
+		});
+
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -131,10 +131,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getName().size() > 0
-					? nextPt.getName().get(0).getGivenAsSingleString() + " "
-							+ nextPt.getName().get(0).getFamily()
-					: "";
+			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}
@@ -175,8 +172,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		return params;
 	}
 
-	public static ParametersParameterComponent getPartByName(
-			ParametersParameterComponent theParameter, String theName) {
+	public static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
 		for (ParametersParameterComponent part : theParameter.getPart()) {
 			if (part.getName().equals(theName)) {
 				return part;
@@ -185,4 +181,5 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 		return new ParametersParameterComponent();
 	}
+
 }

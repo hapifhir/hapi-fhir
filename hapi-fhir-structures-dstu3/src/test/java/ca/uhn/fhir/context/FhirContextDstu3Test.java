@@ -39,18 +39,17 @@ public class FhirContextDstu3Test {
 		assertEquals(FhirVersionEnum.DSTU3, ctx.getVersion().getVersion());
 	}
 
+
 	@Test
 	public void testToString() {
 		assertEquals("FhirContext[DSTU3]", FhirContext.forDstu3().toString());
 	}
 
+
 	@Test
 	public void testRuntimeSearchParamToString() {
-		String val =
-				ourCtx.getResourceDefinition("Patient").getSearchParam("gender").toString();
-		assertEquals(
-				"RuntimeSearchParam[base=[Patient],name=gender,path=Patient.gender,id=<null>,uri=http://hl7.org/fhir/SearchParameter/Patient-gender]",
-				val);
+		String val = ourCtx.getResourceDefinition("Patient").getSearchParam("gender").toString();
+		assertEquals("RuntimeSearchParam[base=[Patient],name=gender,path=Patient.gender,id=<null>,uri=http://hl7.org/fhir/SearchParameter/Patient-gender]", val);
 	}
 
 	@Test
@@ -82,9 +81,7 @@ public class FhirContextDstu3Test {
 		assertEquals(Patient.class, ourCtx.getResourceDefinition("patient").getImplementingClass());
 		assertEquals(Patient.class, ourCtx.getResourceDefinition("Patient").getImplementingClass());
 		assertEquals(Patient.class, ourCtx.getResourceDefinition("PATient").getImplementingClass());
-		assertEquals(
-				StructureDefinition.class,
-				ourCtx.getResourceDefinition("structuredefinition").getImplementingClass());
+		assertEquals(StructureDefinition.class, ourCtx.getResourceDefinition("structuredefinition").getImplementingClass());
 	}
 
 	@Test
@@ -99,18 +96,20 @@ public class FhirContextDstu3Test {
 			final CountDownLatch threadsFinished = new CountDownLatch(numThreads);
 
 			for (int i = 0; i < numThreads; i++) {
-				threadPool.submit(() -> {
-					threadsReady.countDown();
-					try {
-						threadsReady.await();
-						RuntimeResourceDefinition def = ctx.getResourceDefinition("patient");
-						ourLog.info(def.toString());
-						assertNotNull(def);
-					} catch (final Exception e) {
-						exceptions.add(e);
+				threadPool.submit(
+					() -> {
+						threadsReady.countDown();
+						try {
+							threadsReady.await();
+							RuntimeResourceDefinition def = ctx.getResourceDefinition("patient");
+							ourLog.info(def.toString());
+							assertNotNull(def);
+						} catch (final Exception e) {
+							exceptions.add(e);
+						}
+						threadsFinished.countDown();
 					}
-					threadsFinished.countDown();
-				});
+				);
 			}
 
 			threadsFinished.await();
@@ -134,21 +133,20 @@ public class FhirContextDstu3Test {
 
 		for (int i = 0; i < 10; i++) {
 			new Thread(() -> {
-						OperationOutcomeUtil.newInstance(dstu3FhirContext);
-						ourLog.info("Have finished {}", count.incrementAndGet());
-					})
-					.start();
+				OperationOutcomeUtil.newInstance(dstu3FhirContext);
+				ourLog.info("Have finished {}", count.incrementAndGet());
+			}).start();
 		}
 
 		TestUtil.waitForSize(10, count);
+
 	}
 
 	@Test
 	public void testQueryBoundCode() {
 		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);
 		String childName = "gender";
-		BaseRuntimeChildDatatypeDefinition genderChild =
-				(BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
+		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
 		assertEquals(AdministrativeGender.class, genderChild.getBoundEnumType());
@@ -158,8 +156,7 @@ public class FhirContextDstu3Test {
 	public void testQueryNonBoundCode() {
 		RuntimeResourceDefinition patientType = ourCtx.getResourceDefinition(Patient.class);
 		String childName = "name";
-		BaseRuntimeChildDatatypeDefinition genderChild =
-				(BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
+		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
 		assertEquals(null, genderChild.getBoundEnumType());
@@ -176,15 +173,17 @@ public class FhirContextDstu3Test {
 		myReferralInformation._setReferralType(new Coding("someSystem", "someCode", "someDisplay"));
 		myReferralInformation._setFreeChoice(new Coding("someSystem2", "someCode", "someDisplay2"));
 		myReferralInformation._setReceived(new DateTimeType(createDate(2017, Calendar.JULY, 31)));
-		myReferralInformation._setReferringOrganisation(
-				new Reference().setReference("someReference").setDisplay("someDisplay3"));
+		myReferralInformation._setReferringOrganisation(new Reference().setReference("someReference").setDisplay("someDisplay3"));
 		myEpisodeOfCare._setReferralInformation(myReferralInformation);
 		bundle.addEntry().setResource(myEpisodeOfCare);
 		FhirContext ctx = FhirContext.forDstu3();
 		ctx.newXmlParser().encodeResourceToString(bundle);
 	}
 
-	private static Date createDate(int year, int month, int day) {
+	private static Date createDate(
+		int year,
+		int month,
+		int day) {
 		Calendar CAL = Calendar.getInstance();
 		CAL.clear();
 		CAL.set(year, month, day);
@@ -195,4 +194,6 @@ public class FhirContextDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
+
 }

@@ -32,4 +32,5 @@ public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.CONTAINED_RESOURCES;
 	}
+
 }

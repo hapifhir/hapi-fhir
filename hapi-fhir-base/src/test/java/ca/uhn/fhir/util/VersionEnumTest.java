@@ -14,8 +14,9 @@ public class VersionEnumTest {
 
 	@Test
 	public void testCurrentVersionExists() {
-		List<String> versions =
-				Arrays.stream(VersionEnum.values()).map(Enum::name).collect(Collectors.toList());
+		List<String> versions = Arrays.stream(VersionEnum.values())
+			.map(Enum::name)
+			.collect(Collectors.toList());
 
 		String version = VersionUtil.getVersion();
 
@@ -39,4 +40,6 @@ public class VersionEnumTest {
 
 		assertThat(versions, hasItem(version));
 	}
+
+
 }

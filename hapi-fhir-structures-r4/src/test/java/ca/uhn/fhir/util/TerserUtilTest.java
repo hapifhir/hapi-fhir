@@ -29,87 +29,87 @@ class TerserUtilTest {
 
 	private FhirContext ourFhirContext = FhirContext.forR4();
 	private static final String SAMPLE_PERSON =
-			"""
+		"""
 			{
-				"resourceType": "Patient",
-				"extension": [
-					{
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-					"valueCoding": {
-						"system": "MyInternalRace",
-						"code": "X",
-						"display": "Eks"
-					}
-					},
-					{
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
-					"valueCoding": {
-						"system": "MyInternalEthnicity",
-						"display": "NNN"
-					}
-					}
-				],
-				"identifier": [
-					{
-					"system": "http://example.org/member_id",
-					"value": "123123"
-					},
-					{
-					"system": "http://example.org/medicaid_id",
-					"value": "12312323123Z"
-					},
-					{
-					"system": "http://example.org/CDNS_id",
-					"value": "123123123E"
-					},
-					{
-					"system": "http://example.org/SSN"
-					}
-				],
-				"active": true,
-				"name": [
-					{
-					"family": "TestFamily",
-					"given": [
-						"Given"
-					]
-					}
-				],
-				"telecom": [
-					{
-					"system": "email",
-					"value": "email@email.io"
-					},
-					{
-					"system": "phone",
-					"value": "123123231"
-					},
-					{
-					"system": "phone",
-					"value": "1231232312"
-					},
-					{
-					"system": "phone",
-					"value": "1231232314"
-					}
-				],
-				"gender": "male",
-				"birthDate": "1900-01-01",
-				"deceasedBoolean": true,
-				"contained": [
-						{
-							"id": "1",
-							"identifier": [
-								{
-									"system": "urn:hssc:srhs:contact:organizationId",
-									"value": "1000"
-								}
-							],
-							"name": "BUILDERS FIRST SOURCE",
-							"resourceType": "Organization"
-						}
-					]
-				}
+			      "resourceType": "Patient",
+			      "extension": [
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+			          "valueCoding": {
+			            "system": "MyInternalRace",
+			            "code": "X",
+			            "display": "Eks"
+			          }
+			        },
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
+			          "valueCoding": {
+			            "system": "MyInternalEthnicity",
+			            "display": "NNN"
+			          }
+			        }
+			      ],
+			      "identifier": [
+			        {
+			          "system": "http://example.org/member_id",
+			          "value": "123123"
+			        },
+			        {
+			          "system": "http://example.org/medicaid_id",
+			          "value": "12312323123Z"
+			        },
+			        {
+			          "system": "http://example.org/CDNS_id",
+			          "value": "123123123E"
+			        },
+			        {
+			          "system": "http://example.org/SSN"
+			        }
+			      ],
+			      "active": true,
+			      "name": [
+			        {
+			          "family": "TestFamily",
+			          "given": [
+			            "Given"
+			          ]
+			        }
+			      ],
+			      "telecom": [
+			        {
+			          "system": "email",
+			          "value": "email@email.io"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "123123231"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232312"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232314"
+			        }
+			      ],
+			      "gender": "male",
+			      "birthDate": "1900-01-01",
+			      "deceasedBoolean": true,
+			       "contained": [
+			              {
+			                  "id": "1",
+			                  "identifier": [
+			                      {
+			                          "system": "urn:hssc:srhs:contact:organizationId",
+			                          "value": "1000"
+			                      }
+			                  ],
+			                  "name": "BUILDERS FIRST SOURCE",
+			                  "resourceType": "Organization"
+			              }
+			          ]
+			    }
 				""";
 
 	@Test
@@ -124,10 +124,8 @@ class TerserUtilTest {
 		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
 
 		assertEquals(1, p2.getIdentifier().size());
-		assertEquals(
-				p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
-		assertEquals(
-				p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
+		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
+		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
 	}
 
 	@Test
@@ -180,11 +178,8 @@ class TerserUtilTest {
 		TerserUtilHelper p2Helper = TerserUtilHelper.newHelper(ourFhirContext, "Patient");
 		RuntimeResourceDefinition definition = p1Helper.getResourceDefinition();
 
-		TerserUtil.cloneEidIntoResource(
-				ourFhirContext,
-				definition.getChildByName("identifier"),
-				p1.getIdentifier().get(0),
-				p2Helper.getResource());
+		TerserUtil.cloneEidIntoResource(ourFhirContext, definition.getChildByName("identifier"),
+			p1.getIdentifier().get(0), p2Helper.getResource());
 
 		assertEquals(1, p2Helper.getFieldValues("identifier").size());
 
@@ -211,12 +206,11 @@ class TerserUtilTest {
 		assertEquals(check.getValue(), p.getBirthDate());
 	}
 
+
 	@Test
 	void testFieldExists() {
-		assertTrue(TerserUtil.fieldExists(
-				ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient")));
-		assertFalse(TerserUtil.fieldExists(
-				ourFhirContext, "randomFieldName", TerserUtil.newResource(ourFhirContext, "Patient")));
+		assertTrue(TerserUtil.fieldExists(ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient")));
+		assertFalse(TerserUtil.fieldExists(ourFhirContext, "randomFieldName", TerserUtil.newResource(ourFhirContext, "Patient")));
 	}
 
 	@Test
@@ -232,8 +226,7 @@ class TerserUtilTest {
 
 		assertNull(p2.getId());
 		assertEquals(1, p2.getName().size());
-		assertEquals(
-				p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
+		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
 	}
 
 	@Test
@@ -297,12 +290,12 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-				.addLine("10 Main Street")
-				.setCity("Hamilton")
-				.setState("ON")
-				.setPostalCode("Z0Z0Z0")
-				.setCountry("Canada")
-				.addExtension(ext);
+			.addLine("10 Main Street")
+			.setCity("Hamilton")
+			.setState("ON")
+			.setPostalCode("Z0Z0Z0")
+			.setCountry("Canada")
+			.addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress().addLine("10 Lenin Street").setCity("Severodvinsk").setCountry("Russia");
@@ -323,6 +316,7 @@ class TerserUtilTest {
 		assertEquals(2, p2.getAddress().size());
 		assertTrue(p2.getAddress().get(0).hasExtension());
 		assertTrue(p2.getAddress().get(1).hasExtension());
+
 	}
 
 	@Test
@@ -333,12 +327,12 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-				.addLine("10 Main Street")
-				.setCity("Hamilton")
-				.setState("ON")
-				.setPostalCode("Z0Z0Z0")
-				.setCountry("Canada")
-				.addExtension(ext);
+			.addLine("10 Main Street")
+			.setCity("Hamilton")
+			.setState("ON")
+			.setPostalCode("Z0Z0Z0")
+			.setCountry("Canada")
+			.addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress().addLine("10 Lenin Street").setCity("Severodvinsk").setCountry("Russia");
@@ -358,21 +352,21 @@ class TerserUtilTest {
 
 		Patient p1 = new Patient();
 		p1.addAddress()
-				.addLine("10 Main Street")
-				.setCity("Hamilton")
-				.setState("ON")
-				.setPostalCode("Z0Z0Z0")
-				.setCountry("Canada")
-				.addExtension(ext);
+			.addLine("10 Main Street")
+			.setCity("Hamilton")
+			.setState("ON")
+			.setPostalCode("Z0Z0Z0")
+			.setCountry("Canada")
+			.addExtension(ext);
 
 		Patient p2 = new Patient();
 		p2.addAddress()
-				.addLine("10 Main Street")
-				.setCity("Hamilton")
-				.setState("ON")
-				.setPostalCode("Z0Z0Z1")
-				.setCountry("Canada")
-				.addExtension(ext);
+			.addLine("10 Main Street")
+			.setCity("Hamilton")
+			.setState("ON")
+			.setPostalCode("Z0Z0Z1")
+			.setCountry("Canada")
+			.addExtension(ext);
 
 		TerserUtil.mergeField(ourFhirContext, "address", p1, p2);
 
@@ -381,6 +375,7 @@ class TerserUtilTest {
 		assertEquals("[10 Main Street]", p2.getAddress().get(1).getLine().toString());
 		assertTrue(p2.getAddress().get(1).hasExtension());
 	}
+
 
 	@Test
 	void testCloneWithDuplicateNonPrimitives() {
@@ -404,6 +399,7 @@ class TerserUtilTest {
 		assertThat(p2.getName(), hasSize(1));
 		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
 	}
+
 
 	@Test
 	void testEqualsFunction() {
@@ -472,8 +468,7 @@ class TerserUtilTest {
 		assertEquals(1, p2.getName().size());
 		assertEquals("Doe", p2.getName().get(0).getFamily());
 	}
-
-	@Test
+		@Test
 	public void testReplaceFieldByEmptyValue() {
 		Patient p1 = new Patient();
 		Patient p2 = new Patient();
@@ -562,8 +557,7 @@ class TerserUtilTest {
 
 		Patient p2 = TerserUtil.clone(ourFhirContext, p1);
 
-		assertEquals(
-				p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
+		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
 		assertTrue(p1.equalsDeep(p2));
 	}
 
@@ -584,4 +578,5 @@ class TerserUtilTest {
 		assertNotNull(TerserUtil.newResource(ourFhirContext, "Patient"));
 		assertNotNull(TerserUtil.newResource(ourFhirContext, "Patient", null));
 	}
+
 }

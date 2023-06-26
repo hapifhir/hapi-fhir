@@ -24,8 +24,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -44,26 +44,28 @@ public class SearchContinuationTask extends SearchTask {
 	private final RequestDetails myRequestDetails;
 
 	public SearchContinuationTask(
-			SearchTaskParameters theCreationParams,
-			HapiTransactionService theTxService,
-			FhirContext theContext,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			SearchBuilderFactory theSearchBuilderFactory,
-			ISearchResultCacheSvc theSearchResultCacheSvc,
-			JpaStorageSettings theStorageSettings,
-			ISearchCacheSvc theSearchCacheSvc,
-			IPagingProvider thePagingProvider,
-			ExceptionService theExceptionSvc) {
+		SearchTaskParameters theCreationParams,
+		HapiTransactionService theTxService,
+		FhirContext theContext,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		SearchBuilderFactory theSearchBuilderFactory,
+		ISearchResultCacheSvc theSearchResultCacheSvc,
+		JpaStorageSettings theStorageSettings,
+		ISearchCacheSvc theSearchCacheSvc,
+		IPagingProvider thePagingProvider,
+		ExceptionService theExceptionSvc
+	) {
 		super(
-				theCreationParams,
-				theTxService,
-				theContext,
-				theInterceptorBroadcaster,
-				theSearchBuilderFactory,
-				theSearchResultCacheSvc,
-				theStorageSettings,
-				theSearchCacheSvc,
-				thePagingProvider);
+			theCreationParams,
+			theTxService,
+			theContext,
+			theInterceptorBroadcaster,
+			theSearchBuilderFactory,
+			theSearchResultCacheSvc,
+			theStorageSettings,
+			theSearchCacheSvc,
+			thePagingProvider
+		);
 
 		myRequestDetails = theCreationParams.Request;
 		myExceptionSvc = theExceptionSvc;
@@ -74,22 +76,17 @@ public class SearchContinuationTask extends SearchTask {
 		try {
 			RequestPartitionId requestPartitionId = getRequestPartitionId();
 			myTxService
-					.withRequest(myRequestDetails)
-					.withRequestPartitionId(requestPartitionId)
-					.execute(() -> {
-						List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(
-								getSearch(), myRequestDetails, requestPartitionId);
-						if (previouslyAddedResourcePids == null) {
-							throw myExceptionSvc.newUnknownSearchException(
-									getSearch().getUuid());
-						}
+				.withRequest(myRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> {
+				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch(), myRequestDetails, requestPartitionId);
+				if (previouslyAddedResourcePids == null) {
+					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());
+				}
 
-						ourLog.trace(
-								"Have {} previously added IDs in search: {}",
-								previouslyAddedResourcePids.size(),
-								getSearch().getUuid());
-						setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
-					});
+				ourLog.trace("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
+				setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
+			});
 
 		} catch (Throwable e) {
 			ourLog.error("Failure processing search", e);
@@ -105,4 +102,5 @@ public class SearchContinuationTask extends SearchTask {
 
 		return super.call();
 	}
+
 }

@@ -27,19 +27,16 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
 
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
 	private final IUrlListValidator myUrlListValidator;
 	private final IDeleteExpungeSvc<?> myDeleteExpungeSvc;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	public DeleteExpungeJobParametersValidator(
-			IUrlListValidator theUrlListValidator,
-			IDeleteExpungeSvc<?> theDeleteExpungeSvc,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public DeleteExpungeJobParametersValidator(IUrlListValidator theUrlListValidator, IDeleteExpungeSvc<?> theDeleteExpungeSvc, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myUrlListValidator = theUrlListValidator;
 		myDeleteExpungeSvc = theDeleteExpungeSvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
@@ -55,17 +52,13 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 		}
 
 		// Verify that the user has access to all requested partitions
-		myRequestPartitionHelperSvc.validateHasPartitionPermissions(
-				theRequestDetails, null, theParameters.getRequestPartitionId());
+		myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, null, theParameters.getRequestPartitionId());
 
 		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
-			ValidateUtil.isTrueOrThrowInvalidRequest(
-					url.matches("[a-zA-Z]+\\?.*"),
-					"Delete expunge URLs must be in the format [resourceType]?[parameters]");
+			ValidateUtil.isTrueOrThrowInvalidRequest(url.matches("[a-zA-Z]+\\?.*"), "Delete expunge URLs must be in the format [resourceType]?[parameters]");
 			if (partitionedUrl.getRequestPartitionId() != null) {
-				myRequestPartitionHelperSvc.validateHasPartitionPermissions(
-						theRequestDetails, null, partitionedUrl.getRequestPartitionId());
+				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, null, partitionedUrl.getRequestPartitionId());
 			}
 		}
 		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());

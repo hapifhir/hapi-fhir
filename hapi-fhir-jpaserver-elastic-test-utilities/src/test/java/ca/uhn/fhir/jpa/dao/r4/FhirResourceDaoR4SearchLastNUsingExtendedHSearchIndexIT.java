@@ -24,8 +24,7 @@ import java.util.List;
  */
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends FhirResourceDaoR4SearchLastNIT {
-	private static final Logger ourLog =
-			LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT.class);
 
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
@@ -33,15 +32,14 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
 
+
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
 		myStorageSettings.setLastNEnabled(true);
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
-		ourLog.info(
-				"enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}",
-				myStorageSettings.isLastNEnabled(),
-				myStorageSettings.isAdvancedHSearchIndexing());
+		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myStorageSettings.isLastNEnabled(), myStorageSettings.isAdvancedHSearchIndexing());
+
 	}
 
 	@AfterEach
@@ -56,6 +54,7 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 	@Override
 	void verifyResourcesLoadedFromElastic(List<IIdType> theObservationIds, List<String> theResults) {
 		Mockito.verify(mySearchEventListener, Mockito.times(1))
-				.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+			.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 	}
+
 }

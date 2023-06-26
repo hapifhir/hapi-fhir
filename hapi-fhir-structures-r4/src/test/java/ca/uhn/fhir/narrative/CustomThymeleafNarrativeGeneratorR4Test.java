@@ -13,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomThymeleafNarrativeGeneratorR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorR4Test.class);
 
 	/**
 	 * Don't use cached here since we modify the context
@@ -32,8 +31,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 	@Test
 	public void testStandardType() {
 
-		CustomThymeleafNarrativeGenerator gen =
-				new CustomThymeleafNarrativeGenerator("classpath:narrative/standardtypes_r4.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/standardtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
 
 		Practitioner p = new Practitioner();
@@ -47,10 +45,8 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		String actual = p.getText().getDiv().getValueAsString();
 		ourLog.info(actual);
 
-		assertThat(
-				actual,
-				containsString(
-						"<h1>Name</h1><div class=\"nameElement\">given <b>FAM1 </b></div><h1>Address</h1><div><span>line1 </span><br/><span>line2 </span><br/></div></div>"));
+		assertThat(actual, containsString("<h1>Name</h1><div class=\"nameElement\">given <b>FAM1 </b></div><h1>Address</h1><div><span>line1 </span><br/><span>line2 </span><br/></div></div>"));
+
 	}
 
 	@Test
@@ -66,39 +62,40 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		String output = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info("Encoded: {}", output);
 
-		String expectedEncoding = "{\n" + "  \"resourceType\": \"Patient\",\n"
-				+ "  \"meta\": {\n"
-				+ "    \"profile\": [ \"http://custom_patient\" ]\n"
-				+ "  },\n"
-				+ "  \"extension\": [ {\n"
-				+ "    \"url\": \"http://example.com/favourite_pizza\",\n"
-				+ "    \"extension\": [ {\n"
-				+ "      \"url\": \"toppings\",\n"
-				+ "      \"valueString\": \"Mushrooms, Onions\"\n"
-				+ "    }, {\n"
-				+ "      \"url\": \"size\",\n"
-				+ "      \"valueQuantity\": {\n"
-				+ "        \"value\": 14,\n"
-				+ "        \"unit\": \"Inches\",\n"
-				+ "        \"system\": \"http://unitsofmeasure\",\n"
-				+ "        \"code\": \"[in_i]\"\n"
-				+ "      }\n"
-				+ "    } ]\n"
-				+ "  } ],\n"
-				+ "  \"active\": true\n"
-				+ "}";
+		String expectedEncoding = "{\n" +
+			"  \"resourceType\": \"Patient\",\n" +
+			"  \"meta\": {\n" +
+			"    \"profile\": [ \"http://custom_patient\" ]\n" +
+			"  },\n" +
+			"  \"extension\": [ {\n" +
+			"    \"url\": \"http://example.com/favourite_pizza\",\n" +
+			"    \"extension\": [ {\n" +
+			"      \"url\": \"toppings\",\n" +
+			"      \"valueString\": \"Mushrooms, Onions\"\n" +
+			"    }, {\n" +
+			"      \"url\": \"size\",\n" +
+			"      \"valueQuantity\": {\n" +
+			"        \"value\": 14,\n" +
+			"        \"unit\": \"Inches\",\n" +
+			"        \"system\": \"http://unitsofmeasure\",\n" +
+			"        \"code\": \"[in_i]\"\n" +
+			"      }\n" +
+			"    } ]\n" +
+			"  } ],\n" +
+			"  \"active\": true\n" +
+			"}";
 		assertEquals(expectedEncoding, output);
 
-		CustomThymeleafNarrativeGenerator gen =
-				new CustomThymeleafNarrativeGenerator("classpath:narrative/customtypes_r4.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
 		gen.populateResourceNarrative(myCtx, patient);
 
 		String actual = patient.getText().getDiv().getValueAsString();
 		ourLog.info(actual);
 
-		String expected =
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>CustomPatient</h1><div><div><h1>Favourite Pizza</h1> Toppings: <span>Mushrooms, Onions</span> Size: <span>14</span></div></div></div>";
+		String expected = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>CustomPatient</h1><div><div><h1>Favourite Pizza</h1> Toppings: <span>Mushrooms, Onions</span> Size: <span>14</span></div></div></div>";
 		assertEquals(expected, actual);
+
 	}
+
 }

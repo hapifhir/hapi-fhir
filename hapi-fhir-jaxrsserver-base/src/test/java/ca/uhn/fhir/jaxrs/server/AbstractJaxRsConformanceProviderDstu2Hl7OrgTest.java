@@ -9,12 +9,12 @@ import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,9 +35,10 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 		// uri info
 		queryParameters = new MultivaluedHashMap<>();
 		// headers
-		//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
-		//				new MapPropertiesDelegate());
+//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
+//				new MapPropertiesDelegate());
 		headers = new ResteasyHttpHeaders(queryParameters);
+
 
 		providers = new ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider>();
 		provider = createConformanceProvider(providers);
@@ -62,8 +63,7 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 	@Test
 	public void testConformanceWithMethods() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(
-				TestJaxRsMockPatientRestProviderDstu2Hl7Org.class, new TestJaxRsMockPatientRestProviderDstu2Hl7Org());
+		providers.put(TestJaxRsMockPatientRestProviderDstu2Hl7Org.class, new TestJaxRsMockPatientRestProviderDstu2Hl7Org());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		assertTrue(response.getEntity().toString().contains("\"type\": \"Patient\""));
@@ -76,8 +76,7 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 	public void testConformanceInXml() throws Exception {
 		queryParameters.put(Constants.PARAM_FORMAT, Arrays.asList(Constants.CT_XML));
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(
-				TestJaxRsMockPatientRestProviderDstu2Hl7Org.class, new TestJaxRsMockPatientRestProviderDstu2Hl7Org());
+		providers.put(TestJaxRsMockPatientRestProviderDstu2Hl7Org.class, new TestJaxRsMockPatientRestProviderDstu2Hl7Org());
 		Response response = createConformanceProvider(providers).conformance();
 		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		System.out.println(response.getEntity());
@@ -86,15 +85,14 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 		System.out.println(response.getEntity());
 	}
 
-	private AbstractJaxRsConformanceProvider createConformanceProvider(
-			final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers) throws Exception {
-		AbstractJaxRsConformanceProvider result =
-				new AbstractJaxRsConformanceProvider(FhirContext.forDstu2Hl7Org(), null, null, null) {
-					@Override
-					protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
-						return providers;
-					}
-				};
+	private AbstractJaxRsConformanceProvider createConformanceProvider(final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers)
+			throws Exception {
+		AbstractJaxRsConformanceProvider result = new AbstractJaxRsConformanceProvider(FhirContext.forDstu2Hl7Org(), null, null, null) {
+			@Override
+			protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
+				return providers;
+			}
+		};
 		// mocks
 		UriInfo uriInfo = mock(UriInfo.class);
 		when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
@@ -105,4 +103,6 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 		result.buildCapabilityStatement();
 		return result;
 	}
+
 }
+

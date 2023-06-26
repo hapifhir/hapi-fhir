@@ -24,216 +24,205 @@ package ca.uhn.fhir.parser.json;
  * element in a JSON structure. This could be a JSON object,
  * a JSON array, a scalar value (number, string, boolean),
  * or a null.
- *
+ * 
  */
 public abstract class BaseJsonLikeValue {
-
+	
 	public enum ValueType {
-		ARRAY,
-		OBJECT,
-		SCALAR,
-		NULL
+		ARRAY, OBJECT, SCALAR, NULL
 	};
-
+	
 	public enum ScalarType {
-		NUMBER,
-		STRING,
-		BOOLEAN
+		NUMBER, STRING, BOOLEAN
 	}
-
-	public abstract ValueType getJsonType();
-
-	public abstract ScalarType getDataType();
-
-	public abstract Object getValue();
-
-	public boolean isArray() {
+	
+	public abstract ValueType getJsonType ();
+	
+	public abstract ScalarType getDataType ();
+	
+	public abstract Object getValue ();
+	
+	public boolean isArray () {
 		return this.getJsonType() == ValueType.ARRAY;
 	}
-
-	public boolean isObject() {
+	
+	public boolean isObject () {
 		return this.getJsonType() == ValueType.OBJECT;
 	}
-
-	public boolean isScalar() {
+	
+	public boolean isScalar () {
 		return this.getJsonType() == ValueType.SCALAR;
 	}
-
-	public boolean isString() {
+	
+	public boolean isString () {
 		return this.getJsonType() == ValueType.SCALAR && this.getDataType() == ScalarType.STRING;
 	}
-
-	public boolean isNumber() {
+	
+	public boolean isNumber () {
 		return this.getJsonType() == ValueType.SCALAR && this.getDataType() == ScalarType.NUMBER;
 	}
-
-	public boolean isNull() {
+	
+	public boolean isNull () {
 		return this.getJsonType() == ValueType.NULL;
 	}
-
-	public BaseJsonLikeArray getAsArray() {
+	
+	public BaseJsonLikeArray getAsArray () {
 		return null;
 	}
-
-	public BaseJsonLikeObject getAsObject() {
+	public BaseJsonLikeObject getAsObject () {
 		return null;
 	}
-
-	public String getAsString() {
+	public String getAsString () {
 		return this.toString();
 	}
-
-	public Number getAsNumber() {
-		return this.isNumber() ? (Number) this.getValue() : null;
+	public Number getAsNumber () {
+		return this.isNumber() ? (Number)this.getValue() : null;
 	}
-
-	public boolean getAsBoolean() {
+	public boolean getAsBoolean () {
 		return !isNull();
 	}
-
-	public static BaseJsonLikeArray asArray(BaseJsonLikeValue element) {
+	
+	public static BaseJsonLikeArray asArray (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsArray();
 		}
 		return null;
 	}
-
-	public static BaseJsonLikeObject asObject(BaseJsonLikeValue element) {
+	public static BaseJsonLikeObject asObject (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsObject();
 		}
 		return null;
 	}
-
-	public static String asString(BaseJsonLikeValue element) {
+	public static String asString (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsString();
 		}
 		return null;
 	}
-
-	public static boolean asBoolean(BaseJsonLikeValue element) {
+	public static boolean asBoolean (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsBoolean();
 		}
 		return false;
 	}
+	
 
-	public static final BaseJsonLikeValue NULL = new BaseJsonLikeValue() {
-		@Override
-		public ValueType getJsonType() {
-			return ValueType.NULL;
-		}
+    public static final BaseJsonLikeValue NULL = new BaseJsonLikeValue() {
+        @Override
+        public ValueType getJsonType() {
+            return ValueType.NULL;
+        }
 
-		@Override
+        @Override
 		public ScalarType getDataType() {
 			return null;
 		}
 
 		@Override
 		public Object getValue() {
-			return null;
+			 return null;
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj instanceof BaseJsonLikeValue) {
-				return getJsonType().equals(((BaseJsonLikeValue) obj).getJsonType());
-			}
-			return false;
-		}
+        public boolean equals (Object obj) {
+            if (this == obj){
+                return true;
+            }
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType());
+            }
+            return false;
+        }
 
-		@Override
-		public int hashCode() {
-			return "null".hashCode();
-		}
+        @Override
+        public int hashCode() {
+            return "null".hashCode();
+        }
 
-		@Override
-		public String toString() {
-			return "null";
-		}
-	};
+        @Override
+        public String toString() {
+            return "null";
+        }
+    };
 
-	public static final BaseJsonLikeValue TRUE = new BaseJsonLikeValue() {
-		@Override
-		public ValueType getJsonType() {
-			return ValueType.SCALAR;
-		}
+    public static final BaseJsonLikeValue TRUE = new BaseJsonLikeValue() {
+        @Override
+        public ValueType getJsonType() {
+        	return ValueType.SCALAR;
+        }
+        
+        @Override
+        public ScalarType getDataType() {
+            return ScalarType.BOOLEAN;
+        }
 
-		@Override
-		public ScalarType getDataType() {
-			return ScalarType.BOOLEAN;
-		}
+		  @Override
+		  public Object getValue() {
+			   return Boolean.TRUE;
+		  }
 
-		@Override
-		public Object getValue() {
-			return Boolean.TRUE;
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj){
+                return true;
+            }
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType())
+                	&& getDataType().equals(((BaseJsonLikeValue)obj).getDataType())
+                	&& toString().equals(((BaseJsonLikeValue)obj).toString());
+            }
+            return false;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj instanceof BaseJsonLikeValue) {
-				return getJsonType().equals(((BaseJsonLikeValue) obj).getJsonType())
-						&& getDataType().equals(((BaseJsonLikeValue) obj).getDataType())
-						&& toString().equals(((BaseJsonLikeValue) obj).toString());
-			}
-			return false;
-		}
+        @Override
+        public int hashCode() {
+            return "true".hashCode();
+        }
 
-		@Override
-		public int hashCode() {
-			return "true".hashCode();
-		}
+        @Override
+        public String toString() {
+            return "true";
+        }
+    };
 
-		@Override
-		public String toString() {
-			return "true";
-		}
-	};
+    public static final BaseJsonLikeValue FALSE = new BaseJsonLikeValue() {
+        @Override
+        public ValueType getJsonType() {
+        	return ValueType.SCALAR;
+        }
+        
+        @Override
+        public ScalarType getDataType() {
+            return ScalarType.BOOLEAN;
+        }
 
-	public static final BaseJsonLikeValue FALSE = new BaseJsonLikeValue() {
-		@Override
-		public ValueType getJsonType() {
-			return ValueType.SCALAR;
-		}
+		  @Override
+		  public Object getValue() {
+			   return Boolean.FALSE;
+		  }
 
-		@Override
-		public ScalarType getDataType() {
-			return ScalarType.BOOLEAN;
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj){
+                return true;
+            }
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType())
+                    	&& getDataType().equals(((BaseJsonLikeValue)obj).getDataType())
+                    	&& toString().equals(((BaseJsonLikeValue)obj).toString());
+            }
+            return false;
+        }
 
-		@Override
-		public Object getValue() {
-			return Boolean.FALSE;
-		}
+        @Override
+        public int hashCode() {
+            return "false".hashCode();
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj instanceof BaseJsonLikeValue) {
-				return getJsonType().equals(((BaseJsonLikeValue) obj).getJsonType())
-						&& getDataType().equals(((BaseJsonLikeValue) obj).getDataType())
-						&& toString().equals(((BaseJsonLikeValue) obj).toString());
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return "false".hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return "false";
-		}
-	};
+        @Override
+        public String toString() {
+            return "false";
+        }
+    };
 }

@@ -38,14 +38,12 @@ public class DerbyTenSevenHapiFhirDialect extends DerbyTenSevenDialect {
 			protected String doExtractConstraintName(SQLException theSqlException) throws NumberFormatException {
 				switch (theSqlException.getSQLState()) {
 					case "23505":
-						return this.extractUsingTemplate(
-								"unique or primary key constraint or unique index identified by '",
-								"'",
-								theSqlException.getMessage());
+						return this.extractUsingTemplate("unique or primary key constraint or unique index identified by '", "'", theSqlException.getMessage());
 					default:
 						return null;
 				}
 			}
 		};
 	}
+
 }

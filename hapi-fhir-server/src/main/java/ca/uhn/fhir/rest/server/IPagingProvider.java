@@ -60,8 +60,7 @@ public interface IPagingProvider {
 	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
 	 * add this parameter and not use it if needed.
 	 */
-	default IBundleProvider retrieveResultList(
-			@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
+	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;
 	}
 
@@ -71,4 +70,5 @@ public interface IPagingProvider {
 	 * @param theRequestDetails The server request being made (may be null)
 	 */
 	String storeResultList(@Nullable RequestDetails theRequestDetails, IBundleProvider theList);
+
 }

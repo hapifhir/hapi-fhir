@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class SchemaValidationDstu3Test {
 
 	static {
+
 	}
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -22,25 +23,27 @@ public class SchemaValidationDstu3Test {
 
 	/**
 	 * See #339
-	 *
+	 * 
 	 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 	 */
 	@Test
 	public void testXxe() {
-		// @formatter:off
-		String input = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + "<!DOCTYPE foo [  \n"
-				+ "<!ELEMENT foo ANY >\n"
-				+ "<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>"
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">"
-				+ "<text>"
-				+ "<status value=\"generated\"/>"
-				+ "<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n"
-				+ "</text>"
-				+ "<address>"
-				+ "<line value=\"FOO\"/>"
-				+ "</address>"
-				+ "</Patient>";
-		// @formatter:on
+		//@formatter:off
+		String input =
+			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + 
+			"<!DOCTYPE foo [  \n" + 
+			"<!ELEMENT foo ANY >\n" + 
+			"<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>" +
+			"<Patient xmlns=\"http://hl7.org/fhir\">" +
+				"<text>" + 
+					"<status value=\"generated\"/>" +
+					"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n" + 
+				"</text>" +
+				"<address>" + 
+					"<line value=\"FOO\"/>" + 
+				"</address>" +
+			"</Patient>";
+		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);

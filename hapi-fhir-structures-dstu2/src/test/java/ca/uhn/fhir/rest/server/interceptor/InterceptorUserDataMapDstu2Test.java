@@ -59,8 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class InterceptorUserDataMapDstu2Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static int ourPort;
@@ -77,11 +76,13 @@ public class InterceptorUserDataMapDstu2Test {
 		servlet.getInterceptorService().registerInterceptor(new MyInterceptor());
 	}
 
+
 	@BeforeEach
 	public void beforePurgeMap() {
 		myMap = null;
 		myMapCheckMethods = Collections.synchronizedSet(new LinkedHashSet<>());
 	}
+
 
 	@Test
 	public void testException() throws Exception {
@@ -91,14 +92,7 @@ public class InterceptorUserDataMapDstu2Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
 
-		await().until(
-						() -> myMapCheckMethods,
-						contains(
-								"incomingRequestPostProcessed",
-								"incomingRequestPreHandled",
-								"preProcessOutgoingException",
-								"handleException",
-								"processingCompleted"));
+		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
 	@Test
@@ -110,15 +104,9 @@ public class InterceptorUserDataMapDstu2Test {
 
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(response, containsString("\"id\":\"1\""));
-			await().until(
-							() -> myMapCheckMethods,
-							contains(
-									"incomingRequestPostProcessed",
-									"incomingRequestPreHandled",
-									"outgoingResponse",
-									"processingCompletedNormally",
-									"processingCompleted"));
-		}
+		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
+	}
+
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
@@ -137,8 +125,7 @@ public class InterceptorUserDataMapDstu2Test {
 	public class MyInterceptor {
 
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-		public void incomingRequestPostProcessed(
-				RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		public void incomingRequestPostProcessed(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
 			updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
 		}
@@ -155,22 +142,19 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
-		public void processingCompletedNormally(
-				RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
 			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
 		}
 
 		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
-		public void processingCompleted(
-				RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		public void processingCompleted(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "processingCompleted");
 			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompleted");
 		}
 
 		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-		public void preProcessOutgoingException(
-				RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		public void preProcessOutgoingException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
 			updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
 		}
@@ -180,6 +164,7 @@ public class InterceptorUserDataMapDstu2Test {
 			updateMapUsing(theRequestDetails.getUserData(), "handleException");
 			updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
 		}
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -253,8 +238,7 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
@@ -262,27 +246,25 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(
-				@IdParam IdDt theId,
-				@OperationParam(name = "start") DateDt theStart,
-				@OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(@IdParam IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
 			return retVal;
 		}
+
 	}
 
 	public static class PlainProvider {
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(
-				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
 			return retVal;
 		}
+
 	}
 
 	@AfterAll
@@ -307,10 +289,11 @@ public class InterceptorUserDataMapDstu2Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

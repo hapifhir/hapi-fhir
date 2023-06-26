@@ -41,7 +41,7 @@ public class Icd10CmLoaderTest {
 		assertEquals("A00", rootConcepts.get(0).getCode());
 		assertEquals("Cholera", rootConcepts.get(0).getDisplay());
 		List<String> conceptNames = rootConcepts.stream().map(t -> t.getCode()).collect(Collectors.toList());
-		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00", "A01", "H40", "R40"));
+		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00", "A01","H40","R40"));
 	}
 
 	@Test
@@ -51,9 +51,7 @@ public class Icd10CmLoaderTest {
 		TermConcept firstChildCode = rootConcepts.get(0).getChildCodes().get(0);
 		assertEquals("A00.0", firstChildCode.getCode());
 		assertEquals("Cholera due to Vibrio cholerae 01, biovar cholerae", firstChildCode.getDisplay());
-		List<String> conceptNames = rootConcepts.get(0).getChildCodes().stream()
-				.map(t -> t.getCode())
-				.collect(Collectors.toList());
+		List<String> conceptNames = rootConcepts.get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
 		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00.0", "A00.1", "A00.9"));
 	}
 
@@ -61,49 +59,16 @@ public class Icd10CmLoaderTest {
 	public void testLoadIcd10CmCheckExtendedChildCode() {
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
 
-		List<String> conceptNames = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().stream()
-				.map(t -> t.getCode())
-				.collect(Collectors.toList());
-		assertThat(
-				conceptNames.toString(),
-				conceptNames,
-				Matchers.contains(
-						"H40.40",
-						"H40.40X0",
-						"H40.40X1",
-						"H40.40X2",
-						"H40.40X3",
-						"H40.40X4",
-						"H40.41",
-						"H40.41X0",
-						"H40.41X1",
-						"H40.41X2",
-						"H40.41X3",
-						"H40.41X4"));
+		List<String> conceptNames = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("H40.40", "H40.40X0", "H40.40X1", "H40.40X2", "H40.40X3", "H40.40X4", "H40.41", "H40.41X0", "H40.41X1", "H40.41X2", "H40.41X3", "H40.41X4"));
 
-		TermConcept ExtendedChildCode =
-				rootConcepts.get(2).getChildCodes().get(0).getChildCodes().get(1);
+		TermConcept ExtendedChildCode = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().get(1);
 		assertEquals("H40.40X0", ExtendedChildCode.getCode());
-		assertEquals(
-				"Glaucoma secondary to eye inflammation, unspecified eye, stage unspecified",
-				ExtendedChildCode.getDisplay());
+		assertEquals("Glaucoma secondary to eye inflammation, unspecified eye, stage unspecified", ExtendedChildCode.getDisplay());
 
-		ExtendedChildCode = rootConcepts
-				.get(3)
-				.getChildCodes()
-				.get(0)
-				.getChildCodes()
-				.get(0)
-				.getChildCodes()
-				.get(0)
-				.getChildCodes()
-				.get(0)
-				.getChildCodes()
-				.get(0)
-				.getChildCodes()
-				.get(3);
+
+		ExtendedChildCode = rootConcepts.get(3).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(3);
 		assertEquals("R40.2112", ExtendedChildCode.getCode());
-		assertEquals(
-				"Coma scale, eyes open, never, at arrival to emergency department", ExtendedChildCode.getDisplay());
+		assertEquals("Coma scale, eyes open, never, at arrival to emergency department", ExtendedChildCode.getDisplay());
 	}
 }

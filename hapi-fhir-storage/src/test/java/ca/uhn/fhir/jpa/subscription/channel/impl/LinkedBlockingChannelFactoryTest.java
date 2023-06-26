@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,9 +32,9 @@ class LinkedBlockingChannelFactoryTest {
 	LinkedBlockingChannelFactory myChannelFactory = new LinkedBlockingChannelFactory((name, settings) -> name);
 	private List<String> myReceivedPayloads;
 	private PointcutLatch[] myHandlerCanProceedLatch = {
-		new PointcutLatch("first delivery"), new PointcutLatch("second delivery")
+		new PointcutLatch("first delivery"),
+		new PointcutLatch("second delivery")
 	};
-
 	@BeforeEach
 	public void before() {
 		myReceivedPayloads = new ArrayList<>();
@@ -44,8 +44,7 @@ class LinkedBlockingChannelFactoryTest {
 	void testDeliverOneAtATime() {
 		// setup
 		AtomicInteger index = new AtomicInteger();
-		LinkedBlockingChannel producer =
-				(LinkedBlockingChannel) buildChannels(() -> startProcessingMessage(index.getAndIncrement()));
+		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(() -> startProcessingMessage(index.getAndIncrement()));
 
 		// execute
 		prepareToHandleMessage(0);
@@ -89,8 +88,7 @@ class LinkedBlockingChannelFactoryTest {
 	void testDeliveryResumesAfterFailedMessages() throws InterruptedException {
 		// setup
 		CountDownLatch successfulProcessedLatch = new CountDownLatch(5);
-		LinkedBlockingChannel producer =
-				(LinkedBlockingChannel) buildChannels(failTwiceThenProceed(successfulProcessedLatch));
+		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(failTwiceThenProceed(successfulProcessedLatch));
 
 		// execute
 		producer.send(new TestMessage(TEST_PAYLOAD));
@@ -142,16 +140,15 @@ class LinkedBlockingChannelFactoryTest {
 	private IChannelProducer buildChannels(Runnable theCallback) {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
 		channelSettings.setConcurrentConsumers(1);
-		IChannelProducer producer =
-				myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
-		IChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(
-				TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
+		IChannelProducer producer = myChannelFactory.getOrCreateProducer(TEST_CHANNEL_NAME, TestMessage.class, channelSettings);
+		IChannelReceiver reciever = myChannelFactory.getOrCreateReceiver(TEST_CHANNEL_NAME, TestMessage.class, new ChannelConsumerSettings());
 		reciever.subscribe(msg -> {
 			theCallback.run();
 			myReceivedPayloads.add((String) msg.getPayload());
 		});
 		return producer;
 	}
+
 
 	static class TestMessage implements Message<String> {
 		private final String payload;

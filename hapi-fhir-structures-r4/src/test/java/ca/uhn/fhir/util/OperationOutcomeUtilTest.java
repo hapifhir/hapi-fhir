@@ -16,14 +16,14 @@ public class OperationOutcomeUtilTest {
 
 	@Test
 	public void testHasIssueTrue() {
-		OperationOutcome oo = new OperationOutcome();
+		OperationOutcome oo =new OperationOutcome();
 		oo.addIssue().setDiagnostics("foo");
 		assertTrue(OperationOutcomeUtil.hasIssues(myCtx, oo));
 	}
 
 	@Test
 	public void testHasIssueFalse() {
-		OperationOutcome oo = new OperationOutcome();
+		OperationOutcome oo =new OperationOutcome();
 		assertFalse(OperationOutcomeUtil.hasIssues(myCtx, oo));
 	}
 
@@ -34,16 +34,13 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, null);
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "line 3");
-		assertEquals(
-				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}",
-				myCtx.newJsonParser().encodeResourceToString(oo));
+		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}", myCtx.newJsonParser().encodeResourceToString(oo));
 	}
 
 	@Test
 	public void testAddIssueWithMessageId() {
 		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
-		OperationOutcomeUtil.addIssueWithMessageId(
-				myCtx, oo, "error", "message", "messageID", "location", "processing");
+		OperationOutcomeUtil.addIssueWithMessageId(myCtx, oo, "error", "message", "messageID", "location", "processing");
 		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
 	}
 

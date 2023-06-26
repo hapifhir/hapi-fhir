@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchParameterCanonicalizerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterCanonicalizerTest.class);
 
-	ca.uhn.fhir.model.dstu2.resource.SearchParameter initSearchParamDstu2() {
+	ca.uhn.fhir.model.dstu2.resource.SearchParameter initSearchParamDstu2(){
 		ca.uhn.fhir.model.dstu2.resource.SearchParameter sp = new ca.uhn.fhir.model.dstu2.resource.SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
@@ -43,14 +43,12 @@ public class SearchParameterCanonicalizerTest {
 		sp.setXpath("Meal.chef | Observation.subject");
 		sp.addTarget(ResourceTypeEnum.RESOURCE);
 		sp.addTarget(ResourceTypeEnum.OBSERVATION);
-		sp.addUndeclaredExtension(
-				new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new StringDt("Meal")));
-		sp.addUndeclaredExtension(
-				new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new StringDt("Chef")));
+		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE, new StringDt("Meal")));
+		sp.addUndeclaredExtension(new ExtensionDt(false, EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new StringDt("Chef")));
 		return sp;
 	}
 
-	org.hl7.fhir.dstu3.model.SearchParameter initSearchParamDstu3() {
+	org.hl7.fhir.dstu3.model.SearchParameter initSearchParamDstu3(){
 		org.hl7.fhir.dstu3.model.SearchParameter sp = new org.hl7.fhir.dstu3.model.SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
@@ -67,7 +65,7 @@ public class SearchParameterCanonicalizerTest {
 		return sp;
 	}
 
-	IBaseResource initSearchParamR4() {
+	IBaseResource initSearchParamR4(){
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
@@ -84,7 +82,7 @@ public class SearchParameterCanonicalizerTest {
 		return sp;
 	}
 
-	IBaseResource initSearchParamR4B() {
+	IBaseResource initSearchParamR4B(){
 		org.hl7.fhir.r4b.model.SearchParameter sp = new org.hl7.fhir.r4b.model.SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
@@ -101,7 +99,7 @@ public class SearchParameterCanonicalizerTest {
 		return sp;
 	}
 
-	IBaseResource initSearchParamR5() {
+	IBaseResource initSearchParamR5(){
 		org.hl7.fhir.r5.model.SearchParameter sp = new org.hl7.fhir.r5.model.SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
@@ -117,6 +115,7 @@ public class SearchParameterCanonicalizerTest {
 		sp.addExtension(EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE, new org.hl7.fhir.r5.model.StringType("Chef"));
 		return sp;
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
@@ -138,13 +137,8 @@ public class SearchParameterCanonicalizerTest {
 			VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR4Cached());
 			searchParamToCanonicalize = versionCanonicalizer.searchParameterToCanonical(sp);
 			FhirContext fhirContextR5 = FhirContext.forR5Cached();
-			ourLog.info(
-					"R5 Subscription: {}",
-					fhirContextR5
-							.newJsonParser()
-							.setPrettyPrint(true)
-							.encodeResourceToString(searchParamToCanonicalize));
-			svc = new SearchParameterCanonicalizer(fhirContextR5);
+			ourLog.info("R5 Subscription: {}", fhirContextR5.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParamToCanonicalize));
+				svc = new SearchParameterCanonicalizer(fhirContextR5);
 		} else {
 			svc = new SearchParameterCanonicalizer(FhirContext.forR4Cached());
 		}
@@ -164,7 +158,7 @@ public class SearchParameterCanonicalizerTest {
 		SearchParameterCanonicalizer svc;
 		IBaseResource searchParamToCanonicalize;
 
-		switch (version) {
+		switch (version){
 			case "Dstu2":
 				searchParamToCanonicalize = initSearchParamDstu2();
 				svc = new SearchParameterCanonicalizer(FhirContext.forDstu2Cached());
@@ -193,7 +187,7 @@ public class SearchParameterCanonicalizerTest {
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
 		assertThat(output.getPathsSplit(), containsInAnyOrder("Meal.chef", "Observation.subject"));
 		// DSTU2 Resources must only have 1 base
-		if ("Dstu2".equals(version)) {
+		if ("Dstu2".equals(version)){
 			assertThat(output.getBase(), containsInAnyOrder("Meal"));
 		} else {
 			assertThat(output.getBase(), containsInAnyOrder("Meal", "Patient"));
@@ -202,4 +196,5 @@ public class SearchParameterCanonicalizerTest {
 		assertThat(output.getBase(), not(contains("Resource")));
 		assertThat(output.getTargets(), not(contains("Resource")));
 	}
+
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -70,7 +71,8 @@ public class WriteBinaryStepTest {
 		protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
 			if (myWriter == null) {
 				return super.getStreamWriter(theOutputStream);
-			} else {
+			}
+			else {
 				return myWriter;
 			}
 		}
@@ -98,13 +100,19 @@ public class WriteBinaryStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> createInput(
-			ExpandedResourcesList theData, JobInstance theInstance, boolean thePartitioned) {
+	private StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> createInput(ExpandedResourcesList theData,
+                                                                                             JobInstance theInstance,
+																														  	boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setSince(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setPartitionId(getPartitionId(thePartitioned));
-		return new StepExecutionDetails<>(parameters, theData, theInstance, "1");
+		return new StepExecutionDetails<>(
+			parameters,
+			theData,
+			theInstance,
+			"1"
+		);
 	}
 
 	private RequestPartitionId getPartitionId(boolean thePartitioned) {
@@ -114,6 +122,7 @@ public class WriteBinaryStepTest {
 			return RequestPartitionId.defaultPartition();
 		}
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -127,16 +136,16 @@ public class WriteBinaryStepTest {
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input =
-				createInput(expandedResources, instance, thePartitioned);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance, thePartitioned);
 		IIdType binaryId = new IdType("Binary/123");
 		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 		methodOutcome.setId(binaryId);
 
 		// when
-		when(myDaoRegistry.getResourceDao(eq("Binary"))).thenReturn(binaryDao);
+		when(myDaoRegistry.getResourceDao(eq("Binary")))
+			.thenReturn(binaryDao);
 		when(binaryDao.create(any(IBaseBinary.class), any(RequestDetails.class)))
-				.thenReturn(methodOutcome);
+			.thenReturn(methodOutcome);
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -145,24 +154,25 @@ public class WriteBinaryStepTest {
 		assertEquals(new RunOutcome(stringified.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
-		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor =
-				ArgumentCaptor.forClass(SystemRequestDetails.class);
-		verify(binaryDao).create(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
+		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
+		verify(binaryDao)
+			.create(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		// post-pending a \n (as this is what the binary does)
 		String expected = String.join("\n", stringified) + "\n";
-		assertEquals(expected, outputString, outputString + " != " + expected);
+		assertEquals(
+			expected,
+			outputString,
+			outputString + " != " + expected
+		);
 		if (thePartitioned) {
-			assertEquals(
-					getPartitionId(thePartitioned),
-					binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 		}
 
-		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor =
-				ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
-		verify(sink).accept(fileIdArgumentCaptor.capture());
-		assertEquals(
-				binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
+		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
+		verify(sink)
+			.accept(fileIdArgumentCaptor.capture());
+		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
 	@Test
@@ -177,13 +187,13 @@ public class WriteBinaryStepTest {
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input =
-				createInput(expandedResources, instance, false);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance, false);
 
 		ourLog.setLevel(Level.ERROR);
 
 		// when
-		when(myDaoRegistry.getResourceDao(eq("Binary"))).thenReturn(binaryDao);
+		when(myDaoRegistry.getResourceDao(eq("Binary")))
+			.thenReturn(binaryDao);
 
 		// we're gong to mock the writer
 		OutputStreamWriter writer = mock(OutputStreamWriter.class);
@@ -201,14 +211,15 @@ public class WriteBinaryStepTest {
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertTrue(logCaptor
-				.getValue()
-				.getFormattedMessage()
-				.contains("Failure to process resource of type "
-						+ expandedResources.getResourceType()
-						+ " : "
-						+ testException));
+		assertTrue(logCaptor.getValue().getFormattedMessage()
+			.contains(
+				"Failure to process resource of type "
+				+ expandedResources.getResourceType()
+				+ " : "
+				+ testException
+			));
 
-		verify(sink, never()).accept(any(BulkExportBinaryFileId.class));
+		verify(sink, never())
+			.accept(any(BulkExportBinaryFileId.class));
 	}
 }

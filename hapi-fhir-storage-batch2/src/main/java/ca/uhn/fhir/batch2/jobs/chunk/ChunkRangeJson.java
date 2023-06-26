@@ -26,8 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
+import java.util.Date;
 
 public class ChunkRangeJson implements IModelJson {
 	@JsonSerialize(using = JsonDateSerializer.class)

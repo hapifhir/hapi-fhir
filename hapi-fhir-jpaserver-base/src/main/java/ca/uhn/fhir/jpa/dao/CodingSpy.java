@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,8 +59,7 @@ public class CodingSpy {
 			if (o instanceof Boolean) {
 				return (Boolean) o;
 			}
-			throw new RuntimeException(
-					Msg.code(2342) + "unsupported type :" + theValue.getClass().getName());
+			throw new RuntimeException(Msg.code(2342) + "unsupported type :" + theValue.getClass().getName());
 		} catch (IllegalAccessException theException) {
 			// should never happen - all Coding models have this field.
 			throw new RuntimeException(Msg.code(2343) + "illegal access during reflection", theException);
@@ -77,4 +77,5 @@ public class CodingSpy {
 		}
 		return result;
 	}
+
 }

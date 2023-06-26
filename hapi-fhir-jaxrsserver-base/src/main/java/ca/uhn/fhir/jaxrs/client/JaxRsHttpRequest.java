@@ -26,14 +26,14 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -128,4 +128,5 @@ public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
 	public void setUri(String theUrl) {
 		throw new UnsupportedOperationException(Msg.code(606));
 	}
+
 }

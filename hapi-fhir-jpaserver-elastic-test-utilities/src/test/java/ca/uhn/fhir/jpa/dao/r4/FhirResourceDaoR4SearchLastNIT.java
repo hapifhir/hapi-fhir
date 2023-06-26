@@ -69,16 +69,16 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		myCaptureQueriesListener.clear();
-		List<String> results =
-				toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
+		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 		assertEquals(75, results.size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		List<String> queries = myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
-				.map(t -> t.getSql(true, false))
-				.collect(Collectors.toList());
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
 
-		// Two chunked queries executed by the QueryIterator (in current thread) and two chunked queries to retrieve
-		// resources by PID.
+		// Two chunked queries executed by the QueryIterator (in current thread) and two chunked queries to retrieve resources by PID.
 		assertEquals(4, queries.size());
 
 		// The first and third chunked queries should have a full complement of PIDs
@@ -101,11 +101,11 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		secondQueryPattern.append("\\).*");
 		assertThat(queries.get(1).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
 		assertThat(queries.get(3).toUpperCase().replaceAll(" , ", ","), matchesPattern(secondQueryPattern.toString()));
+
 	}
 
 	@Test
-	public void testLastN_onEnablingStoringObservationWithIndexMapping_shouldSkipLoadingResourceFromDB()
-			throws IOException {
+	public void testLastN_onEnablingStoringObservationWithIndexMapping_shouldSkipLoadingResourceFromDB() throws IOException {
 		// Enable flag
 		myStorageSettings.setStoreResourceInHSearchIndex(true);
 
@@ -113,8 +113,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		Patient pt = new Patient();
 		pt.addName().setFamily("lastn-" + UUID.randomUUID()).addGiven("LastNPat1");
 		IIdType patient1 = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
-		List<IIdType> observationIds =
-				createFiveObservationsForPatientCodeCategory(patient1, observationCd0, categoryCd0, 15);
+		List<IIdType> observationIds = createFiveObservationsForPatientCodeCategory(patient1, observationCd0, categoryCd0, 15);
 		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
@@ -131,20 +130,22 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		Map<String, String[]> requestParameters = new HashMap<>();
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
-		List<String> results =
-				toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
+		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
+
 	}
 
 	void verifyResourcesLoadedFromElastic(List<IIdType> theObservationIds, List<String> theResults) {
 		List<JpaPid> expectedArgumentPids = JpaPid.fromLongList(
-				theObservationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList()));
+			theObservationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList())
+		);
 		ArgumentCaptor<List<JpaPid>> actualPids = ArgumentCaptor.forClass(List.class);
 		verify(myElasticsearchSvc, times(1)).getObservationResources(actualPids.capture());
 		assertThat(actualPids.getValue(), is(expectedArgumentPids));
 
 		List<String> expectedObservationList = theObservationIds.stream()
-				.map(id -> id.toUnqualifiedVersionless().getValue())
-				.collect(Collectors.toList());
+			.map(id -> id.toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertEquals(expectedObservationList, theResults);
+
 	}
+
 }

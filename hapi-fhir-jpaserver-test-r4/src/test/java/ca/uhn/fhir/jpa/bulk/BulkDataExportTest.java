@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -39,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -100,9 +100,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(Sets.newHashSet("Patient?gender=female"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
+
 
 	@Test
 	public void testGroupBulkExportWithTypeFilter_OnTags_InlineTagMode() {
@@ -137,9 +137,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(Sets.newHashSet("Patient?_security=http://security|val1"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
 	}
+
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
@@ -176,8 +176,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
+		verifyBulkExportResults(options, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
 	}
 
 	@Test
@@ -212,6 +211,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			verifyBulkExportResults(options, List.of("Patient/PING1"), Collections.singletonList("Patient/PNING3"));
 		} finally {
 			myCaptureQueriesListener.logSelectQueries();
+
 		}
 	}
 
@@ -227,22 +227,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Observation observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P1"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P1"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// diff patient
 		patient = new Patient();
@@ -253,31 +243,16 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P2"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId2 = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId2 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P2"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId2 = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId3 = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId3 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -287,8 +262,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		verifyBulkExportResults(
-				options, List.of("Patient/P1", obsId, encId), List.of("Patient/P2", obsId2, encId2, obsId3));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId), List.of("Patient/P2", obsId2, encId2, obsId3));
 	}
 
 	@Test
@@ -303,22 +277,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Observation observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P1"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P1"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// diff patient
 		patient = new Patient();
@@ -329,22 +293,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P2"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId2 = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId2 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P2"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId2 = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// yet another diff patient
 		patient = new Patient();
@@ -355,22 +309,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P3"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId3 = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId3 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P3"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId3 = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId3 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -380,10 +324,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		verifyBulkExportResults(
-				options,
-				List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2),
-				List.of("Patient/P3", obsId3, encId3));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2), List.of("Patient/P3", obsId3, encId3));
 	}
 
 	@Test
@@ -391,48 +332,23 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Create some resources
 		Practitioner practitioner = new Practitioner();
 		practitioner.setActive(true);
-		String practId = myClient.create()
-				.resource(practitioner)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Organization organization = new Organization();
 		organization.setActive(true);
-		String orgId = myClient.create()
-				.resource(organization)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String orgId = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
 
 		organization = new Organization();
 		organization.setActive(true);
-		String orgId2 = myClient.create()
-				.resource(organization)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String orgId2 = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Location location = new Location();
 		location.setStatus(Location.LocationStatus.ACTIVE);
-		String locId = myClient.create()
-				.resource(location)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String locId = myClient.create().resource(location).execute().getId().toUnqualifiedVersionless().getValue();
 
 		location = new Location();
 		location.setStatus(Location.LocationStatus.ACTIVE);
-		String locId2 = myClient.create()
-				.resource(location)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String locId2 = myClient.create().resource(location).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -447,51 +363,34 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter.setSubject(new Reference("Patient/P1"));
-		Encounter.EncounterParticipantComponent encounterParticipantComponent =
-				new Encounter.EncounterParticipantComponent();
+		Encounter.EncounterParticipantComponent encounterParticipantComponent = new Encounter.EncounterParticipantComponent();
 		encounterParticipantComponent.setIndividual(new Reference(practId));
 		encounter.addParticipant(encounterParticipantComponent);
 		Encounter.EncounterLocationComponent encounterLocationComponent = new Encounter.EncounterLocationComponent();
 		encounterLocationComponent.setLocation(new Reference(locId));
 		encounter.addLocation(encounterLocationComponent);
 		encounter.setServiceProvider(new Reference(orgId));
-		String encId = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// Second encounter that links to the same location and practitioner
 		Encounter encounter2 = new Encounter();
 		encounter2.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter2.setSubject(new Reference("Patient/P1"));
-		Encounter.EncounterParticipantComponent encounterParticipantComponent2 =
-				new Encounter.EncounterParticipantComponent();
+		Encounter.EncounterParticipantComponent encounterParticipantComponent2 = new Encounter.EncounterParticipantComponent();
 		encounterParticipantComponent2.setIndividual(new Reference(practId));
 		encounter2.addParticipant(encounterParticipantComponent2);
 		Encounter.EncounterLocationComponent encounterLocationComponent2 = new Encounter.EncounterLocationComponent();
 		encounterLocationComponent2.setLocation(new Reference(locId));
 		encounter2.addLocation(encounterLocationComponent2);
 		encounter2.setServiceProvider(new Reference(orgId));
-		String encId2 = myClient.create()
-				.resource(encounter2)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId2 = myClient.create().resource(encounter2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter encounter3 = new Encounter();
 		encounter3.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter3.setSubject(new Reference("Patient/P2"));
 		Encounter.EncounterLocationComponent encounterLocationComponent3 = encounter3.getLocationFirstRep();
 		encounterLocationComponent3.setLocation(new Reference(locId2));
-		String encId3 = myClient.create()
-				.resource(encounter3)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId3 = myClient.create().resource(encounter3).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -506,10 +405,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options,
-				List.of("Patient/P1", practId, orgId, encId, encId2, locId),
-				List.of("Patient/P2", orgId2, encId3, locId2));
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2, locId), List.of("Patient/P2", orgId2, encId3, locId2));
 	}
 
 	@Test
@@ -517,12 +413,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Create some resources
 		Practitioner practitioner = new Practitioner();
 		practitioner.setActive(true);
-		String practId = myClient.create()
-				.resource(practitioner)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -534,23 +425,13 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter.setSubject(new Reference("Patient/P1"));
 		encounter.addParticipant().setIndividual(new Reference(practId));
-		String encId = myClient.create()
-				.resource(encounter)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 		observation.setSubject(new Reference("Patient/P1"));
 		observation.getPerformerFirstRep().setReference(practId);
-		String obsId = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -573,30 +454,15 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Create some resources
 		Device device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId = myClient.create()
-				.resource(device)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String devId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId2 = myClient.create()
-				.resource(device)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String devId2 = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId3 = myClient.create()
-				.resource(device)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String devId3 = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -612,32 +478,17 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
 		observation.setDevice(new Reference(devId));
 		observation.setSubject(new Reference("Patient/P1"));
-		String obsId = myClient.create()
-				.resource(observation)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Provenance provenance = new Provenance();
 		provenance.addAgent().setWho(new Reference(devId2));
 		provenance.addTarget(new Reference("Patient/P1"));
-		String provId = myClient.create()
-				.resource(provenance)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String provId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
 		provenance = new Provenance();
 		provenance.addAgent().setWho(new Reference(devId3));
 		provenance.addTarget(new Reference("Patient/P2"));
-		String provId2 = myClient.create()
-				.resource(provenance)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String provId2 = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -652,13 +503,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options, List.of("Patient/P1", obsId, provId, devId, devId2), List.of("Patient/P2", provId2, devId3));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, provId, devId, devId2), List.of("Patient/P2", provId2, devId3));
 	}
 
 	@Test
-	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp()
-			throws InterruptedException {
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
 
 		// Patient with lastUpdated before _since
 		Patient patient = new Patient();
@@ -708,52 +557,29 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		Basic basic = new Basic();
 		basic.setAuthor(new Reference("Patient/P1"));
-		String basicId = myClient.create()
-				.resource(basic)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String basicId = myClient.create().resource(basic).execute().getId().toUnqualifiedVersionless().getValue();
 
 		DocumentReference documentReference = new DocumentReference();
 		documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		documentReference.addAuthor(new Reference("Patient/P1"));
-		String docRefId = myClient.create()
-				.resource(documentReference)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String docRefId = myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless().getValue();
 
 		QuestionnaireResponse questionnaireResponseSub = new QuestionnaireResponse();
 		questionnaireResponseSub.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
 		questionnaireResponseSub.setSubject(new Reference("Patient/P1"));
-		String questRespSubId = myClient.create()
-				.resource(questionnaireResponseSub)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String questRespSubId = myClient.create().resource(questionnaireResponseSub).execute().getId().toUnqualifiedVersionless().getValue();
 
 		QuestionnaireResponse questionnaireResponseAuth = new QuestionnaireResponse();
 		questionnaireResponseAuth.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
 		questionnaireResponseAuth.setAuthor(new Reference("Patient/P1"));
-		String questRespAuthId = myClient.create()
-				.resource(questionnaireResponseAuth)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String questRespAuthId = myClient.create().resource(questionnaireResponseAuth).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient", "Basic", "DocumentReference", "QuestionnaireResponse"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options,
-				List.of("Patient/P1", basicId, docRefId, questRespAuthId, questRespSubId),
-				Collections.emptyList());
+		verifyBulkExportResults(options, List.of("Patient/P1", basicId, docRefId, questRespAuthId, questRespSubId), Collections.emptyList());
 	}
 
 	@Test
@@ -768,71 +594,40 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		CarePlan carePlan = new CarePlan();
 		carePlan.setStatus(CarePlan.CarePlanStatus.COMPLETED);
 		CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
-		CarePlan.CarePlanActivityDetailComponent carePlanActivityDetailComponent =
-				new CarePlan.CarePlanActivityDetailComponent();
+		CarePlan.CarePlanActivityDetailComponent carePlanActivityDetailComponent = new CarePlan.CarePlanActivityDetailComponent();
 		carePlanActivityDetailComponent.addPerformer(new Reference("Patient/P1"));
 		carePlanActivityComponent.setDetail(carePlanActivityDetailComponent);
 		carePlan.addActivity(carePlanActivityComponent);
-		String carePlanId = myClient.create()
-				.resource(carePlan)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String carePlanId = myClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless().getValue();
 
 		MedicationAdministration medicationAdministration = new MedicationAdministration();
 		medicationAdministration.setStatus(MedicationAdministration.MedicationAdministrationStatus.COMPLETED);
-		MedicationAdministration.MedicationAdministrationPerformerComponent medicationAdministrationPerformerComponent =
-				new MedicationAdministration.MedicationAdministrationPerformerComponent();
+		MedicationAdministration.MedicationAdministrationPerformerComponent medicationAdministrationPerformerComponent = new MedicationAdministration.MedicationAdministrationPerformerComponent();
 		medicationAdministrationPerformerComponent.setActor(new Reference("Patient/P1"));
 		medicationAdministration.addPerformer(medicationAdministrationPerformerComponent);
-		String medAdminId = myClient.create()
-				.resource(medicationAdministration)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String medAdminId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.COMPLETED);
 		serviceRequest.addPerformer(new Reference("Patient/P1"));
-		String sevReqId = myClient.create()
-				.resource(serviceRequest)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String sevReqId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Observation observationSub = new Observation();
 		observationSub.setStatus(Observation.ObservationStatus.AMENDED);
 		observationSub.setSubject(new Reference("Patient/P1"));
-		String obsSubId = myClient.create()
-				.resource(observationSub)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsSubId = myClient.create().resource(observationSub).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Observation observationPer = new Observation();
 		observationPer.setStatus(Observation.ObservationStatus.AMENDED);
 		observationPer.addPerformer(new Reference("Patient/P1"));
-		String obsPerId = myClient.create()
-				.resource(observationPer)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String obsPerId = myClient.create().resource(observationPer).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(
-				Sets.newHashSet("Patient", "Observation", "CarePlan", "MedicationAdministration", "ServiceRequest"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "CarePlan", "MedicationAdministration", "ServiceRequest"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(
-				options,
-				List.of("Patient/P1", carePlanId, medAdminId, sevReqId, obsSubId, obsPerId),
-				Collections.emptyList());
+		verifyBulkExportResults(options, List.of("Patient/P1", carePlanId, medAdminId, sevReqId, obsSubId, obsPerId), Collections.emptyList());
 	}
 
 	@Test
@@ -847,12 +642,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Device device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
 		device.setPatient(new Reference("Patient/P1"));
-		String deviceId = myClient.create()
-				.resource(device)
-				.execute()
-				.getId()
-				.toUnqualifiedVersionless()
-				.getValue();
+		String deviceId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
+
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -868,8 +659,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		final Patient patient = new Patient();
 		patient.setId("A");
 		patient.setActive(true);
-		final IIdType patientIdType =
-				myClient.update().resource(patient).execute().getId().toUnqualifiedVersionless();
+		final IIdType patientIdType = myClient.update().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		final Group group = new Group();
 		group.setId("B");
@@ -877,15 +667,13 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		final Reference patientReference = new Reference(patientIdType.getValue());
 		groupMemberComponent.setEntity(patientReference);
 		group.getMember().add(groupMemberComponent);
-		final IIdType groupIdType =
-				myClient.update().resource(group).execute().getId().toUnqualifiedVersionless();
+		final IIdType groupIdType = myClient.update().resource(group).execute().getId().toUnqualifiedVersionless();
 
 		final Device device = new Device();
 		device.setId("C");
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
 		device.setPatient(patientReference);
-		final IIdType deviceIdType =
-				myClient.create().resource(device).execute().getId().toUnqualifiedVersionless();
+		final IIdType deviceIdType = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless();
 
 		final BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(resourceTypesForExport);
@@ -922,10 +710,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
 	}
 
-	private JobInstance verifyBulkExportResults(
-			BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(
-				mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
+	private JobInstance verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
 		assertFalse(startResponse.isUsesCachedResult());
@@ -933,22 +719,20 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Run a scheduled pass to build the export
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
 
-		await().atMost(200, TimeUnit.SECONDS)
-				.until(() ->
-						myJobRunner.getJobInfo(startResponse.getInstanceId()).getStatus()
-								== BulkExportJobStatusEnum.COMPLETE);
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getStatus() == BulkExportJobStatusEnum.COMPLETE);
 
-		await().atMost(200, TimeUnit.SECONDS)
-				.until(() ->
-						myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
-		for (Map.Entry<String, List<String>> file :
-				results.getResourceTypeToBinaryIds().entrySet()) {
+		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
@@ -963,8 +747,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 							IBaseResource next = myFhirContext.newJsonParser().parseResource(t);
 							IIdType nextId = next.getIdElement().toUnqualifiedVersionless();
 							if (!resourceType.equals(nextId.getResourceType())) {
-								fail("Found resource of type " + nextId.getResourceType() + " in file for type "
-										+ resourceType);
+								fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
 							} else {
 								if (!foundIds.add(nextId.getValue())) {
 									fail("Found duplicate ID: " + nextId.getValue());
@@ -975,25 +758,21 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				} catch (IOException e) {
 					fail(e.toString());
 				}
+
 			}
 
 			return jobInstance;
 		}
 
 		for (String containedString : theContainedList) {
-			assertThat(
-					"Didn't find expected ID " + containedString + " in IDS: " + foundIds,
-					foundIds,
-					hasItem(containedString));
+			assertThat("Didn't find expected ID " + containedString + " in IDS: " + foundIds, foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat(
-					"Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds,
-					foundIds,
-					not(hasItem(excludedString)));
+			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
 		return jobInstance;
 	}
+
 
 	@Test
 	public void testValidateParameters_InvalidPostFetch_NoParams() {
@@ -1007,10 +786,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"));
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: foo"
+			));
+
 		}
 	}
 
@@ -1026,10 +805,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"));
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: Patient?"
+			));
+
 		}
 	}
 
@@ -1045,15 +824,17 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL, unknown resource type: Foo"));
+			assertThat(e.getMessage(), containsString(
+				"Invalid post-fetch filter URL, unknown resource type: Foo"
+			));
+
 		}
 	}
 
 	@Test
 	public void testValidateParameters_InvalidPostFetch_UnsupportedParam() {
 		// Setup
-		final BulkDataExportOptions options =
-				createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
+		final BulkDataExportOptions options = createOptionsWithPostFetchFilterUrl("Observation?subject.identifier=blah");
 
 		// Test
 		try {
@@ -1062,7 +843,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage(), containsString("Chained parameters are not supported"));
+			assertThat(e.getMessage(), containsString(
+				"Chained parameters are not supported"
+			));
+
 		}
 	}
 
@@ -1079,9 +863,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 			// Verify
 			assertThat(e.getMessage(), containsString("Invalid post-fetch filter URL."));
-			assertThat(
-					e.getMessage(),
-					containsString("Resource type Observation does not have a parameter with name: foo"));
+			assertThat(e.getMessage(), containsString("Resource type Observation does not have a parameter with name: foo"));
+
 		}
 	}
 
@@ -1096,7 +879,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		return options;
 	}
 
+
 	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
 		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
 	}
+
 }

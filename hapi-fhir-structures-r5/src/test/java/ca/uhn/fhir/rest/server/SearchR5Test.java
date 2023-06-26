@@ -50,6 +50,7 @@ public class SearchR5Test {
 		ourIdentifiers = null;
 	}
 
+
 	@Test
 	public void testSearch() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
@@ -60,24 +61,12 @@ public class SearchR5Test {
 
 			assertEquals("search", ourLastMethod);
 
-			assertEquals(
-					"foo",
-					ourIdentifiers
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getSystem());
-			assertEquals(
-					"bar",
-					ourIdentifiers
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 		}
+
 	}
+
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
@@ -88,7 +77,8 @@ public class SearchR5Test {
 
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(@RequiredParam(name = "identifier") TokenAndListParam theIdentifiers) {
+		public List search(
+			@RequiredParam(name = "identifier") TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<>();
@@ -103,7 +93,9 @@ public class SearchR5Test {
 			}
 			return retVal;
 		}
+
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -129,10 +121,11 @@ public class SearchR5Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

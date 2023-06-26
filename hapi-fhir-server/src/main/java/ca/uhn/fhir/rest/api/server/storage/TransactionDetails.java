@@ -31,10 +31,10 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.function.Supplier;
-import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * This object contains runtime information that is gathered and relevant to a single <i>database transaction</i>.
@@ -185,6 +185,7 @@ public class TransactionDetails {
 		return false;
 	}
 
+
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
@@ -232,17 +233,14 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(
-			FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
+	public void addResolvedMatchUrl(FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		Validate.notBlank(theConditionalUrl);
 		Validate.notNull(thePersistentId);
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
 		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
-			String msg = theFhirContext
-					.getLocalizer()
-					.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
+			String msg = theFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
@@ -256,10 +254,10 @@ public class TransactionDetails {
 		myResolvedMatchUrls.remove(theMatchUrl);
 	}
 
+
 	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
-		if (myResolvedMatchUrls.containsKey(theConditionalUrl)
-				&& myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
-			return !myResolvedMatchUrls.get(theConditionalUrl).getId().equals(thePersistentId.getId());
+		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
+			return ! myResolvedMatchUrls.get(theConditionalUrl).getId().equals(thePersistentId.getId());
 		}
 		return false;
 	}
@@ -381,7 +379,8 @@ public class TransactionDetails {
 		return hookParams == null ? InterceptorInvocationTimingEnum.ACTIVE : InterceptorInvocationTimingEnum.DEFERRED;
 	}
 
-	public void deferredBroadcastProcessingFinished() {}
+	public void deferredBroadcastProcessingFinished() {
+	}
 
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
@@ -399,4 +398,6 @@ public class TransactionDetails {
 	public void setFhirTransaction(boolean theFhirTransaction) {
 		myFhirTransaction = theFhirTransaction;
 	}
+
 }
+

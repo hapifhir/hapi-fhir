@@ -33,4 +33,5 @@ public class ResourceNotFoundInIndexException extends IllegalStateException {
 	public ResourceNotFoundInIndexException(String theString, Throwable theCause) {
 		super(theString, theCause);
 	}
+
 }

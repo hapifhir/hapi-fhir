@@ -6,7 +6,11 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Patient;
 
-@ResourceDef(name = "Patient", profile = "http://acme.org//StructureDefinition/patient-with-eyes")
+
+@ResourceDef(
+	name = "Patient",
+	profile = "http://acme.org//StructureDefinition/patient-with-eyes"
+)
 public class ExtendedPatient extends Patient {
 
 	@Child(name = "eyeColour")
@@ -23,4 +27,5 @@ public class ExtendedPatient extends Patient {
 	public void setEyeColour(CodeType theEyeColour) {
 		myEyeColour = theEyeColour;
 	}
+
 }

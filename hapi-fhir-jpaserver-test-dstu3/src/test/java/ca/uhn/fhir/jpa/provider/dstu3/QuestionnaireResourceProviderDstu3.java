@@ -10,4 +10,5 @@ public class QuestionnaireResourceProviderDstu3 extends BaseJpaResourceProvider<
 	public Class<? extends IBaseResource> getResourceType() {
 		return Questionnaire.class;
 	}
+
 }

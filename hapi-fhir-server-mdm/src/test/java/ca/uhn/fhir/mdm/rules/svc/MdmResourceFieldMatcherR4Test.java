@@ -3,6 +3,7 @@ package ca.uhn.fhir.mdm.rules.svc;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	protected MdmResourceFieldMatcher myComparator;
@@ -26,8 +29,12 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	public void before() {
 		super.before();
 
-		myComparator =
-				new MdmResourceFieldMatcher(ourFhirContext, myIMatcherFactory, myGivenNameMatchField, myMdmRulesJson);
+		myComparator = new MdmResourceFieldMatcher(
+			ourFhirContext,
+			myIMatcherFactory,
+			myGivenNameMatchField,
+			myMdmRulesJson
+		);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
 	}
@@ -35,15 +42,19 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	@Test
 	public void testEmptyPath() {
 		myMdmRulesJson = new MdmRulesJson();
-		myMdmRulesJson.setMdmTypes(Arrays.asList(new String[] {"Patient"}));
+		myMdmRulesJson.setMdmTypes(Arrays.asList(new String[]{"Patient"}));
 
 		myGivenNameMatchField = new MdmFieldMatchJson()
-				.setName("empty-given")
-				.setResourceType("Patient")
-				.setResourcePath("name.given")
-				.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.EMPTY_FIELD));
-		myComparator =
-				new MdmResourceFieldMatcher(ourFhirContext, myIMatcherFactory, myGivenNameMatchField, myMdmRulesJson);
+			.setName("empty-given")
+			.setResourceType("Patient")
+			.setResourcePath("name.given")
+			.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.EMPTY_FIELD));
+		myComparator = new MdmResourceFieldMatcher(
+			ourFhirContext,
+			myIMatcherFactory,
+			myGivenNameMatchField,
+			myMdmRulesJson
+		);
 
 		assertFalse(myComparator.match(myJohn, myJohny).match);
 

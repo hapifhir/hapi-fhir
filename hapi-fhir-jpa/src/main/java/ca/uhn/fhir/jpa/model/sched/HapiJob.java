@@ -23,4 +23,5 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 
 @DisallowConcurrentExecution
-public interface HapiJob extends Job {}
+public interface HapiJob extends Job {
+}

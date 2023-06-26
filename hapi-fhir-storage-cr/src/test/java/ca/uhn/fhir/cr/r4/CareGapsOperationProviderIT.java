@@ -72,7 +72,6 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 	private static CloseableHttpClient ourHttpClient;
 	private static Server ourServer;
 	private static String ourServerBase;
-
 	@Autowired
 	CareGapsOperationProvider myCareGapsOperationProvider;
 
@@ -116,8 +115,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 			int myPort = JettyUtil.getPortForStartedServer(ourServer);
 			ourServerBase = "http://localhost:" + myPort + "/fhir";
 
-			PoolingHttpClientConnectionManager connectionManager =
-					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -137,8 +135,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 
 		// Set properties
 		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
-		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration =
-				new CrProperties.MeasureProperties.MeasureReportConfiguration();
+		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
 		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
 		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		measureProperties.setMeasureReportConfiguration(measureReportConfiguration);
@@ -146,7 +143,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 	}
 
 	@Test
-	public void careGapsEndToEnd() {
+	public void careGapsEndToEnd(){
 
 		// 1. Initialize Payer content
 		var measureBundle = (Bundle) readResource("CaregapsColorectalCancerScreeningsFHIR-bundle.json");
@@ -158,12 +155,8 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 
 		// 3. Provider submits Patient data
 		var patientData = (Parameters) readResource("CaregapsPatientData.json");
-		ourClient
-				.operation()
-				.onInstance("Measure/ColorectalCancerScreeningsFHIR")
-				.named("submit-data")
-				.withParameters(patientData)
-				.execute();
+		ourClient.operation().onInstance("Measure/ColorectalCancerScreeningsFHIR").named("submit-data")
+			.withParameters(patientData).execute();
 
 		// 4. Provider runs $care-gaps
 		var parameters = new Parameters();
@@ -174,13 +167,11 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		parameters.addParameter("subject", "Patient/end-to-end-EXM130");
 		parameters.addParameter("measureId", "ColorectalCancerScreeningsFHIR");
 
-		var result = ourClient
-				.operation()
-				.onType(Measure.class)
-				.named("$care-gaps")
-				.withParameters(parameters)
-				.returnResourceType(Parameters.class)
-				.execute();
+		var result = ourClient.operation().onType(Measure.class)
+			.named("$care-gaps")
+			.withParameters(parameters)
+			.returnResourceType(Parameters.class)
+			.execute();
 
 		// assert open-gap
 		assertForGaps(result);
@@ -188,20 +179,13 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		// 5. (out of band) Provider fixes gaps
 		var newData = (Parameters) readResource("CaregapsSubmitDataCloseGap.json");
 		// 6. Provider submits additional Patient data showing that they did another procedure that was needed.
-		ourClient
-				.operation()
-				.onInstance("Measure/ColorectalCancerScreeningsFHIR")
-				.named("submit-data")
-				.withParameters(newData)
-				.execute();
+		ourClient.operation().onInstance("Measure/ColorectalCancerScreeningsFHIR").named("submit-data").withParameters(newData).execute();
 
 		// 7. Provider runs care-gaps again
-		result = ourClient
-				.operation()
-				.onType("Measure")
-				.named("care-gaps")
-				.withParameters(parameters)
-				.execute();
+		result = ourClient.operation().onType("Measure")
+			.named("care-gaps")
+			.withParameters(parameters)
+			.execute();
 
 		// assert closed-gap
 		assertForGaps(result);
@@ -210,25 +194,15 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 	private void assertForGaps(Parameters theResult) {
 		assertNotNull(theResult);
 		var dataBundle = (Bundle) theResult.getParameter().get(0).getResource();
-		var detectedIssue = dataBundle.getEntry().stream()
-				.filter(bundleEntryComponent -> "DetectedIssue"
-						.equalsIgnoreCase(bundleEntryComponent
-								.getResource()
-								.getResourceType()
-								.name()))
-				.findFirst()
-				.get();
-		var extension = (Extension) detectedIssue
-				.getResource()
-				.getChildByName("modifierExtension")
-				.getValues()
-				.get(0);
+		var detectedIssue = dataBundle.getEntry()
+																.stream()
+											.filter(bundleEntryComponent -> "DetectedIssue".equalsIgnoreCase(bundleEntryComponent.getResource().getResourceType().name())).findFirst().get();
+		var extension = (Extension) detectedIssue.getResource().getChildByName("modifierExtension").getValues().get(0);
 
 		var codeableConcept = (CodeableConcept) extension.getValue();
-		Optional<Coding> coding = codeableConcept.getCoding().stream()
-				.filter(code ->
-						"open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode()))
-				.findFirst();
+		Optional<Coding> coding = codeableConcept.getCoding()
+																.stream()
+											.filter(code -> "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode())).findFirst();
 		assertTrue(!coding.isEmpty());
 	}
 

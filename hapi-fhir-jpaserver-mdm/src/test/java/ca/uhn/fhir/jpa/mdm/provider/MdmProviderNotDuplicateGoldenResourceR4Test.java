@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4Test {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
-
 	private Patient myGoldenPatient;
 	private StringType myGoldenPatientId;
 	private Patient myTargetPatient;
@@ -53,12 +52,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 
 	@Test
 	public void testNotDuplicateGoldenResource() {
-		myMdmLinkSvc.updateLink(
-				myGoldenPatient,
-				myTargetPatient,
-				MdmMatchOutcome.POSSIBLE_DUPLICATE,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(myGoldenPatient, myTargetPatient, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
 		myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
 		assertLinkCount(1);
@@ -80,12 +74,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 
 	@Test
 	public void testNotDuplicateGoldenResourceNotPossibleDuplicate() {
-		myMdmLinkSvc.updateLink(
-				myGoldenPatient,
-				myTargetPatient,
-				MdmMatchOutcome.POSSIBLE_MATCH,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(myGoldenPatient, myTargetPatient, MdmMatchOutcome.POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
 		try {
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
@@ -105,12 +94,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		Patient targetPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId);
 		StringType targetPatientId = new StringType(targetPatient.getIdElement().getValue());
 
-		myMdmLinkSvc.updateLink(
-				goldenPatient,
-				targetPatient,
-				MdmMatchOutcome.POSSIBLE_DUPLICATE,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(goldenPatient, targetPatient, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
 		myMdmProvider.notDuplicate(goldenPatientId, targetPatientId, myRequestDetails);
 		assertLinkCount(1);

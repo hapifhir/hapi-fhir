@@ -42,36 +42,33 @@ public class IpsOperationProvider {
 		myIpsGeneratorSvc = theIpsGeneratorSvc;
 	}
 
+
 	/**
 	 * Patient/123/$summary
 	 */
-	@Operation(
-			name = JpaConstants.OPERATION_SUMMARY,
-			idempotent = true,
-			bundleType = BundleTypeEnum.DOCUMENT,
-			typeName = "Patient",
-			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
-	public IBaseBundle patientInstanceSummary(@IdParam IIdType thePatientId, RequestDetails theRequestDetails) {
+	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	public IBaseBundle patientInstanceSummary(
+		@IdParam
+		IIdType thePatientId,
 
+		RequestDetails theRequestDetails
+	) {
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId);
 	}
 
 	/**
 	 * /Patient/$summary?identifier=foo|bar
 	 */
-	@Operation(
-			name = JpaConstants.OPERATION_SUMMARY,
-			idempotent = true,
-			bundleType = BundleTypeEnum.DOCUMENT,
-			typeName = "Patient",
-			canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
+	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
 	public IBaseBundle patientTypeSummary(
-			@Description(
-							shortDefinition =
-									"When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
-					@OperationParam(name = "identifier", min = 0, max = 1)
-					TokenParam thePatientIdentifier,
-			RequestDetails theRequestDetails) {
+
+		@Description(shortDefinition = "When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
+		@OperationParam(name = "identifier", min = 0, max = 1)
+		TokenParam thePatientIdentifier,
+
+		RequestDetails theRequestDetails
+	) {
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientIdentifier);
 	}
+
 }

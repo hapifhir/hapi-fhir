@@ -95,10 +95,7 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public Batch2JobHelper batch2JobHelper(
-			IJobMaintenanceService theJobMaintenanceService,
-			IJobCoordinator theJobCoordinator,
-			IJobPersistence theJobPersistence) {
+	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
 	}
 
@@ -119,7 +116,7 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public IEmailSender emailSender() {
+	public IEmailSender emailSender(){
 		return new LoggingEmailSender();
 	}
 }

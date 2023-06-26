@@ -34,8 +34,7 @@ import static org.mockito.Mockito.when;
 
 public class ClientWithCustomTypeDstu2_1Test {
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ClientWithCustomTypeDstu2_1Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientWithCustomTypeDstu2_1Test.class);
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
@@ -43,6 +42,7 @@ public class ClientWithCustomTypeDstu2_1Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 
 	@BeforeEach
 	public void before() {
@@ -53,21 +53,15 @@ public class ClientWithCustomTypeDstu2_1Test {
 	}
 
 	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		byte[] body = IOUtils.toByteArray(
-				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0))
-						.getEntity()
-						.getContent());
+		byte[] body = IOUtils.toByteArray(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent());
 		return body;
 	}
 
 	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(
-				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0))
-						.getEntity()
-						.getContent(),
-				"UTF-8");
+		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
 		return body;
 	}
+
 
 	@Test
 	public void testReadCustomType() throws Exception {
@@ -78,13 +72,11 @@ public class ClientWithCustomTypeDstu2_1Test {
 		response.getStringExt().setValue("STRINGVAL");
 		response.getDateExt().setValueAsString("2011-01-02");
 		final String respString = p.encodeResourceToString(response);
-
+		
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -94,12 +86,13 @@ public class ClientWithCustomTypeDstu2_1Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		// @formatter:off
-		MyPatientWithExtensions value = client.read()
-				.resource(MyPatientWithExtensions.class)
-				.withId("123")
-				.execute();
-		// @formatter:on
+		//@formatter:off
+		MyPatientWithExtensions value = client
+			.read()
+			.resource(MyPatientWithExtensions.class)
+			.withId("123")
+			.execute();
+		//@formatter:on
 
 		HttpUriRequest request = capt.getAllValues().get(0);
 
@@ -110,10 +103,14 @@ public class ClientWithCustomTypeDstu2_1Test {
 		assertEquals("FAMILY", value.getName().get(0).getFamilyAsSingleString());
 		assertEquals("STRINGVAL", value.getStringExt().getValue());
 		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
+		
 	}
+
+
 
 	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2_1();
 	}
+
 }

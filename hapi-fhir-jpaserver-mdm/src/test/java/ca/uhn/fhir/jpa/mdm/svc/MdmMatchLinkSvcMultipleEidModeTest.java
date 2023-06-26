@@ -30,17 +30,17 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@TestPropertySource(properties = {"mdm.prevent_multiple_eids=false"})
+@TestPropertySource(properties = {
+	"mdm.prevent_multiple_eids=false"
+})
 public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcMultipleEidModeTest.class);
-
 	@Autowired
 	private EIDHelper myEidHelper;
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesGoldenResourceWithHapiEidAddsExternalEidsToGoldenResource() {
-		// Existing GoldenResource with system-assigned EID found linked from matched Patient.  incoming Patient has
-		// EID.
+		// Existing GoldenResource with system-assigned EID found linked from matched Patient.  incoming Patient has EID.
 		// Replace GoldenResource system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinksMatchResult(MATCH);
@@ -60,32 +60,28 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
-		assertLinksMatchScore(1.0, 2.0 / 3.0);
+		assertLinksMatchScore(1.0, 2.0/3.0);
 		assertLinksMatchVector(null, 6L);
 
-		// We want to make sure the patients were linked to the same GoldenResource.
+		//We want to make sure the patients were linked to the same GoldenResource.
 		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
 		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
-		// The collision should have kept the old identifier
+		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
 		assertThat(firstIdentifier.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
 
-		// The collision should have added a new identifier with the external system.
+		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(
-				secondIdentifier.getSystem(),
-				is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 
 		Identifier thirdIdentifier = identifier.get(2);
-		assertThat(
-				thirdIdentifier.getSystem(),
-				is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
+		assertThat(thirdIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(thirdIdentifier.getValue(), is(equalTo("67890")));
 	}
 
@@ -120,7 +116,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
 
-		// At this point, there should be 5 EIDs on the GoldenResource
+		//At this point, there should be 5 EIDs on the GoldenResource
 		Patient patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(patientFromTarget.getIdentifier(), hasSize(5));
 
@@ -139,8 +135,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void
-			testDuplicateGoldenResourceLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
+	public void testDuplicateGoldenResourceLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
@@ -166,13 +161,11 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		Patient finalPatient1 = patient1;
 		Patient finalPatient2 = patient2;
-		List<IResourcePersistentId> duplicatePids = runInTransaction(() -> Stream.of(finalPatient1, finalPatient2)
-				.map(t -> myIdHelperService.getPidOrNull(
-						RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
-				.collect(Collectors.toList()));
+		List<IResourcePersistentId> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
+			.map(t -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
+			.collect(Collectors.toList()));
 
-		// The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE
-		// MdmLink.
+		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePersistenceId(), is(in(duplicatePids)));
 		assertThat(mdmLink.getSourcePersistenceId(), is(in(duplicatePids)));
@@ -210,13 +203,12 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchScore(1.0, 1.0, 1.0);
 		assertLinksMatchVector(null, null, null);
 
-		// Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
+		//Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
 		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
 
-		// Now lets change one of the EIDs on the second patient to one that matches our original patient.
-		// This should create a situation in which the incoming EIDs are matched to _two_ different GoldenResources. In
-		// this case, we want to
-		// set them all to possible_match, and set the two GoldenResources as possible duplicates.
+		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
+		//This should create a situation in which the incoming EIDs are matched to _two_ different GoldenResources. In this case, we want to
+		//set them all to possible_match, and set the two GoldenResources as possible duplicates.
 		patient2.getIdentifier().clear();
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");

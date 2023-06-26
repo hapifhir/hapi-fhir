@@ -38,6 +38,7 @@ import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,22 +51,16 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 	public static final RequestPartitionId PARTITION_PATIENT = RequestPartitionId.fromPartitionId(1);
 	public static final RequestPartitionId PARTITION_OBSERVATION = RequestPartitionId.fromPartitionId(2);
-
 	@Autowired
 	private JpaHapiTransactionService myTransactionSvc;
-
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-
 	@Autowired
 	private IHapiTransactionService myTransactionService;
-
 	@Autowired
 	private IResourceLinkResolver myResourceLinkResolver;
-
 	@Mock
 	private ICrossPartitionReferenceDetectedHandler myCrossPartitionReferencesDetectedInterceptor;
-
 	@Captor
 	private ArgumentCaptor<CrossPartitionReferenceDetails> myCrossPartitionReferenceDetailsCaptor;
 
@@ -75,8 +70,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		super.before();
 
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setAllowReferencesAcrossPartitions(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setAlwaysOpenNewTransactionForDifferentPartition(true);
 
@@ -89,11 +83,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 	@AfterEach
 	public void after() {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(
-				new PartitionSettings().getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
-		myPartitionSettings.setAlwaysOpenNewTransactionForDifferentPartition(
-				new PartitionSettings().isAlwaysOpenNewTransactionForDifferentPartition());
+		myPartitionSettings.setAlwaysOpenNewTransactionForDifferentPartition(new PartitionSettings().isAlwaysOpenNewTransactionForDifferentPartition());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyPartitionSelectorInterceptor);
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof ICrossPartitionReferenceDetectedHandler);
@@ -124,9 +116,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		SearchParameterMap params = SearchParameterMap.newSynchronous(
-						Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
-				.addInclude(Patient.INCLUDE_LINK);
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
+			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
 		assertEquals(2, search.getAllResources().size());
@@ -149,9 +141,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patient2Id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 
 		// Test
-		SearchParameterMap params = SearchParameterMap.newSynchronous(
-						Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
-				.addInclude(Patient.INCLUDE_LINK);
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
+			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 
 		// Verify
@@ -169,8 +161,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		ourLog.info("Patient ID: {}", patientId);
 		runInTransaction(() -> {
-			ResourceTable resourceTable =
-					myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow();
 			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
@@ -189,40 +180,28 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		runInTransaction(() -> {
-			ResourceTable resourceTable =
-					myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
 
-		verify(myCrossPartitionReferencesDetectedInterceptor, times(1))
-				.handle(
-						eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE),
-						myCrossPartitionReferenceDetailsCaptor.capture());
+		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE), myCrossPartitionReferenceDetailsCaptor.capture());
 		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
 		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
-		assertEquals(
-				patientId.getValue(),
-				referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
+		assertEquals(patientId.getValue(), referenceDetails.getPathAndRef().getRef().getReferenceElement().getValue());
 	}
 
 	private void initializeCrossReferencesInterceptor() {
-		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(), any())).thenAnswer(t -> {
+		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(),any())).thenAnswer(t->{
 			CrossPartitionReferenceDetails theDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
 			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(targetId);
-			RequestPartitionId referenceTargetPartition =
-					myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), details);
+			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), details);
 
 			IResourceLookup targetResource = myTransactionService
-					.withRequest(theDetails.getRequestDetails())
-					.withTransactionDetails(theDetails.getTransactionDetails())
-					.withRequestPartitionId(referenceTargetPartition)
-					.execute(() -> myResourceLinkResolver.findTargetResource(
-							referenceTargetPartition,
-							theDetails.getSourceResourceName(),
-							theDetails.getPathAndRef(),
-							theDetails.getRequestDetails(),
-							theDetails.getTransactionDetails()));
+				.withRequest(theDetails.getRequestDetails())
+				.withTransactionDetails(theDetails.getTransactionDetails())
+				.withRequestPartitionId(referenceTargetPartition)
+				.execute(() -> myResourceLinkResolver.findTargetResource(referenceTargetPartition, theDetails.getSourceResourceName(), theDetails.getPathAndRef(), theDetails.getRequestDetails(), theDetails.getTransactionDetails()));
 
 			return targetResource;
 		});
@@ -233,7 +212,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		@Hook(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)
 		IResourceLookup<JpaPid> handle(Pointcut thePointcut, CrossPartitionReferenceDetails theDetails);
+
 	}
+
 
 	public class MyPartitionSelectorInterceptor {
 
@@ -260,5 +241,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 					throw new InternalErrorException("Don't know how to handle resource type");
 			}
 		}
+
 	}
+
 }

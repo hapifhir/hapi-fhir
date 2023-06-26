@@ -57,16 +57,13 @@ public class NonGenericClientDstu2_1Test {
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
-
+	
 		HapiSystemProperties.enableHapiClientKeepResponses();
+
 	}
 
 	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt, int theIdx) throws IOException {
-		String body = IOUtils.toString(
-				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(theIdx))
-						.getEntity()
-						.getContent(),
-				"UTF-8");
+		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(theIdx)).getEntity().getContent(), "UTF-8");
 		return body;
 	}
 
@@ -75,19 +72,18 @@ public class NonGenericClientDstu2_1Test {
 		IParser p = ourCtx.newXmlParser();
 
 		Bundle b = new Bundle();
-
+		
 		MyPatientWithExtensions patient = new MyPatientWithExtensions();
 		patient.setId("123");
 		patient.getText().setDivAsString("OK!");
 		b.addEntry().setResource(patient);
-
+		
+		
 		final String respString = p.encodeResourceToString(b);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -97,11 +93,11 @@ public class NonGenericClientDstu2_1Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		List<MyPatientWithExtensions> list = client.search();
-
+		
 		assertEquals(1, list.size());
 		assertEquals(MyPatientWithExtensions.class, list.get(0).getClass());
 	}
-
+	
 	@Test
 	public void testValidateCustomTypeFromClientRead() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -109,14 +105,12 @@ public class NonGenericClientDstu2_1Test {
 		MyPatientWithExtensions patient = new MyPatientWithExtensions();
 		patient.setId("123");
 		patient.getText().setDivAsString("OK!");
-
+		
 		final String respString = p.encodeResourceToString(patient);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -126,11 +120,9 @@ public class NonGenericClientDstu2_1Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		MyPatientWithExtensions read = client.read(new IdType("1"));
-		assertEquals(
-				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
-				read.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
 	}
-
+	
 	@Test
 	public void testValidateResourceOnly() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -141,10 +133,8 @@ public class NonGenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -156,61 +146,50 @@ public class NonGenericClientDstu2_1Test {
 
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAM");
-
+		
 		int idx = 0;
 		MethodOutcome outcome = client.validate(patient, null, null);
 		String resp = ourCtx.newXmlParser().encodeResourceToString(outcome.getOperationOutcome());
-		assertEquals(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>",
-				resp);
-		assertEquals(
-				"http://example.com/fhir/$validate",
-				capt.getAllValues().get(idx).getURI().toString());
-		String request = extractBodyAsString(capt, idx);
-		assertEquals(
-				"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":[\"FAM\"]}]}}]}",
-				request);
+		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>", resp);
+		assertEquals("http://example.com/fhir/$validate", capt.getAllValues().get(idx).getURI().toString());
+		String request = extractBodyAsString(capt,idx);
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":[\"FAM\"]}]}}]}", request);
 
 		idx = 1;
 		outcome = client.validate(patient, ValidationModeEnum.CREATE, "http://foo");
 		resp = ourCtx.newXmlParser().encodeResourceToString(outcome.getOperationOutcome());
-		assertEquals(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>",
-				resp);
-		assertEquals(
-				"http://example.com/fhir/$validate",
-				capt.getAllValues().get(idx).getURI().toString());
-		request = extractBodyAsString(capt, idx);
-		assertEquals(
-				"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":[\"FAM\"]}]}},{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"profile\",\"valueString\":\"http://foo\"}]}",
-				request);
+		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>", resp);
+		assertEquals("http://example.com/fhir/$validate", capt.getAllValues().get(idx).getURI().toString());
+		request = extractBodyAsString(capt,idx);
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":[\"FAM\"]}]}},{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"profile\",\"valueString\":\"http://foo\"}]}", request);
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
+	
 	@BeforeAll
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2_1();
 	}
 
 	private interface IClient extends IRestfulClient {
-
+		
 		@Validate
-		MethodOutcome validate(
-				@ResourceParam IBaseResource theResource,
-				@Validate.Mode ValidationModeEnum theMode,
-				@Validate.Profile String theProfile);
+		MethodOutcome validate(@ResourceParam IBaseResource theResource, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile);
+		
 	}
 
 	private interface IClientWithCustomType extends IRestfulClient {
-
+		
 		@Search
 		List<MyPatientWithExtensions> search();
 
 		@Read
 		MyPatientWithExtensions read(@IdParam IdType theId);
+		
 	}
+
 }

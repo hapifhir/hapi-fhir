@@ -19,19 +19,19 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 import java.util.Arrays;
 import java.util.List;
+
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  *
  */
-public class UriClientParam extends BaseClientParam implements IParam {
+public class UriClientParam extends BaseClientParam  implements IParam {
 
-	// TODO: handle :above and :below
-
+	//TODO: handle :above and :below
+	
 	private final String myParamName;
 
 	public UriClientParam(String theParamName) {
@@ -46,7 +46,7 @@ public class UriClientParam extends BaseClientParam implements IParam {
 	/**
 	 * The string matches the given value (servers will often, but are not required to) implement this as a left match, meaning that a value of "smi" would match "smi" and "smith".
 	 * @param theValue THIS PARAMETER DOES NOT DO ANYTHING - This method was added by accident
-	 *
+	 * 
 	 * @deprecated theValue does not do anything, use {@link #matches()} instead
 	 */
 	@CoverageIgnore
@@ -85,6 +85,7 @@ public class UriClientParam extends BaseClientParam implements IParam {
 		 * where} criteria with the same parameter.
 		 */
 		ICriterion<?> values(String... theValues);
+
 	}
 
 	private class UriMatches implements IUriMatch {
@@ -107,5 +108,7 @@ public class UriClientParam extends BaseClientParam implements IParam {
 		public ICriterion<?> values(String... theValues) {
 			return new StringCriterion<UriClientParam>(getParamName(), Arrays.asList(theValues));
 		}
+
 	}
+
 }

@@ -12,8 +12,12 @@ class TokenParamModifierTest {
 	@ParameterizedTest
 	@EnumSource()
 	void negativeModifiers(TokenParamModifier theTokenParamModifier) {
-		EnumSet<TokenParamModifier> negativeSet = EnumSet.of(TokenParamModifier.NOT, TokenParamModifier.NOT_IN);
+		EnumSet<TokenParamModifier> negativeSet = EnumSet.of(
+			TokenParamModifier.NOT,
+			TokenParamModifier.NOT_IN
+		);
 
 		assertEquals(negativeSet.contains(theTokenParamModifier), theTokenParamModifier.isNegative());
 	}
+
 }

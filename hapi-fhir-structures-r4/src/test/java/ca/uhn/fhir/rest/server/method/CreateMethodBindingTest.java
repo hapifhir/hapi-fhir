@@ -27,6 +27,7 @@ public class CreateMethodBindingTest {
 			public void create() {
 				// nothing
 			}
+
 		}
 
 		Method method = MyClass.class.getMethod("create");
@@ -34,10 +35,9 @@ public class CreateMethodBindingTest {
 			new CreateMethodBinding(method, myCtx, new MyClass());
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"is a @Create method but it does not return class ca.uhn.fhir.rest.api.MethodOutcome"));
+			assertThat(e.getMessage(), containsString("is a @Create method but it does not return class ca.uhn.fhir.rest.api.MethodOutcome"));
 		}
 	}
+
+
 }

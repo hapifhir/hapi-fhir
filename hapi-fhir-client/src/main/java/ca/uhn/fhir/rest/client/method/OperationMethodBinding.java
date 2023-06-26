@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -54,16 +54,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private BundleTypeEnum myBundleType;
 	private String myDescription;
 
-	protected OperationMethodBinding(
-			Class<?> theReturnResourceType,
-			Class<? extends IBaseResource> theReturnTypeFromRp,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider,
-			boolean theIdempotent,
-			String theOperationName,
-			Class<? extends IBaseResource> theOperationType,
-			BundleTypeEnum theBundleType) {
+	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
+												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
+												BundleTypeEnum theBundleType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
@@ -79,9 +72,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (isBlank(theOperationName)) {
-			throw new ConfigurationException(Msg.code(1452) + "Method '" + theMethod.getName() + "' on type "
-					+ theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
-					+ " but this annotation has no name defined");
+			throw new ConfigurationException(Msg.code(1452) + "Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
+				+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
 			theOperationName = "$" + theOperationName;
@@ -107,25 +99,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
+
 	}
 
-	public OperationMethodBinding(
-			Class<?> theReturnResourceType,
-			Class<? extends IBaseResource> theReturnTypeFromRp,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider,
-			Operation theAnnotation) {
-		this(
-				theReturnResourceType,
-				theReturnTypeFromRp,
-				theMethod,
-				theContext,
-				theProvider,
-				theAnnotation.idempotent(),
-				theAnnotation.name(),
-				theAnnotation.type(),
-				theAnnotation.bundleType());
+	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
+											Operation theAnnotation) {
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.bundleType());
 	}
 
 	public String getDescription() {
@@ -165,8 +144,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			IIdType idDt = (IIdType) theArgs[myIdParamIndex];
 			id = idDt.getValue();
 		}
-		IBaseParameters parameters = (IBaseParameters)
-				getContext().getResourceDefinition("Parameters").newInstance();
+		IBaseParameters parameters = (IBaseParameters) getContext().getResourceDefinition("Parameters").newInstance();
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -182,14 +160,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myIdempotent;
 	}
 
-	public static BaseHttpClientInvocation createOperationInvocation(
-			FhirContext theContext,
-			String theResourceName,
-			String theId,
-			String theVersion,
-			String theOperationName,
-			IBaseParameters theInput,
-			boolean theUseHttpGet) {
+	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theVersion, String theOperationName, IBaseParameters theInput,
+																						  boolean theUseHttpGet) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -220,8 +192,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		for (Object nextParameter : parameters) {
 			IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
 			if (nextNameDt == null || nextNameDt.isEmpty()) {
-				ourLog.warn(
-						"Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
+				ourLog.warn("Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
 				continue;
 			}
 			String nextName = nextNameDt.getValueAsString();
@@ -234,9 +205,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				continue;
 			}
 			if (!(value instanceof IPrimitiveType)) {
-				throw new IllegalArgumentException(Msg.code(1453)
-						+ "Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: "
-						+ value.getClass().getName());
+				throw new IllegalArgumentException(Msg.code(1453) + "Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: " + value.getClass().getName());
 			}
 			IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
 			params.get(nextName).add(primitive.getValueAsString());
@@ -244,11 +213,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return new HttpGetClientInvocation(theContext, params, b.toString());
 	}
 
-	public static BaseHttpClientInvocation createProcessMsgInvocation(
-			FhirContext theContext,
-			String theOperationName,
-			IBaseBundle theInput,
-			Map<String, List<String>> urlParams) {
+	public static BaseHttpClientInvocation createProcessMsgInvocation(FhirContext theContext, String theOperationName, IBaseBundle theInput, Map<String, List<String>> urlParams) {
 		StringBuilder b = new StringBuilder();
 
 		if (b.length() > 0) {
@@ -262,5 +227,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		BaseHttpClientInvocation.appendExtraParamsWithQuestionMark(urlParams, b, b.indexOf("?") == -1);
 
 		return new HttpPostClientInvocation(theContext, theInput, b.toString());
+
 	}
+
 }

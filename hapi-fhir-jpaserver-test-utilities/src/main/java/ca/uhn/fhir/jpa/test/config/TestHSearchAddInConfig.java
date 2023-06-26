@@ -44,13 +44,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.annotation.PreDestroy;
 
 /**
  * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.
@@ -85,11 +85,11 @@ public class TestHSearchAddInConfig {
 			Path tempDirPath = Files.createTempDirectory(null);
 			String dirPath = tempDirPath.toString();
 
+
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-			luceneProperties.put(
-					BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-					HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), dirPath);
 			ourLog.info("Using lucene root dir: {}", dirPath);
@@ -104,6 +104,7 @@ public class TestHSearchAddInConfig {
 			};
 		}
 
+
 		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
@@ -113,7 +114,9 @@ public class TestHSearchAddInConfig {
 		public IHSearchEventListener testHSearchEventDispatcher() {
 			return new TestHSearchEventDispatcher();
 		}
+
 	}
+
 
 	/**
 	 * Our default config - Lucene in-memory.
@@ -127,12 +130,10 @@ public class TestHSearchAddInConfig {
 
 			Map<String, String> luceneHeapProperties = new HashMap<>();
 			luceneHeapProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-			luceneHeapProperties.put(
-					BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-					HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-			luceneHeapProperties.put(
-					BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
 			luceneHeapProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, "true");
@@ -142,6 +143,7 @@ public class TestHSearchAddInConfig {
 				theProperties.putAll(luceneHeapProperties);
 			};
 		}
+
 
 		@Bean
 		public IFulltextSearchSvc fullTextSearchSvc() {
@@ -153,6 +155,7 @@ public class TestHSearchAddInConfig {
 		public IHSearchEventListener testHSearchEventDispatcher() {
 			return new TestHSearchEventDispatcher();
 		}
+
 	}
 
 	/**
@@ -172,7 +175,9 @@ public class TestHSearchAddInConfig {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
 			return null;
 		}
+
 	}
+
 
 	/**
 	 * Enable our Fulltext search with an Elasticsearch container instead of our default Lucene heap.
@@ -189,23 +194,23 @@ public class TestHSearchAddInConfig {
 		@Primary // override the default
 		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
 			return (theProperties) -> {
-				int httpPort = theContainer.getMappedPort(9200); // 9200 is the HTTP port
+				int httpPort = theContainer.getMappedPort(9200);//9200 is the HTTP port
 				String host = theContainer.getHost();
 
 				ourLog.info("Hibernate Search: using elasticsearch - host {} {}", host, httpPort);
 
 				new ElasticsearchHibernatePropertiesBuilder()
-						.setDebugIndexSyncStrategy("read-sync")
-						.setDebugPrettyPrintJsonLog(true)
-						.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
-						.setIndexManagementWaitTimeoutMillis(10000)
-						.setRequiredIndexStatus(IndexStatus.YELLOW)
-						.setScrollTimeoutSecs(60 * 30) // 30 min for tests
-						.setHosts(host + ":" + httpPort)
-						.setProtocol("http")
-						.setUsername("")
-						.setPassword("")
-						.apply(theProperties);
+					.setDebugIndexSyncStrategy("read-sync")
+					.setDebugPrettyPrintJsonLog(true)
+					.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
+					.setIndexManagementWaitTimeoutMillis(10000)
+					.setRequiredIndexStatus(IndexStatus.YELLOW)
+					.setScrollTimeoutSecs(60 * 30) // 30 min for tests
+					.setHosts(host + ":" + httpPort)
+					.setProtocol("http")
+					.setUsername("")
+					.setPassword("")
+					.apply(theProperties);
 			};
 		}
 
@@ -240,5 +245,6 @@ public class TestHSearchAddInConfig {
 			embeddedElasticSearch.start();
 			return embeddedElasticSearch;
 		}
+
 	}
 }

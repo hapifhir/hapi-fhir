@@ -19,16 +19,17 @@
  */
 package ca.uhn.fhir.jpa.term.loinc;
 
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import org.apache.commons.csv.CSVRecord;
-
-import java.util.Map;
-
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
+
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 
@@ -42,7 +43,7 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-
+		
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		if (isBlank(loincNumber)) {
 			return;
@@ -52,14 +53,14 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 		if (concept == null) {
 			return;
 		}
-
+	
 		// The following should be created as designations for each term:
-		// COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)
-		// SHORTNAME
-		// LONG_COMMON_NAME
-		// LinguisticVariantDisplayName
-
-		// -- add formalName designation
+        // COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)
+        // SHORTNAME
+        // LONG_COMMON_NAME
+        // LinguisticVariantDisplayName
+			
+		//-- add formalName designation
 		StringBuilder fullySpecifiedName = new StringBuilder();
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("COMPONENT") + ":"));
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("PROPERTY") + ":"));
@@ -67,37 +68,38 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("SYSTEM") + ":"));
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
 		fullySpecifiedName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
-
+		
 		String fullySpecifiedNameStr = fullySpecifiedName.toString();
-
+		
 		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
 		if (!fullySpecifiedNameStr.equals(":::::")) {
 			concept.addDesignation()
-					.setLanguage(myLanguageCode)
-					.setUseSystem(ITermLoaderSvc.LOINC_URI)
-					.setUseCode("FullySpecifiedName")
-					.setUseDisplay("FullySpecifiedName")
-					.setValue(fullySpecifiedNameStr);
+				.setLanguage(myLanguageCode)
+				.setUseSystem(ITermLoaderSvc.LOINC_URI)
+				.setUseCode("FullySpecifiedName")
+				.setUseDisplay("FullySpecifiedName")
+				.setValue(fullySpecifiedNameStr);
 		}
-
-		// -- other designations
+		
+		//-- other designations
 		addDesignation(theRecord, concept, "SHORTNAME");
-		addDesignation(theRecord, concept, "LONG_COMMON_NAME");
+		addDesignation(theRecord, concept, "LONG_COMMON_NAME");		
 		addDesignation(theRecord, concept, "LinguisticVariantDisplayName");
+		
 	}
 
 	private void addDesignation(CSVRecord theRecord, TermConcept concept, String fieldName) {
-
+		
 		String field = trim(theRecord.get(fieldName));
 		if (isBlank(field)) {
 			return;
 		}
-
+		
 		concept.addDesignation()
-				.setLanguage(myLanguageCode)
-				.setUseSystem(ITermLoaderSvc.LOINC_URI)
-				.setUseCode(fieldName)
-				.setUseDisplay(fieldName)
-				.setValue(field);
+		  .setLanguage(myLanguageCode)
+		  .setUseSystem(ITermLoaderSvc.LOINC_URI)
+		  .setUseCode(fieldName)
+	      .setUseDisplay(fieldName)
+	      .setValue(field);
 	}
 }

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
+import org.apache.commons.collections4.IteratorUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;

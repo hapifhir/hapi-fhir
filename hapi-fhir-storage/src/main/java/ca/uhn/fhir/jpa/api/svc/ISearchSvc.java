@@ -25,6 +25,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 public interface ISearchSvc {
 
-	IBundleProvider executeQuery(
-			String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId);
+	IBundleProvider executeQuery(String theResourceType, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId);
+
 }

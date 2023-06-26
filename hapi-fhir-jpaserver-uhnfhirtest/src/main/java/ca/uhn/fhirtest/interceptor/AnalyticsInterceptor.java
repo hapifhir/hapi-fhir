@@ -19,6 +19,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -26,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.PreDestroy;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -90,10 +91,7 @@ public class AnalyticsInterceptor extends InterceptorAdapter implements IHasSche
 			b.append("&tid=").append(myAnalyticsTid);
 
 			b.append("&t=event");
-			b.append("&an=")
-					.append(UrlUtil.escapeUrlParam(myHostname))
-					.append('+')
-					.append(UrlUtil.escapeUrlParam(next.getApplicationName()));
+			b.append("&an=").append(UrlUtil.escapeUrlParam(myHostname)).append('+').append(UrlUtil.escapeUrlParam(next.getApplicationName()));
 			b.append("&ec=").append(next.getResourceName());
 			b.append("&ea=").append(next.getRestOperation());
 
@@ -108,14 +106,11 @@ public class AnalyticsInterceptor extends InterceptorAdapter implements IHasSche
 		post.setEntity(new StringEntity(contents, ContentType.APPLICATION_FORM_URLENCODED));
 		try (CloseableHttpResponse response = (CloseableHttpResponse) myHttpClient.execute(post)) {
 			ourLog.trace("Analytics response: {}", response);
-			ourLog.info(
-					"Flushed {} analytics events and got HTTP {} {}",
-					eventsToFlush.size(),
-					response.getStatusLine().getStatusCode(),
-					response.getStatusLine().getReasonPhrase());
+			ourLog.info("Flushed {} analytics events and got HTTP {} {}", eventsToFlush.size(), response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
 		} catch (Exception e) {
 			ourLog.error("Failed to submit analytics:", e);
 		}
+
 	}
 
 	private synchronized void flush() {
@@ -167,8 +162,7 @@ public class AnalyticsInterceptor extends InterceptorAdapter implements IHasSche
 
 		synchronized (myEventBuffer) {
 			if (myEventBuffer.size() > myCollectThreshold) {
-				ourLog.warn(
-						"Not collecting analytics on request! Event buffer has {} items in it", myEventBuffer.size());
+				ourLog.warn("Not collecting analytics on request! Event buffer has {} items in it", myEventBuffer.size());
 			}
 			myEventBuffer.add(event);
 		}
@@ -244,5 +238,6 @@ public class AnalyticsInterceptor extends InterceptorAdapter implements IHasSche
 		void setUserAgent(String theUserAgent) {
 			myUserAgent = theUserAgent;
 		}
+
 	}
 }

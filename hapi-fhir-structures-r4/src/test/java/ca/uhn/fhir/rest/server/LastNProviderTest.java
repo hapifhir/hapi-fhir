@@ -25,11 +25,7 @@ public class LastNProviderTest extends BaseR4ServerTest {
 		class MyProvider extends BaseLastNProvider {
 
 			@Override
-			protected IBaseBundle processLastN(
-					IBaseReference theSubject,
-					List<IBaseCoding> theCategories,
-					List<IBaseCoding> theCodes,
-					IPrimitiveType<Integer> theMax) {
+			protected IBaseBundle processLastN(IBaseReference theSubject, List<IBaseCoding> theCategories, List<IBaseCoding> theCodes, IPrimitiveType<Integer> theMax) {
 				myLastSubject = theSubject;
 				myLastCategories = theCategories;
 				myLastCodes = theCodes;
@@ -44,22 +40,17 @@ public class LastNProviderTest extends BaseR4ServerTest {
 		MyProvider provider = new MyProvider();
 		startServer(provider);
 
-		Bundle response = myClient.search()
-				.byUrl(
-						myBaseUrl
-								+ "/Observation/$lastn?subject=Patient/123&category=http://terminology.hl7.org/CodeSystem/observation-category|laboratory,http://terminology.hl7.org/CodeSystem/observation-category|vital-signs&code=http://loinc.org|1111-1,http://loinc.org|2222-2&max=15")
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle response = myClient
+			.search()
+			.byUrl(myBaseUrl + "/Observation/$lastn?subject=Patient/123&category=http://terminology.hl7.org/CodeSystem/observation-category|laboratory,http://terminology.hl7.org/CodeSystem/observation-category|vital-signs&code=http://loinc.org|1111-1,http://loinc.org|2222-2&max=15")
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals("abc123", response.getIdElement().getIdPart());
 		assertEquals("Patient/123", myLastSubject.getReferenceElement().getValue());
 		assertEquals(2, myLastCategories.size());
-		assertEquals(
-				"http://terminology.hl7.org/CodeSystem/observation-category",
-				myLastCategories.get(0).getSystem());
+		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(0).getSystem());
 		assertEquals("laboratory", myLastCategories.get(0).getCode());
-		assertEquals(
-				"http://terminology.hl7.org/CodeSystem/observation-category",
-				myLastCategories.get(1).getSystem());
+		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(1).getSystem());
 		assertEquals("vital-signs", myLastCategories.get(1).getCode());
 		assertEquals(2, myLastCodes.size());
 		assertEquals("http://loinc.org", myLastCodes.get(0).getSystem());
@@ -68,4 +59,6 @@ public class LastNProviderTest extends BaseR4ServerTest {
 		assertEquals("2222-2", myLastCodes.get(1).getCode());
 		assertEquals(15, myLastMax.getValue().intValue());
 	}
+
+
 }

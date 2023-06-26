@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -77,8 +77,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleDataUploader.class);
 
-	private IBaseBundle getBundleFromFile(Integer theLimit, File theSuppliedFile, FhirContext theCtx)
-			throws ParseException, IOException {
+	private IBaseBundle getBundleFromFile(Integer theLimit, File theSuppliedFile, FhirContext theCtx) throws ParseException, IOException {
 		switch (theCtx.getVersion().getVersion()) {
 			case DSTU2:
 				return getBundleFromFileDstu2(theLimit, theSuppliedFile, theCtx);
@@ -87,8 +86,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			case R4:
 				return getBundleFromFileR4(theLimit, theSuppliedFile, theCtx);
 			default:
-				throw new ParseException(Msg.code(1607) + "Invalid spec version for this command: "
-						+ theCtx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1607) + "Invalid spec version for this command: " + theCtx.getVersion().getVersion());
 		}
 	}
 
@@ -130,30 +128,20 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				ourLog.info("FAILED to parse example {}", nextEntry.getName(), e);
 				continue;
 			}
-			ourLog.info(
-					"Found example {} - {} - {} chars",
-					nextEntry.getName(),
-					parsed.getClass().getSimpleName(),
-					exampleString.length());
+			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			if (ctx.getResourceType(parsed).equals("Bundle")) {
-				BaseRuntimeChildDefinition entryChildDef =
-						ctx.getResourceDefinition(parsed).getChildByName("entry");
-				BaseRuntimeElementCompositeDefinition<?> entryDef =
-						(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
 				for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
-					List<IBase> resources =
-							entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+					List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
 					if (resources == null) {
 						continue;
 					}
 					for (IBase nextResource : resources) {
-						if (!ctx.getResourceType(parsed).equals("Bundle")
-								&& ctx.getResourceType(parsed).equals("SearchParameter")) {
-							bundle.addEntry()
-									.setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST))
-									.setResource((IResource) nextResource);
+						if (!ctx.getResourceType(parsed).equals("Bundle") && ctx.getResourceType(parsed).equals("SearchParameter")) {
+							bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) nextResource);
 						}
 					}
 				}
@@ -161,17 +149,14 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				if (ctx.getResourceType(parsed).equals("SearchParameter")) {
 					continue;
 				}
-				bundle.addEntry()
-						.setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST))
-						.setResource((IResource) parsed);
+				bundle.addEntry().setRequest(new EntryRequest().setMethod(HTTPVerbEnum.POST)).setResource((IResource) parsed);
 			}
 		}
 		return bundle;
 	}
 
 	@SuppressWarnings("unchecked")
-	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx)
-			throws IOException {
+	private org.hl7.fhir.dstu3.model.Bundle getBundleFromFileDstu3(Integer limit, File inputFile, FhirContext ctx) throws IOException {
 
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -213,27 +198,20 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				ourLog.info("FAILED to parse example {}", nextEntry.getName(), e);
 				continue;
 			}
-			ourLog.info(
-					"Found example {} - {} - {} chars",
-					nextEntry.getName(),
-					parsed.getClass().getSimpleName(),
-					exampleString.length());
+			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (!result.isSuccessful()) {
+			if (! result.isSuccessful()) {
 				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
 			if (ctx.getResourceType(parsed).equals("Bundle")) {
-				BaseRuntimeChildDefinition entryChildDef =
-						ctx.getResourceDefinition(parsed).getChildByName("entry");
-				BaseRuntimeElementCompositeDefinition<?> entryDef =
-						(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
 				for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
-					List<IBase> resources =
-							entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+					List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
 					if (resources == null) {
 						continue;
 					}
@@ -241,12 +219,8 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 						if (nextResource == null) {
 							continue;
 						}
-						if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass())
-										.getName()
-										.equals("Bundle")
-								&& ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass())
-										.getName()
-										.equals("SearchParameter")) {
+						if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("Bundle")
+							&& ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("SearchParameter")) {
 							BundleEntryComponent entry = bundle.addEntry();
 							entry.getRequest().setMethod(HTTPVerb.POST);
 							entry.setResource((Resource) nextResource);
@@ -266,8 +240,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 	}
 
 	@SuppressWarnings("unchecked")
-	private org.hl7.fhir.r4.model.Bundle getBundleFromFileR4(Integer limit, File inputFile, FhirContext ctx)
-			throws IOException {
+	private org.hl7.fhir.r4.model.Bundle getBundleFromFileR4(Integer limit, File inputFile, FhirContext ctx) throws IOException {
 
 		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
 		bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
@@ -309,27 +282,20 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				ourLog.info("FAILED to parse example {}", nextEntry.getName(), e);
 				continue;
 			}
-			ourLog.info(
-					"Found example {} - {} - {} chars",
-					nextEntry.getName(),
-					parsed.getClass().getSimpleName(),
-					exampleString.length());
+			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (!result.isSuccessful()) {
+			if (! result.isSuccessful()) {
 				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
 			if (ctx.getResourceType(parsed).equals("Bundle")) {
-				BaseRuntimeChildDefinition entryChildDef =
-						ctx.getResourceDefinition(parsed).getChildByName("entry");
-				BaseRuntimeElementCompositeDefinition<?> entryDef =
-						(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+				BaseRuntimeChildDefinition entryChildDef = ctx.getResourceDefinition(parsed).getChildByName("entry");
+				BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 
 				for (IBase nextEntry1 : entryChildDef.getAccessor().getValues(parsed)) {
-					List<IBase> resources =
-							entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
+					List<IBase> resources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry1);
 					if (resources == null) {
 						continue;
 					}
@@ -337,12 +303,8 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 						if (nextResource == null) {
 							continue;
 						}
-						if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass())
-										.getName()
-										.equals("Bundle")
-								&& ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass())
-										.getName()
-										.equals("SearchParameter")) {
+						if (!ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("Bundle")
+							&& ctx.getResourceDefinition((Class<? extends IBaseResource>) nextResource.getClass()).getName().equals("SearchParameter")) {
 							org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = bundle.addEntry();
 							entry.getRequest().setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST);
 							entry.setResource((org.hl7.fhir.r4.model.Resource) nextResource);
@@ -384,16 +346,14 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
-		opt = new Option(
-				"c",
-				"cache",
-				false,
-				"Cache the downloaded examples-json.zip file in the ~/.hapi-fhir-cli/cache directory. Use this file for 12 hours if it exists, instead of fetching it from the internet.");
+		opt = new Option("c", "cache", false,
+			"Cache the downloaded examples-json.zip file in the ~/.hapi-fhir-cli/cache directory. Use this file for 12 hours if it exists, instead of fetching it from the internet.");
 		opt.setRequired(false);
 		options.addOption(opt);
 
 		return options;
 	}
+
 
 	@Override
 	protected Collection<Object> getFilterOutVersions() {
@@ -426,15 +386,12 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			Entry next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceName())
-					|| "DataElement".equals(next.getResource().getResourceName())
-					|| "OperationOutcome".equals(next.getResource().getResourceName())
-					|| "OperationDefinition".equals(next.getResource().getResourceName())) {
+			if ("Subscription".equals(next.getResource().getResourceName()) || "DataElement".equals(next.getResource().getResourceName())
+				|| "OperationOutcome".equals(next.getResource().getResourceName()) || "OperationDefinition".equals(next.getResource().getResourceName())) {
 				ourLog.info("Skipping " + next.getResource().getResourceName() + " example");
 				iterator.remove();
 			} else {
-				IdDt resourceId = new IdDt(next.getResource().getResourceName() + "/EX"
-						+ next.getResource().getId().getIdPart());
+				IdDt resourceId = new IdDt(next.getResource().getResourceName() + "/EX" + next.getResource().getId().getIdPart());
 				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
 					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
 					iterator.remove();
@@ -471,16 +428,10 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				// nextRef.getResourceReference().getReferenceElement().setValue(null);
 				// }
 				nextRef.getResourceReference().setResource(null);
-				String value = nextRef.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless()
-						.getValue();
+				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
 
 				if (isNotBlank(value)) {
-					if (!qualIds.contains(value)
-							&& !nextRef.getResourceReference()
-									.getReferenceElement()
-									.isLocal()) {
+					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
 						nextRef.getResourceReference().getReferenceElement().setValue(null);
 					} else {
@@ -504,6 +455,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		System.gc();
 
 		ourLog.info("Final bundle: {} entries", bundle.getEntry().size());
+
 	}
 
 	private void processBundleDstu3(FhirContext ctx, org.hl7.fhir.dstu3.model.Bundle bundle) {
@@ -514,17 +466,12 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceType().name())
-					|| "DataElement".equals(next.getResource().getResourceType().name())
-					|| "OperationOutcome"
-							.equals(next.getResource().getResourceType().name())
-					|| "OperationDefinition"
-							.equals(next.getResource().getResourceType().name())) {
+			if ("Subscription".equals(next.getResource().getResourceType().name()) || "DataElement".equals(next.getResource().getResourceType().name())
+				|| "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
-				IdDt resourceId = new IdDt(next.getResource().getResourceType() + "/EX"
-						+ next.getResource().getIdElement().getIdPart());
+				IdDt resourceId = new IdDt(next.getResource().getResourceType() + "/EX" + next.getResource().getIdElement().getIdPart());
 				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
 					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
 					iterator.remove();
@@ -560,16 +507,10 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				// nextRef.getResourceReference().getReferenceElement().setValue(null);
 				// }
 				nextRef.getResourceReference().setResource(null);
-				String value = nextRef.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless()
-						.getValue();
+				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
 
 				if (isNotBlank(value)) {
-					if (!qualIds.contains(value)
-							&& !nextRef.getResourceReference()
-									.getReferenceElement()
-									.isLocal()) {
+					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
 						nextRef.getResourceReference().getReferenceElement().setValue(null);
 					} else {
@@ -593,29 +534,23 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		System.gc();
 
 		ourLog.info("Final bundle: {} entries", bundle.getEntry().size());
+
 	}
 
 	private void processBundleR4(FhirContext ctx, org.hl7.fhir.r4.model.Bundle bundle) {
 
 		Set<String> fullIds = new HashSet<>();
 
-		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iterator =
-						bundle.getEntry().iterator();
-				iterator.hasNext(); ) {
+		for (Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> iterator = bundle.getEntry().iterator(); iterator.hasNext(); ) {
 			org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next = iterator.next();
 
 			// DataElement have giant IDs that seem invalid, need to investigate this..
-			if ("Subscription".equals(next.getResource().getResourceType().name())
-					|| "DataElement".equals(next.getResource().getResourceType().name())
-					|| "OperationOutcome"
-							.equals(next.getResource().getResourceType().name())
-					|| "OperationDefinition"
-							.equals(next.getResource().getResourceType().name())) {
+			if ("Subscription".equals(next.getResource().getResourceType().name()) || "DataElement".equals(next.getResource().getResourceType().name())
+				|| "OperationOutcome".equals(next.getResource().getResourceType().name()) || "OperationDefinition".equals(next.getResource().getResourceType().name())) {
 				ourLog.info("Skipping " + next.getResource().getResourceType() + " example");
 				iterator.remove();
 			} else {
-				IdDt resourceId = new IdDt(next.getResource().getResourceType() + "/EX"
-						+ next.getResource().getIdElement().getIdPart());
+				IdDt resourceId = new IdDt(next.getResource().getResourceType() + "/EX" + next.getResource().getIdElement().getIdPart());
 				if (!fullIds.add(resourceId.toUnqualifiedVersionless().getValue())) {
 					ourLog.info("Discarding duplicate resource: " + resourceId.getValue());
 					iterator.remove();
@@ -646,16 +581,10 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			List<ResourceReferenceInfo> refs = ctx.newTerser().getAllResourceReferences(next.getResource());
 			for (ResourceReferenceInfo nextRef : refs) {
 				nextRef.getResourceReference().setResource(null);
-				String value = nextRef.getResourceReference()
-						.getReferenceElement()
-						.toUnqualifiedVersionless()
-						.getValue();
+				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
 
 				if (isNotBlank(value)) {
-					if (!qualIds.contains(value)
-							&& !nextRef.getResourceReference()
-									.getReferenceElement()
-									.isLocal()) {
+					if (!qualIds.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
 						ourLog.info("Discarding unknown reference: {}", value);
 						nextRef.getResourceReference().getReferenceElement().setValue(null);
 					} else {
@@ -670,6 +599,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		System.gc();
 
 		ourLog.info("Final bundle: {} entries", bundle.getEntry().size());
+
 	}
 
 	@Override
@@ -680,9 +610,8 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
 			throw new ParseException(Msg.code(1609) + "No target server (-t) specified");
-		} else if (!targetServer.startsWith("http") && !targetServer.startsWith("file")) {
-			throw new ParseException(
-					Msg.code(1610) + "Invalid target server specified, must begin with 'http' or 'file'");
+		} else if (! targetServer.startsWith("http") && ! targetServer.startsWith("file")) {
+			throw new ParseException(Msg.code(1610) + "Invalid target server specified, must begin with 'http' or 'file'");
 		}
 
 		Integer limit = null;
@@ -691,8 +620,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			try {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
-				throw new ParseException(
-						Msg.code(1611) + "Invalid number for limit (-l) option, must be a number: " + limitString);
+				throw new ParseException(Msg.code(1611) + "Invalid number for limit (-l) option, must be a number: " + limitString);
 			}
 		}
 
@@ -708,8 +636,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				specUrl = "http://build.fhir.org/examples-json.zip";
 				break;
 			default:
-				throw new ParseException(Msg.code(1612) + "Invalid spec version for this command: "
-						+ ctx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1612) + "Invalid spec version for this command: " + ctx.getVersion().getVersion());
 		}
 
 		String filepath = theCommandLine.getOptionValue('d');
@@ -727,10 +654,11 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 		} catch (Exception e) {
 			throw new CommandFailureException(Msg.code(1613) + e);
 		}
+
+
 	}
 
-	private void sendBundleToTarget(
-			String targetServer, FhirContext ctx, IBaseBundle bundle, CommandLine theCommandLine) throws Exception {
+	private void sendBundleToTarget(String targetServer, FhirContext ctx, IBaseBundle bundle, CommandLine theCommandLine) throws Exception {
 		List<IBaseResource> resources = BundleUtil.toListOfResources(ctx, bundle);
 
 		for (Iterator<IBaseResource> iter = resources.iterator(); iter.hasNext(); ) {
@@ -757,10 +685,8 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			for (int i = 0; i < subResourceList.size(); i++) {
 				IBaseResource nextCandidateSource = subResourceList.get(i);
 				for (ResourceReferenceInfo nextRef : ctx.newTerser().getAllResourceReferences(nextCandidateSource)) {
-					String nextRefResourceType =
-							nextRef.getResourceReference().getReferenceElement().getResourceType();
-					String nextRefIdPart =
-							nextRef.getResourceReference().getReferenceElement().getIdPart();
+					String nextRefResourceType = nextRef.getResourceReference().getReferenceElement().getResourceType();
+					String nextRefIdPart = nextRef.getResourceReference().getReferenceElement().getIdPart();
 					if (isBlank(nextRefResourceType) || isBlank(nextRefIdPart)) {
 						nextRef.getResourceReference().setResource(null);
 						nextRef.getResourceReference().setReference(null);
@@ -772,15 +698,14 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 					String nextTarget = nextRefResourceType + "/EX" + nextRefIdPart;
 					nextRef.getResourceReference().setResource(null);
 					nextRef.getResourceReference().setReference(nextTarget);
-					if (!checkedTargets.add(nextTarget)) {
+					if (! checkedTargets.add(nextTarget)) {
 						continue;
 					}
 
 					for (int j = 0; j < resources.size(); j++) {
 						String candidateTarget = resources.get(j).getIdElement().getValue();
 						if (isNotBlank(nextTarget) && nextTarget.equals(candidateTarget)) {
-							ourLog.info(
-									"Reflexively adding resource {} to bundle as it is a reference target", nextTarget);
+							ourLog.info("Reflexively adding resource {} to bundle as it is a reference target", nextTarget);
 							subResourceList.add(resources.remove(j));
 							break;
 						}
@@ -793,15 +718,11 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				continue;
 			}
 
-			ourLog.info(
-					"About to upload {} examples in a transaction, {} remaining",
-					subResourceList.size(),
-					resources.size());
+			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
 
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
 			bundleFactory.addTotalResultsToBundle(subResourceList.size(), BundleTypeEnum.TRANSACTION);
-			bundleFactory.addResourcesToBundle(
-					new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
+			bundleFactory.addResourcesToBundle(new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
 
 			String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(subBundle);
@@ -837,5 +758,8 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 
 			subResourceList.clear();
 		}
+
 	}
+
+
 }

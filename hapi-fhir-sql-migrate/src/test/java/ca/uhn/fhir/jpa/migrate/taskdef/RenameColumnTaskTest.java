@@ -34,14 +34,12 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(
-				JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnAlreadyExists_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testForeignKeyColumnAlreadyExists_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnAlreadyExists(true);
@@ -54,9 +52,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -69,18 +65,14 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
-		assertThat(
-				JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "PARENTREF"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "PARENTREF"));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnAlreadyExists_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testForeignKeyColumnAlreadyExists_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnAlreadyExists(false);
@@ -88,8 +80,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testBothExistDeleteTargetFirst(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testBothExistDeleteTargetFirst(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
@@ -110,8 +101,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnBothExistDeleteTargetFirst_MySql(
-			Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnBothExistDeleteTargetFirst(true);
@@ -119,8 +109,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	private void testForeignKeyColumnBothExistDeleteTargetFirst(boolean isMySql) throws SQLException {
 		executeSql("create table PARENT (PARENTID bigint not null, TEXTCOL varchar(255), primary key (PARENTID))");
-		executeSql(
-				"create table RELATION (RELATIONID bigint not null, TEXTCOL varchar(255), primary key (RELATIONID))");
+		executeSql("create table RELATION (RELATIONID bigint not null, TEXTCOL varchar(255), primary key (RELATIONID))");
 		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint, NOKREF bigint)");
 		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PARENTID)");
 		executeSql("alter table CHILD add constraint FK_NOK foreign key (NOKREF) references RELATION(RELATIONID)");
@@ -128,12 +117,8 @@ public class RenameColumnTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "RELATION", "CHILD"), hasSize(1));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"),
-				containsInAnyOrder("FK_NOK"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_NOK"));
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -150,15 +135,13 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "NOKREF"));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "NOKREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnBothExistDeleteTargetFirst_OtherDB(
-			Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testForeignKeyColumnBothExistDeleteTargetFirst_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnBothExistDeleteTargetFirst(false);
@@ -166,8 +149,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget(
-			Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
@@ -185,12 +167,9 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(
-					Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "
-							+ Msg.code(54)
-							+ "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL",
-					e.getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "+ Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
 		}
+
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -209,14 +188,12 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(
-				JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnDoesntAlreadyExist_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testForeignKeyColumnDoesntAlreadyExist_MySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnDoesntAlreadyExist(true);
@@ -229,9 +206,7 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "PARENTREF", "CHILD"), containsInAnyOrder("FK_MOM"));
 
 		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("CHILD");
@@ -246,15 +221,13 @@ public class RenameColumnTaskTest extends BaseTest {
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "CHILD"), containsInAnyOrder("PID", "MOMREF"));
 
-		assertThat(
-				JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "MOMREF", "CHILD"),
-				containsInAnyOrder("FK_MOM"));
+		assertThat(JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), "MOMREF", "CHILD"), containsInAnyOrder("FK_MOM"));
+
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testForeignKeyColumnDoesntAlreadyExist_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testForeignKeyColumnDoesntAlreadyExist_OtherDB(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		testForeignKeyColumnDoesntAlreadyExist(false);
@@ -277,13 +250,10 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(
-					Msg.code(47)
-							+ "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "
-							+ Msg.code(56)
-							+ "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!",
-					e.getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getMessage());
 		}
+
+
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -320,11 +290,10 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(
-					Msg.code(47)
-							+ "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "
-							+ Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!",
-					e.getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getMessage());
 		}
+
+
 	}
+
 }

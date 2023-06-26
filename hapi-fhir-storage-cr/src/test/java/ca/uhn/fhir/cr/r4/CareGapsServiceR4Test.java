@@ -60,10 +60,8 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	Function<RequestDetails, CareGapsService> myCareGapsService;
 
 	CrProperties myCrProperties;
-
 	@Autowired
 	MeasureService myMeasureService;
-
 	Executor myExecutor;
 
 	@BeforeEach
@@ -76,8 +74,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 		myCrProperties = new CrProperties();
 		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
-		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration =
-				new CrProperties.MeasureProperties.MeasureReportConfiguration();
+		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
 		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
 		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		measureProperties.setMeasureReportConfiguration(measureReportConfiguration);
@@ -85,19 +82,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 		myExecutor = Executors.newSingleThreadExecutor();
 
-		// measureService = new MeasureService();
+		//measureService = new MeasureService();
 
 		myCareGapsService = requestDetails -> {
-			CareGapsService careGapsService =
-					new CareGapsService(myCrProperties, myMeasureService, getDaoRegistry(), myExecutor, requestDetails);
+			CareGapsService careGapsService = new CareGapsService(myCrProperties, myMeasureService, getDaoRegistry(), myExecutor, requestDetails);
 			return careGapsService;
 		};
+
 	}
 
 	private void beforeEachMeasure() {
 		loadBundle("BreastCancerScreeningFHIR-bundle.json");
 	}
-
 	private void beforeEachMultipleMeasures() {
 		loadBundle("BreastCancerScreeningFHIR-bundle.json");
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
@@ -112,20 +108,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 
 		assertNotNull(result);
 	}
@@ -137,20 +130,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						null,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(null, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -161,20 +151,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						new DateDt("12-21-2025"),
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(new DateDt("12-21-2025"), ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -185,20 +172,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						null,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, null
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -208,20 +192,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						new DateDt("12-21-2025"),
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, new DateDt("12-21-2025")
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -233,20 +214,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
 		assertDoesNotThrow(() -> {
-			myCareGapsService
-					.apply(requestDetails)
-					.getCareGapsReport(
-							ourPeriodStart,
-							ourPeriodEnd,
-							null,
-							ourSubjectGroupValid,
-							null,
-							null,
-							myStatuses,
-							myMeasures,
-							null,
-							null,
-							null);
+			 myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+				, null
+				, ourSubjectGroupValid
+				, null
+				, null
+				, myStatuses
+				, myMeasures
+				, null
+				, null
+				, null
+			);
 		});
 	}
 
@@ -257,20 +235,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectInvalid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectInvalid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 		assertTrue(result.getParameter().isEmpty());
 	}
 
@@ -281,20 +256,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectReferenceInvalid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectReferenceInvalid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 		assertTrue(result.getParameter().isEmpty());
 	}
 
@@ -305,20 +277,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						ourPractitionerValid,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, ourPractitionerValid
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 		assertTrue(result.getParameter().isEmpty());
 	}
 
@@ -329,20 +298,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						ourOrganizationValid,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 		assertTrue(result.getParameter().isEmpty());
 	}
 
@@ -353,20 +319,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						null,
-						null,
-						ourOrganizationValid,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, null
+			, null
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -376,20 +339,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						null,
-						ourPractitionerValid,
-						ourOrganizationValid,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, null
+			, ourPractitionerValid
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -399,20 +359,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						null,
-						ourPractitionerValid,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null));
+		assertThrows(NotImplementedOperationException.class, () ->  myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, null
+			, ourPractitionerValid
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
@@ -421,20 +378,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		var result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						null,
-						null,
-						null,
-						null);
+		var result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, null
+			, null
+			, null
+			, null
+		);
 
 		assertTrue(result.getParameter().isEmpty());
 	}
@@ -446,20 +400,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 		assertTrue(result.getParameter().isEmpty());
 	}
 
@@ -470,20 +421,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		var result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						null,
-						myMeasures,
-						null,
-						null,
-						null);
+		var result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, null
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 
 		assertTrue(result.getParameter().isEmpty());
 	}
@@ -499,27 +447,24 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectPatientValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						myMeasureUrls,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectPatientValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, myMeasureUrls
+			, null
+		);
 
 		assertNotNull(result);
 
-		// Test to search for how many search parameters are created.
-		// only 1 should be created.
-		var searchParams =
-				this.myDaoRegistry.getResourceDao("SearchParameter").search(new SearchParameterMap(), requestDetails);
+		//Test to search for how many search parameters are created.
+		//only 1 should be created.
+		var searchParams = this.myDaoRegistry.getResourceDao("SearchParameter")
+			.search(new SearchParameterMap(), requestDetails);
 
 		assertNotNull(searchParams);
 
@@ -535,20 +480,17 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = myCareGapsService
-				.apply(requestDetails)
-				.getCareGapsReport(
-						ourPeriodStart,
-						ourPeriodEnd,
-						null,
-						ourSubjectGroupParallelValid,
-						null,
-						null,
-						myStatuses,
-						myMeasures,
-						null,
-						null,
-						null);
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
+			, null
+			, ourSubjectGroupParallelValid
+			, null
+			, null
+			, myStatuses
+			, myMeasures
+			, null
+			, null
+			, null
+		);
 
 		assertNotNull(result);
 	}

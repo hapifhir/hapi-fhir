@@ -27,15 +27,18 @@ public class CompositeClientParam<A extends IParam, B extends IParam> extends Ba
 	private String myName;
 
 	public CompositeClientParam(String theName) {
-		myName = theName;
+		myName=theName;
 	}
+
 
 	@Override
 	public String getParamName() {
 		return myName;
 	}
-
+	
 	public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
-		return new CompositeCriterion<A, B>(myName, theLeft);
+		return new CompositeCriterion<A,B>(myName, theLeft);
 	}
+	
+	
 }

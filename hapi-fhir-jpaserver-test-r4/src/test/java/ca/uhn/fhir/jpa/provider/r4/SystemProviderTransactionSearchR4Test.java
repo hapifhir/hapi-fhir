@@ -51,8 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchR4Test.class);
 	private static RestfulServer myRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
@@ -61,12 +60,12 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	private static String ourServerBase;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setMaximumSearchResultCountInTransaction(
-				new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
+		myStorageSettings.setMaximumSearchResultCountInTransaction(new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
 	}
 
 	@BeforeEach
@@ -91,8 +90,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			medicationRequestRp.setDao(myMedicationRequestDao);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(
-					patientRp, questionnaireRp, observationRp, organizationRp, medicationRequestRp, medicationRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, medicationRequestRp, medicationRp);
 
 			restServer.setPlainProviders(mySystemProvider);
 
@@ -110,11 +108,10 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
-			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+            int myPort = JettyUtil.getPortForStartedServer(ourServer);
+            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager =
-					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -141,11 +138,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
 			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i + 1));
-			String id = myPatientDao
-					.update(patient)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getValue();
+			String id = myPatientDao.update(patient).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;
@@ -157,7 +150,11 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=_id");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=_id");
 
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
@@ -178,7 +175,11 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=name");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -190,11 +191,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = ourClient
-				.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
@@ -208,13 +205,15 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	public void testBatchWithManyGets() {
 		List<String> ids = create20Patients();
 
+
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 		for (int i = 0; i < 30; i++) {
-			input.addEntry()
-					.getRequest()
-					.setMethod(HTTPVerb.GET)
-					.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerb.GET)
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
@@ -265,50 +264,31 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		myMedicationRequestDao.update(medRequest);
 
 		SearchParameterMap map = new SearchParameterMap();
-		map.add(
-				MedicationRequest.SP_INTENT,
-				new TokenOrListParam().add(null, "plan").add(null, "order"));
-		map.add(
-				MedicationRequest.SP_MEDICATION,
-				new ReferenceParam().setChain("code").setValue("50580-0449-23"));
+		map.add(MedicationRequest.SP_INTENT, new TokenOrListParam().add(null, "plan").add(null, "order"));
+		map.add(MedicationRequest.SP_MEDICATION, new ReferenceParam().setChain("code").setValue("50580-0449-23"));
 		Bundle b = ourClient
-				.search()
-				.forResource("MedicationRequest")
-				.where(MedicationRequest.INTENT.exactly().codes("plan", "order"))
-				.and(MedicationRequest.MEDICATION.hasChainedProperty(
-						Medication.CODE.exactly().code("50580-0449-23")))
-				.returnBundle(Bundle.class)
-				.execute();
+			.search()
+			.forResource("MedicationRequest")
+			.where(MedicationRequest.INTENT.exactly().codes("plan", "order"))
+			.and(MedicationRequest.MEDICATION.hasChainedProperty(Medication.CODE.exactly().code("50580-0449-23")))
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(1, b.getEntry().size());
-		assertEquals(
-				"MedicationRequest/MR635079",
-				b.getEntry()
-						.get(0)
-						.getResource()
-						.getIdElement()
-						.toUnqualifiedVersionless()
-						.getValue());
+		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 		b = new Bundle();
 		b.setType(BundleType.BATCH);
 		b.addEntry()
-				.setFullUrl(IdType.newRandomUuid().getValueAsString())
-				.getRequest()
-				.setMethod(HTTPVerb.GET)
-				.setUrl("MedicationRequest?intent=plan,order&medication.code=50580-0449-23&patient=P3000254749");
+			.setFullUrl(IdType.newRandomUuid().getValueAsString())
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("MedicationRequest?intent=plan,order&medication.code=50580-0449-23&patient=P3000254749");
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		b = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, b.getEntry().size());
-		assertEquals(
-				"MedicationRequest/MR635079",
-				b.getEntry()
-						.get(0)
-						.getResource()
-						.getIdElement()
-						.toUnqualifiedVersionless()
-						.getValue());
+		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -317,7 +297,11 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=_id");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=_id");
 
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
 
@@ -338,7 +322,11 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=name");
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -350,11 +338,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = ourClient
-				.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
@@ -368,13 +352,15 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	public void testTransactionWithManyGets() {
 		List<String> ids = create20Patients();
 
+
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
 		for (int i = 0; i < 30; i++) {
-			input.addEntry()
-					.getRequest()
-					.setMethod(HTTPVerb.GET)
-					.setUrl("Patient?_count=5&_sort=family&identifier=urn:foo|A,AAAAA" + i);
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerb.GET)
+				.setUrl("Patient?_count=5&_sort=family&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
@@ -409,7 +395,8 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
 		input.setId("bundle-batch-test");
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("/Medication?_include=Medication:ingredient");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET)
+			.setUrl("/Medication?_include=Medication:ingredient");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -420,8 +407,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	private List<String> toIds(Bundle theRespBundle) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (BundleEntryComponent next : theRespBundle.getEntry()) {
-			retVal.add(
-					next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}
@@ -430,4 +416,5 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
+
 }

@@ -56,14 +56,15 @@ public class UrlUtilTest {
 	@Test
 	public void testUnescape() {
 		assertAll(
-				() -> assertEquals(Constants.CT_JSON, UrlUtil.unescape(Constants.CT_JSON)),
-				() -> assertEquals(Constants.CT_NDJSON, UrlUtil.unescape(Constants.CT_NDJSON)),
-				() -> assertEquals(Constants.CT_XML, UrlUtil.unescape(Constants.CT_XML)),
-				() -> assertEquals(Constants.CT_XML_PATCH, UrlUtil.unescape(Constants.CT_XML_PATCH)),
-				() -> assertEquals(Constants.CT_APPLICATION_GZIP, UrlUtil.unescape(Constants.CT_APPLICATION_GZIP)),
-				() -> assertEquals(Constants.CT_RDF_TURTLE, UrlUtil.unescape(Constants.CT_RDF_TURTLE)),
-				() -> assertEquals(Constants.CT_FHIR_JSON, UrlUtil.unescape(Constants.CT_FHIR_JSON)),
-				() -> assertEquals(Constants.CT_FHIR_NDJSON, UrlUtil.unescape(Constants.CT_FHIR_NDJSON)));
+			() -> assertEquals(Constants.CT_JSON, UrlUtil.unescape(Constants.CT_JSON)),
+			() -> assertEquals(Constants.CT_NDJSON, UrlUtil.unescape(Constants.CT_NDJSON)),
+			() -> assertEquals(Constants.CT_XML, UrlUtil.unescape(Constants.CT_XML)),
+			() -> assertEquals(Constants.CT_XML_PATCH, UrlUtil.unescape(Constants.CT_XML_PATCH)),
+			() -> assertEquals(Constants.CT_APPLICATION_GZIP, UrlUtil.unescape(Constants.CT_APPLICATION_GZIP)),
+			() -> assertEquals(Constants.CT_RDF_TURTLE, UrlUtil.unescape(Constants.CT_RDF_TURTLE)),
+			() -> assertEquals(Constants.CT_FHIR_JSON, UrlUtil.unescape(Constants.CT_FHIR_JSON)),
+			() -> assertEquals(Constants.CT_FHIR_NDJSON, UrlUtil.unescape(Constants.CT_FHIR_NDJSON))
+		);
 	}
 
 	@Test
@@ -85,30 +86,16 @@ public class UrlUtilTest {
 
 	@Test
 	public void testParseUrl() {
-		assertEquals(
-				"ConceptMap",
-				UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde")
-						.getResourceType());
-		assertEquals(
-				"ConceptMap",
-				UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde")
-						.getResourceType());
-		assertEquals(
-				"ussgfht-loincde",
-				UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde")
-						.getResourceId());
-		assertEquals(
-				null,
-				UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?")
-						.getParams());
-		assertEquals(
-				"a=b",
-				UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b")
-						.getParams());
+		assertEquals("ConceptMap", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType());
+		assertEquals("ConceptMap", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType());
+		assertEquals("ussgfht-loincde", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceId());
+		assertEquals(null, UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams());
+		assertEquals("a=b", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams());
 
 		assertEquals("a=b", UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams());
 		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap?a=b").getParams());
 		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap/ussgfht-loincde?a=b").getParams());
+
 	}
 
 	@Test
@@ -125,22 +112,20 @@ public class UrlUtilTest {
 	@Test
 	public void testTranslateMatchUrl_UrlWithSpaces() {
 		// Real space
-		assertThat(
-				UrlUtil.translateMatchUrl("Observation?names=homer%20simpson"),
-				containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
 
 		// Treat + as an actual + and not a space
-		assertThat(
-				UrlUtil.translateMatchUrl("Observation?names=homer+simpson"),
-				containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
+
 	}
 
 	@Test
 	public void testTranslateMatchUrl_UrlWithPipe() {
 		// Real space
-		assertThat(
-				UrlUtil.translateMatchUrl("Observation?names=homer|simpson"),
-				containsInAnyOrder(new BasicNameValuePair("names", "homer|simpson")));
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer|simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer|simpson")));
 	}
 
 	@ParameterizedTest
@@ -175,4 +160,5 @@ public class UrlUtilTest {
 			assertEquals(theExpected, actual);
 		}
 	}
+
 }

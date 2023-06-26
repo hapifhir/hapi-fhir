@@ -11,49 +11,33 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.StringType;
 
 @Block
-public class _OtherReferrerComponent extends BackboneElement
-		implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
+public class _OtherReferrerComponent extends BackboneElement implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
 
 	/**
 	 * name (extension)
 	 */
-	@Child(
-			name = FIELD_NAME,
-			min = 0,
-			max = 1,
-			type = {StringType.class})
+	@Child(name = FIELD_NAME, min = 0, max = 1, type = {StringType.class})
 	@Description(shortDefinition = "", formalDefinition = "Name of the referrer")
 	@Extension(url = EXTURL_NAME, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.StringType ourName;
-
 	public static final String EXTURL_NAME = "http://myfhir.dk/x/MyReferrer/otherReferrer/name";
 	public static final String FIELD_NAME = "name";
 	/**
 	 * address (extension)
 	 */
-	@Child(
-			name = FIELD_ADDRESS,
-			min = 0,
-			max = 1,
-			type = {Address.class})
+	@Child(name = FIELD_ADDRESS, min = 0, max = 1, type = {Address.class})
 	@Description(shortDefinition = "", formalDefinition = "Address of the referrer")
 	@Extension(url = EXTURL_ADDRESS, definedLocally = false, isModifier = false)
 	protected Address ourAddress;
-
 	public static final String EXTURL_ADDRESS = "http://myfhir.dk/x/MyReferrer/otherReferrer/address";
 	public static final String FIELD_ADDRESS = "address";
 	/**
 	 * phoneNumber (extension)
 	 */
-	@Child(
-			name = FIELD_PHONENUMBER,
-			min = 0,
-			max = 1,
-			type = {StringType.class})
+	@Child(name = FIELD_PHONENUMBER, min = 0, max = 1, type = {StringType.class})
 	@Description(shortDefinition = "", formalDefinition = "Phone number of the referrer")
 	@Extension(url = EXTURL_PHONENUMBER, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.StringType ourPhoneNumber;
-
 	public static final String EXTURL_PHONENUMBER = "http://myfhir.dk/x/MyReferrer/otherReferrer/phoneNumber";
 	public static final String FIELD_PHONENUMBER = "phoneNumber";
 
@@ -84,9 +68,7 @@ public class _OtherReferrerComponent extends BackboneElement
 			return false;
 		}
 		_OtherReferrerComponent that = (_OtherReferrerComponent) other;
-		return compareDeep(ourName, that.ourName, true)
-				&& compareDeep(ourAddress, that.ourAddress, true)
-				&& compareDeep(ourPhoneNumber, that.ourPhoneNumber, true);
+		return compareDeep(ourName, that.ourName, true) && compareDeep(ourAddress, that.ourAddress, true) && compareDeep(ourPhoneNumber, that.ourPhoneNumber, true);
 	}
 
 	@Override
@@ -105,7 +87,8 @@ public class _OtherReferrerComponent extends BackboneElement
 	}
 
 	public org.hl7.fhir.dstu3.model.StringType _getName() {
-		if (ourName == null) ourName = new org.hl7.fhir.dstu3.model.StringType();
+		if (ourName == null)
+			ourName = new org.hl7.fhir.dstu3.model.StringType();
 		return ourName;
 	}
 
@@ -115,7 +98,8 @@ public class _OtherReferrerComponent extends BackboneElement
 	}
 
 	public Address _getAddress() {
-		if (ourAddress == null) ourAddress = new Address();
+		if (ourAddress == null)
+			ourAddress = new Address();
 		return ourAddress;
 	}
 
@@ -125,7 +109,8 @@ public class _OtherReferrerComponent extends BackboneElement
 	}
 
 	public org.hl7.fhir.dstu3.model.StringType _getPhoneNumber() {
-		if (ourPhoneNumber == null) ourPhoneNumber = new org.hl7.fhir.dstu3.model.StringType();
+		if (ourPhoneNumber == null)
+			ourPhoneNumber = new org.hl7.fhir.dstu3.model.StringType();
 		return ourPhoneNumber;
 	}
 
@@ -133,4 +118,5 @@ public class _OtherReferrerComponent extends BackboneElement
 		ourPhoneNumber = theValue;
 		return this;
 	}
+
 }

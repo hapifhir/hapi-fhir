@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import org.slf4j.Logger;
 
@@ -28,7 +29,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkExportUtil {
 	private static final Logger ourLog = getLogger(BulkExportUtil.class);
 
-	private BulkExportUtil() {}
+	private BulkExportUtil() {
+
+	}
 
 	/**
 	 * Converts Batch2 StatusEnum -> BulkExportJobStatusEnum
@@ -38,7 +41,7 @@ public class BulkExportUtil {
 			case QUEUED:
 			case FINALIZE:
 				return BulkExportJobStatusEnum.SUBMITTED;
-			case COMPLETED:
+			case COMPLETED :
 				return BulkExportJobStatusEnum.COMPLETE;
 			case ERRORED:
 			case IN_PROGRESS:

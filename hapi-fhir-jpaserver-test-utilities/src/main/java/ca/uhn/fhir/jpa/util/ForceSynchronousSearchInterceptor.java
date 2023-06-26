@@ -29,4 +29,5 @@ public class ForceSynchronousSearchInterceptor {
 	public void storagePreSearchRegistered(SearchParameterMap theMap) {
 		theMap.setLoadSynchronous(true);
 	}
+
 }

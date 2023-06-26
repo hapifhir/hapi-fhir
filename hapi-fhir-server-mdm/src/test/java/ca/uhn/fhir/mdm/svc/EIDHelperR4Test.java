@@ -25,6 +25,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+
 public class EIDHelperR4Test extends BaseR4Test {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
@@ -44,19 +45,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 	@BeforeEach
 	public void before() {
 		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
-				.thenReturn(new RuntimeSearchParam(
-						null,
-						null,
-						"identifier",
-						"Description",
-						"identifier",
-						RestSearchParameterTypeEnum.STRING,
-						new HashSet<>(),
-						new HashSet<>(),
-						RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
-						null,
-						null,
-						null));
+			.thenReturn(new RuntimeSearchParam(null, null, "identifier", "Description", "identifier", RestSearchParameterTypeEnum.STRING, new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
 
 		myMdmSettings = new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)) {
 			{
@@ -70,9 +59,9 @@ public class EIDHelperR4Test extends BaseR4Test {
 	public void testExtractionOfInternalEID() {
 		Patient patient = new Patient();
 		patient.addIdentifier()
-				.setSystem(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)
-				.setValue("simpletest")
-				.setUse(Identifier.IdentifierUse.SECONDARY);
+			.setSystem(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)
+			.setValue("simpletest")
+			.setUse(Identifier.IdentifierUse.SECONDARY);
 
 		List<CanonicalEID> externalEid = myEidHelper.getHapiEid(patient);
 
@@ -87,7 +76,9 @@ public class EIDHelperR4Test extends BaseR4Test {
 		String uniqueID = "uniqueID!";
 
 		Patient patient = new Patient();
-		patient.addIdentifier().setSystem(EXTERNAL_ID_SYSTEM_FOR_TEST).setValue(uniqueID);
+		patient.addIdentifier()
+			.setSystem(EXTERNAL_ID_SYSTEM_FOR_TEST)
+			.setValue(uniqueID);
 
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 

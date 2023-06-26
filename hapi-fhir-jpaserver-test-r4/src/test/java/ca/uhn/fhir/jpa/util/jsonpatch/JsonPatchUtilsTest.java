@@ -27,13 +27,14 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 	public void testInvalidPatchJsonError() {
 
 		// Quotes are incorrect in the "value" body
-		String patchText = "[ {\n" + "        \"comment\": \"add image to examination\",\n"
-				+ "        \"patch\": [ {\n"
-				+ "            \"op\": \"add\",\n"
-				+ "            \"path\": \"/derivedFrom/-\",\n"
-				+ "            \"value\": [{'reference': '/Media/465eb73a-bce3-423a-b86e-5d0d267638f4'}]\n"
-				+ "        } ]\n"
-				+ "    } ]";
+		String patchText = "[ {\n" +
+			"        \"comment\": \"add image to examination\",\n" +
+			"        \"patch\": [ {\n" +
+			"            \"op\": \"add\",\n" +
+			"            \"path\": \"/derivedFrom/-\",\n" +
+			"            \"value\": [{'reference': '/Media/465eb73a-bce3-423a-b86e-5d0d267638f4'}]\n" +
+			"        } ]\n" +
+			"    } ]";
 
 		try {
 			JsonPatchUtils.apply(ourCtx, new Observation(), patchText);
@@ -44,19 +45,21 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 			// The error message should not contain the patch body
 			assertThat(e.toString(), not(containsString("add image to examination")));
 		}
+
 	}
 
 	@Test
 	public void testInvalidPatchSyntaxError() {
 
 		// Quotes are incorrect in the "value" body
-		String patchText = "[ {" + "        \"comment\": \"add image to examination\","
-				+ "        \"patch\": [ {"
-				+ "            \"op\": \"foo\","
-				+ "            \"path\": \"/derivedFrom/-\","
-				+ "            \"value\": [{\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]"
-				+ "        } ]\n"
-				+ "    } ]";
+		String patchText = "[ {" +
+			"        \"comment\": \"add image to examination\"," +
+			"        \"patch\": [ {" +
+			"            \"op\": \"foo\"," +
+			"            \"path\": \"/derivedFrom/-\"," +
+			"            \"value\": [{\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]" +
+			"        } ]\n" +
+			"    } ]";
 
 		try {
 			JsonPatchUtils.apply(ourCtx, new Observation(), patchText);
@@ -67,19 +70,22 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 			// The error message should not contain the patch body
 			assertThat(e.toString(), not(containsString("add image to examination")));
 		}
+
 	}
+
 
 	@Test
 	public void testPatchAddArray() {
 
-		String patchText = "[ " + "      {"
-				+ "        \"op\": \"add\","
-				+ "        \"path\": \"/derivedFrom\","
-				+ "        \"value\": ["
-				+ "          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}"
-				+ "        ]"
-				+ "      } "
-				+ "]";
+		String patchText = "[ " +
+			"      {" +
+			"        \"op\": \"add\"," +
+			"        \"path\": \"/derivedFrom\"," +
+			"        \"value\": [" +
+			"          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}" +
+			"        ]" +
+			"      } " +
+			"]";
 
 		Observation toUpdate = new Observation();
 		toUpdate = JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
@@ -93,25 +99,24 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 	@Test
 	public void testPatchAddInvalidElement() {
 
-		String patchText = "[ " + "      {"
-				+ "        \"op\": \"add\","
-				+ "        \"path\": \"/derivedFromXXX\","
-				+ "        \"value\": ["
-				+ "          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}"
-				+ "        ]"
-				+ "      } "
-				+ "]";
+		String patchText = "[ " +
+			"      {" +
+			"        \"op\": \"add\"," +
+			"        \"path\": \"/derivedFromXXX\"," +
+			"        \"value\": [" +
+			"          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}" +
+			"        ]" +
+			"      } " +
+			"]";
 
 		Observation toUpdate = new Observation();
 		try {
 			JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825)
-							+ "Unknown element 'derivedFromXXX' found during parse",
-					e.getMessage());
+			assertEquals(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse", e.getMessage());
 		}
+
 	}
 
 	@Override

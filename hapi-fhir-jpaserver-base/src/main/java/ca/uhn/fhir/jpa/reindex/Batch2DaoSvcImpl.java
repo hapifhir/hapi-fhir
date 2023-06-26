@@ -32,25 +32,25 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
@@ -76,35 +76,27 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(
-			Date theStart,
-			Date theEnd,
-			@Nonnull Integer thePageSize,
-			@Nullable RequestPartitionId theRequestPartitionId,
-			@Nullable String theUrl) {
+	public IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 		return myTransactionService
-				.withSystemRequest()
-				.withRequestPartitionId(theRequestPartitionId)
-				.execute(() -> {
-					if (theUrl == null) {
-						return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
-					} else {
-						return fetchResourceIdsPageWithUrl(
-								theStart, theEnd, thePageSize, theUrl, theRequestPartitionId);
-					}
-				});
+			.withSystemRequest()
+			.withRequestPartitionId(theRequestPartitionId)
+ 			.execute(()->{
+				if (theUrl == null) {
+					return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
+				} else {
+					return fetchResourceIdsPageWithUrl(theStart, theEnd, thePageSize, theUrl, theRequestPartitionId);
+				}
+			});
 	}
 
-	private IResourcePidList fetchResourceIdsPageWithUrl(
-			Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private IResourcePidList fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
 
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		DateRangeParam chunkDateRange =
-				DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
+		DateRangeParam chunkDateRange = DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
 		searchParamMap.setLastUpdated(chunkDateRange);
 		searchParamMap.setCount(thePageSize);
 
@@ -123,23 +115,15 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	}
 
 	@Nonnull
-	private IResourcePidList fetchResourceIdsPageNoUrl(
-			Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
+	private IResourcePidList fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
 		Pageable page = Pageable.ofSize(thePagesize);
 		Slice<Object[]> slice;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
-			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
-					page, theStart, theEnd);
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theStart, theEnd);
 		} else if (theRequestPartitionId.isDefaultPartition()) {
-			slice =
-					myResourceTableDao
-							.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
-									page, theStart, theEnd);
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(page, theStart, theEnd);
 		} else {
-			slice =
-					myResourceTableDao
-							.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
-									page, theStart, theEnd, theRequestPartitionId.getPartitionIds());
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(page, theStart, theEnd, theRequestPartitionId.getPartitionIds());
 		}
 
 		List<Object[]> content = slice.getContent();
@@ -147,10 +131,15 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			return new EmptyResourcePidList();
 		}
 
-		List<IResourcePersistentId> ids =
-				content.stream().map(t -> JpaPid.fromId((Long) t[0])).collect(Collectors.toList());
+		List<IResourcePersistentId> ids = content
+			.stream()
+			.map(t -> JpaPid.fromId((Long) t[0]))
+			.collect(Collectors.toList());
 
-		List<String> types = content.stream().map(t -> (String) t[1]).collect(Collectors.toList());
+		List<String> types = content
+			.stream()
+			.map(t -> (String) t[1])
+			.collect(Collectors.toList());
 
 		Date lastDate = (Date) content.get(content.size() - 1)[2];
 

@@ -27,11 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
 import static org.awaitility.Awaitility.await;
@@ -75,8 +75,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		logAllInterceptors(myInterceptorRegistry);
 	}
 
-	private Subscription createSubscription(String criteria, String payload, String endpoint)
-			throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
@@ -123,10 +122,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-		await().until(
-						() -> mySubscriptionRegistry.get(
-								subscription1.getIdElement().getIdPart()),
-						Matchers.not(Matchers.nullValue()));
+		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
 		assertEquals(0, Arrays.asList(ourGreenMail.getReceivedMessages()).size());
 
@@ -151,8 +147,9 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private IMailSvc withMailService() {
 		final MailConfig mailConfig = new MailConfig()
-				.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-				.setSmtpPort(ourGreenMail.getSmtp().getPort());
+			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
 		return new MailSvc(mailConfig);
 	}
+
 }

@@ -50,8 +50,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testStoreAndRetrieve() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		StoredDetails outcome = mySvc.storeBlob(
-				id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 
 		ourLog.info("Got id: {}", outcome);
 
@@ -74,8 +73,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
 		String blobId = "ABCDEFGHIJKLMNOPQRSTUV";
-		StoredDetails outcome = mySvc.storeBlob(
-				id, blobId, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(id, blobId, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 		assertEquals(blobId, outcome.getBlobId());
 
 		ourLog.info("Got id: {}", outcome);
@@ -94,6 +92,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(id, outcome.getBlobId()));
 	}
 
+
 	@Test
 	public void testFetchBlobUnknown() throws IOException {
 		try {
@@ -104,12 +103,12 @@ public class FilesystemBinaryStorageSvcImplTest {
 		}
 	}
 
+
 	@Test
 	public void testExpunge() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		StoredDetails outcome = mySvc.storeBlob(
-				id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
+		StoredDetails outcome = mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 
 		ourLog.info("Got id: {}", outcome);
 
@@ -140,5 +139,9 @@ public class FilesystemBinaryStorageSvcImplTest {
 		} catch (PayloadTooLargeException e) {
 			assertEquals(Msg.code(1343) + "Binary size exceeds maximum: 5", e.getMessage());
 		}
+
+
 	}
+
+
 }

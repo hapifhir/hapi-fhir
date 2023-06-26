@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -23,8 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderExpungeR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -99,6 +99,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		myDeletedObservationId = myObservationDao.create(o).getId();
 		myDeletedObservationId = myObservationDao.delete(myDeletedObservationId).getId();
+
 	}
 
 	@BeforeEach
@@ -130,29 +131,26 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeInstanceOldVersionsAndDeleted() {
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
-				.setValue(new IntegerType(1000));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient.operation()
-				.onInstance(myTwoVersionPatientId)
-				.named("expunge")
-				.withParameters(input)
-				.execute();
+		Parameters output = myClient
+			.operation()
+			.onInstance(myTwoVersionPatientId)
+			.named("expunge")
+			.withParameters(input)
+			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(
-				1,
-				((IntegerType) output.getParameter().get(0).getValue())
-						.getValue()
-						.intValue());
+		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -165,6 +163,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
 	}
 
 	@Test
@@ -173,26 +172,25 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
-				.setValue(new IntegerType(1000));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 
 		try {
-			myClient.operation()
-					.onInstance(myTwoVersionPatientId)
-					.named("expunge")
-					.withParameters(input)
-					.execute();
+			myClient
+				.operation()
+				.onInstance(myTwoVersionPatientId)
+				.named("expunge")
+				.withParameters(input)
+				.execute();
 			fail();
-		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					"HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server",
-					e.getMessage());
+		} catch (MethodNotAllowedException e){
+			assertEquals("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server", e.getMessage());
 		}
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -205,25 +203,27 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
 	}
 
 	@Test
 	public void testExpungeSystemEverything() {
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING)
+			.setValue(new BooleanType(true));
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient.operation()
-				.onServer()
-				.named("expunge")
-				.withParameters(input)
-				.execute();
+		Parameters output = myClient
+			.operation()
+			.onServer()
+			.named("expunge")
+			.withParameters(input)
+			.execute();
 
-		//		assertEquals("count", output.getParameter().get(0).getName());
-		//		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+//		assertEquals("count", output.getParameter().get(0).getName());
+//		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// All patients deleted
 		assertExpunged(myOneVersionPatientId);
@@ -236,35 +236,33 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
+
 	}
 
 	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
-				.setValue(new IntegerType(1000));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient.operation()
-				.onType(Patient.class)
-				.named("expunge")
-				.withParameters(input)
-				.execute();
+		Parameters output = myClient
+			.operation()
+			.onType(Patient.class)
+			.named("expunge")
+			.withParameters(input)
+			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(
-				3,
-				((IntegerType) output.getParameter().get(0).getValue())
-						.getValue()
-						.intValue());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -277,6 +275,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
 	}
 
 	@Test
@@ -290,29 +289,26 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
-				.setValue(new IntegerType(1000));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient.operation()
-				.onInstanceVersion(myTwoVersionPatientId.withVersion("1"))
-				.named("expunge")
-				.withParameters(input)
-				.execute();
+		Parameters output = myClient
+			.operation()
+			.onInstanceVersion(myTwoVersionPatientId.withVersion("1"))
+			.named("expunge")
+			.withParameters(input)
+			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(
-				1,
-				((IntegerType) output.getParameter().get(0).getValue())
-						.getValue()
-						.intValue());
+		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -325,6 +321,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
+
 	}
 
 	/**
@@ -340,35 +337,38 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		patient.getManagingOrganization()
-				.setReference(orgId.toUnqualifiedVersionless().getValue());
+		patient.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless().getValue());
 		myPatientDao.create(patient);
 
-		runInTransaction(() -> assertEquals(1, myResourceLinkDao.count()));
+		runInTransaction(()-> assertEquals(1, myResourceLinkDao.count()));
 
 		myOrganizationDao.delete(orgId);
 
-		runInTransaction(() -> assertEquals(0, myResourceLinkDao.count()));
+		runInTransaction(()-> assertEquals(0, myResourceLinkDao.count()));
 
 		Parameters input = new Parameters();
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
-				.setValue(new IntegerType(1000));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
 		input.addParameter()
-				.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
-				.setValue(new BooleanType(true));
+			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
 
-		myClient.operation()
-				.onInstance(orgId.toUnqualifiedVersionless())
-				.named("expunge")
-				.withParameters(input)
-				.execute();
+		myClient
+			.operation()
+			.onInstance(orgId.toUnqualifiedVersionless())
+			.named("expunge")
+			.withParameters(input)
+			.execute();
 
 		assertExpunged(orgId.toUnqualifiedVersionless());
 
-		runInTransaction(() -> assertEquals(0, myResourceLinkDao.count()));
+		runInTransaction(()-> assertEquals(0, myResourceLinkDao.count()));
+
 	}
+
+
 }

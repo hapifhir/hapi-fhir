@@ -22,9 +22,7 @@ package ca.uhn.fhir.cr.enumeration;
 import ca.uhn.fhir.i18n.Msg;
 
 public enum CareGapsStatusCode {
-	OPEN_GAP("open-gap"),
-	CLOSED_GAP("closed-gap"),
-	NOT_APPLICABLE("not-applicable");
+	OPEN_GAP("open-gap"), CLOSED_GAP("closed-gap"), NOT_APPLICABLE("not-applicable");
 
 	private final String myValue;
 

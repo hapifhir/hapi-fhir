@@ -15,8 +15,7 @@ import static org.hamcrest.Matchers.nullValue;
 class ValueSetAutocompleteSearchTest {
 	FhirContext myFhirContext = FhirContext.forR4();
 	private StorageSettings myStorageSettings;
-	ValueSetAutocompleteSearch myValueSetAutocompleteSearch =
-			new ValueSetAutocompleteSearch(myFhirContext, myStorageSettings, null);
+	ValueSetAutocompleteSearch myValueSetAutocompleteSearch = new ValueSetAutocompleteSearch(myFhirContext, myStorageSettings, null);
 
 	@Nested
 	public class HitToValueSetConversion {
@@ -25,8 +24,7 @@ class ValueSetAutocompleteSearchTest {
 
 		@Test
 		public void testCreateCoding() {
-			TokenAutocompleteHit entry = new TokenAutocompleteHit(
-					"http://loinc.org|4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count");
+			TokenAutocompleteHit entry = new TokenAutocompleteHit("http://loinc.org|4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count");
 
 			makeCoding(entry);
 
@@ -58,6 +56,7 @@ class ValueSetAutocompleteSearchTest {
 			assertThat(myCoding.getSystem(), is(nullValue()));
 			assertThat(myCoding.getCode(), equalTo("some_code"));
 			assertThat(myCoding.getDisplay(), is(nullValue()));
+
 		}
 
 		private void makeCoding(TokenAutocompleteHit theEntry) {

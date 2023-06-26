@@ -40,7 +40,8 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		setWriter(theWriter);
 	}
 
-	public JacksonWriter() {}
+	public JacksonWriter() {
+	}
 
 	@Override
 	public BaseJsonLikeWriter init() {
@@ -67,6 +68,7 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 					_objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
 					return this;
 				}
+
 			};
 			prettyPrinter = prettyPrinter.withObjectIndenter(new DefaultIndenter("  ", "\n"));
 

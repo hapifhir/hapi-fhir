@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.conformance;
 import ca.uhn.fhir.util.CollectionUtil;
 import org.junit.jupiter.params.provider.Arguments;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 /**
  * Collection of test cases for date type search.
@@ -49,12 +49,7 @@ public class DateSearchTestCase {
 	final String myFileName;
 	final int myLineNumber;
 
-	public DateSearchTestCase(
-			String myResourceValue,
-			String myQueryValue,
-			boolean expectedResult,
-			String theFileName,
-			int theLineNumber) {
+	public DateSearchTestCase(String myResourceValue, String myQueryValue, boolean expectedResult, String theFileName, int theLineNumber) {
 		this.myResourceValue = myResourceValue;
 		this.myQueryValue = myQueryValue;
 		this.expectedResult = expectedResult;
@@ -70,9 +65,8 @@ public class DateSearchTestCase {
 	 * We have two sources of test cases:
 	 * - DateSearchTestCase.csv which holds one test case per line
 	 * - DateSearchTestCase-compact.csv which specifies all operators for each value pair
-	 */
-	public static final List<DateSearchTestCase> ourCases;
-
+ 	 */
+	public final static List<DateSearchTestCase> ourCases;
 	static {
 		ourCases = new ArrayList<>();
 		ourCases.addAll(expandedCases());
@@ -95,17 +89,11 @@ public class DateSearchTestCase {
 
 	static List<DateSearchTestCase> parseCsvCases(Reader theSource, String theFileName) {
 		LineNumberReader lineNumberReader = new LineNumberReader(theSource);
-		return lineNumberReader
-				.lines()
-				.filter(l -> !l.startsWith("#")) // strip comments
-				.map(l -> l.split(","))
-				.map(fields -> new DateSearchTestCase(
-						fields[0].trim(),
-						fields[1].trim(),
-						Boolean.parseBoolean(fields[2].trim()),
-						theFileName,
-						lineNumberReader.getLineNumber()))
-				.collect(Collectors.toList());
+		return lineNumberReader.lines()
+			.filter(l->!l.startsWith("#")) // strip comments
+			.map(l -> l.split(","))
+			.map(fields -> new DateSearchTestCase(fields[0].trim(), fields[1].trim(), Boolean.parseBoolean(fields[2].trim()), theFileName, lineNumberReader.getLineNumber()))
+			.collect(Collectors.toList());
 	}
 
 	public static List<DateSearchTestCase> compactCases() {
@@ -131,31 +119,24 @@ public class DateSearchTestCase {
 
 		// expand these into individual tests for each prefix.
 		LineNumberReader lineNumberReader = new LineNumberReader(theSource);
-		return lineNumberReader
-				.lines()
-				.filter(l -> !l.startsWith("#")) // strip comments
-				.map(l -> l.split(","))
-				.flatMap(fields -> {
-					// line looks like: "eq ge le,2020, 2020"
-					// Matching prefixes, Query Date, Resource Date
-					String resourceValue = fields[0].trim();
-					String truePrefixes = fields[1].trim();
-					String queryValue = fields[2].trim();
-					Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split("\\s+"))
-							.map(String::trim)
-							.collect(Collectors.toSet());
+		return lineNumberReader.lines()
+			.filter(l->!l.startsWith("#")) // strip comments
+			.map(l -> l.split(","))
+			.flatMap(fields -> {
+				// line looks like: "eq ge le,2020, 2020"
+				// Matching prefixes, Query Date, Resource Date
+				String resourceValue = fields[0].trim();
+				String truePrefixes = fields[1].trim();
+				String queryValue = fields[2].trim();
+				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split("\\s+")).map(String::trim).collect(Collectors.toSet());
 
-					// expand to one test case per supportedPrefixes
-					return supportedPrefixes.stream().map(prefix -> {
+				// expand to one test case per supportedPrefixes
+				return supportedPrefixes.stream()
+					.map(prefix -> {
 						boolean expectMatch = expectedTruePrefixes.contains(prefix);
-						return new DateSearchTestCase(
-								resourceValue,
-								prefix + queryValue,
-								expectMatch,
-								theFileName,
-								lineNumberReader.getLineNumber());
+						return new DateSearchTestCase(resourceValue, prefix + queryValue, expectMatch, theFileName, lineNumberReader.getLineNumber());
 					});
-				})
-				.collect(Collectors.toList());
+			})
+			.collect(Collectors.toList());
 	}
 }

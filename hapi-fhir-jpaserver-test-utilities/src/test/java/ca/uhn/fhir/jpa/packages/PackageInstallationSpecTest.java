@@ -20,4 +20,5 @@ public class PackageInstallationSpecTest {
 		json = JsonUtil.serialize(output);
 		assertThat(json, containsString("\"packageUrl\" : \"classpath:/my-resources.tgz\""));
 	}
+
 }

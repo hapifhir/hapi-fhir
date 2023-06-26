@@ -45,8 +45,7 @@ public class FhirAutoConfigurationTest {
 		load("hapi.fhir.server.path:/hapi-fhir/*");
 		assertThat(this.context.getBeansOfType(ServletRegistrationBean.class)).hasSize(1);
 		assertThat(this.context.getBeansOfType(RestfulServer.class)).hasSize(1);
-		assertThat(this.context.getBean(ServletRegistrationBean.class).getUrlMappings())
-				.contains("/hapi-fhir/*");
+		assertThat(this.context.getBean(ServletRegistrationBean.class).getUrlMappings()).contains("/hapi-fhir/*");
 	}
 
 	@Test
@@ -63,48 +62,41 @@ public class FhirAutoConfigurationTest {
 	@Test
 	public void withValidation() {
 		load();
-		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class))
-				.hasSize(1);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test
 	public void withValidations() {
 		load("hapi.fhir.validation.request-only:false");
-		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class))
-				.hasSize(1);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test
 	public void withCustomValidationSchemaLocation() {
 		load("hapi.fhir.validation.schema-location:custom-schema-location");
-		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class))
-				.hasSize(1);
+		assertThat(this.context.getBeansOfType(RequestValidatingInterceptor.class)).hasSize(1);
 	}
 
 	@Test
 	public void withApacheHttpClient() {
 		load(new HidePackagesClassLoader("okhttp3"), "hapi.fhir.server.url:http://localhost:8080");
-		assertThat(this.context.getBeansOfType(ApacheRestfulClientFactory.class))
-				.hasSize(1);
-		assertThat(this.context.getBeansOfType(OkHttpRestfulClientFactory.class))
-				.hasSize(0);
+		assertThat(this.context.getBeansOfType(ApacheRestfulClientFactory.class)).hasSize(1);
+		assertThat(this.context.getBeansOfType(OkHttpRestfulClientFactory.class)).hasSize(0);
 	}
 
 	@Test
 	public void withOkHttpClient() {
 		load("hapi.fhir.server.url:http://localhost:8080");
-		assertThat(this.context.getBeansOfType(OkHttpRestfulClientFactory.class))
-				.hasSize(1);
-		assertThat(this.context.getBeansOfType(ApacheRestfulClientFactory.class))
-				.hasSize(0);
+		assertThat(this.context.getBeansOfType(OkHttpRestfulClientFactory.class)).hasSize(1);
+		assertThat(this.context.getBeansOfType(ApacheRestfulClientFactory.class)).hasSize(0);
 	}
 
 	private void load(String... environment) {
-		load(new Class<?>[] {FhirAutoConfiguration.class}, null, environment);
+		load(new Class<?>[]{FhirAutoConfiguration.class}, null, environment);
 	}
 
 	private void load(ClassLoader classLoader, String... environment) {
-		load(new Class<?>[] {FhirAutoConfiguration.class}, classLoader, environment);
+		load(new Class<?>[]{FhirAutoConfiguration.class}, classLoader, environment);
 	}
 
 	private void load(Class<?>[] configs, String... environment) {
@@ -119,6 +111,7 @@ public class FhirAutoConfigurationTest {
 			String nextValue = next.substring(next.indexOf(':') + 1);
 			env.setProperty(nextKey, nextValue);
 		}
+
 
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.setEnvironment(env);
@@ -142,7 +135,8 @@ public class FhirAutoConfigurationTest {
 		}
 
 		@Override
-		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		protected Class<?> loadClass(String name, boolean resolve)
+			throws ClassNotFoundException {
 			for (String hiddenPackage : this.hiddenPackages) {
 				if (name.startsWith(hiddenPackage)) {
 					throw new ClassNotFoundException();
@@ -150,5 +144,7 @@ public class FhirAutoConfigurationTest {
 			}
 			return super.loadClass(name, resolve);
 		}
+
 	}
+
 }

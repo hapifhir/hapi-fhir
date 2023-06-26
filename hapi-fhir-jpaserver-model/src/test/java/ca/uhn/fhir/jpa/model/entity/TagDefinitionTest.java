@@ -16,8 +16,8 @@ public class TagDefinitionTest {
 		def.setVersion("V 1.0");
 		def.setUserSelected(true);
 		assertEquals(
-				"TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V 1.0,userSelected=true]",
-				def.toString());
+			"TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V 1.0,userSelected=true]",
+			def.toString());
 	}
 
 	@Test
@@ -45,6 +45,6 @@ public class TagDefinitionTest {
 		def.setDisplay("my_display");
 		def.setVersion("V 1.0");
 		def.setUserSelected(true);
-		assertEquals(434167707, def.hashCode());
+		assertEquals (434167707,def.hashCode());
 	}
 }

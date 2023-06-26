@@ -53,8 +53,7 @@ public class PropertyModifyingHelper {
 	 */
 	public PropertyModifyingHelper(FhirContext theFhirContext, IBase theBase) {
 		if (findGetPropertyMethod(theBase) == null) {
-			throw new IllegalArgumentException(
-					Msg.code(1771) + "Specified base instance does not support property retrieval.");
+			throw new IllegalArgumentException(Msg.code(1771) + "Specified base instance does not support property retrieval.");
 		}
 		myBase = theBase;
 		myFhirContext = theFhirContext;
@@ -96,9 +95,9 @@ public class PropertyModifyingHelper {
 	 */
 	public String getFields(String... theFiledNames) {
 		return Arrays.stream(theFiledNames)
-				.map(this::get)
-				.filter(s -> !StringUtils.isBlank(s))
-				.collect(Collectors.joining(getDelimiter()));
+			.map(this::get)
+			.filter(s -> !StringUtils.isBlank(s))
+			.collect(Collectors.joining(getDelimiter()));
 	}
 
 	/**
@@ -109,7 +108,9 @@ public class PropertyModifyingHelper {
 	 * specified delimiter.
 	 */
 	public String get(String thePropertyName) {
-		return getMultiple(thePropertyName).stream().collect(Collectors.joining(getDelimiter()));
+		return getMultiple(thePropertyName)
+			.stream()
+			.collect(Collectors.joining(getDelimiter()));
 	}
 
 	/**
@@ -128,8 +129,7 @@ public class PropertyModifyingHelper {
 			int hashCode = thePropertyName.hashCode();
 			setPropertyMethod.invoke(myBase, hashCode, thePropertyName, value);
 		} catch (Exception e) {
-			throw new IllegalStateException(
-					Msg.code(1772) + String.format("Unable to set property %s on %s", thePropertyName, myBase), e);
+			throw new IllegalStateException(Msg.code(1772) + String.format("Unable to set property %s on %s", thePropertyName, myBase), e);
 		}
 	}
 
@@ -145,15 +145,13 @@ public class PropertyModifyingHelper {
 		try {
 			values = (Object[]) getPropertyMethod.invoke(myBase, thePropertyName.hashCode(), thePropertyName, true);
 		} catch (Exception e) {
-			throw new IllegalStateException(
-					Msg.code(1773) + String.format("Instance %s does not supply property %s", myBase, thePropertyName),
-					e);
+			throw new IllegalStateException(Msg.code(1773) + String.format("Instance %s does not supply property %s", myBase, thePropertyName), e);
 		}
 
 		return Arrays.stream(values)
-				.map(String::valueOf)
-				.filter(s -> !StringUtils.isEmpty(s))
-				.collect(Collectors.toList());
+			.map(String::valueOf)
+			.filter(s -> !StringUtils.isEmpty(s))
+			.collect(Collectors.toList());
 	}
 
 	private Method findGetPropertyMethod(IBase theAddress) {

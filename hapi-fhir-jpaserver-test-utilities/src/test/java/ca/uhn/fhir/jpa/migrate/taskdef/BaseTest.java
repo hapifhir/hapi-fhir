@@ -40,15 +40,13 @@ public abstract class BaseTest {
 			@Override
 			public TestDatabaseDetails get() {
 				String url = "jdbc:h2:mem:" + DATABASE_NAME + UUID.randomUUID();
-				DriverTypeEnum.ConnectionProperties connectionProperties =
-						DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
 				dataSource.setUrl(url);
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(
-						SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 
@@ -63,15 +61,13 @@ public abstract class BaseTest {
 			@Override
 			public TestDatabaseDetails get() {
 				String url = "jdbc:derby:memory:" + DATABASE_NAME + UUID.randomUUID() + ";create=true";
-				DriverTypeEnum.ConnectionProperties connectionProperties =
-						DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
 				dataSource.setUrl(url);
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(
-						SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 
@@ -110,8 +106,7 @@ public abstract class BaseTest {
 		if (getConnectionProperties() != null) {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
-				executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME
-						+ " where \"installed_rank\" > 0");
+				executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
 			}
 		}
 	}
@@ -151,11 +146,7 @@ public abstract class BaseTest {
 		private final BasicDataSource myDataSource;
 		private final HapiMigrator myMigrator;
 
-		public TestDatabaseDetails(
-				String theUrl,
-				DriverTypeEnum.ConnectionProperties theConnectionProperties,
-				BasicDataSource theDataSource,
-				HapiMigrator theMigrator) {
+		public TestDatabaseDetails(String theUrl, DriverTypeEnum.ConnectionProperties theConnectionProperties, BasicDataSource theDataSource, HapiMigrator theMigrator) {
 			myUrl = theUrl;
 			myConnectionProperties = theConnectionProperties;
 			myDataSource = theDataSource;
@@ -165,5 +156,7 @@ public abstract class BaseTest {
 		public DriverTypeEnum getDriverType() {
 			return myConnectionProperties.getDriverType();
 		}
+
 	}
+
 }

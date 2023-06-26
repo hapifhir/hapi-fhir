@@ -19,29 +19,23 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import org.hl7.fhir.instance.model.api.IBase;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBase;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+
 public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
-	//	private RuntimeResourceBlockDefinition myElementDef;
+//	private RuntimeResourceBlockDefinition myElementDef;
 	private Class<? extends IBase> myResourceBlockType;
 	private FhirContext myContext;
 
-	public RuntimeChildResourceBlockDefinition(
-			FhirContext theContext,
-			Field theField,
-			Child theChildAnnotation,
-			Description theDescriptionAnnotation,
-			String theElementName,
-			Class<? extends IBase> theResourceBlockType)
-			throws ConfigurationException {
+	public RuntimeChildResourceBlockDefinition(FhirContext theContext, Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IBase> theResourceBlockType) throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myContext = theContext;
 		myResourceBlockType = theResourceBlockType;
@@ -81,9 +75,8 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	void sealAndInitialize(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		//		myElementDef = (RuntimeResourceBlockDefinition) theClassToElementDefinitions.get(myResourceBlockType);
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+//		myElementDef = (RuntimeResourceBlockDefinition) theClassToElementDefinitions.get(myResourceBlockType);
 	}
+
 }

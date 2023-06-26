@@ -12,4 +12,5 @@ public class VerdictTest {
 		Verdict v = new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, new RuleImplOp("foo"));
 		assertEquals("AuthorizationInterceptor.Verdict[rule=foo,decision=ALLOW]", v.toString());
 	}
+	
 }

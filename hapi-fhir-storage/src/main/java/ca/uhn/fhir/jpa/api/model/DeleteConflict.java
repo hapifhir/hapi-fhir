@@ -50,9 +50,10 @@ public class DeleteConflict {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("sourceId", mySourceId)
-				.append("sourcePath", mySourcePath)
-				.append("targetId", myTargetId)
-				.toString();
+			.append("sourceId", mySourceId)
+			.append("sourcePath", mySourcePath)
+			.append("targetId", myTargetId)
+			.toString();
 	}
+
 }

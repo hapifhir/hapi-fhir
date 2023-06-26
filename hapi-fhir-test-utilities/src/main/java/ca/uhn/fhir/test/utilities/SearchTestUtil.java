@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 
 public class SearchTestUtil {
 
-	private SearchTestUtil() {}
+	private SearchTestUtil() {
+	}
 
 	public static List<IIdType> toUnqualifiedVersionlessIds(IBaseBundle theFound) {
 		FhirContext ctx = FhirContext.forCached(theFound.getStructureFhirVersionEnum());
@@ -46,8 +47,10 @@ public class SearchTestUtil {
 	}
 
 	public static List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
-		return toUnqualifiedVersionlessIds(theFound).stream()
-				.map(t -> t.getValue())
-				.collect(Collectors.toList());
+		return toUnqualifiedVersionlessIds(theFound)
+			.stream()
+			.map(t -> t.getValue())
+			.collect(Collectors.toList());
 	}
+
 }

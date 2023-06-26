@@ -12,4 +12,5 @@ public class MethodMatchEnumTest {
 		assertEquals(1, MethodMatchEnum.APPROXIMATE.ordinal());
 		assertEquals(2, MethodMatchEnum.EXACT.ordinal());
 	}
+
 }

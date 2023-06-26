@@ -29,6 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,32 +53,24 @@ import static org.mockito.Mockito.when;
  */
 public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorTest.class);
 	private IIdType myDiagnosticReportId;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private IIdType myPatientId;
-
 	@Autowired
 	private CascadingDeleteInterceptor myDeleteInterceptor;
-
 	private IIdType myObservationId;
 	private IIdType myConditionId;
 	private IIdType myEncounterId;
-
 	@Autowired
-	private OverridePathBasedReferentialIntegrityForDeletesInterceptor
-			myOverridePathBasedReferentialIntegrityForDeletesInterceptor;
-
+	private OverridePathBasedReferentialIntegrityForDeletesInterceptor myOverridePathBasedReferentialIntegrityForDeletesInterceptor;
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
-
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
 
@@ -122,24 +115,19 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteWithInterceptorVerifyTheRequestGetsPassedToDao() throws IOException {
-		// The whole and ONLY point of this Cascade Delete Unit Test is to make sure that a non-NULL RequestDetails
-		// param
+		// The whole and ONLY point of this Cascade Delete Unit Test is to make sure that a non-NULL RequestDetails param
 		// is passed to the dao.read() method from inside the CascadingDeleteInterceptor.handleDeleteConflicts() method
 		// For details see: https://gitlab.com/simpatico.ai/cdr/-/issues/1643
 		DaoRegistry mockDaoRegistry = mock(DaoRegistry.class);
-		IFhirResourceDao mockResourceDao = mock(IFhirResourceDao.class);
+		IFhirResourceDao mockResourceDao = mock (IFhirResourceDao.class);
 		IBaseResource mockResource = mock(IBaseResource.class);
-		// This is done in order to pass the mockDaoRegistry, otherwise this assertion will fail:
-		// verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
-		final ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc =
-				new ThreadSafeResourceDeleterSvc(mockDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
-		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(
-				myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+		// This is done in order to pass the mockDaoRegistry, otherwise this assertion will fail:  verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
+		final ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(mockDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
+		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, threadSafeResourceDeleterSvc);
 		myServer.unregisterInterceptor(myDeleteInterceptor);
 		myServer.registerInterceptor(aDeleteInterceptor);
 		when(mockDaoRegistry.getResourceDao(any(String.class))).thenReturn(mockResourceDao);
-		when(mockResourceDao.read(any(IIdType.class), any(RequestDetails.class)))
-				.thenReturn(mockResource);
+		when(mockResourceDao.read(any(IIdType.class), any(RequestDetails.class))).thenReturn(mockResource);
 		ArgumentCaptor<RequestDetails> theRequestDetailsCaptor = ArgumentCaptor.forClass(RequestDetails.class);
 
 		Patient p = new Patient();
@@ -149,8 +137,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		e.setSubject(new Reference(myPatientId));
 		myEncounterId = myClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
-		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?"
-				+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -173,8 +160,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
-			ourLog.debug(
-					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -188,8 +174,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myPatientDao.delete(myPatientId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(
-					e.getMessage(), containsString("because at least one resource has a reference to this resource"));
+			assertThat(e.getMessage(), containsString("because at least one resource has a reference to this resource"));
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(myDeleteInterceptor);
 		}
@@ -205,13 +190,9 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myClient.delete().resourceById(myPatientId).execute();
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			String output =
-					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			String output = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
-			assertThat(
-					output,
-					containsString(
-							"Note that cascading deletes are not active for this request. You can enable cascading deletes"));
+			assertThat(output, containsString("Note that cascading deletes are not active for this request. You can enable cascading deletes"));
 		}
 	}
 
@@ -225,8 +206,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		myServer.registerInterceptor(myDeleteInterceptor);
 
-		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?"
-				+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -245,8 +225,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testDeleteCascadingWithOverridePathBasedReferentialIntegrityForDeletesInterceptorAlsoRegistered()
-			throws IOException {
+	public void testDeleteCascadingWithOverridePathBasedReferentialIntegrityForDeletesInterceptorAlsoRegistered() throws IOException {
 		if (TestR4Config.getMaxThreads() == 1) {
 			return; // See class javadoc for explanation
 		}
@@ -258,8 +237,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 			myServer.registerInterceptor(myDeleteInterceptor);
 
-			HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?"
-					+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+			HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 			delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 				String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -298,8 +276,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		myServer.registerInterceptor(myDeleteInterceptor);
 
-		HttpDelete delete = new HttpDelete(myServerBase + "/Organization/" + o0id.getIdPart() + "?"
-				+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		HttpDelete delete = new HttpDelete(myServerBase + "/Organization/" + o0id.getIdPart() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);

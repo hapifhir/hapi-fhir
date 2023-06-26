@@ -39,13 +39,8 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 
-	public LoincAnswerListHandler(
-			TermCodeSystemVersion theCodeSystemVersion,
-			Map<String, TermConcept> theCode2concept,
-			List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps,
-			Properties theUploadProperties,
-			String theCopyrightStatement) {
+	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
@@ -70,6 +65,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 		String extCodeSystem = trim(theRecord.get("ExtCodeSystem"));
 		String extCodeSystemVersion = trim(theRecord.get("ExtCodeSystemVersion"));
 
+
 		// Answer list code
 		if (!myCode2Concept.containsKey(answerListId)) {
 			TermConcept concept = new TermConcept(myCodeSystemVersion, answerListId);
@@ -85,10 +81,11 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 		} else {
 			valueSetId = answerListId;
 		}
-		ValueSet vs = getValueSet(
-				valueSetId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
+		ValueSet vs = getValueSet(valueSetId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
-			vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue("urn:oid:" + answerListOid);
+			vs.addIdentifier()
+				.setSystem("urn:ietf:rfc:3986")
+				.setValue("urn:oid:" + answerListOid);
 		}
 
 		if (isNotBlank(answerString)) {
@@ -103,13 +100,17 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 				myCode2Concept.put(answerString, concept);
 			}
 
-			vs.getCompose()
-					.getIncludeFirstRep()
-					.setSystem(ITermLoaderSvc.LOINC_URI)
-					.setVersion(codeSystemVersionId)
-					.addConcept()
-					.setCode(answerString)
-					.setDisplay(displayText);
+			vs
+				.getCompose()
+				.getIncludeFirstRep()
+				.setSystem(ITermLoaderSvc.LOINC_URI)
+				.setVersion(codeSystemVersionId)
+				.addConcept()
+				.setCode(answerString)
+				.setDisplay(displayText);
+
 		}
+
 	}
+
 }

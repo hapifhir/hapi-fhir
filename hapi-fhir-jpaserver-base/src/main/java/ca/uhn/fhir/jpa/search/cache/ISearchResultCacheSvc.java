@@ -24,8 +24,8 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
-import java.util.List;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public interface ISearchResultCacheSvc {
 	/**
@@ -33,12 +33,7 @@ public interface ISearchResultCacheSvc {
 	 * @param thePreviouslyStoredResourcePids A list of resource PIDs that have previously been saved to this search
 	 * @param theNewResourcePids              A list of new resource PIDs to add to this search (these ones have not been previously saved)
 	 */
-	void storeResults(
-			Search theSearch,
-			List<JpaPid> thePreviouslyStoredResourcePids,
-			List<JpaPid> theNewResourcePids,
-			RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
+	void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch a subset of the search result IDs from the cache
@@ -50,12 +45,7 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<JpaPid> fetchResultPids(
-			Search theSearch,
-			int theFrom,
-			int theTo,
-			RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
+	List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch all result PIDs for a given search with no particular order required
@@ -65,6 +55,6 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<JpaPid> fetchAllResultPids(
-			Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
+	List<JpaPid> fetchAllResultPids(Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
+
 }

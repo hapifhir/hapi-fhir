@@ -44,8 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InterceptorThrowingExceptionR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(InterceptorThrowingExceptionR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorThrowingExceptionR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static boolean ourHitMethod;
@@ -68,6 +67,7 @@ public class InterceptorThrowingExceptionR4Test {
 		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
+
 	private Resource createPatient(Integer theId) {
 		Patient retVal = new Patient();
 		if (theId != null) {
@@ -76,6 +76,7 @@ public class InterceptorThrowingExceptionR4Test {
 		retVal.addName().setFamily("FAM");
 		return retVal;
 	}
+
 
 	private String extractResponseAndClose(HttpResponse status) throws IOException {
 		if (status.getEntity() == null) {
@@ -129,6 +130,7 @@ public class InterceptorThrowingExceptionR4Test {
 
 		ourLog.info("Hit: {}", hit);
 		assertThat("Hits: " + hit.toString(), hit, contains(1, 2, 3));
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -138,11 +140,14 @@ public class InterceptorThrowingExceptionR4Test {
 			return Patient.class;
 		}
 
+
 		@Read(version = true)
 		public Patient read(@IdParam IdType theId) {
 			ourHitMethod = true;
 			return (Patient) ourReturn.get(0);
 		}
+
+
 	}
 
 	@AfterAll
@@ -171,10 +176,12 @@ public class InterceptorThrowingExceptionR4Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
+
 }

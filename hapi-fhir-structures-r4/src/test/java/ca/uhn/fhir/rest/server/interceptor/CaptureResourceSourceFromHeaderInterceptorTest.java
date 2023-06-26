@@ -17,15 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class CaptureResourceSourceFromHeaderInterceptorTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
-
 	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
-
 	private CaptureResourceSourceFromHeaderInterceptor myInterceptor;
-
 	@RegisterExtension
-	public HashMapResourceProviderExtension<Patient> myPatientProviderRule =
-			new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
+	public HashMapResourceProviderExtension<Patient> myPatientProviderRule = new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
 
 	@BeforeEach
 	public void before() {
@@ -67,11 +63,11 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 		resource.setActive(true);
 
 		ourServerRule
-				.getFhirClient()
-				.create()
-				.resource(resource)
-				.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
-				.execute();
+			.getFhirClient()
+			.create()
+			.resource(resource)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
+			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
 		assertEquals("http://header", stored.getMeta().getSource());
@@ -84,11 +80,11 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 		resource.getMeta().setSource("http://source");
 
 		ourServerRule
-				.getFhirClient()
-				.create()
-				.resource(resource)
-				.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
-				.execute();
+			.getFhirClient()
+			.create()
+			.resource(resource)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_SOURCE, "http://header")
+			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
 		assertEquals("http://header", stored.getMeta().getSource());
@@ -97,11 +93,12 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 	@Test
 	public void testNonCreateShouldntFail() {
 		Bundle bundle = ourServerRule
-				.getFhirClient()
-				.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.execute();
+			.getFhirClient()
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(0, bundle.getEntry().size());
 	}
+
 }

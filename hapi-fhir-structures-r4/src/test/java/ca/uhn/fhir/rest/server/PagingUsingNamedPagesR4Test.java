@@ -81,11 +81,7 @@ public class PagingUsingNamedPagesR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity()
-					.getContentType()
-					.getValue()
-					.replaceAll(";.*", "")
-					.trim());
+			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
 			assertEquals(theExpectEncoding, ct);
 			assert ct != null;
 			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
@@ -98,26 +94,20 @@ public class PagingUsingNamedPagesR4Test {
 	public void testPaging() throws Exception {
 
 		List<IBaseResource> patients0 = createPatients(0, 9);
-		BundleProviderWithNamedPages provider0 =
-				new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
+		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
 		provider0.setNextPageId("PAGEID1");
-		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0")))
-				.thenReturn(provider0);
+		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
 
 		List<IBaseResource> patients1 = createPatients(10, 19);
-		BundleProviderWithNamedPages provider1 =
-				new BundleProviderWithNamedPages(patients1, "SEARCHID0", "PAGEID1", 1000);
+		BundleProviderWithNamedPages provider1 = new BundleProviderWithNamedPages(patients1, "SEARCHID0", "PAGEID1", 1000);
 		provider1.setPreviousPageId("PAGEID0");
 		provider1.setNextPageId("PAGEID2");
-		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID1")))
-				.thenReturn(provider1);
+		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID1"))).thenReturn(provider1);
 
 		List<IBaseResource> patients2 = createPatients(20, 29);
-		BundleProviderWithNamedPages provider2 =
-				new BundleProviderWithNamedPages(patients2, "SEARCHID0", "PAGEID2", 1000);
+		BundleProviderWithNamedPages provider2 = new BundleProviderWithNamedPages(patients2, "SEARCHID0", "PAGEID2", 1000);
 		provider2.setPreviousPageId("PAGEID1");
-		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID2")))
-				.thenReturn(provider2);
+		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID2"))).thenReturn(provider2);
 
 		ourNextBundleProvider = provider0;
 
@@ -133,58 +123,37 @@ public class PagingUsingNamedPagesR4Test {
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertEquals("http://localhost:" + ourPort + "/Patient?_format=xml", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset",
-				linkNext);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkNext);
 		assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset",
-				linkSelf);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset",
-				linkNext);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkNext);
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset",
-				linkPrev);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset", linkPrev);
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset",
-				linkSelf);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkSelf);
 		assertNull(bundle.getLink(Constants.LINK_NEXT));
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertEquals(
-				"http://localhost:" + ourPort
-						+ "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset",
-				linkPrev);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkPrev);
 	}
 
 	@Test
 	public void testPagingLinkUnknownPage() throws Exception {
 
-		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), any()))
-				.thenReturn(null);
-		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class)))
-				.thenReturn(null);
+		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), any())).thenReturn(null);
+		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class))).thenReturn(null);
 
 		// With ID
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
-				+ "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
@@ -193,43 +162,37 @@ public class PagingUsingNamedPagesR4Test {
 		}
 
 		// Without ID
-		httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_format=xml&_bundletype=FOO"
-				+ UrlUtil.escapeUrlParam("\""));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertThat(responseContent, not(containsString("FOO\"")));
 			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
+
 	}
 
 	@Test
 	public void testPagingLinksSanitizeBundleType() throws Exception {
 
 		List<IBaseResource> patients0 = createPatients(0, 9);
-		BundleProviderWithNamedPages provider0 =
-				new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
+		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
 		provider0.setNextPageId("PAGEID1");
-		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0")))
-				.thenReturn(provider0);
+		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
 
 		// Initial search
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
-				+ "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertThat(responseContent, not(containsString("FOO\"")));
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity()
-					.getContentType()
-					.getValue()
-					.replaceAll(";.*", "")
-					.trim());
+			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
 			assert ct != null;
 			Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 			assertEquals(10, bundle.getEntry().size());
 		}
+
 	}
 
 	@AfterAll
@@ -254,18 +217,18 @@ public class PagingUsingNamedPagesR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
-		builder.setDefaultSocketConfig(
-				SocketConfig.custom().setSoTimeout(600000).build());
+		builder.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(600000).build());
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -280,5 +243,8 @@ public class PagingUsingNamedPagesR4Test {
 			ourNextBundleProvider = null;
 			return retVal;
 		}
+
 	}
+
+
 }

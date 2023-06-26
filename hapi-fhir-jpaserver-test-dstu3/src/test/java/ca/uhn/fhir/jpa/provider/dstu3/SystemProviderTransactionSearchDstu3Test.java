@@ -53,18 +53,18 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchDstu3Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
+
+	
 	@SuppressWarnings("deprecation")
 	@AfterEach
 	public void after() {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myStorageSettings.setMaximumSearchResultCountInTransaction(
-				new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
+		myStorageSettings.setMaximumSearchResultCountInTransaction(new JpaStorageSettings().getMaximumSearchResultCountInTransaction());
 	}
 
 	@BeforeEach
@@ -90,7 +90,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			ourServer = new Server(0);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
+			proxyHandler.setContextPath("/");			
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -101,11 +101,10 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
-			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+            int myPort = JettyUtil.getPortForStartedServer(ourServer);
+            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager =
-					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -115,13 +114,14 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
-
+		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);
 
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
 	}
+	
 
 	private List<String> create20Patients() {
 		List<String> ids = new ArrayList<String>();
@@ -129,12 +129,8 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			Patient patient = new Patient();
 			patient.setGender(AdministrativeGender.MALE);
 			patient.addIdentifier().setSystem("urn:foo").setValue("A");
-			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i + 1));
-			String id = myPatientDao
-					.create(patient)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getValue();
+			patient.addName().setFamily("abcdefghijklmnopqrstuvwxyz".substring(i, i+1));
+			String id = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
 			ids.add(id);
 		}
 		return ids;
@@ -143,16 +139,20 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testBatchWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
-
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=_id");
-
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=_id");
+		
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
-
+		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-
+		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
@@ -160,35 +160,36 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 	}
-
+	
 	@Test
 	public void testBatchWithGetNormalSearch() {
 		List<String> ids = create20Patients();
-
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=name");
-
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=name");
+		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-
+		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
-
+		
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = ourClient
-				.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
 	}
+
 
 	@Test
 	public void testPatchUsingJsonPatch_Transaction() {
@@ -208,27 +209,21 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
 		input.addEntry()
-				.setFullUrl(pid1.getValue())
-				.setResource(patch)
-				.getRequest()
-				.setUrl(pid1.getValue());
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest().setUrl(pid1.getValue());
 
 		Bundle putBundle = new Bundle();
 		putBundle.setType(Bundle.BundleType.TRANSACTION);
-		putBundle
-				.addEntry()
-				.setFullUrl(pid1.getValue())
-				.setResource(new Patient().setId(pid1.getIdPart()))
-				.getRequest()
-				.setUrl(pid1.getValue())
-				.setMethod(HTTPVerb.PUT);
+		putBundle.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(new Patient().setId(pid1.getIdPart()))
+			.getRequest().setUrl(pid1.getValue()).setMethod(HTTPVerb.PUT);
 
 		Bundle bundle = ourClient.transaction().withBundle(input).execute();
-		ourLog.debug(
-				"Response: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		// Validate over all bundle response entry contents.
+		//Validate over all bundle response entry contents.
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.TRANSACTIONRESPONSE)));
 		assertThat(bundle.getEntry(), hasSize(1));
 		Bundle.BundleEntryResponseComponent response = bundle.getEntry().get(0).getResponse();
@@ -237,28 +232,30 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(response.getLastModified(), is(notNullValue()));
 		assertThat(response.getLocation(), is(equalTo(pid1.getValue() + "/_history/2")));
 
-		Patient newPt = ourClient
-				.read()
-				.resource(Patient.class)
-				.withId(pid1.getIdPart())
-				.execute();
+		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
 		assertEquals(false, newPt.getActive());
 	}
 
+
+
 	@Test
 	public void testTransactionWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
-
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=_id");
-
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=_id");
+		
 		myStorageSettings.setMaximumSearchResultCountInTransaction(100);
-
+		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-
+		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
@@ -266,30 +263,30 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 	}
-
+	
 	@Test
 	public void testTransactionWithGetNormalSearch() {
 		List<String> ids = create20Patients();
-
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_count=5&_sort=name");
-
+		input
+			.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.GET)
+			.setUrl("Patient?_count=5&_sort=name");
+		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-
+		
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertEquals(5, respBundle.getEntry().size());
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
-
+		
 		String nextPageLink = respBundle.getLink("next").getUrl();
-		output = ourClient
-				.loadPage()
-				.byUrl(nextPageLink)
-				.andReturnBundle(Bundle.class)
-				.execute();
+		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
@@ -303,18 +300,20 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	public void testTransactionWithManyGets() {
 		List<String> ids = create20Patients();
 
+		
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
 		for (int i = 0; i < 30; i++) {
-			input.addEntry()
-					.getRequest()
-					.setMethod(HTTPVerb.GET)
-					.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerb.GET)
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
 		}
-
+		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-
+		
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
@@ -327,13 +326,13 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testTransactionGetStartsWithSlash() {
-		IIdType patientId =
-				ourClient.create().resource(new Patient()).execute().getId().toUnqualifiedVersionless();
+		IIdType patientId = ourClient.create().resource(new Patient()).execute().getId().toUnqualifiedVersionless();
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 		input.setId("bundle-batch-test");
-		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("/Patient?_id=" + patientId.getIdPart());
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET)
+			.setUrl("/Patient?_id="+patientId.getIdPart());
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -346,8 +345,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	private List<String> toIds(Bundle theRespBundle) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (BundleEntryComponent next : theRespBundle.getEntry()) {
-			retVal.add(
-					next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}
@@ -356,4 +354,5 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
+
 }

@@ -29,10 +29,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+
 public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderSearchModifierR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderSearchModifierR4Test.class);
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
@@ -42,8 +42,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
@@ -74,10 +73,10 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 	public void testSearch_SingleCode_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, false);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(9, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -108,10 +107,10 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 	public void testSearch_SingleCode_multiple_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, false);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(7, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -121,29 +120,29 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(6).toString(), ids.get(5));
 		assertEquals(obsList.get(8).toString(), ids.get(6));
 	}
-
+	
 	@Test
 	public void testSearch_SingleCode_mix_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, false);
-
+		
 		// Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9
 		// slower than Observation?code:not=2345-3&code=2345-7&code:not=2345-9
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(1, ids.size());
 		assertEquals(obsList.get(7).toString(), ids.get(0));
 	}
-
+	
 	@Test
 	public void testSearch_SingleCode_or_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, false);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(7, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -153,15 +152,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(6).toString(), ids.get(5));
 		assertEquals(obsList.get(8).toString(), ids.get(6));
 	}
-
+	
 	@Test
 	public void testSearch_MultiCode_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, true);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(8, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -172,15 +171,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(8).toString(), ids.get(6));
 		assertEquals(obsList.get(9).toString(), ids.get(7));
 	}
-
+	
 	@Test
 	public void testSearch_MultiCode_multiple_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, true);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-4";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(7, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -190,28 +189,28 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(8).toString(), ids.get(5));
 		assertEquals(obsList.get(9).toString(), ids.get(6));
 	}
-
+	
 	@Test
 	public void testSearch_MultiCode_mix_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, true);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(2, ids.size());
 		assertEquals(obsList.get(6).toString(), ids.get(0));
 		assertEquals(obsList.get(7).toString(), ids.get(1));
 	}
-
+	
 	@Test
 	public void testSearch_MultiCode_or_not_modifier() throws Exception {
 
 		List<IIdType> obsList = createObs(10, true);
-
+		
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-
+		
 		assertEquals(4, ids.size());
 		assertEquals(obsList.get(0).toString(), ids.get(0));
 		assertEquals(obsList.get(1).toString(), ids.get(1));
@@ -228,9 +227,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) +  "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -238,9 +235,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -248,9 +243,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -258,9 +251,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -268,9 +259,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -278,9 +267,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -288,9 +275,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -298,12 +283,11 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
-	}
 
+	}
+	
 	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
@@ -312,8 +296,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
-			ourLog.debug("Bundle: \n"
-					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 		}
 		return ids;
@@ -327,19 +310,19 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsIds = new ArrayList<>();
 		IIdType obsId = null;
-		for (int i = 0; i < obsNum; i++) {
+		for (int i=0; i<obsNum; i++) {
 			Observation obs = new Observation();
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.getSubject().setReferenceElement(pid);
 			obs.setEffective(new DateTimeType(effectiveDateString));
 
 			CodeableConcept cc = obs.getCode();
-			cc.addCoding().setCode("2345-" + i).setSystem("http://loinc.org");
+			cc.addCoding().setCode("2345-"+i).setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValue(200));
 
 			if (isMultiple) {
 				cc = obs.getCode();
-				cc.addCoding().setCode("2345-" + (i + 1)).setSystem("http://loinc.org");
+				cc.addCoding().setCode("2345-"+(i+1)).setSystem("http://loinc.org");
 				obs.setValue(new Quantity().setValue(300));
 			}
 
@@ -349,8 +332,8 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		return obsIds;
 	}
-
 	private List<IIdType> createObs(int obsNum, boolean isMultiple) {
 		return createObs(obsNum, isMultiple, "2001-02-01");
 	}
+
 }

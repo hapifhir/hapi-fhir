@@ -33,20 +33,16 @@ public class HashTest {
 
 	@Test
 	public void testCheckAllHashes() {
-		MigrationTaskList tasks1 =
-				new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		MigrationTaskList tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		Map<String, Integer> hashesByVersion = new HashMap<>();
 
 		tasks1.forEach(task -> {
 			String version = task.getMigrationVersion();
-			assertNull(
-					hashesByVersion.get(version),
-					"Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName());
+			assertNull(hashesByVersion.get(version), "Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName());
 			hashesByVersion.put(version, task.hashCode());
 		});
 
-		MigrationTaskList tasks2 =
-				new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		MigrationTaskList tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		tasks2.forEach(task -> {
 			String version = task.getMigrationVersion();
 			int origHash = hashesByVersion.get(version);

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -48,12 +48,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
 @Service
 public class MdmControllerHelper {
@@ -66,13 +66,12 @@ public class MdmControllerHelper {
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
-	public MdmControllerHelper(
-			FhirContext theFhirContext,
-			IResourceLoader theResourceLoader,
-			IMdmMatchFinderSvc theMdmMatchFinderSvc,
-			IMdmSettings theMdmSettings,
-			MessageHelper theMessageHelper,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public MdmControllerHelper(FhirContext theFhirContext,
+										IResourceLoader theResourceLoader,
+										IMdmMatchFinderSvc theMdmMatchFinderSvc,
+										IMdmSettings theMdmSettings,
+										MessageHelper theMessageHelper,
+										IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myResourceLoader = theResourceLoader;
 		myMdmSettings = theMdmSettings;
@@ -84,8 +83,7 @@ public class MdmControllerHelper {
 	public void validateSameVersion(IAnyResource theResource, String theResourceId) {
 		String storedId = theResource.getIdElement().getValue();
 		if (hasVersionIdPart(theResourceId) && !storedId.equals(theResourceId)) {
-			throw new ResourceVersionConflictException(Msg.code(1501) + "Requested resource " + theResourceId
-					+ " is not the latest version.  Latest version is " + storedId);
+			throw new ResourceVersionConflictException(Msg.code(1501) + "Requested resource " + theResourceId + " is not the latest version.  Latest version is " + storedId);
 		}
 	}
 
@@ -99,10 +97,10 @@ public class MdmControllerHelper {
 		if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
 			return iAnyResource;
 		} else {
-			throw new InvalidRequestException(Msg.code(1502)
-					+ myMessageHelper.getMessageForFailedGoldenResourceLoad(theParamName, theGoldenResourceId));
+			throw new InvalidRequestException(Msg.code(1502) + myMessageHelper.getMessageForFailedGoldenResourceLoad(theParamName, theGoldenResourceId));
 		}
 	}
+
 
 	public IAnyResource getLatestSourceFromIdOrThrowException(String theParamName, String theSourceId) {
 		IIdType sourceId = MdmControllerUtil.getSourceIdDtOrThrowException(theParamName, theSourceId);
@@ -110,9 +108,7 @@ public class MdmControllerHelper {
 	}
 
 	protected IAnyResource loadResource(IIdType theResourceId) {
-		Class<? extends IBaseResource> resourceClass = myFhirContext
-				.getResourceDefinition(theResourceId.getResourceType())
-				.getImplementingClass();
+		Class<? extends IBaseResource> resourceClass = myFhirContext.getResourceDefinition(theResourceId.getResourceType()).getImplementingClass();
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
@@ -128,8 +124,8 @@ public class MdmControllerHelper {
 	public void validateIsMdmManaged(String theName, IAnyResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		if (!myMdmSettings.isSupportedMdmType(resourceType)) {
-			throw new InvalidRequestException(
-					Msg.code(1503) + myMessageHelper.getMessageForUnsupportedResource(theName, resourceType));
+			throw new InvalidRequestException(Msg.code(1503) + myMessageHelper.getMessageForUnsupportedResource(theName, resourceType)
+			);
 		}
 
 		if (!MdmResourceUtil.isMdmManaged(theResource)) {
@@ -140,22 +136,16 @@ public class MdmControllerHelper {
 	/**
 	 * Helper method which will return a bundle of all Matches and Possible Matches.
 	 */
-	public IBaseBundle getMatchesAndPossibleMatchesForResource(
-			IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
+	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
 		if (myMdmSettings.getSearchAllPartitionForMatch()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
-			requestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		}
-		List<MatchedTarget> matches =
-				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
-		matches.sort(
-				Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
-						.reversed());
+		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
+		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.setBundleField("type", "searchset");
@@ -178,15 +168,14 @@ public class MdmControllerHelper {
 		return retVal;
 	}
 
-	public IBaseBackboneElement toBundleEntrySearchComponent(
-			BundleBuilder theBuilder, IBaseBackboneElement theSearch, MatchedTarget theMatchedTarget) {
+	public IBaseBackboneElement toBundleEntrySearchComponent(BundleBuilder theBuilder, IBaseBackboneElement theSearch, MatchedTarget theMatchedTarget) {
 		theBuilder.setSearchField(theSearch, "mode", "match");
 		double score = theMatchedTarget.getMatchResult().getNormalizedScore();
-		theBuilder.setSearchField(theSearch, "score", theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
+		theBuilder.setSearchField(theSearch, "score",
+			theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
 
 		String matchGrade = getMatchGrade(theMatchedTarget);
-		IBaseDatatype codeType =
-				(IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
+		IBaseDatatype codeType = (IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
 		IBaseExtension searchExtension = theSearch.addExtension();
 		searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		searchExtension.setValue(codeType);

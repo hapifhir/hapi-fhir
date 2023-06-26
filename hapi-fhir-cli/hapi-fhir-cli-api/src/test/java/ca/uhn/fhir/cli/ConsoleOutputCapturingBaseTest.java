@@ -25,8 +25,8 @@ public class ConsoleOutputCapturingBaseTest {
 		outputStreamCaptor.reset();
 		System.setOut(System.out);
 	}
-
 	protected String getConsoleOutput() {
 		return outputStreamCaptor.toString().trim();
 	}
+
 }

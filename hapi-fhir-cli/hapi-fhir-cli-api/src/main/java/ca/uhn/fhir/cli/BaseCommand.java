@@ -27,8 +27,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TrustStoreInfo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -75,7 +76,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -87,21 +87,17 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASE_URL_PARAM = "t";
 	protected static final String BASE_URL_PARAM_LONGOPT = "target";
 	protected static final String BASE_URL_PARAM_NAME = "target";
-	protected static final String BASE_URL_PARAM_DESC =
-			"Base URL for the target server (e.g. \"http://example.com/fhir\").";
+	protected static final String BASE_URL_PARAM_DESC = "Base URL for the target server (e.g. \"http://example.com/fhir\").";
 	protected static final String TLS_AUTH_PARAM_LONGOPT = "tls-auth";
 	protected static final String TLS_AUTH_PARAM_NAME = "tls-auth";
-	protected static final String TLS_AUTH_PARAM_DESC =
-			"If specified, this parameter supplies a path and filename for a json authentication file that will be used to authenticate HTTPS requests.";
+	protected static final String TLS_AUTH_PARAM_DESC = "If specified, this parameter supplies a path and filename for a json authentication file that will be used to authenticate HTTPS requests.";
 	protected static final String BASIC_AUTH_PARAM = "b";
 	protected static final String BASIC_AUTH_PARAM_LONGOPT = "basic-auth";
 	protected static final String BASIC_AUTH_PARAM_NAME = "basic-auth";
-	protected static final String BASIC_AUTH_PARAM_DESC =
-			"If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header. The value \"PROMPT\" may also be used to specify that an interactive prompt should request credentials from the user.";
+	protected static final String BASIC_AUTH_PARAM_DESC = "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header. The value \"PROMPT\" may also be used to specify that an interactive prompt should request credentials from the user.";
 	protected static final String BEARER_TOKEN_PARAM_LONGOPT = "bearer-token";
 	protected static final String BEARER_TOKEN_PARAM_NAME = "bearer-token";
-	protected static final String BEARER_TOKEN_PARAM_DESC =
-			"If specified, this parameter supplies a Bearer Token to supply with the request. The value \"PROMPT\" may also be used to specify that an interactive prompt should request a Bearer Token from the user.";
+	protected static final String BEARER_TOKEN_PARAM_DESC = "If specified, this parameter supplies a Bearer Token to supply with the request. The value \"PROMPT\" may also be used to specify that an interactive prompt should request a Bearer Token from the user.";
 	protected static final String FHIR_VERSION_PARAM = "v";
 	protected static final String FHIR_VERSION_PARAM_LONGOPT = "fhir-version";
 	protected static final String FHIR_VERSION_PARAM_NAME = "version";
@@ -125,25 +121,18 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected void addBasicAuthOption(Options theOptions) {
-		addOptionalOption(
-				theOptions, BASIC_AUTH_PARAM, BASIC_AUTH_PARAM_LONGOPT, BASIC_AUTH_PARAM_NAME, BASIC_AUTH_PARAM_DESC);
-		addOptionalOption(
-				theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
+		addOptionalOption(theOptions, BASIC_AUTH_PARAM, BASIC_AUTH_PARAM_LONGOPT, BASIC_AUTH_PARAM_NAME, BASIC_AUTH_PARAM_DESC);
+		addOptionalOption(theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
 	}
 
 	protected void addThreadCountOption(Options theOptions) {
-		addOptionalOption(
-				theOptions,
-				null,
-				THREAD_COUNT,
-				"count",
-				"If specified, this argument specifies the number of worker threads used (default is "
-						+ DEFAULT_THREAD_COUNT + ")");
+		addOptionalOption(theOptions, null, THREAD_COUNT, "count", "If specified, this argument specifies the number of worker threads used (default is " + DEFAULT_THREAD_COUNT + ")");
 	}
 
-	protected void addHttpsAuthOption(Options theOptions) {
+	protected void addHttpsAuthOption(Options theOptions){
 		addOptionalOption(theOptions, null, TLS_AUTH_PARAM_LONGOPT, TLS_AUTH_PARAM_NAME, TLS_AUTH_PARAM_DESC);
 	}
+
 
 	protected String promptUser(String thePrompt) throws ParseException {
 		System.out.print(ansi().bold().fgBrightDefault());
@@ -175,27 +164,15 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void addFhirVersionOption(Options theOptions) {
 		String versions = Arrays.stream(FhirVersionEnum.values())
-				.filter(t -> !getFilterOutVersions().contains(t))
-				.map(t -> t.name().toLowerCase())
-				.sorted()
-				.collect(Collectors.joining(", "));
-		addRequiredOption(
-				theOptions,
-				FHIR_VERSION_PARAM,
-				FHIR_VERSION_PARAM_LONGOPT,
-				FHIR_VERSION_PARAM_NAME,
-				FHIR_VERSION_PARAM_DESC + versions);
+			.filter(t -> ! getFilterOutVersions().contains(t))
+			.map(t -> t.name().toLowerCase())
+			.sorted()
+			.collect(Collectors.joining(", "));
+		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
 	}
 
-	private void addOption(
-			Options theOptions,
-			OptionGroup theOptionGroup,
-			boolean theRequired,
-			String theOpt,
-			String theLongOpt,
-			boolean theHasArgument,
-			String theArgumentName,
-			String theDescription) {
+
+	private void addOption(Options theOptions, OptionGroup theOptionGroup, boolean theRequired, String theOpt, String theLongOpt, boolean theHasArgument, String theArgumentName, String theDescription) {
 		Option option = createOption(theRequired, theOpt, theLongOpt, theHasArgument, theDescription);
 		if (theHasArgument && isNotBlank(theArgumentName)) {
 			option.setArgName(theArgumentName);
@@ -205,8 +182,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			if (theOptions.getOption(theOpt) != null) {
 				throw new IllegalStateException(Msg.code(1567) + "Duplicate option: " + theOpt);
 			}
-			if (theOptionGroup != null
-					&& theOptionGroup.getOptions().stream().anyMatch(t -> theOpt.equals(t.getOpt()))) {
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theOpt.equals(t.getOpt()))) {
 				throw new IllegalStateException(Msg.code(1568) + "Duplicate option: " + theOpt);
 			}
 		}
@@ -214,8 +190,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			if (theOptions.getOption(theLongOpt) != null) {
 				throw new IllegalStateException(Msg.code(1569) + "Duplicate option: " + theLongOpt);
 			}
-			if (theOptionGroup != null
-					&& theOptionGroup.getOptions().stream().anyMatch(t -> theLongOpt.equals(t.getLongOpt()))) {
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theLongOpt.equals(t.getLongOpt()))) {
 				throw new IllegalStateException(Msg.code(1570) + "Duplicate option: " + theOpt);
 			}
 		}
@@ -227,49 +202,28 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 	}
 
-	protected void addOptionalOption(
-			Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
+	protected void addOptionalOption(Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
 		addOption(theOptions, null, false, theOpt, theLong, theTakesArgument, null, theDescription);
 	}
 
-	protected void addOptionalOption(
-			Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
-		addOption(
-				theOptions, null, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+	protected void addOptionalOption(Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
+		addOption(theOptions, null, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
 	}
 
-	protected void addOptionalOption(
-			Options theOptions,
-			OptionGroup theOptionGroup,
-			String theOpt,
-			String theLong,
-			String theArgumentName,
-			String theDescription) {
-		addOption(
-				theOptions,
-				theOptionGroup,
-				false,
-				theOpt,
-				theLong,
-				isNotBlank(theArgumentName),
-				theArgumentName,
-				theDescription);
+	protected void addOptionalOption(Options theOptions, OptionGroup theOptionGroup, String theOpt, String theLong, String theArgumentName, String theDescription) {
+		addOption(theOptions, theOptionGroup, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
 	}
 
-	protected void addRequiredOption(
-			Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
+	protected void addRequiredOption(Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
 		addOption(theOptions, null, true, theOpt, theLong, theTakesArgument, null, theDescription);
 	}
 
-	protected void addRequiredOption(
-			Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
-		addOption(
-				theOptions, null, true, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+	protected void addRequiredOption(Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
+		addOption(theOptions, null, true, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
 	}
 
 	protected void addVerboseLoggingOption(Options theOptions) {
-		addOptionalOption(
-				theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
+		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
 	}
 
 	/**
@@ -284,8 +238,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return getCommandName().compareTo(theO.getCommandName());
 	}
 
-	private Option createOption(
-			boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theDescription) {
+	private Option createOption(boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theDescription) {
 		Option option = new Option(theOpt, theLong, theHasArgument, theDescription);
 		option.setRequired(theRequired);
 		return option;
@@ -352,8 +305,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	/**
 	 * @return Returns the complete authorization header value using an arbitrary option
 	 */
-	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine, String theOptionName)
-			throws ParseException {
+	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine, String theOptionName) throws ParseException {
 		String basicAuthHeaderValue = null;
 		if (theCommandLine.hasOption(theOptionName)) {
 			String optionValue = theCommandLine.getOptionValue(theOptionName);
@@ -369,12 +321,13 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return basicAuthHeaderValue;
 	}
 
-	protected Pair<String, String> parseNameValueParameter(String separator, String theParamName, String theParam)
-			throws ParseException {
+
+	protected Pair<String, String> parseNameValueParameter(
+			String separator, String theParamName, String theParam) throws ParseException {
 
 		String errorMsg = "Parameter " + theParamName + " must be in the format: \"name:value\"";
 
-		if (!theParam.contains(separator)) {
+		if (! theParam.contains(separator)) {
 			throw new ParseException(Msg.code(1571) + errorMsg);
 		}
 
@@ -390,9 +343,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return Pair.of(nameValue[0], nameValue[1]);
 	}
 
-	public <T extends Enum> T getAndParseOptionEnum(
-			CommandLine theCommandLine, String theOption, Class<T> theEnumClass, boolean theRequired, T theDefault)
-			throws ParseException {
+
+	public <T extends Enum> T getAndParseOptionEnum(CommandLine theCommandLine, String theOption, Class<T> theEnumClass, boolean theRequired, T theDefault) throws ParseException {
 		String val = theCommandLine.getOptionValue(theOption);
 		if (isBlank(val)) {
 			if (theRequired && theDefault == null) {
@@ -407,8 +359,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 	}
 
-	public Integer getAndParseNonNegativeIntegerParam(CommandLine theCommandLine, String theName)
-			throws ParseException {
+	public Integer getAndParseNonNegativeIntegerParam(CommandLine theCommandLine, String theName) throws ParseException {
 		int minimum = 0;
 		return doGetAndParseIntegerParam(theCommandLine, theName, minimum);
 	}
@@ -419,8 +370,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	@Nullable
-	private Integer doGetAndParseIntegerParam(CommandLine theCommandLine, String theName, int minimum)
-			throws ParseException {
+	private Integer doGetAndParseIntegerParam(CommandLine theCommandLine, String theName, int minimum) throws ParseException {
 		String value = theCommandLine.getOptionValue(theName);
 		value = trim(value);
 		if (isBlank(value)) {
@@ -430,13 +380,11 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		try {
 			int valueInt = Integer.parseInt(value);
 			if (valueInt < minimum) {
-				throw new ParseException(Msg.code(1576) + "Value for argument " + theName + " must be an integer >= "
-						+ minimum + ", got: " + value);
+				throw new ParseException(Msg.code(1576) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 			}
 			return valueInt;
 		} catch (NumberFormatException e) {
-			throw new ParseException(Msg.code(1577) + "Value for argument " + theName + " must be an integer >= "
-					+ minimum + ", got: " + value);
+			throw new ParseException(Msg.code(1577) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 		}
 	}
 
@@ -460,8 +408,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	public abstract Options getOptions();
 
-	protected Collection<File> loadFile(String theSpecUrl, String theFilepath, boolean theCacheFile)
-			throws IOException {
+	protected Collection<File> loadFile(String theSpecUrl, String theFilepath, boolean theCacheFile) throws IOException {
 		String userHomeDir = System.getProperty("user.home");
 
 		File applicationDir = new File(userHomeDir + File.separator + "." + "hapi-fhir-cli");
@@ -478,7 +425,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			File suppliedFile = new File(FilenameUtils.normalize(theFilepath));
 
 			if (suppliedFile.isDirectory()) {
-				inputFiles = FileUtils.listFiles(suppliedFile, new String[] {"zip"}, false);
+				inputFiles = FileUtils.listFiles(suppliedFile, new String[]{"zip"}, false);
 			} else {
 				inputFiles = Collections.singletonList(suppliedFile);
 			}
@@ -488,24 +435,20 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			File cacheDir = new File(applicationDir, "cache");
 			FileUtils.forceMkdir(cacheDir);
 
-			File inputFile = new File(
-					cacheDir, "examples-json-" + getFhirContext().getVersion().getVersion() + ".zip");
+			File inputFile = new File(cacheDir, "examples-json-" + getFhirContext().getVersion().getVersion() + ".zip");
 
 			Date cacheExpiryDate = DateUtils.addHours(new Date(), -12);
 
 			if (!inputFile.exists() | (theCacheFile && FileUtils.isFileOlder(inputFile, cacheExpiryDate))) {
 
-				File exampleFileDownloading = new File(
-						cacheDir,
-						"examples-json-" + getFhirContext().getVersion().getVersion() + ".zip.partial");
+				File exampleFileDownloading = new File(cacheDir, "examples-json-" + getFhirContext().getVersion().getVersion() + ".zip.partial");
 
 				HttpGet get = new HttpGet(theSpecUrl);
 				CloseableHttpClient client = HttpClientBuilder.create().build();
 				CloseableHttpResponse result = client.execute(get);
 
 				if (result.getStatusLine().getStatusCode() != 200) {
-					throw new CommandFailureException(Msg.code(1578) + "Got HTTP "
-							+ result.getStatusLine().getStatusCode() + " response code loading " + theSpecUrl);
+					throw new CommandFailureException(Msg.code(1578) + "Got HTTP " + result.getStatusLine().getStatusCode() + " response code loading " + theSpecUrl);
 				}
 
 				ourLog.info("Downloading from remote url: {}", theSpecUrl);
@@ -518,53 +461,39 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 					inputFile.deleteOnExit();
 				}
 
-				ourLog.info(
-						"Successfully Loaded example pack ({})",
-						FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(inputFile)));
+				ourLog.info("Successfully Loaded example pack ({})", FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(inputFile)));
 				IOUtils.closeQuietly(result.getEntity().getContent());
 			}
 
 			inputFiles = Collections.singletonList(inputFile);
+
 		}
 		return inputFiles;
 	}
 
 	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
-		return newClient(
-				theCommandLine, BASE_URL_PARAM, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
+		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 	}
 
-	protected IGenericClient newClient(
-			CommandLine theCommandLine,
-			String theBaseUrlParamName,
-			String theBasicAuthOptionName,
-			String theBearerTokenOptionName,
-			String theTlsAuthOptionName)
-			throws ParseException {
+	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName,
+												  String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
 		if (isBlank(baseUrl)) {
 			throw new ParseException(Msg.code(1579) + "No target server (-" + BASE_URL_PARAM + ") specified.");
 		} else if (!baseUrl.startsWith("http") && !baseUrl.startsWith("file")) {
-			throw new ParseException(
-					Msg.code(1580) + "Invalid target server specified, must begin with 'http' or 'file'.");
+			throw new ParseException(Msg.code(1580) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
-		return newClientWithBaseUrl(
-				theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
+		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 	}
 
-	protected IGenericClient newClientWithBaseUrl(
-			CommandLine theCommandLine,
-			String theBaseUrl,
-			String theBasicAuthOptionName,
-			String theBearerTokenOptionName,
-			String theTlsAuthOptionName)
-			throws ParseException {
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName,
+																 String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 
 		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theTlsAuthOptionName);
 		RestfulClientFactory restfulClientFactory = tlsConfig.isPresent()
-				? new HapiFhirCliRestfulClientFactory(myFhirCtx, tlsConfig.get())
-				: new HapiFhirCliRestfulClientFactory(myFhirCtx);
+			? new HapiFhirCliRestfulClientFactory(myFhirCtx, tlsConfig.get())
+			: new HapiFhirCliRestfulClientFactory(myFhirCtx);
 
 		myFhirCtx.setRestfulClientFactory(restfulClientFactory);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
@@ -572,45 +501,42 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
 		if (isNotBlank(basicAuthHeaderValue)) {
-			retVal.registerInterceptor(
-					new SimpleRequestHeaderInterceptor(Constants.HEADER_AUTHORIZATION, basicAuthHeaderValue));
+			retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(Constants.HEADER_AUTHORIZATION, basicAuthHeaderValue));
 		}
 
 		if (isNotBlank(theBearerTokenOptionName)) {
 			String bearerToken = getAndParseBearerTokenAuthHeader(theCommandLine, theBearerTokenOptionName);
 			if (isNotBlank(bearerToken)) {
-				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(
-						Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
+				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
 			}
 		}
 
 		return retVal;
 	}
 
-	private Optional<TlsAuthentication> createTlsConfig(CommandLine theCommandLine, String theTlsAuthOptionName) {
+	private Optional<TlsAuthentication> createTlsConfig(CommandLine theCommandLine, String theTlsAuthOptionName){
 		String httpAuthFilePath = theCommandLine.getOptionValue(theTlsAuthOptionName);
-		if (isBlank(httpAuthFilePath)) {
+		if(isBlank(httpAuthFilePath)){
 			return Optional.empty();
 		}
 
-		try (FileReader fileReader = new FileReader(httpAuthFilePath)) {
+		try(FileReader fileReader = new FileReader(httpAuthFilePath)) {
 			JsonObject json = JsonParser.parseReader(fileReader).getAsJsonObject();
-			Optional<KeyStoreInfo> keyStoreInfo =
-					createKeyStoreInfo(json.get("keyStore").getAsJsonObject());
-			Optional<TrustStoreInfo> trustStoreInfo =
-					createTrustStoreInfo(json.get("trustStore").getAsJsonObject());
-			if (keyStoreInfo.isEmpty() && trustStoreInfo.isEmpty()) {
+			Optional<KeyStoreInfo> keyStoreInfo = createKeyStoreInfo(json.get("keyStore").getAsJsonObject());
+			Optional<TrustStoreInfo> trustStoreInfo = createTrustStoreInfo(json.get("trustStore").getAsJsonObject());
+			if(keyStoreInfo.isEmpty() && trustStoreInfo.isEmpty()){
 				return Optional.empty();
 			}
 			return Optional.of(new TlsAuthentication(keyStoreInfo, trustStoreInfo));
-		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(2253) + "Could not create TLS configuration options", e);
+		}
+		catch(Exception e){
+			throw new RuntimeException(Msg.code(2253)+"Could not create TLS configuration options", e);
 		}
 	}
 
 	private Optional<KeyStoreInfo> createKeyStoreInfo(JsonObject theJson) throws ParseException {
 		String filePath = theJson.get("filePath").getAsString();
-		if (isBlank(filePath)) {
+		if(isBlank(filePath)){
 			return Optional.empty();
 		}
 
@@ -630,7 +556,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	private Optional<TrustStoreInfo> createTrustStoreInfo(JsonObject theJson) throws ParseException {
 		String filePath = theJson.get("filePath").getAsString();
-		if (isBlank(filePath)) {
+		if(isBlank(filePath)){
 			return Optional.empty();
 		}
 
@@ -644,8 +570,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return Optional.of(trustStoreInfo);
 	}
 
-	private String getAndParseBearerTokenAuthHeader(CommandLine theCommandLine, String theBearerTokenOptionName)
-			throws ParseException {
+	private String getAndParseBearerTokenAuthHeader(CommandLine theCommandLine, String theBearerTokenOptionName) throws ParseException {
 		String value = theCommandLine.getOptionValue(theBearerTokenOptionName);
 		if (PROMPT.equals(value)) {
 			return promptUser("Enter Bearer Token: ");
@@ -670,6 +595,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		FhirVersionEnum versionEnum = parseFhirVersion(theCommandLine);
 		myFhirCtx = versionEnum.newContext();
 	}
+
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;
 

@@ -34,15 +34,14 @@ public class UnclassifiedServerExceptionDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(UnclassifiedServerExceptionDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UnclassifiedServerExceptionDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	public static UnclassifiedServerFailureException ourException;
 
 	@Test
 	public void testSearch() throws Exception {
-
+		
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
 		ourException = new UnclassifiedServerFailureException(477, "SOME MESSAGE", operationOutcome);
@@ -54,11 +53,12 @@ public class UnclassifiedServerExceptionDstu3Test {
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 			assertEquals(477, status.getStatusLine().getStatusCode());
-			// assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
+			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
 			assertThat(responseContent, stringContainsInOrder("business-rule"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@AfterAll
@@ -82,13 +82,13 @@ public class UnclassifiedServerExceptionDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -102,5 +102,7 @@ public class UnclassifiedServerExceptionDstu3Test {
 		public List<Patient> search() {
 			throw ourException;
 		}
+
 	}
+
 }

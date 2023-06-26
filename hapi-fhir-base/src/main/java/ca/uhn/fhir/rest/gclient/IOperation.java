@@ -61,4 +61,5 @@ public interface IOperation extends IBaseOn<IOperationUnnamed> {
 	 * using FHIR Resources</a>
 	 */
 	IOperationProcessMsg processMessage();
+
 }

@@ -36,10 +36,11 @@ public class TagTest {
 		assertFalse(new Tag("http://foo").isEmpty());
 		assertFalse(new Tag("http://foo", "http://bar").isEmpty());
 		assertFalse(new Tag(new URI("http://foo"), new URI("http://bar"), "Label").isEmpty());
-		assertTrue(new Tag((URI) null, null, "Label").isEmpty());
+		assertTrue(new Tag((URI)null, null, "Label").isEmpty());
 
 		assertEquals("http://foo", new Tag(new URI("http://foo"), new URI("http://bar"), "Label").getSystem());
 		assertEquals("http://bar", new Tag(new URI("http://foo"), new URI("http://bar"), "Label").getCode());
 		assertEquals("Label", new Tag(new URI("http://foo"), new URI("http://bar"), "Label").getDisplay());
 	}
+
 }

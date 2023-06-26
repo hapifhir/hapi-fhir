@@ -13,8 +13,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
@@ -22,7 +22,6 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 public class MdmHelperR4 extends BaseMdmHelper {
 	@Autowired
 	private FhirContext myFhirContext;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -30,8 +29,7 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		return createWithLatch(theResource, true);
 	}
 
-	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest)
-			throws InterruptedException {
+	public OutcomeAndLogMessageWrapper createWithLatch(IBaseResource theBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterMdmLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doCreateResource(theBaseResource, isExternalHttpRequest);
 		List<HookParams> hookParams = myAfterMdmLatch.awaitExpected();
@@ -42,8 +40,7 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		return updateWithLatch(theIBaseResource, true);
 	}
 
-	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest)
-			throws InterruptedException {
+	public OutcomeAndLogMessageWrapper updateWithLatch(IBaseResource theIBaseResource, boolean isExternalHttpRequest) throws InterruptedException {
 		myAfterMdmLatch.setExpectedCount(1);
 		DaoMethodOutcome daoMethodOutcome = doUpdateResource(theIBaseResource, isExternalHttpRequest);
 		List<HookParams> hookParams = myAfterMdmLatch.awaitExpected();
@@ -54,14 +51,15 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		String resourceType = myFhirContext.getResourceType(theResource);
 
 		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-		return isExternalHttpRequest ? dao.create(theResource, myMockSrd) : dao.create(theResource);
+		return isExternalHttpRequest ? dao.create(theResource, myMockSrd): dao.create(theResource);
 	}
 
 	public DaoMethodOutcome doUpdateResource(IBaseResource theResource, boolean isExternalHttpRequest) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-		return isExternalHttpRequest ? dao.update(theResource, myMockSrd) : dao.create(theResource);
+		return isExternalHttpRequest ? dao.update(theResource, myMockSrd): dao.create(theResource);
 	}
+
 
 	@Nonnull
 	public Patient buildGoldenPatient() {
@@ -103,4 +101,5 @@ public class MdmHelperR4 extends BaseMdmHelper {
 			return PointcutLatch.getInvocationParameterOfType(myHookParams, ResourceOperationMessage.class);
 		}
 	}
+
 }

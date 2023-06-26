@@ -14,4 +14,5 @@ public class SimpleBundleProviderTest {
 		p.setPreferredPageSize(100);
 		assertEquals(100, p.preferredPageSize().intValue());
 	}
+
 }

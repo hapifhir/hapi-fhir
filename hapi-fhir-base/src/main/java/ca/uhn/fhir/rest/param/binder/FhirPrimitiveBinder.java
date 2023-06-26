@@ -19,11 +19,12 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
-import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiveType<?>> {
+import ca.uhn.fhir.util.ReflectionUtil;
 
+public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiveType<?>> {
+	
 	private Class<IPrimitiveType<?>> myType;
 
 	public FhirPrimitiveBinder(Class<IPrimitiveType<?>> theType) {
@@ -41,4 +42,6 @@ public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiv
 		instance.setValueAsString(theString);
 		return instance;
 	}
+
+
 }

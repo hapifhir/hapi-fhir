@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.tenant;
 
-import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -58,10 +58,8 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 		}
 
 		if (tenantId == null) {
-			HapiLocalizer localizer =
-					theRequestDetails.getServer().getFhirContext().getLocalizer();
-			throw new InvalidRequestException(
-					Msg.code(307) + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
+			HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
+			throw new InvalidRequestException(Msg.code(307) + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
 		}
 	}
 
@@ -70,4 +68,5 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 		Validate.notNull(theRequestDetails.getTenantId(), "theTenantId is not populated on this request");
 		return theFhirServerBase + '/' + theRequestDetails.getTenantId();
 	}
+
 }

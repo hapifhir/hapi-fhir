@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Icd10LoaderTest {
@@ -27,9 +28,7 @@ public class Icd10LoaderTest {
 		loader.load(reader);
 
 		assertEquals("ICD-10-EN", codeSystem.getTitle());
-		assertEquals(
-				"International Statistical Classification of Diseases and Related Health Problems 10th Revision",
-				codeSystem.getDescription());
+		assertEquals("International Statistical Classification of Diseases and Related Health Problems 10th Revision", codeSystem.getDescription());
 		assertEquals("2022-tree-expanded", codeSystemVersion.getCodeSystemVersionId());
 
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
@@ -42,8 +41,7 @@ public class Icd10LoaderTest {
 		assertEquals("Include fruit", chapterA.getStringProperty("inclusion"));
 		assertEquals("Things that are not fruit", chapterA.getStringProperty("exclusion"));
 
-		assertEquals(
-				"""
+		assertEquals("""
 						A "Fruit"
 						-A1-A3 "A1 to A3 type fruit"
 						--A1 "Apples"
@@ -53,8 +51,7 @@ public class Icd10LoaderTest {
 						-B1-B2 "A group of trees"
 						--B1 "Oak trees"
 						--B2 "Ash trees"
-				""",
-				toTree(rootConcepts));
+                  """, toTree(rootConcepts));
 	}
 
 	private String toTree(List<TermConcept> concepts) {

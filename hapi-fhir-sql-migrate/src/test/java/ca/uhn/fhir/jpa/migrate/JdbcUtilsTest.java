@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -15,7 +16,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Set;
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,16 +26,12 @@ import static org.mockito.Mockito.when;
 public class JdbcUtilsTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtilsTest.class);
-
 	@Mock
 	DataSource myDataSource;
-
 	@Mock
 	Connection myConnection;
-
 	@Mock
 	DatabaseMetaData myDatabaseMetaData;
-
 	@Mock
 	ResultSet myResultSet;
 
@@ -54,26 +50,23 @@ public class JdbcUtilsTest {
 		testGetColumnType_verifyTypeMapping(Types.CLOB, ColumnTypeEnum.CLOB);
 		testGetColumnType_verifyTypeMapping(Types.DOUBLE, ColumnTypeEnum.DOUBLE);
 		testGetColumnType_verifyTypeMapping(Types.FLOAT, ColumnTypeEnum.FLOAT);
+
 	}
 
-	private void testGetColumnType_verifyTypeMapping(int theExistingDataType, ColumnTypeEnum theExpectedColumnType)
-			throws SQLException {
+	private void testGetColumnType_verifyTypeMapping(int theExistingDataType, ColumnTypeEnum theExpectedColumnType) throws SQLException {
 		when(myResultSet.next()).thenReturn(true).thenReturn(false);
 		when(myResultSet.getString("TABLE_NAME")).thenReturn("TEST_TABLE");
 		when(myResultSet.getString("COLUMN_NAME")).thenReturn("TEST_COLUMN");
 		when(myResultSet.getInt("DATA_TYPE")).thenReturn(theExistingDataType);
 		when(myResultSet.getLong("COLUMN_SIZE")).thenReturn(17L);
 
-		when(myDatabaseMetaData.getColumns("Catalog", "Schema", "TEST_TABLE", null))
-				.thenReturn(myResultSet);
+		when(myDatabaseMetaData.getColumns("Catalog", "Schema", "TEST_TABLE", null)).thenReturn(myResultSet);
 		when(myConnection.getMetaData()).thenReturn(myDatabaseMetaData);
 		when(myConnection.getCatalog()).thenReturn("Catalog");
 		when(myConnection.getSchema()).thenReturn("Schema");
 		when(myDataSource.getConnection()).thenReturn(myConnection);
-		DriverTypeEnum.ConnectionProperties myConnectionProperties =
-				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
-		JdbcUtils.ColumnType testColumnType =
-				JdbcUtils.getColumnType(myConnectionProperties, "TEST_TABLE", "TEST_COLUMN");
+		DriverTypeEnum.ConnectionProperties myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
+		JdbcUtils.ColumnType testColumnType = JdbcUtils.getColumnType(myConnectionProperties, "TEST_TABLE", "TEST_COLUMN");
 		ourLog.info("Column type: {}", testColumnType);
 
 		assertEquals(theExpectedColumnType, testColumnType.getColumnTypeEnum());
@@ -102,18 +95,15 @@ public class JdbcUtilsTest {
 		when(mockUniqueIndicesResultSet.getMetaData()).thenReturn(mockResultSetMetaData);
 
 		when(myDatabaseMetaData.getTables("Catalog", "Schema", null, null)).thenReturn(mockTableResultSet);
-		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", false, true))
-				.thenReturn(mockIndicesResultSet);
-		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", true, true))
-				.thenReturn(mockUniqueIndicesResultSet);
+		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", false, true)).thenReturn(mockIndicesResultSet);
+		when(myDatabaseMetaData.getIndexInfo("Catalog", "Schema", "TEST_TABLE", true, true)).thenReturn(mockUniqueIndicesResultSet);
 		when(myConnection.getMetaData()).thenReturn(myDatabaseMetaData);
 		when(myConnection.getCatalog()).thenReturn("Catalog");
 		when(myConnection.getSchema()).thenReturn("Schema");
 		when(myDataSource.getConnection()).thenReturn(myConnection);
-		DriverTypeEnum.ConnectionProperties myConnectionProperties =
-				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
+		DriverTypeEnum.ConnectionProperties myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myDataSource);
 
-		// execute
+		//execute
 		Set<String> indexNames = JdbcUtils.getIndexNames(myConnectionProperties, "TEST_TABLE");
 
 		// verify

@@ -44,8 +44,7 @@ public class SearchParamSubmitInterceptorLoader {
 	}
 
 	@Autowired
-	public void setSearchParamValidatingInterceptor(
-			SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
+	public void setSearchParamValidatingInterceptor(SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
 		mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
 	}
 

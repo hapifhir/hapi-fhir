@@ -52,12 +52,10 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myGoldenMedicationId;
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture =
-			new LogbackCaptureTestExtension((Logger) Logs.getMdmTroubleshootingLog());
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
 	IInterceptorService myInterceptorService;
-
 	@Autowired
 	MdmSettings myMdmSettings;
 
@@ -69,20 +67,18 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		ServletRequestDetails syncSrd = mock(ServletRequestDetails.class);
 
 		return Stream.of(
-				Arguments.of(Named.of("Asynchronous Request", asyncSrd)),
-				Arguments.of(Named.of("Synchronous Request", syncSrd)));
+			Arguments.of(Named.of("Asynchronous Request", asyncSrd)),
+			Arguments.of(Named.of("Synchronous Request", syncSrd))
+		);
 	}
-
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myPractitioner =
-				createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
+		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
 		myGoldenPractitioner = getGoldenResourceFromTargetResource(myPractitioner);
-		myGoldenPractitionerId =
-				new StringType(myGoldenPractitioner.getIdElement().getValue());
+		myGoldenPractitionerId = new StringType(myGoldenPractitioner.getIdElement().getValue());
 
 		Organization dummyOrganization = new Organization();
 		dummyOrganization.setId(ORGANIZATION_DUMMY);
@@ -111,30 +107,23 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(
-				1,
-				() -> myMdmProvider.mdmBatchOnAllSourceResources(
-						new StringType("Medication"), criteria, null, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
 	@ParameterizedTest
 	@MethodSource("requestTypes")
-	public void testBatchRunOnAllPractitioners(ServletRequestDetails theSyncOrAsyncRequest)
-			throws InterruptedException {
+	public void testBatchRunOnAllPractitioners(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(
-				1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, null, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
-
 	@Test
 	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
 		clearMdmLinks();
-		afterMdmLatch.runWithExpectedCount(
-				1, () -> myMdmProvider.mdmBatchPractitionerInstance(myPractitioner.getIdElement(), null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
@@ -154,8 +143,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 		StringType criteria = null;
 		clearMdmLinks();
-		afterMdmLatch.runWithExpectedCount(
-				1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
@@ -163,8 +151,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnSpecificPatient() throws InterruptedException {
 		assertLinkCount(3);
 		clearMdmLinks();
-		afterMdmLatch.runWithExpectedCount(
-				1, () -> myMdmProvider.mdmBatchPatientInstance(myPatient.getIdElement(), null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientInstance(myPatient.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
@@ -199,14 +186,13 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 
 		try {
-			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null, theSyncOrAsyncRequest);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
 			fail();
 		} catch (InvalidRequestException e) {
 
-			assertThat(
-					e.getMessage(),
-					either(containsString(Msg.code(2039) + "Failed to validate parameters for job")) // Async case
-							.or(containsString(Msg.code(488) + "Failed to parse match URL"))); // Sync case
+			assertThat(e.getMessage(), either(
+				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
+				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
 		}
 	}
 
@@ -226,16 +212,14 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		} catch (InternalErrorException e) {
 			// Then
 			assertLinkCount(1);
-			String expectedMsg = Msg.code(2362)
-					+ "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
+			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
 			assertEquals(expectedMsg, e.getMessage());
 		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("requestTypes")
-	public void testUpdateResource_WithClearAndSubmit_Succeeds(ServletRequestDetails theSyncOrAsyncRequest)
-			throws InterruptedException {
+	public void testUpdateResource_WithClearAndSubmit_Succeeds(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		// Given
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
@@ -244,7 +228,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		// When
 		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(3, () -> {
-			myMdmProvider.mdmBatchPatientType(null, null, theSyncOrAsyncRequest);
+			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
 		});
 
 		// Then

@@ -22,4 +22,5 @@ class ResourceOrderTest {
 		assertThat(r4Order.indexOf("Patient"), lessThan(r4Order.indexOf("Observation")));
 		assertThat(r4Order.indexOf("Practitioner"), lessThan(r4Order.indexOf("Patient")));
 	}
+
 }

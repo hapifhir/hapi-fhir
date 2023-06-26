@@ -54,18 +54,15 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	private final DaoRegistry myDaoRegistry;
 	private final VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
 
-	public ValidatorResourceFetcher(
-			FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+	public ValidatorResourceFetcher(FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myValidationSupport = theValidationSupport;
 		myDaoRegistry = theDaoRegistry;
-		myVersionSpecificContextWrapper =
-				VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+		myVersionSpecificContextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 
 	@Override
-	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl)
-			throws FHIRFormatError, DefinitionException, FHIRException, IOException {
+	public Element fetch(IResourceValidator iResourceValidator, Object appContext, String theUrl) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
 		IdType id = new IdType(theUrl);
 		String resourceType = id.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
@@ -78,16 +75,14 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		}
 
 		try {
-			return new JsonParser(myVersionSpecificContextWrapper)
-					.parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
+			return new JsonParser(myVersionSpecificContextWrapper).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
 			throw new FHIRException(Msg.code(576) + e);
 		}
 	}
 
 	@Override
-	public boolean resolveURL(IResourceValidator iResourceValidator, Object o, String s, String s1, String s2)
-			throws IOException, FHIRException {
+	public boolean resolveURL(IResourceValidator iResourceValidator, Object o, String s, String s1, String s2) throws IOException, FHIRException {
 		return true;
 	}
 
@@ -103,8 +98,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s)
-			throws URISyntaxException {
+	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s) throws URISyntaxException {
 		return null;
 	}
 

@@ -16,23 +16,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class EmptyElementWithExtensionDstu3Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(EmptyElementWithExtensionDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmptyElementWithExtensionDstu3Test.class);
 	private static FhirContext ctx = FhirContext.forDstu2_1();
+
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+
 	@Test
 	public void testNullFlavorCompositeJson() {
 		Observation observation = new Observation();
-		observation
-				.getCode()
-				.addCoding()
-				.addExtension(new Extension(
-						"http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
+		observation.getCode().addCoding().addExtension(new Extension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
 		IParser parser = ctx.newJsonParser().setPrettyPrint(true);
 		String json = parser.encodeResourceToString(observation);
 
@@ -45,11 +42,7 @@ public class EmptyElementWithExtensionDstu3Test {
 	@Test
 	public void testNullFlavorCompositeXml() {
 		Observation observation = new Observation();
-		observation
-				.getCode()
-				.addCoding()
-				.addExtension(new Extension(
-						"http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
+		observation.getCode().addCoding().addExtension(new Extension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
 		IParser parser = ctx.newXmlParser().setPrettyPrint(true);
 		String xml = parser.encodeResourceToString(observation);
 
@@ -62,14 +55,8 @@ public class EmptyElementWithExtensionDstu3Test {
 	@Test
 	public void testNullFlavorPrimitiveJson() {
 		Observation observation = new Observation();
-		observation
-				.getCode()
-				.getCoding()
-				.add(new Coding().setSystem("http://loinc.org").setCode("3141-9"));
-		observation
-				.getStatusElement()
-				.addExtension(new Extension(
-						"http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
+		observation.getCode().getCoding().add(new Coding().setSystem("http://loinc.org").setCode("3141-9"));
+		observation.getStatusElement().addExtension(new Extension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
 		IParser parser = ctx.newJsonParser().setPrettyPrint(true);
 		String json = parser.encodeResourceToString(observation);
 
@@ -82,14 +69,8 @@ public class EmptyElementWithExtensionDstu3Test {
 	@Test
 	public void testNullFlavorPrimitiveXml() {
 		Observation observation = new Observation();
-		observation
-				.getCode()
-				.getCoding()
-				.add(new Coding().setSystem("http://loinc.org").setCode("3141-9"));
-		observation
-				.getStatusElement()
-				.addExtension(new Extension(
-						"http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
+		observation.getCode().getCoding().add(new Coding().setSystem("http://loinc.org").setCode("3141-9"));
+		observation.getStatusElement().addExtension(new Extension("http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor", new StringType("UNK")));
 		IParser parser = ctx.newXmlParser().setPrettyPrint(true);
 		String xml = parser.encodeResourceToString(observation);
 
@@ -98,4 +79,5 @@ public class EmptyElementWithExtensionDstu3Test {
 		observation = (Observation) parser.parseResource(xml);
 		assertEquals(1, observation.getStatusElement().getExtension().size());
 	}
+
 }

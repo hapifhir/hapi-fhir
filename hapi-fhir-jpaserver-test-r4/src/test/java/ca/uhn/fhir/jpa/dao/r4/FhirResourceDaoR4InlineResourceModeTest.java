@@ -45,8 +45,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			// Version 1
-			ResourceHistoryTable entity =
-					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
+			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
 			assertNull(entity.getResource());
 			assertThat(entity.getResourceTextVc(), containsString("\"active\":true"));
 			// Version 2
@@ -58,12 +57,11 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
 		assertFalse(patient.getActive());
 
-		patient = (Patient) myPatientDao
-				.search(SearchParameterMap.newSynchronous())
-				.getAllResources()
-				.get(0);
+		patient = (Patient) myPatientDao.search(SearchParameterMap.newSynchronous()).getAllResources().get(0);
 		assertFalse(patient.getActive());
+
 	}
+
 
 	@Test
 	public void testDontUseInlineAboveThreshold() {
@@ -76,8 +74,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			// Version 1
-			ResourceHistoryTable entity =
-					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
+			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
 			assertNotNull(entity.getResource());
 			assertNull(entity.getResourceTextVc());
 		});
@@ -85,6 +82,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
 		assertEquals(veryLongFamilyName, patient.getNameFirstRep().getFamily());
 	}
+
 
 	@Test
 	public void testNopOnUnchangedUpdate() {
@@ -98,5 +96,8 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 		DaoMethodOutcome updateOutcome = myPatientDao.update(patient);
 		assertEquals("1", updateOutcome.getId().getVersionIdPart());
 		assertTrue(updateOutcome.isNop());
+
 	}
+
+
 }

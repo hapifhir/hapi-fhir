@@ -63,8 +63,7 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 	public ResponseTerminologyDisplayPopulationInterceptor(IValidationSupport theValidationSupport) {
 		super(theValidationSupport);
 
-		myCodingDefinitition = (BaseRuntimeElementCompositeDefinition<?>)
-				Objects.requireNonNull(myContext.getElementDefinition("Coding"));
+		myCodingDefinitition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myContext.getElementDefinition("Coding"));
 		myCodingType = myCodingDefinitition.getImplementingClass();
 		myCodingSystemChild = myCodingDefinitition.getChildByName("system");
 		myCodingCodeChild = myCodingDefinitition.getChildByName("code");
@@ -81,40 +80,21 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 		for (IBaseResource nextResource : resources) {
 			terser.visit(nextResource, new MappingVisitor());
 		}
+
 	}
 
 	private class MappingVisitor implements IModelVisitor {
 
 		@Override
-		public void acceptElement(
-				IBaseResource theResource,
-				IBase theElement,
-				List<String> thePathToElement,
-				BaseRuntimeChildDefinition theChildDefinition,
-				BaseRuntimeElementDefinition<?> theDefinition) {
+		public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 			if (myCodingType.isAssignableFrom(theElement.getClass())) {
-				String system = myCodingSystemChild
-						.getAccessor()
-						.getFirstValueOrNull(theElement)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.orElse(null);
-				String code = myCodingCodeChild
-						.getAccessor()
-						.getFirstValueOrNull(theElement)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.orElse(null);
+				String system = myCodingSystemChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
+				String code = myCodingCodeChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
 				if (isBlank(system) || isBlank(code)) {
 					return;
 				}
 
-				String display = myCodingDisplayChild
-						.getAccessor()
-						.getFirstValueOrNull(theElement)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.orElse(null);
+				String display = myCodingDisplayChild.getAccessor().getFirstValueOrNull(theElement).map(t -> (IPrimitiveType<?>) t).map(t -> t.getValueAsString()).orElse(null);
 				if (isNotBlank(display)) {
 					return;
 				}
@@ -122,15 +102,18 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 				ValidationSupportContext validationSupportContext = new ValidationSupportContext(myValidationSupport);
 				if (myValidationSupport.isCodeSystemSupported(validationSupportContext, system)) {
 
-					IValidationSupport.LookupCodeResult lookupCodeResult =
-							myValidationSupport.lookupCode(validationSupportContext, system, code);
+					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(validationSupportContext, system, code);
 					if (lookupCodeResult != null && lookupCodeResult.isFound()) {
 						String newDisplay = lookupCodeResult.getCodeDisplay();
 						IPrimitiveType<?> newString = myStringDefinition.newInstance(newDisplay);
 						myCodingDisplayChild.getMutator().addValue(theElement, newString);
 					}
+
 				}
 			}
+
 		}
+
 	}
+
 }

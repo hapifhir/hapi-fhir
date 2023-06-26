@@ -59,6 +59,7 @@ public class ValidateDstu2Test {
 		ourLastProfile = null;
 	}
 
+
 	@Test
 	public void testValidate() throws Exception {
 
@@ -70,9 +71,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -94,17 +93,14 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(org);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newJsonParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(
-				ourLastResourceBody,
-				stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+
 	}
 
 	@Test
@@ -120,9 +116,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("mode").setValue(new StringDt(ValidationModeEnum.CREATE.getCode()));
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -149,9 +143,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(params),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -181,13 +173,13 @@ public class ValidateDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class OrganizationProvider implements IResourceProvider {
@@ -204,6 +196,7 @@ public class ValidateDstu2Test {
 
 			return new MethodOutcome(new IdDt("001"));
 		}
+
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -214,10 +207,7 @@ public class ValidateDstu2Test {
 		}
 
 		@Validate()
-		public MethodOutcome validatePatient(
-				@ResourceParam Patient thePatient,
-				@Validate.Mode ValidationModeEnum theMode,
-				@Validate.Profile String theProfile) {
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
 			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue());
 			if (thePatient.getId().isEmpty() == false) {
 				id = thePatient.getId();
@@ -230,5 +220,7 @@ public class ValidateDstu2Test {
 			outcome.setOperationOutcome(ourOutcomeToReturn);
 			return outcome;
 		}
+
 	}
+
 }

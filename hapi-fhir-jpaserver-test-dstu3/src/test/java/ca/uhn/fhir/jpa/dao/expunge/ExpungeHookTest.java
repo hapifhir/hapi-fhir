@@ -28,10 +28,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Autowired
 	private IFhirResourceDaoPatient<Patient> myPatientDao;
-
 	@Autowired
 	private ExpungeService myExpungeService;
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
@@ -43,10 +41,8 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, myEverythingLatch);
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myExpungeResourceLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, myEverythingLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myExpungeResourceLatch);
 	}
 
 	@AfterEach
@@ -55,8 +51,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		assertTrue(myInterceptorService.unregisterInterceptor(myExpungeResourceLatch));
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(
-				new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 	}
 
 	@Test

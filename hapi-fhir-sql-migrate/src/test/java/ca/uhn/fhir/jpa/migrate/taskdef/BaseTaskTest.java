@@ -21,10 +21,7 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals(
-					Msg.code(62) + "The version 123.4 does not match the expected pattern "
-							+ BaseTask.MIGRATION_VERSION_PATTERN,
-					e.getMessage());
+			assertEquals(Msg.code(62) + "The version 123.4 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
 
@@ -35,10 +32,7 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals(
-					Msg.code(62) + "The version 123456789 does not match the expected pattern "
-							+ BaseTask.MIGRATION_VERSION_PATTERN,
-					e.getMessage());
+			assertEquals(Msg.code(62) + "The version 123456789 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
 
@@ -49,10 +43,9 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals(
-					Msg.code(62) + "The version 12345678.9.1 does not match the expected pattern "
-							+ BaseTask.MIGRATION_VERSION_PATTERN,
-					e.getMessage());
+			assertEquals(Msg.code(62) + "The version 12345678.9.1 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
+
+
 }

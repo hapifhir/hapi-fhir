@@ -18,7 +18,7 @@ public class TestCrConfig {
 		storageSettings.setEnforceReferentialIntegrityOnWrite(false);
 		storageSettings.setEnforceReferenceTargetTypes(false);
 		storageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
-		// storageSettings.setResourceServerIdStrategy(Id);
+		//storageSettings.setResourceServerIdStrategy(Id);
 		return storageSettings;
 	}
 
@@ -26,4 +26,5 @@ public class TestCrConfig {
 	public PartitionHelper partitionHelper() {
 		return new PartitionHelper();
 	}
+
 }

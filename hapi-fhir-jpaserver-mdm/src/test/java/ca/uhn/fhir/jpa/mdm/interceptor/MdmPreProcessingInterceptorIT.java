@@ -18,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
-public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test {
+public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 	@RegisterExtension
 	@Autowired
@@ -27,19 +27,17 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
-	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor =
-			new PatientNameModifierMdmPreProcessingInterceptor();
+	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor = new PatientNameModifierMdmPreProcessingInterceptor();
 	private PatientInterceptorWrapper myPatientInterceptorWrapper;
-
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach(){
 		// we wrap the preProcessing interceptor to catch the return value;
 		myPatientInterceptorWrapper = new PatientInterceptorWrapper(myPreProcessingInterceptor);
 		myInterceptorService.registerInterceptor(myPatientInterceptorWrapper);
 	}
 
 	@AfterEach
-	public void afterEach() {
+	public void afterEach(){
 		myInterceptorService.unregisterInterceptor(myPatientInterceptorWrapper);
 	}
 
@@ -53,6 +51,7 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test {
 		Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
 
 		assertEquals(0, interceptedResource.getName().size());
+
 	}
 
 	public static class PatientInterceptorWrapper {
@@ -75,4 +74,9 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test {
 			return myReturnedValue;
 		}
 	}
+
 }
+
+
+
+

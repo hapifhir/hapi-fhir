@@ -40,8 +40,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	public static final String NAME_SOUNDEX_SP = "nameSoundex";
 	public static final String ADDRESS_LINE_SOUNDEX_SP = "addressLineSoundex";
 	public static final String PHONE_NUMBER_SP = "phoneNumber";
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
 	private static final String BOB = "BOB";
 	private static final String ADDRESS = "123 Nohili St";
 	private static final String ADDRESS_CLOSE = "123 Nohily St";
@@ -105,19 +104,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		List<ResourceIndexedSearchParamString> stringParams = myResourceIndexedSearchParamStringDao.findAll();
 
 		assertThat(stringParams, hasSize(7));
-		List<String> stringParamNames = stringParams.stream()
-				.map(ResourceIndexedSearchParamString::getParamName)
-				.collect(Collectors.toList());
-		assertThat(
-				stringParamNames,
-				containsInAnyOrder(
-						Patient.SP_NAME,
-						Patient.SP_GIVEN,
-						Patient.SP_PHONETIC,
-						NAME_SOUNDEX_SP,
-						Patient.SP_ADDRESS,
-						ADDRESS_LINE_SOUNDEX_SP,
-						PHONE_NUMBER_SP));
+		List<String> stringParamNames = stringParams.stream().map(ResourceIndexedSearchParamString::getParamName).collect(Collectors.toList());
+		assertThat(stringParamNames, containsInAnyOrder(Patient.SP_NAME, Patient.SP_GIVEN, Patient.SP_PHONETIC, NAME_SOUNDEX_SP, Patient.SP_ADDRESS, ADDRESS_LINE_SOUNDEX_SP, PHONE_NUMBER_SP));
 
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GALE);
 		assertSearchMatch(pId, Patient.SP_PHONETIC, GAIL);
@@ -157,14 +145,15 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		searchParameter.setType(Enumerations.SearchParamType.STRING);
 		searchParameter.setTitle("Test Soundex");
 		searchParameter.setExpression(theFhirPath);
-		// Maybe use in the future?  RuntimeSearchParam doesn't store this...
-		//		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
+// Maybe use in the future?  RuntimeSearchParam doesn't store this...
+//		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.PHONETIC);
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter
-				.addExtension()
-				.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
-				.setValue(new StringType(theEncoder.name()));
+		searchParameter.addExtension()
+			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
+			.setValue(new StringType(theEncoder.name()));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
 	}
+
+
 }

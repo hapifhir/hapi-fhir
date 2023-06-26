@@ -30,7 +30,8 @@ import com.google.gson.JsonPrimitive;
  */
 public class RegexpGsonBuilderUtil {
 
-	private RegexpGsonBuilderUtil() {}
+
+	private RegexpGsonBuilderUtil() { }
 
 	/**
 	 * Builds a json object as this sample:
@@ -49,4 +50,6 @@ public class RegexpGsonBuilderUtil {
 		JsonArray a = new JsonArray();
 		return regexpJO;
 	}
+
+
 }

@@ -66,8 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AuthorizationInterceptorDstu3Test {
 
-	private static final String ERR403 =
-			"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
+	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorDstu3Test.class);
 	private static CloseableHttpClient ourClient;
 	private static String ourConditionalCreateId;
@@ -158,9 +157,8 @@ public class AuthorizationInterceptorDstu3Test {
 		Bundle output = new Bundle();
 		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		output.addEntry()
-				.setResource(new Patient().setActive(true)) // don't give this an ID
-				.getResponse()
-				.setLocation("/Patient/1");
+			.setResource(new Patient().setActive(true)) // don't give this an ID
+			.getResponse().setLocation("/Patient/1");
 		return output;
 	}
 
@@ -174,6 +172,7 @@ public class AuthorizationInterceptorDstu3Test {
 		return responseContent;
 	}
 
+
 	@Test
 	public void testTransactionWithPatch() throws IOException {
 
@@ -181,21 +180,10 @@ public class AuthorizationInterceptorDstu3Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.allow("transactions")
-						.transaction()
-						.withAnyOperation()
-						.andApplyNormalRules()
-						.andThen()
-						.allow("read patient")
-						.patch()
-						.allRequests()
-						.andThen()
-						.allow()
-						.write()
-						.resourcesOfType("Patient")
-						.withAnyId()
-						.andThen()
-						.build();
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("read patient").patch().allRequests().andThen()
+					.allow().write().resourcesOfType("Patient").withAnyId().andThen()
+					.build();
 			}
 		});
 
@@ -207,7 +195,10 @@ public class AuthorizationInterceptorDstu3Test {
 		// Request is a transaction with 1 search
 		Bundle requestBundle = new Bundle();
 		requestBundle.setType(Bundle.BundleType.TRANSACTION);
-		requestBundle.addEntry().setResource(binary).getRequest().setUrl(ResourceType.Patient.name() + "/123");
+		requestBundle.addEntry()
+			.setResource(binary)
+			.getRequest()
+			.setUrl(ResourceType.Patient.name() + "/123");
 
 		/*
 		 * Response is a transaction response containing the search results
@@ -221,7 +212,9 @@ public class AuthorizationInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		String resp = extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
+
 	}
+
 
 	public static class PlainProvider {
 
@@ -244,29 +237,26 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@GraphQL
-		public String processGraphQlRequest(
-				ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
+		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
 			ourHitMethod = true;
 			return "{'foo':'bar'}";
 		}
 
 		@Transaction()
-		public Bundle search(
-				ServletRequestDetails theRequestDetails,
-				IInterceptorBroadcaster theInterceptorBroadcaster,
-				@TransactionParam Bundle theInput) {
+		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
 					HookParams params = new HookParams()
-							.add(IBaseResource.class, next)
-							.add(RequestDetails.class, theRequestDetails)
-							.add(ServletRequestDetails.class, theRequestDetails);
+						.add(IBaseResource.class, next)
+						.add(RequestDetails.class, theRequestDetails)
+						.add(ServletRequestDetails.class, theRequestDetails);
 					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 				}
 			}
 			return (Bundle) ourReturn.get(0);
 		}
+
 	}
 
 	@AfterAll
@@ -293,10 +283,12 @@ public class AuthorizationInterceptorDstu3Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
+
 }

@@ -25,15 +25,11 @@ import static org.hamcrest.Matchers.containsString;
 public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RepositoryValidatingInterceptorHttpR4Test.class);
-
 	@Autowired
 	protected ObservationResourceProvider myObservationResourceProvider;
-
 	private RepositoryValidatingInterceptor myValInterceptor;
-
 	@RegisterExtension
 	protected RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(FhirVersionEnum.R4);
-
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
@@ -44,10 +40,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
 
 		myRestfulServerExtension.getRestfulServer().registerProvider(myObservationResourceProvider);
-		myRestfulServerExtension
-				.getRestfulServer()
-				.getInterceptorService()
-				.registerInterceptor(new ValidationResultEnrichingInterceptor());
+		myRestfulServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(new ValidationResultEnrichingInterceptor());
 	}
 
 	@AfterEach
@@ -58,9 +51,9 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 	@Test
 	public void testValidationIsSkippedOnAutoCreatedPlaceholderReferencesIfConfiguredToDoSo() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-				.forResourcesOfType("Observation")
-				.requireValidationToDeclaredProfiles()
-				.build();
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.build();
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
@@ -68,27 +61,24 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 
 		MethodOutcome outcome = myRestfulServerExtension
-				.getFhirClient()
-				.create()
-				.resource(obs)
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute();
+			.getFhirClient()
+			.create()
+			.resource(obs)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute();
 
-		String operationOutcomeEncoded = myFhirContext
-				.newJsonParser()
-				.setPrettyPrint(true)
-				.encodeResourceToString(outcome.getOperationOutcome());
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
 		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
-	}
 
+	}
 	@Test
 	public void testValidationOutcomeAddedToRequestResponse() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-				.forResourcesOfType("Observation")
-				.requireValidationToDeclaredProfiles()
-				.withBestPracticeWarningLevel("WARNING")
-				.build();
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.withBestPracticeWarningLevel("WARNING")
+			.build();
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
@@ -96,23 +86,20 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 
 		MethodOutcome outcome = myRestfulServerExtension
-				.getFhirClient()
-				.create()
-				.resource(obs)
-				.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-				.execute();
+			.getFhirClient()
+			.create()
+			.resource(obs)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute();
 
-		String operationOutcomeEncoded = myFhirContext
-				.newJsonParser()
-				.setPrettyPrint(true)
-				.encodeResourceToString(outcome.getOperationOutcome());
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
 		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+
 	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
-		return myApplicationContext.getBean(
-				RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER,
-				RepositoryValidatingRuleBuilder.class);
+		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
 	}
+
 }

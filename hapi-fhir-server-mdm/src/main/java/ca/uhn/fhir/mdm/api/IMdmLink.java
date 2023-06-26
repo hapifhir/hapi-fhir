@@ -65,17 +65,17 @@ public interface IMdmLink<T extends IResourcePersistentId> {
 
 	IMdmLink<T> setLinkSource(MdmLinkSourceEnum theLinkSource);
 
-	default boolean isAuto() {
-		return getLinkSource() == MdmLinkSourceEnum.AUTO;
-	}
+    default boolean isAuto() {
+        return getLinkSource() == MdmLinkSourceEnum.AUTO;
+    }
 
-	default boolean isManual() {
-		return getLinkSource() == MdmLinkSourceEnum.MANUAL;
-	}
+    default boolean isManual() {
+        return getLinkSource() == MdmLinkSourceEnum.MANUAL;
+    }
 
-	Date getCreated();
+    Date getCreated();
 
-	IMdmLink<T> setCreated(Date theCreated);
+	 IMdmLink<T> setCreated(Date theCreated);
 
 	Date getUpdated();
 

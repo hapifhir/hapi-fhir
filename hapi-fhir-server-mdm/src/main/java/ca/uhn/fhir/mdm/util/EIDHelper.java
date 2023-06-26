@@ -20,8 +20,8 @@
 package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,9 +47,10 @@ public final class EIDHelper {
 
 	public CanonicalEID createHapiEid() {
 		return new CanonicalEID(
-				MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
-				UUID.randomUUID().toString(),
-				null);
+			MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM,
+			UUID.randomUUID().toString(),
+			null
+		);
 	}
 
 	/**
@@ -62,10 +63,7 @@ public final class EIDHelper {
 	 */
 	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		return CanonicalEID.extractFromResource(
-				myFhirContext,
-				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType),
-				theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType), theResource);
 	}
 
 	/**
@@ -77,8 +75,7 @@ public final class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the internal EID. Absent if the EID is not present.
 	 */
 	public List<CanonicalEID> getHapiEid(IAnyResource theResource) {
-		return CanonicalEID.extractFromResource(
-				myFhirContext, MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, theResource);
 	}
 
 	/**
@@ -91,11 +88,12 @@ public final class EIDHelper {
 	 * @return a boolean indicating whether there is a match between these two identifier sets.
 	 */
 	public boolean eidMatchExists(List<CanonicalEID> theFirstResourceEids, List<CanonicalEID> theSecondResourceEids) {
-		List<String> collect =
-				theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
-		List<String> collect1 =
-				theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
-		return !Collections.disjoint(collect, collect1);
+		List<String> collect = theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
+		List<String> collect1 = theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
+		return !Collections.disjoint(
+			collect,
+			collect1
+			);
 	}
 
 	/**

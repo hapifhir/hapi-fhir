@@ -56,12 +56,8 @@ public class SearchHasParamDstu2_1Test {
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("search", ourLastMethod);
-
-		HasParam param = ourLastParam
-				.getValuesAsQueryTokens()
-				.get(0)
-				.getValuesAsQueryTokens()
-				.get(0);
+		
+		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		assertEquals("Encounter", param.getTargetResourceType());
 		assertEquals("patient", param.getReferenceFieldName());
 		assertEquals("type", param.getParameterName());
@@ -89,13 +85,13 @@ public class SearchHasParamDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -105,20 +101,21 @@ public class SearchHasParamDstu2_1Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-				@OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@OptionalParam(name = "_has") HasAndListParam theParam) {
+				@OptionalParam(name=Patient.SP_IDENTIFIER) TokenParam theIdentifier,
+				@OptionalParam(name="_has") HasAndListParam theParam
+				) {
 			ourLastMethod = "search";
 			ourLastParam = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
 	}
+
 }

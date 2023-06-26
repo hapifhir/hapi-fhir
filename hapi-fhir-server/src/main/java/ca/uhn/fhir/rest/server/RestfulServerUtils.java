@@ -29,10 +29,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ElementsParameter;
@@ -46,30 +46,27 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class RestfulServerUtils {
-	static final Pattern ACCEPT_HEADER_PATTERN =
-			Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
+	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
-	private static final HashSet<String> TEXT_ENCODE_ELEMENTS =
-			new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
+	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
 	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader =
-			EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
@@ -85,8 +82,7 @@ public class RestfulServerUtils {
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
-			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and "
-					+ Constants.PARAM_ELEMENTS + " parameters");
+			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
 
 		// _elements:exclude
@@ -174,24 +170,19 @@ public class RestfulServerUtils {
 	/**
 	 * This function will create a self link but omit any parameters passed in via the excludedParameterNames list.
 	 */
-	public static String createLinkSelfWithoutGivenParameters(
-			String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
+	public static String createLinkSelfWithoutGivenParameters(String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 
 		if (isNotBlank(theRequest.getRequestPath())) {
 			b.append('/');
-			if (isNotBlank(theRequest.getTenantId())
-					&& theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
-				b.append(theRequest
-						.getRequestPath()
-						.substring(theRequest.getTenantId().length() + 1));
+			if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+				b.append(theRequest.getRequestPath().substring(theRequest.getTenantId().length() + 1));
 			} else {
 				b.append(theRequest.getRequestPath());
 			}
 		}
-		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be
-		// huge
+		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			boolean first = true;
 			Map<String, String[]> parameters = theRequest.getParameters();
@@ -213,15 +204,10 @@ public class RestfulServerUtils {
 		}
 
 		return b.toString();
+
 	}
 
-	public static String createOffsetPagingLink(
-			BundleLinks theBundleLinks,
-			String requestPath,
-			String tenantId,
-			Integer theOffset,
-			Integer theCount,
-			Map<String, String[]> theRequestParameters) {
+	public static String createOffsetPagingLink(BundleLinks theBundleLinks, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {
 		StringBuilder b = new StringBuilder();
 		b.append(theBundleLinks.serverBase);
 
@@ -235,8 +221,8 @@ public class RestfulServerUtils {
 		}
 
 		Map<String, String[]> params = Maps.newLinkedHashMap(theRequestParameters);
-		params.put(Constants.PARAM_OFFSET, new String[] {String.valueOf(theOffset)});
-		params.put(Constants.PARAM_COUNT, new String[] {String.valueOf(theCount)});
+		params.put(Constants.PARAM_OFFSET, new String[]{String.valueOf(theOffset)});
+		params.put(Constants.PARAM_COUNT, new String[]{String.valueOf(theCount)});
 
 		boolean first = true;
 		for (String nextParamName : new TreeSet<>(params.keySet())) {
@@ -256,35 +242,17 @@ public class RestfulServerUtils {
 		return b.toString();
 	}
 
-	public static String createPagingLink(
-			BundleLinks theBundleLinks,
-			RequestDetails theRequestDetails,
-			String theSearchId,
-			int theOffset,
-			int theCount,
-			Map<String, String[]> theRequestParameters) {
-		return createPagingLink(
-				theBundleLinks, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, null);
+	public static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters) {
+		return createPagingLink(theBundleLinks, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, null);
 	}
 
-	public static String createPagingLink(
-			BundleLinks theBundleLinks,
-			RequestDetails theRequestDetails,
-			String theSearchId,
-			String thePageId,
-			Map<String, String[]> theRequestParameters) {
-		return createPagingLink(
-				theBundleLinks, theRequestDetails, theSearchId, null, null, theRequestParameters, thePageId);
+	public static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters) {
+		return createPagingLink(theBundleLinks, theRequestDetails, theSearchId, null, null, theRequestParameters,
+			thePageId);
 	}
 
-	private static String createPagingLink(
-			BundleLinks theBundleLinks,
-			RequestDetails theRequestDetails,
-			String theSearchId,
-			Integer theOffset,
-			Integer theCount,
-			Map<String, String[]> theRequestParameters,
-			String thePageId) {
+	private static String createPagingLink(BundleLinks theBundleLinks, RequestDetails theRequestDetails, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters,
+														String thePageId) {
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 
@@ -353,8 +321,11 @@ public class RestfulServerUtils {
 			b.append('&');
 			b.append(Constants.PARAM_ELEMENTS);
 			b.append('=');
-			String nextValue =
-					elements.stream().sorted().map(UrlUtil::escapeUrlParam).collect(Collectors.joining(","));
+			String nextValue = elements
+				.stream()
+				.sorted()
+				.map(UrlUtil::escapeUrlParam)
+				.collect(Collectors.joining(","));
 			b.append(nextValue);
 		}
 
@@ -365,10 +336,11 @@ public class RestfulServerUtils {
 				b.append('&');
 				b.append(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
 				b.append('=');
-				String nextValue = elementsExclude.stream()
-						.sorted()
-						.map(UrlUtil::escapeUrlParam)
-						.collect(Collectors.joining(","));
+				String nextValue = elementsExclude
+					.stream()
+					.sorted()
+					.map(UrlUtil::escapeUrlParam)
+					.collect(Collectors.joining(","));
 				b.append(nextValue);
 			}
 		}
@@ -390,8 +362,7 @@ public class RestfulServerUtils {
 		return retVal.getEncoding();
 	}
 
-	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(
-			RequestDetails theReq, boolean theStrict) {
+	private static ResponseEncoding determineRequestEncodingNoDefaultReturnRE(RequestDetails theReq, boolean theStrict) {
 		ResponseEncoding retVal = null;
 		List<String> headers = theReq.getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (headers != null) {
@@ -440,8 +411,7 @@ public class RestfulServerUtils {
 	 * _format parameter. If a value is provided to thePreferContents, we'll
 	 * prefer to return that value over the native FHIR value.
 	 */
-	public static ResponseEncoding determineResponseEncodingNoDefault(
-			RequestDetails theReq, EncodingEnum thePrefer, String thePreferContentType) {
+	public static ResponseEncoding determineResponseEncodingNoDefault(RequestDetails theReq, EncodingEnum thePrefer, String thePreferContentType) {
 		String[] format = theReq.getParameters().get(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
@@ -503,32 +473,20 @@ public class RestfulServerUtils {
 					ResponseEncoding encoding;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
-							encoding = getEncodingForContentType(
-									theReq.getServer().getFhirContext(), strict, nextToken, thePreferContentType);
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken, thePreferContentType);
 						} else {
-							encoding = getEncodingForContentType(
-									theReq.getServer().getFhirContext(),
-									strict,
-									nextToken.substring(startSpaceIndex),
-									thePreferContentType);
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex), thePreferContentType);
 						}
 					} else {
-						encoding = getEncodingForContentType(
-								theReq.getServer().getFhirContext(),
-								strict,
-								nextToken.substring(startSpaceIndex, endSpaceIndex),
-								thePreferContentType);
+						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex), thePreferContentType);
 						String remaining = nextToken.substring(endSpaceIndex + 1);
 						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
 						while (qualifierTok.hasMoreTokens()) {
 							String nextQualifier = qualifierTok.nextToken();
 							int equalsIndex = nextQualifier.indexOf('=');
 							if (equalsIndex != -1) {
-								String nextQualifierKey =
-										nextQualifier.substring(0, equalsIndex).trim();
-								String nextQualifierValue = nextQualifier
-										.substring(equalsIndex + 1, nextQualifier.length())
-										.trim();
+								String nextQualifierKey = nextQualifier.substring(0, equalsIndex).trim();
+								String nextQualifierValue = nextQualifier.substring(equalsIndex + 1, nextQualifier.length()).trim();
 								if (nextQualifierKey.equals("q")) {
 									try {
 										q = Float.parseFloat(nextQualifierValue);
@@ -547,8 +505,11 @@ public class RestfulServerUtils {
 							bestQ = q;
 						}
 					}
+
 				}
+
 			}
+
 		}
 
 		/*
@@ -569,11 +530,9 @@ public class RestfulServerUtils {
 	 * <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
 	 */
 	public static ResponseEncoding determineResponseEncodingWithDefault(RequestDetails theReq) {
-		ResponseEncoding retVal =
-				determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
+		ResponseEncoding retVal = determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
 		if (retVal == null) {
-			retVal = new ResponseEncoding(
-					theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), null);
+			retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), null);
 		}
 		return retVal;
 	}
@@ -634,8 +593,7 @@ public class RestfulServerUtils {
 		return lastUpdated;
 	}
 
-	public static IIdType fullyQualifyResourceIdOrReturnNull(
-			IRestfulServerDefaults theServer, IBaseResource theResource, String theServerBase, IIdType theResourceId) {
+	public static IIdType fullyQualifyResourceIdOrReturnNull(IRestfulServerDefaults theServer, IBaseResource theResource, String theServerBase, IIdType theResourceId) {
 		IIdType retVal = null;
 		if (theResourceId.hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theResourceId.getResourceType();
@@ -669,8 +627,7 @@ public class RestfulServerUtils {
 		return context;
 	}
 
-	private static ResponseEncoding getEncodingForContentType(
-			FhirContext theFhirContext, boolean theStrict, String theContentType, String thePreferContentType) {
+	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType, String thePreferContentType) {
 		EncodingEnum encoding;
 		if (theStrict) {
 			encoding = EncodingEnum.forContentTypeStrict(theContentType);
@@ -688,13 +645,11 @@ public class RestfulServerUtils {
 		return new ResponseEncoding(theFhirContext, encoding, theContentType);
 	}
 
-	public static IParser getNewParser(
-			FhirContext theContext, FhirVersionEnum theForVersion, RequestDetails theRequestDetails) {
+	public static IParser getNewParser(FhirContext theContext, FhirVersionEnum theForVersion, RequestDetails theRequestDetails) {
 		FhirContext context = getContextForVersion(theContext, theForVersion);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails)
-				.getEncoding();
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails).getEncoding();
 		IParser parser;
 		switch (responseEncoding) {
 			case JSON:
@@ -749,12 +704,14 @@ public class RestfulServerUtils {
 						if (q == bestQ) {
 							retVal.add(contentTypeGroup.trim());
 						}
+
 					}
 
 					if (!",".equals(m.group(5))) {
 						break;
 					}
 				}
+
 			}
 		}
 
@@ -798,6 +755,7 @@ public class RestfulServerUtils {
 				} else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
 
 					retVal.setRespondAsync(true);
+
 				}
 			}
 		}
@@ -839,43 +797,18 @@ public class RestfulServerUtils {
 		return prettyPrint;
 	}
 
-	public static Object streamResponseAsResource(
-			IRestfulServerDefaults theServer,
-			IBaseResource theResource,
-			Set<SummaryEnum> theSummaryMode,
-			int theStatusCode,
-			boolean theAddContentLocationHeader,
-			boolean respondGzip,
-			RequestDetails theRequestDetails)
-			throws IOException {
-		return streamResponseAsResource(
-				theServer,
-				theResource,
-				theSummaryMode,
-				theStatusCode,
-				theAddContentLocationHeader,
-				respondGzip,
-				theRequestDetails,
-				null,
-				null);
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, boolean theAddContentLocationHeader,
+																 boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
+		return streamResponseAsResource(theServer, theResource, theSummaryMode, theStatusCode, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
-	public static Object streamResponseAsResource(
-			IRestfulServerDefaults theServer,
-			IBaseResource theResource,
-			Set<SummaryEnum> theSummaryMode,
-			int theStatusCode,
-			boolean theAddContentLocationHeader,
-			boolean respondGzip,
-			RequestDetails theRequestDetails,
-			IIdType theOperationResourceId,
-			IPrimitiveType<Date> theOperationResourceLastUpdated)
-			throws IOException {
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode,
+																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
+		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
-		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
-				theRequestDetails, theServer.getDefaultResponseEncoding());
+		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, theServer.getDefaultResponseEncoding());
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 		IIdType fullId = null;
@@ -905,9 +838,7 @@ public class RestfulServerUtils {
 						if (fullId != null && fullId.hasVersionIdPart()) {
 							String versionIdPart = fullId.getVersionIdPart();
 							response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
-						} else if (theResource != null
-								&& theResource.getMeta() != null
-								&& isNotBlank(theResource.getMeta().getVersionId())) {
+						} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
 							String versionId = theResource.getMeta().getVersionId();
 							response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
 						}
@@ -923,8 +854,7 @@ public class RestfulServerUtils {
 			// Add a security context header
 			IBaseReference securityContext = BinaryUtil.getSecurityContext(theServer.getFhirContext(), bin);
 			if (securityContext != null) {
-				String securityContextRef =
-						securityContext.getReferenceElement().getValue();
+				String securityContextRef = securityContext.getReferenceElement().getValue();
 				if (isNotBlank(securityContextRef)) {
 					response.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, securityContextRef);
 				}
@@ -953,8 +883,7 @@ public class RestfulServerUtils {
 
 		// Ok, we're not serving a binary resource, so apply default encoding
 		if (responseEncoding == null) {
-			responseEncoding =
-					new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
+			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
 		}
 
 		boolean encodingDomainResourceAsText = theSummaryMode.size() == 1 && theSummaryMode.contains(SummaryEnum.TEXT);
@@ -999,15 +928,12 @@ public class RestfulServerUtils {
 		Writer writer = response.getResponseWriter(theStatusCode, contentType, charset, respondGzip);
 
 		// Interceptor call: SERVER_OUTGOING_WRITER_CREATED
-		if (theServer.getInterceptorService() != null
-				&& theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
+		if (theServer.getInterceptorService() != null && theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
 			HookParams params = new HookParams()
-					.add(Writer.class, writer)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			Object newWriter = theServer
-					.getInterceptorService()
-					.callHooksAndReturnObject(Pointcut.SERVER_OUTGOING_WRITER_CREATED, params);
+				.add(Writer.class, writer)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			Object newWriter = theServer.getInterceptorService().callHooksAndReturnObject(Pointcut.SERVER_OUTGOING_WRITER_CREATED, params);
 			if (newWriter != null) {
 				writer = (Writer) newWriter;
 			}
@@ -1093,8 +1019,7 @@ public class RestfulServerUtils {
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
-			throw new InternalErrorException(
-					Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed");
+			throw new InternalErrorException(Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed");
 		}
 	}
 
@@ -1108,8 +1033,7 @@ public class RestfulServerUtils {
 			String[] cascadeParameters = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE);
 			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains(Constants.CASCADE_DELETE)) {
 				mode = DeleteCascadeModeEnum.DELETE;
-				String[] maxRoundsValues =
-						theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS);
+				String[] maxRoundsValues = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS);
 				if (maxRoundsValues != null && maxRoundsValues.length > 0) {
 					String maxRoundsString = maxRoundsValues[0];
 					maxRounds = parseMaxRoundsString(maxRoundsString);
@@ -1119,17 +1043,14 @@ public class RestfulServerUtils {
 			if (mode == null) {
 				String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
 				if (isNotBlank(cascadeHeader)) {
-					if (Constants.CASCADE_DELETE.equals(cascadeHeader)
-							|| cascadeHeader.startsWith(Constants.CASCADE_DELETE + ";")
-							|| cascadeHeader.startsWith(Constants.CASCADE_DELETE + " ")) {
+					if (Constants.CASCADE_DELETE.equals(cascadeHeader) || cascadeHeader.startsWith(Constants.CASCADE_DELETE + ";") || cascadeHeader.startsWith(Constants.CASCADE_DELETE + " ")) {
 						mode = DeleteCascadeModeEnum.DELETE;
 
 						if (cascadeHeader.contains(";")) {
 							String remainder = cascadeHeader.substring(cascadeHeader.indexOf(';') + 1);
 							remainder = trim(remainder);
 							if (remainder.startsWith(Constants.HEADER_CASCADE_MAX_ROUNDS + "=")) {
-								String maxRoundsString =
-										remainder.substring(Constants.HEADER_CASCADE_MAX_ROUNDS.length() + 1);
+								String maxRoundsString = remainder.substring(Constants.HEADER_CASCADE_MAX_ROUNDS.length() + 1);
 								maxRounds = parseMaxRoundsString(maxRoundsString);
 							}
 						}
@@ -1153,16 +1074,13 @@ public class RestfulServerUtils {
 		} else if (NumberUtils.isDigits(theMaxRoundsString)) {
 			maxRounds = Integer.parseInt(theMaxRoundsString);
 		} else {
-			throw new InvalidRequestException(Msg.code(2349) + "Invalid value for "
-					+ Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS + " parameter");
+			throw new InvalidRequestException(Msg.code(2349) + "Invalid value for " + Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS + " parameter");
 		}
 		return maxRounds;
 	}
 
 	private enum NarrativeModeEnum {
-		NORMAL,
-		ONLY,
-		SUPPRESS;
+		NORMAL, ONLY, SUPPRESS;
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
@@ -1183,12 +1101,10 @@ public class RestfulServerUtils {
 			myContentType = theContentType;
 			if (theContentType != null) {
 				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING)
-						|| theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
+				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
 					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1);
 				} else {
-					myNonLegacy =
-							ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
 				}
 			} else {
 				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
@@ -1238,4 +1154,5 @@ public class RestfulServerUtils {
 			return myMaxRounds;
 		}
 	}
+
 }

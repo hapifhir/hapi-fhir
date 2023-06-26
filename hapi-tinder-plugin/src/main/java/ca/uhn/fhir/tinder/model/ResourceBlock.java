@@ -7,7 +7,7 @@ public class ResourceBlock extends Child {
 	public ResourceBlock() {
 		super();
 	}
-
+	
 	private String myForcedClassName;
 
 	@Override
@@ -23,30 +23,31 @@ public class ResourceBlock extends Child {
 			setForcedClassName("ObjectElement");
 		}
 	}
-
+	
 	public String getClassName() {
 		if (myForcedClassName != null) {
 			return myForcedClassName;
 		}
-
-		//		return getElementName().substring(0, 1).toUpperCase() + getElementName().substring(1);
+		
+//		return getElementName().substring(0, 1).toUpperCase() + getElementName().substring(1);
 		String name = getName();
 		return convertFhirPathNameToClassName(name);
 	}
 
 	public static String convertFhirPathNameToClassName(String name) {
 		StringBuilder b = new StringBuilder();
-		boolean first = true;
+		boolean first=true;
 		for (String next : name.split("\\.")) {
 			if (first) {
-				first = false;
+				first=false;
 				continue;
 			}
 			b.append(next.substring(0, 1).toUpperCase() + next.substring(1));
 		}
-
+		
 		return b.toString();
 	}
+
 
 	@Override
 	public String getDeclaringClassNameCompleteForChildren() {
@@ -64,6 +65,7 @@ public class ResourceBlock extends Child {
 	}
 
 	public void setForcedClassName(String theClassName) {
-		myForcedClassName = theClassName;
+		myForcedClassName =theClassName;
 	}
+
 }

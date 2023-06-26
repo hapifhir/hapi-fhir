@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 
 public class DropIdGeneratorTaskTest extends BaseTest {
 
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testAddIdGenerator(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -31,11 +32,15 @@ public class DropIdGeneratorTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 	}
 
+
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 			v.dropIdGenerator("1", "SEQ_FOO");
 		}
+
+
 	}
+
 }

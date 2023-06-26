@@ -43,31 +43,22 @@ public final class MdmPageLinkBuilder {
 	 *
 	 * @return the {@link MdmPageLinkTuple}
 	 */
-	public static MdmPageLinkTuple buildMdmPageLinks(
-			ServletRequestDetails theServletRequestDetails,
-			Page<MdmLinkJson> theCurrentPage,
-			MdmPageRequest thePageRequest) {
-		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(
-				theServletRequestDetails.getFhirServerBase(),
-				theServletRequestDetails,
-				Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
+	public static MdmPageLinkTuple buildMdmPageLinks(ServletRequestDetails theServletRequestDetails, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
+		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServletRequestDetails.getFhirServerBase(), theServletRequestDetails, Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
 		return buildMdmPageLinks(urlWithoutPaging, theCurrentPage, thePageRequest);
 	}
 
-	public static MdmPageLinkTuple buildMdmPageLinks(
-			String theUrlWithoutPaging, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
+	public static MdmPageLinkTuple buildMdmPageLinks(String theUrlWithoutPaging, Page<MdmLinkJson> theCurrentPage, MdmPageRequest thePageRequest) {
 		MdmPageLinkTuple tuple = new MdmPageLinkTuple();
-		tuple.setSelfLink(buildLinkWithOffsetAndCount(
-				theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
+		tuple.setSelfLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getOffset()));
 		if (theCurrentPage.hasNext()) {
-			tuple.setNextLink(buildLinkWithOffsetAndCount(
-					theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getNextOffset()));
+			tuple.setNextLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getNextOffset()));
 		}
 		if (theCurrentPage.hasPrevious()) {
-			tuple.setPreviousLink(buildLinkWithOffsetAndCount(
-					theUrlWithoutPaging, thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
+			tuple.setPreviousLink(buildLinkWithOffsetAndCount(theUrlWithoutPaging,thePageRequest.getCount(), thePageRequest.getPreviousOffset()));
 		}
 		return tuple;
+
 	}
 
 	public static String buildLinkWithOffsetAndCount(String theBaseUrl, int theCount, int theOffset) {

@@ -41,6 +41,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -50,14 +53,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -73,25 +74,18 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	private final String FIRSTCATEGORYFIRSTCODINGCODE = "test-heart-rate";
 	private final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	private final String CODEFIRSTCODINGCODE = "test-code";
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
-
 	@Autowired
 	protected FhirContext myFhirCtx;
-
 	@Autowired
 	ObservationLastNIndexPersistSvc testObservationPersist;
-
 	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
-
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> myDao;
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
 	private ReferenceAndListParam multiSubjectParams = null;
 
 	@BeforeEach
@@ -102,6 +96,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
 
 	@AfterEach
@@ -115,8 +110,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		indexMultipleObservations();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(100);
-		List<ObservationJson> observationDocuments =
-				elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(100, observationDocuments.size());
 		// Check that fifth observation for fifth patient has been indexed.
 		ObservationJson observation = elasticsearchSvc.getObservationDocument("55");
@@ -149,7 +143,10 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
 		assertEquals(99, observationIdsOnly.size());
 		assertTrue(!observationIdsOnly.contains("55"));
+
 	}
+
+
 
 	private void indexSingleObservation() throws IOException {
 
@@ -168,6 +165,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
 
 	private List<CodeableConcept> getCategoryCode() {
@@ -175,45 +173,26 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		List<CodeableConcept> categoryConcepts = new ArrayList<>();
 		// Create three codings and first category CodeableConcept
 		List<Coding> category = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept1 =
-				new CodeableConcept().setText("Test Codeable Concept Field for first category");
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field for first category");
 		category.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, "test-heart-rate display"));
-		category.add(new Coding(
-				"http://myalternatecodes.org/fhir/observation-category",
-				"test-alt-heart-rate",
-				"test-alt-heart-rate display"));
-		category.add(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-category",
-				"test-2nd-alt-heart-rate",
-				"test-2nd-alt-heart-rate display"));
+		category.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display"));
+		category.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display"));
 		categoryCodeableConcept1.setCoding(category);
 		categoryConcepts.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
 		List<Coding> category2 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept2 =
-				new CodeableConcept().setText("Test Codeable Concept Field for for second category");
+		CodeableConcept categoryCodeableConcept2 = new CodeableConcept().setText("Test Codeable Concept Field for for second category");
 		category2.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, "test-vital-signs", "test-vital-signs display"));
-		category2.add(new Coding(
-				"http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display"));
-		category2.add(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-category",
-				"test-2nd-alt-vitals",
-				"test-2nd-alt-vitals display"));
+		category2.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display"));
+		category2.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display"));
 		categoryCodeableConcept2.setCoding(category2);
 		categoryConcepts.add(categoryCodeableConcept2);
 		// Create three codings and third category CodeableConcept
 		List<Coding> category3 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept3 =
-				new CodeableConcept().setText("Test Codeable Concept Field for third category");
+		CodeableConcept categoryCodeableConcept3 = new CodeableConcept().setText("Test Codeable Concept Field for third category");
 		category3.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, "test-vitals-panel", "test-vitals-panel display"));
-		category3.add(new Coding(
-				"http://myalternatecodes.org/fhir/observation-category",
-				"test-alt-vitals-panel",
-				"test-alt-vitals-panel display"));
-		category3.add(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-category",
-				"test-2nd-alt-vitals-panel",
-				"test-2nd-alt-vitals-panel display"));
+		category3.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals-panel", "test-alt-vitals-panel display"));
+		category3.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals-panel", "test-2nd-alt-vitals-panel display"));
 		categoryCodeableConcept3.setCoding(category3);
 		categoryConcepts.add(categoryCodeableConcept3);
 		return categoryConcepts;
@@ -237,31 +216,34 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		AtomicInteger index = new AtomicInteger();
 
-		Arrays.stream(bundleResources).forEach(resource -> {
-			index.incrementAndGet();
+		Arrays.stream(bundleResources).forEach(
+			resource -> {
+				index.incrementAndGet();
 
-			InputStream resIs = null;
-			String nextBundleString;
-			try {
-				resIs = resource.getInputStream();
-				nextBundleString = IOUtils.toString(resIs, Charsets.UTF_8);
-			} catch (IOException e) {
-				return;
-			} finally {
+				InputStream resIs = null;
+				String nextBundleString;
 				try {
-					if (resIs != null) {
-						resIs.close();
+					resIs = resource.getInputStream();
+					nextBundleString = IOUtils.toString(resIs, Charsets.UTF_8);
+				} catch (IOException e) {
+					return;
+				} finally {
+					try {
+						if (resIs != null) {
+							resIs.close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
 					}
-				} catch (final IOException ioe) {
-					// ignore
 				}
+
+				IParser parser = myFhirCtx.newJsonParser();
+				Bundle bundle = parser.parseResource(Bundle.class, nextBundleString);
+
+				myDao.transaction(null, bundle);
+
 			}
-
-			IParser parser = myFhirCtx.newJsonParser();
-			Bundle bundle = parser.parseResource(Bundle.class, nextBundleString);
-
-			myDao.transaction(null, bundle);
-		});
+		);
 
 		elasticsearchSvc.refreshIndex("*");
 
@@ -277,6 +259,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
 
 		assertEquals(38, observationIdsOnly.size());
+
 	}
 
 	@Order(2)
@@ -285,8 +268,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		indexMultipleObservations();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(100);
-		List<ObservationJson> observationDocuments =
-				elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(100, observationDocuments.size());
 
 		// Check that all observations were indexed.
@@ -300,66 +282,45 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		// Filter the results by category code.
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+
 
 		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 100);
 
 		assertEquals(50, observationIdsOnly.size());
+
 	}
 
 	private void indexMultipleObservations() throws IOException {
 
 		// Create two CodeableConcept values each for a Code with three codings.
-		CodeableConcept codeableConceptField1 =
-				new CodeableConcept().setText("Test Codeable Concept Field for First Code");
+		CodeableConcept codeableConceptField1 = new CodeableConcept().setText("Test Codeable Concept Field for First Code");
 		codeableConceptField1.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, "test-code-1", "test-code-1 display"));
-		codeableConceptField1.addCoding(new Coding(
-				"http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display"));
-		codeableConceptField1.addCoding(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-code",
-				"test-second-alt-code-1",
-				"test-second-alt-code-1 display"));
+		codeableConceptField1.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-1", "test-alt-code-1 display"));
+		codeableConceptField1.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-1", "test-second-alt-code-1 display"));
 
-		CodeableConcept codeableConceptField2 =
-				new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
+		CodeableConcept codeableConceptField2 = new CodeableConcept().setText("Test Codeable Concept Field for Second Code");
 		codeableConceptField2.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, "test-code-2", "test-code-2 display"));
-		codeableConceptField2.addCoding(new Coding(
-				"http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display"));
-		codeableConceptField2.addCoding(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-code",
-				"test-second-alt-code-2",
-				"test-second-alt-code-2 display"));
+		codeableConceptField2.addCoding(new Coding("http://myalternatecodes.org/fhir/observation-code", "test-alt-code-2", "test-alt-code-2 display"));
+		codeableConceptField2.addCoding(new Coding("http://mysecondaltcodes.org/fhir/observation-code", "test-second-alt-code-2", "test-second-alt-code-2 display"));
 
 		// Create two CodeableConcept entities for category, each with three codings.
 		List<Coding> category1 = new ArrayList<>();
 		// Create three codings and first category CodeableConcept
 		category1.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, "test-heart-rate display"));
-		category1.add(new Coding(
-				"http://myalternatecodes.org/fhir/observation-category",
-				"test-alt-heart-rate",
-				"test-alt-heart-rate display"));
-		category1.add(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-category",
-				"test-2nd-alt-heart-rate",
-				"test-2nd-alt-heart-rate display"));
+		category1.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-heart-rate", "test-alt-heart-rate display"));
+		category1.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-heart-rate", "test-2nd-alt-heart-rate display"));
 		List<CodeableConcept> categoryConcepts1 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept1 =
-				new CodeableConcept().setText("Test Codeable Concept Field for first category");
+		CodeableConcept categoryCodeableConcept1 = new CodeableConcept().setText("Test Codeable Concept Field for first category");
 		categoryCodeableConcept1.setCoding(category1);
 		categoryConcepts1.add(categoryCodeableConcept1);
 		// Create three codings and second category CodeableConcept
 		List<Coding> category2 = new ArrayList<>();
 		category2.add(new Coding(CATEGORYFIRSTCODINGSYSTEM, "test-vital-signs", "test-vital-signs display"));
-		category2.add(new Coding(
-				"http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display"));
-		category2.add(new Coding(
-				"http://mysecondaltcodes.org/fhir/observation-category",
-				"test-2nd-alt-vitals",
-				"test-2nd-alt-vitals display"));
+		category2.add(new Coding("http://myalternatecodes.org/fhir/observation-category", "test-alt-vitals", "test-alt-vitals display"));
+		category2.add(new Coding("http://mysecondaltcodes.org/fhir/observation-category", "test-2nd-alt-vitals", "test-2nd-alt-vitals display"));
 		List<CodeableConcept> categoryConcepts2 = new ArrayList<>();
-		CodeableConcept categoryCodeableConcept2 =
-				new CodeableConcept().setText("Test Codeable Concept Field for second category");
+		CodeableConcept categoryCodeableConcept2 = new CodeableConcept().setText("Test Codeable Concept Field for second category");
 		categoryCodeableConcept2.setCoding(category2);
 		categoryConcepts2.add(categoryCodeableConcept2);
 
@@ -394,12 +355,14 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 				testObservationPersist.indexObservation(observation);
 			}
+
 		}
 
 		multiSubjectParams = new ReferenceAndListParam().addAnd(subjectParams);
 
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
 
 	@Order(3)
@@ -408,8 +371,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		indexSingleObservation();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(10);
-		List<ObservationJson> persistedObservationEntities =
-				elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		List<ObservationJson> persistedObservationEntities = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
 		assertEquals(1, persistedObservationEntities.size());
 		ObservationJson persistedObservationEntity = persistedObservationEntities.get(0);
 		assertEquals(SINGLE_SUBJECT_ID, persistedObservationEntity.getSubject());
@@ -434,15 +396,11 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 		searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
-		searchParameterMap.add(
-				Observation.SP_SUBJECT,
-				new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
+		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
+		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 		searchParameterMap.setLastNMax(3);
 
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 100);
@@ -457,24 +415,18 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		indexSingleObservation();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLastNMax(10);
-		ObservationJson observationIndexEntity = elasticsearchSvc
-				.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx)
-				.get(0);
+		ObservationJson observationIndexEntity = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx).get(0);
 		assertEquals(SINGLE_OBSERVATION_PID, observationIndexEntity.getIdentifier());
 		assertEquals(SINGLE_SUBJECT_ID, observationIndexEntity.getSubject());
 		assertEquals(SINGLE_EFFECTIVEDTM, observationIndexEntity.getEffectiveDtm());
 
 		searchParameterMap = new SearchParameterMap();
 		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
-		searchParameterMap.add(
-				Observation.SP_SUBJECT,
-				new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
+		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
-		searchParameterMap.add(
-				Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
+		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 		searchParameterMap.setLastNMax(10);
 
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
@@ -506,18 +458,17 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		// Try again with the new patient ID.
 		searchParameterMap = new SearchParameterMap();
 		subjectParam = new ReferenceParam("Patient", "", "1234");
-		searchParameterMap.add(
-				Observation.SP_SUBJECT,
-				new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
-		searchParameterMap.add(
-				Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
-		searchParameterMap.add(
-				Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
+		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
 		searchParameterMap.setLastNMax(10);
 		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
 
 		// Should see the observation returned now.
 		assertEquals(1, observationIdsOnly.size());
 		assertTrue(observationIdsOnly.contains(SINGLE_OBSERVATION_PID));
+
 	}
+
+
 }

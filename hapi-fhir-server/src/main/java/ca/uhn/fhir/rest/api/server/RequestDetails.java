@@ -26,12 +26,16 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -43,8 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -309,10 +311,10 @@ public abstract class RequestDetails {
 			}
 		}
 		if (needsSanitization) {
-			myParameters = myParameters.entrySet().stream()
-					.collect(
-							Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
-									(String[]) ((Map.Entry<?, ?>) t).getValue()));
+			myParameters = myParameters
+				.entrySet()
+				.stream()
+				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t -> (String[]) ((Map.Entry<?, ?>) t).getValue()));
 		}
 	}
 
@@ -432,8 +434,7 @@ public abstract class RequestDetails {
 							myUnqualifiedToQualifiedNames = new HashMap<>();
 						}
 						String unqualified = next.substring(0, i);
-						List<String> list =
-								myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
+						List<String> list = myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
 						list.add(next);
 						break;
 					}
@@ -546,6 +547,7 @@ public abstract class RequestDetails {
 	public void setTransactionGuid(String theTransactionGuid) {
 		myTransactionGuid = theTransactionGuid;
 	}
+
 
 	public boolean isRewriteHistory() {
 		return myRewriteHistory;

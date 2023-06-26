@@ -27,13 +27,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 public class AddIndexTask extends BaseTableTask {
 
@@ -68,9 +68,7 @@ public class AddIndexTask extends BaseTableTask {
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
-		Validate.isTrue(
-				myColumns.size() > 0,
-				"Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
+		Validate.isTrue(myColumns.size() > 0, "Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 		setDescription("Add " + myIndexName + " index to table " + getTableName());
 	}
@@ -83,13 +81,7 @@ public class AddIndexTask extends BaseTableTask {
 			return;
 		}
 
-		logInfo(
-				ourLog,
-				"Going to add a {} index named {} on table {} for columns {}",
-				(myUnique ? "UNIQUE" : "NON-UNIQUE"),
-				myIndexName,
-				getTableName(),
-				myColumns);
+		logInfo(ourLog, "Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
 
 		String sql = generateSql();
 		String tableName = getTableName();
@@ -157,8 +149,10 @@ public class AddIndexTask extends BaseTableTask {
 			}
 		}
 
-		String sql = "create " + unique + "index " + postgresOnlineClause + myIndexName + " on " + getTableName() + "("
-				+ columns + ")" + includeClause + mssqlWhereClause + msSqlOracleOnlineClause;
+
+		String sql =
+			"create " + unique + "index " + postgresOnlineClause + myIndexName +
+			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + msSqlOracleOnlineClause;
 		return sql;
 	}
 
@@ -195,7 +189,6 @@ public class AddIndexTask extends BaseTableTask {
 	public void setOnline(boolean theFlag) {
 		myOnline = theFlag;
 	}
-
 	@Override
 	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
 		super.generateEquals(theBuilder, theOtherObject);
@@ -206,6 +199,7 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myUnique, otherObject.myUnique);
 		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
 		theBuilder.append(myOnline, otherObject.myOnline);
+
 	}
 
 	@Override

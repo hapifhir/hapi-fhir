@@ -37,11 +37,12 @@ public class ObjectUtil {
 	public static boolean equals(Object object1, Object object2) {
 		return Objects.equals(object1, object2);
 	}
-
+	
 	public static <T> T requireNonNull(T obj, String message) {
-		if (obj == null) throw new NullPointerException(Msg.code(1776) + message);
-		return obj;
-	}
+        if (obj == null)
+            throw new NullPointerException(Msg.code(1776) + message);
+        return obj;
+    }
 
 	public static void requireNotEmpty(String str, String message) {
 		if (StringUtils.isBlank(str)) {
@@ -64,4 +65,5 @@ public class ObjectUtil {
 			return Optional.empty();
 		}
 	}
+	
 }

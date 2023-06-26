@@ -18,8 +18,7 @@ public class ParserWithValidationR4Test {
 	@Test
 	public void testActivityDefinitionElementsOrder() {
 		ourCtx.setValidationSupport(getValidationSupport());
-		MedicationRequest med_req = ourCtx.newJsonParser()
-				.parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
+		MedicationRequest med_req = ourCtx.newJsonParser().parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
 
 		final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ourCtx);
 		instanceValidator.setNoTerminologyChecks(true);

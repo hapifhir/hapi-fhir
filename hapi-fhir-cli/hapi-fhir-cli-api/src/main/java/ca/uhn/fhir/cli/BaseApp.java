@@ -52,8 +52,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 public abstract class BaseApp {
 	protected static final org.slf4j.Logger ourLog;
 	static final String LINESEP = System.getProperty("line.separator");
-	private static final String STACKFILTER_PATTERN =
-			"%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
+	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
 	private static List<BaseCommand> ourCommands;
 	private static boolean ourDebugMode;
 
@@ -65,7 +64,7 @@ public abstract class BaseApp {
 		ourLog = LoggerFactory.getLogger(App.class);
 	}
 
-	private Consumer<BaseApp> myStartupHook = noop -> {};
+	private Consumer<BaseApp> myStartupHook = noop->{};
 	private MyShutdownHook myShutdownHook;
 	private boolean myShutdownHookHasNotRun;
 
@@ -75,10 +74,8 @@ public abstract class BaseApp {
 		printMessageToStdout(msg);
 		logProductName();
 		printMessageToStdout("------------------------------------------------------------");
-		printMessageToStdout("Process ID                      : "
-				+ ManagementFactory.getRuntimeMXBean().getName());
-		printMessageToStdout("Max configured JVM memory (Xmx) : "
-				+ FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		printMessageToStdout("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
+		printMessageToStdout("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		printMessageToStdout("Detected Java version           : " + System.getProperty("java.version"));
 		printMessageToStdout("------------------------------------------------------------");
 	}
@@ -93,8 +90,7 @@ public abstract class BaseApp {
 	}
 
 	protected void logProductName() {
-		printMessageToStdout("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " "
-				+ provideProductVersion() + " - Command Line Tool");
+		printMessageToStdout("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 	}
 
 	private void logCommandUsage(BaseCommand theCommand) {
@@ -159,20 +155,16 @@ public abstract class BaseApp {
 
 		int longestCommandLength = 0;
 		for (BaseCommand next : ourCommands) {
-			longestCommandLength =
-					Math.max(longestCommandLength, next.getCommandName().length());
+			longestCommandLength = Math.max(longestCommandLength, next.getCommandName().length());
 		}
 
 		for (BaseCommand next : ourCommands) {
 			String left = "  " + StringUtils.rightPad(next.getCommandName(), longestCommandLength);
-			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - (left.length() + 3))
-					.split("\\n");
+			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - (left.length() + 3)).split("\\n");
 			for (int i = 1; i < rightParts.length; i++) {
 				rightParts[i] = StringUtils.leftPad("", left.length() + 3) + rightParts[i];
 			}
-			printMessageToStdout(
-					ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - "
-							+ ansi().bold() + StringUtils.join(rightParts, LINESEP));
+			printMessageToStdout(ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - " + ansi().bold() + StringUtils.join(rightParts, LINESEP));
 		}
 		printMessageToStdout("");
 		printMessageToStdout(ansi().boldOff().fg(Ansi.Color.WHITE) + "See what options are available:");
@@ -220,6 +212,7 @@ public abstract class BaseApp {
 		ourCommands.addAll(provideCommands());
 		Collections.sort(ourCommands);
 
+
 		if (theArgs.length == 0) {
 			logUsage();
 			return;
@@ -231,7 +224,7 @@ public abstract class BaseApp {
 		}
 
 		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
-		if (commandOpt.isEmpty()) return;
+		if (commandOpt.isEmpty())  return;
 
 		BaseCommand command = commandOpt.get();
 
@@ -257,8 +250,7 @@ public abstract class BaseApp {
 			String[] args = Arrays.copyOfRange(theArgs, 1, theArgs.length);
 			parsedOptions = parser.parse(options, args, true);
 			if (!parsedOptions.getArgList().isEmpty()) {
-				throw new ParseException(Msg.code(1555) + "Unrecognized argument: "
-						+ parsedOptions.getArgList().get(0));
+				throw new ParseException(Msg.code(1555) + "Unrecognized argument: " + parsedOptions.getArgList().get(0));
 			}
 
 			if (parsedOptions.hasOption("debug")) {
@@ -297,14 +289,14 @@ public abstract class BaseApp {
 			runCleanupHookAndUnregister();
 			exitDueToException(new CommandFailureException("Error: " + t, t));
 		}
+
 	}
 
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
 		if (commandOpt.isEmpty()) {
-			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0]
-					+ ansi().boldOff().fg(Ansi.Color.WHITE);
+			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
 			printMessageToStdout(message);
 			printMessageToStdout("");
 			logUsage();
@@ -314,9 +306,7 @@ public abstract class BaseApp {
 	}
 
 	private Optional<BaseCommand> getNextCommand(String[] theArgs, int thePosition) {
-		return ourCommands.stream()
-				.filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition]))
-				.findFirst();
+		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition])).findFirst();
 	}
 
 	private void processHelp(String[] theArgs) {
@@ -333,6 +323,7 @@ public abstract class BaseApp {
 		}
 		logCommandUsage(commandOpt.get());
 	}
+
 
 	private void exitDueToProblem(String theDescription) {
 		if (HapiSystemProperties.isTestModeEnabled()) {

@@ -9,12 +9,12 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.util.Optional;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -32,20 +32,18 @@ public class TlsAuthenticationSvcTest {
 	private TlsAuthentication myClientTlsAuthentication;
 
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach(){
 		myServerKeyStoreInfo = new KeyStoreInfo("classpath:/server-keystore.p12", "changeit", "changeit", "server");
 		myServerTrustStoreInfo = new TrustStoreInfo("classpath:/server-truststore.p12", "changeit", "client");
-		myServerTlsAuthentication =
-				new TlsAuthentication(Optional.of(myServerKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
+		myServerTlsAuthentication = new TlsAuthentication(Optional.of(myServerKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
 
 		myClientKeyStoreInfo = new KeyStoreInfo("classpath:/client-keystore.p12", "changeit", "changeit", "client");
 		myClientTrustStoreInfo = new TrustStoreInfo("classpath:/client-truststore.p12", "changeit", "server");
-		myClientTlsAuthentication =
-				new TlsAuthentication(Optional.of(myClientKeyStoreInfo), Optional.of(myClientTrustStoreInfo));
+		myClientTlsAuthentication = new TlsAuthentication(Optional.of(myClientKeyStoreInfo), Optional.of(myClientTrustStoreInfo));
 	}
 
 	@Test
-	public void testCreateSslContextEmpty() {
+	public void testCreateSslContextEmpty(){
 		TlsAuthentication emptyAuthentication = null;
 		try {
 			TlsAuthenticationSvc.createSslContext(emptyAuthentication);
@@ -56,21 +54,20 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateSslContextPresent() {
+	public void testCreateSslContextPresent(){
 		SSLContext result = TlsAuthenticationSvc.createSslContext(myServerTlsAuthentication);
 		assertEquals("TLS", result.getProtocol());
 	}
 
 	@Test
-	public void testCreateSslContextPresentInvalid() {
+	public void testCreateSslContextPresentInvalid(){
 		KeyStoreInfo invalidKeyStoreInfo = new KeyStoreInfo("file:///INVALID.p12", "changeit", "changeit", "server");
-		TlsAuthentication invalidTlsAuthentication =
-				new TlsAuthentication(Optional.of(invalidKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
+		TlsAuthentication invalidTlsAuthentication = new TlsAuthentication(Optional.of(invalidKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
 		try {
 			TlsAuthenticationSvc.createSslContext(invalidTlsAuthentication);
 			fail();
 		} catch (Exception e) {
-			assertEquals(Msg.code(2102) + "Failed to create SSLContext", e.getMessage());
+			assertEquals(Msg.code(2102)+"Failed to create SSLContext", e.getMessage());
 		}
 	}
 
@@ -93,14 +90,15 @@ public class TlsAuthenticationSvcTest {
 		try {
 			TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
 			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
+		}
+		catch (Exception e) {
+			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testCreateTrustStoreJks() throws Exception {
-		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/truststore.jks", "changeit", "client");
+		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/truststore.jks", "changeit",  "client");
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
 		assertNotNull(keyStore.getCertificate(trustStoreInfo.getAlias()));
 	}
@@ -118,7 +116,7 @@ public class TlsAuthenticationSvcTest {
 			TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
 			fail();
 		} catch (Exception e) {
-			assertEquals(Msg.code(2103) + "Failed to create KeyStore", e.getMessage());
+			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
 		}
 	}
 
@@ -146,19 +144,19 @@ public class TlsAuthenticationSvcTest {
 			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
 			fail();
 		} catch (Exception e) {
-			assertEquals(Msg.code(2105) + "Failed to create X509TrustManager", e.getMessage());
+			assertEquals(Msg.code(2105)+"Failed to create X509TrustManager", e.getMessage());
 		}
 	}
 
 	@Test
-	public void testCreateHostnameVerifierEmptyTrustStoreInfo() {
+	public void testCreateHostnameVerifierEmptyTrustStoreInfo(){
 		Optional<TrustStoreInfo> trustStoreInfo = Optional.empty();
 		HostnameVerifier result = TlsAuthenticationSvc.createHostnameVerifier(trustStoreInfo);
 		assertEquals(NoopHostnameVerifier.class, result.getClass());
 	}
 
 	@Test
-	public void testCreateHostnameVerifierPresentTrustStoreInfo() {
+	public void testCreateHostnameVerifierPresentTrustStoreInfo(){
 		Optional<TrustStoreInfo> trustStoreInfo = Optional.of(myServerTrustStoreInfo);
 		HostnameVerifier result = TlsAuthenticationSvc.createHostnameVerifier(trustStoreInfo);
 		assertEquals(DefaultHostnameVerifier.class, result.getClass());

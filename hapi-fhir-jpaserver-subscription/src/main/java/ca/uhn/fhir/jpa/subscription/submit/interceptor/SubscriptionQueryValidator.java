@@ -32,8 +32,7 @@ public class SubscriptionQueryValidator {
 	private final DaoRegistry myDaoRegistry;
 	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
-	public SubscriptionQueryValidator(
-			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+	public SubscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		myDaoRegistry = theDaoRegistry;
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 	}
@@ -54,8 +53,7 @@ public class SubscriptionQueryValidator {
 
 		for (String next : parsedCriteria.getApplicableResourceTypes()) {
 			if (!myDaoRegistry.isResourceTypeSupported(next)) {
-				throw new UnprocessableEntityException(
-						Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
+				throw new UnprocessableEntityException(Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
 			}
 		}
 
@@ -65,14 +63,12 @@ public class SubscriptionQueryValidator {
 
 		int sep = theCriteria.indexOf('?');
 		if (sep <= 1) {
-			throw new UnprocessableEntityException(
-					Msg.code(14) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+			throw new UnprocessableEntityException(Msg.code(14) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
 		String resType = theCriteria.substring(0, sep);
 		if (resType.contains("/")) {
-			throw new UnprocessableEntityException(
-					Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+			throw new UnprocessableEntityException(Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 	}
 

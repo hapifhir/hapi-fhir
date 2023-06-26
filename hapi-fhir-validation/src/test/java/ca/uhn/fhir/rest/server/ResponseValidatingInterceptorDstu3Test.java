@@ -48,8 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class ResponseValidatingInterceptorDstu3Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorDstu3Test.class);
 	public static IBaseResource myReturnResource;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -87,9 +86,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new NullPointerException("SOME MESSAGE"))
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -101,10 +98,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(
-				responseContent,
-				Matchers.containsString(
-						"<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
+		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -122,9 +116,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(NullPointerException.class)
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -154,9 +146,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new InternalErrorException("FOO"))
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -186,9 +176,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(InternalErrorException.class)
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -202,6 +190,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), Matchers.not(Matchers.containsString("X-FHIR-Response-Validation")));
 	}
+
 
 	/**
 	 * Test for #345
@@ -223,6 +212,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 			IOUtils.closeQuietly(status);
 		}
 	}
+
 
 	@Test
 	public void testLongHeaderTruncated() throws Exception {
@@ -251,9 +241,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
-			assertThat(
-					status.getFirstHeader("X-FHIR-Response-Validation").getValue(),
-					Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
@@ -267,9 +255,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.endsWith("..."));
-			assertThat(
-					status.getFirstHeader("X-FHIR-Response-Validation").getValue(),
-					Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
+			assertThat(status.getFirstHeader("X-FHIR-Response-Validation").getValue(), Matchers.startsWith("{\"resourceType\":\"OperationOutcome\""));
 		}
 	}
 
@@ -292,10 +278,8 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.trace("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(
-				status.toString(),
-				(Matchers.containsString(
-						"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
+		assertThat(status.toString(), (Matchers.containsString(
+			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
 	}
 
 	/**
@@ -500,6 +484,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 			retVal.add(myReturnResource);
 			return retVal;
 		}
+
 	}
 
 	@AfterAll
@@ -525,10 +510,11 @@ public class ResponseValidatingInterceptorDstu3Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

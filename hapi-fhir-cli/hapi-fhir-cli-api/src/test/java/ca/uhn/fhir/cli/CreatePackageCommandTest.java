@@ -57,8 +57,7 @@ public class CreatePackageCommandTest extends BaseTest {
 			FileUtils.deleteDirectory(myTargetDirectory);
 			FileUtils.deleteDirectory(myExtractDirectory);
 		} catch (IOException e) {
-			throw new InternalErrorException(
-					"Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath() + "\"", e);
+			throw new InternalErrorException("Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath() + "\"", e);
 		}
 	}
 
@@ -73,22 +72,15 @@ public class CreatePackageCommandTest extends BaseTest {
 		vs.setUrl("http://foo/2");
 		writeFile(vs, "foo2.json");
 
-		App.main(new String[] {
+		App.main(new String[]{
 			"create-package",
-			"--fhir-version",
-			"R4",
-			"--name",
-			"com.example.ig",
-			"--version",
-			"1.0.1",
-			"--include-package",
-			myWorkDirectory.getAbsolutePath() + "/*.json",
-			"--target-directory",
-			myTargetDirectory.getAbsolutePath(),
-			"--dependency",
-			"hl7.fhir.core:4.0.1",
-			"--dependency",
-			"foo.bar:1.2.3"
+			"--fhir-version", "R4",
+			"--name", "com.example.ig",
+			"--version", "1.0.1",
+			"--include-package", myWorkDirectory.getAbsolutePath() + "/*.json",
+			"--target-directory", myTargetDirectory.getAbsolutePath(),
+			"--dependency", "hl7.fhir.core:4.0.1",
+			"--dependency", "foo.bar:1.2.3"
 		});
 
 		Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
@@ -96,29 +88,27 @@ public class CreatePackageCommandTest extends BaseTest {
 		File igArchive = new File(myTargetDirectory, "com.example.ig-1.0.1.tgz");
 		archiver.extract(igArchive, myExtractDirectory);
 
-		List<String> allFiles =
-				FileUtils.listFiles(myExtractDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).stream()
-						.map(t -> t.getPath())
-						.sorted()
-						.collect(Collectors.toList());
+		List<String> allFiles = FileUtils.listFiles(myExtractDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE)
+			.stream()
+			.map(t -> t.getPath())
+			.sorted()
+			.collect(Collectors.toList());
 		ourLog.info("Archive contains files:\n * {}", allFiles.stream().collect(Collectors.joining("\n * ")));
 
 		// Verify package.json
-		String packageJsonContents = IOUtils.toString(
-				new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
+		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson =
-				"""
+		String expectedPackageJson = """
 			{
-			"name" : "com.example.ig",
-			"version" : "1.0.1",
-			"description" : null,
-			"fhirVersions" : ["4.0.1"],
-			"dependencies" : {
-				"hl7.fhir.core" : "4.0.1",
-				"foo.bar" : "1.2.3"
-			}
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : null,
+			  "fhirVersions" : ["4.0.1"],
+			  "dependencies" : {
+			    "hl7.fhir.core" : "4.0.1",
+			    "foo.bar" : "1.2.3"
+			  }
 			}
 			""";
 		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
@@ -139,18 +129,13 @@ public class CreatePackageCommandTest extends BaseTest {
 		vs.setUrl("http://foo/2");
 		writeFile(vs, "foo2.json");
 
-		App.main(new String[] {
+		App.main(new String[]{
 			"create-package",
-			"--fhir-version",
-			"R4",
-			"--name",
-			"com.example.ig",
-			"--version",
-			"1.0.1",
-			"--include-package",
-			myWorkDirectory.getAbsolutePath() + "/*.json",
-			"--target-directory",
-			myTargetDirectory.getAbsolutePath()
+			"--fhir-version", "R4",
+			"--name", "com.example.ig",
+			"--version", "1.0.1",
+			"--include-package", myWorkDirectory.getAbsolutePath() + "/*.json",
+			"--target-directory", myTargetDirectory.getAbsolutePath()
 		});
 
 		Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
@@ -158,25 +143,23 @@ public class CreatePackageCommandTest extends BaseTest {
 		File igArchive = new File(myTargetDirectory, "com.example.ig-1.0.1.tgz");
 		archiver.extract(igArchive, myExtractDirectory);
 
-		List<String> allFiles =
-				FileUtils.listFiles(myExtractDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).stream()
-						.map(t -> t.getPath())
-						.sorted()
-						.collect(Collectors.toList());
+		List<String> allFiles = FileUtils.listFiles(myExtractDirectory, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE)
+			.stream()
+			.map(t -> t.getPath())
+			.sorted()
+			.collect(Collectors.toList());
 		ourLog.info("Archive contains files:\n * {}", allFiles.stream().collect(Collectors.joining("\n * ")));
 
 		// Verify package.json
-		String packageJsonContents = IOUtils.toString(
-				new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
+		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson =
-				"""
+		String expectedPackageJson = """
 			{
-			"name" : "com.example.ig",
-			"version" : "1.0.1",
-			"description" : null,
-			"fhirVersions" : ["4.0.1"]
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : null,
+			  "fhirVersions" : ["4.0.1"]
 			}
 			""";
 		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
@@ -184,6 +167,7 @@ public class CreatePackageCommandTest extends BaseTest {
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
 		assertEquals("com.example.ig", loadedPackage.name());
+
 	}
 
 	public void writeFile(IBaseResource theResource, String theFileName) throws IOException {
@@ -191,4 +175,5 @@ public class CreatePackageCommandTest extends BaseTest {
 			myContext.newJsonParser().encodeResourceToWriter(theResource, w);
 		}
 	}
+
 }

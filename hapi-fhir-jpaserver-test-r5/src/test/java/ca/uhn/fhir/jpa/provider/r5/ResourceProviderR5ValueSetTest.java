@@ -30,10 +30,10 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters;
@@ -47,12 +47,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
@@ -71,8 +71,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ResourceProviderR5ValueSetTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR5ValueSetTest.class);
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
@@ -96,8 +95,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	private void loadAndPersistCodeSystemWithDesignations(HTTPVerb theVerb) throws IOException {
-		CodeSystem codeSystem =
-				loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
 		codeSystem.setId("CodeSystem/cs");
 		persistCodeSystem(codeSystem, theVerb);
 	}
@@ -109,10 +107,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao
-								.create(theCodeSystem, mySrd)
-								.getId()
-								.toUnqualifiedVersionless();
+						myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -120,10 +115,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao
-								.update(theCodeSystem, mySrd)
-								.getId()
-								.toUnqualifiedVersionless();
+						myExtensionalCsId = myCodeSystemDao.update(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -145,8 +137,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalVsId =
-								myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -154,18 +145,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalVsId =
-								myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao
-				.readEntity(myExtensionalVsId, null)
-				.getPersistentId()
-				.getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 	private CodeSystem createExternalCs() {
@@ -193,21 +180,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem
-				.addConcept()
-				.setCode("A")
-				.setDisplay("Code A")
-				.addConcept(new ConceptDefinitionComponent()
-						.setCode("AA")
-						.setDisplay("Code AA")
-						.addConcept(
-								new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA")))
-				.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+			.addConcept().setCode("A").setDisplay("Code A")
+			.addConcept(new ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+				.addConcept(new ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+			)
+			.addConcept(new ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
 		codeSystem
-				.addConcept()
-				.setCode("B")
-				.setDisplay("Code B")
-				.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
-				.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+			.addConcept().setCode("B").setDisplay("Code B")
+			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
 		myCodeSystemDao.create(codeSystem, mySrd);
 	}
 
@@ -226,10 +207,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(codeSystem.getUrl());
-		include.addFilter()
-				.setProperty("concept")
-				.setOp(Enumerations.FilterOperator.ISA)
-				.setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(Enumerations.FilterOperator.ISA).setValue("ParentA");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
@@ -246,10 +224,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(codeSystem.getUrl());
-		include.addFilter()
-				.setProperty("concept")
-				.setOp(Enumerations.FilterOperator.ISA)
-				.setValue("childFOOOOOOO");
+		include.addFilter().setProperty("concept").setOp(Enumerations.FilterOperator.ISA).setValue("childFOOOOOOO");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
@@ -257,11 +232,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -279,6 +255,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
+
 	}
 
 	@Test
@@ -288,11 +265,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -310,6 +288,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
+
 	}
 
 	@Test
@@ -319,48 +298,34 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConceptsByValueSetUrl = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withParameter(Parameters.class, "offset", new IntegerType(1))
-				.execute();
+		List<String> expandedConceptsByValueSetUrl = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
+
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1000,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(23, expanded.getExpansion().getContains().size());
 
-		assertThat(toCodes(expanded), is(equalTo(expandedConceptsByValueSetUrl.subList(1, 24))));
+
+		assertThat(toCodes(expanded), is(equalTo(expandedConceptsByValueSetUrl.subList(1,24))));
 	}
 
 	@Nonnull
 	public List<String> toCodes(ValueSet theExpandedValueSet) {
-		return theExpandedValueSet.getExpansion().getContains().stream()
-				.map(t -> t.getCode())
-				.collect(Collectors.toList());
+		return theExpandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
 	}
 
 	@Test
@@ -369,13 +334,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withParameter(Parameters.class, "count", new IntegerType(1))
-				.execute();
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -384,25 +349,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(0, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				0,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0, 1))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
+
 	}
 
 	@Test
@@ -412,15 +364,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withParameter(Parameters.class, "offset", new IntegerType(1))
-				.andParameter("count", new IntegerType(1))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -429,43 +381,31 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1, 2))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
 	}
 
 	@Test
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
+
 	}
 
 	@Test
@@ -475,40 +415,39 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("expand")
-				.withParameter(Parameters.class, "filter", new StringType("systolic"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
+
 	}
 
 	@Test
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -516,23 +455,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(false);
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -540,19 +476,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		try {
-			myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withParameter(
-							Parameters.class,
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
-					.execute();
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals(
-					"HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus",
-					e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -563,23 +495,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -589,18 +518,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("offset", new IntegerType(1))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -609,25 +535,11 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1000,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(23, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1, 24))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,24))));
 	}
 
 	@Test
@@ -636,18 +548,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("count", new IntegerType(1))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -656,25 +565,11 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(0, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				0,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0, 1))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
 	}
 
 	@Test
@@ -684,19 +579,16 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("offset", new IntegerType(1))
-				.andParameter("count", new IntegerType(1))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -705,25 +597,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1, 2))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
+
 	}
 
 	@Test
@@ -734,19 +613,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			Parameters respParam = myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withParameter(
-							Parameters.class,
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
-					.execute();
+			Parameters respParam = myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals(
-					"HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus",
-					e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -756,20 +631,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -781,20 +656,20 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -806,14 +681,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("offset", new IntegerType(1))
-				.execute();
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -822,25 +697,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1000,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1000, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(23, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1, 24))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,24))));
+
 	}
 
 	@Test
@@ -852,14 +714,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("count", new IntegerType(1))
-				.execute();
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -868,25 +730,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(0, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				0,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(0, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0, 1))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(0,1))));
+
 	}
 
 	@Test
@@ -898,15 +747,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl(
-				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("offset", new IntegerType(1))
-				.andParameter("count", new IntegerType(1))
-				.execute();
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("offset", new IntegerType(1))
+			.andParameter("count", new IntegerType(1))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -915,25 +764,11 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertEquals(24, expanded.getExpansion().getTotal());
 		assertEquals(1, expanded.getExpansion().getOffset());
 		assertEquals("offset", expanded.getExpansion().getParameter().get(0).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(0)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
 		assertEquals("count", expanded.getExpansion().getParameter().get(1).getName());
-		assertEquals(
-				1,
-				expanded.getExpansion()
-						.getParameter()
-						.get(1)
-						.getValueIntegerType()
-						.getValue()
-						.intValue());
+		assertEquals(1, expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 		assertEquals(1, expanded.getExpansion().getContains().size());
-		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1, 2))));
+		assertThat(toCodes(expanded), is(equalTo(expandedConcepts.subList(1,2))));
 	}
 
 	@Test
@@ -941,11 +776,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", myLocalVs)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -960,11 +796,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", myLocalVs)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", myLocalVs)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -973,6 +810,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+
 	}
 
 	@Test
@@ -980,81 +818,67 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		try {
-			myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withNoParameters(Parameters.class)
-					.execute();
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1133)
-							+ "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.", e.getMessage());
 		}
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case-r4.xml");
-			myClient.operation()
-					.onType(ValueSet.class)
-					.named("expand")
-					.withParameter(Parameters.class, "valueSet", toExpand)
-					.andParameter(
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-					.execute();
+			myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "valueSet", toExpand)
+				.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1134)
-							+ "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case.xml");
-			myClient.operation()
-					.onInstance(myExtensionalVsId)
-					.named("expand")
-					.withParameter(Parameters.class, "valueSet", toExpand)
-					.andParameter(
-							"url",
-							new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-					.execute();
+			myClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "valueSet", toExpand)
+				.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1134)
-							+ "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
-			myClient.operation()
-					.onInstance(myExtensionalVsId)
-					.named("expand")
-					.withParameter(Parameters.class, "offset", new IntegerType(-1))
-					.execute();
+			myClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "offset", new IntegerType(-1))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1135)
-							+ "offset parameter for $expand operation must be >= 0 when specified. offset: -1",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1135) + "offset parameter for $expand operation must be >= 0 when specified. offset: -1", e.getMessage());
 		}
 
 		try {
-			myClient.operation()
-					.onInstance(myExtensionalVsId)
-					.named("expand")
-					.withParameter(Parameters.class, "count", new IntegerType(-1))
-					.execute();
+			myClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "count", new IntegerType(-1))
+				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					"HTTP 400 Bad Request: " + Msg.code(1136)
-							+ "count parameter for $expand operation must be >= 0 when specified. count: -1",
-					e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: -1", e.getMessage());
 		}
 	}
 
@@ -1063,11 +887,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myLocalValueSetId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -1081,11 +906,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myLocalValueSetId)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -1094,6 +920,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+
 	}
 
 	@Test
@@ -1101,11 +928,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -1114,6 +942,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+
 	}
 
 	@Test
@@ -1132,14 +961,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		vs.getCompose().addInclude().setSystem("http://foo1").addConcept().setCode("foo1");
 		myClient.update().resource(vs).execute();
 
-		ValueSet expanded = myClient.operation()
-				.onInstance(new IdType("ValueSet/VS179789"))
-				.named("$expand")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(ValueSet.class)
-				.execute();
-		ourLog.debug(
-				"Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ValueSet expanded = myClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem URL and Codes
@@ -1156,24 +985,24 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		vs.getCompose().addInclude().setSystem("http://foo2").addConcept().setCode("foo2");
 		myClient.update().resource(vs).execute();
 
-		expanded = myClient.operation()
-				.onInstance(new IdType("ValueSet/VS179789"))
-				.named("$expand")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(ValueSet.class)
-				.execute();
-		ourLog.debug(
-				"Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		expanded = myClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
+
 
 	/**
 	 * #516
 	 */
 	@Test
 	public void testInvalidFilter() throws Exception {
-		String string = IOUtils.toString(
-				getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
+		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
 		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
 		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
@@ -1186,6 +1015,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
+
 		}
 	}
 
@@ -1196,12 +1026,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HTTPVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug(
-				"CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug(
-				"ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -1212,8 +1040,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
 		persistValueSet(updatedValueSet, HTTPVerb.PUT);
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
@@ -1228,12 +1055,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(Bundle.HTTPVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug(
-				"CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug(
-				"ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -1246,19 +1071,18 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String url = myClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setFullUrl(url)
-				.setResource(updatedValueSet)
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(myExtensionalVsId.getValueAsString());
-		ourLog.debug("Transaction Bundle:\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		bundle
+			.addEntry()
+			.setFullUrl(url)
+			.setResource(updatedValueSet)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl(myExtensionalVsId.getValueAsString());
+		ourLog.debug("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("Updated ValueSet:\n"
-				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
@@ -1268,19 +1092,16 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	private void validateTermValueSetNotExpanded(String theValueSetName) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid =
-					myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertEquals(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
@@ -1289,48 +1110,24 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	private void validateTermValueSetExpandedAndChildren(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid =
-					myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl(
-					"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 
-			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
-			assertTermConceptContainsDesignation(
-					concept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk - expiratie");
-			assertTermConceptContainsDesignation(
-					concept,
-					"sv",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systoliskt blodtryck - utgång");
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
-			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-			assertTermConceptContainsDesignation(
-					otherConcept,
-					"nl",
-					"http://snomed.info/sct",
-					"900000000000013009",
-					"Synonym",
-					"Systolische bloeddruk minimaal 1 uur");
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			assertTermValueSetContainsConceptAndIsInDeclaredOrder(
-					termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
 	}
 
@@ -1338,12 +1135,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8495-4"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1356,9 +1154,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase + "/ValueSet/"
-				+ myLocalValueSetId.getIdPart() + "/$validate-code?system=" + UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM)
-				+ "&code=AA";
+		String url = myServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
+			"&code=AA";
 
 		HttpGet request = new HttpGet(url);
 		request.addHeader("Accept", "application/fhir+json");
@@ -1376,9 +1175,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase + "/ValueSet/"
-				+ myLocalValueSetId.getIdPart() + "/$validate-code?system=" + UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM)
-				+ "&code=AA";
+		String url = myServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
+			"&code=AA";
 
 		ourLog.info("* Requesting: {}", url);
 
@@ -1397,12 +1197,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onInstance(myExtensionalVsId)
-				.named("validate-code")
-				.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-				.andParameter("system", new UriType("http://acme.org"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("validate-code")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -1414,14 +1215,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testValidateCodeAgainstBuiltInSystem() {
 		// Good code and system, good valueset
 		{
-			Parameters respParam = myClient.operation()
-					.onType(ValueSet.class)
-					.named("validate-code")
-					.withParameter(Parameters.class, "code", new StringType("male"))
-					.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
-					.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
-					.useHttpGet()
-					.execute();
+			Parameters respParam = myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "code", new StringType("male"))
+				.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/administrative-gender"))
+				.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
+				.useHttpGet()
+				.execute();
 
 			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 			ourLog.info(resp);
@@ -1430,9 +1232,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 			assertEquals("message", respParam.getParameter().get(1).getName());
-			assertEquals(
-					"Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender",
-					((StringType) respParam.getParameter().get(1).getValue()).getValue());
+			assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 
 			assertEquals("display", respParam.getParameter().get(2).getName());
 			assertEquals("Male", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
@@ -1440,14 +1240,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		// Good code and system, but not in specified valueset
 		{
-			Parameters respParam = myClient.operation()
-					.onType(ValueSet.class)
-					.named("validate-code")
-					.withParameter(Parameters.class, "code", new StringType("male"))
-					.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/marital-status"))
-					.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
-					.useHttpGet()
-					.execute();
+			Parameters respParam = myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "code", new StringType("male"))
+				.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/marital-status"))
+				.andParameter("system", new StringType("http://hl7.org/fhir/administrative-gender"))
+				.useHttpGet()
+				.execute();
 
 			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 			ourLog.info(resp);
@@ -1456,9 +1257,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(false, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 			assertEquals("message", respParam.getParameter().get(1).getName());
-			assertEquals(
-					"Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'",
-					((StringType) respParam.getParameter().get(1).getValue()).getValue());
+			assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#male' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/marital-status'", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		}
 	}
 
@@ -1476,12 +1275,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://myvs");
 		vs.getCompose()
-				.addInclude()
-				.setSystem("http://mycs")
-				.addFilter()
-				.setOp(Enumerations.FilterOperator.ISA)
-				.setProperty("concept")
-				.setValue("ParentA");
+			.addInclude()
+			.setSystem("http://mycs")
+			.addFilter()
+			.setOp(Enumerations.FilterOperator.ISA)
+			.setProperty("concept")
+			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
 		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
@@ -1491,8 +1290,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertThat(response, containsString("<display value=\"Child AA\"/>"));
 		}
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart()
-				+ "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
+		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
@@ -1500,8 +1298,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(true, output.getParameterBool("result"));
 		}
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart()
-				+ "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
+		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
@@ -1518,8 +1315,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			ourLog.info("Response: {}", response);
 		}
 
-		validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart()
-				+ "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
+		validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
@@ -1527,14 +1323,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			assertEquals(true, output.getParameterBool("result"));
 		}
 
-		validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart()
-				+ "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
+		validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", response);
 			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
 			assertEquals(false, output.getParameterBool("result"));
 		}
+
 	}
 
 	@Test
@@ -1543,21 +1339,21 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("filter", new StringType("blood"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("blood"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@Test
@@ -1566,93 +1362,81 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("filter", new StringType("blo"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("blo"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>"));
 	}
-
+	
 	@Test
 	public void testExpandByValueSetWithFilterContainsNoPrefixValue() throws IOException {
 		loadAndPersistCodeSystem(HTTPVerb.POST);
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("filter", new StringType("lood"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("lood"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-
-		assertThat(
-				resp,
-				not(stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>")));
+		
+		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
 	}
-
+	
 	@Test
 	public void testExpandByValueSetWithFilterNotContainsAnyValue() throws IOException {
 		loadAndPersistCodeSystem(HTTPVerb.POST);
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(Parameters.class, "valueSet", toExpand)
-				.andParameter("filter", new StringType("loood"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("loood"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-
-		assertThat(
-				resp,
-				not(stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>")));
+		
+		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
 	}
 
 	@Test
 	public void testExpandByUrlWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
-		Parameters respParam = myClient.operation()
-				.onType(ValueSet.class)
-				.named("expand")
-				.withParameter(
-						Parameters.class,
-						"url",
-						new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-				.andParameter("filter", new StringType("systolic"))
-				.execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("filter", new StringType("systolic"))
+			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(
-				resp,
-				stringContainsInOrder(
-						"<code value=\"11378-7\"/>",
-						"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
 	}
 
 	@AfterEach
@@ -1660,20 +1444,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
-	public static CodeSystem createExternalCs(
-			IFhirResourceDao<CodeSystem> theCodeSystemDao,
-			IResourceTableDao theResourceTableDao,
-			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
-			ServletRequestDetails theRequestDetails) {
+
+	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setVersion("SYSTEM VERSION");
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id =
-				theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
+		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table =
-				theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -1696,8 +1475,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
+
 }

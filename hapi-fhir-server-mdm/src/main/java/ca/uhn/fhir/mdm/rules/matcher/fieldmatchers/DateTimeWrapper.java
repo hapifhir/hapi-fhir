@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 
 /**
  * A wrapper class for datetimes of ambiguous fhir version
@@ -51,8 +52,7 @@ public class DateTimeWrapper {
 			myValueAsString = r4Date.getValueAsString();
 		} else {
 			// we should consider changing this error so we don't need the fhir context at all
-			throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: "
-					+ theFhirContext.getVersion().getVersion());
+			throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 		}
 	}
 

@@ -38,8 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
-public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T>
-		implements BeforeEachCallback, AfterEachCallback {
+public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
 	private boolean myClearBetweenTests = true;
@@ -50,8 +49,7 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	 *
 	 * @param theResourceType The resource type to support
 	 */
-	public HashMapResourceProviderExtension(
-			RestfulServerExtension theRestfulServerExtension, Class<T> theResourceType) {
+	public HashMapResourceProviderExtension(RestfulServerExtension theRestfulServerExtension, Class<T> theResourceType) {
 		super(theRestfulServerExtension.getFhirContext(), theResourceType);
 
 		myRestfulServerExtension = theRestfulServerExtension;

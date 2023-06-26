@@ -26,8 +26,7 @@ class ResourceBindingTest {
 		// setup
 		Method method = ResourceBindingTest.class.getMethod("testFILO");
 		BaseMethodBinding first = new PageMethodBinding(ourFhirContext, method);
-		BaseMethodBinding second = new PageMethodBinding(ourFhirContext, method);
-		;
+		BaseMethodBinding second = new PageMethodBinding(ourFhirContext, method);;
 
 		// execute
 		myResourceBinding.addMethod(first);

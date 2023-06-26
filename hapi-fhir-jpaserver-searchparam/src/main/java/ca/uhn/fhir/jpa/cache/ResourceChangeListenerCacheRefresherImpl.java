@@ -50,8 +50,7 @@ import java.util.List;
  * if any entries in the new cache are different from the last time that cache was loaded.
  */
 @Service
-public class ResourceChangeListenerCacheRefresherImpl
-		implements IResourceChangeListenerCacheRefresher, IHasScheduledJobs {
+public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
 	/**
@@ -61,10 +60,8 @@ public class ResourceChangeListenerCacheRefresherImpl
 
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
-
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
-
 	private boolean myStopping = false;
 
 	@Override
@@ -108,8 +105,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 	}
 
 	@VisibleForTesting
-	public void setResourceChangeListenerRegistry(
-			ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
+	public void setResourceChangeListenerRegistry(ResourceChangeListenerRegistryImpl theResourceChangeListenerRegistry) {
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
@@ -117,6 +113,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 	public void setResourceVersionSvc(IResourceVersionSvc theResourceVersionSvc) {
 		myResourceVersionSvc = theResourceVersionSvc;
 	}
+
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
@@ -144,8 +141,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 			return retVal;
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
-		ResourceVersionMap newResourceVersionMap =
-				myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
 		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retVal;
@@ -158,14 +154,12 @@ public class ResourceChangeListenerCacheRefresherImpl
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	ResourceChangeResult notifyListener(
-			IResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
+	ResourceChangeResult notifyListener(IResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		ResourceChangeListenerCache cache = (ResourceChangeListenerCache) theCache;
 		IResourceChangeListener resourceChangeListener = cache.getResourceChangeListener();
 		if (theCache.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(
-					resourceChangeListener, cache.getResourceVersionCache(), theNewResourceVersionMap);
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, cache.getResourceVersionCache(), theNewResourceVersionMap);
 		} else {
 			cache.getResourceVersionCache().initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
@@ -175,17 +169,15 @@ public class ResourceChangeListenerCacheRefresherImpl
 		return retval;
 	}
 
-	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(
-			IResourceChangeListener theListener,
-			ResourceVersionCache theOldResourceVersionCache,
-			ResourceVersionMap theNewResourceVersionMap) {
+	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
-		theOldResourceVersionCache.keySet().forEach(id -> {
-			if (!theNewResourceVersionMap.containsKey(id)) {
-				deletedIds.add(id);
-			}
-		});
+		theOldResourceVersionCache.keySet()
+			.forEach(id -> {
+				if (!theNewResourceVersionMap.containsKey(id)) {
+					deletedIds.add(id);
+				}
+			});
 		deletedIds.forEach(theOldResourceVersionCache::removeResourceId);
 
 		List<IIdType> createdIds = new ArrayList<>();
@@ -201,8 +193,7 @@ public class ResourceChangeListenerCacheRefresherImpl
 			}
 		}
 
-		IResourceChangeEvent resourceChangeEvent =
-				ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
+		IResourceChangeEvent resourceChangeEvent = ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
 		if (!resourceChangeEvent.isEmpty()) {
 			theListener.handleChange(resourceChangeEvent);
 		}

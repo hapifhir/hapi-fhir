@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -37,8 +37,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class TransactionProcessorVersionAdapterDstu3
-		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+public class TransactionProcessorVersionAdapterDstu3 implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
 	@Override
 	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
@@ -68,13 +67,12 @@ public class TransactionProcessorVersionAdapterDstu3
 	}
 
 	@Override
-	public void populateEntryWithOperationOutcome(
-			BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
+	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue()
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setDiagnostics(theCaughtEx.getMessage())
-				.setCode(OperationOutcome.IssueType.EXCEPTION);
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 
@@ -186,4 +184,5 @@ public class TransactionProcessorVersionAdapterDstu3
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
 	}
+
 }

@@ -10,20 +10,11 @@ public class GeneratedSqlTest {
 
 	@Test
 	public void testBlockInlineNonBoundParameters() {
-		assertThrows(
-				AssertionError.class,
-				() -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t = '123'", Collections.emptyList()));
-		assertThrows(
-				AssertionError.class,
-				() -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t='123'", Collections.emptyList()));
-		assertThrows(
-				AssertionError.class,
-				() -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t in ('123')", Collections.emptyList()));
-		assertThrows(
-				AssertionError.class,
-				() -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t IN ('123')", Collections.emptyList()));
-		assertThrows(
-				AssertionError.class,
-				() -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t IN('123')", Collections.emptyList()));
+		assertThrows(AssertionError.class, () -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t = '123'", Collections.emptyList()));
+		assertThrows(AssertionError.class, () -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t='123'", Collections.emptyList()));
+		assertThrows(AssertionError.class, () -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t in ('123')", Collections.emptyList()));
+		assertThrows(AssertionError.class, () -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t IN ('123')", Collections.emptyList()));
+		assertThrows(AssertionError.class, () -> new GeneratedSql(false, "SELECT * FROM FOO WHERE t IN('123')", Collections.emptyList()));
 	}
+
 }

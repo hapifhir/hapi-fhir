@@ -16,11 +16,13 @@ public class TolerantJsonParserR4Test {
 
 	@Test
 	public void testParseInvalidNumeric_LeadingDecimal() {
-		String input = "{\n" + "\"resourceType\": \"Observation\",\n"
-				+ "\"valueQuantity\": {\n"
-				+ "      \"value\": .5\n"
-				+ "   }\n"
-				+ "}";
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": .5\n" +
+			"   }\n" +
+			"}";
+
 
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
@@ -30,11 +32,13 @@ public class TolerantJsonParserR4Test {
 
 	@Test
 	public void testParseInvalidNumeric_LeadingZeros() {
-		String input = "{\n" + "\"resourceType\": \"Observation\",\n"
-				+ "\"valueQuantity\": {\n"
-				+ "      \"value\": 00.5\n"
-				+ "   }\n"
-				+ "}";
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": 00.5\n" +
+			"   }\n" +
+			"}";
+
 
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
@@ -44,11 +48,13 @@ public class TolerantJsonParserR4Test {
 
 	@Test
 	public void testParseInvalidNumeric_DoubleZeros() {
-		String input = "{\n" + "\"resourceType\": \"Observation\",\n"
-				+ "\"valueQuantity\": {\n"
-				+ "      \"value\": 00\n"
-				+ "   }\n"
-				+ "}";
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": 00\n" +
+			"   }\n" +
+			"}";
+
 
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
@@ -58,11 +64,13 @@ public class TolerantJsonParserR4Test {
 
 	@Test
 	public void testParseInvalidNumeric2() {
-		String input = "{\n" + "\"resourceType\": \"Observation\",\n"
-				+ "\"valueQuantity\": {\n"
-				+ "      \"value\": .\n"
-				+ "   }\n"
-				+ "}";
+		String input = "{\n" +
+			"\"resourceType\": \"Observation\",\n" +
+			"\"valueQuantity\": {\n" +
+			"      \"value\": .\n" +
+			"   }\n" +
+			"}";
+
 
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		try {
@@ -70,5 +78,7 @@ public class TolerantJsonParserR4Test {
 		} catch (DataFormatException e) {
 			assertThat(e.getMessage(), containsString("[element=\"value\"] Invalid attribute value \".\""));
 		}
+
 	}
+
 }

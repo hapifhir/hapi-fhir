@@ -50,6 +50,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		}
 	}
 
+
 	@Test
 	public void testAllowDelete() {
 		mySvc.addPath("AuditEvent.agent.who");
@@ -77,9 +78,10 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		}
 
 		// Search should still work
-		IBundleProvider searchOutcome = myAuditEventDao.search(
-				SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")));
+		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")));
 		assertEquals(1, searchOutcome.size());
+
+
 	}
 
 	@Test
@@ -105,6 +107,8 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
+
+
 	}
 
 	@Test
@@ -131,5 +135,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(myCascadingDeleteInterceptor);
 		}
+
 	}
+
 }

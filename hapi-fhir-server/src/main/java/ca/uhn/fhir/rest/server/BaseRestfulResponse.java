@@ -67,4 +67,5 @@ public abstract class BaseRestfulResponse<T extends RequestDetails> implements I
 	public void setRequestDetails(T requestDetails) {
 		this.myRequestDetails = requestDetails;
 	}
+
 }

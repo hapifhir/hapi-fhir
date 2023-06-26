@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -32,14 +32,14 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Date;
 import java.util.List;
 
-public class TransactionProcessorVersionAdapterDstu2
-		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
+public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProcessorVersionAdapter<Bundle, Bundle.Entry> {
 	@Override
 	public void setResponseStatus(Bundle.Entry theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
@@ -72,9 +72,9 @@ public class TransactionProcessorVersionAdapterDstu2
 	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.Entry theEntry) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue()
-				.setSeverity(IssueSeverityEnum.ERROR)
-				.setDiagnostics(theCaughtEx.getMessage())
-				.setCode(IssueTypeEnum.EXCEPTION);
+			.setSeverity(IssueSeverityEnum.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(IssueTypeEnum.EXCEPTION);
 		theEntry.setResource(oo);
 	}
 
@@ -173,4 +173,5 @@ public class TransactionProcessorVersionAdapterDstu2
 	public void setRequestUrl(Bundle.Entry theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
 	}
+
 }

@@ -19,17 +19,19 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import ca.uhn.fhir.rest.param.ParameterUtil;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Collection;
+
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 
 class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal {
 
@@ -38,7 +40,7 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 
 	public TokenCriterion(String theName, String theSystem, String theCode) {
 		myName = theName;
-		myValue = toValue(theSystem, theCode);
+		myValue=toValue(theSystem, theCode);
 	}
 
 	private String toValue(String theSystem, String theCode) {
@@ -56,7 +58,7 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 	}
 
 	public TokenCriterion(String theParamName, List<BaseIdentifierDt> theValue) {
-		myName = theParamName;
+		myName=theParamName;
 		StringBuilder b = new StringBuilder();
 		for (BaseIdentifierDt next : theValue) {
 			if (next.getSystemElement().isEmpty() && next.getValueElement().isEmpty()) {
@@ -65,9 +67,7 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 			if (b.length() > 0) {
 				b.append(',');
 			}
-			b.append(toValue(
-					next.getSystemElement().getValueAsString(),
-					next.getValueElement().getValue()));
+			b.append(toValue(next.getSystemElement().getValueAsString(), next.getValueElement().getValue()));
 		}
 		myValue = b.toString();
 	}
@@ -91,18 +91,18 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 	}
 
 	public TokenCriterion(String theParamName, IBaseCoding... theCodings) {
-		myName = theParamName;
+		myName=theParamName;
 		StringBuilder b = new StringBuilder();
 		if (theCodings != null) {
-			for (IBaseCoding next : theCodings) {
-				if (isBlank(next.getSystem()) && isBlank(next.getCode())) {
-					continue;
-				}
-				if (b.length() > 0) {
-					b.append(',');
-				}
-				b.append(toValue(next.getSystem(), next.getCode()));
+		for (IBaseCoding next : theCodings) {
+			if (isBlank(next.getSystem()) && isBlank(next.getCode())) {
+				continue;
 			}
+			if (b.length() > 0) {
+				b.append(',');
+			}
+			b.append(toValue(next.getSystem(), next.getCode()));
+		}
 		}
 		myValue = b.toString();
 	}
@@ -116,4 +116,5 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 	public String getParameterName() {
 		return myName;
 	}
+
 }

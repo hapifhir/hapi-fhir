@@ -37,8 +37,7 @@ public class SearchWithGenericListDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchWithGenericListDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithGenericListDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -63,6 +62,8 @@ public class SearchWithGenericListDstu2Test {
 		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
 	}
 
+
+
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -85,13 +86,13 @@ public class SearchWithGenericListDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -101,17 +102,19 @@ public class SearchWithGenericListDstu2Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public List searchByIdentifier(
+				@RequiredParam(name=Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			ourLastMethod = "searchByIdentifier";
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanNameDt().addFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanNameDt().addFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
+
 
 	}
+
 }

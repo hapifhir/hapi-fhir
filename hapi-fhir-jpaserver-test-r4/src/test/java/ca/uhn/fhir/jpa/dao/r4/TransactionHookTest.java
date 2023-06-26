@@ -43,14 +43,13 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 	}
 
 	PointcutLatch myTransactionProcessedLatch = new PointcutLatch(Pointcut.STORAGE_TRANSACTION_PROCESSED);
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
+
 	@BeforeEach
 	public void beforeEach() {
-		myInterceptorService.registerAnonymousInterceptor(
-				Pointcut.STORAGE_TRANSACTION_PROCESSED, myTransactionProcessedLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, myTransactionProcessedLatch);
 	}
 
 	@AfterEach
@@ -86,26 +85,21 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		patientComponent.setResource(pat1);
 		patientComponent.getRequest().setMethod(POST).setUrl("Patient");
 
-		// Delete an observation
-		b.addEntry()
-				.getRequest()
-				.setMethod(DELETE)
-				.setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
+
+		//Delete an observation
+		b.addEntry().getRequest().setMethod(DELETE).setUrl(daoMethodOutcome.getId().toUnqualifiedVersionless().getValue());
 
 		List<HookParams> hookParams = callTransaction(b);
 
 		DeferredInterceptorBroadcasts broadcastsParam = hookParams.get(0).get(DeferredInterceptorBroadcasts.class);
-		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts =
-				broadcastsParam.getDeferredInterceptorBroadcasts();
+		ListMultimap<Pointcut, HookParams> deferredInterceptorBroadcasts = broadcastsParam.getDeferredInterceptorBroadcasts();
 		assertThat(deferredInterceptorBroadcasts.entries(), hasSize(3));
 
-		List<HookParams> createPointcutInvocations =
-				deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED);
+		List<HookParams> createPointcutInvocations = deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED);
 		assertThat(createPointcutInvocations, hasSize(2));
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
-		InterceptorInvocationTimingEnum timing =
-				createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
+		InterceptorInvocationTimingEnum timing = createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
 		assertTrue(firstCreatedResource instanceof Observation);
 		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
@@ -147,6 +141,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		}
 	}
 
+
 	@Test
 	public void testDeleteWithHas_SourceModifiedToNoLongerIncludeReference() throws InterruptedException {
 
@@ -170,10 +165,7 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
 
 		Bundle b = new Bundle();
-		b.addEntry()
-				.getRequest()
-				.setMethod(DELETE)
-				.setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		callTransaction(b);
 
@@ -229,7 +221,9 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+
 	}
+
 
 	@Test
 	public void testDeleteWithHas_SourceModifiedToStillIncludeReference() throws InterruptedException {
@@ -255,20 +249,13 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		rpt.addResult(new Reference(obs2id));
 
 		Bundle b = new Bundle();
-		b.addEntry()
-				.getRequest()
-				.setMethod(DELETE)
-				.setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry().getRequest().setMethod(DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
 		b.addEntry().setResource(rpt).getRequest().setMethod(PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
 			callTransaction(b);
 			fail();
-		} catch (ResourceVersionConflictException e) {
-			assertThat(
-					e.getMessage(),
-					matchesPattern(
-							Msg.code(550) + Msg.code(515)
-									+ "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
+		} catch (ResourceVersionConflictException e ) {
+			assertThat(e.getMessage(), matchesPattern(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
 		}
 
 		myObservationDao.read(obs1id);

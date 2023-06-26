@@ -1,5 +1,14 @@
 package ca.uhn.fhir.cr.r4;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.repo.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -12,14 +21,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -97,7 +98,8 @@ class SearchConverterTest {
 		UriAndListParam theValue = withUriAndListParam();
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
-		String expected = "?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
+		String expected =
+				"?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
 		assertEquals(expected, result);
 	}
 
@@ -124,7 +126,8 @@ class SearchConverterTest {
 		myFixture.convertToStringMap(withParamList(), withFhirContext());
 		Map<String, String[]> result = myFixture.resultParameters;
 		assertEquals(result.keySet(), expected.keySet());
-		assertTrue(result.entrySet().stream().allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))));
+		assertTrue(result.entrySet().stream()
+				.allMatch(e -> Arrays.equals(e.getValue(), expected.get(e.getKey()))));
 	}
 
 	Map<String, List<IQueryParameterType>> withParamList() {

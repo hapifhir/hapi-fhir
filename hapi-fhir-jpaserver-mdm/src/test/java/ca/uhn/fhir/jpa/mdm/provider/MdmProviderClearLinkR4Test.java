@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchOutcome.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -63,8 +63,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
 		myPractitionerGoldenResource = getGoldenResourceFromTargetResource(myPractitioner);
-		myPractitionerGoldenResourceId =
-				new StringType(myPractitionerGoldenResource.getIdElement().getValue());
+		myPractitionerGoldenResourceId = new StringType(myPractitionerGoldenResource.getIdElement().getValue());
 
 		setMdmRuleJson("mdm/nickname-mdm-rules.json");
 	}
@@ -103,10 +102,10 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		// test
 		try {
 			Parameters result = (Parameters) myMdmProvider.clearMdmLinks(
-					null, // resource names (everything if null)
-					new DecimalType(batchSize), // batch size
-					myRequestDetails // request details
-					);
+				null, // resource names (everything if null)
+				new DecimalType(batchSize), // batch size
+				myRequestDetails // request details
+			);
 			myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 
 			// verify
@@ -116,7 +115,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			// "Deleted {} of {} golden resources in {}"
 			String regex = ".(\\d)+";
 			ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-			verify(appender, atLeastOnce()).doAppend(loggingCaptor.capture());
+			verify(appender, atLeastOnce())
+				.doAppend(loggingCaptor.capture());
 			Pattern pattern = Pattern.compile(regex);
 			boolean hasMsgs = false;
 			for (ILoggingEvent event : loggingCaptor.getAllValues()) {
@@ -129,8 +129,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 				if (msg.contains("golden resources")) {
 					hasMsgs = true;
 					// golden resources deleted
-					boolean contains =
-							msg.contains(String.format("Deleted %d of %d golden resources in", batchSize, batchSize));
+					boolean contains = msg.contains(String.format("Deleted %d of %d golden resources in", batchSize, batchSize));
 					if (!contains) {
 						// if we didn't delete exactly <batchsize>, we should've deleted < batchsize
 						Matcher matcher = pattern.matcher(msg);
@@ -149,7 +148,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 						}
 
 						// we have < batch size, but it should be the total deleted still
-						assertTrue(deletedTotal < batchSize, msg);
+						assertTrue( deletedTotal < batchSize, msg);
 						assertEquals(deletedTotal, deletedCount, msg);
 					} else {
 						// pointless, but...
@@ -200,8 +199,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		} catch (ResourceNotFoundException e) {
 			// Expected exception
 		}
-	}
 
+	}
 	@Test
 	public void testGoldenResourceWithMultipleHistoricalVersionsCanBeDeleted() {
 		createPatientAndUpdateLinks(buildJanePatient());
@@ -227,7 +226,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		IAnyResource goldenResourceFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
 		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
-		// SUT
+		//SUT
 		clearMdmLinks();
 
 		assertNoPatientLinksExist();
@@ -240,50 +239,23 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	 * @return
 	 */
 	private SearchParameterMap buildGoldenResourceParameterMap() {
-		return new SearchParameterMap()
-				.setLoadSynchronous(true)
-				.add("_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
+		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
 	}
 
 	@Tag("intermittent")
-	// TODO KHS I know intermittent tags aren't used by hapi but this will help me find this test when I review
-	// intermittents.
-	//  Last time this test failed, this is what was in the logs:
-	//	2022-07-17 19:57:27.103 [main] INFO  c.u.f.batch2.channel.BatchJobSender [BatchJobSender.java:43] Sending work
-	// notification for job[MDM_CLEAR] instance[6f6d6fc5-f74a-426f-b215-7a383893f4bc] step[generate-ranges]
-	// chunk[219e29d5-1ee7-47dd-99a1-c636b1b221ae]
-	//	2022-07-17 19:57:27.193 [batch2-work-notification-1] INFO  c.u.f.m.b.MdmGenerateRangeChunksStep
-	// [MdmGenerateRangeChunksStep.java:49] Initiating mdm clear of [Patient]] Golden Resources from Sat Jan 01 00:00:00
-	// UTC 2000 to Sun Jul 17 19:57:27 UTC 2022
-	//	2022-07-17 19:57:27.275 [batch2-work-notification-1] INFO  c.u.f.m.b.MdmGenerateRangeChunksStep
-	// [MdmGenerateRangeChunksStep.java:49] Initiating mdm clear of [Practitioner]] Golden Resources from Sat Jan 01
-	// 00:00:00 UTC 2000 to Sun Jul 17 19:57:27 UTC 2022
-	//	2022-07-17 19:57:27.381 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator
-	// [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status
-	// IN_PROGRESS - 0 records processed (null/sec) - ETA: null
-	//	2022-07-17 19:57:27.510 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator
-	// [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status
-	// IN_PROGRESS - 0 records processed (null/sec) - ETA: null
-	//	2022-07-17 19:57:37.175 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator
-	// [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status
-	// IN_PROGRESS - 0 records processed (null/sec) - ETA: null
-	//	2022-07-17 19:57:37.329 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:116] Validating MDM
-	// types [Patient, Practitioner, Medication]
-	//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:133] Validating
-	// search parameters [ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@799225ca,
-	// ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@f03b50d,
-	// ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@5f19ad6b,
-	// ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@4976b9,
-	// ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@681dbf0f]
-	//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:161] Validating
-	// match fields [ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@7aa4d4dc,
-	// ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@68444c16, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@23f30319,
-	// ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@261325af, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@7acd1785,
-	// ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@30a3d036, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@bf3e6f0]
-	//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:253] Validating
-	// system URI http://company.io/fhir/NamingSystem/custom-eid-system
-	//	2022-07-17 19:57:37.335 [main] INFO  c.u.f.j.s.r.ResourceReindexingSvcImpl [ResourceReindexingSvcImpl.java:235]
-	// Cancelling and purging all resource reindexing jobs
+// TODO KHS I know intermittent tags aren't used by hapi but this will help me find this test when I review intermittents.
+//  Last time this test failed, this is what was in the logs:
+//	2022-07-17 19:57:27.103 [main] INFO  c.u.f.batch2.channel.BatchJobSender [BatchJobSender.java:43] Sending work notification for job[MDM_CLEAR] instance[6f6d6fc5-f74a-426f-b215-7a383893f4bc] step[generate-ranges] chunk[219e29d5-1ee7-47dd-99a1-c636b1b221ae]
+//	2022-07-17 19:57:27.193 [batch2-work-notification-1] INFO  c.u.f.m.b.MdmGenerateRangeChunksStep [MdmGenerateRangeChunksStep.java:49] Initiating mdm clear of [Patient]] Golden Resources from Sat Jan 01 00:00:00 UTC 2000 to Sun Jul 17 19:57:27 UTC 2022
+//	2022-07-17 19:57:27.275 [batch2-work-notification-1] INFO  c.u.f.m.b.MdmGenerateRangeChunksStep [MdmGenerateRangeChunksStep.java:49] Initiating mdm clear of [Practitioner]] Golden Resources from Sat Jan 01 00:00:00 UTC 2000 to Sun Jul 17 19:57:27 UTC 2022
+//	2022-07-17 19:57:27.381 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status IN_PROGRESS - 0 records processed (null/sec) - ETA: null
+//	2022-07-17 19:57:27.510 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status IN_PROGRESS - 0 records processed (null/sec) - ETA: null
+//	2022-07-17 19:57:37.175 [awaitility-thread] INFO  c.u.f.b.p.JobInstanceProgressCalculator [JobInstanceProgressCalculator.java:67] Job 6f6d6fc5-f74a-426f-b215-7a383893f4bc of type MDM_CLEAR has status IN_PROGRESS - 0 records processed (null/sec) - ETA: null
+//	2022-07-17 19:57:37.329 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:116] Validating MDM types [Patient, Practitioner, Medication]
+//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:133] Validating search parameters [ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@799225ca, ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@f03b50d, ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@5f19ad6b, ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@4976b9, ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson@681dbf0f]
+//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:161] Validating match fields [ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@7aa4d4dc, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@68444c16, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@23f30319, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@261325af, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@7acd1785, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@30a3d036, ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson@bf3e6f0]
+//	2022-07-17 19:57:37.330 [main] INFO  c.u.f.m.r.config.MdmRuleValidator [MdmRuleValidator.java:253] Validating system URI http://company.io/fhir/NamingSystem/custom-eid-system
+//	2022-07-17 19:57:37.335 [main] INFO  c.u.f.j.s.r.ResourceReindexingSvcImpl [ResourceReindexingSvcImpl.java:235] Cancelling and purging all resource reindexing jobs
 
 	//	@Test
 	public void testGoldenResourceWithCircularReferenceCanBeCleared() {
@@ -300,7 +272,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget1, goldenResourceFromTarget2);
 		linkGoldenResources(goldenResourceFromTarget2, goldenResourceFromTarget);
 
-		// SUT
+		//SUT
 		clearMdmLinks();
 
 		printLinks();
@@ -308,25 +280,20 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
+
 	}
 
-	// TODO GGG unclear if we actually need to reimplement this.
+	//TODO GGG unclear if we actually need to reimplement this.
 	private void linkGoldenResources(IAnyResource theGoldenResource, IAnyResource theTargetResource) {
 		// TODO NG - Should be ok to leave this - not really
 		// throw new UnsupportedOperationException("We need to fix this!");
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-				theGoldenResource,
-				theTargetResource,
-				POSSIBLE_MATCH,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theTargetResource, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 
 	@Test
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
-		Practitioner read =
-				myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
+		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		clearMdmLinks("Practitioner");
 		assertNoPractitionerLinksExist();
@@ -343,8 +310,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(
-					e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
 		}
 	}
 

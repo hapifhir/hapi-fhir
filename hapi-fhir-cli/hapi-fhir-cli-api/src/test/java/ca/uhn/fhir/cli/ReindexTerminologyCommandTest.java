@@ -40,7 +40,6 @@ class ReindexTerminologyCommandTest {
 
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
-
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -52,7 +51,7 @@ class ReindexTerminologyCommandTest {
 	}
 
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach(){
 		myRestServerR4Helper.registerProvider(myProvider);
 	}
 
@@ -64,14 +63,17 @@ class ReindexTerminologyCommandTest {
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4"},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper);
+			new String[]{
+				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+				"-v", "r4"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
 		assertThat(myAppLogCapture.getLogEvents(), Matchers.not(hasItem(eventWithMessageContains("FAILURE"))));
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -81,10 +83,11 @@ class ReindexTerminologyCommandTest {
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {ReindexTerminologyCommand.REINDEX_TERMINOLOGY},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper);
+			new String[]{
+				ReindexTerminologyCommand.REINDEX_TERMINOLOGY
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		);
 		try {
 			App.main(args);
 			fail();
@@ -92,6 +95,7 @@ class ReindexTerminologyCommandTest {
 			assertThat(e.getMessage(), containsString("Missing required option: v"));
 		}
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -102,15 +106,18 @@ class ReindexTerminologyCommandTest {
 
 		try {
 			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-					new String[] {ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4"},
-					null,
-					theIncludeTls,
-					myRestServerR4Helper));
+				new String[]{
+					ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+					"-v", "r4"
+				},
+				null, theIncludeTls, myRestServerR4Helper
+			));
 			fail();
 		} catch (Error e) {
 			assertThat(e.getMessage(), containsString("Missing required option: t"));
 		}
 	}
+
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -119,17 +126,16 @@ class ReindexTerminologyCommandTest {
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4"},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper);
+			new String[]{
+				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+				"-v", "r4"
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
 		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("FAILURE")));
-		assertThat(
-				myAppLogCapture.getLogEvents(),
-				hasItem(eventWithMessageContains(
-						"Internal error. Command result unknown. Check system logs for details")));
+		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("Internal error. Command result unknown. Check system logs for details")));
 	}
 
 	@ParameterizedTest
@@ -137,24 +143,23 @@ class ReindexTerminologyCommandTest {
 	public void testHandleServiceError(boolean theIncludeTls) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, false);
-		ParametersUtil.addParameterToParametersString(
-				myContext, retVal, "message", "Freetext service is not configured. Operation didn't run.");
+		ParametersUtil.addParameterToParametersString(myContext, retVal, "message",
+			"Freetext service is not configured. Operation didn't run.");
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		// to keep logging verbose.
 		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[] {
-					ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4", "--debug" // to keep logging verbose.
-				},
-				"-t",
-				theIncludeTls,
-				myRestServerR4Helper);
+			new String[]{
+				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+				"-v", "r4",
+				"--debug" // to keep logging verbose.
+			},
+			"-t", theIncludeTls, myRestServerR4Helper
+		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
 		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("FAILURE")));
-		assertThat(
-				myAppLogCapture.getLogEvents(),
-				hasItem(eventWithMessageContains("Freetext service is not configured. Operation didn't run.")));
+		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("Freetext service is not configured. Operation didn't run.")));
 	}
 
 	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {

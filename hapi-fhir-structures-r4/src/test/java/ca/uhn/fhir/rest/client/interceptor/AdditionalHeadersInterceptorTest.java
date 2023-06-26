@@ -54,16 +54,14 @@ public class AdditionalHeadersInterceptorTest {
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+
 	@Test
 	public void testNoHeaders() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IGenericClient client = ctx.newRestfulGenericClient("http://foo");
 
@@ -80,12 +78,9 @@ public class AdditionalHeadersInterceptorTest {
 	public void testManyHeaders() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
 		IGenericClient client = ctx.newRestfulGenericClient("http://foo");
 
@@ -104,23 +99,19 @@ public class AdditionalHeadersInterceptorTest {
 		HttpGet get = (HttpGet) capt.getValue();
 		assertEquals("http://foo/Patient", get.getURI().toString());
 
-		assertThat(
-				Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList()),
-				Matchers.contains("X-0: X-0-VAL"));
-		assertThat(
-				Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList()),
-				Matchers.contains("X-1: X-1-VAL"));
-		assertThat(
-				Arrays.stream(get.getHeaders("X-2")).map(Object::toString).collect(Collectors.toList()),
-				Matchers.contains("X-2: X-2-VAL1", "X-2: X-2-VAL2"));
+		assertThat(Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-0: X-0-VAL"));
+		assertThat(Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-1: X-1-VAL"));
+		assertThat(Arrays.stream(get.getHeaders("X-2")).map(Object::toString).collect(Collectors.toList()), Matchers.contains("X-2: X-2-VAL1", "X-2: X-2-VAL2"));
 	}
 
 	private String createBundle() {
 		return ctx.newXmlParser().encodeResourceToString(new Bundle().setTotal(0));
 	}
 
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

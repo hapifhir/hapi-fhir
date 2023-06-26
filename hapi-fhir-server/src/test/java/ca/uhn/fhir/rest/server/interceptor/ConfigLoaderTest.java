@@ -29,4 +29,5 @@ class ConfigLoaderTest {
 		} catch (Exception e) {
 		}
 	}
+
 }

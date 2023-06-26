@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.search.builder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SearchQueryExecutors {
 
@@ -92,11 +92,11 @@ public class SearchQueryExecutors {
 		}
 	}
 
-	public static ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
+	static public ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
 		return new JpaPidQueryAdaptor(theIterator);
 	}
 
-	public static ISearchQueryExecutor from(Iterable<JpaPid> theIterable) {
+	static public ISearchQueryExecutor from(Iterable<JpaPid> theIterable) {
 		return new JpaPidQueryAdaptor(theIterable.iterator());
 	}
 
@@ -108,7 +108,8 @@ public class SearchQueryExecutors {
 		}
 
 		@Override
-		public void close() {}
+		public void close() {
+		}
 
 		@Override
 		public boolean hasNext() {
@@ -120,5 +121,6 @@ public class SearchQueryExecutors {
 			JpaPid next = myIterator.next();
 			return next == null ? null : next.getId();
 		}
+
 	}
 }

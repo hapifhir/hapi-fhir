@@ -40,13 +40,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -62,11 +62,8 @@ public class ExtendedHSearchIndexExtractor {
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
 
-	public ExtendedHSearchIndexExtractor(
-			JpaStorageSettings theJpaStorageSettings,
-			FhirContext theContext,
-			ResourceSearchParams theActiveParams,
-			ISearchParamExtractor theSearchParamExtractor) {
+	public ExtendedHSearchIndexExtractor(JpaStorageSettings theJpaStorageSettings, FhirContext theContext, ResourceSearchParams theActiveParams,
+													 ISearchParamExtractor theSearchParamExtractor) {
 		myJpaStorageSettings = theJpaStorageSettings;
 		myContext = theContext;
 		myParams = theActiveParams;
@@ -87,37 +84,37 @@ public class ExtendedHSearchIndexExtractor {
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(nextParam -> retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
 
 		theNewParams.myTokenParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(nextParam -> retVal.addTokenIndexDataIfNotPresent(
-						nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
 		theNewParams.myNumberParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(nextParam ->
-						retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
 
 		theNewParams.myDateParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
 		theNewParams.myQuantityParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(
-						nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theNewParams.myUriParams.stream()
-				.filter(nextParam -> !nextParam.isMissing())
-				.forEach(nextParam -> retVal.addUriIndexData(nextParam.getParamName(), nextParam.getUri()));
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addUriIndexData(nextParam.getParamName(), nextParam.getUri()));
 
-		theResource.getMeta().getTag().forEach(tag -> retVal.addTokenIndexData("_tag", tag));
+		theResource.getMeta().getTag().forEach(tag ->
+			retVal.addTokenIndexData("_tag", tag));
 
-		theResource.getMeta().getSecurity().forEach(sec -> retVal.addTokenIndexData("_security", sec));
+		theResource.getMeta().getSecurity().forEach(sec ->
+			retVal.addTokenIndexData("_security", sec));
 
-		theResource.getMeta().getProfile().forEach(prof -> retVal.addUriIndexData("_profile", prof.getValue()));
+		theResource.getMeta().getProfile().forEach(prof ->
+			retVal.addUriIndexData("_profile", prof.getValue()));
 
 		String source = MetaUtil.getSource(myContext, theResource.getMeta());
 		if (isNotBlank(source)) {
@@ -125,19 +122,15 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		theNewParams.myCompositeParams.forEach(nextParam ->
-				retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
+			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
+
 
 		if (theResource.getMeta().getLastUpdated() != null) {
-			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(
-							theResource.getMeta().getLastUpdated())
-					.intValue();
-			retVal.addDateIndexData(
-					"_lastUpdated",
-					theResource.getMeta().getLastUpdated(),
-					ordinal,
-					theResource.getMeta().getLastUpdated(),
-					ordinal);
+			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
+			retVal.addDateIndexData("_lastUpdated", theResource.getMeta().getLastUpdated(), ordinal,
+				theResource.getMeta().getLastUpdated(), ordinal);
 		}
+
 
 		if (!theNewParams.myLinks.isEmpty()) {
 
@@ -152,8 +145,8 @@ public class ExtendedHSearchIndexExtractor {
 					nextPath = nextPath.toLowerCase(Locale.ROOT);
 
 					linkPathToParamName
-							.computeIfAbsent(nextPath, (p) -> new ArrayList<>())
-							.add(nextParamName);
+						.computeIfAbsent(nextPath, (p) -> new ArrayList<>())
+						.add(nextParamName);
 				}
 			}
 
@@ -166,8 +159,7 @@ public class ExtendedHSearchIndexExtractor {
 					// Case 1: Resource Type and Resource ID is known
 					// Case 2: Resource is unknown and referred by canonical url reference
 					if (!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
-						qualifiedTargetResourceId =
-								nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+						qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
 					} else if (!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
 						qualifiedTargetResourceId = nextLink.getTargetResourceUrl();
 					}
@@ -180,8 +172,7 @@ public class ExtendedHSearchIndexExtractor {
 	}
 
 	@Nonnull
-	private CompositeSearchIndexData buildCompositeIndexData(
-			ResourceIndexedSearchParamComposite theSearchParamComposite) {
+	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
 		return new HSearchCompositeSearchIndexDataImpl(theSearchParamComposite);
 	}
 
@@ -191,11 +182,11 @@ public class ExtendedHSearchIndexExtractor {
 	private void extractAutocompleteTokens(IBaseResource theResource, ExtendedHSearchIndexData theRetVal) {
 		// we need to re-index token params to match up display with codes.
 		myParams.values().stream()
-				.filter(p -> p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
-				// TODO it would be nice to reuse TokenExtractor
-				.forEach(p -> mySearchParamExtractor
-						.extractValues(p.getPath(), theResource)
-						.forEach(nextValue -> indexTokenValue(theRetVal, p, nextValue)));
+			.filter(p -> p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
+			// TODO it would be nice to reuse TokenExtractor
+			.forEach(p -> mySearchParamExtractor.extractValues(p.getPath(), theResource)
+				.forEach(nextValue -> indexTokenValue(theRetVal, p, nextValue)
+				));
 	}
 
 	private void indexTokenValue(ExtendedHSearchIndexData theRetVal, RuntimeSearchParam p, IBase nextValue) {
@@ -208,15 +199,15 @@ public class ExtendedHSearchIndexExtractor {
 			case "Coding":
 				addToken_Coding(theRetVal, spName, (IBaseCoding) nextValue);
 				break;
-				// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
-				// Ignore unknown types for now.
-				// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
-				//					case "Identifier":
-				//						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
-				//						break;
-				//					case "ContactPoint":
-				//						mySearchParamExtractor.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
-				//						break;
+			// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
+			// Ignore unknown types for now.
+			// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
+//					case "Identifier":
+//						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
+//						break;
+//					case "ContactPoint":
+//						mySearchParamExtractor.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
+//						break;
 			default:
 				break;
 		}
@@ -235,18 +226,12 @@ public class ExtendedHSearchIndexExtractor {
 
 	@Nonnull
 	public static DateSearchIndexData convertDate(ResourceIndexedSearchParamDate nextParam) {
-		return new DateSearchIndexData(
-				nextParam.getValueLow(),
-				nextParam.getValueLowDateOrdinal(),
-				nextParam.getValueHigh(),
-				nextParam.getValueHighDateOrdinal());
+		return new DateSearchIndexData(nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(), nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal());
 	}
 
 	@Nonnull
 	public static QuantitySearchIndexData convertQuantity(ResourceIndexedSearchParamQuantity nextParam) {
-		return new QuantitySearchIndexData(
-				nextParam.getUnits(),
-				nextParam.getSystem(),
-				nextParam.getValue().doubleValue());
+		return new QuantitySearchIndexData(nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue());
 	}
+
 }

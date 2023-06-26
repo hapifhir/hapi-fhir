@@ -44,7 +44,7 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
-
+	
 	@BeforeEach
 	public void beforeStartServer() throws Exception {
 		if (myRestServer == null) {
@@ -79,11 +79,10 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
-			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+            int myPort = JettyUtil.getPortForStartedServer(ourServer);
+            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager =
-					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -93,7 +92,7 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
-
+		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);
 
@@ -102,13 +101,14 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
+
 	@Test
 	public void testDontCreateNullIndexesWithOnlyString() {
 		Observation obs = new Observation();
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), empty());
 		});
@@ -120,19 +120,18 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 		obs.getCode().addCoding().setSystem("FOO").setCode("BAR");
 		myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
 			// code and combo-code
-			assertThat(
-					myResourceIndexedSearchParamTokenDao.findAll().toString(),
-					myResourceIndexedSearchParamTokenDao.findAll(),
-					hasSize(2));
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll().toString(), myResourceIndexedSearchParamTokenDao.findAll(), hasSize(2));
 		});
 	}
+
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
+
 }

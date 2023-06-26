@@ -52,7 +52,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theToken
 	 *           The bearer token to use (must not be null)
 	 */
@@ -70,8 +70,7 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader(
-				Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
+		theRequest.addHeader(Constants.HEADER_AUTHORIZATION, (Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + myToken));
 	}
 
 	@Override
@@ -86,4 +85,5 @@ public class BearerTokenAuthInterceptor implements IClientInterceptor {
 		Validate.notNull(theToken, "theToken must not be null");
 		myToken = theToken;
 	}
+
 }

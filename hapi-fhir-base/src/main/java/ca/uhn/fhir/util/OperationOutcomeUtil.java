@@ -34,8 +34,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.List;
 import javax.annotation.Nullable;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -53,45 +53,20 @@ public class OperationOutcomeUtil {
 	 * @param theCode
 	 * @return Returns the newly added issue
 	 */
-	public static IBase addIssue(
-			FhirContext theCtx,
-			IBaseOperationOutcome theOperationOutcome,
-			String theSeverity,
-			String theDetails,
-			String theLocation,
-			String theCode) {
+	public static IBase addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
 		return addIssue(theCtx, theOperationOutcome, theSeverity, theDetails, theLocation, theCode, null, null, null);
 	}
 
-	public static IBase addIssue(
-			FhirContext theCtx,
-			IBaseOperationOutcome theOperationOutcome,
-			String theSeverity,
-			String theDetails,
-			String theLocation,
-			String theCode,
-			@Nullable String theDetailSystem,
-			@Nullable String theDetailCode,
-			@Nullable String theDetailDescription) {
+	public static IBase addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode, @Nullable String theDetailSystem, @Nullable String theDetailCode, @Nullable String theDetailDescription) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
-		populateDetails(
-				theCtx,
-				issue,
-				theSeverity,
-				theDetails,
-				theLocation,
-				theCode,
-				theDetailSystem,
-				theDetailCode,
-				theDetailDescription);
+		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation, theCode, theDetailSystem, theDetailCode, theDetailDescription);
 		return issue;
 	}
 
 	private static IBase createIssue(FhirContext theCtx, IBaseResource theOutcome) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
-		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) issueChild.getChildByName("issue");
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) issueChild.getChildByName("issue");
 
 		IBase issue = issueElement.newInstance();
 		issueChild.getMutator().addValue(theOutcome, issue);
@@ -120,8 +95,7 @@ public class OperationOutcomeUtil {
 		}
 
 		IBase issue = issues.get(0);
-		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
 		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
 
 		List<IBase> details = detailsChild.getAccessor().getValues(issue);
@@ -147,26 +121,24 @@ public class OperationOutcomeUtil {
 		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
-	public static boolean hasIssuesOfSeverity(
-			FhirContext theCtx, IBaseOperationOutcome theOutcome, String theSeverity) {
+	public static boolean hasIssuesOfSeverity(FhirContext theCtx, IBaseOperationOutcome theOutcome, String theSeverity) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
 
 		if (issues.isEmpty()) {
-			return false; // if there are no issues at all, there are no issues of the required severity
+			return false;	// if there are no issues at all, there are no issues of the required severity
 		}
 
 		IBase firstIssue = issues.get(0);
-		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(firstIssue.getClass());
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(firstIssue.getClass());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 
 		return issues.stream()
-				.flatMap(t -> severityChild.getAccessor().getValues(t).stream())
-				.map(t -> (IPrimitiveType<?>) t)
-				.map(IPrimitiveType::getValueAsString)
-				.anyMatch(theSeverity::equals);
+			.flatMap(t -> severityChild.getAccessor().getValues(t).stream())
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValueAsString)
+			.anyMatch(theSeverity::equals);
 	}
 
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
@@ -180,32 +152,20 @@ public class OperationOutcomeUtil {
 		}
 	}
 
-	private static void populateDetails(
-			FhirContext theCtx,
-			IBase theIssue,
-			String theSeverity,
-			String theDetails,
-			String theLocation,
-			String theCode,
-			String theDetailSystem,
-			String theDetailCode,
-			String theDetailDescription) {
-		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
+	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation, String theCode, String theDetailSystem, String theDetailCode, String theDetailDescription) {
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
 		BaseRuntimeChildDefinition diagnosticsChild;
 		diagnosticsChild = issueElement.getChildByName("diagnostics");
 
 		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
-		IPrimitiveType<?> codeElem = (IPrimitiveType<?>)
-				codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
 		codeElem.setValueAsString(theCode);
 		codeChild.getMutator().addValue(theIssue, codeElem);
 
 		BaseRuntimeElementDefinition<?> stringDef = diagnosticsChild.getChildByName(diagnosticsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 
-		IPrimitiveType<?> severityElem = (IPrimitiveType<?>)
-				severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> severityElem = (IPrimitiveType<?>) severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
 		severityElem.setValueAsString(theSeverity);
 		severityChild.getMutator().addValue(theIssue, severityElem);
 
@@ -236,44 +196,29 @@ public class OperationOutcomeUtil {
 
 	public static void addLocationToIssue(FhirContext theContext, IBase theIssue, String theLocation) {
 		if (isNotBlank(theLocation)) {
-			BaseRuntimeElementCompositeDefinition<?> issueElement =
-					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
+			BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theIssue.getClass());
 			BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
-			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild
-					.getChildByName("location")
-					.newInstance(locationChild.getInstanceConstructorArguments());
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild.getChildByName("location").newInstance(locationChild.getInstanceConstructorArguments());
 			locationElem.setValueAsString(theLocation);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
 	}
 
-	public static IBase addIssueWithMessageId(
-			FhirContext myCtx,
-			IBaseOperationOutcome theOperationOutcome,
-			String severity,
-			String message,
-			String messageId,
-			String location,
-			String theCode) {
+	public static IBase addIssueWithMessageId(FhirContext myCtx, IBaseOperationOutcome theOperationOutcome, String severity, String message, String messageId, String location, String theCode) {
 		IBase issue = addIssue(myCtx, theOperationOutcome, severity, message, location, theCode);
-		BaseRuntimeElementCompositeDefinition<?> issueElement =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition(issue.getClass());
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition(issue.getClass());
 		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
 
-		IPrimitiveType<?> system =
-				(IPrimitiveType<?>) myCtx.getElementDefinition("uri").newInstance();
+		IPrimitiveType<?> system = (IPrimitiveType<?>) myCtx.getElementDefinition("uri").newInstance();
 		system.setValueAsString(Constants.JAVA_VALIDATOR_DETAILS_SYSTEM);
-		IPrimitiveType<?> code =
-				(IPrimitiveType<?>) myCtx.getElementDefinition("code").newInstance();
+		IPrimitiveType<?> code = (IPrimitiveType<?>) myCtx.getElementDefinition("code").newInstance();
 		code.setValueAsString(messageId);
 
-		BaseRuntimeElementCompositeDefinition<?> codingDef =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("Coding");
+		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("Coding");
 		ICompositeType coding = (ICompositeType) codingDef.newInstance();
 		codingDef.getChildByName("system").getMutator().addValue(coding, system);
 		codingDef.getChildByName("code").getMutator().addValue(coding, code);
-		BaseRuntimeElementCompositeDefinition<?> ccDef =
-				(BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("CodeableConcept");
+		BaseRuntimeElementCompositeDefinition<?> ccDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("CodeableConcept");
 		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
 		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
 

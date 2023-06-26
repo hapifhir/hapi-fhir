@@ -30,10 +30,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -70,8 +70,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		List<String> observationIds = new ArrayList<>();
 		for (int i = 0; i < theResourceCount; i++) {
 			// create patient
-			MdmHelperR4.OutcomeAndLogMessageWrapper withLatch =
-					myMdmHelper.createWithLatch(addExternalEID(buildJanePatient(), "123"));
+			MdmHelperR4.OutcomeAndLogMessageWrapper withLatch = myMdmHelper.createWithLatch(addExternalEID(buildJanePatient(), "123"));
 			createdResourceIds.add(withLatch.getDaoMethodOutcome().getId().getIdPart());
 
 			// create observation with patient
@@ -101,8 +100,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 			// create patient
 			Patient patient = buildJanePatient();
 			patient.setId("jane-" + i);
-			MdmHelperR4.OutcomeAndLogMessageWrapper withLatch =
-					myMdmHelper.updateWithLatch(addExternalEID(patient, "123"));
+			MdmHelperR4.OutcomeAndLogMessageWrapper withLatch = myMdmHelper.updateWithLatch(addExternalEID(patient, "123"));
 			createdResourceIds.add(withLatch.getDaoMethodOutcome().getId().getIdPart());
 
 			// create observation with patient
@@ -122,6 +120,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		return createdResourceIds;
 	}
 
+
 	@Test
 	public void testReferenceExpansionWorksWithForcedIds() throws InterruptedException {
 		int resourceCount = 4;
@@ -134,20 +133,19 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		referenceOrListParam.addOr(new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
-		// With MDM Expansion disabled, this should return 1 result.
+		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
-		// Once MDM Expansion is allowed, this should now return 4 resourecs.
+		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId =
-				myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
-		// Verify that expansion by the golden resource id resolves down to everything its links have.
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
+		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();
 		goldenSpMap.setLoadSynchronous(true);
@@ -171,20 +169,19 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		referenceOrListParam.addOr(new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
-		// With MDM Expansion disabled, this should return 1 result.
+		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
-		// Once MDM Expansion is allowed, this should now return 4 resourecs.
+		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId =
-				myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
-		// Verify that expansion by the golden resource id resolves down to everything its links have.
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
+		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();
 		goldenSpMap.setLoadSynchronous(true);
@@ -232,18 +229,21 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		String id = expectedIds.get(0);
 
 		HashMap<String, String[]> queryParameters = new HashMap<>();
-		queryParameters.put("_mdm", new String[] {"true"});
+		queryParameters.put("_mdm", new String[]{"true"});
 
 		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
 		RequestDetails theDetails = Mockito.mock(RequestDetails.class);
 
-		Mockito.when(theDetails.getParameters()).thenReturn(queryParameters);
+		Mockito.when(theDetails.getParameters())
+			.thenReturn(queryParameters);
 
 		// test
 		myStorageSettings.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
-		IBundleProvider outcome =
-				dao.patientInstanceEverything(req, theDetails, new PatientEverythingParameters(), new IdDt(id));
+		IBundleProvider outcome = dao.patientInstanceEverything(
+			req,
+			theDetails, new PatientEverythingParameters(), new IdDt(id)
+		);
 
 		// verify return results
 		// we expect all the linked ids to be returned too
@@ -261,13 +261,10 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		myStorageSettings.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
 		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
-		String id = myMdmHelper
-				.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true))
-				.getId()
-				.getIdPart();
+		String id = myMdmHelper.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true)).getId().getIdPart();
 		createObservationWithSubject(id);
 
-		// Even though the user has NO mdm links, that should not cause a request failure.
+		//Even though the user has NO mdm links, that should not cause a request failure.
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		IBundleProvider search = myObservationDao.search(map);

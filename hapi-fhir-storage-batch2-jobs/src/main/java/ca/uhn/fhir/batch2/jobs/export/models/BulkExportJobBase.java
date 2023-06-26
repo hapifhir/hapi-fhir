@@ -21,4 +21,6 @@ package ca.uhn.fhir.batch2.jobs.export.models;
 
 import ca.uhn.fhir.model.api.IModelJson;
 
-public class BulkExportJobBase implements IModelJson {}
+public class BulkExportJobBase implements IModelJson {
+
+}

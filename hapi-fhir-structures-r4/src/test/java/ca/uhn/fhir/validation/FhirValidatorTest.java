@@ -1,6 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -24,7 +25,7 @@ public class FhirValidatorTest {
 		patient.getContained().add(obs);
 
 		// run
-		Patient patientWithoutContained = (Patient) validator.withoutContainedResources(patient);
+		Patient patientWithoutContained = (Patient)validator.withoutContainedResources(patient);
 
 		// check
 		assertEquals("bob", patientWithoutContained.getNameFirstRep().getGivenAsSingleString());
@@ -32,8 +33,6 @@ public class FhirValidatorTest {
 
 		assertEquals("bob", patient.getNameFirstRep().getGivenAsSingleString());
 		assertThat(patient.getContained(), hasSize(1));
-		assertEquals(
-				"heavy",
-				((Observation) patient.getContained().get(0)).getValue().toString());
+		assertEquals("heavy", ((Observation)patient.getContained().get(0)).getValue().toString());
 	}
 }

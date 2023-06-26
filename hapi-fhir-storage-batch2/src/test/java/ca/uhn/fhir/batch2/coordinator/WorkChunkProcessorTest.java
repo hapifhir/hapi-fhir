@@ -57,16 +57,13 @@ public class WorkChunkProcessorTest {
 
 	// static internal use classes
 	// step worker mocks
-	private final IJobStepWorker<TestJobParameters, StepInputData, StepOutputData> myNonReductionStep =
-			mock(IJobStepWorker.class);
-	private final IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStep =
-			mock(IReductionStepWorker.class);
+	private final IJobStepWorker<TestJobParameters, StepInputData, StepOutputData> myNonReductionStep = mock(IJobStepWorker.class);
+	private final IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStep = mock(IReductionStepWorker.class);
 	private final ILastJobStepWorker<TestJobParameters, StepInputData> myLastStep = mock(ILastJobStepWorker.class);
 	private TestDataSink myDataSink;
 	// class specific mocks
 	@Mock
 	private IJobPersistence myJobPersistence;
-
 	@Mock
 	private BatchJobSender myJobSender;
 
@@ -79,28 +76,37 @@ public class WorkChunkProcessorTest {
 	}
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
-			StepType theStepType,
-			JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor,
-			boolean theMockOutTargetStep,
-			boolean mockFinalWorkCursor) {
-		JobDefinition<TestJobParameters> jobDefinition = createTestJobDefinition(theStepType == StepType.REDUCTION);
+		StepType theStepType,
+		JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor,
+		boolean theMockOutTargetStep,
+		boolean mockFinalWorkCursor
+	) {
+		JobDefinition<TestJobParameters> jobDefinition = createTestJobDefinition(
+			theStepType == StepType.REDUCTION
+		);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, OT> step =
-				(JobDefinitionStep<TestJobParameters, StepInputData, OT>)
-						getJobDefinitionStep(REDUCTION_STEP_ID, theStepType);
+		JobDefinitionStep<TestJobParameters, StepInputData, OT> step = (JobDefinitionStep<TestJobParameters, StepInputData, OT>) getJobDefinitionStep(
+			REDUCTION_STEP_ID,
+			theStepType
+		);
 
-		when(theWorkCursor.getJobDefinition()).thenReturn(jobDefinition);
-		when(theWorkCursor.getCurrentStep()).thenReturn(step);
+		when(theWorkCursor.getJobDefinition())
+			.thenReturn(jobDefinition);
+		when(theWorkCursor.getCurrentStep())
+			.thenReturn(step);
 
 		myDataSink = spy(new TestDataSink<>(theWorkCursor));
 		if (theMockOutTargetStep) {
-			when(myDataSink.getTargetStep()).thenReturn(step);
+			when(myDataSink.getTargetStep())
+				.thenReturn(step);
 		}
 		if (mockFinalWorkCursor) {
 			JobWorkCursor<TestJobParameters, StepInputData, VoidModel> finalWorkCursor = mock(JobWorkCursor.class);
 
-			when(finalWorkCursor.getJobDefinition()).thenReturn(jobDefinition);
-			when(theWorkCursor.asFinalCursor()).thenReturn(finalWorkCursor);
+			when(finalWorkCursor.getJobDefinition())
+				.thenReturn(jobDefinition);
+			when(theWorkCursor.asFinalCursor())
+				.thenReturn(finalWorkCursor);
 		}
 
 		return step;
@@ -125,25 +131,32 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step =
-				mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
 
 		// when
-		when(myNonReductionStep.run(any(StepExecutionDetails.class), any(IJobDataSink.class)))
-				.thenReturn(RunOutcome.SUCCESS);
-		when(myDataSink.getRecoveredErrorCount()).thenReturn(theRecoveredErrorsForDataSink);
+		when(myNonReductionStep.run(
+			any(StepExecutionDetails.class), any(IJobDataSink.class)
+		)).thenReturn(RunOutcome.SUCCESS);
+		when(myDataSink.getRecoveredErrorCount())
+			.thenReturn(theRecoveredErrorsForDataSink);
 
 		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(workCursor, jobInstance, chunk);
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			chunk
+		);
 
 		// verify
 		assertTrue(result.isSuccessful());
-		verify(myJobPersistence).onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
+		verify(myJobPersistence)
+			.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {
-			verify(myJobPersistence).onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
-			// .workChunkErrorEvent(anyString(new WorkChunkErrorEvent(chunk.getId(), theRecoveredErrorsForDataSink)));
+			verify(myJobPersistence)
+				.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
+				//.workChunkErrorEvent(anyString(new WorkChunkErrorEvent(chunk.getId(), theRecoveredErrorsForDataSink)));
 		}
 
 		// nevers
@@ -163,16 +176,20 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, VoidModel> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step =
-				mockOutWorkCursor(StepType.FINAL, workCursor, true, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, true, true);
 
 		// when
-		when(workCursor.isFinalStep()).thenReturn(true);
+		when(workCursor.isFinalStep())
+			.thenReturn(true);
 		when(myLastStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
-				.thenReturn(RunOutcome.SUCCESS);
+			.thenReturn(RunOutcome.SUCCESS);
 
 		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(workCursor, jobInstance, chunk);
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			chunk
+		);
 
 		// verify
 		assertTrue(result.isSuccessful());
@@ -189,7 +206,8 @@ public class WorkChunkProcessorTest {
 	public void doExecute_stepWorkerThrowsJobExecutionException_marksWorkChunkAsFailed() {
 		runExceptionThrowingTest(new JobExecutionFailedException("Failure"));
 
-		verify(myJobPersistence).onWorkChunkFailed(anyString(), anyString());
+		verify(myJobPersistence)
+			.onWorkChunkFailed(anyString(), anyString());
 	}
 
 	@Test
@@ -216,24 +234,29 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step =
-				mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
 
 		// when
-		when(myNonReductionStep.run(any(), any())).thenThrow(new RuntimeException(errorMsg));
-		when(myJobPersistence.onWorkChunkError(any(WorkChunkErrorEvent.class))).thenAnswer((p) -> {
-			WorkChunk ec = new WorkChunk();
-			ec.setId(chunk.getId());
-			int count = errorCounter.getAndIncrement();
-			ec.setErrorCount(count);
-			return count <= WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT ? ec.getStatus() : WorkChunkStatusEnum.FAILED;
-		});
+		when(myNonReductionStep.run(any(), any()))
+			.thenThrow(new RuntimeException(errorMsg));
+		when(myJobPersistence.onWorkChunkError(any(WorkChunkErrorEvent.class)))
+			.thenAnswer((p) -> {
+				WorkChunk ec = new WorkChunk();
+				ec.setId(chunk.getId());
+				int count = errorCounter.getAndIncrement();
+				ec.setErrorCount(count);
+				return count<=WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT?ec.getStatus():WorkChunkStatusEnum.FAILED;
+			});
 
 		// test
 		Boolean processedOutcomeSuccessfully = null;
 		do {
 			try {
-				JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(workCursor, jobInstance, chunk);
+				JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
+					workCursor,
+					jobInstance,
+					chunk
+				);
 				/*
 				 * Getting a value here means we are no longer
 				 * throwing exceptions. Which is the desired outcome.
@@ -269,32 +292,43 @@ public class WorkChunkProcessorTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step =
-				mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
 
 		// when
-		when(myNonReductionStep.run(any(), any())).thenThrow(theExceptionToThrow);
+		when(myNonReductionStep.run(any(), any()))
+			.thenThrow(theExceptionToThrow);
 
 		// test
-		JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(workCursor, jobInstance, chunk);
+		JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			chunk
+		);
 
 		// verify
 		assertFalse(output.isSuccessful());
 	}
 
 	/**********************/
+
 	private void verifyNoErrors(int theRecoveredErrorCount) {
 		if (theRecoveredErrorCount == 0) {
-			verify(myJobPersistence, never()).onWorkChunkError(any());
+			verify(myJobPersistence, never())
+				.onWorkChunkError(any());
 		}
-		verify(myJobPersistence, never()).onWorkChunkFailed(anyString(), anyString());
-		verify(myJobPersistence, never()).onWorkChunkError(any(WorkChunkErrorEvent.class));
+		verify(myJobPersistence, never())
+			.onWorkChunkFailed(anyString(), anyString());
+		verify(myJobPersistence, never())
+			.onWorkChunkError(any(WorkChunkErrorEvent.class));
 	}
 
 	private void verifyNonReductionStep() {
-		verify(myJobPersistence, never()).onWorkChunkDequeue(anyString());
-		verify(myJobPersistence, never()).markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
-		verify(myJobPersistence, never()).fetchAllWorkChunksForStepStream(anyString(), anyString());
+		verify(myJobPersistence, never())
+			.onWorkChunkDequeue(anyString());
+		verify(myJobPersistence, never())
+			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
+		verify(myJobPersistence, never())
+			.fetchAllWorkChunksForStepStream(anyString(), anyString());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -302,53 +336,81 @@ public class WorkChunkProcessorTest {
 		JobDefinition<TestJobParameters> def = null;
 		if (theWithReductionStep) {
 			def = JobDefinition.newBuilder()
-					.setJobDefinitionId(JOB_DEFINITION_ID)
-					.setJobDescription("Reduction job description")
-					.setJobDefinitionVersion(1)
-					.gatedExecution()
-					.setParametersType(TestJobParameters.class)
-					.addFirstStep(
-							"step 1",
-							"description 1",
-							VoidModel.class,
-							mock(IJobStepWorker.class) // we don't care about this step - we just need it
-							)
-					.addFinalReducerStep(REDUCTION_STEP_ID, "description 2", StepOutputData.class, myReductionStep)
-					.build();
+				.setJobDefinitionId(JOB_DEFINITION_ID)
+				.setJobDescription("Reduction job description")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep(
+					"step 1",
+					"description 1",
+					VoidModel.class,
+					mock(IJobStepWorker.class) // we don't care about this step - we just need it
+				)
+				.addFinalReducerStep(
+					REDUCTION_STEP_ID,
+					"description 2",
+					StepOutputData.class,
+					myReductionStep
+				)
+				.build();
 		} else {
 			def = JobDefinition.newBuilder()
-					.setJobDefinitionId(JOB_DEFINITION_ID)
-					.setJobDescription("Non reduction job description")
-					.setJobDefinitionVersion(1)
-					.setParametersType(TestJobParameters.class)
-					.addFirstStep(
-							"step 1",
-							"description 1",
-							VoidModel.class,
-							mock(IJobStepWorker.class) // we don't care about this step
-							)
-					.addIntermediateStep("Step 2", "description 2", StepInputData.class, myNonReductionStep)
-					.addLastStep("Step 3", "description 3", myLastStep)
-					.build();
+				.setJobDefinitionId(JOB_DEFINITION_ID)
+				.setJobDescription("Non reduction job description")
+				.setJobDefinitionVersion(1)
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep(
+					"step 1",
+					"description 1",
+					VoidModel.class,
+					mock(IJobStepWorker.class) // we don't care about this step
+				)
+				.addIntermediateStep(
+					"Step 2",
+					"description 2",
+					StepInputData.class,
+					myNonReductionStep
+				)
+				.addLastStep(
+					"Step 3",
+					"description 3",
+					myLastStep
+				)
+				.build();
 		}
 
 		return def;
 	}
 
 	private JobDefinitionStep<TestJobParameters, StepInputData, ?> getJobDefinitionStep(
-			String theId, StepType theStepType) {
+		String theId,
+		StepType theStepType
+	) {
 		if (theStepType == StepType.REDUCTION) {
 			return new JobDefinitionReductionStep<>(
-					theId, "i'm a reduction step", myReductionStep, StepInputData.class, StepOutputData.class);
+				theId,
+				"i'm a reduction step",
+				myReductionStep,
+				StepInputData.class,
+				StepOutputData.class
+			);
 		} else if (theStepType == StepType.INTERMEDIATE) {
 			return new JobDefinitionStep<>(
-					theId,
-					"i'm a step - many like me, but i'm unique",
-					myNonReductionStep,
-					StepInputData.class,
-					StepOutputData.class);
+				theId,
+				"i'm a step - many like me, but i'm unique",
+				myNonReductionStep,
+				StepInputData.class,
+				StepOutputData.class
+			);
 		} else if (theStepType == StepType.FINAL) {
-			return new JobDefinitionStep<>(theId, "I'm a final step", myLastStep, StepInputData.class, VoidModel.class);
+			return new JobDefinitionStep<>(
+				theId,
+				"I'm a final step",
+				myLastStep,
+				StepInputData.class,
+				VoidModel.class
+			);
 		}
 
 		/// TODO - log
@@ -370,28 +432,33 @@ public class WorkChunkProcessorTest {
 		}
 
 		@Override
-		protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-				BaseDataSink<PT, IT, OT> getDataSink(
-						JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
+		protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
+			JobWorkCursor<PT, IT, OT> theCursor,
+			JobDefinition<PT> theJobDefinition,
+			String theInstanceId
+		) {
 			// cause we don't want to test the actual DataSink class here!
 			myDataSink.setDataSink(super.getDataSink(theCursor, theJobDefinition, theInstanceId));
 			return (BaseDataSink<PT, IT, OT>) myDataSink;
 		}
 	}
 
-	static class TestJobParameters implements IModelJson {}
+	static class TestJobParameters implements IModelJson {
+	}
 
-	static class StepInputData implements IModelJson {}
+	static class StepInputData implements IModelJson {
+	}
 
-	static class StepOutputData implements IModelJson {}
+	static class StepOutputData implements IModelJson {
+	}
 
-	private static class TestDataSink<OT extends IModelJson>
-			extends BaseDataSink<TestJobParameters, StepInputData, OT> {
+	private static class TestDataSink<OT extends IModelJson> extends BaseDataSink<TestJobParameters, StepInputData, OT> {
 
 		private BaseDataSink<?, ?, ?> myActualDataSink;
 
 		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor) {
-			super(INSTANCE_ID, theWorkCursor);
+			super(INSTANCE_ID,
+				theWorkCursor);
 		}
 
 		public void setDataSink(BaseDataSink<?, ?, ?> theSink) {
@@ -399,7 +466,9 @@ public class WorkChunkProcessorTest {
 		}
 
 		@Override
-		public void accept(WorkChunkData<OT> theData) {}
+		public void accept(WorkChunkData<OT> theData) {
+
+		}
 
 		@Override
 		public int getWorkChunkCount() {
@@ -419,7 +488,9 @@ public class WorkChunkProcessorTest {
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
 		chunk.setStatus(WorkChunkStatusEnum.QUEUED);
-		chunk.setData(JsonUtil.serialize(new StepInputData()));
+		chunk.setData(JsonUtil.serialize(
+			new StepInputData()
+		));
 		return chunk;
 	}
 }

@@ -18,4 +18,5 @@ class EmailValidatorTest {
 		assertFalse(val.isValid("show me the money@email.com"));
 		assertFalse(val.isValid("gimme dough"));
 	}
+
 }

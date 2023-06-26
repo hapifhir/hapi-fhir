@@ -14,8 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ContainedTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ContainedTest.class);
+
 
 	@Test
 	public void testIndexContained() {
@@ -39,12 +39,12 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));
 
+
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "some observation").setModifier(TokenParamModifier.TEXT));
-		assertThat(
-				toUnqualifiedVersionlessIdValues(myObservationDao.search(map)),
-				containsInAnyOrder(toValues(oid1, oid2)));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(oid1, oid2)));
 	}
+
 
 	// TODO: make sure match URLs don't delete
 

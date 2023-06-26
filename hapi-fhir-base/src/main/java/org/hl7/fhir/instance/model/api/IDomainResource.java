@@ -26,4 +26,5 @@ public interface IDomainResource extends IAnyResource, IBaseHasExtensions, IBase
 	List<? extends IAnyResource> getContained();
 
 	INarrative getText();
+
 }

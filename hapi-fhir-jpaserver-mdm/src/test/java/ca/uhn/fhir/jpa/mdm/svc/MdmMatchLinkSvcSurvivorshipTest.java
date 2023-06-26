@@ -32,7 +32,6 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 
 	@Captor
 	ArgumentCaptor<Patient> myPatientCaptor;
-
 	@Captor
 	ArgumentCaptor<MdmTransactionContext> myContext;
 
@@ -52,8 +51,6 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 	}
 
 	private void verifySurvivorshipCalled(int theNumberOfTimes) {
-		Mockito.verify(myMdmSurvivorshipService, times(theNumberOfTimes))
-				.applySurvivorshipRulesToGoldenResource(
-						myPatientCaptor.capture(), myPatientCaptor.capture(), myContext.capture());
+		Mockito.verify(myMdmSurvivorshipService, times(theNumberOfTimes)).applySurvivorshipRulesToGoldenResource(myPatientCaptor.capture(), myPatientCaptor.capture(), myContext.capture());
 	}
 }

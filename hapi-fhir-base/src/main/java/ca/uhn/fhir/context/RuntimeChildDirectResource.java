@@ -19,24 +19,23 @@
  */
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+
 public class RuntimeChildDirectResource extends BaseRuntimeDeclaredChildDefinition {
 
-	//	private RuntimeElemContainedResources myElem;
+//	private RuntimeElemContainedResources myElem;
 	private FhirContext myContext;
 
-	RuntimeChildDirectResource(
-			Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName)
-			throws ConfigurationException {
+	RuntimeChildDirectResource(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
@@ -62,9 +61,8 @@ public class RuntimeChildDirectResource extends BaseRuntimeDeclaredChildDefiniti
 	}
 
 	@Override
-	void sealAndInitialize(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myContext = theContext;
 	}
+
 }

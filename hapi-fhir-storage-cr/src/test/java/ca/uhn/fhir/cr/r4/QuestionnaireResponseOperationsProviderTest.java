@@ -21,10 +21,8 @@ public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4Test {
 	void testExtract() throws IOException {
 		var requestDetails = setupRequestDetails();
 		loadResource(Questionnaire.class, "ca/uhn/fhir/cr/r4/Questionnaire-MyPainQuestionnaire.json", requestDetails);
-		var questionnaireResponse = readResource(
-				QuestionnaireResponse.class, "ca/uhn/fhir/cr/r4/QuestionnaireResponse-QRSharonDecision.json");
-		var result = (Bundle)
-				this.questionnaireResponseOperationsProvider.extract(null, questionnaireResponse, requestDetails);
+		var questionnaireResponse = readResource(QuestionnaireResponse.class, "ca/uhn/fhir/cr/r4/QuestionnaireResponse-QRSharonDecision.json");
+		var result = (Bundle) this.questionnaireResponseOperationsProvider.extract(null, questionnaireResponse, requestDetails);
 
 		assertNotNull(result);
 		assertEquals(5, result.getEntry().size());

@@ -45,7 +45,6 @@ public class SchedulerServiceImplIT {
 	public static final String SCHEDULED_JOB_ID = CountingJob.class.getName();
 	private static final AtomicInteger ourNameCounter = new AtomicInteger();
 	private static long ourTaskDelay;
-
 	@Autowired
 	private ISchedulerService mySvc;
 
@@ -85,12 +84,13 @@ public class SchedulerServiceImplIT {
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis(), greaterThan(500L));
 		assertThat(sw.getMillis(), lessThan(1000L));
+
 	}
 
 	private static ScheduledJobDefinition buildJobDefinition() {
 		return new ScheduledJobDefinition()
-				.setId(SCHEDULED_JOB_ID + ourNameCounter.incrementAndGet())
-				.setJobClass(CountingJob.class);
+			.setId(SCHEDULED_JOB_ID + ourNameCounter.incrementAndGet())
+			.setJobClass(CountingJob.class);
 	}
 
 	@Test
@@ -146,12 +146,13 @@ public class SchedulerServiceImplIT {
 		assertThat(sw.getMillis(), lessThan(3500L));
 	}
 
+
 	@Test
 	public void testIntervalJob() {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
-				.setId(CountingIntervalJob.class.getName())
-				.setJobClass(CountingIntervalJob.class);
+			.setId(CountingIntervalJob.class.getName())
+			.setJobClass(CountingIntervalJob.class);
 		ourTaskDelay = 500;
 
 		mySvc.scheduleLocalJob(100, def);
@@ -180,7 +181,6 @@ public class SchedulerServiceImplIT {
 		@Autowired
 		@Qualifier("stringBean")
 		private String myStringBean;
-
 		private ApplicationContext myAppCtx;
 
 		public static void resetCount() {
@@ -223,7 +223,6 @@ public class SchedulerServiceImplIT {
 		@Autowired
 		@Qualifier("stringBean")
 		private String myStringBean;
-
 		private ApplicationContext myAppCtx;
 
 		@Override
@@ -251,5 +250,6 @@ public class SchedulerServiceImplIT {
 		public AutowiringSpringBeanJobFactory springBeanJobFactory() {
 			return new AutowiringSpringBeanJobFactory();
 		}
+
 	}
 }

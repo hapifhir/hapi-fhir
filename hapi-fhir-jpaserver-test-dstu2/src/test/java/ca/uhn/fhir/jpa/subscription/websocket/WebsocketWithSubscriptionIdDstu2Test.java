@@ -42,14 +42,10 @@ import static org.hamcrest.Matchers.contains;
  */
 public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu2Test.class);
-
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension =
-			new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
-
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
-
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
@@ -116,9 +112,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		MatcherAssert.assertThat(
-				myWebsocketClientExtension.getMessages(),
-				contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		MatcherAssert.assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
 	}
 
 	@Test

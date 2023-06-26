@@ -50,4 +50,5 @@ public class PhoneticEncoderMatcher implements IMdmFieldMatcher {
 
 		return matches(leftString, rightString);
 	}
+
 }

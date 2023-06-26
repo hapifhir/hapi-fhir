@@ -69,7 +69,6 @@ public interface ISchedulerService {
 	/**
 	 * @return true if this server supports clustered scheduling
 	 */
-	default boolean isClusteredSchedulingEnabled() {
-		return false;
-	}
+
+	default boolean isClusteredSchedulingEnabled() { return false; }
 }

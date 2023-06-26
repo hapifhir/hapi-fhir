@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 public class UriParam extends BaseParam implements IQueryParameterType {
 
@@ -90,7 +91,7 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	/**
 	 * Sets the qualifier for this param (may be <code>null</code> and generally will be)
-	 *
+	 * 
 	 * @return Returns a reference to <code>this</code> for easy method chanining
 	 */
 	public UriParam setQualifier(UriParamQualifierEnum theQualifier) {
@@ -100,7 +101,7 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 
 	/**
 	 * Sets the value for this param
-	 *
+	 * 
 	 * @return Returns a reference to <code>this</code> for easy method chanining
 	 */
 	public UriParam setValue(String theValue) {
@@ -114,4 +115,5 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 		builder.append("value", getValue());
 		return builder.toString();
 	}
+
 }

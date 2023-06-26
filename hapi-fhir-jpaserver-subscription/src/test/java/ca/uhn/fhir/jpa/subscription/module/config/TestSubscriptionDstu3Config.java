@@ -49,7 +49,9 @@ public class TestSubscriptionDstu3Config {
 	@Bean
 	public DaoRegistry daoRegistry() {
 		DaoRegistry retVal = new DaoRegistry(fhirContext());
-		retVal.setResourceDaos(Lists.newArrayList(subscriptionDao()));
+		retVal.setResourceDaos(Lists.newArrayList(
+			subscriptionDao()
+		));
 		return retVal;
 	}
 
@@ -59,4 +61,5 @@ public class TestSubscriptionDstu3Config {
 		when(mock.getResourceType()).thenReturn(Subscription.class);
 		return mock;
 	}
+
 }

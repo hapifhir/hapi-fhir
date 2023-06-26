@@ -19,4 +19,7 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-public interface IBaseDatatypeElement extends IBase {}
+
+public interface IBaseDatatypeElement extends IBase {
+
+}

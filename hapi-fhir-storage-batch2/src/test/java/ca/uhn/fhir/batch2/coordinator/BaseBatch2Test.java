@@ -10,8 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.function.Consumer;
 import javax.annotation.Nonnull;
+import java.util.function.Consumer;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseBatch2Test {
@@ -35,16 +35,13 @@ public abstract class BaseBatch2Test {
 
 	@Mock
 	protected IJobStepWorker<TestJobParameters, VoidModel, TestJobStep2InputType> myStep1Worker;
-
 	@Mock
 	protected IJobStepWorker<TestJobParameters, TestJobStep2InputType, TestJobStep3InputType> myStep2Worker;
-
 	@Mock
 	protected IJobStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> myStep3Worker;
 
 	@Mock
-	protected IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestJobReductionOutputType>
-			myReductionStepWorker;
+	protected IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestJobReductionOutputType> myReductionStepWorker;
 
 	@Nonnull
 	protected static JobInstance createInstance() {
@@ -57,23 +54,24 @@ public abstract class BaseBatch2Test {
 		instance.setJobDefinitionId(theJobId);
 		instance.setJobDefinitionVersion(1);
 		instance.setParameters(new TestJobParameters()
-				.setParam1(PARAM_1_VALUE)
-				.setParam2(PARAM_2_VALUE)
-				.setPassword(PASSWORD_VALUE));
+			.setParam1(PARAM_1_VALUE)
+			.setParam2(PARAM_2_VALUE)
+			.setPassword(PASSWORD_VALUE)
+		);
 		return instance;
 	}
 
 	@SafeVarargs
-	protected final JobDefinition<TestJobParameters> createJobDefinition(
-			Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
-		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition.newBuilder()
-				.setJobDefinitionId(JOB_DEFINITION_ID)
-				.setJobDescription("This is a job description")
-				.setJobDefinitionVersion(1)
-				.setParametersType(TestJobParameters.class)
-				.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
-				.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
-				.addLastStep(STEP_3, "Step 3", myStep3Worker);
+	protected final JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDescription("This is a job description")
+			.setJobDefinitionVersion(1)
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
+			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
+			.addLastStep(STEP_3, "Step 3", myStep3Worker);
 
 		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
 			next.accept(builder);
@@ -83,18 +81,18 @@ public abstract class BaseBatch2Test {
 	}
 
 	@SafeVarargs
-	protected final JobDefinition<TestJobParameters> createJobDefinitionWithReduction(
-			Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+	protected final JobDefinition<TestJobParameters> createJobDefinitionWithReduction(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
 		// create a job reduction
-		JobDefinition.Builder<TestJobParameters, TestJobReductionOutputType> builder = JobDefinition.newBuilder()
-				.setJobDefinitionId(REDUCTION_JOB_ID)
-				.setJobDescription("Some description")
-				.setJobDefinitionVersion(1)
-				.gatedExecution()
-				.setParametersType(TestJobParameters.class)
-				.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
-				.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
-				.addFinalReducerStep(STEP_3, "Step 3", TestJobReductionOutputType.class, myReductionStepWorker);
+		JobDefinition.Builder<TestJobParameters, TestJobReductionOutputType> builder = JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(REDUCTION_JOB_ID)
+			.setJobDescription("Some description")
+			.setJobDefinitionVersion(1)
+			.gatedExecution()
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
+			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
+			.addFinalReducerStep(STEP_3, "Step 3", TestJobReductionOutputType.class, myReductionStepWorker);
 
 		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
 			next.accept(builder);
@@ -102,4 +100,5 @@ public abstract class BaseBatch2Test {
 
 		return builder.build();
 	}
+
 }

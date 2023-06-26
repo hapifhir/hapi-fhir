@@ -33,4 +33,5 @@ public class PropertyModifyingHelperTest {
 		List<String> lines = helper.getMultiple("line");
 		assertEquals("[line1, line2]", lines.toString());
 	}
+
 }

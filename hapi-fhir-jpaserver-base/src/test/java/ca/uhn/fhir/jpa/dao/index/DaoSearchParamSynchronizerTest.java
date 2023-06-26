@@ -12,27 +12,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
-import javax.persistence.EntityManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @ExtendWith(MockitoExtension.class)
 public class DaoSearchParamSynchronizerTest {
 	private static final String GRITTSCORE = "grittscore";
 
-	private static final ResourceIndexedSearchParamNumber EXISTING_SEARCH_PARAM_NUMBER =
-			new ResourceIndexedSearchParamNumber(
-					new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
-	private static final ResourceIndexedSearchParamNumber THE_SEARCH_PARAM_NUMBER =
-			new ResourceIndexedSearchParamNumber(
-					new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(12));
+	private static final ResourceIndexedSearchParamNumber EXISTING_SEARCH_PARAM_NUMBER = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(10));
+	private static final ResourceIndexedSearchParamNumber THE_SEARCH_PARAM_NUMBER = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "Patient", GRITTSCORE, BigDecimal.valueOf(12));
 
 	private final DaoSearchParamSynchronizer subject = new DaoSearchParamSynchronizer();
 
@@ -69,8 +66,7 @@ public class DaoSearchParamSynchronizerTest {
 
 	@Test
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
-		final AddRemoveCount addRemoveCount =
-				subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
+		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
 		assertEquals(1, addRemoveCount.getAddCount());

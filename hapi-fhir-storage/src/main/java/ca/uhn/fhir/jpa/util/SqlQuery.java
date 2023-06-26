@@ -42,36 +42,11 @@ public class SqlQuery {
 	private final String myNamespace;
 	private final RequestPartitionId myRequestPartitionId;
 
-	public SqlQuery(
-			String theSql,
-			List<String> theParams,
-			long theQueryTimestamp,
-			long theElapsedTime,
-			StackTraceElement[] theStackTraceElements,
-			int theSize,
-			RequestPartitionId theRequestPartitionId) {
-		this(
-				null,
-				theSql,
-				theParams,
-				theQueryTimestamp,
-				theElapsedTime,
-				theStackTraceElements,
-				theSize,
-				LanguageEnum.SQL,
-				theRequestPartitionId);
+	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, RequestPartitionId theRequestPartitionId) {
+		this(null, theSql, theParams, theQueryTimestamp, theElapsedTime, theStackTraceElements, theSize, LanguageEnum.SQL, theRequestPartitionId);
 	}
 
-	public SqlQuery(
-			String theNamespace,
-			String theSql,
-			List<String> theParams,
-			long theQueryTimestamp,
-			long theElapsedTime,
-			StackTraceElement[] theStackTraceElements,
-			int theSize,
-			LanguageEnum theLanguage,
-			RequestPartitionId theRequestPartitionId) {
+	public SqlQuery(String theNamespace, String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage, RequestPartitionId theRequestPartitionId) {
 		Validate.notNull(theLanguage, "theLanguage must not be null");
 
 		myNamespace = theNamespace;
@@ -161,7 +136,9 @@ public class SqlQuery {
 	}
 
 	public enum LanguageEnum {
+
 		SQL,
 		JSON
+
 	}
 }

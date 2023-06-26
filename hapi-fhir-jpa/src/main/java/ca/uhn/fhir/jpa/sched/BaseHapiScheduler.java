@@ -43,11 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
@@ -67,9 +67,11 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		mySpringBeanJobFactory = theSpringBeanJobFactory;
 	}
 
+
 	void setInstanceName(String theInstanceName) {
 		myInstanceName = theInstanceName;
 	}
+
 
 	int nextSchedulerId() {
 		return ourNextSchedulerId.getAndIncrement();
@@ -100,8 +102,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	protected void setProperties() {
 		addProperty("org.quartz.threadPool.threadCount", "4");
-		myProperties.setProperty(
-				StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
+		myProperties.setProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, myInstanceName + "-" + nextSchedulerId());
 		addProperty("org.quartz.threadPool.threadNamePrefix", getThreadPrefix());
 	}
 
@@ -179,18 +180,18 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		TriggerKey triggerKey = theJobDefinition.toTriggerKey();
 		JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
 
-		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder.simpleSchedule()
-				.withIntervalInMilliseconds(theIntervalMillis)
-				.withMisfireHandlingInstructionIgnoreMisfires() // We ignore misfires in cases of multiple JVMs each
-				// trying to fire.
-				.repeatForever();
+		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
+			.simpleSchedule()
+			.withIntervalInMilliseconds(theIntervalMillis)
+			.withMisfireHandlingInstructionIgnoreMisfires()//We ignore misfires in cases of multiple JVMs each trying to fire.
+			.repeatForever();
 
 		Trigger trigger = TriggerBuilder.newTrigger()
-				.forJob(jobDetail)
-				.withIdentity(triggerKey)
-				.startNow()
-				.withSchedule(schedule)
-				.build();
+			.forJob(jobDetail)
+			.withIdentity(triggerKey)
+			.startNow()
+			.withSchedule(schedule)
+			.build();
 
 		Set<? extends Trigger> triggers = Sets.newHashSet(trigger);
 		try {
@@ -199,6 +200,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			ourLog.error("Failed to schedule job", e);
 			throw new InternalErrorException(Msg.code(1638) + e);
 		}
+
 	}
 
 	@Nonnull

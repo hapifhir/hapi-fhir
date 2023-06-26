@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.searchparam.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -42,25 +42,21 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 	 * @param theFhirContext  The FHIR context
 	 * @param theResourceType The resource type to support
 	 */
-	public SearchableHashMapResourceProvider(
-			FhirContext theFhirContext, Class<T> theResourceType, SearchParamMatcher theSearchParamMatcher) {
+	public SearchableHashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType, SearchParamMatcher theSearchParamMatcher) {
 		super(theFhirContext, theResourceType);
 		mySearchParamMatcher = theSearchParamMatcher;
 	}
 
 	public List<IBaseResource> searchByCriteria(String theCriteria, RequestDetails theRequest) {
 		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource, theRequest), theRequest);
+
 	}
 
 	public List<IBaseResource> searchByParams(SearchParameterMap theSearchParams, RequestDetails theRequest) {
-		return searchBy(
-				resource -> mySearchParamMatcher.match(
-						theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest),
-				theRequest);
+		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest), theRequest);
 	}
 
-	private List<IBaseResource> searchBy(
-			Function<IBaseResource, InMemoryMatchResult> theMatcher, RequestDetails theRequest) {
+	private List<IBaseResource> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher, RequestDetails theRequest) {
 		mySearchCount.incrementAndGet();
 		List<T> allEResources = getAllResources();
 
@@ -68,8 +64,7 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 		for (T resource : allEResources) {
 			InMemoryMatchResult result = theMatcher.apply(resource);
 			if (!result.supported()) {
-				throw new InvalidRequestException(
-						Msg.code(502) + "Search not supported by in-memory matcher: " + result.getUnsupportedReason());
+				throw new InvalidRequestException(Msg.code(502) + "Search not supported by in-memory matcher: "+result.getUnsupportedReason());
 			}
 			if (result.matched()) {
 				matches.add(resource);

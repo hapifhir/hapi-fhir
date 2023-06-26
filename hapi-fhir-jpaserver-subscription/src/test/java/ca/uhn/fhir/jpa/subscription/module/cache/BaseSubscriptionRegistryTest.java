@@ -28,8 +28,8 @@ public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3
 		subscription.setId(SUBSCRIPTION_ID);
 		subscription.setCriteria(ORIG_CRITERIA);
 		subscription.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.ACTIVE);
-		org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent channel =
-				new org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent();
+		org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent channel
+			= new org.hl7.fhir.r4.model.Subscription.SubscriptionChannelComponent();
 		channel.setType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload("application/json");
 		channel.setEndpoint("http://unused.test.endpoint/");

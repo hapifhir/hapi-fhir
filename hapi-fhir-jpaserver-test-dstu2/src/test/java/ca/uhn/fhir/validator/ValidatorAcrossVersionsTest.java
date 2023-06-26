@@ -26,12 +26,11 @@ public class ValidatorAcrossVersionsTest {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(
-					Msg.code(1731)
-							+ "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"",
-					e.getMessage());
+			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
 		}
+		
 	}
+
 
 	@Test
 	public void testValidateProfileOnDstu2Resource() {
@@ -49,11 +48,8 @@ public class ValidatorAcrossVersionsTest {
 		ourLog.debug(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
 		assertEquals(2, result.getMessages().size());
-		assertEquals(
-				"QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)",
-				result.getMessages().get(0).getMessage());
-		assertEquals(
-				"No questionnaire is identified, so no validation can be performed against the base questionnaire",
-				result.getMessages().get(1).getMessage());
+		assertEquals("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)", result.getMessages().get(0).getMessage());
+		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(1).getMessage());
 	}
+
 }

@@ -36,7 +36,6 @@ public class MdmLinkDeleteSvc {
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
-
 	@Autowired
 	private IIdHelperService myIdHelperService;
 
@@ -47,27 +46,19 @@ public class MdmLinkDeleteSvc {
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(
-				RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
-			ourLog.info(
-					"Removed {} MDM links with references to {}",
-					removed,
-					theResource.getIdElement().toVersionless());
+			ourLog.info("Removed {} MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}
 
 	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
-		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(
-				RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {
-			ourLog.info(
-					"Removed {} non-redirect MDM links with references to {}",
-					removed,
-					theResource.getIdElement().toVersionless());
+			ourLog.info("Removed {} non-redirect MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}

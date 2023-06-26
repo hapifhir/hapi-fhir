@@ -21,14 +21,17 @@ package ca.uhn.fhir.rest.api.server.bulk;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Date;
-import java.util.Set;
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 // TODO: JA in next ticket - We have 3 more or less identical classes representing
 // bulk data job parameters: BulkDataExportOptions, BulkExportJobParameters, and BulkExportParameters
 // They don't seem to serve any distinct purpose so they should be collapsed into 1
 public class BulkDataExportOptions {
+
 
 	public enum ExportStyle {
 		PATIENT,

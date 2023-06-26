@@ -74,8 +74,8 @@ class SearchParameterMapTest {
 		SearchParameterMap map = new SearchParameterMap();
 
 		TokenOrListParam qualifiedTokenParam = new TokenOrListParam()
-				.addOr(new TokenParam("weight-text-1").setModifier(TEXT))
-				.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
+			.addOr(new TokenParam("weight-text-1").setModifier(TEXT))
+			.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
 
 		TokenParam unqualifiedTokenParam = new TokenParam("weight-no-text");
 
@@ -88,6 +88,8 @@ class SearchParameterMapTest {
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.get("code");
 		assertThat(unqualifiedAnds, hasSize(1));
+
+
 	}
 
 	@Test
@@ -95,8 +97,8 @@ class SearchParameterMapTest {
 		SearchParameterMap map = new SearchParameterMap();
 
 		TokenOrListParam unqualifiedTokenParam = new TokenOrListParam()
-				.addOr(new TokenParam("http://example.com", "123"))
-				.addOr(new TokenParam("http://example.com", "345"));
+			.addOr(new TokenParam("http://example.com", "123"))
+			.addOr(new TokenParam("http://example.com", "345"));
 
 		TokenParam qualifiedTokenParam = new TokenParam("weight-text").setModifier(TEXT);
 
@@ -116,8 +118,8 @@ class SearchParameterMapTest {
 		SearchParameterMap map = new SearchParameterMap();
 
 		TokenOrListParam qualifiedTokenParam = new TokenOrListParam()
-				.addOr(new TokenParam("weight-text-1").setModifier(TEXT))
-				.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
+			.addOr(new TokenParam("weight-text-1").setModifier(TEXT))
+			.addOr(new TokenParam("weight-text-2").setModifier(TEXT));
 
 		map.add("code", qualifiedTokenParam);
 		List<List<IQueryParameterType>> andList = map.removeByNameAndModifier("code", TEXT);
@@ -159,7 +161,8 @@ class SearchParameterMapTest {
 		Assertions.assertNotEquals(orig, copy);
 
 		// ... but that they are equal
-		Assertions.assertEquals(orig.toNormalizedQueryString(null), copy.toNormalizedQueryString(null));
+		Assertions.assertEquals(orig.toNormalizedQueryString(null),
+			copy.toNormalizedQueryString(null));
 		Assertions.assertEquals(orig.getOffset(), copy.getOffset());
 		Assertions.assertEquals(orig.getLoadSynchronousUpTo(), copy.getLoadSynchronousUpTo());
 		Assertions.assertEquals(orig.isLoadSynchronous(), copy.isLoadSynchronous());
@@ -178,14 +181,16 @@ class SearchParameterMapTest {
 
 		// verify changing one does not change the other
 		orig.setOffset(100);
-		Assertions.assertNotEquals(orig.toNormalizedQueryString(null), copy.toNormalizedQueryString(null));
+		Assertions.assertNotEquals(orig.toNormalizedQueryString(null),
+			copy.toNormalizedQueryString(null));
 	}
 
 	@Test
 	public void clone_searchParams_haveSameSearchParamsMap() {
 		SearchParameterMap orig = new SearchParameterMap();
 		orig.add("string", new StringParam("stringvalue"));
-		orig.add("datetime", new DateRangeParam(Date.from(Instant.now()), new Date(2000, 11, 11)));
+		orig.add("datetime", new DateRangeParam(Date.from(Instant.now()),
+			new Date(2000, 11, 11)));
 		orig.add("int", new QuantityParam(1));
 
 		// test
@@ -198,22 +203,17 @@ class SearchParameterMapTest {
 		Assertions.assertEquals(orig.get("int"), clone.get("int"));
 	}
 
+
 	@Test
 	public void testCompareParameters() {
 
 		// Missing
-		assertEquals(
-				0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
+		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
 		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));
 		assertEquals(1, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam("A")));
 
 		// Qualifier
-		assertEquals(
-				0,
-				compare(
-						ourFhirContext,
-						new StringParam("A").setContains(true),
-						new StringParam("A").setContains(true)));
+		assertEquals(0, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A").setContains(true)));
 		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A")));
 		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("A").setContains(true)));
 
@@ -225,5 +225,9 @@ class SearchParameterMapTest {
 		// Value + Comparator (value should have no effect if comparator is changed)
 		assertEquals(1, compare(ourFhirContext, new StringParam("B").setContains(true), new StringParam("A")));
 		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("B")));
+
 	}
+
+
+
 }

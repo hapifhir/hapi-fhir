@@ -17,7 +17,7 @@ public abstract class BaseMigrationTest {
 		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
 	}
 
-	static BasicDataSource getDataSource() {
+	 static BasicDataSource getDataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:test_migration");
@@ -33,4 +33,5 @@ public abstract class BaseMigrationTest {
 	void after() {
 		ourHapiMigrationDao.deleteAll();
 	}
+
 }

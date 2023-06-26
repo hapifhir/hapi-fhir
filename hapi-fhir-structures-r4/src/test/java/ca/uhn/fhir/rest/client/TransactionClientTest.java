@@ -40,131 +40,122 @@ import static org.mockito.Mockito.when;
 
 public class TransactionClientTest {
 
-	private FhirContext ctx;
-	private HttpClient httpClient;
-	private HttpResponse httpResponse;
+  private FhirContext ctx;
+  private HttpClient httpClient;
+  private HttpResponse httpResponse;
 
-	// atom-document-large.xml
+  // atom-document-large.xml
 
-	@BeforeEach
-	public void before() {
-		ctx = FhirContext.forR4();
+  @BeforeEach
+  public void before() {
+    ctx = FhirContext.forR4();
 
-		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		ctx.getRestfulClientFactory().setHttpClient(httpClient);
-		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+    httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
+    ctx.getRestfulClientFactory().setHttpClient(httpClient);
+    ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
-		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
-	}
+    httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
+  }
 
-	@Test
-	public void testSimpleTransaction() throws Exception {
-		Patient patient = new Patient();
-		patient.setId(new IdType("Patient/testPersistWithSimpleLinkP01"));
-		patient.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		patient.addName().setFamily("Tester").addGiven("Joe");
+  @Test
+  public void testSimpleTransaction() throws Exception {
+    Patient patient = new Patient();
+    patient.setId(new IdType("Patient/testPersistWithSimpleLinkP01"));
+    patient.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+    patient.addName().setFamily("Tester").addGiven("Joe");
 
-		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
-		obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
+    Observation obs = new Observation();
+    obs.getCode().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
+    obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
 
-		List<IBaseResource> resources = Arrays.asList(patient, obs);
+    List<IBaseResource> resources = Arrays.asList(patient, obs);
 
-		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
+    IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+    when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+    when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+    when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
-		client.transaction(resources);
+    client.transaction(resources);
 
-		assertEquals(HttpPost.class, capt.getValue().getClass());
-		HttpPost post = (HttpPost) capt.getValue();
-		assertEquals("http://foo", post.getURI().toString());
+    assertEquals(HttpPost.class, capt.getValue().getClass());
+    HttpPost post = (HttpPost) capt.getValue();
+    assertEquals("http://foo", post.getURI().toString());
 
-		Bundle bundle = ctx.newJsonParser()
-				.parseResource(
-						Bundle.class, new InputStreamReader(post.getEntity().getContent()));
-		ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+    Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
+    ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(2, bundle.getEntry().size());
-		assertEquals(
-				"Patient/testPersistWithSimpleLinkP01",
-				bundle.getEntry().get(0).getResource().getIdElement().getValue());
+    assertEquals(2, bundle.getEntry().size());
+    assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
-		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
-	}
+    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
-	@Test
-	public void testSimpleTransactionWithBundleParam() throws Exception {
-		Patient patient = new Patient();
-		patient.setId(new IdType("Patient/testPersistWithSimpleLinkP01"));
-		patient.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
-		patient.addName().setFamily("Tester").addGiven("Joe");
+  }
 
-		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
-		obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
+  @Test
+  public void testSimpleTransactionWithBundleParam() throws Exception {
+    Patient patient = new Patient();
+    patient.setId(new IdType("Patient/testPersistWithSimpleLinkP01"));
+    patient.addIdentifier().setSystem("urn:system").setValue("testPersistWithSimpleLinkP01");
+    patient.addName().setFamily("Tester").addGiven("Joe");
 
-		Bundle transactionBundle = new Bundle();
-		transactionBundle.addEntry().setResource(patient).setFullUrl("http://foo/Patient/testPersistWithSimpleLinkP01");
-		transactionBundle.addEntry().setResource(obs);
+    Observation obs = new Observation();
+    obs.getCode().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
+    obs.setSubject(new Reference("Patient/testPersistWithSimpleLinkP01"));
 
-		IBundleClient client = ctx.newRestfulClient(IBundleClient.class, "http://foo");
+    Bundle transactionBundle = new Bundle();
+    transactionBundle.addEntry().setResource(patient).setFullUrl("http://foo/Patient/testPersistWithSimpleLinkP01");
+    transactionBundle.addEntry().setResource(obs);
 
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(httpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
+    IBundleClient client = ctx.newRestfulClient(IBundleClient.class, "http://foo");
 
-		client.transaction(transactionBundle);
+    ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+    when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+    when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+    when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+    when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), StandardCharsets.UTF_8));
 
-		assertEquals(HttpPost.class, capt.getValue().getClass());
-		HttpPost post = (HttpPost) capt.getValue();
-		assertEquals("http://foo", post.getURI().toString());
+    client.transaction(transactionBundle);
 
-		Bundle bundle = ctx.newJsonParser()
-				.parseResource(
-						Bundle.class, new InputStreamReader(post.getEntity().getContent()));
-		ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+    assertEquals(HttpPost.class, capt.getValue().getClass());
+    HttpPost post = (HttpPost) capt.getValue();
+    assertEquals("http://foo", post.getURI().toString());
 
-		assertEquals(2, bundle.getEntry().size());
-		assertEquals(
-				"http://foo/Patient/testPersistWithSimpleLinkP01",
-				bundle.getEntry().get(0).getResource().getIdElement().getValue());
+    Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
+    ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
-	}
+    assertEquals(2, bundle.getEntry().size());
+    assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionClientTest.class);
+    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
-	private String createBundle() {
-		return ctx.newXmlParser().encodeResourceToString(new Bundle());
-	}
+  }
 
-	private interface IClient extends IBasicClient {
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionClientTest.class);
 
-		@Transaction
-		List<IBaseResource> transaction(@TransactionParam List<IBaseResource> theResources);
-	}
+  private String createBundle() {
+    return ctx.newXmlParser().encodeResourceToString(new Bundle());
+  }
 
-	private interface IBundleClient extends IBasicClient {
+  private interface IClient extends IBasicClient {
 
-		@Transaction
-		List<IBaseResource> transaction(@TransactionParam Bundle theResources);
-	}
+    @Transaction
+	 List<IBaseResource> transaction(@TransactionParam List<IBaseResource> theResources);
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+  }
+
+  private interface IBundleClient extends IBasicClient {
+
+    @Transaction
+	 List<IBaseResource> transaction(@TransactionParam Bundle theResources);
+
+  }
+
+  @AfterAll
+  public static void afterClassClearContext() {
+    TestUtil.randomizeLocaleAndTimezone();
+  }
+
 }

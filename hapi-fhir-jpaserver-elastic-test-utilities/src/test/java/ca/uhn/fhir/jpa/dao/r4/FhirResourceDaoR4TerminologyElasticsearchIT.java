@@ -52,52 +52,40 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyElasticsearchIT.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyElasticsearchIT.class);
 
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-
 	@Autowired
 	FhirContext myFhirContext;
-
 	@Autowired
 	PlatformTransactionManager myTxManager;
-
 	@Autowired
 	private IFhirSystemDao mySystemDao;
-
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
-
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@BeforeEach
 	public void beforeEach() {
-		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
-				.thenReturn(Boolean.TRUE);
+		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
 	}
+
 
 	@Test
 	public void testExpandWithIncludeContainingDashesInInclude() {
@@ -128,25 +116,28 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 		concept = new TermConcept(cs, "LA9999-7");
 		cs.getConcepts().add(concept);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose()
-				.addInclude()
-				.setSystem(codeSystem.getUrl())
-				.addConcept(new ConceptReferenceComponent().setCode("LA2222-2"))
-				.addConcept(new ConceptReferenceComponent().setCode("LA1122-2"));
+			.addInclude()
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("LA2222-2"))
+			.addConcept(new ConceptReferenceComponent().setCode("LA1122-2"));
 		IIdType vsId = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
 		ValueSet expansion = myValueSetDao.expand(vsId, null, null);
-		Set<String> codes = expansion.getExpansion().getContains().stream()
-				.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
-				.collect(Collectors.toSet());
+		Set<String> codes = expansion
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toSet());
 		ourLog.info("Codes: {}", codes);
 		assertThat(codes, containsInAnyOrder("LA2222-2", "LA1122-2"));
 	}
+
 
 	@Override
 	protected FhirContext getFhirContext() {
@@ -160,17 +151,12 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(
-				myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

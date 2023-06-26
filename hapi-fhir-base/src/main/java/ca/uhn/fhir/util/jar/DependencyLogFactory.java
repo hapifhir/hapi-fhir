@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public class DependencyLogFactory {
-
+	
 	/**
 	 * Non instantiable
 	 */
@@ -31,7 +31,7 @@ public class DependencyLogFactory {
 	private DependencyLogFactory() {
 		// nothing
 	}
-
+	
 	public static IDependencyLog createJarLogger() {
 		return ReflectionUtil.newInstanceOrReturnNull("ca.uhn.fhir.util.jar.DependencyLogImpl", IDependencyLog.class);
 	}

@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private String myCompartmentName;
@@ -52,11 +54,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private Integer myIdParamIndex;
 	private String myQueryName;
 
-	public SearchMethodBinding(
-			Class<? extends IBaseResource> theReturnResourceType,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider) {
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
@@ -78,13 +76,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			SearchParameter sp = (SearchParameter) next;
 			if (sp.getName().startsWith("_")) {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext()
-							.getLocalizer()
-							.getMessage(
-									getClass().getName() + ".invalidSpecialParamName",
-									theMethod.getName(),
-									theMethod.getDeclaringClass().getSimpleName(),
-									sp.getName());
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
+							sp.getName());
 					throw new ConfigurationException(Msg.code(1442) + msg);
 				}
 			}
@@ -100,14 +93,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 * Only compartment searching methods may have an ID parameter
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
-			String msg = theContext
-					.getLocalizer()
-					.getMessage(
-							getClass().getName() + ".idWithoutCompartment",
-							theMethod.getName(),
-							theMethod.getDeclaringClass());
+			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
 			throw new ConfigurationException(Msg.code(1443) + msg);
 		}
+
 	}
 
 	public String getDescription() {
@@ -126,15 +115,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.BUNDLE;
+			return ReturnTypeEnum.BUNDLE;
 	}
+
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		assert (myQueryName == null
-						|| ((theArgs != null ? theArgs.length : 0)
-								== getParameters().size()))
-				: "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
+		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
 
 		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
 
@@ -152,36 +139,29 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		BaseHttpClientInvocation retVal =
-				createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
+		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
 
 		return retVal;
 	}
+
 
 	@Override
 	protected boolean isAddContentLocationHeader() {
 		return false;
 	}
 
+
 	@Override
 	public String toString() {
 		return getMethod().toString();
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(
-			FhirContext theContext,
-			String theSearchUrl,
-			UrlSourceEnum theUrlSource,
-			Map<String, List<String>> theParams) {
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, UrlSourceEnum theUrlSource, Map<String, List<String>> theParams) {
 		return new HttpGetClientInvocation(theContext, theParams, theUrlSource, theSearchUrl);
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(
-			FhirContext theContext,
-			String theResourceName,
-			Map<String, List<String>> theParameters,
-			IIdType theId,
-			String theCompartmentName,
+
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IIdType theId, String theCompartmentName,
 			SearchStyleEnum theSearchStyle) {
 		SearchStyleEnum searchStyle = theSearchStyle;
 		if (searchStyle == null) {
@@ -205,9 +185,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		boolean compartmentSearch = false;
 		if (theCompartmentName != null) {
 			if (theId == null || !theId.hasIdPart()) {
-				String msg = theContext
-						.getLocalizer()
-						.getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
+				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
 				throw new InvalidRequestException(Msg.code(1444) + msg);
 			}
 			compartmentSearch = true;
@@ -217,44 +195,30 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo) or a post (POST [base]/Patient with parameters in the POST body)
 		 */
 		switch (searchStyle) {
-			case GET:
-			default:
-				if (compartmentSearch) {
-					invocation = new HttpGetClientInvocation(
-							theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
-				} else {
-					invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName);
-				}
-				break;
-			case GET_WITH_SEARCH:
-				if (compartmentSearch) {
-					invocation = new HttpGetClientInvocation(
-							theContext,
-							theParameters,
-							theResourceName,
-							theId.getIdPart(),
-							theCompartmentName,
-							Constants.PARAM_SEARCH);
-				} else {
-					invocation = new HttpGetClientInvocation(
-							theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
-				}
-				break;
-			case POST:
-				if (compartmentSearch) {
-					invocation = new HttpPostClientInvocation(
-							theContext,
-							theParameters,
-							theResourceName,
-							theId.getIdPart(),
-							theCompartmentName,
-							Constants.PARAM_SEARCH);
-				} else {
-					invocation = new HttpPostClientInvocation(
-							theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
-				}
+		case GET:
+		default:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+			} else {
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName);
+			}
+			break;
+		case GET_WITH_SEARCH:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
+			break;
+		case POST:
+			if (compartmentSearch) {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
 		}
 
 		return invocation;
 	}
+
 }

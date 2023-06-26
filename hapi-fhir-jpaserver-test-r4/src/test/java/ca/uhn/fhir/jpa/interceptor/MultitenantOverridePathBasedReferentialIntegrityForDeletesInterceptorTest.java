@@ -30,8 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>This test runs a subset of tests from {@link OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}
  * against the {@link BaseMultitenantResourceProviderR4Test}</p>
  */
-public class MultitenantOverridePathBasedReferentialIntegrityForDeletesInterceptorTest
-		extends BaseMultitenantResourceProviderR4Test {
+public class MultitenantOverridePathBasedReferentialIntegrityForDeletesInterceptorTest extends BaseMultitenantResourceProviderR4Test {
 
 	@Autowired
 	private OverridePathBasedReferentialIntegrityForDeletesInterceptor mySvc;
@@ -48,8 +47,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 
 	@AfterEach
 	public void after() throws Exception {
-		myPartitionSettings.setAllowReferencesAcrossPartitions(
-				PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
 		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
@@ -86,9 +84,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		}
 
 		// Search should still work
-		IBundleProvider searchOutcome = myAuditEventDao.search(
-				SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")),
-				requestDetails);
+		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")), requestDetails);
 		assertEquals(1, searchOutcome.size());
 	}
 
@@ -115,6 +111,8 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
+
+
 	}
 
 	@Test
@@ -141,5 +139,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(myCascadingDeleteInterceptor);
 		}
+
 	}
+
 }

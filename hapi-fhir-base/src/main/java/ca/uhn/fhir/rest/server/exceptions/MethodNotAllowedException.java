@@ -19,20 +19,21 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+
 /**
  * Represents an <b>HTTP 405 Method Not Allowed</b> response.
- *
+ * 
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package Summary</a>.
  * </p>
- *
+ * 
  * @see UnprocessableEntityException Which should be used for business level validation failures
  */
 public class MethodNotAllowedException extends BaseServerResponseException {
@@ -42,7 +43,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theMessage
 	 *           The message
 	 * @param theOperationOutcome
@@ -50,15 +51,14 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * @param theAllowedMethods
 	 *           A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
 	 */
-	public MethodNotAllowedException(
-			String theMessage, IBaseOperationOutcome theOperationOutcome, RequestTypeEnum... theAllowedMethods) {
+	public MethodNotAllowedException(String theMessage, IBaseOperationOutcome theOperationOutcome, RequestTypeEnum... theAllowedMethods) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 		setAllowedMethods(theAllowedMethods);
 	}
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theMessage
 	 *           The message
 	 * @param theAllowedMethods
@@ -71,7 +71,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theMessage
 	 *           The message
 	 * @param theOperationOutcome
@@ -83,7 +83,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theMessage
 	 *           The message
 	 */
@@ -133,4 +133,5 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 		}
 		addResponseHeader(Constants.HEADER_ALLOW, b.toString());
 	}
+
 }

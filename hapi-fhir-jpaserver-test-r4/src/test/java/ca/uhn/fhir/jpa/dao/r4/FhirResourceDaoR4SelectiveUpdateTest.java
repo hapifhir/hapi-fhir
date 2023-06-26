@@ -60,8 +60,7 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 	public class CentralAttributesPreservationInterceptor extends ServerOperationInterceptorAdapter {
 
 		@Override
-		public void resourcePreUpdate(
-				RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 			Resource oldResource = (Resource) theOldResource;
 			Resource newResource = (Resource) theNewResource;
 			if (theOldResource instanceof Patient) {
@@ -79,21 +78,26 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 				}
 			}
 		}
+
 	}
 
 	public static Identifier getEuidIdentifier(Patient thePt, boolean theCreate) {
-		return thePt.getIdentifier().stream()
-				.filter(t -> t.getSystem().equals("http://euid"))
-				.findFirst()
-				.orElseGet(() -> {
-					if (!theCreate) {
-						return null;
-					}
-					Identifier identifier = new Identifier();
-					identifier.setSystem(EUID_SYSTEM);
-					identifier.setUse(Identifier.IdentifierUse.SECONDARY);
-					thePt.getIdentifier().add(identifier);
-					return identifier;
-				});
+		return thePt
+			.getIdentifier()
+			.stream()
+			.filter(t -> t.getSystem().equals("http://euid"))
+			.findFirst()
+			.orElseGet(() -> {
+				if (!theCreate) {
+					return null;
+				}
+				Identifier identifier = new Identifier();
+				identifier.setSystem(EUID_SYSTEM);
+				identifier.setUse(Identifier.IdentifierUse.SECONDARY);
+				thePt.getIdentifier().add(identifier);
+				return identifier;
+			});
 	}
+
+
 }

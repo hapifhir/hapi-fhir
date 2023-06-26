@@ -36,7 +36,7 @@ class ValueSetAutocompleteOptionsTest {
 	private IPrimitiveType<String> myUrl;
 	private ValueSet myValueSet;
 	private ValueSetAutocompleteOptions myOptionsResult;
-	private final JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+	final private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	{
 		myStorageSettings.setAdvancedHSearchIndexing(true);
@@ -169,21 +169,22 @@ class ValueSetAutocompleteOptionsTest {
 
 		@Test
 		public void whenAdvancedIndexingOff() {
-			// given
+		    // given
 			myStorageSettings.setAdvancedHSearchIndexing(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
 
+
 		private void assertParseThrowsInvalidRequestWithErrorCode(int theErrorCode) {
-			InvalidRequestException e =
-					assertThrows(InvalidRequestException.class, ValueSetAutocompleteOptionsTest.this::parseOptions);
+			InvalidRequestException e = assertThrows(InvalidRequestException.class, ValueSetAutocompleteOptionsTest.this::parseOptions);
 			assertThat(e.getMessage(), startsWith(Msg.code(theErrorCode)));
 		}
+
 	}
 
 	void parseOptions() {
-		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(
-				myStorageSettings, myContext, myFilter, myCount, myId, myUrl, myValueSet);
+		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myStorageSettings, myContext, myFilter, myCount, myId, myUrl, myValueSet);
 	}
+
 }

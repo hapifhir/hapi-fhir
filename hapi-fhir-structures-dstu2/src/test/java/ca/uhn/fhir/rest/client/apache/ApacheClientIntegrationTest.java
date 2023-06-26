@@ -41,23 +41,19 @@ public class ApacheClientIntegrationTest {
 		ourLastName = null;
 	}
 
+
 	@Test
 	public void testSearchWithParam() throws Exception {
-
+		
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourBase);
-
-		Bundle response = client.search()
-				.forResource(Patient.class)
-				.where(Patient.NAME.matches().value("FOO"))
-				.returnBundle(Bundle.class)
-				.execute();
+		
+		Bundle response = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("FOO")).returnBundle(Bundle.class).execute();
 		assertEquals("search", ourLastMethod);
 		assertEquals("FOO", ourLastName.getValue());
 		assertEquals(1, response.getEntry().size());
-		assertEquals(
-				"123", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals("123", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
-
+	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -70,7 +66,7 @@ public class ApacheClientIntegrationTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-
+		
 		servlet.registerInterceptor(new VerboseLoggingInterceptor());
 
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
@@ -78,19 +74,19 @@ public class ApacheClientIntegrationTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		
 		ourBase = "http://localhost:" + ourPort;
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
-
-		// @formatter:off
+		
+		//@formatter:off
 		@Search()
-		public List<IBaseResource> search(@OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+		public List<IBaseResource> search(@OptionalParam(name=Patient.SP_NAME) StringParam theName) {
 			ourLastMethod = "search";
 			ourLastName = theName;
-
+			
 			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 			Patient patient = new Patient();
 			patient.setId("123");
@@ -98,11 +94,13 @@ public class ApacheClientIntegrationTest {
 			retVal.add(patient);
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
+
 }

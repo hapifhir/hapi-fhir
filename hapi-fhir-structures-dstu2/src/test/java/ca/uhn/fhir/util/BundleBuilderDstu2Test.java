@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class BundleBuilderDstu2Test {
 
@@ -36,6 +39,7 @@ public class BundleBuilderDstu2Test {
 		myCheckDate = cal.getTime();
 	}
 
+
 	@Test
 	public void testAddEntryUpdate() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
@@ -46,18 +50,14 @@ public class BundleBuilderDstu2Test {
 		builder.addTransactionUpdateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(BundleTypeEnum.TRANSACTION, bundle.getTypeElement().getValueAsEnum());
 		assertEquals(1, bundle.getEntry().size());
 		assertSame(patient, bundle.getEntry().get(0).getResource());
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(
-				HTTPVerbEnum.PUT,
-				bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals(HTTPVerbEnum.PUT, bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
 	}
 
 	@Test
@@ -78,15 +78,18 @@ public class BundleBuilderDstu2Test {
 			fail();
 		} catch (NullPointerException e) {
 			assertEquals("Unable to find field id", e.getMessage());
+
 		}
 
 		try {
-			builder.setMetaField("lastUpdated", builder.newPrimitive("instant", myCheckDate));
+		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", myCheckDate));
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("This method may only be called for FHIR version DSTU3 and above", e.getMessage());
 		}
+
 	}
+
 
 	@Test
 	public void testAddEntryUpdateConditional() {
@@ -98,19 +101,14 @@ public class BundleBuilderDstu2Test {
 		builder.addTransactionUpdateEntry(patient).conditional("Patient?active=true");
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(BundleTypeEnum.TRANSACTION, bundle.getTypeElement().getValueAsEnum());
 		assertEquals(1, bundle.getEntry().size());
 		assertSame(patient, bundle.getEntry().get(0).getResource());
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
-		assertEquals(
-				"Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(
-				HTTPVerbEnum.PUT,
-				bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(HTTPVerbEnum.PUT, bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
 	}
 
 	@Test
@@ -138,9 +136,7 @@ public class BundleBuilderDstu2Test {
 		builder.addToEntry(entry, "resource", patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(1, bundle.getEntry().size());
 	}
@@ -154,18 +150,14 @@ public class BundleBuilderDstu2Test {
 		builder.addTransactionCreateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(BundleTypeEnum.TRANSACTION, bundle.getTypeElement().getValueAsEnum());
 		assertEquals(1, bundle.getEntry().size());
 		assertSame(patient, bundle.getEntry().get(0).getResource());
 		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(
-				HTTPVerbEnum.POST,
-				bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals(HTTPVerbEnum.POST, bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
 	}
 
 	@Test
@@ -179,26 +171,22 @@ public class BundleBuilderDstu2Test {
 		builder.addTransactionDeleteEntry("Patient", "123");
 		Bundle bundle = (Bundle) builder.getBundle();
 
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(BundleTypeEnum.TRANSACTION, bundle.getTypeElement().getValueAsEnum());
 		assertEquals(2, bundle.getEntry().size());
 
-		// Check the IBaseresource style entry
+		//Check the IBaseresource style entry
 		assertNull(bundle.getEntry().get(0).getResource());
 		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(
-				HTTPVerbEnum.DELETE,
-				bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals(HTTPVerbEnum.DELETE, bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
 
-		// Check the resourcetype + id style entry.
+		//Check the resourcetype + id style entry.
 		assertNull(bundle.getEntry().get(1).getResource());
 		assertEquals("Patient/123", bundle.getEntry().get(1).getRequest().getUrl());
-		assertEquals(
-				HTTPVerbEnum.DELETE,
-				bundle.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals(HTTPVerbEnum.DELETE, bundle.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum());
+
+
 	}
 
 	@Test
@@ -210,19 +198,15 @@ public class BundleBuilderDstu2Test {
 		builder.addTransactionCreateEntry(patient).conditional("Patient?active=true");
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.debug(
-				"Bundle:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(BundleTypeEnum.TRANSACTION, bundle.getTypeElement().getValueAsEnum());
 		assertEquals(1, bundle.getEntry().size());
 		assertSame(patient, bundle.getEntry().get(0).getResource());
 		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(
-				"Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
-		assertEquals(
-				HTTPVerbEnum.POST,
-				bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
+		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
+		assertEquals(HTTPVerbEnum.POST, bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum());
 	}
+
 }

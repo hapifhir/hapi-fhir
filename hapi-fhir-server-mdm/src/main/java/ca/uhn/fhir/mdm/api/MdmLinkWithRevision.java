@@ -58,8 +58,9 @@ public class MdmLinkWithRevision<T extends IMdmLink<?>> {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("myMdmLink", myMdmLink)
-				.append("myEnversRevision", myEnversRevision)
-				.toString();
+			.append("myMdmLink", myMdmLink)
+			.append("myEnversRevision", myEnversRevision)
+			.toString();
 	}
+
 }

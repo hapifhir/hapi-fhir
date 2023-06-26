@@ -20,33 +20,21 @@ import java.util.List;
 public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(
-			IResourceValidator validator, Object appContext, String path, String url) {
+	public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path,
+																		 String url) {
 		return ReferenceValidationPolicy.IGNORE;
 	}
 
 	@Override
-	public ContainedReferenceValidationPolicy policyForContained(
-			IResourceValidator validator,
-			Object appContext,
-			String containerType,
-			String containerId,
-			Element.SpecialElement containingResourceType,
-			String path,
-			String url) {
+	public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId,
+																					 Element.SpecialElement containingResourceType, String path, String url) {
 		return ContainedReferenceValidationPolicy.CHECK_VALID;
 	}
 
 	@Override
-	public CodedContentValidationPolicy policyForCodedContent(
-			IResourceValidator validator,
-			Object appContext,
-			String stackPath,
-			ElementDefinition definition,
-			StructureDefinition structure,
-			BindingKind kind,
-			ValueSet valueSet,
-			List<String> systems) {
+	public CodedContentValidationPolicy policyForCodedContent(IResourceValidator validator, Object appContext, String stackPath,
+																				 ElementDefinition definition, StructureDefinition structure, BindingKind kind,
+																				 ValueSet valueSet, List<String> systems) {
 		return CodedContentValidationPolicy.CODE;
 	}
 }

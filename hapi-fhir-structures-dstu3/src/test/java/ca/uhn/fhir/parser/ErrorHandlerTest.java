@@ -73,9 +73,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().unexpectedRepeatingElement(null, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse",
-					e.getMessage());
+			assertEquals(Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -125,9 +123,7 @@ public class ErrorHandlerTest {
 			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR",
-					e.getMessage());
+			assertEquals(Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR", e.getMessage());
 		}
 	}
 
@@ -140,4 +136,5 @@ public class ErrorHandlerTest {
 			assertEquals(Msg.code(1821) + "Invalid attribute value \"null\": null", e.getMessage());
 		}
 	}
+
 }

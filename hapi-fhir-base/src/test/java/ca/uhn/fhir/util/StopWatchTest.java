@@ -67,6 +67,7 @@ public class StopWatchTest {
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("60ms", sw.getEstimatedTimeRemaining(0.999, 1.0));
+
 	}
 
 	@Test
@@ -97,6 +98,7 @@ public class StopWatchTest {
 
 		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("360ms", sw.getEstimatedTimeRemaining(99.99, 100));
+
 	}
 
 	@Test
@@ -107,17 +109,10 @@ public class StopWatchTest {
 		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
 		assertEquals("01:00:00", StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR));
 		assertEquals("1.0 day", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY).replace(',', '.'));
-		assertEquals(
-				"2.0 days", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2).replace(',', '.'));
-		assertEquals(
-				"2.0 days",
-				StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1).replace(',', '.'));
-		assertEquals(
-				"2.4 days",
-				StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR))
-						.replace(',', '.'));
-		assertEquals(
-				"11 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 11) + (10 * DateUtils.MILLIS_PER_HOUR)));
+		assertEquals("2.0 days", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2).replace(',', '.'));
+		assertEquals("2.0 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1).replace(',', '.'));
+		assertEquals("2.4 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR)).replace(',', '.'));
+		assertEquals("11 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 11) + (10 * DateUtils.MILLIS_PER_HOUR)));
 	}
 
 	@Test
@@ -155,8 +150,10 @@ public class StopWatchTest {
 		StopWatch.setNowForUnitTest(2200L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
-		assertEquals(
-				"TASK1: 500ms\n" + "Between: 500ms\n" + "TASK2: 100ms\n" + "After last task: 100ms", taskDurations);
+		assertEquals("TASK1: 500ms\n" +
+			"Between: 500ms\n" +
+			"TASK2: 100ms\n" +
+			"After last task: 100ms", taskDurations);
 	}
 
 	@Test
@@ -198,11 +195,7 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -minutes));
 		int numOperations = 60;
 		long millis = sw.getMillisPerOperation(numOperations);
-		ourLog.info(
-				"{} operations in {}ms = {}ms / operation",
-				numOperations,
-				minutes * DateUtils.MILLIS_PER_MINUTE,
-				millis);
+		ourLog.info("{} operations in {}ms = {}ms / operation", numOperations, minutes * DateUtils.MILLIS_PER_MINUTE, millis);
 
 		assertThat(millis, Matchers.lessThan(62000L));
 		assertThat(millis, Matchers.greaterThan(58000L));
@@ -270,9 +263,10 @@ public class StopWatchTest {
 		assertThat(string, matchesPattern("^[0-9]{3,4}ms$"));
 	}
 
+
 	@Test
 	public void testAppendRightAlignedNumber() {
-		StringBuilder b = new StringBuilder();
+		StringBuilder b= new StringBuilder();
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 0, 100);
@@ -298,4 +292,5 @@ public class StopWatchTest {
 		StopWatch.appendRightAlignedNumber(b, "PFX", 10, 100);
 		assertEquals("PFX0000000100", b.toString());
 	}
+
 }

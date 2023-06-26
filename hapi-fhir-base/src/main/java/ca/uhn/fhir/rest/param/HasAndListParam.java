@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
+
 public class HasAndListParam extends BaseAndListParam<HasOrListParam> {
 
 	@Override
@@ -34,4 +35,6 @@ public class HasAndListParam extends BaseAndListParam<HasOrListParam> {
 		addValue(theValue);
 		return this;
 	}
+
+	
 }

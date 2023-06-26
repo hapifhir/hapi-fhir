@@ -5,12 +5,12 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -82,6 +82,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 	}
 
+
 	@Test
 	public void testCreatePatient_ClientAssignedId() {
 		createPatientA();
@@ -118,9 +119,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode",
-					e.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}
 	}
 
@@ -133,8 +132,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		Long id = myObservationDao.create(obs).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
-			ResourceTable observation =
-					myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Observation", observation.getResourceType());
 			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
@@ -152,8 +150,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		Long id = myEncounterDao.create(encounter).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
-			ResourceTable observation =
-					myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Encounter", observation.getResourceType());
 			assertEquals(65, observation.getPartitionId().getPartitionId());
 		});
@@ -169,12 +166,9 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		Long id = myOrganizationDao.create(org).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
-			ResourceTable observation =
-					myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			ResourceTable observation = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals("Organization", observation.getResourceType());
-			assertEquals(
-					ALTERNATE_DEFAULT_ID,
-					observation.getPartitionId().getPartitionId().intValue());
+			assertEquals(ALTERNATE_DEFAULT_ID, observation.getPartitionId().getPartitionId().intValue());
 		});
 	}
 
@@ -187,12 +181,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("forcedid0_.PARTITION_ID in (?)"));
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false),
-				containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("forcedid0_.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("where resourceta0_.PARTITION_ID=? and resourceta0_.RES_ID=?"));
 	}
 
 	@Test
@@ -216,6 +206,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		patientA.setGender(Enumerations.AdministrativeGender.MALE);
 		myPatientDao.update(patientA);
 
+
 		IdType patientVersionOne = new IdType("Patient", "A", "1");
 		myCaptureQueriesListener.clear();
 		Patient patient = myPatientDao.read(patientVersionOne);
@@ -223,30 +214,23 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(4, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("PARTITION_ID in (?)"));
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false),
-				containsString("PARTITION_ID="));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
+
 	}
+
 
 	@Test
 	public void testSearchPatient_Good() {
 		createPatientA();
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider outcome =
-				myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("A")), mySrd);
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("A")), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("forcedid0_.PARTITION_ID in (?)"));
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false),
-				containsString("t0.PARTITION_ID = ?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("forcedid0_.PARTITION_ID in (?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 
 	@Test
@@ -255,14 +239,11 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		createObservationB();
 
 		myCaptureQueriesListener.clear();
-		IBundleProvider outcome = myObservationDao.search(
-				SearchParameterMap.newSynchronous("subject", new ReferenceParam("Patient/A")), mySrd);
+		IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", new ReferenceParam("Patient/A")), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
 
 		// Typed
 		myCaptureQueriesListener.clear();
@@ -272,9 +253,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)"));
 	}
 
 	@Test
@@ -285,9 +264,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(
-				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL))",
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE ((t0.RES_TYPE = 'Observation') AND (t0.RES_DELETED_AT IS NULL))", myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false));
 	}
 
 	@Test
@@ -297,28 +274,22 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		// Multiple ANDs
 		try {
-			myObservationDao.search(
-					SearchParameterMap.newSynchronous()
-							.add("subject", new TokenParam("http://foo", "1"))
-							.add("subject", new TokenParam("http://foo", "2")),
-					mySrd);
+			myObservationDao.search(SearchParameterMap.newSynchronous()
+					.add("subject", new TokenParam("http://foo", "1"))
+					.add("subject", new TokenParam("http://foo", "2"))
+				, mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					Msg.code(1325)
-							+ "Multiple values for parameter subject is not supported in patient compartment mode",
-					e.getMessage());
+			assertEquals(Msg.code(1325) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
 
 		// Multiple ORs
 		try {
-			myObservationDao.search(
-					SearchParameterMap.newSynchronous().add("subject", new TokenOrListParam("http://foo", "1", "2")),
-					mySrd);
+			myObservationDao.search(SearchParameterMap.newSynchronous()
+				.add(
+					"subject", new TokenOrListParam("http://foo", "1", "2")
+				), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					Msg.code(1324)
-							+ "Multiple values for parameter subject is not supported in patient compartment mode",
-					e.getMessage());
+			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
 	}
 
@@ -329,27 +300,19 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		// Chain
 		try {
-			myObservationDao.search(
-					SearchParameterMap.newSynchronous()
-							.add("subject", new ReferenceParam("identifier", "http://foo|123")),
-					mySrd);
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode",
-					e.getMessage());
+			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
 		}
+
 
 		// Missing
 		try {
-			myObservationDao.search(
-					SearchParameterMap.newSynchronous()
-							.add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)),
-					mySrd);
+			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					Msg.code(1322) + "The parameter subject:mdm is not supported in patient compartment mode",
-					e.getMessage());
+			assertEquals(Msg.code(1322) + "The parameter subject:mdm is not supported in patient compartment mode", e.getMessage());
 		}
+
 	}
 
 	/**
@@ -364,9 +327,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("t0.PARTITION_ID = ?"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("t0.PARTITION_ID = ?"));
 	}
 
 	@Test
@@ -384,13 +345,10 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(2, outcome.size());
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false),
-				containsString("PARTITION_ID in "));
-		assertThat(
-				myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false),
-				containsString("PARTITION_ID="));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
 	}
+
 
 	@Test
 	public void testTransaction_NoRequestDetails() throws IOException {
@@ -400,20 +358,14 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		// causes this to fail that's ok
 		Bundle outcome = mySystemDao.transaction(null, input);
 
-		ListMultimap<String, String> resourceIds = outcome.getEntry().stream()
-				.collect(MultimapCollector.toMultimap(
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getResourceType(),
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getValue()));
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
 
 		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			return myResourceTableDao.findAll().stream()
-					.collect(MultimapCollector.toMultimap(
-							t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));
@@ -429,30 +381,26 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 		myCaptureQueriesListener.logSelectQueries();
-		List<String> selectQueryStrings = myCaptureQueriesListener.getSelectQueries().stream()
-				.map(t -> t.getSql(false, false).toUpperCase(Locale.US))
-				.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
-				.collect(Collectors.toList());
+		List<String> selectQueryStrings = myCaptureQueriesListener
+			.getSelectQueries()
+			.stream()
+			.map(t -> t.getSql(false, false).toUpperCase(Locale.US))
+			.filter(t -> !t.contains("FROM HFJ_TAG_DEF"))
+			.collect(Collectors.toList());
 		for (String next : selectQueryStrings) {
 			assertThat(next, either(containsString("PARTITION_ID =")).or(containsString("PARTITION_ID IN")));
 		}
 
-		ListMultimap<String, String> resourceIds = outcome.getEntry().stream()
-				.collect(MultimapCollector.toMultimap(
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getResourceType(),
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getValue()));
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
 
 		String patientId = resourceIds.get("Patient").get(0);
 
 		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			return myResourceTableDao.findAll().stream()
-					.collect(MultimapCollector.toMultimap(
-							t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));
@@ -468,24 +416,21 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		IBundleProvider result = myExplanationOfBenefitDao.search(map);
 		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
-		assertThat(
-				resultIds.toString(),
-				resultIds,
-				containsInAnyOrder(
-						resourceIds.get("Coverage").get(0),
-						resourceIds.get("Organization").get(0),
-						resourceIds.get("ExplanationOfBenefit").get(0),
-						resourceIds.get("Patient").get(0),
-						resourceIds.get("Practitioner").get(0),
-						resourceIds.get("Practitioner").get(1),
-						resourceIds.get("Practitioner").get(2)));
+		assertThat(resultIds.toString(), resultIds, containsInAnyOrder(
+			resourceIds.get("Coverage").get(0),
+			resourceIds.get("Organization").get(0),
+			resourceIds.get("ExplanationOfBenefit").get(0),
+			resourceIds.get("Patient").get(0),
+			resourceIds.get("Practitioner").get(0),
+			resourceIds.get("Practitioner").get(1),
+			resourceIds.get("Practitioner").get(2)
+		));
 
 		myCaptureQueriesListener.logSelectQueries();
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-		assertThat(
-				selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US),
-				matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
+		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US), matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
+
 	}
 
 	@Test
@@ -507,33 +452,27 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals(
-					"HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode",
-					e.getMessage());
+			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}
 	}
+
+
 
 	@Test
 	public void testSearch() throws IOException {
 		Bundle input = loadResourceFromClasspath(Bundle.class, "/r4/load_bundle.json");
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), input);
 
-		ListMultimap<String, String> resourceIds = outcome.getEntry().stream()
-				.collect(MultimapCollector.toMultimap(
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getResourceType(),
-						t -> new IdType(t.getResponse().getLocation())
-								.toUnqualifiedVersionless()
-								.getValue()));
+		ListMultimap<String, String> resourceIds = outcome
+			.getEntry()
+			.stream()
+			.collect(MultimapCollector.toMultimap(t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getResourceType(), t -> new IdType(t.getResponse().getLocation()).toUnqualifiedVersionless().getValue()));
 
 		String patientId = resourceIds.get("Patient").get(0);
 
 		logAllResources();
 		Multimap<String, Integer> resourcesByType = runInTransaction(() -> {
-			return myResourceTableDao.findAll().stream()
-					.collect(MultimapCollector.toMultimap(
-							t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
+			return myResourceTableDao.findAll().stream().collect(MultimapCollector.toMultimap(t -> t.getResourceType(), t -> t.getPartitionId().getPartitionId()));
 		});
 
 		assertThat(resourcesByType.get("Patient"), contains(4267));
@@ -549,25 +488,23 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		IBundleProvider result = myExplanationOfBenefitDao.search(map);
 		List<String> resultIds = toUnqualifiedVersionlessIdValues(result);
-		assertThat(
-				resultIds.toString(),
-				resultIds,
-				containsInAnyOrder(
-						resourceIds.get("Coverage").get(0),
-						resourceIds.get("Organization").get(0),
-						resourceIds.get("ExplanationOfBenefit").get(0),
-						resourceIds.get("Patient").get(0),
-						resourceIds.get("Practitioner").get(0),
-						resourceIds.get("Practitioner").get(1),
-						resourceIds.get("Practitioner").get(2)));
+		assertThat(resultIds.toString(), resultIds, containsInAnyOrder(
+			resourceIds.get("Coverage").get(0),
+			resourceIds.get("Organization").get(0),
+			resourceIds.get("ExplanationOfBenefit").get(0),
+			resourceIds.get("Patient").get(0),
+			resourceIds.get("Practitioner").get(0),
+			resourceIds.get("Practitioner").get(1),
+			resourceIds.get("Practitioner").get(2)
+		));
 
 		myCaptureQueriesListener.logSelectQueries();
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-		assertThat(
-				selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US),
-				matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
+		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US), matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
+
 	}
+
 
 	@Test
 	public void testHistory_Type() {
@@ -599,6 +536,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		patient.setId("Patient/A");
 		patient.setActive(true);
 		DaoMethodOutcome update = myPatientDao.update(patient);
-		return (Patient) update.getResource();
+		return (Patient)update.getResource();
 	}
+
 }

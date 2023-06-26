@@ -22,48 +22,47 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 public class PropertyTest {
 
-	private static final FhirContext ourCtx = FhirContext.forR4();
-	private Property property;
-	private StructureDefinition sd;
-	private HapiWorkerContext workerContext;
+    private static final FhirContext ourCtx = FhirContext.forR4();
+    private Property property;
+    private StructureDefinition sd;
+    private HapiWorkerContext workerContext;
 
-	@Test
-	public void getChildPropertiesErrorTest() throws FHIRException {
-		try {
+    @Test
+    public void getChildPropertiesErrorTest() throws FHIRException {
+    	try {
 			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
 		} catch (Error e) {
-			assertEquals("types == 0, and no children found on Patient.extension", e.getMessage());
+    		assertEquals("types == 0, and no children found on Patient.extension", e.getMessage());
 		}
-	}
+    }
 
-	@Test
-	public void getChildPropertiesOnlyExtensionElementTest() throws FHIRException {
-		final ElementDefinition ed = sd.getSnapshot().getElement().get(23);
-		property = new Property(workerContext, ed, sd);
-		final List<Property> result = property.getChildProperties("birthdate", null);
-		assertFalse(result.isEmpty());
-		assertEquals(3, result.size());
-		assertEquals("date.id", result.get(0).getDefinition().getPath());
-	}
+    @Test
+    public void getChildPropertiesOnlyExtensionElementTest() throws FHIRException {
+        final ElementDefinition ed = sd.getSnapshot().getElement().get(23);
+        property = new Property(workerContext, ed, sd);
+        final List<Property> result = property.getChildProperties("birthdate", null);
+        assertFalse(result.isEmpty());
+        assertEquals(3, result.size());
+        assertEquals("date.id", result.get(0).getDefinition().getPath());
+    }
 
-	@Test
-	public void getChildPropertiesPrimitiveTest() throws FHIRException {
-		final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
-		property = new Property(workerContext, ed, sd);
-		final List<Property> result = property.getChildProperties("id", null);
-		assertFalse(result.isEmpty());
-		assertEquals(3, result.size());
-		assertEquals("id.id", result.get(0).getDefinition().getPath());
-	}
+    @Test
+    public void getChildPropertiesPrimitiveTest() throws FHIRException {
+        final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
+        property = new Property(workerContext, ed, sd);
+        final List<Property> result = property.getChildProperties("id", null);
+        assertFalse(result.isEmpty());
+        assertEquals(3, result.size());
+        assertEquals("id.id", result.get(0).getDefinition().getPath());
+    }
 
-	@BeforeEach
-	public void setUp() throws IOException {
-		final String sdString = IOUtils.toString(
-				PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
-		final IParser parser = ourCtx.newXmlParser();
-		sd = parser.parseResource(StructureDefinition.class, sdString);
-		workerContext = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
-	}
+    @BeforeEach
+    public void setUp() throws IOException {
+        final String sdString = IOUtils.toString(PropertyTest.class.getResourceAsStream("/customPatientSd.xml"), StandardCharsets.UTF_8);
+        final IParser parser = ourCtx.newXmlParser();
+        sd = parser.parseResource(StructureDefinition.class, sdString);
+        workerContext = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
+    }
 }

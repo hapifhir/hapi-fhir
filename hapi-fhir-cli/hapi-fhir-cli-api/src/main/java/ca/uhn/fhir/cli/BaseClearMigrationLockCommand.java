@@ -42,6 +42,7 @@ public abstract class BaseClearMigrationLockCommand extends BaseCommand {
 		return "This command clears a database migration lock";
 	}
 
+
 	@Override
 	public String getCommandName() {
 		return CLEAR_LOCK;
@@ -53,8 +54,7 @@ public abstract class BaseClearMigrationLockCommand extends BaseCommand {
 		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
 		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
-		addRequiredOption(
-				retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
+		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addRequiredOption(retVal, "l", "lock-uuid", "Lock UUID", "The UUID value of the lock held in the database.");
 		return retVal;
 	}
@@ -75,16 +75,15 @@ public abstract class BaseClearMigrationLockCommand extends BaseCommand {
 		try {
 			driverType = DriverTypeEnum.valueOf(driverTypeString);
 		} catch (Exception e) {
-			throw new ParseException(Msg.code(2774) + "Invalid driver type \"" + driverTypeString
-					+ "\". Valid values are: " + driverOptions());
+			throw new ParseException(Msg.code(2774) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
-		DriverTypeEnum.ConnectionProperties connectionProperties =
-				driverType.newConnectionProperties(url, username, password);
-		HapiMigrator migrator =
-				new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
+
+		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
+		HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
 		migrator.clearMigrationLockWithUUID(lockUUID);
 	}
+
 
 	protected void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;

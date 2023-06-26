@@ -21,11 +21,13 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
-		client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		client
+			.history()
+			.onType(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
-		assertEquals(
-				"http://example.com/fhir/TENANT-A/Patient/_history",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com/fhir/TENANT-A/Patient/_history", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -35,11 +37,13 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com:8000");
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
-		client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		client
+			.history()
+			.onType(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
 
-		assertEquals(
-				"http://example.com:8000/TENANT-A/Patient/_history",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com:8000/TENANT-A/Patient/_history", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -49,11 +53,12 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com:8000/");
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
-		client.capabilities().ofType(CapabilityStatement.class).execute();
+		client
+			.capabilities()
+			.ofType(CapabilityStatement.class)
+			.execute();
 
-		assertEquals(
-				"http://example.com:8000/TENANT-A/metadata",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com:8000/TENANT-A/metadata", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -63,12 +68,14 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
-		client.create().resource(new Patient().setActive(true)).execute();
+		client
+			.create()
+			.resource(new Patient().setActive(true))
+			.execute();
 
-		assertEquals(
-				"http://example.com/fhir/TENANT-A/Patient",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com/fhir/TENANT-A/Patient", capt.getAllValues().get(0).getURI().toString());
 	}
+
 
 	@Test
 	public void testPagingLinksRetainTenant() throws Exception {
@@ -78,15 +85,14 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
 		Bundle bundle = new Bundle();
-		bundle.addLink()
-				.setRelation("next")
-				.setUrl("http://example.com/fhir/TENANT-A/?" + Constants.PARAM_PAGINGACTION + "=123456");
+		bundle.addLink().setRelation("next").setUrl("http://example.com/fhir/TENANT-A/?" + Constants.PARAM_PAGINGACTION + "=123456");
 
-		client.loadPage().next(bundle).execute();
+		client
+			.loadPage()
+			.next(bundle)
+			.execute();
 
-		assertEquals(
-				"http://example.com/fhir/TENANT-A/?_getpages=123456",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com/fhir/TENANT-A/?_getpages=123456", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -97,14 +103,14 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 		client.registerInterceptor(new UrlTenantSelectionInterceptor("TENANT-A"));
 
 		Bundle bundle = new Bundle();
-		bundle.addLink()
-				.setRelation("next")
-				.setUrl("http://example.com/fhir/TENANT-A?" + Constants.PARAM_PAGINGACTION + "=123456");
+		bundle.addLink().setRelation("next").setUrl("http://example.com/fhir/TENANT-A?" + Constants.PARAM_PAGINGACTION + "=123456");
 
-		client.loadPage().next(bundle).execute();
+		client
+			.loadPage()
+			.next(bundle)
+			.execute();
 
-		assertEquals(
-				"http://example.com/fhir/TENANT-A?_getpages=123456",
-				capt.getAllValues().get(0).getURI().toString());
+		assertEquals("http://example.com/fhir/TENANT-A?_getpages=123456", capt.getAllValues().get(0).getURI().toString());
 	}
+
 }

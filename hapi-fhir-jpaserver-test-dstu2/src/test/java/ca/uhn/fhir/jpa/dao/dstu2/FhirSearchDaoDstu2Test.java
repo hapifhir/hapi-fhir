@@ -32,11 +32,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_h\u00F6ra");
 			patient.addName().addFamily("AAAS");
 			patient.addName().addFamily("CCC");
-			id1 = myPatientDao
-					.create(patient, mySrd)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getIdPartAsLong();
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
 		{
@@ -45,21 +41,13 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			patient.addName().addGiven("testSearchStringParamWithNonNormalized_HORA");
 			patient.addName().addFamily("AAAB");
 			patient.addName().addFamily("CCC");
-			id2 = myPatientDao
-					.create(patient, mySrd)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getIdPartAsLong();
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id3;
 		{
 			Organization org = new Organization();
 			org.setName("DDD");
-			id3 = myOrganizationDao
-					.create(org, mySrd)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getIdPartAsLong();
+			id3 = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -77,8 +65,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		// OR
 		{
 			StringAndListParam content = new StringAndListParam();
-			content.addAnd(
-					new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
+			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
 
 			map.add(Constants.PARAM_CONTENT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map);
@@ -97,8 +84,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		// AND OR
 		{
 			StringAndListParam content = new StringAndListParam();
-			content.addAnd(
-					new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
+			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
 
 			map.add(Constants.PARAM_CONTENT, content);
@@ -114,6 +100,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			List<JpaPid> found = mySearchDao.search(null, map);
 			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2, id3));
 		}
+
 	}
 
 	@Test
@@ -122,21 +109,13 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.getText().setDiv("<div>AAAS<p>FOO</p> CCC    </div>");
-			id1 = myPatientDao
-					.create(patient, mySrd)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getIdPartAsLong();
+			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 		Long id2;
 		{
 			Patient patient = new Patient();
 			patient.getText().setDiv("<div>AAAB<p>FOO</p> CCC    </div>");
-			id2 = myPatientDao
-					.create(patient, mySrd)
-					.getId()
-					.toUnqualifiedVersionless()
-					.getIdPartAsLong();
+			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getIdPartAsLong();
 		}
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -154,8 +133,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		// OR
 		{
 			StringAndListParam content = new StringAndListParam();
-			content.addAnd(
-					new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
+			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAS")).addOr(new StringParam("AAAB")));
 
 			map.add(Constants.PARAM_TEXT, content);
 			List<JpaPid> found = mySearchDao.search(resourceName, map);
@@ -174,8 +152,7 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 		// AND OR
 		{
 			StringAndListParam content = new StringAndListParam();
-			content.addAnd(
-					new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
+			content.addAnd(new StringOrListParam().addOr(new StringParam("AAAB")).addOr(new StringParam("AAAS")));
 			content.addAnd(new StringOrListParam().addOr(new StringParam("CCC")));
 
 			map.add(Constants.PARAM_TEXT, content);
@@ -192,4 +169,5 @@ public class FhirSearchDaoDstu2Test extends BaseJpaDstu2Test {
 			assertThat(JpaPid.toLongList(found), empty());
 		}
 	}
+
 }

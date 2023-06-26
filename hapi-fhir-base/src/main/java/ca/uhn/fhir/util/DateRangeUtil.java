@@ -21,9 +21,9 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Date;
 
 public class DateRangeUtil {
 
@@ -36,15 +36,11 @@ public class DateRangeUtil {
 	 * @return a DateRange within the original range, and between theStartInclusive and theEnd
 	 */
 	@Nonnull
-	public static DateRangeParam narrowDateRange(
-			@Nullable DateRangeParam theDateRangeParam,
-			@Nullable Date theStartInclusive,
-			@Nullable Date theEndExclusive) {
+	public static DateRangeParam narrowDateRange(@Nullable DateRangeParam theDateRangeParam, @Nullable Date theStartInclusive, @Nullable Date theEndExclusive) {
 		if (theStartInclusive == null && theEndExclusive == null) {
 			return theDateRangeParam;
 		}
-		DateRangeParam result =
-				theDateRangeParam == null ? new DateRangeParam() : new DateRangeParam(theDateRangeParam);
+		DateRangeParam result = theDateRangeParam == null ? new DateRangeParam() : new DateRangeParam(theDateRangeParam);
 
 		Date startInclusive = theStartInclusive;
 		if (startInclusive != null) {
@@ -60,9 +56,7 @@ public class DateRangeUtil {
 			}
 		}
 		if (theEndExclusive != null) {
-			Date inputEnd = result.getUpperBound() == null
-					? null
-					: result.getUpperBound().getValue();
+			Date inputEnd = result.getUpperBound() == null ? null : result.getUpperBound().getValue();
 			if (theDateRangeParam == null || inputEnd == null || inputEnd.after(theEndExclusive)) {
 				result.setUpperBoundExclusive(theEndExclusive);
 			}
@@ -70,4 +64,5 @@ public class DateRangeUtil {
 
 		return result;
 	}
+
 }

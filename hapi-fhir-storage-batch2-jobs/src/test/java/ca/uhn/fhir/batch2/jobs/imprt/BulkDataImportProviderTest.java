@@ -50,13 +50,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -76,24 +76,17 @@ public class BulkDataImportProviderTest {
 	private static final String A_JOB_ID = "0000000-A1A1A1A1";
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
-
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider);
-
 	@RegisterExtension
 	private final HttpClientExtension myClient = new HttpClientExtension();
-
 	@Mock
 	private IJobCoordinator myJobCoordinator;
-
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
-
 	@Spy
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc = new MyRequestPartitionHelperSvc();
-
-	private final RequestPartitionId myRequestPartitionId =
-			RequestPartitionId.fromPartitionIdAndName(123, "Partition-A");
+	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(123, "Partition-A");
 	private final String myPartitionName = "Partition-A";
 
 	@BeforeEach
@@ -104,17 +97,16 @@ public class BulkDataImportProviderTest {
 	}
 
 	public void enablePartitioning() {
-		myRestfulServerExtension
-				.getRestfulServer()
-				.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
+		myRestfulServerExtension.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 	}
 
 	private static Stream<Arguments> provideParameters() {
 		return Stream.of(
-				Arguments.of(UrlType.class, false),
-				Arguments.of(UriType.class, false),
-				Arguments.of(UrlType.class, true),
-				Arguments.of(UriType.class, true));
+			Arguments.of(UrlType.class, false),
+			Arguments.of(UriType.class, false),
+			Arguments.of(UrlType.class, true),
+			Arguments.of(UriType.class, true)
+		);
 	}
 
 	@ParameterizedTest
@@ -127,7 +119,8 @@ public class BulkDataImportProviderTest {
 		String jobId = UUID.randomUUID().toString();
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(jobId);
-		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(startResponse);
+		when(myJobCoordinator.startInstance(isNotNull(), any()))
+			.thenReturn(startResponse);
 
 		String requestUrl;
 		if (partitionEnabled) {
@@ -153,24 +146,15 @@ public class BulkDataImportProviderTest {
 			assertEquals(202, response.getStatusLine().getStatusCode());
 
 			OperationOutcome oo = myCtx.newJsonParser().parseResource(OperationOutcome.class, resp);
-			assertEquals(
-					"Bulk import job has been submitted with ID: " + jobId,
-					oo.getIssue().get(0).getDiagnostics());
-			assertEquals(
-					"Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId="
-							+ jobId,
-					oo.getIssue().get(1).getDiagnostics());
+			assertEquals("Bulk import job has been submitted with ID: " + jobId, oo.getIssue().get(0).getDiagnostics());
+			assertEquals("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId, oo.getIssue().get(1).getDiagnostics());
 		}
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
-		assertTrue(
-				startRequest
-						.getParameters()
-						.startsWith(
-								"{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500"));
+		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500"));
 	}
 
 	@Test
@@ -193,12 +177,11 @@ public class BulkDataImportProviderTest {
 			// Verify
 
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertEquals(
-					"application/fhir+json;charset=utf-8",
-					response.getEntity().getContentType().getValue());
+			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 			assertThat(resp, containsString("\"resourceType\": \"OperationOutcome\""));
 			assertThat(resp, containsString("HAPI-0513: Must request async processing for $import"));
 		}
+
 	}
 
 	@Test
@@ -206,7 +189,9 @@ public class BulkDataImportProviderTest {
 		// Setup
 
 		Parameters input = createRequest();
-		input.getParameter().removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
+		input
+			.getParameter()
+			.removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -224,6 +209,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertThat(resp, containsString("HAPI-1769: No URLs specified"));
 		}
+
 	}
 
 	@Nonnull
@@ -235,55 +221,33 @@ public class BulkDataImportProviderTest {
 	private Parameters createRequest(Class<?> type) {
 		Parameters input = new Parameters();
 		input.addParameter(BulkDataImportProvider.PARAM_INPUT_FORMAT, new CodeType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(
-				BulkDataImportProvider.PARAM_INPUT_SOURCE,
-				type == UrlType.class ? new UrlType("http://foo") : new UriType("http://foo"));
+		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, type == UrlType.class ? new UrlType("http://foo") : new UriType("http://foo"));
 		input.addParameter()
-				.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE)
-						.setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC)
-						.setValue(new StringType("admin:password")))
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT)
-						.setValue(new StringType("500")));
+			.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC).setValue(new StringType("admin:password")))
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT).setValue(new StringType("500")));
 		input.addParameter()
-				.setName(BulkDataImportProvider.PARAM_INPUT)
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_INPUT_TYPE)
-						.setValue(new CodeType("Observation")))
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_INPUT_URL)
-						.setValue(
-								type == UrlType.class
-										? new UrlType("http://example.com/Observation")
-										: new UriType("http://example.com/Observation")));
+			.setName(BulkDataImportProvider.PARAM_INPUT)
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Observation") : new UriType("http://example.com/Observation")));
 		input.addParameter()
-				.setName(BulkDataImportProvider.PARAM_INPUT)
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_INPUT_TYPE)
-						.setValue(new CodeType("Patient")))
-				.addPart(new Parameters.ParametersParameterComponent()
-						.setName(BulkDataImportProvider.PARAM_INPUT_URL)
-						.setValue(
-								type == UrlType.class
-										? new UrlType("http://example.com/Patient")
-										: new UriType("http://example.com/Patient")));
+			.setName(BulkDataImportProvider.PARAM_INPUT)
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Patient")))
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Patient") : new UriType("http://example.com/Patient")));
 		return input;
 	}
 
 	@Test
 	public void testPollForStatus_QUEUED() throws IOException {
 
-		JobInstance jobInfo =
-				new JobInstance().setStatus(StatusEnum.QUEUED).setCreateTime(parseDate("2022-01-01T12:00:00-04:00"));
+		JobInstance jobInfo = new JobInstance()
+			.setStatus(StatusEnum.QUEUED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/"
-				+ JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" + JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "="
-				+ A_JOB_ID;
+		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
@@ -291,11 +255,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(
-					"120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(
-					response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(),
-					containsString("Job was created at "));
+			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at "));
 		}
 	}
 
@@ -303,14 +264,13 @@ public class BulkDataImportProviderTest {
 	public void testPollForStatus_IN_PROGRESS() throws IOException {
 
 		JobInstance jobInfo = new JobInstance()
-				.setStatus(StatusEnum.IN_PROGRESS)
-				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+			.setStatus(StatusEnum.IN_PROGRESS)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/"
-				+ JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" + JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "="
-				+ A_JOB_ID;
+		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
@@ -318,11 +278,8 @@ public class BulkDataImportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(
-					"120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(
-					response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(),
-					containsString("Job was created at 2022-01-01"));
+			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Job was created at 2022-01-01"));
 		}
 	}
 
@@ -330,10 +287,10 @@ public class BulkDataImportProviderTest {
 	@ValueSource(booleans = {false, true})
 	public void testPollForStatus_COMPLETE(boolean partitionEnabled) throws IOException {
 		JobInstance jobInfo = new JobInstance()
-				.setStatus(StatusEnum.COMPLETED)
-				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
-				.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
+			.setStatus(StatusEnum.COMPLETED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
+			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
 		String requestUrl;
@@ -345,8 +302,8 @@ public class BulkDataImportProviderTest {
 		} else {
 			requestUrl = myRestfulServerExtension.getBaseUrl() + "/";
 		}
-		String url = requestUrl + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?"
-				+ JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		String url = requestUrl + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
@@ -361,17 +318,16 @@ public class BulkDataImportProviderTest {
 	@Test
 	public void testPollForStatus_FAILED() throws IOException {
 		JobInstance jobInfo = new JobInstance()
-				.setStatus(StatusEnum.FAILED)
-				.setErrorMessage("It failed.")
-				.setErrorCount(123)
-				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
-				.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
+			.setStatus(StatusEnum.FAILED)
+			.setErrorMessage("It failed.")
+			.setErrorCount(123)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
+			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/"
-				+ JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" + JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "="
-				+ A_JOB_ID;
+		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
@@ -381,10 +337,7 @@ public class BulkDataImportProviderTest {
 			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			assertThat(
-					responseContent,
-					containsString(
-							"\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\""));
+			assertThat(responseContent, containsString("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\""));
 		}
 	}
 
@@ -411,6 +364,7 @@ public class BulkDataImportProviderTest {
 			assertEquals(403, response.getStatusLine().getStatusCode());
 			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}
+
 	}
 
 	@Test
@@ -418,17 +372,17 @@ public class BulkDataImportProviderTest {
 		// setup
 		enablePartitioning();
 		JobInstance jobInfo = new JobInstance()
-				.setStatus(StatusEnum.COMPLETED)
-				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
-				.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
+			.setStatus(StatusEnum.COMPLETED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
+			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 		BulkImportJobParameters jobParameters = new BulkImportJobParameters().setPartitionId(myRequestPartitionId);
 		jobInfo.setParameters(jobParameters);
 
 		// test
-		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS
-				+ "?" + JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -439,13 +393,13 @@ public class BulkDataImportProviderTest {
 			assertEquals(403, response.getStatusLine().getStatusCode());
 			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}
+
 	}
 
 	private class MyRequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		@Nonnull
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(
-				@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;
@@ -455,11 +409,9 @@ public class BulkDataImportProviderTest {
 		}
 
 		@Override
-		public void validateHasPartitionPermissions(
-				RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
-				throw new ForbiddenOperationException(
-						"User does not have access to resources on the requested partition");
+				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
 			}
 		}
 
@@ -470,10 +422,7 @@ public class BulkDataImportProviderTest {
 
 		@NotNull
 		@Override
-		public RequestPartitionId determineCreatePartitionForRequest(
-				@Nullable RequestDetails theRequest,
-				@NotNull IBaseResource theResource,
-				@NotNull String theResourceType) {
+		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @NotNull IBaseResource theResource, @NotNull String theResourceType) {
 			return null;
 		}
 
@@ -492,4 +441,5 @@ public class BulkDataImportProviderTest {
 	private Date parseDate(String theString) {
 		return new InstantType(theString).getValue();
 	}
+
 }

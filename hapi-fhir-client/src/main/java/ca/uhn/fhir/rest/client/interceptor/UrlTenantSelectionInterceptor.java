@@ -79,11 +79,7 @@ public class UrlTenantSelectionInterceptor {
 			serverBase = serverBase.substring(0, serverBase.length() - 1);
 		}
 
-		Validate.isTrue(
-				requestUri.startsWith(serverBase),
-				"Request URI %s does not start with server base %s",
-				requestUri,
-				serverBase);
+		Validate.isTrue(requestUri.startsWith(serverBase), "Request URI %s does not start with server base %s", requestUri, serverBase);
 
 		if (theRequest.getUrlSource() == UrlSourceEnum.EXPLICIT) {
 			return;
@@ -92,4 +88,5 @@ public class UrlTenantSelectionInterceptor {
 		String newUri = serverBase + "/" + tenantId + requestUri.substring(serverBase.length());
 		theRequest.setUri(newUri);
 	}
+
 }

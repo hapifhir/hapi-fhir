@@ -20,12 +20,16 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import org.springframework.stereotype.Service;
 
 public class SubscriptionDeliveryChannelNamer implements ISubscriptionDeliveryChannelNamer {
 	@Override
 	public String nameFromSubscription(CanonicalSubscription theCanonicalSubscription) {
 		String channelType = theCanonicalSubscription.getChannelType().toCode().toLowerCase();
 		String subscriptionId = theCanonicalSubscription.getIdPart();
-		return "subscription-delivery-" + channelType + "-" + subscriptionId;
+		return "subscription-delivery-" +
+			channelType +
+			"-" +
+			subscriptionId;
 	}
 }

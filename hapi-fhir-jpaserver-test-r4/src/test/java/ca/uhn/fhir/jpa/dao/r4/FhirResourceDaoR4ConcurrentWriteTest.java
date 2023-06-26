@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,7 +55,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -68,8 +68,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"deprecation", "Duplicates"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentWriteTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentWriteTest.class);
 
 	private static final int THREAD_COUNT = 10;
 
@@ -100,11 +99,16 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransaction_multiThreaded() throws InterruptedException, ExecutionException {
+	public void testTransaction_multiThreaded()
+		throws InterruptedException, ExecutionException {
 		// setup
 		Bundle bundle1 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle.json");
-		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext, Bundle.class, "/r4/test-bundle2.json");
-		Bundle[] bundles = {bundle1, bundle2};
+		Bundle bundle2 = ClasspathUtil.loadResource(myFhirContext,
+			Bundle.class, "/r4/test-bundle2.json");
+		Bundle[] bundles = {
+			bundle1,
+			bundle2
+		};
 		int calls = bundles.length;
 		AtomicInteger counter = new AtomicInteger();
 		PointcutLatch latch = new PointcutLatch("transactionLatch");
@@ -125,7 +129,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				SystemRequestDetails details = new SystemRequestDetails();
 				details.setRetry(true);
 				details.setMaxRetries(3);
-				Bundle b = mySystemDao.transaction(details, bundle);
+				Bundle b = mySystemDao.transaction(details,
+					bundle);
 				int c = counter.incrementAndGet();
 				latch.call(1);
 				watch.endCurrentTask();
@@ -185,7 +190,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 			assertEquals(10, counts.get("Patient"), counts.toString());
 		});
+
 	}
+
 
 	/**
 	 * Make a transaction with conditional updates that will fail due to
@@ -219,6 +226,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			for (Future<?> next : futures) {
 				next.get();
 			}
+
+
 		}
 
 		logAllResourceLinks();
@@ -231,6 +240,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			assertEquals(6, myResourceTableDao.count());
 			assertEquals(14, myResourceHistoryTableDao.count());
 		});
+
 	}
 
 	@Test
@@ -256,6 +266,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			for (Future<?> next : futures) {
 				next.get();
 			}
+
 		}
 
 		logAllResourceLinks();
@@ -273,13 +284,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate()
-			throws ExecutionException, InterruptedException {
+	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
 		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
 		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
-		Runnable creator = () -> {
+		Runnable creator = ()->{
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Patient patient1 = new Patient();
@@ -318,24 +328,28 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			Map<String, Integer> counts = getResourceCountMap();
 			assertEquals(2, counts.get("Patient"), counts.toString());
 		});
+
 	}
 
 	@Nonnull
 	private Map<String, Integer> getResourceCountMap() {
 		Map<String, Integer> counts = new TreeMap<>();
-		myResourceTableDao.findAll().stream().forEach(t -> {
-			counts.putIfAbsent(t.getResourceType(), 0);
-			int value = counts.get(t.getResourceType());
-			value++;
-			counts.put(t.getResourceType(), value);
-		});
+		myResourceTableDao
+			.findAll()
+			.stream()
+			.forEach(t -> {
+				counts.putIfAbsent(t.getResourceType(), 0);
+				int value = counts.get(t.getResourceType());
+				value++;
+				counts.put(t.getResourceType(), value);
+			});
 		ourLog.info("Counts: {}", counts);
 		return counts;
 	}
 
+
 	@Nonnull
-	private Runnable newTransactionTaskWithUpdatesAndConditionalUpdates(
-			AtomicInteger theSetCounter, AtomicInteger theFuzzCounter) {
+	private Runnable newTransactionTaskWithUpdatesAndConditionalUpdates(AtomicInteger theSetCounter, AtomicInteger theFuzzCounter) {
 		Runnable creator = () -> {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			String patientId = "Patient/PT" + theSetCounter.get();
@@ -366,15 +380,13 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			practitioner.setId(practitionerId);
 			practitioner.addIdentifier().setSystem("foo").setValue("" + theSetCounter.get());
 			practitioner.addName().setFamily("SET " + theFuzzCounter.get());
-			bb.addTransactionCreateEntry(practitioner)
-					.conditional("Practitioner?identifier=foo|" + theSetCounter.get());
+			bb.addTransactionCreateEntry(practitioner).conditional("Practitioner?identifier=foo|" + theSetCounter.get());
 
 			Practitioner practitioner2 = new Practitioner();
 			practitioner2.setId(practitionerId2);
 			practitioner2.addIdentifier().setSystem("foo2").setValue("" + theSetCounter.get());
 			practitioner2.addName().setFamily("SET " + theFuzzCounter.get());
-			bb.addTransactionCreateEntry(practitioner2)
-					.conditional("Practitioner?identifier=foo2|" + theSetCounter.get());
+			bb.addTransactionCreateEntry(practitioner2).conditional("Practitioner?identifier=foo2|" + theSetCounter.get());
 
 			Observation obs = new Observation();
 			obs.setId("Observation/OBS" + theSetCounter);
@@ -389,6 +401,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		};
 		return creator;
 	}
+
 
 	@Test
 	public void testCreateWithClientAssignedId() {
@@ -421,6 +434,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
 
 	@Test
@@ -445,8 +459,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (ExecutionException e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				assertEquals(
-						ResourceVersionConflictException.class, e.getCause().getClass());
+				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
 			}
 		}
 
@@ -454,11 +467,11 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
 
 	@Test
-	public void testCreateWithClientAssignedId_SystemRequestContainingRetryDirective()
-			throws InterruptedException, ExecutionException {
+	public void testCreateWithClientAssignedId_SystemRequestContainingRetryDirective() throws InterruptedException, ExecutionException {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
@@ -487,6 +500,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
 
 	@Test
@@ -505,8 +519,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		sp.addComponent().setExpression("Patient").setDefinition("SearchParameter/patient-gender");
-		sp.addExtension().setUrl(HapiExtensions.EXT_SP_UNIQUE).setValue(new BooleanType(true));
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-gender");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -521,10 +539,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					myPatientDao.create(p);
 				} catch (PreconditionFailedException e) {
 					// expected - This is as a result of the unique SP
-					assertThat(
-							e.getMessage(),
-							containsString(
-									"duplicate unique index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+					assertThat(e.getMessage(), containsString("duplicate unique index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
 				} catch (ResourceVersionConflictException e) {
 					// expected - This is as a result of the unique SP
 					assertThat(e.getMessage(), containsString("duplicate"));
@@ -546,18 +561,15 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		}
 
 		runInTransaction(() -> {
-			ourLog.info("Uniques:\n * "
-					+ myResourceIndexedCompositeStringUniqueDao.findAll().stream()
-							.map(t -> t.toString())
-							.collect(Collectors.joining("\n * ")));
+			ourLog.info("Uniques:\n * " + myResourceIndexedCompositeStringUniqueDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		// Make sure we saved the object
 		myCaptureQueriesListener.clear();
-		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(
-				"gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male")));
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male")));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, search.sizeOrThrowNpe());
+
 	}
 
 	@Test
@@ -585,6 +597,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			task = () -> myPatientDao.delete(patientId, mySrd);
 			future = myExecutor.submit(task);
 			futures.add(future);
+
 		}
 
 		// Look for failures
@@ -601,13 +614,13 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		IBundleProvider patient = myPatientDao.history(patientId, null, null, null, null);
 		assertThat(patient.sizeOrThrowNpe(), greaterThanOrEqualTo(3));
+
 	}
 
 	@Test
 	public void testNoRetryRequest() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME)))
-				.thenReturn(Collections.emptyList());
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
@@ -640,6 +653,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
 
 	@Test
@@ -675,13 +689,14 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
+
 
 	@Test
 	public void testNoRequestDetails() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME)))
-				.thenReturn(Collections.emptyList());
+		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.emptyList());
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
@@ -714,7 +729,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
+
 
 	@Test
 	public void testPatch() {
@@ -731,9 +748,18 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			Parameters patch = new Parameters();
 			Parameters.ParametersParameterComponent operation = patch.addParameter();
 			operation.setName("operation");
-			operation.addPart().setName("type").setValue(new CodeType("replace"));
-			operation.addPart().setName("path").setValue(new StringType("Patient.name[0].family"));
-			operation.addPart().setName("value").setValue(new StringType("FAMILY-" + i));
+			operation
+				.addPart()
+				.setName("type")
+				.setValue(new CodeType("replace"));
+			operation
+				.addPart()
+				.setName("path")
+				.setValue(new StringType("Patient.name[0].family"));
+			operation
+				.addPart()
+				.setName("value")
+				.setValue(new StringType("FAMILY-" + i));
 
 			Runnable task = () -> myPatientDao.patch(pId, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
 			Future<?> future = myExecutor.submit(task);
@@ -755,7 +781,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(pId);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("6", patient.getMeta().getVersionId());
+
 	}
+
 
 	@Test
 	public void testTransactionWithCreate() {
@@ -777,11 +805,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 			Bundle bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry()
-					.setResource(p)
-					.getRequest()
-					.setMethod(Bundle.HTTPVerb.PUT)
-					.setUrl("Patient/ABC");
+			bundle
+				.addEntry()
+				.setResource(p)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("Patient/ABC");
 			Runnable task = () -> mySystemDao.transaction(srd, bundle);
 
 			Future<?> future = myExecutor.submit(task);
@@ -803,7 +832,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
+
 	}
+
 
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReferenceToThatId() {
@@ -859,10 +890,12 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			Patient patient = myPatientDao.read(new IdType("Patient/PATIENT0"));
 			assertEquals(true, patient.getActive());
 		}
+
 	}
 
 	private void setupRetryBehaviour(ServletRequestDetails theServletRequestDetails) {
 		when(theServletRequestDetails.isRetry()).thenReturn(true);
 		when(theServletRequestDetails.getMaxRetries()).thenReturn(10);
 	}
+
 }

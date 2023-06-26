@@ -73,6 +73,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		} catch (ResourceNotFoundException e) {
 			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
+
 	}
 
 	@Test
@@ -103,7 +104,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreatePartition_whenPartitionIdAlreadyExists_operationNotAllowed() {
+	public void testCreatePartition_whenPartitionIdAlreadyExists_operationNotAllowed(){
 		try {
 			PartitionEntity partition = new PartitionEntity();
 			partition.setId(123);
@@ -116,8 +117,10 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			partition.setName("NAME111");
 			partition.setDescription("A description");
 			myPartitionConfigSvc.createPartition(partition, null);
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2366) + "Partition ID already exists", e.getMessage());
+		}
+
+		catch (InvalidRequestException e) {
+			assertEquals( Msg.code(2366) + "Partition ID already exists", e.getMessage());
 		}
 	}
 
@@ -170,6 +173,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1312) + "Partition name \"NAME 123\" is not valid", e.getMessage());
 		}
+
 	}
 
 	@Test
@@ -184,6 +188,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1307) + "No partition exists with ID 123", e.getMessage());
 		}
+
 	}
 
 	@Test

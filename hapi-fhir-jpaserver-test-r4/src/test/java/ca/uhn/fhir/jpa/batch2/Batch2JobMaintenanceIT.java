@@ -31,10 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,13 +44,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater#handleStatusChange}
  * {@link ca.uhn.fhir.batch2.progress.InstanceProgress#updateStatus(JobInstance)}
  * {@link JobInstanceProcessor#cleanupInstance()}
- *
+
  * For chunks:
  *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
  *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
  *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
- */
-@TestPropertySource(properties = {UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE})
+*/
+@TestPropertySource(properties = {
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
+})
 @ContextConfiguration(classes = {Batch2JobMaintenanceIT.SpringConfig.class})
 public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceIT.class);
@@ -58,19 +60,14 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	public static final int TEST_JOB_VERSION = 1;
 	public static final String FIRST_STEP_ID = "first-step";
 	public static final String LAST_STEP_ID = "last-step";
-
 	@Autowired
 	JobDefinitionRegistry myJobDefinitionRegistry;
-
 	@Autowired
 	IJobCoordinator myJobCoordinator;
-
 	@Autowired
 	IJobMaintenanceService myJobMaintenanceService;
-
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
-
 	@Autowired
 	private IChannelFactory myChannelFactory;
 
@@ -91,8 +88,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() {
 		myCompletionHandler = details -> {};
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(
-				CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 			ourLog.info("Batch maintenance job started");
@@ -115,8 +111,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 			callLatch(myFirstStepLatch, step);
 			return RunOutcome.SUCCESS;
 		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep =
-				(step, sink) -> callLatch(myLastStepLatch, step);
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
@@ -142,9 +137,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	}
 
 	private void assertJobMaintenanceCalledAtLeast(int theSize) {
-		assertTrue(
-				myStackTraceElements.size() >= theSize,
-				"Expected at least " + theSize + " calls to job maintenance but got " + myStackTraceElements.size());
+		assertTrue(myStackTraceElements.size() >= theSize, "Expected at least " + theSize + " calls to job maintenance but got " + myStackTraceElements.size());
 	}
 
 	private void assertJobMaintenanceCalledByQuartzThread() {
@@ -160,18 +153,15 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFirstStepToSecondStepFasttrackingDisabled_singleChunkDoesNotFasttrack()
-			throws InterruptedException {
+	public void testFirstStepToSecondStepFasttrackingDisabled_singleChunkDoesNotFasttrack() throws InterruptedException {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 
-		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, VoidModel, Batch2JobMaintenanceIT.FirstStepOutput>
-				firstStep = (step, sink) -> {
-					sink.accept(new Batch2JobMaintenanceIT.FirstStepOutput());
-					callLatch(myFirstStepLatch, step);
-					return RunOutcome.SUCCESS;
-				};
-		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, Batch2JobMaintenanceIT.FirstStepOutput, VoidModel>
-				lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
+		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, VoidModel, Batch2JobMaintenanceIT.FirstStepOutput> firstStep = (step, sink) -> {
+			sink.accept(new Batch2JobMaintenanceIT.FirstStepOutput());
+			callLatch(myFirstStepLatch, step);
+			return RunOutcome.SUCCESS;
+		};
+		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, Batch2JobMaintenanceIT.FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 
@@ -209,35 +199,44 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(
-			String theJobId,
-			IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
-			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
+	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
-				.setJobDefinitionId(theJobId)
-				.setJobDescription("test job")
-				.setJobDefinitionVersion(TEST_JOB_VERSION)
-				.setParametersType(TestJobParameters.class)
-				.gatedExecution()
-				.addFirstStep(FIRST_STEP_ID, "Test first step", FirstStepOutput.class, theFirstStep)
-				.addLastStep(LAST_STEP_ID, "Test last step", theLastStep)
-				.completionHandler(myCompletionHandler)
-				.build();
+			.setJobDefinitionId(theJobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				theFirstStep
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				theLastStep
+			)
+			.completionHandler(myCompletionHandler)
+			.build();
 	}
 
 	static class TestJobParameters implements IModelJson {
-		TestJobParameters() {}
+		TestJobParameters() {
+		}
 	}
 
 	static class FirstStepOutput implements IModelJson {
-		FirstStepOutput() {}
+		FirstStepOutput() {
+		}
 	}
 
 	static class SecondStepOutput implements IModelJson {
 		@JsonProperty("test")
 		private String myTestValue;
 
-		SecondStepOutput() {}
+		SecondStepOutput() {
+		}
 
 		public void setValue(String theV) {
 			myTestValue = theV;
@@ -259,7 +258,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		@PostConstruct
 		void fastScheduler() {
-			((JobMaintenanceServiceImpl) myJobMaintenanceService).setScheduledJobFrequencyMillis(200);
+			((JobMaintenanceServiceImpl)myJobMaintenanceService).setScheduledJobFrequencyMillis(200);
 		}
 	}
 }

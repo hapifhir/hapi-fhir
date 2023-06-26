@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,7 @@ public class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 
 		String resource = ClasspathUtil.loadResource(filename);
 		List<ITermLoaderSvc.FileDescriptor> descriptors = new ArrayList<>();
-		descriptors.add(
-				new ITermLoaderSvc.ByteArrayFileDescriptor(filename, resource.getBytes(StandardCharsets.UTF_8)));
+		descriptors.add(new ITermLoaderSvc.ByteArrayFileDescriptor(filename, resource.getBytes(StandardCharsets.UTF_8)));
 		mySvc.loadIcd10cm(descriptors, new SystemRequestDetails());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -50,12 +49,11 @@ public class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 
 			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());
 
-			TermCodeSystemVersion codeSystemVersion =
-					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(codeSystem.getPid(), "2021");
+			TermCodeSystemVersion codeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(codeSystem.getPid(), "2021");
 			assertEquals(codeSystem.getCurrentVersion().getPid(), codeSystemVersion.getPid());
-			assertEquals(
-					codeSystem.getResource().getId(),
-					codeSystemVersion.getResource().getId());
+			assertEquals(codeSystem.getResource().getId(), codeSystemVersion.getResource().getId());
 		});
+
 	}
+
 }

@@ -29,16 +29,9 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 		"QUEUED, QUEUED, QUEUED, true, normal transition",
 		"QUEUED, FAILED, IN_PROGRESS, false, blocked transition"
 	})
-	void updateInstance_toState_fromState_whenAllowed(
-			StatusEnum theCurrentState,
-			StatusEnum theTargetState,
-			String theAllowedPriorStatesString,
-			boolean theExpectedSuccessFlag) {
-		Set<StatusEnum> theAllowedPriorStates = Arrays.stream(
-						theAllowedPriorStatesString.trim().split(" +"))
-				.map(StatusEnum::valueOf)
-				.collect(Collectors.toSet());
-		// given
+	void updateInstance_toState_fromState_whenAllowed(StatusEnum theCurrentState, StatusEnum theTargetState, String theAllowedPriorStatesString, boolean theExpectedSuccessFlag) {
+		Set<StatusEnum> theAllowedPriorStates = Arrays.stream(theAllowedPriorStatesString.trim().split(" +")).map(StatusEnum::valueOf).collect(Collectors.toSet());
+	    // given
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
 		String jobId = UUID.randomUUID().toString();
 		entity.setId(jobId);
@@ -48,12 +41,13 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 		myBatch2JobInstanceRepository.save(entity);
 
 		// when
-		int changeCount = runInTransaction(() ->
+		int changeCount =
+			runInTransaction(()->
 				myBatch2JobInstanceRepository.updateInstanceStatusIfIn(jobId, theTargetState, theAllowedPriorStates));
 
 		// then
-		Batch2JobInstanceEntity readBack = runInTransaction(
-				() -> myBatch2JobInstanceRepository.findById(jobId).orElseThrow());
+		Batch2JobInstanceEntity readBack = runInTransaction(() ->
+			myBatch2JobInstanceRepository.findById(jobId).orElseThrow());
 		if (theExpectedSuccessFlag) {
 			assertEquals(1, changeCount, "The change happened");
 			assertEquals(theTargetState, readBack.getStatus());
@@ -61,5 +55,8 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 			assertEquals(0, changeCount, "The change did not happened");
 			assertEquals(theCurrentState, readBack.getStatus());
 		}
+
 	}
+
+
 }

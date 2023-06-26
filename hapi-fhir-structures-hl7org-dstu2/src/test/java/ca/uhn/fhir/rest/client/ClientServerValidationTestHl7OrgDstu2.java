@@ -68,30 +68,25 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				if (myFirstResponse) {
-					myFirstResponse = false;
+					myFirstResponse=false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
 				} else {
-					return new ReaderInputStream(
-							new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())),
-							Charset.forName("UTF-8"));
+					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())), Charset.forName("UTF-8"));
 				}
-			}
-		});
+			}});
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
-
-		// don't load the conformance until the first time the client is actually used
+		
+		// don't load the conformance until the first time the client is actually used 
 		assertTrue(myFirstResponse);
 		client.read(new UriDt("http://foo/Patient/123"));
 		assertFalse(myFirstResponse);
@@ -105,25 +100,16 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		String wrongFhirVersion = "3.0.2";
-		assertThat(
-				wrongFhirVersion,
-				is(
-						FhirVersionEnum.DSTU3
-								.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version
-		// is
-		// still correct
+		assertThat(wrongFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version is still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
@@ -132,35 +118,29 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
 			fail();
 		} catch (FhirClientInappropriateForServerException e) {
-			assertThat(
-					e.toString(),
-					containsString(
-							"The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"3.0.2\" which corresponds to DSTU3, but this client is configured to use DSTU2_HL7ORG (via the FhirContext)"));
+			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"3.0.2\" which corresponds to DSTU3, but this client is configured to use DSTU2_HL7ORG (via the FhirContext)"));
 		}
 	}
 
-	@Test
-	public void testServerReturnsRightVersionForDstu2() throws Exception {
-		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString()));
-		Conformance conf = new Conformance();
-		conf.setFhirVersion(appropriateFhirVersion);
-		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
+   @Test
+   public void testServerReturnsRightVersionForDstu2() throws Exception {
+     String appropriateFhirVersion = "1.0.2";
+     assertThat(appropriateFhirVersion, is(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString()));
+     Conformance conf = new Conformance();
+     conf.setFhirVersion(appropriateFhirVersion);
+     String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+     ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine())
-				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType())
-				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent())
-				.thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+     when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+     when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+     when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+     when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myCtx.newRestfulGenericClient("http://foo").forceConformanceCheck();
-	}
+     myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+     myCtx.newRestfulGenericClient("http://foo").forceConformanceCheck();
+  }
 
 	@AfterAll
 	public static void afterClassClearContext() {

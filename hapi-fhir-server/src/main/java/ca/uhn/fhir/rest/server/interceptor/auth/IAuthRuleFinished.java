@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import java.util.List;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public interface IAuthRuleFinished {
 
@@ -55,4 +55,5 @@ public interface IAuthRuleFinished {
 	 * @param theQueryParameters a FHIR query parameter string.  E.g. category=laboratory&date=ge2021
 	 */
 	IAuthRuleFinished withFilterTester(String theQueryParameters);
+
 }

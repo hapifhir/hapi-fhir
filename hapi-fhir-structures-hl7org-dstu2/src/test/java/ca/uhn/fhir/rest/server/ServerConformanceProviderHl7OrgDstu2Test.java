@@ -45,11 +45,11 @@ import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -62,21 +62,18 @@ import static org.mockito.Mockito.when;
 
 public class ServerConformanceProviderHl7OrgDstu2Test {
 
-	static {
-		HapiSystemProperties.enableTestMode();
-	}
+  static {
+    HapiSystemProperties.enableTestMode();
+  }
 
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderHl7OrgDstu2Test.class);
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderHl7OrgDstu2Test.class);
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
 		when(req.getServletPath()).thenReturn("/fhir");
-		when(req.getRequestURL())
-				.thenReturn(
-						new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
 		when(req.getContextPath()).thenReturn("/FhirStorm");
 		return req;
 	}
@@ -102,15 +99,14 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		ConformanceRestResourceComponent res =
-				conformance.getRest().get(0).getResource().get(1);
+		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
-
+		
 		assertTrue(res.getConditionalCreate());
 		assertEquals(ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
 	}
-
+	
 	@Test
 	public void testExtendedOperationReturningBundle() throws Exception {
 
@@ -128,20 +124,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals(
-				"$everything",
-				conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals(
-				"OperationDefinition/Patient-i-everything",
-				conformance
-						.getRest()
-						.get(0)
-						.getOperation()
-						.get(0)
-						.getDefinition()
-						.getReference());
+		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
 	}
 
+	
 	@Test
 	public void testExtendedOperationReturningBundleOperation() throws Exception {
 
@@ -153,9 +140,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(
-				new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
-
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
+				
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
@@ -179,10 +165,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(
-				conf,
-				containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode()
-						+ "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -202,8 +185,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param =
-						(SearchParameter) binding.getParameters().iterator().next();
+				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
 				found = true;
 			}
@@ -234,10 +216,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		ConformanceRestResourceComponent res =
-				conformance.getRest().get(0).getResource().get(1);
+		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
-
+		
 		assertNull(res.getConditionalCreateElement().getValue());
 		assertNull(res.getConditionalDeleteElement().getValue());
 		assertNull(res.getConditionalUpdateElement().getValue());
@@ -260,8 +241,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param =
-						(SearchParameter) binding.getParameters().iterator().next();
+				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
 				found = true;
 			}
@@ -272,9 +252,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(
-				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
+
 	}
 
 	@Test
@@ -364,8 +344,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param =
-						(SearchParameter) binding.getParameters().iterator().next();
+				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
 				found = true;
 			}
@@ -375,10 +354,10 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
-
-		assertThat(
-				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		
+		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
+
 	}
 
 	@Test
@@ -397,10 +376,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(
-				conf,
-				containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode()
-						+ "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -419,10 +395,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(
-				conf,
-				containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode()
-						+ "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -459,12 +432,10 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(
-				@IdParam IdType theId,
-				@ResourceParam Patient thePatient,
-				@ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
+
 	}
 
 	public static class InstanceHistoryProvider implements IResourceProvider {
@@ -477,6 +448,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public List<IBaseResource> history(@IdParam IdType theId) {
 			return null;
 		}
+
 	}
 
 	/**
@@ -485,13 +457,10 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(
-				@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER)
-						TokenParam theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME)
-						StringParam theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
+
 	}
 
 	public static class NonConditionalProvider implements IResourceProvider {
@@ -515,31 +484,24 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
+
 	}
 
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(
-				name = "plain",
-				idempotent = true,
-				returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringType.class)})
-		public IBundleProvider everything(
-				javax.servlet.http.HttpServletRequest theServletRequest,
-				@IdParam IdType theId,
-				@OperationParam(name = "start") DateType theStart,
-				@OperationParam(name = "end") DateType theEnd) {
+		@Operation(name = "plain", idempotent = true, returnParameters= {
+			@OperationParam(min=1, max=2, name="out1", type=StringType.class)
+		})
+		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
+
 	}
 
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(
-				javax.servlet.http.HttpServletRequest theServletRequest,
-				@IdParam IdType theId,
-				@OperationParam(name = "start") DateType theStart,
-				@OperationParam(name = "end") DateType theEnd) {
+		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart, @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -547,21 +509,18 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
 
 	public static class ProviderWithRequiredAndOptional {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(
-				@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER)
-						TokenParam thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
-				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-				@IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes)
-				throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
+
 	}
 
 	/**
@@ -570,10 +529,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(
-				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
-						@RequiredParam(name = Patient.SP_IDENTIFIER)
-						TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -581,6 +537,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
+
 	}
 
 	/**
@@ -589,12 +546,10 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(
-				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
-						@RequiredParam(name = Patient.SP_IDENTIFIER)
-						TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
+
 	}
 
 	public static class SystemHistoryProvider {
@@ -603,6 +558,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
+
 	}
 
 	public static class TypeHistoryProvider implements IResourceProvider {
@@ -616,6 +572,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
+
 	}
 
 	/**
@@ -624,10 +581,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(
-				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
-						@RequiredParam(name = Patient.SP_IDENTIFIER)
-						TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -635,11 +589,13 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
+
 	}
 
-	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails();
-		retVal.setServer(theServer);
-		return retVal;
-	}
+  private RequestDetails createRequestDetails(RestfulServer theServer) {
+    ServletRequestDetails retVal = new ServletRequestDetails();
+    retVal.setServer(theServer);
+    return retVal;
+  }
+
 }

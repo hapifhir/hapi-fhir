@@ -66,9 +66,7 @@ public class ReadDstu2Test {
 		// thus it has changed before the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
-		httpGet.addHeader(
-				Constants.HEADER_IF_MODIFIED_SINCE,
-				DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(304, status.getStatusLine().getStatusCode());
@@ -80,9 +78,7 @@ public class ReadDstu2Test {
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
-		httpGet.addHeader(
-				Constants.HEADER_IF_MODIFIED_SINCE,
-				DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(304, status.getStatusLine().getStatusCode());
@@ -94,15 +90,14 @@ public class ReadDstu2Test {
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
-		httpGet.addHeader(
-				Constants.HEADER_IF_MODIFIED_SINCE,
-				DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
+
 	}
 
 	/**
@@ -120,9 +115,7 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals(
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>",
-				responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);
 
@@ -147,9 +140,7 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals(
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>",
-				responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 	}
 
 	/**
@@ -168,10 +159,7 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertThat(
-				responseContent,
-				containsString(
-						"\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}"));
+		assertThat(responseContent, containsString("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}"));
 	}
 
 	/**
@@ -203,9 +191,7 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		assertEquals(
-				"<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>",
-				responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);
 
@@ -236,12 +222,14 @@ public class ReadDstu2Test {
 			}
 			return p1;
 		}
+
 	}
 
 	@ResourceDef(name = "Patient", profile = "http://foo_profile")
 	public static class MyPatient extends Patient {
 
 		private static final long serialVersionUID = 1L;
+
 	}
 
 	@AfterAll
@@ -268,10 +256,11 @@ public class ReadDstu2Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
+
 }

@@ -44,8 +44,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		List<BaseTask> notAppliedTasks = new ArrayList<>();
 		notAppliedYet.forEach(notAppliedTasks::add);
 
-		assertEquals(
-				RELEASE_VERSION_PREFIX + FAILED_VERSION, notAppliedTasks.get(0).getMigrationVersion());
+		assertEquals(RELEASE_VERSION_PREFIX + FAILED_VERSION, notAppliedTasks.get(0).getMigrationVersion());
 		assertEquals(RELEASE_VERSION_PREFIX + version, notAppliedTasks.get(1).getMigrationVersion());
 	}
 
@@ -111,24 +110,20 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 
 		Builder version = forVersion(taskList);
 
-		Builder.BuilderAddTableByColumns cmpToks = version.addTableByColumns("20210720.3", "HFJ_IDX_CMB_TOK_NU", "PID");
+		Builder.BuilderAddTableByColumns cmpToks = version
+			.addTableByColumns("20210720.3", "HFJ_IDX_CMB_TOK_NU", "PID");
 		cmpToks.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		cmpToks.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 		cmpToks.addColumn("HASH_COMPLETE").nonNullable().type(ColumnTypeEnum.LONG);
 		cmpToks.addColumn("IDX_STRING").nonNullable().type(ColumnTypeEnum.STRING, 500);
-		cmpToks.addForeignKey("20210720.4", "FK_IDXCMBTOKNU_RES_ID")
-				.toColumn("RES_ID")
-				.references("HFJ_RESOURCE", "RES_ID");
+		cmpToks.addForeignKey("20210720.4", "FK_IDXCMBTOKNU_RES_ID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		cmpToks.addIndex("20210720.5", "IDX_IDXCMBTOKNU_STR").unique(false).withColumns("IDX_STRING");
 		cmpToks.addIndex("20210720.6", "IDX_IDXCMBTOKNU_RES").unique(false).withColumns("RES_ID");
 
 		Builder.BuilderWithTableName cmbTokNuTable = version.onTable("HFJ_IDX_CMB_TOK_NU");
 
 		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
-		cmbTokNuTable
-				.addColumn(LAST_SUCCEEDED_VERSION, "PARTITION_DATE")
-				.nullable()
-				.type(ColumnTypeEnum.DATE_ONLY);
+		cmbTokNuTable.addColumn(LAST_SUCCEEDED_VERSION, "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
 		cmbTokNuTable.modifyColumn(FAILED_VERSION, "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
 
 		return taskList;
@@ -141,4 +136,6 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		};
 		return new Builder(RELEASE, sink);
 	}
+
+
 }

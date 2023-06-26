@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.test;
 
-// import javax.persistence.EntityManagerFactory;
+//import javax.persistence.EntityManagerFactory;
 
-// import org.hibernate.jpa.HibernatePersistenceProvider;
+//import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import org.springframework.context.annotation.Bean;

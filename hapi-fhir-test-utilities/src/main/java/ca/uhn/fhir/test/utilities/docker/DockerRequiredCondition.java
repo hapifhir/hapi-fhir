@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.DockerClientFactory;
 
+
 /**
  * Execution condition which will skip test classes that require docker if it is not present on the host machine
  */
@@ -36,8 +37,8 @@ public class DockerRequiredCondition implements ExecutionCondition {
 		try {
 			boolean isDockerAvailable = DockerClientFactory.instance().isDockerAvailable();
 			return isDockerAvailable
-					? ConditionEvaluationResult.enabled(AVAILABLE_MSG)
-					: ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
+				? ConditionEvaluationResult.enabled(AVAILABLE_MSG)
+				: ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
 		} catch (Exception e) {
 			return ConditionEvaluationResult.disabled(UNAVAILABLE_MSG);
 		}

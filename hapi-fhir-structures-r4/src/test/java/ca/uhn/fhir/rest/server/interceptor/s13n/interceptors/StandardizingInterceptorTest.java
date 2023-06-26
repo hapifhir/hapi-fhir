@@ -2,37 +2,44 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.interceptors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
 import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class StandardizingInterceptorTest {
 
-	private static final String CONFIG = "{\n" + "\t\"Person\" : {\n"
-			+ "\t\t\"Person.name.family\" : \"NAME_FAMILY\",\n"
-			+ "\t\t\"Person.name.given\" : \"NAME_GIVEN\",\n"
-			+ "\t\t\"Person.telecom.where(system='phone').value\" : \"PHONE\"\n"
-			+ "\t\t},\n"
-			+ "\t\"Patient\" : {\n"
-			+ "\t\t\"name.given\" : \"NAME_GIVEN\",\n"
-			+ "\t\t\"telecom.where(system='phone').value\" : \"PHONE\"\n"
-			+ "\t\t}\n"
-			+ "}";
-
-	private static final String BAD_CONFIG =
-			"{ \"Person\" : { \"Person.name.family\" : \"org.nonexistent.Standardizer\"}}";
+	private static final String CONFIG =
+		"{\n" +
+			"\t\"Person\" : {\n" +
+			"\t\t\"Person.name.family\" : \"NAME_FAMILY\",\n" +
+			"\t\t\"Person.name.given\" : \"NAME_GIVEN\",\n" +
+			"\t\t\"Person.telecom.where(system='phone').value\" : \"PHONE\"\n" +
+			"\t\t},\n" +
+			"\t\"Patient\" : {\n" +
+			"\t\t\"name.given\" : \"NAME_GIVEN\",\n" +
+			"\t\t\"telecom.where(system='phone').value\" : \"PHONE\"\n" +
+			"\t\t}\n" +
+			"}";
+	
+	private static final String BAD_CONFIG = "{ \"Person\" : { \"Person.name.family\" : \"org.nonexistent.Standardizer\"}}";
 
 	private static FhirContext ourCtx = FhirContext.forR4();
 
@@ -82,8 +89,7 @@ class StandardizingInterceptorTest {
 
 	@Test
 	public void testDisablingValidationViaHeader() {
-		when(myRequestDetails.getHeaders(eq(STANDARDIZATION_DISABLED_HEADER)))
-				.thenReturn(Arrays.asList(new String[] {"True"}));
+		when(myRequestDetails.getHeaders(eq(STANDARDIZATION_DISABLED_HEADER))).thenReturn(Arrays.asList(new String[]{"True"}));
 
 		Person p = new Person();
 		p.addName().setFamily("non'normalized").addGiven("name");

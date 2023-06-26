@@ -39,8 +39,7 @@ public class SearchDefaultMethodDstu3Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchDefaultMethodDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDefaultMethodDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourLastMethod;
@@ -72,6 +71,7 @@ public class SearchDefaultMethodDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -85,20 +85,14 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val1",
-					ourLastParam1
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 			assertEquals(null, ourLastParam2);
 			assertEquals(null, ourLastAdditionalParams);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -112,37 +106,23 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val1",
-					ourLastParam1
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			assertThat(ourLastParam2.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val2",
-					ourLastParam2
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			assertEquals(null, ourLastAdditionalParams);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
 	public void testSearchTwoOptionalParamsAndExtraParam() throws Exception {
-		HttpGet httpGet = new HttpGet(
-				"http://localhost:" + ourPort + "/Patient?param1=val1&param2=val2&param3=val3&_pretty=true");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?param1=val1&param2=val2&param3=val3&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -153,25 +133,11 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val1",
-					ourLastParam1
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			assertThat(ourLastParam2.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val2",
-					ourLastParam2
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			ourLog.info(ourLastAdditionalParams.toString());
 			assertEquals(1, ourLastAdditionalParams.size());
@@ -180,12 +146,12 @@ public class SearchDefaultMethodDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
 	public void testSearchTwoOptionalParamsWithQualifierAndExtraParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
-				+ "/Patient?param1=val1&param2=val2&param2:exact=val2e&param3=val3&_pretty=true");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?param1=val1&param2=val2&param2:exact=val2e&param3=val3&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -196,33 +162,12 @@ public class SearchDefaultMethodDstu3Test {
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens(), hasSize(1));
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val1",
-					ourLastParam1
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			assertThat(ourLastParam2.toString(), ourLastParam2.getValuesAsQueryTokens(), hasSize(2));
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens(), hasSize(1));
-			assertEquals(
-					"val2",
-					ourLastParam2
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
-			assertEquals(
-					"val2e",
-					ourLastParam2
-							.getValuesAsQueryTokens()
-							.get(1)
-							.getValuesAsQueryTokens()
-							.get(0)
-							.getValue());
+			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals("val2e", ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
 
 			ourLog.info(ourLastAdditionalParams.toString());
 			assertEquals(1, ourLastAdditionalParams.size());
@@ -231,6 +176,7 @@ public class SearchDefaultMethodDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@AfterAll
@@ -254,13 +200,13 @@ public class SearchDefaultMethodDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	private static Map<String, List<String>> ourLastAdditionalParams;
@@ -273,12 +219,12 @@ public class SearchDefaultMethodDstu3Test {
 		}
 
 		@Search()
-		public List<Patient> search01(@OptionalParam(name = "param1") StringAndListParam theParam1) {
+		public List<Patient> search01(
+				@OptionalParam(name = "param1") StringAndListParam theParam1) {
 			ourLastMethod = "search01";
 			ourLastParam1 = theParam1;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
 
@@ -290,8 +236,7 @@ public class SearchDefaultMethodDstu3Test {
 			ourLastParam1 = theParam1;
 			ourLastParam2 = theParam2;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
 
@@ -305,9 +250,10 @@ public class SearchDefaultMethodDstu3Test {
 			ourLastParam2 = theParam2;
 			ourLastAdditionalParams = theAdditionalParams;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("1"));
 			return retVal;
 		}
+
 	}
+
 }

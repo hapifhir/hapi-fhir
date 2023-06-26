@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import java.sql.Blob;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -28,6 +26,8 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import java.sql.Blob;
+import java.util.Date;
 
 @Entity
 @Table(name = "HFJ_BINARY_STORAGE_BLOB")
@@ -35,26 +35,20 @@ public class BinaryStorageEntity {
 
 	@Id
 	@Column(name = "BLOB_ID", length = 200, nullable = false)
-	// N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
+	//N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
 	private String myBlobId;
-
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
-
 	@Column(name = "BLOB_SIZE", nullable = true)
 	private long mySize;
-
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
 	private String myBlobContentType;
-
 	@Lob
 	@Column(name = "BLOB_DATA", nullable = false, insertable = true, updatable = false)
 	private Blob myBlob;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "PUBLISHED_DATE", nullable = false)
 	private Date myPublished;
-
 	@Column(name = "BLOB_HASH", length = 128, nullable = true)
 	private String myHash;
 

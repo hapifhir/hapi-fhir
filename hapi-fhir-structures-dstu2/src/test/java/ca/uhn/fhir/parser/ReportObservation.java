@@ -109,4 +109,5 @@ public class ReportObservation extends Observation {
 		this.sectionContentId = new StringDt(sectionContentId);
 		return this;
 	}
+
 }

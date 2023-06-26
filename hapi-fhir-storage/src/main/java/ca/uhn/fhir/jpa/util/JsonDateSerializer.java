@@ -35,4 +35,5 @@ public class JsonDateSerializer extends JsonSerializer<Date> {
 			theGen.writeString(new InstantType(theValue).getValueAsString());
 		}
 	}
+
 }

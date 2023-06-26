@@ -46,19 +46,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 public class ResourceReindexer {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexer.class);
-
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
-
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
@@ -69,8 +64,7 @@ public class ResourceReindexer {
 	}
 
 	public void readAndReindexResourceByPid(Long theResourcePid) {
-		ResourceTable resourceTable =
-				myResourceTableDao.findById(theResourcePid).orElseThrow(IllegalStateException::new);
+		ResourceTable resourceTable = myResourceTableDao.findById(theResourcePid).orElseThrow(IllegalStateException::new);
 		reindexResourceEntity(resourceTable);
 	}
 
@@ -81,10 +75,7 @@ public class ResourceReindexer {
 		ForcedId forcedId = theResourceTable.getForcedId();
 		if (forcedId != null) {
 			if (isBlank(forcedId.getResourceType())) {
-				ourLog.info(
-						"Updating resource {} forcedId type to {}",
-						forcedId.getForcedId(),
-						theResourceTable.getResourceType());
+				ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), theResourceTable.getResourceType());
 				forcedId.setResourceType(theResourceTable.getResourceType());
 				myForcedIdDao.save(forcedId);
 			}
@@ -95,17 +86,12 @@ public class ResourceReindexer {
 		IBaseResource resource = dao.readByPid(JpaPid.fromId(theResourceTable.getId()), true);
 
 		if (resource == null) {
-			throw new InternalErrorException(Msg.code(1171) + "Could not find resource version "
-					+ theResourceTable.getIdDt().toUnqualified().getValue() + " in database");
+			throw new InternalErrorException(Msg.code(1171) + "Could not find resource version " + theResourceTable.getIdDt().toUnqualified().getValue() + " in database");
 		}
 
 		Long actualVersion = resource.getIdElement().getVersionIdPartAsLong();
 		if (actualVersion < expectedVersion) {
-			ourLog.warn(
-					"Resource {} version {} does not exist, renumbering version {}",
-					resource.getIdElement().toUnqualifiedVersionless().getValue(),
-					resource.getIdElement().getVersionIdPart(),
-					expectedVersion);
+			ourLog.warn("Resource {} version {} does not exist, renumbering version {}", resource.getIdElement().toUnqualifiedVersionless().getValue(), resource.getIdElement().getVersionIdPart(), expectedVersion);
 			myResourceHistoryTableDao.updateVersion(theResourceTable.getId(), actualVersion, expectedVersion);
 		}
 
@@ -122,5 +108,6 @@ public class ResourceReindexer {
 			// update the full-text index, if active.
 			myFulltextSearchSvc.reindex(theResourceTable);
 		}
+
 	}
 }

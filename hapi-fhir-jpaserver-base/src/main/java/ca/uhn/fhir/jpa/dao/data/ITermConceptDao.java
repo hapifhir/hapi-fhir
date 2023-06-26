@@ -33,23 +33,24 @@ import java.util.Optional;
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d " + "WHERE t.myId IN :pids")
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myId IN :pids")
 	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
 
-	@Query("SELECT t FROM TermConcept t " + "LEFT JOIN FETCH t.myDesignations d "
-			+ "WHERE t.myCodeSystemVersionPid = :pid")
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myCodeSystemVersionPid = :pid")
 	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid AND c.myCode = :code")
-	Optional<TermConcept> findByCodeSystemAndCode(
-			@Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
+	Optional<TermConcept> findByCodeSystemAndCode(@Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
 
 	@Query("FROM TermConcept WHERE myCodeSystemVersionPid = :csv_pid AND myCode in (:codeList)")
-	List<TermConcept> findByCodeSystemAndCodeList(
-			@Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
+	List<TermConcept> findByCodeSystemAndCodeList(@Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
 
 	@Modifying
 	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")
@@ -60,4 +61,5 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapi
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
+
 }

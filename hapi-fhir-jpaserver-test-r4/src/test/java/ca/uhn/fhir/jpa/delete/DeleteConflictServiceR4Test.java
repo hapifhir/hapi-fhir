@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceR4Test.class);
 
+
 	private final DeleteConflictInterceptor myDeleteInterceptor = new DeleteConflictInterceptor();
 	private int myInterceptorDeleteCount;
 
@@ -61,11 +62,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(
-					Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart()
-							+ " because at least one resource has a reference to this resource. First reference found was resource Patient/"
-							+ patientId.getIdPart() + " in path Patient.managingOrganization",
-					e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
 		assertEquals(1, myDeleteInterceptor.myDeleteConflictList.size());
 		assertEquals(1, myDeleteInterceptor.myCallCount);
@@ -148,7 +145,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
 
 		// Create 12 conflicts.
-		for (int j = 0; j < 12; j++) {
+		for (int j=0; j < 12 ; j++) {
 			Patient patient = new Patient();
 			patient.setManagingOrganization(new Reference(organizationId));
 			myPatientDao.create(patient).getId().toUnqualifiedVersionless();
@@ -162,13 +159,11 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			// Needs a fourth and final pass to ensure that all conflicts are now gone.
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(
-					Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,
-					e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 
 		// Try again with Maximum conflict count set to 6.
-		myDeleteInterceptor.myCallCount = 0;
+		myDeleteInterceptor.myCallCount=0;
 		myInterceptorDeleteCount = 0;
 		myStorageSettings.setMaximumDeleteConflictQueryCount(6);
 
@@ -181,6 +176,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
 		assertEquals(3, myDeleteInterceptor.myCallCount);
 		assertEquals(12, myInterceptorDeleteCount);
+
 	}
 
 	@Test
@@ -194,16 +190,13 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// Always returning true is bad behaviour.  Our infinite loop checker should halt it
-		myDeleteInterceptor.deleteConflictFunction =
-				t -> new DeleteConflictOutcome().setShouldRetryCount(Integer.MAX_VALUE);
+		myDeleteInterceptor.deleteConflictFunction = t -> new DeleteConflictOutcome().setShouldRetryCount(Integer.MAX_VALUE);
 
 		try {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(
-					Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG,
-					e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}
@@ -279,4 +272,5 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myCallCount = 0;
 		}
 	}
+
 }

@@ -39,6 +39,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier rightNoSystem = new Identifier().setValue(MATCHING_VALUE);
 		Identifier rightNoValue = new Identifier().setSystem(MATCHING_SYSTEM);
 
+
 		assertFalse(match(left, rightWrongSystem));
 		assertFalse(match(left, rightWrongValue));
 		assertFalse(match(left, rightNoSystem));

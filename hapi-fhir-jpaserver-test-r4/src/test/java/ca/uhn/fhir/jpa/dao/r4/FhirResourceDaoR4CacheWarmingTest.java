@@ -35,42 +35,48 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		cacheWarmingSvc.initCacheMap();
 	}
 
+
 	@Test
 	public void testInvalidCacheEntries() {
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
 
 		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
-		myStorageSettings
-				.getWarmCacheEntries()
-				.add(new WarmCacheEntry().setPeriodMillis(10).setUrl("BadResource?name=smith"));
+		myStorageSettings.getWarmCacheEntries().add(
+			new WarmCacheEntry()
+				.setPeriodMillis(10)
+				.setUrl("BadResource?name=smith")
+		);
 		try {
 			cacheWarmingSvc.initCacheMap();
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(
-					Msg.code(1684)
-							+ "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")",
-					e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 
 		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
-		myStorageSettings
-				.getWarmCacheEntries()
-				.add(new WarmCacheEntry().setPeriodMillis(10).setUrl("foo/Patient"));
+		myStorageSettings.getWarmCacheEntries().add(
+			new WarmCacheEntry()
+				.setPeriodMillis(10)
+				.setUrl("foo/Patient")
+		);
 		try {
 			cacheWarmingSvc.initCacheMap();
 			fail();
 		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1172) + "Invalid warm cache URL (must have ? character)", e.getMessage());
 		}
+
+
 	}
 
 	@Test
 	public void testKeepCacheWarm() throws InterruptedException {
 		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
-		myStorageSettings
-				.getWarmCacheEntries()
-				.add(new WarmCacheEntry().setPeriodMillis(10).setUrl("Patient?name=smith"));
+		myStorageSettings.getWarmCacheEntries().add(
+			new WarmCacheEntry()
+				.setPeriodMillis(10)
+				.setUrl("Patient?name=smith")
+		);
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
 		ourLog.info("Have {} tasks", cacheWarmingSvc.initCacheMap().size());
 
@@ -98,4 +104,5 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
 		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.getCacheStatus());
 	}
+
 }

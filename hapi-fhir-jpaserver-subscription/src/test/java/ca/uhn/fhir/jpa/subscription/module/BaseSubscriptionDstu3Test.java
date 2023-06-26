@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-
 	@Autowired
 	protected SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
@@ -36,17 +35,18 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 			}
 		}
 		if (sw.getMillis() >= 16000) {
-			String describeResults = theList.stream()
-					.map(t -> {
-						if (t == null) {
-							return "null";
-						}
-						if (t instanceof IBaseResource) {
-							return ((IBaseResource) t).getIdElement().getValue();
-						}
-						return t.toString();
-					})
-					.collect(Collectors.joining(", "));
+			String describeResults = theList
+				.stream()
+				.map(t -> {
+					if (t == null) {
+						return "null";
+					}
+					if (t instanceof IBaseResource) {
+						return ((IBaseResource) t).getIdElement().getValue();
+					}
+					return t.toString();
+				})
+				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
@@ -59,8 +59,7 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 		return mySubscriptionTestHelper.makeActiveSubscription(theCriteria, thePayload, theEndpoint);
 	}
 
-	protected Subscription makeSubscriptionWithStatus(
-			String theCriteria, String thePayload, String theEndpoint, Subscription.SubscriptionStatus status) {
+	protected Subscription makeSubscriptionWithStatus(String theCriteria, String thePayload, String theEndpoint, Subscription.SubscriptionStatus status) {
 		return mySubscriptionTestHelper.makeSubscriptionWithStatus(theCriteria, thePayload, theEndpoint, status);
 	}
 

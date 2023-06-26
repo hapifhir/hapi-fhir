@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.model.primitive;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Represents a FHIR instant datatype. Valid precisions values for this type are:
@@ -48,7 +48,7 @@ public class InstantDt extends BaseDateTimeDt {
 	 * that unlike the default constructor for the Java {@link Date} or
 	 * {@link Calendar} objects, this constructor does not initialize the object
 	 * with the current time.
-	 *
+	 * 
 	 * @see #withCurrentTime() to create a new object that has been initialized
 	 *      with the current time.
 	 */
@@ -65,7 +65,7 @@ public class InstantDt extends BaseDateTimeDt {
 
 	/**
 	 * Create a new instance using the given date, precision level, and time zone
-	 *
+	 * 
 	 * @throws DataFormatException
 	 *             If the specified precision is not allowed for this type
 	 */
@@ -73,10 +73,11 @@ public class InstantDt extends BaseDateTimeDt {
 		super(theDate, thePrecision, theTimezone);
 	}
 
+
 	/**
 	 * Create a new DateTimeDt using an existing value. <b>Use this constructor with caution</b>,
 	 * as it may create more precision than warranted (since for example it is possible to pass in
-	 * a DateTime with only a year, and this constructor will convert to an InstantDt with
+	 * a DateTime with only a year, and this constructor will convert to an InstantDt with 
 	 * milliseconds precision).
 	 */
 	public InstantDt(BaseDateTimeDt theDateTime) {
@@ -103,9 +104,7 @@ public class InstantDt extends BaseDateTimeDt {
 	 * </ul>
 	 */
 	@SimpleSetter
-	public InstantDt(
-			@SimpleSetter.Parameter(name = "theDate") Date theDate,
-			@SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
+	public InstantDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
 		setValue(theDate);
 		setPrecision(thePrecision);
 		setTimeZone(TimeZone.getDefault());
@@ -113,7 +112,7 @@ public class InstantDt extends BaseDateTimeDt {
 
 	/**
 	 * Create a new InstantDt from a string value
-	 *
+	 * 
 	 * @param theString
 	 *            The string representation of the string. Must be in a valid
 	 *            format according to the FHIR specification
@@ -126,7 +125,7 @@ public class InstantDt extends BaseDateTimeDt {
 	/**
 	 * Invokes {@link Date#after(Date)} on the contained Date against the given
 	 * date
-	 *
+	 * 
 	 * @throws NullPointerException
 	 *             If the {@link #getValue() contained Date} is null
 	 */
@@ -137,7 +136,7 @@ public class InstantDt extends BaseDateTimeDt {
 	/**
 	 * Invokes {@link Date#before(Date)} on the contained Date against the given
 	 * date
-	 *
+	 * 
 	 * @throws NullPointerException
 	 *             If the {@link #getValue() contained Date} is null
 	 */
@@ -159,11 +158,11 @@ public class InstantDt extends BaseDateTimeDt {
 	@Override
 	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
-			case SECOND:
-			case MILLI:
-				return true;
-			default:
-				return false;
+		case SECOND:
+		case MILLI:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -177,11 +176,12 @@ public class InstantDt extends BaseDateTimeDt {
 
 	/**
 	 * Returns the default precision for this datatype
-	 *
+	 * 
 	 * @see #DEFAULT_PRECISION
 	 */
 	@Override
 	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
 		return DEFAULT_PRECISION;
 	}
+
 }

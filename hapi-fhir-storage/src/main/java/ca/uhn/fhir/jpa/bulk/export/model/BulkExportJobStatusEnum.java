@@ -30,8 +30,10 @@ public enum BulkExportJobStatusEnum {
 	/**
 	 * Sorting OK!
 	 */
+
 	SUBMITTED,
 	BUILDING,
 	COMPLETE,
 	ERROR;
+
 }

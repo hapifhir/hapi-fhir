@@ -34,8 +34,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam
-		implements IQueryParameterType {
+public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam implements IQueryParameterType {
 
 	private A myLeftType;
 	private B myRightType;
@@ -90,9 +89,7 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		} else {
 			List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
 			if (parts.size() > 2) {
-				throw new InvalidRequestException(Msg.code(1947)
-						+ "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: "
-						+ theValue);
+				throw new InvalidRequestException(Msg.code(1947) + "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
 			}
 			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
 			if (parts.size() > 1) {
@@ -129,4 +126,5 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		b.append("myRightType", getRightValue());
 		return b.toString();
 	}
+
 }

@@ -15,9 +15,7 @@ public class SubscriptionCriteriaParserTest {
 		assertEquals(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION, criteria.getType());
 		assertEquals(expression, criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes(), containsInAnyOrder("Patient"));
-		assertEquals(
-				"SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient?foo=bar,applicableResourceTypes=[Patient]]",
-				criteria.toString());
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient?foo=bar,applicableResourceTypes=[Patient]]", criteria.toString());
 	}
 
 	@Test
@@ -27,9 +25,7 @@ public class SubscriptionCriteriaParserTest {
 		assertEquals(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION, criteria.getType());
 		assertEquals(expression, criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes(), containsInAnyOrder("Patient"));
-		assertEquals(
-				"SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient,applicableResourceTypes=[Patient]]",
-				criteria.toString());
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient,applicableResourceTypes=[Patient]]", criteria.toString());
 	}
 
 	@Test
@@ -49,9 +45,7 @@ public class SubscriptionCriteriaParserTest {
 		assertEquals(SubscriptionCriteriaParser.TypeEnum.MULTITYPE_EXPRESSION, criteria.getType());
 		assertEquals(null, criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes(), containsInAnyOrder("Patient", "Observation"));
-		assertEquals(
-				"SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]",
-				criteria.toString());
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]", criteria.toString());
 	}
 
 	@Test
@@ -62,4 +56,5 @@ public class SubscriptionCriteriaParserTest {
 		assertNull(SubscriptionCriteriaParser.parse(" "));
 		assertNull(SubscriptionCriteriaParser.parse("#123"));
 	}
+
 }

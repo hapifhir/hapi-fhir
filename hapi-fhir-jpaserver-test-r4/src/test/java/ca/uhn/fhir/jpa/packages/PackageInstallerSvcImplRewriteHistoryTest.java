@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 	public static final IIdType CONCEPT_MAP_TEST_ID = new IdDt("ConceptMap/PackageInstallerSvcImplRewriteHistoryTest");
-
 	@Autowired
 	PackageInstallerSvcImpl mySvc;
+
 
 	@AfterEach
 	void after() {
@@ -42,8 +42,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// verify
 		ConceptMap readConceptMap = myConceptMapDao.read(CONCEPT_MAP_TEST_ID);
-		assertEquals(
-				CONCEPT_MAP_TEST_ID.toString(),
-				readConceptMap.getIdElement().toVersionless().toString());
+		assertEquals(CONCEPT_MAP_TEST_ID.toString(), readConceptMap.getIdElement().toVersionless().toString());
+
 	}
 }

@@ -48,4 +48,5 @@ public interface IConsentExtensionProvider extends IMemberMatchConsentHook {
 		}
 		ourLog.trace("{} extension(s) added to Consent", extensions.size());
 	}
+
 }

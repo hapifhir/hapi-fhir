@@ -19,4 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-public interface IRestfulHeader {}
+public interface IRestfulHeader {
+
+}

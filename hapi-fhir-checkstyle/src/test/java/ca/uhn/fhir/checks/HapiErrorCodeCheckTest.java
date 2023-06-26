@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiErrorCodeCheckTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiErrorCodeCheckTest.class);
-
 	@Test
 	public void testExpectedErrors() throws CheckstyleException {
 		// setup
@@ -35,11 +34,8 @@ class HapiErrorCodeCheckTest {
 		files.add(getFile("BadClass.java"));
 
 		ByteArrayOutputStream errors = new ByteArrayOutputStream();
-		DefaultLogger listener = new DefaultLogger(
-				NullOutputStream.NULL_OUTPUT_STREAM,
-				AutomaticBean.OutputStreamOptions.CLOSE,
-				errors,
-				AutomaticBean.OutputStreamOptions.CLOSE);
+		DefaultLogger listener = new DefaultLogger(NullOutputStream.NULL_OUTPUT_STREAM, AutomaticBean.OutputStreamOptions.CLOSE,
+			errors, AutomaticBean.OutputStreamOptions.CLOSE);
 		checker.addListener(listener);
 
 		// execute
@@ -50,9 +46,7 @@ class HapiErrorCodeCheckTest {
 		Arrays.stream(errorLines).forEach(ourLog::info);
 		assertEquals(4, errorLines.length);
 		assertThat(errorLines[0], startsWith("[ERROR] "));
-		assertThat(
-				errorLines[0],
-				endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
+		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
 		assertThat(errorLines[1], startsWith("[ERROR] "));
 		assertThat(errorLines[1], containsString("Two different exception messages call Msg.code(2258)."));
 		assertThat(errorLines[2], containsString("Each thrown exception must call Msg.code() with a different code."));
@@ -66,20 +60,22 @@ class HapiErrorCodeCheckTest {
 		DefaultConfiguration config = new DefaultConfiguration("TreeWalker");
 
 		config.addChild(childConf);
-		treeWalker.setModuleFactory(
-				new PackageObjectFactory("test", this.getClass().getClassLoader()));
+		treeWalker.setModuleFactory(new PackageObjectFactory("test", this.getClass().getClassLoader()));
 		treeWalker.configure(config);
 		checker.addFileSetCheck(treeWalker);
 		return checker;
 	}
 
 	private File getFile(String theFilename) {
-		URL url = this.getClass().getClassLoader().getResource(theFilename);
+		URL url = this.getClass()
+			.getClassLoader()
+			.getResource(theFilename);
 
-		if (url == null) {
+		if(url == null) {
 			throw new IllegalArgumentException(theFilename + " file not found");
 		}
 
 		return new File(url.getFile());
 	}
+
 }

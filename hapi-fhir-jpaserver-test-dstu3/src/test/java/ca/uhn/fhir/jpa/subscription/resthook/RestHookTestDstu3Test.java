@@ -51,13 +51,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
@@ -88,13 +88,10 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
-	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor =
-			new SubscriptionDebugLogInterceptor();
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
-
 	@Autowired(required = false)
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
@@ -110,9 +107,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete()
-				.resourceConditionalByUrl("Observation?code:missing=false")
-				.execute();
+		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
@@ -138,18 +133,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourNotificationServlet.reset();
 	}
 
-	private Subscription createSubscription(String criteria, String payload, String endpoint)
-			throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
 		return createSubscription(criteria, payload, endpoint, null, null);
 	}
 
-	private Subscription createSubscription(
-			String theCriteria,
-			String thePayload,
-			String theEndpoint,
-			List<StringType> headers,
-			Extension theChannelExtension)
-			throws InterruptedException {
+	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
+														 List<StringType> headers, Extension theChannelExtension) throws InterruptedException {
 		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint, headers, theChannelExtension);
 
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
@@ -161,12 +150,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Nonnull
-	private Subscription newSubscription(
-			String theCriteria,
-			String thePayload,
-			String theEndpoint,
-			List<StringType> headers,
-			Extension theChannelExtension) {
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers, Extension theChannelExtension) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -179,7 +163,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		if (headers != null) {
 			channel.setHeader(headers);
 		}
-		if (theChannelExtension != null) {
+		if (theChannelExtension != null ) {
 			channel.addExtension(theChannelExtension);
 		}
 		subscription.setChannel(channel);
@@ -215,10 +199,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertEquals(
-				HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
-		assertEquals(
-				SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
 	}
 
 	@Test
@@ -227,19 +209,17 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertEquals(
-				HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
-		assertEquals(
-				SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
-
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
 	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
 		String payload = "application/json";
 
-		Extension sendDeleteMessagesExtension =
-				new Extension().setUrl(EX_SEND_DELETE_MESSAGES).setValue(new BooleanType(true));
+		Extension sendDeleteMessagesExtension = new Extension()
+			.setUrl(EX_SEND_DELETE_MESSAGES)
+			.setValue(new BooleanType(true));
 
 		waitForActivatedSubscriptionCount(0);
 		createSubscription(theCriteria, payload, ourNotificationListenerServer, null, sendDeleteMessagesExtension);
@@ -260,12 +240,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code;
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
-		createSubscription(
-				criteria1,
-				null,
-				ourNotificationListenerServer,
-				Collections.singletonList(new StringType("Authorization: abc-def")),
-				null);
+		createSubscription(criteria1, null, ourNotificationListenerServer,
+			Collections.singletonList(new StringType("Authorization: abc-def")), null);
 		createSubscription(criteria2, null, ourNotificationListenerServer);
 
 		ourLog.debug("Sending first observation");
@@ -275,9 +251,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
 		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals(
-				"abc-def",
-				ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		sendObservation(code, "SNOMED-CT");
@@ -285,9 +259,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
 		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals(
-				"abc-def",
-				ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
@@ -295,9 +267,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		/// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
 		Assertions.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
-		Assertions.assertEquals(
-				"abc-def",
-				ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		Assertions.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
@@ -306,10 +276,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update()
-				.resource(observation3)
-				.withId(observation3.getIdElement())
-				.execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see 2 subscription notifications with and without authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
@@ -337,6 +304,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
+
 
 	@Test
 	public void testRestHookSubscriptionSource() throws Exception {
@@ -387,10 +355,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update()
-				.resource(subscriptionTemp)
-				.withId(subscriptionTemp.getIdElement())
-				.execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		// Send another
@@ -401,9 +366,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete()
-				.resourceById(new IdType("Subscription/" + subscription2.getId()))
-				.execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
@@ -419,10 +382,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update()
-				.resource(observation3)
-				.withId(observation3.getIdElement())
-				.execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
@@ -436,10 +396,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update()
-				.resource(observation3a)
-				.withId(observation3a.getIdElement())
-				.execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -475,10 +432,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update()
-				.resource(subscriptionTemp)
-				.withId(subscriptionTemp.getIdElement())
-				.execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		// Send another observation
@@ -490,9 +444,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete()
-				.resourceById(new IdType("Subscription/" + subscription2.getId()))
-				.execute();
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
 
 		// Send another
@@ -510,10 +462,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update()
-				.resource(observation3)
-				.withId(observation3.getIdElement())
-				.execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
@@ -527,10 +476,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update()
-				.resource(observation3a)
-				.withId(observation3a.getIdElement())
-				.execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -591,11 +537,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(
-					"HTTP 422 Unprocessable Entity: " + Msg.code(9)
-							+ "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488)
-							+ "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee",
-					e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -622,16 +564,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("In-memory", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
-		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read()
-				.resource(Subscription.class)
-				.withId(subscriptionId.toUnqualifiedVersionless())
-				.execute()
-				.getStatus()));
+		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
-		Subscription subscriptionActivated = myClient.read()
-				.resource(Subscription.class)
-				.withId(subscriptionId.toUnqualifiedVersionless())
-				.execute();
+		Subscription subscriptionActivated = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
 		assertInMemoryTag(subscriptionActivated);
 	}
@@ -651,8 +586,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSubscriptionActivatesDatabaseTag() throws Exception {
 		String payload = "application/fhir+xml";
 
-		Subscription subscriptionOrig =
-				createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase);
+		Subscription subscriptionOrig = createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase);
 		IdType subscriptionId = subscriptionOrig.getIdElement();
 
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
@@ -663,16 +597,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("Database", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
-		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read()
-				.resource(Subscription.class)
-				.withId(subscriptionId.toUnqualifiedVersionless())
-				.execute()
-				.getStatus()));
+		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
-		Subscription subscription = myClient.read()
-				.resource(Subscription.class)
-				.withId(subscriptionId.toUnqualifiedVersionless())
-				.execute();
+		Subscription subscription = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		tags = subscription.getMeta().getTag();
 		assertEquals(1, tags.size());
@@ -688,8 +615,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		MethodOutcome methodOutcome = myClient.create().resource(org).execute();
 		String orgId = methodOutcome.getId().getIdPart();
 
-		String criteria = "CommunicationRequest?requester=1276," + orgId
-				+ "&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
+		String criteria = "CommunicationRequest?requester=1276," + orgId + "&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
 		String payload = "application/fhir+xml";
 		createSubscription(criteria, payload, ourListenerServerBase);
 
@@ -698,9 +624,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
 		communicationRequestListenerLatch = new CountDownLatch(1);
 		myClient.create().resource(cr).execute();
-		assertTrue(
-				communicationRequestListenerLatch.await(10, TimeUnit.SECONDS),
-				"Timed out waiting for subscription to match");
+		assertTrue(communicationRequestListenerLatch.await(10, TimeUnit.SECONDS), "Timed out waiting for subscription to match");
 	}
 
 	@Test
@@ -712,20 +636,17 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			myClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(
-					e.getMessage(),
-					containsString(
-							"Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
 		}
 	}
+
 
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(
-					theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
@@ -738,8 +659,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourUpdatedObservations.add(theObservation);
-			ourContentTypes.add(
-					theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}

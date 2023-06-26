@@ -33,8 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OperationDuplicateServerDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(OperationDuplicateServerDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationDuplicateServerDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -52,23 +51,13 @@ public class OperationDuplicateServerDstu2Test {
 
 			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
 			assertEquals(1, resp.getRest().get(0).getOperation().size());
-			assertEquals(
-					"myoperation", resp.getRest().get(0).getOperation().get(0).getName());
-			assertEquals(
-					"OperationDefinition/OrganizationPatient-ts-myoperation",
-					resp.getRest()
-							.get(0)
-							.getOperation()
-							.get(0)
-							.getDefinition()
-							.getReference()
-							.getValue());
+			assertEquals("myoperation", resp.getRest().get(0).getOperation().get(0).getName());
+			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 		}
 
 		// OperationDefinition
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
-					+ "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -84,6 +73,8 @@ public class OperationDuplicateServerDstu2Test {
 			assertEquals(1, resp.getParameter().size());
 		}
 	}
+
+
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -109,13 +100,13 @@ public class OperationDuplicateServerDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class BaseProvider {
@@ -124,6 +115,7 @@ public class OperationDuplicateServerDstu2Test {
 		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringDt theString) {
 			return null;
 		}
+
 	}
 
 	public static class OrganizationProvider extends BaseProvider implements IResourceProvider {
@@ -132,6 +124,7 @@ public class OperationDuplicateServerDstu2Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Organization.class;
 		}
+
 	}
 
 	public static class PatientProvider extends BaseProvider implements IResourceProvider {
@@ -140,6 +133,7 @@ public class OperationDuplicateServerDstu2Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
+
 	}
 
 	public static class PlainProvider {
@@ -148,5 +142,7 @@ public class OperationDuplicateServerDstu2Test {
 		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringDt theString) {
 			return null;
 		}
+
 	}
+
 }

@@ -19,6 +19,7 @@
  */
 package org.hl7.fhir.instance.model.api;
 
+
 public interface IBaseBinary extends IBaseResource {
 
 	byte[] getContent();
@@ -35,8 +36,6 @@ public interface IBaseBinary extends IBaseResource {
 
 	IBaseBinary setContentType(String theContentType);
 
-	default boolean hasData() {
-		return getContent() != null && getContent().length > 0;
-	}
-	;
+	default boolean hasData() { return getContent() != null && getContent().length > 0; };
+
 }

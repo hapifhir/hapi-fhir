@@ -20,17 +20,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class Batch2JobHelperTest {
 
-	private static final String JOB_ID = "Batch2JobHelperTest";
 
+	private static final String JOB_ID = "Batch2JobHelperTest";
 	@Mock
 	IJobMaintenanceService myJobMaintenanceService;
-
 	@Mock
 	IJobCoordinator myJobCoordinator;
 
 	@InjectMocks
 	Batch2JobHelper myBatch2JobHelper;
-
 	static JobInstance ourIncompleteInstance = new JobInstance().setStatus(StatusEnum.IN_PROGRESS);
 	static JobInstance ourCompleteInstance = new JobInstance().setStatus(StatusEnum.COMPLETED);
 
@@ -42,11 +40,11 @@ class Batch2JobHelperTest {
 
 	@Test
 	void awaitJobCompletion_inProgress_callsMaintenance() {
-		when(myJobCoordinator.getInstance(JOB_ID))
-				.thenReturn(ourIncompleteInstance, ourIncompleteInstance, ourIncompleteInstance, ourCompleteInstance);
+		when(myJobCoordinator.getInstance(JOB_ID)).thenReturn(ourIncompleteInstance, ourIncompleteInstance, ourIncompleteInstance, ourCompleteInstance);
 
 		myBatch2JobHelper.awaitJobCompletion(JOB_ID);
 		verify(myJobMaintenanceService, times(1)).runMaintenancePass();
+
 	}
 
 	@Test

@@ -56,4 +56,5 @@ public interface IBaseQuery<T extends IBaseQuery<?>> {
 	 * </p>
 	 */
 	T whereMap(Map<String, List<String>> theRawMap);
+
 }

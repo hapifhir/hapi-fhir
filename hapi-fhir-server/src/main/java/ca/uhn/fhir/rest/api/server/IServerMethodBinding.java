@@ -19,4 +19,6 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-public interface IServerMethodBinding {}
+public interface IServerMethodBinding {
+
+}

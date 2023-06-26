@@ -25,7 +25,6 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 
 	public static final String MY_PROVIDER_ID = "my-provider-id";
 	public static final String ADDRESS_123 = "address_123";
-
 	@Autowired
 	private ExternallyStoredResourceServiceRegistry myProviderRegistry;
 
@@ -49,16 +48,17 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 		IIdType id = storePatientWithExternalAddress();
 
 		// Verify
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			ResourceTable resource = myResourceTableDao.getReferenceById(id.getIdPartAsLong());
 			assertNotNull(resource);
-			ResourceHistoryTable history =
-					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 			assertNotNull(history);
 			assertEquals(ResourceEncodingEnum.ESR, history.getEncoding());
 			assertEquals(MY_PROVIDER_ID + ":" + ADDRESS_123, history.getResourceTextVc());
 		});
+
 	}
+
 
 	@Test
 	public void testRead() {
@@ -71,6 +71,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 		// Test
 		Patient fetchedPatient = myPatientDao.read(id, mySrd);
 		assertTrue(fetchedPatient.getActive());
+
 	}
 
 	private IIdType storePatientWithExternalAddress() {
@@ -80,4 +81,6 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 		return id;
 	}
+
+
 }

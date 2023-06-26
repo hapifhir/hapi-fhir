@@ -1,10 +1,10 @@
 package ca.uhn.fhir.model.primitive;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.RoundingMode;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class DecimalDtTest {
 
@@ -14,7 +14,7 @@ public class DecimalDtTest {
 		dt.round(3, RoundingMode.FLOOR);
 		assertEquals("1.66", dt.getValueAsString());
 	}
-
+	
 	@Test
 	public void testGetValue() {
 		DecimalDt dt = new DecimalDt("1.66666666");
@@ -36,7 +36,7 @@ public class DecimalDtTest {
 		dt.round(3);
 		assertEquals("1.67", dt.getValueAsString());
 	}
-
+	
 	@Test
 	public void testCompareTo() {
 		DecimalDt dt = new DecimalDt("1.66666666");
@@ -48,4 +48,6 @@ public class DecimalDtTest {
 		assertEquals(0, new DecimalDt().compareTo(new DecimalDt()));
 		assertEquals(-1, new DecimalDt().compareTo(new DecimalDt("1.0")));
 	}
+	
+	
 }

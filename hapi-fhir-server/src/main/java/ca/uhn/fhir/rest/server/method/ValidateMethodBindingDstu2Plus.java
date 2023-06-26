@@ -35,27 +35,9 @@ import java.util.List;
 
 public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 
-	public ValidateMethodBindingDstu2Plus(
-			Class<?> theReturnResourceType,
-			Class<? extends IBaseResource> theReturnTypeFromRp,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider,
+	public ValidateMethodBindingDstu2Plus(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 			Validate theAnnotation) {
-		super(
-				theReturnResourceType,
-				theReturnTypeFromRp,
-				theMethod,
-				theContext,
-				theProvider,
-				true,
-				false,
-				Constants.EXTOP_VALIDATE,
-				theAnnotation.type(),
-				null,
-				new OperationParam[0],
-				BundleTypeEnum.COLLECTION,
-				false);
+		super(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, true, false, Constants.EXTOP_VALIDATE, theAnnotation.type(), null, new OperationParam[0], BundleTypeEnum.COLLECTION, false);
 
 		List<IParameter> newParams = new ArrayList<>();
 		int idx = 0;
@@ -69,14 +51,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 						Annotation[] parameterAnnotations = theMethod.getParameterAnnotations()[idx];
 						String description = ParametersUtil.extractDescription(parameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(parameterAnnotations);
-						OperationParameter parameter = new OperationParameter(
-								theContext,
-								Constants.EXTOP_VALIDATE,
-								Constants.EXTOP_VALIDATE_RESOURCE,
-								0,
-								1,
-								description,
-								examples);
+						OperationParameter parameter = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1, description, examples);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
@@ -89,5 +64,7 @@ public class ValidateMethodBindingDstu2Plus extends OperationMethodBinding {
 			idx++;
 		}
 		setParameters(newParams);
+
 	}
+
 }

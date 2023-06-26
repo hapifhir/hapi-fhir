@@ -76,13 +76,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.persistence.EntityManager;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -107,76 +107,57 @@ import static org.mockito.Mockito.when;
  * In case you need to run a specific test, uncomment the @ExtendWith and one of the following configurations
  * and remove the abstract qualifier
  */
-// @ExtendWith(SpringExtension.class)
-// @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-// @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+//@ExtendWith(SpringExtension.class)
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
 public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseValueSetHSearchExpansionR4Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
 	private static final String CS_URL_3 = "http://example.com/my_code_system3";
-
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
-
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-
 	@Autowired
 	protected ITermReadSvc myTermSvc;
-
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-
 	@Autowired
 	FhirContext myFhirContext;
-
 	@Autowired
 	PlatformTransactionManager myTxManager;
-
 	@Autowired
 	private EntityManager myEntityManager;
-
 	@Autowired
 	private IFhirSystemDao mySystemDao;
-
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
-
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
 	@BeforeEach
 	public void beforeEach() {
-		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
-				.thenReturn(Boolean.TRUE);
+		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		purgeHibernateSearch(myEntityManager);
@@ -188,37 +169,22 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(
-				myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(
-				new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
-		purgeDatabase(
-				myStorageSettings,
-				mySystemDao,
-				myResourceReindexingSvc,
-				mySearchCoordinatorSvc,
-				mySearchParamRegistry,
-				myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterEach()
 	public void afterCleanupDao() {
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setExpireSearchResultsAfterMillis(
-				new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(
-				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 	}
 
@@ -234,8 +200,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 	private List<String> generateCodes(int theCodesQueriedCount) {
 		return IntStream.range(0, theCodesQueriedCount)
-				.mapToObj(i -> "generated-code-" + i)
-				.collect(Collectors.toList());
+			.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
 	}
 
 	public long createLoincSystemWithSomeCodes() {
@@ -246,43 +211,65 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
 
-		ResourceTable table =
-				myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion termCodeSystemVersion = new TermCodeSystemVersion();
 		termCodeSystemVersion.setResource(table);
 
 		TermConcept code1 = new TermConcept(termCodeSystemVersion, "50015-7"); // has -3 as a child
 		TermConcept code2 = new TermConcept(termCodeSystemVersion, "43343-3"); // has -4 as a child
-		TermConcept code3 = new TermConcept(termCodeSystemVersion, "43343-4"); // has no children
-		TermConcept code4 = new TermConcept(termCodeSystemVersion, "47239-9"); // has no children
+		TermConcept code3 = new TermConcept(termCodeSystemVersion, "43343-4"); //has no children
+		TermConcept code4 = new TermConcept(termCodeSystemVersion, "47239-9"); //has no children
 
 		code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
-		code1.addPropertyCoding("child", LOINC_URI, code2.getCode(), code2.getDisplay());
+		code1.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
 		code1.addChild(code2, RelationshipTypeEnum.ISA);
 		termCodeSystemVersion.getConcepts().add(code1);
 
 		code2.addPropertyString("SYSTEM", "Ser");
 		code2.addPropertyString("HELLO", "12345-1");
-		code2.addPropertyCoding("parent", LOINC_URI, code1.getCode(), code1.getDisplay());
-		code2.addPropertyCoding("child", LOINC_URI, code3.getCode(), code3.getDisplay());
+		code2.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code1.getCode(),
+			code1.getDisplay());
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code3.getCode(),
+			code3.getDisplay());
 		code2.addChild(code3, RelationshipTypeEnum.ISA);
-		code2.addPropertyCoding("child", LOINC_URI, code4.getCode(), code4.getDisplay());
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code4.getCode(),
+			code4.getDisplay());
 		code2.addChild(code4, RelationshipTypeEnum.ISA);
 		termCodeSystemVersion.getConcepts().add(code2);
 
 		code3.addPropertyString("SYSTEM", "Ser");
 		code3.addPropertyString("HELLO", "12345-2");
-		code3.addPropertyCoding("parent", LOINC_URI, code2.getCode(), code2.getDisplay());
+		code3.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
 		termCodeSystemVersion.getConcepts().add(code3);
 
 		code4.addPropertyString("SYSTEM", "^Patient");
 		code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
-		code4.addPropertyCoding("parent", LOINC_URI, code2.getCode(), code2.getDisplay());
+		code4.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
 		termCodeSystemVersion.getConcepts().add(code4);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
 
 		return csId.getIdPartAsLong();
 	}
@@ -294,8 +281,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table =
-				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -323,11 +309,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
 		childAAB.addDesignation()
-				.setLanguage("D1L")
-				.setUseSystem("D1S")
-				.setUseCode("D1C")
-				.setUseDisplay("D1D")
-				.setValue("D1V");
+			.setLanguage("D1L")
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
 		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
@@ -336,8 +322,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -351,8 +336,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table =
-				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -360,8 +344,8 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+
 	}
 
 	private IIdType createCodeSystem3() {
@@ -371,8 +355,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME 3");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table =
-				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -400,11 +383,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
 		childAAB.addDesignation()
-				.setLanguage("D1L")
-				.setUseSystem("D1S")
-				.setUseCode("D1C")
-				.setUseDisplay("D1D")
-				.setValue("D1V");
+			.setLanguage("D1L")
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
 		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
 
 		TermConcept childAAC = new TermConcept(cs, "childAAC");
@@ -417,8 +400,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		childAAD.addPropertyString("propB", "IG exists");
 		childAA.addChild(childAAD, RelationshipTypeEnum.ISA);
 
-		// this one shouldn't come up in search result because searched argument is not in searched property (propB) but
-		// in propA
+		// this one shouldn't come up in search result because searched argument is not in searched property (propB) but in propA
 		TermConcept childAAE = new TermConcept(cs, "childAAE");
 		childAAE.addPropertyString("propA", "IG exists");
 		childAAE.addPropertyString("propB", "valueAAE");
@@ -430,8 +412,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
-				JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -472,28 +453,34 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("3rdParty"); // mixed case
+			exclude
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("3rdParty"); // mixed case
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("3rdparty"); // lowercase
+			exclude
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("3rdparty");  // lowercase
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -510,28 +497,34 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("LOINC");
+			exclude
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("LOINC");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue(LOINC_LOW);
+			exclude
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue(LOINC_LOW);
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("47239-9"));
@@ -550,10 +543,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("3rdParty");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("3rdParty");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("47239-9"));
@@ -562,10 +556,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("3rdparty");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("3rdparty");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("47239-9"));
@@ -584,10 +579,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("LOINC");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("LOINC");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -596,10 +592,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue(LOINC_LOW);
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue(LOINC_LOW);
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -616,10 +613,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.ISA)
-					.setValue("LOINC");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("LOINC");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
@@ -641,20 +639,19 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("LOINC");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("LOINC");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(895)
-								+ "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system",
-						e.getMessage());
+				assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -668,18 +665,19 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("copyright")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("bogus");
+			include
+				.addFilter()
+				.setProperty("copyright")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("bogus");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
+				assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -693,56 +691,68 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			exclude
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			exclude
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			exclude
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			exclude
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
@@ -759,14 +769,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			exclude
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -785,10 +798,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
@@ -797,10 +811,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
@@ -809,10 +824,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 
@@ -820,10 +836,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 		}
@@ -841,10 +858,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
@@ -861,10 +879,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.ISA)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
@@ -872,6 +891,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			} catch (InvalidRequestException e) {
 				assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -886,20 +906,19 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("ancestor")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("ancestor")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(895)
-								+ "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system",
-						e.getMessage());
+				assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -913,56 +932,68 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			exclude
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			exclude
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			exclude
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			exclude
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
@@ -979,14 +1010,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			exclude
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
@@ -1005,10 +1039,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 
@@ -1016,10 +1051,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1028,10 +1064,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3"));
@@ -1040,10 +1077,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3"));
@@ -1062,10 +1100,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
@@ -1082,10 +1121,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.ISA)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
@@ -1093,6 +1133,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			} catch (InvalidRequestException e) {
 				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -1107,20 +1148,19 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("child")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("child")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(895)
-								+ "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system",
-						e.getMessage());
+				assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -1134,56 +1174,68 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			exclude
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			exclude
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			exclude
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			exclude
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
@@ -1200,14 +1252,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			exclude
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 
@@ -1227,10 +1282,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 
@@ -1238,10 +1294,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1250,10 +1307,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
@@ -1262,10 +1320,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
@@ -1284,10 +1343,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
@@ -1304,10 +1364,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.ISA)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
@@ -1315,6 +1376,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			} catch (InvalidRequestException e) {
 				assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -1329,20 +1391,19 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("descendant")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("descendant")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(895)
-								+ "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system",
-						e.getMessage());
+				assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -1356,56 +1417,68 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			exclude
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			exclude
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			exclude
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			exclude
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
@@ -1422,14 +1495,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 			// Exclude
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			exclude
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1448,10 +1524,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3"));
@@ -1460,10 +1537,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-3");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-3");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
@@ -1472,10 +1550,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("43343-4");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 
@@ -1483,10 +1562,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("47239-9");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(0, outcome.getExpansion().getContains().size());
 		}
@@ -1504,10 +1584,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.IN)
-					.setValue("50015-7,43343-3,43343-4,47239-9");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.IN)
+				.setValue("50015-7,43343-3,43343-4,47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
@@ -1524,10 +1605,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.ISA)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
@@ -1535,6 +1617,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			} catch (InvalidRequestException e) {
 				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
 			}
+
 		}
 
 		@Test
@@ -1549,21 +1632,21 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("parent")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("50015-7");
+			include
+				.addFilter()
+				.setProperty("parent")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("50015-7");
 
 			try {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InvalidRequestException e) {
-				assertEquals(
-						Msg.code(895)
-								+ "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system",
-						e.getMessage());
+				assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
+
 		}
+
 
 		@Test
 		public void testExpandValueSetInMemoryRespectsMaxSize() {
@@ -1576,6 +1659,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			}
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
 
+
 			// Codes available exceeds the max
 			myStorageSettings.setMaximumExpansionSize(50);
 			ValueSet vs = new ValueSet();
@@ -1585,10 +1669,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail();
 			} catch (InternalErrorException e) {
-				assertThat(
-						e.getMessage(),
-						containsString(Msg.code(832)
-								+ "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+				assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
 			}
 
 			// Increase the max so it won't exceed
@@ -1598,6 +1679,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			include.setSystem(CS_URL);
 			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 			assertEquals(109, outcome.getExpansion().getContains().size());
+
 		}
 
 		@Test
@@ -1611,16 +1693,10 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			include.setSystem(CS_URL);
 
 			myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-			verify(myValueSetCodeAccumulator, times(9))
-					.includeConceptWithDesignations(
-							anyString(),
-							anyString(),
-							nullable(String.class),
-							anyCollection(),
-							nullable(Long.class),
-							nullable(String.class),
-							nullable(String.class));
+			verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class), nullable(String.class));
 		}
+
+
 	}
 
 	@Nested
@@ -1639,10 +1715,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("propA")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("valueAAA");
+			include
+				.addFilter()
+				.setProperty("propA")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("valueAAA");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("childAAA"));
@@ -1651,10 +1728,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("propB")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("foo");
+			include
+				.addFilter()
+				.setProperty("propB")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("foo");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
@@ -1663,14 +1741,16 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL_2);
-			include.addFilter()
-					.setProperty("propA")
-					.setOp(ValueSet.FilterOperator.EQUAL)
-					.setValue("valueAAA");
+			include
+				.addFilter()
+				.setProperty("propA")
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("valueAAA");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, empty());
 		}
+
 
 		@Test
 		public void testSearchWithRegexExclude() {
@@ -1683,14 +1763,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue(".*\\^Donor$");
+			exclude
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue(".*\\^Donor$");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
@@ -1707,14 +1790,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			// Include
 			vs = new ValueSet();
-			vs.getCompose().addInclude().setSystem(LOINC_URI);
+			vs.getCompose()
+				.addInclude()
+				.setSystem(LOINC_URI);
 
 			exclude = vs.getCompose().addExclude();
 			exclude.setSystem(LOINC_URI);
-			exclude.addFilter()
-					.setProperty("HELLO")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("12345-1|12345-2");
+			exclude
+				.addFilter()
+				.setProperty("HELLO")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("12345-1|12345-2");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7", "47239-9"));
@@ -1733,10 +1819,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue(".*\\^Donor$"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue(".*\\^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1745,10 +1832,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("\\^Donor$"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("\\^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1757,10 +1845,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("\\^Dono$"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("\\^Dono$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, empty());
@@ -1769,10 +1858,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("^Donor$"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("^Donor$");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, empty());
@@ -1781,10 +1871,11 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("\\^Dono"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("\\^Dono");  // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("50015-7"));
@@ -1793,13 +1884,15 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(LOINC_URI);
-			include.addFilter()
-					.setProperty("SYSTEM")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("^Ser$"); // <------ block diff is here
+			include
+				.addFilter()
+				.setProperty("SYSTEM")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("^Ser$");   // <------ block diff is here
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
+
 		}
 
 		/**
@@ -1817,14 +1910,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			vs = new ValueSet();
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
-			include.addFilter()
-					.setProperty("propB")
-					.setOp(ValueSet.FilterOperator.REGEX)
-					.setValue("^[No ]*IG exists$");
+			include
+				.addFilter()
+				.setProperty("propB")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("^[No ]*IG exists$");
 			outcome = myTermSvc.expandValueSet(null, vs);
 			codes = toCodesContains(outcome.getExpansion().getContains());
 			assertThat(codes, containsInAnyOrder("childAAC", "childAAD"));
+
 		}
+
 	}
 
 	/**
@@ -1845,12 +1941,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			termCsId = createLoincSystemWithSomeCodes();
 		}
 
+
 		@Test
 		public void testShouldNotFindAny() {
 			List<EntityReference> hits = search(allCodesNotIncludingSearched);
 			assertNotNull(hits);
 			assertTrue(hits.isEmpty());
 		}
+
 
 		@Test
 		public void testHitsInFirstSublist() {
@@ -1863,6 +1961,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			assertEquals(existingCodes.size(), hits.size());
 		}
 
+
 		@Test
 		public void testHitsInLastSublist() {
 			// insert existing codes into list of codes searched
@@ -1872,6 +1971,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			assertEquals(existingCodes.size(), hits.size());
 		}
+
 
 		@Test
 		public void testHitsInBothSublists() {
@@ -1892,16 +1992,14 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 		private List<EntityReference> search(List<String> theSearchedCodes) {
 			return runInTransaction(() -> {
-				TermCodeSystemVersion termCsVersion =
-						myTermCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(termCsId);
+				TermCodeSystemVersion termCsVersion = myTermCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(termCsId);
 				Long termCsvPid = termCsVersion.getPid();
 
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchPredicateFactory predicate =
-						searchSession.scope(TermConcept.class).predicate();
+				SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 
 				Optional<PredicateFinalStep> lastStepOpt = ReflectionTestUtils.invokeMethod(
-						new TermReadSvcImpl(), "buildExpansionPredicate", theSearchedCodes, predicate);
+					new TermReadSvcImpl(), "buildExpansionPredicate", theSearchedCodes, predicate);
 
 				assertNotNull(lastStepOpt);
 				assertTrue(lastStepOpt.isPresent());
@@ -1914,15 +2012,17 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				int maxResultsPerBatch = 800;
 
 				SearchQuery<EntityReference> termConceptsQuery = searchSession
-						.search(TermConcept.class)
-						.selectEntityReference()
-						.where(f -> step)
-						.toQuery();
+					.search(TermConcept.class)
+					.selectEntityReference()
+					.where(f -> step)
+					.toQuery();
 
 				ourLog.trace("About to query: {}", termConceptsQuery.queryString());
 
 				return termConceptsQuery.fetchHits(0, maxResultsPerBatch);
 			});
+
 		}
+
 	}
 }

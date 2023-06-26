@@ -24,4 +24,5 @@ public interface IPackageInstallerSvc {
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
 
 	PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theSpec);
+
 }

@@ -45,8 +45,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchReturningProfiledResourceDstu2Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchReturningProfiledResourceDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -54,40 +53,26 @@ public class SearchReturningProfiledResourceDstu2Test {
 	public void testClientTypedRequest() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
-		Bundle bundle = client.search()
-				.forResource(PatientProfileDstu2.class)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle bundle = client.search().forResource(PatientProfileDstu2.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(
-				PatientProfileDstu2.class,
-				bundle.getEntry().get(0).getResource().getClass());
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
 	public void testClientUntypedRequestWithHint() throws Exception {
 		ourCtx = FhirContext.forDstu2();
-		ourCtx.setDefaultTypeForProfile(
-				"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient", PatientProfileDstu2.class);
+		ourCtx.setDefaultTypeForProfile("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient", PatientProfileDstu2.class);
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
-		Bundle bundle = client.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(
-				PatientProfileDstu2.class,
-				bundle.getEntry().get(0).getResource().getClass());
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
 	public void testClientUntypedRequestWithoutHint() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
-		Bundle bundle = client.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.execute();
+		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
 		assertEquals(Patient.class, bundle.getEntry().get(0).getResource().getClass());
 	}
@@ -102,9 +87,8 @@ public class SearchReturningProfiledResourceDstu2Test {
 
 		assertThat(responseContent, not(containsString("html")));
 		assertThat(responseContent, containsString("<profile value=\"http://foo\"/>"));
-		assertThat(
-				responseContent,
-				containsString("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>"));
+		assertThat(responseContent, containsString("<profile value=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient\"/>"));
+
 	}
 
 	@Test
@@ -118,6 +102,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		assertThat(responseContent, containsString("html"));
 		assertThat(responseContent, containsString("http://foo"));
 		assertThat(responseContent, containsString("http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient"));
+
 	}
 
 	@AfterAll
@@ -141,13 +126,13 @@ public class SearchReturningProfiledResourceDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -161,23 +146,22 @@ public class SearchReturningProfiledResourceDstu2Test {
 		 * Basic search, available for every resource. Allows search per id (use of read is better, though), fulltext
 		 * content
 		 * and lastUpdated timestamp.
-		 *
+		 * 
 		 * @param id
 		 * @param content
 		 * @param lastUpdated
 		 * @return
 		 */
-		// @formatter:off
+		//@formatter:off
 		@Search
 		public List<Patient> search(
-				@Description(shortDefinition = "The resource id") @OptionalParam(name = "_id") StringParam id,
-				@Description(shortDefinition = "Search the contents of the resource's data using a fulltext search")
-						@OptionalParam(name = Constants.PARAM_CONTENT)
-						StringParam content,
-				@Description(shortDefinition = "Search for resources considering the time of their last update")
-						@OptionalParam(name = Constants.PARAM_LASTUPDATED)
-						DateRangeParam lastUpdated) {
-			// @formatter:on
+				@Description(shortDefinition = "The resource id") 
+				@OptionalParam(name = "_id") StringParam id, 
+				@Description(shortDefinition = "Search the contents of the resource's data using a fulltext search") 
+				@OptionalParam(name = Constants.PARAM_CONTENT) StringParam content,
+				@Description(shortDefinition = "Search for resources considering the time of their last update") 
+				@OptionalParam(name = Constants.PARAM_LASTUPDATED) DateRangeParam lastUpdated) {
+			//@formatter:on
 
 			List<Patient> result = new ArrayList<Patient>();
 
@@ -192,5 +176,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 			ourLog.info("Search: Everything ok. Going to return results!");
 			return result;
 		}
+
 	}
+
 }

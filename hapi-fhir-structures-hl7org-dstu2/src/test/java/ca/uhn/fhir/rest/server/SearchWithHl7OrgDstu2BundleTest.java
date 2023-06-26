@@ -30,8 +30,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchWithHl7OrgDstu2BundleTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithHl7OrgDstu2BundleTest.class);
 
 	@Test
 	public void testSearch() throws Exception {
@@ -43,25 +42,23 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		responseContent = responseContent.replace("_pretty=true&amp;_format=xml", "_format=xml&amp;_pretty=true");
-
+		
 		ourLog.info(responseContent);
 
-		// @formatter:off
-		assertThat(
-				responseContent,
-				stringContainsInOrder(
-						"<Bundle xmlns=\"http://hl7.org/fhir\">",
-						"<type value=\"searchset\"/>",
-						"<link>",
-						"<relation value=\"self\"/>",
-						"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>",
-						"</link>",
-						"<entry>",
-						// "<fullUrl value=\"http://localhost:" + ourPort + "/Patient/123\"/>" ,
-						"<resource>",
-						"<Patient xmlns=\"http://hl7.org/fhir\">"));
+		//@formatter:off
+		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+				"<type value=\"searchset\"/>", 
+				"<link>" ,
+				"<relation value=\"self\"/>", 
+				"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>", 
+				"</link>" ,
+				"<entry>" , 
+				//"<fullUrl value=\"http://localhost:" + ourPort + "/Patient/123\"/>" , 
+				"<resource>" , 
+				"<Patient xmlns=\"http://hl7.org/fhir\">"));
 		// @formatter:off
 	}
+
 
 	@AfterAll
 	public static void afterClass() throws Exception {
@@ -82,13 +79,13 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	/**
@@ -99,13 +96,13 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		@Search
 		public Bundle search() {
 			Bundle retVal = new Bundle();
-
+			
 			Patient p1 = new Patient();
 			p1.setId("Patient/123/_history/456");
 			p1.addIdentifier().setValue("p1ReadValue");
-
+			
 			retVal.addEntry().setResource(p1);
-
+			
 			return retVal;
 		}
 
@@ -113,5 +110,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
+
 	}
+
 }

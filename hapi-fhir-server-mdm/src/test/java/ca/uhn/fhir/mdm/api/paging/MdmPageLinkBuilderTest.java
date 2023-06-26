@@ -11,27 +11,27 @@ class MdmPageLinkBuilderTest {
 
 	@Test
 	void buildLinkWithExistingParameters() {
-		// Given
+		//Given
 		String expected = "http://localhost:8000/$mdm-query-links?sourceResourceId=Patient/123&_offset=1&_count=1";
 		String baseUrl = "http://localhost:8000/$mdm-query-links?sourceResourceId=Patient/123";
 
-		// When
+		//When
 		String builtUrl = MdmPageLinkBuilder.buildLinkWithOffsetAndCount(baseUrl, 1, 1);
 
-		// Then
+		//Then
 		assertThat(builtUrl, is(equalTo(expected)));
 	}
 
 	@Test
 	void buildLinkWithoutExistingParameters() {
-		// Given
+		//Given
 		String expected = "http://localhost:8000/$mdm-query-links?_offset=1&_count=1";
 		String baseUrl = "http://localhost:8000/$mdm-query-links";
 
-		// When
+		//When
 		String builtUrl = MdmPageLinkBuilder.buildLinkWithOffsetAndCount(baseUrl, 1, 1);
 
-		// Then
+		//Then
 		assertThat(builtUrl, is(equalTo(expected)));
 	}
 }

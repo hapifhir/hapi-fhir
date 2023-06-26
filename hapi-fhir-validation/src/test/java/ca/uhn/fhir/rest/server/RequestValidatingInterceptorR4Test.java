@@ -60,23 +60,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class RequestValidatingInterceptorR4Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorR4Test.class);
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorR4Test.class);
 	@RegisterExtension
 	static HttpClientExtension ourClient = new HttpClientExtension();
-
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
 	@Order(0)
 	static RestfulServerExtension ourServlet = new RestfulServerExtension(ourCtx);
-
 	@RegisterExtension
 	@Order(1)
-	static ResourceProviderExtension<PatientProvider> ourProvider =
-			new ResourceProviderExtension<>(ourServlet, new PatientProvider());
-
+	static ResourceProviderExtension<PatientProvider> ourProvider = new ResourceProviderExtension<>(ourServlet, new PatientProvider());
 	private static boolean ourLastRequestWasSearch;
 	private static int ourPort;
 	private RequestValidatingInterceptor myInterceptor;
@@ -127,8 +121,7 @@ public class RequestValidatingInterceptorR4Test {
 
 	@Test
 	public void testGraphQlRequestResponse_GET() throws IOException {
-		HttpGet request = new HttpGet(
-				"http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		HttpGet request = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
 
 		try (CloseableHttpResponse status = ourClient.getClient().execute(request)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -140,6 +133,7 @@ public class RequestValidatingInterceptorR4Test {
 			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
 			assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryGet);
 		}
+
 	}
 
 	@Test
@@ -157,6 +151,7 @@ public class RequestValidatingInterceptorR4Test {
 			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
 			assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryPost);
 		}
+
 	}
 
 	@Test
@@ -188,9 +183,7 @@ public class RequestValidatingInterceptorR4Test {
 	@Test
 	public void testCreateJsonValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
-		patient.getText()
-				.setDiv(new XhtmlNode().setValue("<div>AA</div>"))
-				.setStatus(Narrative.NarrativeStatus.GENERATED);
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
@@ -216,9 +209,7 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		Patient patient = new Patient();
-		patient.getText()
-				.setDiv(new XhtmlNode().setValue("<div>AA</div>"))
-				.setStatus(Narrative.NarrativeStatus.GENERATED);
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
@@ -243,18 +234,20 @@ public class RequestValidatingInterceptorR4Test {
 		IValidatorModule module = new FhirInstanceValidator(ourCtx);
 		myInterceptor.addValidatorModule(module);
 
-		String encoded = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + "<!DOCTYPE foo [  \n"
-				+ "<!ELEMENT foo ANY >\n"
-				+ "<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>"
-				+ "<Patient xmlns=\"http://hl7.org/fhir\">"
-				+ "<text>"
-				+ "<status value=\"generated\"/>"
-				+ "<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n"
-				+ "</text>"
-				+ "<address>"
-				+ "<line value=\"FOO\"/>"
-				+ "</address>"
-				+ "</Patient>";
+		String encoded =
+			"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+				"<!DOCTYPE foo [  \n" +
+				"<!ELEMENT foo ANY >\n" +
+				"<!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>" +
+				"<Patient xmlns=\"http://hl7.org/fhir\">" +
+				"<text>" +
+				"<status value=\"generated\"/>" +
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT &xxe; TEXT</div>\n" +
+				"</text>" +
+				"<address>" +
+				"<line value=\"FOO\"/>" +
+				"</address>" +
+				"</Patient>";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -268,6 +261,7 @@ public class RequestValidatingInterceptorR4Test {
 			assertEquals(422, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, containsString("DOCTYPE"));
 		}
+
 	}
 
 	@Test
@@ -346,8 +340,7 @@ public class RequestValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(
-				status.toString(), containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
+		assertThat(status.toString(), containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -360,9 +353,7 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new NullPointerException("SOME MESSAGE"))
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -379,10 +370,7 @@ public class RequestValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(
-				responseContent,
-				containsString(
-						"<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
+		assertThat(responseContent, containsString("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -395,9 +383,7 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(NullPointerException.class)
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -427,9 +413,7 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new InternalErrorException("FOO"))
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -459,9 +443,7 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(InternalErrorException.class)
-				.when(module)
-				.validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -484,9 +466,7 @@ public class RequestValidatingInterceptorR4Test {
 	@Test
 	public void testCreateXmlValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
-		patient.getText()
-				.setDiv(new XhtmlNode().setValue("<div>AA</div>"))
-				.setStatus(Narrative.NarrativeStatus.GENERATED);
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -614,10 +594,13 @@ public class RequestValidatingInterceptorR4Test {
 			}
 			return retVal;
 		}
+
+
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+
 }

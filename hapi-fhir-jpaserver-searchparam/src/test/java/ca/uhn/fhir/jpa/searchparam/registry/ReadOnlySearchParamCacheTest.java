@@ -20,16 +20,13 @@ public class ReadOnlySearchParamCacheTest {
 		assertFalse(searchParamMatchesAtLeastOnePattern(newHashSet("Foo:name"), "Patient", "name"));
 	}
 
+
 	@Test
 	void testSearchParamMatchesAtLeastOnePattern_InvalidPattern() {
-		assertThrows(
-				IllegalArgumentException.class,
-				() -> searchParamMatchesAtLeastOnePattern(newHashSet("aaa"), "Patient", "name"));
-		assertThrows(
-				IllegalArgumentException.class,
-				() -> searchParamMatchesAtLeastOnePattern(newHashSet(":name"), "Patient", "name"));
-		assertThrows(
-				IllegalArgumentException.class,
-				() -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
+		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet("aaa"), "Patient", "name"));
+		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet(":name"), "Patient", "name"));
+		assertThrows(IllegalArgumentException.class, () -> searchParamMatchesAtLeastOnePattern(newHashSet("Patient:"), "Patient", "name"));
 	}
+
 }
+

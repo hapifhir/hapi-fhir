@@ -72,12 +72,8 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(
-					"GET,POST,PUT,DELETE,OPTIONS",
-					status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals(
-					"http://www.fhir-starter.com",
-					status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
+			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
 		}
 		{
 			String uri = ourBaseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
@@ -109,12 +105,10 @@ public class CorsInterceptorDstu3Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response: {}", status);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(
-					"http://www.fhir-starter.com",
-					status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
 		}
 	}
-
+	
 	@Test
 	public void testCorsConfigMethods() {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
@@ -154,15 +148,11 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(
-					"GET,POST,PUT,DELETE,OPTIONS",
-					status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals(
-					"null",
-					status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
+			assertEquals("null", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
 		}
 	}
-
+	
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourClient.close();
@@ -172,11 +162,11 @@ public class CorsInterceptorDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
+	
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -203,9 +193,9 @@ public class CorsInterceptorDstu3Test {
 		config.addAllowedOrigin("file://");
 		config.addExposedHeader("Location");
 		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
 		restServer.registerInterceptor(interceptor);
-
+		
 		ServletContextHandler ch = new ServletContextHandler();
 		ch.setContextPath("/rootctx/rcp2");
 		ch.addServlet(servletHolder, "/fhirctx/fcp2/*");
@@ -215,10 +205,11 @@ public class CorsInterceptorDstu3Test {
 
 		ourServer.setHandler(ch);
 		JettyUtil.startServer(ourServer);
-		int port = JettyUtil.getPortForStartedServer(ourServer);
+        int port = JettyUtil.getPortForStartedServer(ourServer);
 		ourBaseUri = "http://localhost:" + port + "/rootctx/rcp2/fhirctx/fcp2";
-	}
 
+	}
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -259,13 +250,12 @@ public class CorsInterceptorDstu3Test {
 			}
 			return idToPatient;
 		}
-
+		
 		@Search()
 		public Patient getPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			for (Patient next : getIdToPatient().values()) {
 				for (Identifier nextId : next.getIdentifier()) {
-					if (nextId.getSystem().equals(theIdentifier.getSystem())
-							&& nextId.getValue().equals(theIdentifier.getValue())) {
+					if (nextId.getSystem().equals(theIdentifier.getSystem())&& nextId.getValue().equals(theIdentifier.getValue())) {
 						return next;
 					}
 				}
@@ -275,7 +265,7 @@ public class CorsInterceptorDstu3Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 *
+		 * 
 		 * @param theId
 		 *            The resource identity
 		 * @return The resource
@@ -289,5 +279,8 @@ public class CorsInterceptorDstu3Test {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
+
 	}
+
+
 }

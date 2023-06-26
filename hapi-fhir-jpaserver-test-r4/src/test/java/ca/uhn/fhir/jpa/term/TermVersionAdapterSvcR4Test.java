@@ -39,19 +39,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(MockitoExtension.class)
 class TermVersionAdapterSvcR4Test {
 
 	private final TermVersionAdapterSvcR4 testedClass = new TermVersionAdapterSvcR4();
 
-	@Mock
-	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
-
-	@Mock
-	ServletRequestDetails theRequestDetails;
-
-	@Mock
-	DaoMethodOutcome theDaoMethodOutcome;
+	@Mock private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
+	@Mock ServletRequestDetails theRequestDetails;
+	@Mock DaoMethodOutcome theDaoMethodOutcome;
 
 	@Test
 	void createOrUpdateCodeSystemMustHaveId() {
@@ -59,11 +55,12 @@ class TermVersionAdapterSvcR4Test {
 		codeSystem.setUrl("a-loinc-system");
 
 		InvalidParameterException thrown = assertThrows(
-				InvalidParameterException.class,
-				() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
+			InvalidParameterException.class,
+			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
 
 		assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
 	}
+
 
 	@Test
 	void createOrUpdateCodeSystemWithIdNoException() {

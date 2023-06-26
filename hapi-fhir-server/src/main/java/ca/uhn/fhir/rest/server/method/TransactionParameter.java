@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,25 +49,17 @@ public class TransactionParameter implements IParameter {
 	}
 
 	private String createParameterTypeError(Method theMethod) {
-		return "Method '" + theMethod.getName() + "' in type '"
-				+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
-				+ TransactionParam.class.getName() + " but is not of type Bundle, IBaseResource, IBaseBundle, or List<"
-				+ IResource.class.getCanonicalName() + ">";
+		return "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName()
+			+ " but is not of type Bundle, IBaseResource, IBaseBundle, or List<" + IResource.class.getCanonicalName() + ">";
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(429) + "Method '" + theMethod.getName() + "' in type '"
-					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
-					+ TransactionParam.class.getName() + " but can not be a collection of collections");
+			throw new ConfigurationException(Msg.code(429) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+				+ TransactionParam.class.getName() + " but can not be a collection of collections");
 		}
-		if (Modifier.isInterface(theParameterType.getModifiers()) == false
-				&& IBaseResource.class.isAssignableFrom(theParameterType)) {
+		if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> parameterType = (Class<? extends IBaseResource>) theParameterType;
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(parameterType);
@@ -95,11 +87,8 @@ public class TransactionParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
-		IBaseResource parsedBundle =
-				ResourceParameter.parseResourceFromRequest(theRequest, theMethodBinding, myResourceBundleType);
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+		IBaseResource parsedBundle = ResourceParameter.parseResourceFromRequest(theRequest, theMethodBinding, myResourceBundleType);
 
 		switch (myParamStyle) {
 			case RESOURCE_LIST:
@@ -127,4 +116,5 @@ public class TransactionParameter implements IParameter {
 		 */
 		RESOURCE_LIST
 	}
+
 }

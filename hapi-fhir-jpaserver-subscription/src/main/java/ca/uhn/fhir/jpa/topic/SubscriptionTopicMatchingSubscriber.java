@@ -39,37 +39,29 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
 
 	private final FhirContext myFhirContext;
-
 	@Autowired
 	SubscriptionTopicSupport mySubscriptionTopicSupport;
-
 	@Autowired
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
-
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
-
 	@Autowired
 	SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
-
 	@Autowired
 	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
 	@Autowired
 	private SubscriptionTopicDispatcher mySubscriptionTopicDispatcher;
-
 	@Autowired
 	private InMemoryTopicFilterMatcher myInMemoryTopicFilterMatcher;
 
@@ -89,9 +81,9 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 
 		// Interceptor call: SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED
-		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
-		if (!myInterceptorBroadcaster.callHooks(
-				Pointcut.SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, msg);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
 			return;
 		}
 		try {
@@ -110,31 +102,17 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
 				int deliveries = deliverToTopicSubscriptions(theMsg, topic, result);
-				ourLog.info(
-						"Matched topic {} to message {}.  Notifications sent to {} subscriptions for delivery.",
-						topic.getUrl(),
-						theMsg,
-						deliveries);
+				ourLog.info("Matched topic {} to message {}.  Notifications sent to {} subscriptions for delivery.", topic.getUrl(), theMsg, deliveries);
 			}
 		}
 	}
 
-	private int deliverToTopicSubscriptions(
-			ResourceModifiedMessage theMsg,
-			SubscriptionTopic theSubscriptionTopic,
-			InMemoryMatchResult theInMemoryMatchResult) {
+	private int deliverToTopicSubscriptions(ResourceModifiedMessage theMsg, SubscriptionTopic theSubscriptionTopic, InMemoryMatchResult theInMemoryMatchResult) {
 		String topicUrl = theSubscriptionTopic.getUrl();
 		IBaseResource matchedResource = theMsg.getNewPayload(myFhirContext);
 		List<IBaseResource> matchedResourceList = Collections.singletonList(matchedResource);
 		RestOperationTypeEnum restOperationType = theMsg.getOperationType().asRestOperationType();
 
-		return mySubscriptionTopicDispatcher.dispatch(new SubscriptionTopicDispatchRequest(
-				topicUrl,
-				matchedResourceList,
-				myInMemoryTopicFilterMatcher,
-				restOperationType,
-				theInMemoryMatchResult,
-				theMsg.getPartitionId(),
-				theMsg.getTransactionId()));
+		return mySubscriptionTopicDispatcher.dispatch(new SubscriptionTopicDispatchRequest(topicUrl, matchedResourceList, myInMemoryTopicFilterMatcher, restOperationType, theInMemoryMatchResult, theMsg.getPartitionId(), theMsg.getTransactionId()));
 	}
 }

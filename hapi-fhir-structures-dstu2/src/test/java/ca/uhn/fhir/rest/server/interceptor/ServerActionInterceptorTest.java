@@ -38,11 +38,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -103,14 +103,7 @@ public class ServerActionInterceptorTest {
 		RequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceName());
 		assertEquals(Patient.class, details.getResource().getClass());
-		assertEquals(
-				"FAMILY",
-				((Patient) details.getResource())
-						.getName()
-						.get(0)
-						.getFamily()
-						.get(0)
-						.getValue());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
@@ -142,14 +135,7 @@ public class ServerActionInterceptorTest {
 		assertEquals("Patient", details.getResourceName());
 		assertEquals("Patient/123", details.getId().getValue());
 		assertEquals(Patient.class, details.getResource().getClass());
-		assertEquals(
-				"FAMILY",
-				((Patient) details.getResource())
-						.getName()
-						.get(0)
-						.getFamily()
-						.get(0)
-						.getValue());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
 		assertEquals("Patient/123", ((Patient) details.getResource()).getId().getValue());
 	}
 
@@ -162,8 +148,7 @@ public class ServerActionInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor)
-				.incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
 	}
 
 	@Test
@@ -188,8 +173,7 @@ public class ServerActionInterceptorTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
-		verify(ourInterceptor)
-				.incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());
 		assertEquals("Patient", detailsCapt.getValue().getResourceName());
 		assertEquals("Patient/123", detailsCapt.getValue().getId().getValue());
 	}
@@ -198,26 +182,11 @@ public class ServerActionInterceptorTest {
 	public void before() {
 		reset(ourInterceptor);
 
-		when(ourInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class)))
-				.thenReturn(true);
-		when(ourInterceptor.incomingRequestPostProcessed(
-						any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class)))
-				.thenReturn(true);
-		when(ourInterceptor.outgoingResponse(
-						any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class)))
-				.thenReturn(true);
-		when(ourInterceptor.outgoingResponse(
-						any(RequestDetails.class),
-						any(IBaseResource.class),
-						any(HttpServletRequest.class),
-						any(HttpServletResponse.class)))
-				.thenReturn(true);
-		when(ourInterceptor.outgoingResponse(
-						any(RequestDetails.class),
-						any(ResponseDetails.class),
-						any(HttpServletRequest.class),
-						any(HttpServletResponse.class)))
-				.thenReturn(true);
+		when(ourInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(ourInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(ourInterceptor.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 	}
 
 	@AfterAll
@@ -244,8 +213,7 @@ public class ServerActionInterceptorTest {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -256,6 +224,7 @@ public class ServerActionInterceptorTest {
 		ourCtx.getRestfulClientFactory().setSocketTimeout(240 * 1000);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+
 	}
 
 	public static class PlainProvider {
@@ -266,6 +235,7 @@ public class ServerActionInterceptorTest {
 			retVal.setId("Patient/123/_history/2");
 			return Collections.singletonList((IBaseResource) retVal);
 		}
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -309,7 +279,9 @@ public class ServerActionInterceptorTest {
 			retVal.setId("Patient/123/_history/2");
 			return new MethodOutcome(retVal.getId());
 		}
+
 	}
+
 
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
@@ -318,6 +290,7 @@ public class ServerActionInterceptorTest {
 			return Observation.class;
 		}
 
+
 		@Create()
 		public MethodOutcome create(@ResourceParam String theBody) {
 			Observation retVal = new Observation();
@@ -325,4 +298,6 @@ public class ServerActionInterceptorTest {
 			return new MethodOutcome(retVal.getId());
 		}
 	}
+
+
 }

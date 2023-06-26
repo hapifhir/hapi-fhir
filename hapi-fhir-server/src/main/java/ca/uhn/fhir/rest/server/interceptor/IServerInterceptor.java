@@ -19,24 +19,36 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use
@@ -79,12 +91,8 @@ public interface IServerInterceptor {
 	 * @throws IOException      If this exception is thrown, it will be re-thrown up to the container for handling.
 	 */
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-	boolean handleException(
-			RequestDetails theRequestDetails,
-			BaseServerResponseException theException,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws ServletException, IOException;
+	boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+		throws ServletException, IOException;
 
 	/**
 	 * This method is called just before the actual implementing server method is invoked.
@@ -104,9 +112,7 @@ public interface IServerInterceptor {
 	 *                                 attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-	boolean incomingRequestPostProcessed(
-			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
-			throws AuthenticationException;
+	boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
 
 	/**
 	 * Invoked before an incoming request is processed. Note that this method is called
@@ -161,11 +167,7 @@ public interface IServerInterceptor {
 	 */
 	@Deprecated
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	boolean outgoingResponse(
-			RequestDetails theRequestDetails,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
 	 * Use {@link #outgoingResponse(RequestDetails, IBaseResource, HttpServletRequest, HttpServletResponse)} instead
@@ -201,12 +203,8 @@ public interface IServerInterceptor {
 	 */
 	@Deprecated
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	boolean outgoingResponse(
-			RequestDetails theRequestDetails,
-			IBaseResource theResponseObject,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+		throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -229,12 +227,9 @@ public interface IServerInterceptor {
 	 *                                 attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	boolean outgoingResponse(
-			RequestDetails theRequestDetails,
-			ResponseDetails theResponseDetails,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+		throws AuthenticationException;
+
 
 	/**
 	 * Use {@link #outgoingResponse(RequestDetails, IBaseResource, HttpServletRequest, HttpServletResponse)} instead
@@ -250,12 +245,7 @@ public interface IServerInterceptor {
 	 * @deprecated As of HAPI FHIR 3.2.0, this method is deprecated and will be removed in a future version of HAPI FHIR.
 	 */
 	@Deprecated
-	boolean outgoingResponse(
-			RequestDetails theRequestDetails,
-			TagList theResponseObject,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes
@@ -280,9 +270,7 @@ public interface IServerInterceptor {
 	 * should return an exception.
 	 */
 	@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-	BaseServerResponseException preProcessOutgoingException(
-			RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest)
-			throws ServletException;
+	BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException;
 
 	/**
 	 * This method is called after all processing is completed for a request, but only if the
@@ -300,4 +288,5 @@ public interface IServerInterceptor {
 	 */
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
+
 }

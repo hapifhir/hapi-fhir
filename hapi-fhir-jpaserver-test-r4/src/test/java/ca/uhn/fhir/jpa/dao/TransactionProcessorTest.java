@@ -51,49 +51,34 @@ import static org.mockito.Mockito.when;
 public class TransactionProcessorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
-
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
-
 	@MockBean
 	private DaoRegistry myDaoRegistry;
-
 	@MockBean
 	private EntityManagerFactory myEntityManagerFactory;
-
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private EntityManager myEntityManager;
-
 	@MockBean
 	private PlatformTransactionManager myPlatformTransactionManager;
-
 	@MockBean
 	private MatchResourceUrlService myMatchResourceUrlService;
-
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-
 	@MockBean
 	private IIdHelperService myIdHelperService;
-
 	@MockBean
 	private PartitionSettings myPartitionSettings;
-
 	@MockBean
 	private MatchUrlService myMatchUrlService;
-
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
-
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
-
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
-
 	@MockBean
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
@@ -103,6 +88,7 @@ public class TransactionProcessorTest {
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 	}
 
+
 	@Test
 	public void testTransactionWithDisabledResourceType() {
 
@@ -111,22 +97,21 @@ public class TransactionProcessorTest {
 
 		MedicationKnowledge medKnowledge = new MedicationKnowledge();
 		medKnowledge.setStatus(MedicationKnowledge.MedicationKnowledgeStatus.ACTIVE);
-		input.addEntry()
-				.setResource(medKnowledge)
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("/MedicationKnowledge");
+		input
+			.addEntry()
+			.setResource(medKnowledge)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl("/MedicationKnowledge");
 
 		try {
 			myTransactionProcessor.transaction(null, input, false);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(
-					Msg.code(544)
-							+ "Resource MedicationKnowledge is not supported on this server. Supported resource types: []",
-					e.getMessage());
+			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
 		}
 	}
+
 
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)
@@ -166,5 +151,6 @@ public class TransactionProcessorTest {
 		public IHapiTransactionService hapiTransactionService() {
 			return new NonTransactionalHapiTransactionService();
 		}
+
 	}
 }

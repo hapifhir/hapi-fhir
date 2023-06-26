@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@
  * #L%
  */
 package org.hl7.fhir.dstu2.model;
+
+
 
 public interface IIdType extends IBase {
 
@@ -31,7 +33,7 @@ public interface IIdType extends IBase {
 
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
-	 *
+	 * 
 	 * @see #getIdPart()
 	 */
 	String getValue();
@@ -48,12 +50,12 @@ public interface IIdType extends IBase {
 	String getBaseUrl();
 
 	/**
-	 * Returns a copy of this ID without the base URL or the version
+	 * Returns a copy of this ID without the base URL or the version 
 	 */
 	IIdType toUnqualifiedVersionless();
 
 	/**
-	 * Returns a copy of this ID without the version
+	 * Returns a copy of this ID without the version 
 	 */
 	IIdType toVersionless();
 
@@ -78,4 +80,5 @@ public interface IIdType extends IBase {
 	boolean isIdPartValidLong();
 
 	Long getIdPartAsLong();
+
 }

@@ -47,12 +47,14 @@ public interface IBinaryTarget {
 
 	@SuppressWarnings("unchecked")
 	default Optional<String> getAttachmentId() {
-		return getTarget().getExtension().stream()
-				.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-				.filter(t -> t.getValue() instanceof IPrimitiveType)
-				.map(t -> (IPrimitiveType<String>) t.getValue())
-				.map(t -> t.getValue())
-				.filter(t -> isNotBlank(t))
-				.findFirst();
+		return getTarget()
+			.getExtension()
+			.stream()
+			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType)
+			.map(t -> (IPrimitiveType<String>) t.getValue())
+			.map(t -> t.getValue())
+			.filter(t -> isNotBlank(t))
+			.findFirst();
 	}
 }

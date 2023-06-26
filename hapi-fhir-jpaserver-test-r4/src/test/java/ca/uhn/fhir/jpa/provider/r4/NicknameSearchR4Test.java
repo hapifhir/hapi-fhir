@@ -45,12 +45,13 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 		patient2.getNameFirstRep().addGiven("bob");
 		myClient.create().resource(patient2).execute();
 
-		Bundle result = myClient.loadPage()
-				.byUrl(myServerBase + "/Patient?name:nickname=kenneth")
-				.andReturnBundle(Bundle.class)
-				.execute();
+		Bundle result = myClient
+			.loadPage()
+			.byUrl(myServerBase + "/Patient?name:nickname=kenneth")
+			.andReturnBundle(Bundle.class)
+			.execute();
 
-		List<Patient> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, result, Patient.class);
+		List<Patient> resources = BundleUtil.toListOfResourcesOfType(myFhirContext,result, Patient.class);
 		assertThat(resources, hasSize(1));
 		assertEquals("ken", resources.get(0).getNameFirstRep().getGivenAsSingleString());
 	}

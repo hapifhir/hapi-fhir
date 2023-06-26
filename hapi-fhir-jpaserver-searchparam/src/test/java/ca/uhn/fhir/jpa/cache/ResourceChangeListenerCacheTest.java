@@ -39,14 +39,12 @@ class ResourceChangeListenerCacheTest {
 
 	@MockBean
 	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
-
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(
-				TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
 		cache.forceRefresh();
 		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 
@@ -61,16 +59,13 @@ class ResourceChangeListenerCacheTest {
 		assertEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 	}
 
-	private void mockInMemorySupported(
-			ResourceChangeListenerCache thecache, InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(mySearchParamMatcher.match(thecache.getSearchParameterMap(), ourPatient))
-				.thenReturn(theTheInMemoryMatchResult);
+	private void mockInMemorySupported(ResourceChangeListenerCache thecache, InMemoryMatchResult theTheInMemoryMatchResult) {
+		when(mySearchParamMatcher.match(thecache.getSearchParameterMap(), ourPatient)).thenReturn(theTheInMemoryMatchResult);
 	}
 
 	@Test
 	public void testSchedule() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(
-				TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:00");
 		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
@@ -85,6 +80,7 @@ class ResourceChangeListenerCacheTest {
 		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
+
 		reset(myResourceChangeListenerCacheRefresher);
 		ResourceChangeListenerCache.setNowForUnitTests("09:00:00");
 		cache.refreshCacheIfNecessary();
@@ -96,4 +92,6 @@ class ResourceChangeListenerCacheTest {
 		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
 	}
+
+
 }

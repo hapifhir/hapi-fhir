@@ -17,8 +17,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -50,13 +55,9 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_NAME, new StringParam("FOO"));
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		String sql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(false, false);
-		assertEquals(
-				"SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))",
-				sql);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
+
 	}
 
 	/**
@@ -67,17 +68,14 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-				.add(Patient.SP_NAME, new StringParam("FOO"))
-				.add(Patient.SP_GENDER, new TokenParam("a", "b"));
+			.add(Patient.SP_NAME, new StringParam("FOO"))
+			.add(Patient.SP_GENDER, new TokenParam("a", "b"));
 		myPatientDao.search(map);
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		String sql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(false, false);
-		assertEquals(
-				"SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))",
-				sql);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_SPIDX_STRING t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_TOKEN t2 ON (t1.RES_ID = t2.RES_ID) WHERE (((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?)) AND (t2.HASH_SYS_AND_VALUE = ?))", sql);
+
+
 	}
 
 	@Test
@@ -92,17 +90,13 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		// Search
 		myCaptureQueriesListener.clear();
-		SearchParameterMap map = SearchParameterMap.newSynchronous().add(Constants.PARAM_PROFILE, new TokenParam(code));
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_PROFILE, new TokenParam(code));
 		IBundleProvider outcome = myPatientDao.search(map);
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Make sure we search for tag type+system+code always
-		String sql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(false, false);
-		assertEquals(
-				"SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))",
-				sql);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND ((t2.TAG_TYPE = ?) AND (t2.TAG_SYSTEM = ?) AND (t2.TAG_CODE = ?)))", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
 		assertThat(sql, containsString("where resourcese0_.RES_ID in (?)"));
@@ -111,6 +105,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(sql, containsString("from HFJ_RES_TAG resourceta0_ inner join HFJ_TAG_DEF"));
 
 		assertThat(toUnqualifiedVersionlessIds(outcome), Matchers.contains(id));
+
 	}
 
 	@Test
@@ -119,11 +114,9 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		boolean reindexParamCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
-		// 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
+// 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
 		SearchParameter searchParameter = FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineProfile();
-		ourLog.debug(
-				"SearchParam:\n{}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -136,14 +129,12 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		// Search
 		myCaptureQueriesListener.clear();
-		SearchParameterMap map = SearchParameterMap.newSynchronous().add(Constants.PARAM_PROFILE, new UriParam(code));
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_PROFILE, new UriParam(code));
 		IBundleProvider outcome = myPatientDao.search(map);
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		// Query 1 - Find resources: Just a standard token search in this mode
-		String sql = myCaptureQueriesListener
-				.getSelectQueriesForCurrentThread()
-				.get(0)
-				.getSql(false, false);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_URI t0 WHERE (t0.HASH_URI = ?)", sql);
 		// Query 2 - Load resourece contents
 		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(false, false);
@@ -153,4 +144,6 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexParamCache);
 	}
+
+
 }

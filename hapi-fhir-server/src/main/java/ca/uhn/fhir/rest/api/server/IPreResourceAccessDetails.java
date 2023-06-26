@@ -34,4 +34,5 @@ public interface IPreResourceAccessDetails {
 	IBaseResource getResource(int theIndex);
 
 	void setDontReturnResourceAtIndex(int theIndex);
+
 }

@@ -23,20 +23,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, DaoTestDataBuilder.Config.class, TestDaoSearch.Config.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
-
 	@Autowired
 	PlatformTransactionManager myTxManager;
-
 	@RegisterExtension
 	@Autowired
 	DaoTestDataBuilder myDataBuilder;
-
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
-
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
@@ -90,4 +90,5 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 			return true;
 		}
 	}
+
 }

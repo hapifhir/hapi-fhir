@@ -50,11 +50,11 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 		return myColumnResourceId;
 	}
 
-	public Condition createPredicateParamMissingForReference(
-			String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		Long hash = SearchParamPresentEntity.calculateHashPresence(
-				myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
+
+	public Condition createPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
+		Long hash = SearchParamPresentEntity.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashPresence, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
+
 }

@@ -47,9 +47,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
-import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -83,15 +83,14 @@ public class TestR5Config {
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
+
 		}
 	}
 
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
-
 	@Autowired
 	private Environment myEnvironment;
-
 	private Exception myLastStackTrace;
 
 	@Bean
@@ -102,6 +101,7 @@ public class TestR5Config {
 	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
+
 
 			@Override
 			public Connection getConnection() {
@@ -140,6 +140,7 @@ public class TestR5Config {
 				}
 				ourLog.info(b.toString());
 			}
+
 		};
 
 		retVal.setDriver(new org.h2.Driver());
@@ -149,16 +150,17 @@ public class TestR5Config {
 		retVal.setPassword("");
 		retVal.setMaxTotal(ourMaxThreads);
 
-		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
-				//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
-				//			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
-				//			.countQuery(new ThreadQueryCountHolder())
-				.beforeQuery(new BlockLargeNumbersOfParamsListener())
-				.afterQuery(captureQueriesListener())
-				.afterQuery(new CurrentThreadCaptureQueriesListener())
-				.countQuery(singleQueryCountHolder())
-				.afterMethod(captureQueriesListener())
-				.build();
+		DataSource dataSource = ProxyDataSourceBuilder
+			.create(retVal)
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+//			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+//			.countQuery(new ThreadQueryCountHolder())
+			.beforeQuery(new BlockLargeNumbersOfParamsListener())
+			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
+			.countQuery(singleQueryCountHolder())
+			.afterMethod(captureQueriesListener())
+			.build();
 
 		return dataSource;
 	}
@@ -169,10 +171,8 @@ public class TestR5Config {
 	}
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
-				theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR5");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -216,4 +216,5 @@ public class TestR5Config {
 	public static int getMaxThreads() {
 		return ourMaxThreads;
 	}
+
 }

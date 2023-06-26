@@ -77,4 +77,5 @@ class AddressHelperTest {
 		helper.setText("Some Text Too");
 		assertEquals("Some Text Too, Line 1, Line 2, Hammer, State, Country", helper.toString());
 	}
+
 }

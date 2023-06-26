@@ -23,7 +23,7 @@ import java.lang.annotation.*;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#transaction">transaction</a> method.
- *
+ * 
  * <p>
  * This method should have a parameter of type Bundle annotated with the {@link TransactionParam} annotation.
  * </p>

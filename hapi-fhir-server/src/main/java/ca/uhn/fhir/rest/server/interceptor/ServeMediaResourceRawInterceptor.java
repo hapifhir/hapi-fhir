@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.interceptor;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -34,13 +34,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -66,38 +66,31 @@ public class ServeMediaResourceRawInterceptor {
 		RESPOND_TO_OPERATION_TYPES = Collections.unmodifiableSet(respondToOperationTypes);
 	}
 
-	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR)
-	public boolean outgoingResponse(
-			RequestDetails theRequestDetails,
-			IBaseResource theResponseObject,
-			HttpServletRequest theServletRequest,
-			HttpServletResponse theServletResponse)
-			throws AuthenticationException {
+	@Hook(value=Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR)
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		if (theResponseObject == null) {
 			return true;
 		}
+
 
 		FhirContext context = theRequestDetails.getFhirContext();
 		String resourceName = context.getResourceType(theResponseObject);
 
 		// Are we serving a FHIR read request on the Media resource type
-		if (!"Media".equals(resourceName)
-				|| !RESPOND_TO_OPERATION_TYPES.contains(theRequestDetails.getRestOperationType())) {
+		if (!"Media".equals(resourceName) || !RESPOND_TO_OPERATION_TYPES.contains(theRequestDetails.getRestOperationType())) {
 			return true;
 		}
 
 		// What is the content type of the Media resource we're returning?
 		String contentType = null;
-		Optional<IPrimitiveType> contentTypeOpt = context.newFluentPath()
-				.evaluateFirst(theResponseObject, MEDIA_CONTENT_CONTENT_TYPE_OPT, IPrimitiveType.class);
+		Optional<IPrimitiveType> contentTypeOpt = context.newFluentPath().evaluateFirst(theResponseObject, MEDIA_CONTENT_CONTENT_TYPE_OPT, IPrimitiveType.class);
 		if (contentTypeOpt.isPresent()) {
 			contentType = contentTypeOpt.get().getValueAsString();
 		}
 
 		// What is the data of the Media resource we're returning?
 		IPrimitiveType<byte[]> data = null;
-		Optional<IPrimitiveType> dataOpt =
-				context.newFluentPath().evaluateFirst(theResponseObject, "Media.content.data", IPrimitiveType.class);
+		Optional<IPrimitiveType> dataOpt = context.newFluentPath().evaluateFirst(theResponseObject, "Media.content.data", IPrimitiveType.class);
 		if (dataOpt.isPresent()) {
 			data = dataOpt.get();
 		}
@@ -106,12 +99,12 @@ public class ServeMediaResourceRawInterceptor {
 			return true;
 		}
 
-		RestfulServerUtils.ResponseEncoding responseEncoding =
-				RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, null, contentType);
+		RestfulServerUtils.ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, null, contentType);
 		if (responseEncoding != null) {
 			if (contentType.equals(responseEncoding.getContentType())) {
 				returnRawResponse(theRequestDetails, theServletResponse, contentType, data);
 				return false;
+
 			}
 		}
 
@@ -124,11 +117,7 @@ public class ServeMediaResourceRawInterceptor {
 		return true;
 	}
 
-	private void returnRawResponse(
-			RequestDetails theRequestDetails,
-			HttpServletResponse theServletResponse,
-			String theContentType,
-			IPrimitiveType<byte[]> theData) {
+	private void returnRawResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, String theContentType, IPrimitiveType<byte[]> theData) {
 		theServletResponse.setStatus(200);
 		if (theRequestDetails.getServer() instanceof RestfulServer) {
 			RestfulServer rs = (RestfulServer) theRequestDetails.getServer();

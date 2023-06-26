@@ -47,7 +47,9 @@ public class InjectionAttackTest {
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidContentType() throws Exception {
-		String requestUrl = "http://localhost:" + ourPort + "/Patient/123";
+		String requestUrl = "http://localhost:" +
+			ourPort +
+			"/Patient/123";
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
@@ -63,7 +65,11 @@ public class InjectionAttackTest {
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidParameterName() throws Exception {
-		String requestUrl = "http://localhost:" + ourPort + "/Patient?a" + UrlUtil.escapeUrlParam("<script>") + "=123";
+		String requestUrl = "http://localhost:" +
+			ourPort +
+			"/Patient?a" +
+			UrlUtil.escapeUrlParam("<script>") +
+			"=123";
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
@@ -74,13 +80,7 @@ public class InjectionAttackTest {
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					"text/html",
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON HTML
@@ -92,13 +92,7 @@ public class InjectionAttackTest {
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					"text/html",
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// XML HTML
@@ -110,13 +104,7 @@ public class InjectionAttackTest {
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					Constants.CT_FHIR_XML_NEW,
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON Plain
@@ -128,19 +116,16 @@ public class InjectionAttackTest {
 
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					Constants.CT_FHIR_JSON_NEW,
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidResourceType() throws Exception {
-		String requestUrl = "http://localhost:" + ourPort + "/AA" + UrlUtil.escapeUrlParam("<script>");
+		String requestUrl = "http://localhost:" +
+			ourPort +
+			"/AA" +
+			UrlUtil.escapeUrlParam("<script>");
 
 		// XML HTML
 		HttpGet httpGet = new HttpGet(requestUrl);
@@ -151,13 +136,7 @@ public class InjectionAttackTest {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					"text/html",
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON HTML
@@ -169,13 +148,7 @@ public class InjectionAttackTest {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					"text/html",
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// XML HTML
@@ -187,13 +160,7 @@ public class InjectionAttackTest {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					Constants.CT_FHIR_XML_NEW,
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON Plain
@@ -205,20 +172,17 @@ public class InjectionAttackTest {
 
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
-			assertEquals(
-					Constants.CT_FHIR_JSON_NEW,
-					status.getFirstHeader("Content-Type")
-							.getValue()
-							.toLowerCase()
-							.replaceAll(";.*", "")
-							.trim());
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidTokenParamModifier() throws Exception {
-		String requestUrl =
-				"http://localhost:" + ourPort + "/Patient?identifier:" + UrlUtil.escapeUrlParam("<script>") + "=123";
+		String requestUrl = "http://localhost:" +
+			ourPort +
+			"/Patient?identifier:" +
+			UrlUtil.escapeUrlParam("<script>") +
+			"=123";
 		HttpGet httpGet = new HttpGet(requestUrl);
 		httpGet.addHeader(Constants.HEADER_ACCEPT, "application/<script>");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
@@ -228,6 +192,7 @@ public class InjectionAttackTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, not(containsString("<script>")));
 		}
+
 	}
 
 	@AfterAll
@@ -251,13 +216,13 @@ public class InjectionAttackTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -279,5 +244,8 @@ public class InjectionAttackTest {
 		public List<Patient> search(@OptionalParam(name = "identifier") TokenParam theToken) {
 			return new ArrayList<>();
 		}
+
+
 	}
+
 }

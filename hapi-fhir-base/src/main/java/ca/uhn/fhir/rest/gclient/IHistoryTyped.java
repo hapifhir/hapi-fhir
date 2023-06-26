@@ -50,4 +50,6 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
 	 */
 	IHistoryTyped<T> since(Date theCutoff);
+
+
 }

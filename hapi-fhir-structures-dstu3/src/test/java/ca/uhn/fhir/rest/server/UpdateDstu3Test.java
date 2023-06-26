@@ -38,17 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UpdateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
-
 	@RegisterExtension
 	private static HttpClientExtension ourClient = new HttpClientExtension();
-
 	private static String ourConditionalUrl;
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-
 	@RegisterExtension
-	private static RestfulServerExtension ourServer =
-			new RestfulServerExtension(ourCtx).registerProvider(new PatientProvider());
-
+	private static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new PatientProvider());
 	private static IdType ourId;
 	private static InstantType ourSetLastUpdated;
 
@@ -68,9 +64,7 @@ public class UpdateDstu3Test {
 		ourSetLastUpdated = new InstantType("2002-04-22T11:22:33.022Z");
 
 		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/123");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -83,22 +77,15 @@ public class UpdateDstu3Test {
 		assertThat(responseContent, is(not(emptyString())));
 
 		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
-		assertEquals(
-				patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
-		assertEquals(
-				patient.getIdentifier().get(0).getValue(),
-				actualPatient.getIdentifier().get(0).getValue());
+		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
+		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));
-		assertEquals(
-				ourServer.getBaseUrl() + "/Patient/123/_history/002",
-				status.getFirstHeader("content-location").getValue());
-		assertEquals(
-				"W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
-		assertEquals(
-				"Mon, 22 Apr 2002 11:22:33 GMT",
-				status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/123/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
+		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
+
 	}
 
 	@Test
@@ -109,9 +96,7 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?_id=001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -124,6 +109,7 @@ public class UpdateDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -133,9 +119,7 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -147,10 +131,7 @@ public class UpdateDstu3Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(
-				Msg.code(419)
-						+ "Can not update resource, resource body must contain an ID element for update (PUT) operation",
-				oo.getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -161,9 +142,7 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/001");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
@@ -176,6 +155,7 @@ public class UpdateDstu3Test {
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
+
 	}
 
 	@Test
@@ -186,9 +166,7 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/1/_history/2");
-		httpPost.setEntity(new StringEntity(
-				ourCtx.newXmlParser().encodeResourceToString(patient),
-				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -209,15 +187,10 @@ public class UpdateDstu3Test {
 		}
 
 		@Update()
-		public MethodOutcome updatePatient(
-				@IdParam IdType theId,
-				@ResourceParam Patient thePatient,
-				@ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			ourId = theId;
 			ourConditionalUrl = theConditionalUrl;
-			IdType id = theId != null
-					? theId.withVersion(thePatient.getIdentifierFirstRep().getValue())
-					: new IdType("Patient/1");
+			IdType id = theId != null ? theId.withVersion(thePatient.getIdentifierFirstRep().getValue()) : new IdType("Patient/1");
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics("OODETAILS");
 			if (id.getValueAsString().contains("CREATE")) {
@@ -230,6 +203,7 @@ public class UpdateDstu3Test {
 			retVal.setResource(thePatient);
 			return retVal;
 		}
+
 	}
 
 	@AfterAll

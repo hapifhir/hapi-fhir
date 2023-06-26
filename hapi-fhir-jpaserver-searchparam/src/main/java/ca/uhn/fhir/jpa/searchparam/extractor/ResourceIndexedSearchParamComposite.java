@@ -74,17 +74,11 @@ public class ResourceIndexedSearchParamComposite {
 	 * @param theComponentSearchParam the component SP we are extracting
 	 * @param theExtractedParams index data extracted by the sub-extractor
 	 */
-	public void addComponentIndexedSearchParams(
-			RuntimeSearchParam theComponentSearchParam,
-			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
-		addComponentIndexedSearchParams(
-				theComponentSearchParam.getName(), theComponentSearchParam.getParamType(), theExtractedParams);
+	public void addComponentIndexedSearchParams(RuntimeSearchParam theComponentSearchParam, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+		addComponentIndexedSearchParams(theComponentSearchParam.getName(), theComponentSearchParam.getParamType(), theExtractedParams);
 	}
 
-	public void addComponentIndexedSearchParams(
-			String theComponentSearchParamName,
-			RestSearchParameterTypeEnum theComponentSearchParamType,
-			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+	public void addComponentIndexedSearchParams(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
 		myComponents.add(new Component(theComponentSearchParamName, theComponentSearchParamType, theExtractedParams));
 	}
 
@@ -108,10 +102,7 @@ public class ResourceIndexedSearchParamComposite {
 		 */
 		private final ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> myParamIndexValues;
 
-		private Component(
-				String theComponentSearchParamName,
-				RestSearchParameterTypeEnum theComponentSearchParamType,
-				ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
+		private Component(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
 			mySearchParamName = theComponentSearchParamName;
 			mySearchParameterType = theComponentSearchParamType;
 			myParamIndexValues = theParamIndexValues;
@@ -134,4 +125,5 @@ public class ResourceIndexedSearchParamComposite {
 			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		}
 	}
+
 }

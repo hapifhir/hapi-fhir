@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.r4.model.Bundle;
@@ -61,25 +61,20 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		// Resource query happens but not count query
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				not(startsWith("select count")));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), not(startsWith("select count")));
+
 	}
 
 	@Test
 	public void testTypeHistory_CountAccurate() {
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertEquals(0, myResourceHistoryTableDao.count());
 		});
 
 		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		create20Patients();
 
-		runInTransaction(() -> {
+		runInTransaction(()->{
 			assertEquals(20, myResourceHistoryTableDao.count());
 		});
 
@@ -100,20 +95,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				startsWith("select count"));
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(1)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 
 		/*
 		 * Subsequent history should also perform count
@@ -132,20 +115,9 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				startsWith("select count"));
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(1)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
+
 	}
 
 	@Test
@@ -170,20 +142,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				startsWith("select count"));
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(1)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		/*
@@ -204,14 +164,9 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+
 	}
 
 	@Test
@@ -236,13 +191,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				not(startsWith("select count")));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), not(startsWith("select count")));
+
 	}
 
 	@Test
@@ -267,20 +217,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				startsWith("select count"));
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(1)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		/*
@@ -301,14 +239,9 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(
-				myCaptureQueriesListener
-						.getSelectQueries()
-						.get(0)
-						.getSql(false, false)
-						.toLowerCase(Locale.ROOT),
-				containsString(" from hfj_res_ver "));
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+
 	}
 
 	@Test
@@ -343,6 +276,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		// We fetch the history resources 20 times, but should only fetch the
 		// count(*) once, for a total of 21
 		assertEquals(20 + 1, myCaptureQueriesListener.countSelectQueries());
+
 	}
 
 	private void create20Patients() {

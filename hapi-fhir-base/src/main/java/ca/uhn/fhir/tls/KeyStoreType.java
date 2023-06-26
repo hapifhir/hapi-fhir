@@ -25,12 +25,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum KeyStoreType {
+
 	PKCS12("p12", "pfx"),
 	JKS("jks");
 
 	private List<String> myFileExtensions;
 
-	KeyStoreType(String... theFileExtensions) {
+	KeyStoreType(String... theFileExtensions){
 		myFileExtensions = Arrays.asList(theFileExtensions);
 	}
 
@@ -39,11 +40,11 @@ public enum KeyStoreType {
 	}
 
 	public static KeyStoreType fromFileExtension(String theFileExtension) {
-		for (KeyStoreType type : KeyStoreType.values()) {
-			if (type.getFileExtensions().contains(theFileExtension.toLowerCase())) {
+		for(KeyStoreType type : KeyStoreType.values()){
+			if(type.getFileExtensions().contains(theFileExtension.toLowerCase())){
 				return type;
 			}
 		}
-		throw new IllegalArgumentException(Msg.code(2121) + "Invalid KeyStore Type");
+		throw new IllegalArgumentException(Msg.code(2121)+"Invalid KeyStore Type");
 	}
 }

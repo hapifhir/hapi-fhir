@@ -3,12 +3,15 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.gargoylesoftware.css.parser.CSSErrorHandler;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -25,6 +28,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -57,17 +61,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WebTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-
 	@RegisterExtension
 	@Order(0)
-	private static final RestfulServerExtension ourFhirServer =
-			new RestfulServerExtension(ourCtx).registerProvider(new MyPatientFakeDocumentController());
-
+	private static final RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(new MyPatientFakeDocumentController());
 	@RegisterExtension
 	@Order(1)
-	private static final HashMapResourceProviderExtension<Patient> ourPatientProvider =
-			new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
-
+	private static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
 	protected static MockMvc ourMockMvc;
 	private static Server ourOverlayServer;
 	private WebClient myWebClient;
@@ -127,8 +127,7 @@ public class WebTest {
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
 		assertEquals(5, controlRows.size());
-		assertEquals(
-				"Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
+		assertEquals("Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
 		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
 		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
@@ -139,6 +138,7 @@ public class WebTest {
 		for (int i = 0; i < 5; i++) {
 			ourFhirServer.getFhirClient().delete().resourceById(new IdType("Patient/A" + i));
 		}
+
 
 		// Load home page
 		HtmlPage page = myWebClient.getPage("http://localhost/");
@@ -166,11 +166,13 @@ public class WebTest {
 		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
 
 		// Find the $summary button and click it
-		HtmlPage summaryPage = controlsCell.getElementsByTagName("button").stream()
-				.filter(t -> t.asNormalizedText().equals("$summary"))
-				.findFirst()
-				.orElseThrow()
-				.click();
+		HtmlPage summaryPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$summary"))
+			.findFirst()
+			.orElseThrow()
+			.click();
 
 		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
 	}
@@ -185,11 +187,13 @@ public class WebTest {
 		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
 
 		// Find the $summary button and click it
-		HtmlPage summaryPage = controlsCell.getElementsByTagName("button").stream()
-				.filter(t -> t.asNormalizedText().equals("$validate"))
-				.findFirst()
-				.orElseThrow()
-				.click();
+		HtmlPage summaryPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$validate"))
+			.findFirst()
+			.orElseThrow()
+			.click();
 
 		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
 	}
@@ -203,11 +207,13 @@ public class WebTest {
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
 		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
 
-		HtmlPage diffPage = controlsCell.getElementsByTagName("button").stream()
-				.filter(t -> t.asNormalizedText().equals("$diff"))
-				.findFirst()
-				.orElseThrow()
-				.click();
+		HtmlPage diffPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$diff"))
+			.findFirst()
+			.orElseThrow()
+			.click();
 
 		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
 	}
@@ -230,13 +236,12 @@ public class WebTest {
 		// Load home page
 		HtmlPage page = myWebClient.getPage("http://localhost/");
 		// Navigate to Patient resource page
-		HtmlPage patientPage =
-				page.<HtmlAnchor>getHtmlElementById("leftResourcePatient").click();
+		HtmlPage patientPage = page.<HtmlAnchor>getHtmlElementById("leftResourcePatient").click();
 		// Click search button
-		HtmlPage searchResultPage =
-				patientPage.<HtmlButton>getHtmlElementById("search-btn").click();
+		HtmlPage searchResultPage = patientPage.<HtmlButton>getHtmlElementById("search-btn").click();
 		return searchResultPage;
 	}
+
 
 	private void register5Patients() {
 		for (int i = 0; i < 5; i++) {
@@ -265,7 +270,8 @@ public class WebTest {
 		@Operation(name = "validate", typeName = "Patient", idempotent = true)
 		public OperationOutcome validate(@IdParam IIdType theId) {
 			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics("VALIDATION FAILURE");
+			oo.addIssue()
+				.setDiagnostics("VALIDATION FAILURE");
 			throw new PreconditionFailedException("failure", oo);
 		}
 
@@ -274,6 +280,7 @@ public class WebTest {
 			Parameters parameters = new Parameters();
 			return parameters;
 		}
+
 	}
 
 	private static class MyServletContextHandler extends ServletContextHandler {
@@ -302,4 +309,6 @@ public class WebTest {
 	public static void afterAll() throws Exception {
 		JettyUtil.closeServer(ourOverlayServer);
 	}
+
+
 }

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.rest.method;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.param.ParameterUtil;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 
 public class ParameterUtilTest {
 
@@ -20,4 +21,5 @@ public class ParameterUtilTest {
 		IdType id2 = ParameterUtil.convertIdToType(id, IdType.class);
 		assertEquals("Patient/123", id2.getValue());
 	}
+	
 }

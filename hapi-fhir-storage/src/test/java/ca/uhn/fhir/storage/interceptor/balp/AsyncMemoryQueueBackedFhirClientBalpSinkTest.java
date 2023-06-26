@@ -33,17 +33,15 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 	@RegisterExtension
 	@Order(0)
 	private RestfulServerExtension myServer = new RestfulServerExtension(FhirVersionEnum.DSTU3)
-			.withServer(t -> t.registerProvider(new MySystemProvider()));
-
+		.withServer(t->t.registerProvider(new MySystemProvider()));
 	@RegisterExtension
 	@Order(1)
-	private HashMapResourceProviderExtension<AuditEvent> myAuditEventProvider =
-			new HashMapResourceProviderExtension<>(myServer, AuditEvent.class);
+	private HashMapResourceProviderExtension<AuditEvent> myAuditEventProvider = new HashMapResourceProviderExtension<>(myServer, AuditEvent.class);
+
 
 	@Test
 	public void testStressTest() {
-		AsyncMemoryQueueBackedFhirClientBalpSink sink =
-				new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
 		try {
 			for (int i = 0; i < 10; i++) {
 				for (int j = 0; j < 100; j++) {
@@ -60,11 +58,11 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 		}
 	}
 
+
 	@Test
 	public void recordAuditEvent() {
 		// Setup
-		AsyncMemoryQueueBackedFhirClientBalpSink sink =
-				new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
 		try {
 			org.hl7.fhir.r4.model.AuditEvent auditEvent1 = new org.hl7.fhir.r4.model.AuditEvent();
 			auditEvent1.addEntity().setWhat(new org.hl7.fhir.r4.model.Reference("Patient/123"));
@@ -77,9 +75,11 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
 			// Validate
 			myAuditEventProvider.waitForCreateCount(2);
-			List<String> whats = myAuditEventProvider.getStoredResources().stream()
-					.map(t -> t.getEntity().get(0).getReference().getReference())
-					.toList();
+			List<String> whats = myAuditEventProvider
+				.getStoredResources()
+				.stream()
+				.map(t -> t.getEntity().get(0).getReference().getReference())
+				.toList();
 			assertThat(whats, containsInAnyOrder("Patient/123", "Patient/456"));
 		} finally {
 			sink.stop();
@@ -89,8 +89,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 	@Test
 	public void recordAuditEvent_AutoRetry() {
 		// Setup
-		AsyncMemoryQueueBackedFhirClientBalpSink sink =
-				new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
+		AsyncMemoryQueueBackedFhirClientBalpSink sink = new AsyncMemoryQueueBackedFhirClientBalpSink(myServer.getFhirContext(), myServer.getBaseUrl());
 		try {
 			org.hl7.fhir.r4.model.AuditEvent auditEvent1 = new org.hl7.fhir.r4.model.AuditEvent();
 			auditEvent1.addEntity().setWhat(new org.hl7.fhir.r4.model.Reference("Patient/123"));
@@ -98,15 +97,14 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 			auditEvent2.addEntity().setWhat(new org.hl7.fhir.r4.model.Reference("Patient/456"));
 
 			AtomicInteger counter = new AtomicInteger(1);
-			myServer.registerAnonymousInterceptor(
-					Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, new IAnonymousInterceptor() {
-						@Override
-						public void invoke(IPointcut thePointcut, HookParams theArgs) {
-							if (counter.getAndDecrement() > 0) {
-								throw new InternalErrorException("Intentional error for unit test");
-							}
-						}
-					});
+			myServer.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, new IAnonymousInterceptor() {
+				@Override
+				public void invoke(IPointcut thePointcut, HookParams theArgs) {
+					if (counter.getAndDecrement() > 0) {
+						throw new InternalErrorException("Intentional error for unit test");
+					}
+				}
+			});
 
 			// Test
 			sink.recordAuditEvent(auditEvent1);
@@ -115,14 +113,17 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 			// Validate
 			myAuditEventProvider.waitForCreateCount(2);
 			assertThat(counter.get(), lessThan(1));
-			List<String> whats = myAuditEventProvider.getStoredResources().stream()
-					.map(t -> t.getEntity().get(0).getReference().getReference())
-					.toList();
+			List<String> whats = myAuditEventProvider
+				.getStoredResources()
+				.stream()
+				.map(t -> t.getEntity().get(0).getReference().getReference())
+				.toList();
 			assertThat(whats.toString(), whats, containsInAnyOrder("Patient/123", "Patient/456"));
 		} finally {
 			sink.stop();
 		}
 	}
+
 
 	public class MySystemProvider {
 
@@ -135,8 +136,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 				assertEquals(Bundle.HTTPVerb.POST, next.getRequest().getMethod());
 				assertEquals("AuditEvent", next.getRequest().getUrl());
 				AuditEvent resource = (AuditEvent) next.getResource();
-				IIdType outcome =
-						myAuditEventProvider.create(resource, theRequestDetails).getId();
+				IIdType outcome = myAuditEventProvider.create(resource, theRequestDetails).getId();
 
 				Bundle.BundleEntryComponent respEntry = retVal.addEntry();
 				respEntry.getResponse().setStatus("201 Created");
@@ -145,5 +145,6 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
 			return retVal;
 		}
+
 	}
 }

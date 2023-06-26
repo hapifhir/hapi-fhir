@@ -68,36 +68,25 @@ import static org.mockito.Mockito.when;
 public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture =
-			new LogbackCaptureTestExtension((Logger) JobMaintenanceServiceImpl.ourLog, Level.WARN);
-
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) JobMaintenanceServiceImpl.ourLog, Level.WARN);
 	@Mock
 	IJobCompletionHandler<TestJobParameters> myCompletionHandler;
-
 	@Mock
 	private ISchedulerService mySchedulerService;
-
 	@Mock
 	private IJobPersistence myJobPersistence;
-
 	@Mock
 	private WorkChunkProcessor myJobExecutorSvc;
-
 	@Spy
 	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
-
 	private JobMaintenanceServiceImpl mySvc;
 	private JobDefinitionRegistry myJobDefinitionRegistry;
-
 	@Mock
 	private IChannelProducer myWorkChannelProducer;
-
 	@Captor
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
-
 	@Captor
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
-
 	@Mock
 	private IReductionStepExecutorService myReductionStepExecutorService;
 
@@ -105,24 +94,24 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		myJobDefinitionRegistry = new JobDefinitionRegistry();
 		BatchJobSender batchJobSender = new BatchJobSender(myWorkChannelProducer);
-		mySvc = new JobMaintenanceServiceImpl(
-				mySchedulerService,
-				myJobPersistence,
-				myStorageSettings,
-				myJobDefinitionRegistry,
-				batchJobSender,
-				myJobExecutorSvc,
-				myReductionStepExecutorService);
+		mySvc = new JobMaintenanceServiceImpl(mySchedulerService,
+			myJobPersistence,
+			myStorageSettings,
+			myJobDefinitionRegistry,
+			batchJobSender,
+			myJobExecutorSvc,
+			myReductionStepExecutorService);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
 	@Test
 	public void testInProgress_CalculateProgress_FirstCompleteButNoOtherStepsYetComplete() {
 		List<WorkChunk> chunks = List.of(
-				JobCoordinatorImplTest.createWorkChunk(STEP_1, null).setStatus(WorkChunkStatusEnum.COMPLETED),
-				JobCoordinatorImplTest.createWorkChunk(STEP_2, null).setStatus(WorkChunkStatusEnum.QUEUED));
+			JobCoordinatorImplTest.createWorkChunk(STEP_1, null).setStatus(WorkChunkStatusEnum.COMPLETED),
+			JobCoordinatorImplTest.createWorkChunk(STEP_2, null).setStatus(WorkChunkStatusEnum.QUEUED)
+		);
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-				.thenReturn(chunks.iterator());
+			.thenReturn(chunks.iterator());
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
@@ -138,19 +127,17 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_Calculate_progresss_JobDefinitionMissing() {
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		List<WorkChunk> chunks = List.of(
-				JobCoordinatorImplTest.createWorkChunk(STEP_1, null).setStatus(WorkChunkStatusEnum.COMPLETED),
-				JobCoordinatorImplTest.createWorkChunk(STEP_2, null).setStatus(WorkChunkStatusEnum.QUEUED));
+			JobCoordinatorImplTest.createWorkChunk(STEP_1, null).setStatus(WorkChunkStatusEnum.COMPLETED),
+			JobCoordinatorImplTest.createWorkChunk(STEP_2, null).setStatus(WorkChunkStatusEnum.QUEUED)
+		);
 
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(List.of(instance));
 
 		mySvc.runMaintenancePass();
 
-		String assumedRoleLogText = String.format(
-				"Job definition %s for instance %s is currently unavailable",
-				JOB_DEFINITION_ID, instance.getInstanceId());
-		List<ILoggingEvent> fetchedCredentialLogs =
-				myLogCapture.filterLoggingEventsWithMessageEqualTo(assumedRoleLogText);
+		String assumedRoleLogText = String.format("Job definition %s for instance %s is currently unavailable", JOB_DEFINITION_ID,  instance.getInstanceId());
+		List<ILoggingEvent> fetchedCredentialLogs = myLogCapture.filterLoggingEventsWithMessageEqualTo(assumedRoleLogText);
 		assertEquals(1, fetchedCredentialLogs.size());
 
 		verify(myJobPersistence, never()).updateInstance(any(), any());
@@ -159,34 +146,19 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testInProgress_CalculateProgress_FirstStepComplete() {
 		List<WorkChunk> chunks = Arrays.asList(
-				createWorkChunkStep1()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:01-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:02-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:03-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep3()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25));
+			createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:01-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:02-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:03-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
+		);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-				.thenReturn(chunks.iterator());
+			.thenReturn(chunks.iterator());
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
@@ -205,7 +177,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
-		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call -> {
+		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
 			IJobPersistence.JobInstanceUpdateCallback callback = call.getArgument(1);
 			return callback.doUpdate(theJobInstance);
 		});
@@ -215,37 +187,20 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_CalculateProgress_InstanceHasErrorButNoChunksAreErrored() {
 		// Setup
 		List<WorkChunk> chunks = Arrays.asList(
-				createWorkChunkStep1()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:01-04:00")),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:02-04:00"))
-						.setErrorCount(2),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
-						.setStartTime(parseTime("2022-02-12T14:00:03-04:00"))
-						.setErrorCount(2),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep3()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25));
+			createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:01-04:00")),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:02-04:00")).setErrorCount(2),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:03-04:00")).setErrorCount(2),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
+		);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
 		instance.setErrorMessage("This is an error message");
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-				.thenReturn(chunks.iterator());
+			.thenReturn(chunks.iterator());
 		stubUpdateInstanceCallback(instance);
 
 		// Execute
@@ -267,27 +222,18 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
 		List<WorkChunk> chunks = Arrays.asList(
-				JobCoordinatorImplTest.createWorkChunkStep1()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setId(CHUNK_ID + "abc"),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.QUEUED)
-						.setId(CHUNK_ID),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.QUEUED)
-						.setId(CHUNK_ID_2));
-		when(myJobPersistence.canAdvanceInstanceToNextStep(any(), any())).thenReturn(true);
+			JobCoordinatorImplTest.createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID + "abc"),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
+		);
+		when (myJobPersistence.canAdvanceInstanceToNextStep(any(), any())).thenReturn(true);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-				.thenReturn(chunks.iterator());
+			.thenReturn(chunks.iterator());
 
-		when(myJobPersistence.fetchAllChunkIdsForStepWithStatus(
-						eq(INSTANCE_ID), eq(STEP_2), eq(WorkChunkStatusEnum.QUEUED)))
-				.thenReturn(chunks.stream()
-						.filter(c -> c.getTargetStepId().equals(STEP_2))
-						.map(WorkChunk::getId)
-						.collect(Collectors.toList()));
+		when(myJobPersistence.fetchAllChunkIdsForStepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(WorkChunkStatusEnum.QUEUED)))
+			.thenReturn(chunks.stream().filter(c->c.getTargetStepId().equals(STEP_2)).map(WorkChunk::getId).collect(Collectors.toList()));
 
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
@@ -329,42 +275,17 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_CalculateProgress_AllStepsComplete() {
 		// Setup
 		List<WorkChunk> chunks = List.of(
-				createWorkChunkStep1()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:01-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:02-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:03-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep3()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25));
+			createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:01-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:02-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:03-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25),JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
+		);
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.completionHandler(myCompletionHandler)));
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenAnswer(t -> chunks.iterator());
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
 		stubUpdateInstanceCallback(instance);
 
@@ -388,54 +309,30 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verifyNoMoreInteractions(myJobPersistence);
 
 		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
-		assertEquals(
-				PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
+		assertEquals(PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
 	}
 
 	@Test
 	public void testInProgress_CalculateProgress_OneStepFailed() {
 		List<WorkChunk> chunks = List.of(
-				createWorkChunkStep1()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:01-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.FAILED)
-						.setStartTime(parseTime("2022-02-12T14:00:02-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25)
-						.setErrorMessage("This is an error message"),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:03-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:06:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep2()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:00:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25),
-				JobCoordinatorImplTest.createWorkChunkStep3()
-						.setStatus(WorkChunkStatusEnum.COMPLETED)
-						.setStartTime(parseTime("2022-02-12T14:01:00-04:00"))
-						.setEndTime(parseTime("2022-02-12T14:10:00-04:00"))
-						.setRecordsProcessed(25));
+			createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:01-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.FAILED).setStartTime(parseTime("2022-02-12T14:00:02-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25).setErrorMessage("This is an error message"),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:03-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25),
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
+		);
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenAnswer(t -> chunks.iterator());
+			.thenAnswer(t->chunks.iterator());
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
+
 
 		assertEquals(0.8333333333333334, instance.getProgress());
 		assertEquals(StatusEnum.FAILED, instance.getStatus());
@@ -474,15 +371,15 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		CountDownLatch secondCall = new CountDownLatch(1);
 
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0)))
-				.thenAnswer(t -> {
-					maintenancePassCalled.countDown();
-					simulatedMaintenancePasslatch.await();
-					return Collections.emptyList();
-				})
-				.thenAnswer(t -> {
-					secondCall.countDown();
-					return Collections.emptyList();
-				});
+			.thenAnswer(t -> {
+				maintenancePassCalled.countDown();
+				simulatedMaintenancePasslatch.await();
+				return Collections.emptyList();
+			})
+			.thenAnswer(t -> {
+				secondCall.countDown();
+				return Collections.emptyList();
+			});
 
 		// Trigger a thread blocking on our latch maintenance pass in the background
 		Future<Boolean> result1 = Executors.newSingleThreadExecutor().submit(() -> mySvc.triggerMaintenancePass());
@@ -494,8 +391,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Wait for the second background maintenance pass to block
 		await().until(() -> mySvc.getQueueLength() > 0);
 
-		// Now trigger a maintenance pass in the foreground.  It should abort right away since there is already one
-		// thread in queue
+		// Now trigger a maintenance pass in the foreground.  It should abort right away since there is already one thread in queue
 		assertFalse(mySvc.triggerMaintenancePass());
 
 		// Now release the background task
@@ -510,7 +406,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertTrue(result2.get());
 	}
 
+
 	private static Date parseTime(String theDate) {
 		return new DateTimeType(theDate).getValue();
 	}
+
 }

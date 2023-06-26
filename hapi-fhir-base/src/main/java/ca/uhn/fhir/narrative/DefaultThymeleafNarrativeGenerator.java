@@ -27,8 +27,7 @@ import java.util.List;
 public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
-	static final String HAPISERVER_NARRATIVES_PROPERTIES =
-			"classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
+	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
 
 	private boolean myUseHapiServerConformanceNarrative;
 	private volatile NarrativeTemplateManifest myManifest;
@@ -67,4 +66,5 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	public boolean isUseHapiServerConformanceNarrative() {
 		return myUseHapiServerConformanceNarrative;
 	}
+
 }

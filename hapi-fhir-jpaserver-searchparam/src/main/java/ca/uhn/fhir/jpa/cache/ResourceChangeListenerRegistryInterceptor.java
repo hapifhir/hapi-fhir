@@ -41,9 +41,9 @@ import javax.annotation.PreDestroy;
 public class ResourceChangeListenerRegistryInterceptor {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
-
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)

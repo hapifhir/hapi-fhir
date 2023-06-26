@@ -57,9 +57,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@RegisterExtension
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
-
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+
 
 	@Override
 	public void beforeUnregisterAllSubscriptions() {
@@ -80,9 +80,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testSearchExpandingInterceptorWorks() {
-		SearchParameterMap subject = new SearchParameterMap(
-						"subject", new ReferenceParam("Patient/123").setMdmExpand(true))
-				.setLoadSynchronous(true);
+		SearchParameterMap subject = new SearchParameterMap("subject", new ReferenceParam("Patient/123").setMdmExpand(true)).setLoadSynchronous(true);
 		myObservationDao.search(subject);
 	}
 
@@ -97,16 +95,14 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testCreatePatientWithMdmTagForbidden() throws InterruptedException {
-		// Creating a golden resource with the MDM-MANAGED tag should fail
+		//Creating a golden resource with the MDM-MANAGED tag should fail
 		Patient patient = new Patient();
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -117,9 +113,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -131,9 +125,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(medication, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -154,22 +146,20 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testCreateOrganizationWithMdmTagForbidden() throws InterruptedException {
-		// Creating a organization with the MDM-MANAGED tag should fail
+		//Creating a organization with the MDM-MANAGED tag should fail
 		Organization organization = new Organization();
 		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doCreateResource(organization, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
 	@Test
 	public void testUpdateOrganizationWithMdmTagForbidden() throws InterruptedException {
-		// Creating a organization with the MDM-MANAGED tag should fail
+		//Creating a organization with the MDM-MANAGED tag should fail
 		Organization organization = new Organization();
 		myMdmHelper.doCreateResource(organization, true);
 		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
@@ -186,7 +176,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmHelper.createWithLatch(buildJanePatient());
 		myMdmHelper.createWithLatch(buildPaulPatient());
 
-		// TODO GGG MDM: this test is out of date, since we now are using golden record Patients
+		//TODO GGG MDM: this test is out of date, since we now are using golden record Patients
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceSearchParameterMap());
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
@@ -202,7 +192,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
 		assertNotNull(daoMethodOutcome.getId());
 
-		// Updating that patient to set them as MDM managed is not allowed.
+		//Updating that patient to set them as MDM managed is not allowed.
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doUpdateResource(patient, true);
@@ -213,23 +203,15 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testMdmManagedGoldenResourceCannotBeModifiedByGoldenResourceUpdateRequest()
-			throws InterruptedException {
-		// When MDM is enabled, only the MDM system is allowed to modify GoldenResource links of GoldenResources with
-		// the MDM-MANAGED tag.
+	public void testMdmManagedGoldenResourceCannotBeModifiedByGoldenResourceUpdateRequest() throws InterruptedException {
+		// When MDM is enabled, only the MDM system is allowed to modify GoldenResource links of GoldenResources with the MDM-MANAGED tag.
 		Patient patient = new Patient();
-		IIdType patientId = myMdmHelper
-				.createWithLatch(buildPaulPatient())
-				.getDaoMethodOutcome()
-				.getId()
-				.toUnqualifiedVersionless();
+		IIdType patientId = myMdmHelper.createWithLatch(buildPaulPatient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc
-				.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient))
-				.orElseThrow(() -> new IllegalStateException()));
+		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)).orElseThrow(() -> new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePersistenceId().getId();
 		Patient goldenResourcePatient = myPatientDao.readByPid(JpaPid.fromId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
@@ -237,9 +219,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -249,7 +229,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		TransactionLogMessages mdmTransactionLogMessages = wrapper.getLogMessages();
 
-		// There is no TransactionGuid here as there is no TransactionLog in this context.
+		//There is no TransactionGuid here as there is no TransactionLog in this context.
 		assertThat(mdmTransactionLogMessages.getTransactionGuid(), is(nullValue()));
 
 		List<String> messages = mdmTransactionLogMessages.getValues();
@@ -266,7 +246,9 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myMdmHelper.updateWithLatch(jane);
 
+
 		IAnyResource patient = getGoldenResourceFromTargetResource(jane);
+
 
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
 		assertThat(externalEids, hasSize(1));
@@ -285,11 +267,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					is(
-							equalTo(
-									"HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources")));
 		}
 		setPreventEidUpdates(false);
 	}
@@ -304,11 +282,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(
-					e.getMessage(),
-					is(
-							equalTo(
-									"HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.")));
 		}
 
 		setPreventMultipleEids(false);
@@ -318,7 +292,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public void testInterceptorHandlesNonMdmResources() {
 		setPreventEidUpdates(true);
 
-		// Create some arbitrary resource.
+		//Create some arbitrary resource.
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setCode("foo");
 		fooSp.addBase("Bundle");
@@ -363,4 +337,5 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	private void setPreventMultipleEids(boolean thePrevent) {
 		((MdmSettings) myMdmSettings).setPreventMultipleEids(thePrevent);
 	}
+
 }

@@ -52,8 +52,7 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubscriptionQueryValidator subscriptionQueryValidator(
-			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+	public SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
@@ -67,4 +66,6 @@ public class SubscriptionSubmitterConfig {
 	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
 		return new SubscriptionTriggeringSvcImpl();
 	}
+
+
 }

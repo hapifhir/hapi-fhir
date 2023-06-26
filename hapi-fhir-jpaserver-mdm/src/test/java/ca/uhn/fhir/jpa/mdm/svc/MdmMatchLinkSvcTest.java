@@ -54,13 +54,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
-
 	@Autowired
 	private EIDHelper myEidHelper;
-
 	@Autowired
 	private GoldenResourceHelper myGoldenResourceHelper;
-
 	@Autowired
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
@@ -116,7 +113,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
-		assertLinksMatchScore(1.0, 2.0 / 3.0);
+		assertLinksMatchScore(1.0, 2.0/3.0);
 		assertLinksMatchVector(null, 6L);
 	}
 
@@ -125,16 +122,11 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource janeGoldenResource = getGoldenResourceFromTargetResource(originalJane);
 
-		// Create a manual NO_MATCH between janeGoldenResource and unmatchedJane.
+		//Create a manual NO_MATCH between janeGoldenResource and unmatchedJane.
 		Patient unmatchedJane = createPatient(buildJanePatient());
-		myMdmLinkSvc.updateLink(
-				janeGoldenResource,
-				unmatchedJane,
-				MdmMatchOutcome.NO_MATCH,
-				MdmLinkSourceEnum.MANUAL,
-				createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(janeGoldenResource, unmatchedJane, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		// rerun MDM rules against unmatchedJane.
+		//rerun MDM rules against unmatchedJane.
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unmatchedJane, createContextForCreate("Patient"));
 
 		assertThat(unmatchedJane, is(not(sameGoldenResourceAs(janeGoldenResource))));
@@ -152,23 +144,16 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
 		IBundleProvider search = myPatientDao.search(buildGoldenRecordSearchParameterMap());
-		IAnyResource janeGoldenResource =
-				(IAnyResource) search.getResources(0, 1).get(0);
+		IAnyResource janeGoldenResource = (IAnyResource) search.getResources(0, 1).get(0);
 
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
 		// This simulates an admin specifically saying that unmatchedPatient does NOT match janeGoldenResource.
-		myMdmLinkSvc.updateLink(
-				janeGoldenResource,
-				unmatchedPatient,
-				MdmMatchOutcome.NO_MATCH,
-				MdmLinkSourceEnum.MANUAL,
-				createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(janeGoldenResource, unmatchedPatient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		// TODO change this so that it will only partially match.
 
-		// Now normally, when we run update links, it should link to janeGoldenResource. However, this manual NO_MATCH
-		// link
-		// should cause a whole new GoldenResource to be created.
+		//Now normally, when we run update links, it should link to janeGoldenResource. However, this manual NO_MATCH link
+		//should cause a whole new GoldenResource to be created.
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unmatchedPatient, createContextForCreate("Patient"));
 
 		assertThat(unmatchedPatient, is(not(sameGoldenResourceAs(janeGoldenResource))));
@@ -187,25 +172,20 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-				JpaPid.fromId(janePatient.getIdElement().getIdPartAsLong()));
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(JpaPid.fromId(janePatient.getIdElement().getIdPartAsLong()));
 		assertThat(mdmLink.isPresent(), is(true));
 
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(
-				externalEid.get(0).getSystem(),
-				is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDTheGoldenResourceGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		IMdmLink mdmLink = myMdmLinkDaoSvc
-				.getMatchedLinkForSourcePid(JpaPid.fromId(patient.getIdElement().getIdPartAsLong()))
-				.get();
+		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(JpaPid.fromId(patient.getIdElement().getIdPartAsLong())).get();
 
 		Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 		Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
@@ -217,26 +197,15 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientAttributesAreCopiedOverWhenGoldenResourceIsCreatedFromPatient() {
 		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-				JpaPid.fromId(patient.getIdElement().getIdPartAsLong()));
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(JpaPid.fromId(patient.getIdElement().getIdPartAsLong()));
 		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
-		assertThat(
-				read.getNameFirstRep().getFamily(),
-				is(equalTo(patient.getNameFirstRep().getFamily())));
-		assertThat(
-				read.getNameFirstRep().getGivenAsSingleString(),
-				is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
-		assertThat(
-				read.getBirthDateElement().toHumanDisplay(),
-				is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
-		assertThat(
-				read.getTelecomFirstRep().getValue(),
-				is(equalTo(patient.getTelecomFirstRep().getValue())));
+		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
+		assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
+		assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
+		assertThat(read.getTelecomFirstRep().getValue(), is(equalTo(patient.getTelecomFirstRep().getValue())));
 		assertThat(read.getPhoto().size(), is(equalTo(patient.getPhoto().size())));
-		assertThat(
-				read.getPhotoFirstRep().getData(),
-				is(equalTo(patient.getPhotoFirstRep().getData())));
+		assertThat(read.getPhotoFirstRep().getData(), is(equalTo(patient.getPhotoFirstRep().getData())));
 		assertThat(read.getGender(), is(equalTo(patient.getGender())));
 	}
 
@@ -249,8 +218,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesGoldenResourceWithHapiEidAddsExternalEidToGoldenResource() {
-		// Existing GoldenResource with system-assigned EID found linked from matched Patient.  incoming Patient has
-		// EID.
+		// Existing GoldenResource with system-assigned EID found linked from matched Patient.  incoming Patient has EID.
 		// Replace GoldenResource system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
@@ -261,23 +229,21 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), "12345");
 		createPatientAndUpdateLinks(janePatient);
 
-		// We want to make sure the patients were linked to the same Golden Resource.
+		//We want to make sure the patients were linked to the same Golden Resource.
 		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
 		Patient sourcePatient = getGoldenResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
-		// The collision should have kept the old identifier
+		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
 		assertThat(firstIdentifier.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(firstIdentifier.getValue(), is(equalTo(foundHapiEid)));
 
-		// The collision should have added a new identifier with the external system.
+		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(
-				secondIdentifier.getSystem(),
-				is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
@@ -312,8 +278,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void
-			testDuplicateGoldenResourceLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
+	public void testDuplicateGoldenResourceLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
 
 		Patient patient1 = addExternalEID(buildJanePatient(), "eid-1");
 		patient1 = createPatientAndUpdateLinks(patient1);
@@ -326,13 +291,11 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		Patient finalPatient1 = patient1;
 		Patient finalPatient2 = patient2;
-		List<IResourcePersistentId> duplicatePids = runInTransaction(() -> Stream.of(finalPatient1, finalPatient2)
-				.map(t -> myIdHelperService.getPidOrNull(
-						RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
-				.collect(Collectors.toList()));
+		List<IResourcePersistentId> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
+			.map(t -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
+			.collect(Collectors.toList()));
 
-		// The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE
-		// MdmLink.
+		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePersistenceId(), is(in(duplicatePids)));
 		assertThat(mdmLink.getSourcePersistenceId(), is(in(duplicatePids)));
@@ -342,9 +305,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientWithNoMdmTagIsNotMatched() {
 		// Patient with "no-mdm" tag is not matched
 		Patient janePatient = buildJanePatient();
-		janePatient
-				.getMeta()
-				.addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
+		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
 		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(janePatient);
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
@@ -406,32 +367,23 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient janePatient2 = createPatient(buildJanePatient());
 
-		// In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are
-		// their
-		// own individual GoldenResource for the purpose of this test.
-		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-				janePatient2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
-		myMdmLinkSvc.updateLink(
-				goldenResource,
-				janePatient2,
-				MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
+		//own individual GoldenResource for the purpose of this test.
+		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+		myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
 
-		// In theory, this will match both GoldenResources!
+		//In theory, this will match both GoldenResources!
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
 
-		// There should now be a single POSSIBLE_DUPLICATE link with
+		//There should now be a single POSSIBLE_DUPLICATE link with
 		assertThat(janePatient, is(possibleDuplicateOf(janePatient2)));
 
-		// There should now be 2 POSSIBLE_MATCH links with this goldenResource.
+		//There should now be 2 POSSIBLE_MATCH links with this goldenResource.
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
-		// Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<? extends IMdmLink> matchedLinkForTargetPid =
-				runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-						myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient)));
+		//Ensure there is no successful MATCH links for incomingJanePatient
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient)));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 
 		logAllLinks();
@@ -466,7 +418,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		IBundleProvider bundle = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 		assertEquals(1, bundle.size());
 
-		// TODO GGG MDM: Convert these asserts to checking the MPI_LINK table
+		//TODO GGG MDM: Convert these asserts to checking the MPI_LINK table
 
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH);
 		assertLinksCreatedNewResource(true, false, false);
@@ -476,8 +428,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	private SearchParameterMap buildGoldenRecordSearchParameterMap() {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLoadSynchronous(true);
-		searchParameterMap.add(
-				"_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
+		searchParameterMap.add("_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
 		return searchParameterMap;
 	}
 
@@ -500,6 +451,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(patient2, is(possibleMatchWith(patient)));
 		assertThat(patient3, is(sameGoldenResourceAs(patient)));
 	}
+
 
 	@Test
 	public void testPossibleMatchUpdatedToMatch() {
@@ -531,8 +483,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testCreateGoldenResourceFromMdmTarget() {
 		// Create Use Case #2 - adding patient with no EID
 		Patient janePatient = buildJanePatient();
-		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-				janePatient, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
 		// golden record now contains HAPI-generated EID and HAPI tag
 		assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));
@@ -544,28 +495,27 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertFalse(janeGoldenResourcePatient.getIdentifier().isEmpty());
 
 		CanonicalEID janeId = myEidHelper.getHapiEid(janePatient).get(0);
-		CanonicalEID janeGoldenResourceId =
-				myEidHelper.getHapiEid(janeGoldenResourcePatient).get(0);
+		CanonicalEID janeGoldenResourceId = myEidHelper.getHapiEid(janeGoldenResourcePatient).get(0);
 
 		// source and target EIDs must match, as target EID should be reset to the newly created EID
 		assertEquals(janeId.getValue(), janeGoldenResourceId.getValue());
 		assertEquals(janeId.getSystem(), janeGoldenResourceId.getSystem());
 	}
 
-	// Case #1
+	//Case #1
 	@Test
 	public void testPatientUpdateOverwritesGoldenResourceDataOnChanges() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient janeSourcePatient = getGoldenResourceFromTargetResource(janePatient);
 
-		// Change Jane's name to paul.
+		//Change Jane's name to paul.
 		Patient patient1 = buildPaulPatient();
 		patient1.setId(janePatient.getId());
 		Patient janePaulPatient = updatePatientAndUpdateLinks(patient1);
 
 		assertThat(janeSourcePatient, is(sameGoldenResourceAs(janePaulPatient)));
 
-		// Ensure the related GoldenResource was updated with new info.
+		//Ensure the related GoldenResource was updated with new info.
 		Patient sourcePatientFromTarget = getGoldenResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 
@@ -573,7 +523,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	// Test Case #1
+	//Test Case #1
 	public void testPatientUpdatesOverwriteGoldenResourceData() {
 		Patient paul = buildPaulPatient();
 		String incorrectBirthdate = "1980-06-27";
@@ -636,7 +586,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testSinglyLinkedGoldenResourceThatGetsAnUpdatedEidSimplyUpdatesEID() {
-		// Use Case # 2
+		//Use Case # 2
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
 		Patient originalPaulGolden = getGoldenResourceFromTargetResource(paul);
 
@@ -661,7 +611,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	// Test Case #3
+	//Test Case #3
 	public void testWhenAnEidChangeWouldCauseARelinkingThatAPossibleDuplicateIsCreated() {
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");
@@ -675,7 +625,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		addExternalEID(patient3, "eid-2");
 		patient3 = createPatientAndUpdateLinks(patient3);
 
-		// Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
+		//Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
 		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
 		assertNoDuplicates();
 		//	GoldenResource A -> {P1}
@@ -701,35 +651,30 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient janePatient2 = createPatient(buildJanePatient());
 
-		// In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are
-		// their
-		// own individual GoldenResource for the purpose of this test.
-		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
-				janePatient2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
-		myMdmLinkSvc.updateLink(
-				goldenResource,
-				janePatient2,
-				MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
-				MdmLinkSourceEnum.AUTO,
-				createContextForCreate("Patient"));
+		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
+		//own individual GoldenResource for the purpose of this test.
+		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2,
+			new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+		myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
+			MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
 
-		// In theory, this will match both GoldenResources!
+		//In theory, this will match both GoldenResources!
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
 
-		// There should now be a single POSSIBLE_DUPLICATE link with
+		//There should now be a single POSSIBLE_DUPLICATE link with
 		assertThat(janePatient, is(possibleDuplicateOf(janePatient2)));
 
-		// There should now be 2 POSSIBLE_MATCH links with this goldenResource.
+		//There should now be 2 POSSIBLE_MATCH links with this goldenResource.
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		// Ensure both links are POSSIBLE_MATCH and both have a score value
-		List<? extends IMdmLink> janetPatientLinks =
-				runInTransaction(() -> myMdmLinkDaoSvc.findMdmLinksBySourceResource(incomingJanePatient));
+		List<? extends IMdmLink> janetPatientLinks = runInTransaction(() -> myMdmLinkDaoSvc.findMdmLinksBySourceResource(incomingJanePatient));
 		assertEquals(2, janetPatientLinks.size());
-		janetPatientLinks.forEach(l -> {
+		janetPatientLinks.forEach( l -> {
 			assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, l.getMatchResult());
 			assertNotNull(l.getScore());
 		});
 	}
+
 }

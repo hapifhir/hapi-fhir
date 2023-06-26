@@ -33,12 +33,9 @@ public enum TermValueSetPreExpansionStatusEnum {
 	 */
 
 	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
-	EXPANSION_IN_PROGRESS(
-			"expansionInProgress",
-			"The ValueSet has been picked up by a scheduled task and pre-expansion is in progress."),
+	EXPANSION_IN_PROGRESS("expansionInProgress", "The ValueSet has been picked up by a scheduled task and pre-expansion is in progress."),
 	EXPANDED("expanded", "The ValueSet has been picked up by a scheduled task and pre-expansion is complete."),
-	FAILED_TO_EXPAND(
-			"failedToExpand", "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
+	FAILED_TO_EXPAND("failedToExpand", "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
 
 	private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
 	private String myCode;
@@ -59,8 +56,7 @@ public enum TermValueSetPreExpansionStatusEnum {
 
 	public static TermValueSetPreExpansionStatusEnum fromCode(String theCode) {
 		if (ourValues == null) {
-			HashMap<String, TermValueSetPreExpansionStatusEnum> values =
-					new HashMap<String, TermValueSetPreExpansionStatusEnum>();
+			HashMap<String, TermValueSetPreExpansionStatusEnum> values = new HashMap<String, TermValueSetPreExpansionStatusEnum>();
 			for (TermValueSetPreExpansionStatusEnum next : values()) {
 				values.put(next.getCode(), next);
 			}

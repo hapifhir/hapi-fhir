@@ -54,4 +54,5 @@ public class JobCompletionDetails<PT extends IModelJson> {
 	public IJobInstance getInstance() {
 		return myInstance;
 	}
+
 }

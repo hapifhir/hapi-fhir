@@ -9,12 +9,12 @@ public class SubscriptionTestHelper {
 
 	protected static final AtomicLong idCounter = new AtomicLong();
 
+
 	public Subscription makeActiveSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		return makeSubscriptionWithStatus(theCriteria, thePayload, theEndpoint, Subscription.SubscriptionStatus.ACTIVE);
 	}
 
-	public Subscription makeSubscriptionWithStatus(
-			String theCriteria, String thePayload, String theEndpoint, Subscription.SubscriptionStatus status) {
+	public Subscription makeSubscriptionWithStatus(String theCriteria, String thePayload, String theEndpoint, Subscription.SubscriptionStatus status) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(status);

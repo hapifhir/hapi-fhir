@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ServerUsingOldTypesDstu2_1Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
@@ -81,6 +80,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		public Patient opTypeRetOldBundle(@IdParam String theId) {
 			return null;
 		}
+
 	}
 
 	public static class ReadProviderIdDt implements IResourceProvider {
@@ -94,6 +94,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		public Patient opTypeRetOldBundle(@IdParam IdDt theId) {
 			return null;
 		}
+
 	}
 
 	public static class OperationProvider implements IResourceProvider {
@@ -107,5 +108,7 @@ public class ServerUsingOldTypesDstu2_1Test {
 		public Patient opTypeRetOldBundle(@OperationParam(name = "foo") IntegerDt theId) {
 			return null;
 		}
+
 	}
+
 }

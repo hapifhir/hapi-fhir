@@ -51,41 +51,40 @@ public class CustomTypeDstu2Test {
 	public void testConstrainedFieldContainedResource() {
 		Medication medication = new Medication();
 		medication.getCode().setText("MED TEXT");
-
+		
 		CustomMedicationOrderDstu2 mo = new CustomMedicationOrderDstu2();
 		mo.setMedication(new ResourceReferenceDt());
 		mo.getMedication().setResource(medication);
-
+		
 		String string = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo);
 		ourLog.info(string);
-
-		// @formatter:on
-		assertThat(
-				string,
-				stringContainsInOrder(
-						"<MedicationOrder xmlns=\"http://hl7.org/fhir\">",
-						"   <contained>",
-						"      <Medication xmlns=\"http://hl7.org/fhir\">",
-						"         <id value=\"1\"/>",
-						"         <code>",
-						"            <text value=\"MED TEXT\"/>",
-						"         </code>",
-						"      </Medication>",
-						"   </contained>",
-						"   <medication>",
-						"      <reference value=\"#1\"/>",
-						"   </medication>",
-						"</MedicationOrder>"));
-		// @formatter:on
-
+		
+		//@formatter:on
+		assertThat(string, stringContainsInOrder(
+				"<MedicationOrder xmlns=\"http://hl7.org/fhir\">", 
+				"   <contained>", 
+				"      <Medication xmlns=\"http://hl7.org/fhir\">", 
+				"         <id value=\"1\"/>", 
+				"         <code>", 
+				"            <text value=\"MED TEXT\"/>", 
+				"         </code>", 
+				"      </Medication>", 
+				"   </contained>", 
+				"   <medication>", 
+				"      <reference value=\"#1\"/>", 
+				"   </medication>", 
+				"</MedicationOrder>"));
+		//@formatter:on
+		
 		mo = ourCtx.newXmlParser().parseResource(CustomMedicationOrderDstu2.class, string);
-
+		
 		medication = (Medication) mo.getMedication().getResource();
 		assertNotNull(medication);
 		assertEquals("#1", medication.getId().getValue());
 		assertEquals("MED TEXT", medication.getCode().getText());
+		
 	}
-
+	
 	/**
 	 * See #364
 	 */
@@ -102,22 +101,17 @@ public class CustomTypeDstu2Test {
 		String xml = parser.encodeResourceToString(resource);
 		ourLog.info(xml);
 
-		// @formatter:on
-		assertThat(
-				xml,
-				stringContainsInOrder(
-						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-						"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
-						"</CustomResource>"));
-		// @formatter:on
-
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
 		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
-		assertEquals(
-				"2016-05-13",
-				((CustomResource364CustomDate) parsedResource.getBaseValues())
-						.getDate()
-						.getValueAsString());
+		assertEquals("2016-05-13", ((CustomResource364CustomDate)parsedResource.getBaseValues()).getDate().getValueAsString());
 	}
 
 	/**
@@ -133,18 +127,17 @@ public class CustomTypeDstu2Test {
 
 		String xml = parser.encodeResourceToString(resource);
 
-		// @formatter:on
-		assertThat(
-				xml,
-				stringContainsInOrder(
-						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-						"<baseValueString value=\"2016-05-13\"/>",
-						"</CustomResource>"));
-		// @formatter:on
-
+		//@formatter:on
+		assertThat(xml, stringContainsInOrder(
+			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+			"<baseValueString value=\"2016-05-13\"/>",
+			"</CustomResource>"
+		));
+		//@formatter:on
+		
 		CustomResource364Dstu2 parsedResource = parser.parseResource(CustomResource364Dstu2.class, xml);
-		assertEquals("2016-05-13", ((StringDt) parsedResource.getBaseValues()).getValueAsString());
+		assertEquals("2016-05-13", ((StringDt)parsedResource.getBaseValues()).getValueAsString());
 	}
 
 	@BeforeEach
@@ -249,8 +242,7 @@ public class CustomTypeDstu2Test {
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
 		assertEquals(1, res1.getMeta().getProfile().size());
-		assertEquals(
-				"http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
+		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getUndeclaredExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
 		assertEquals("185 cm", res1.getWeight().getValue());
@@ -265,8 +257,7 @@ public class CustomTypeDstu2Test {
 
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals(
-				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
@@ -281,8 +272,7 @@ public class CustomTypeDstu2Test {
 		FhirContext ctx = FhirContext.forDstu2();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals(
-				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<ExtensionDt> exts = parsed.getUndeclaredExtensionsByUrl("http://example.com/Weight");
 		assertEquals(1, exts.size());
@@ -301,6 +291,7 @@ public class CustomTypeDstu2Test {
 		assertThat(p.getMeta().getTag(), empty());
 		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
 		assertThat(p.getMeta().getVersionId(), nullValue());
+
 	}
 
 	@Test
@@ -316,33 +307,31 @@ public class CustomTypeDstu2Test {
 		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(out);
 
-		// @formatter:off
-		assertThat(
-				out,
-				stringContainsInOrder(
-						"<meta>",
-						"<profile value=\"http://foo/profile1\"/>",
-						"<profile value=\"http://foo/profile2\"/>",
-						"<security>",
-						"<system value=\"SEC_S1\"/>",
-						"<code value=\"SEC_C1\"/>",
-						"<display value=\"SED_D1\"/>",
-						"</security>",
-						"<security>",
-						"<system value=\"SEC_S2\"/>",
-						"<code value=\"SEC_C2\"/>",
-						"<display value=\"SED_D2\"/>",
-						"</security>",
-						"<tag>",
-						"<system value=\"TAG_S1\"/>",
-						"<display value=\"TAG_D1\"/>",
-						"</tag>",
-						"<tag>",
-						"<system value=\"TAG_S2\"/>",
-						"<display value=\"TAG_D2\"/>",
-						"</tag>",
-						"</meta>"));
-		// @formatter:on
+		//@formatter:off
+		assertThat(out, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://foo/profile1\"/>", 
+			"<profile value=\"http://foo/profile2\"/>", 
+			"<security>", 
+			"<system value=\"SEC_S1\"/>", 
+			"<code value=\"SEC_C1\"/>", 
+			"<display value=\"SED_D1\"/>", 
+			"</security>", 
+			"<security>", 
+			"<system value=\"SEC_S2\"/>", 
+			"<code value=\"SEC_C2\"/>", 
+			"<display value=\"SED_D2\"/>", 
+			"</security>", 
+			"<tag>", 
+			"<system value=\"TAG_S1\"/>", 
+			"<display value=\"TAG_D1\"/>", 
+			"</tag>", 
+			"<tag>", 
+			"<system value=\"TAG_S2\"/>", 
+			"<display value=\"TAG_D2\"/>", 
+			"</tag>", 
+			"</meta>"));
+		//@formatter:on
 
 	}
 
@@ -384,22 +373,20 @@ public class CustomTypeDstu2Test {
 
 		ourLog.info(messageString);
 
-		// @formatter:off
-		assertThat(
-				messageString,
-				stringContainsInOrder("<meta>", "<profile value=\"http://example.com/foo\"/>", "</meta>"));
-		// @formatter:on
+		//@formatter:off
+		assertThat(messageString, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>"));
+		//@formatter:on
 
-		// @formatter:off
-		assertThat(
-				messageString,
-				not(stringContainsInOrder(
-						"<meta>",
-						"<profile value=\"http://example.com/foo\"",
-						"/>",
-						"<profile value=\"http://example.com/foo\"/>",
-						"</meta>")));
-		// @formatter:on
+		//@formatter:off
+		assertThat(messageString, not(stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"", "/>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>")));
+		//@formatter:on
 	}
 
 	@Test
@@ -428,26 +415,21 @@ public class CustomTypeDstu2Test {
 
 		ourLog.info(messageString);
 
-		// @formatter:off
-		assertThat(
-				messageString,
-				stringContainsInOrder(
-						"<meta>",
-						"<profile value=\"http://example.com/foo\"/>",
-						"<profile value=\"http://example.com/bar\"/>",
-						"</meta>"));
-		// @formatter:on
+		//@formatter:off
+		assertThat(messageString, stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"<profile value=\"http://example.com/bar\"/>", 
+			"</meta>"));
+		//@formatter:on
 
-		// @formatter:off
-		assertThat(
-				messageString,
-				not(stringContainsInOrder(
-						"<meta>",
-						"<profile value=\"http://example.com/foo\"",
-						"/>",
-						"<profile value=\"http://example.com/foo\"/>",
-						"</meta>")));
-		// @formatter:on
+		//@formatter:off
+		assertThat(messageString, not(stringContainsInOrder(
+			"<meta>", 
+			"<profile value=\"http://example.com/foo\"", "/>", 
+			"<profile value=\"http://example.com/foo\"/>", 
+			"</meta>")));
+		//@formatter:on
 	}
 
 	/**
@@ -455,7 +437,7 @@ public class CustomTypeDstu2Test {
 	 */
 	@Test
 	public void testParseResourceWithContainedResourcesWithProfile() {
-		// @formatter:off
+		//@formatter:off
 		String input = "<MedicationOrder xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
 				+ "<meta> "
@@ -476,16 +458,13 @@ public class CustomTypeDstu2Test {
 				+ "<reference value=\"#1\"/> "
 				+ "</medication> "
 				+ "</MedicationOrder>";
-		// @formatter:on
+		//@formatter:on
 
 		FhirContext ctx = FhirContext.forDstu2();
-		ctx.setDefaultTypeForProfile(
-				"http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
+		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
 
 		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
-		assertEquals(
-				MyMedication.class,
-				mo.getContained().getContainedResources().get(0).getClass());
+		assertEquals(MyMedication.class, mo.getContained().getContainedResources().get(0).getClass());
 	}
 
 	@ResourceDef(name = "Patient", profile = "http://example.com/foo")
@@ -614,16 +593,7 @@ public class CustomTypeDstu2Test {
 
 		@Override
 		public boolean isEmpty() {
-			return super.isEmpty()
-					&& ElementUtil.isEmpty(
-							myInsulinLevel,
-							myGlucoseLevel,
-							myHbA1c,
-							myBloodPressure,
-							myCholesterol,
-							myWeight,
-							myHeight,
-							myCheckDates);
+			return super.isEmpty() && ElementUtil.isEmpty(myInsulinLevel, myGlucoseLevel, myHbA1c, myBloodPressure, myCholesterol, myWeight, myHeight, myCheckDates);
 		}
 
 		public void setBloodPressure(QuantityDt bloodPressure) {
@@ -674,11 +644,13 @@ public class CustomTypeDstu2Test {
 		public void setWeight(StringDt weight) {
 			myWeight = weight;
 		}
+
 	}
 
 	@ResourceDef()
 	public static class MyMedication extends Medication {
 
 		private static final long serialVersionUID = 1L;
+
 	}
 }

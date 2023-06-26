@@ -93,14 +93,14 @@ class ActiveSubscriptionCache {
 	public List<ActiveSubscription> getTopicSubscriptionsForTopic(String theTopic) {
 		assert !isBlank(theTopic);
 		return getAll().stream()
-				.filter(as -> as.getSubscription().isTopicSubscription())
-				.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
-				.collect(Collectors.toList());
+			.filter(as -> as.getSubscription().isTopicSubscription())
+			.filter(as -> theTopic.equals(as.getSubscription().getTopic()))
+			.collect(Collectors.toList());
 	}
 
 	public List<ActiveSubscription> getAllNonTopicSubscriptions() {
 		return getAll().stream()
-				.filter(as -> !as.getSubscription().isTopicSubscription())
-				.collect(Collectors.toList());
+			.filter(as -> !as.getSubscription().isTopicSubscription())
+			.collect(Collectors.toList());
 	}
 }

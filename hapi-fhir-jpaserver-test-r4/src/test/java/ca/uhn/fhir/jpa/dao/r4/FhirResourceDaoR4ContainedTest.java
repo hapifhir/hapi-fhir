@@ -35,8 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
 
 	@BeforeEach
 	public void before() throws Exception {
@@ -53,71 +52,59 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily("Smith").addGiven("John");
-
+		
 		Observation obs = new Observation();
 		obs.getCode().setText("Some Observation");
 		obs.setSubject(new Reference(p));
-
-		ourLog.debug(
-				"Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		 				
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
-
-		ourLog.debug(
-				"Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
-
-		runInTransaction(() -> {
-			ourLog.info(
-					"String indexes:\n * {}",
-					myResourceIndexedSearchParamStringDao.findAll().stream()
-							.map(t -> t.toString())
-							.collect(Collectors.joining("\n * ")));
+		
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		
+		runInTransaction(()->{
+			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
 			Long i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'", Long.class)
+				.getSingleResult();
 			assertEquals(1L, i.longValue());
 		});
-
+		
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
-
+	
 	@Test
 	public void testCreateSimpleContainedResourceIndexUserDefinedId() {
 
 		Patient p = new Patient();
 		p.setId("fooId");
 		p.addName().setFamily("Smith").addGiven("John");
-
+		
 		Observation obs = new Observation();
 		obs.getCode().setText("Some Observation");
 		obs.getContained().add(p);
 		obs.getSubject().setReference("#fooId");
-
-		ourLog.debug(
-				"Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
-
-		ourLog.debug(
-				"Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
-
-		runInTransaction(() -> {
+		
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		
+		runInTransaction(()->{
 			Long i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'", Long.class)
+				.getSingleResult();
 			assertEquals(1L, i.longValue());
 		});
 
@@ -128,8 +115,10 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
-	}
 
+	}
+	
+	
 	@Test
 	public void testCreateMultipleContainedResourceIndex() {
 
@@ -144,7 +133,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		address.setCity("PleasantVille");
 		address.setState("NY");
 		address.setPostalCode("12345");
-
+		
 		Organization org1 = new Organization();
 		org1.setId("org1");
 		org1.setActive(true);
@@ -163,41 +152,32 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		patient.addGeneralPractitioner().setReference("#prac1");
 		patient.addGeneralPractitioner().setReference("#org1");
 		patient.getManagingOrganization().setReference("#org2");
-
-		ourLog.debug(
-				"Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+				
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient createdPatient = myPatientDao.read(id);
-
-		ourLog.debug(
-				"Output: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
-
-		runInTransaction(() -> {
+		
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
+		
+		runInTransaction(()->{
 			Long i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'general-practitioner.family' AND s.myResourceType = 'Patient'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'general-practitioner.family' AND s.myResourceType = 'Patient'", Long.class)
+				.getSingleResult();
 			assertEquals(1L, i.longValue());
 
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'general-practitioner.name' AND s.myResourceType = 'Patient'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'general-practitioner.name' AND s.myResourceType = 'Patient'", Long.class)
+				.getSingleResult();
 			assertEquals(3L, i.longValue());
 
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'organization.name' AND s.myResourceType = 'Patient'",
-							Long.class)
+					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'organization.name' AND s.myResourceType = 'Patient'", Long.class)
 					.getSingleResult();
-			assertEquals(1L, i.longValue());
+		    assertEquals(1L, i.longValue());
 		});
-
+		
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
@@ -205,19 +185,19 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
-
+	
 	@Test
 	public void testCreateComplexContainedResourceIndex() {
 
 		Encounter encounter = new Encounter();
 		encounter.setStatus(EncounterStatus.ARRIVED);
-
+		
 		Patient patient = new Patient();
 		patient.setId("patient1");
 		patient.addName().setFamily("Doe").addGiven("Jane");
 		encounter.getSubject().setReference("#patient1");
 		encounter.getContained().add(patient);
-
+		
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId("serviceRequest1");
 		serviceRequest.setStatus(ServiceRequestStatus.ACTIVE);
@@ -234,7 +214,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		EncounterParticipantComponent participient = encounter.addParticipant();
 		participient.getIndividual().setReference("#prac1");
 		encounter.getContained().add(prac1);
-
+		
 		Observation obs = new Observation();
 		obs.setId("obs1");
 		obs.addIdentifier().setSystem("urn:system").setValue("FOO");
@@ -243,58 +223,45 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 		encounter.addReasonReference().setReference("#obs1");
 		encounter.getContained().add(obs);
-
-		ourLog.debug(
-				"Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+		
+		ourLog.debug("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter createdEncounter = myEncounterDao.read(id);
-
-		ourLog.debug(
-				"Output: {}",
-				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
-
-		runInTransaction(() -> {
+		
+		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+		
+		runInTransaction(()->{
 			// The practitioner
 			Long i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'participant.family' AND s.myResourceType = 'Encounter'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'participant.family' AND s.myResourceType = 'Encounter'", Long.class)
+				.getSingleResult();
 			assertEquals(1L, i.longValue());
 
 			// The Patient
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Encounter'",
-							Long.class)
-					.getSingleResult();
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Encounter'", Long.class)
+				.getSingleResult();
 			assertEquals(1L, i.longValue());
 
 			// The Observation
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamToken s WHERE s.myParamName = 'reason-reference.code' AND s.myResourceType = 'Encounter'",
-							Long.class)
+					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamToken s WHERE s.myParamName = 'reason-reference.code' AND s.myResourceType = 'Encounter'", Long.class)
 					.getSingleResult();
-			assertEquals(1L, i.longValue());
+		    assertEquals(1L, i.longValue());
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamToken s WHERE s.myParamName = 'reason-reference.combo-code' AND s.myResourceType = 'Encounter'",
-							Long.class)
+					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamToken s WHERE s.myParamName = 'reason-reference.combo-code' AND s.myResourceType = 'Encounter'", Long.class)
 					.getSingleResult();
-			assertEquals(1L, i.longValue());
-
-			// The ServiceRequest
+		    assertEquals(1L, i.longValue());
+		    
+		    // The ServiceRequest
 			i = myEntityManager
-					.createQuery(
-							"SELECT count(s) FROM ResourceIndexedSearchParamDate s WHERE s.myParamName = 'based-on.authored' AND s.myResourceType = 'Encounter'",
-							Long.class)
+					.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamDate s WHERE s.myParamName = 'based-on.authored' AND s.myResourceType = 'Encounter'", Long.class)
 					.getSingleResult();
-			assertEquals(1L, i.longValue());
+		    assertEquals(1L, i.longValue());
 		});
-
+		
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
@@ -302,7 +269,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
-
+	
 	@Test
 	public void testSearchWithNotSupportedSearchParameter() {
 
@@ -318,5 +285,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1214) + "Invalid parameter chain: subject.marital-status", e.getMessage());
 		}
+		
 	}
 }

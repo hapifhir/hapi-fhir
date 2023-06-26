@@ -19,15 +19,16 @@
  */
 package ca.uhn.fhir.model.primitive;
 
+import java.util.Calendar;
+
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 /**
  * Represents a FHIR date datatype. Valid precisions values for this type are:
@@ -36,7 +37,7 @@ import java.util.TimeZone;
  * <li>{@link TemporalPrecisionEnum#MONTH}
  * <li>{@link TemporalPrecisionEnum#DAY}
  * </ul>
- *
+ * 
  * <p>
  * <b>Note on using Java Date objects:</b> This type stores the date as a Java Date. Note that
  * the Java Date has more precision (millisecond precision), and does not store a timezone. As such,
@@ -45,7 +46,7 @@ import java.util.TimeZone;
  * intended.
  * </p>
  * <p>
- * As such, it is recommended to use the <code>Calendar<code> or <code>int,int,int</code> constructors
+ * As such, it is recommended to use the <code>Calendar<code> or <code>int,int,int</code> constructors  
  * </p>
  */
 @DatatypeDef(name = "date")
@@ -90,20 +91,18 @@ public class DateDt extends BaseDateTimeDt {
 	 * </ul>
 	 * <b>Please see the note on timezones</b> on the {@link DateDt class documentation} for considerations
 	 * when using this constructor!
-	 *
+	 * 
 	 * @throws DataFormatException
 	 *             If the specified precision is not allowed for this type
 	 */
 	@SimpleSetter
-	public DateDt(
-			@SimpleSetter.Parameter(name = "theDate") Date theDate,
-			@SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
+	public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
 		super(theDate, thePrecision);
 	}
 
 	/**
 	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type.
-	 *
+	 * 
 	 * @param theYear The year, e.g. 2015
 	 * @param theMonth The month, e.g. 0 for January
 	 * @param theDay The day (1 indexed) e.g. 1 for the first day of the month
@@ -114,7 +113,7 @@ public class DateDt extends BaseDateTimeDt {
 
 	/**
 	 * Constructor which accepts a date as a string in FHIR format
-	 *
+	 * 
 	 * @throws DataFormatException
 	 *             If the precision in the date string is not allowed for this type
 	 */
@@ -124,7 +123,7 @@ public class DateDt extends BaseDateTimeDt {
 
 	/**
 	 * Returns the default precision for this datatype
-	 *
+	 * 
 	 * @see #DEFAULT_PRECISION
 	 */
 	@Override
@@ -135,12 +134,12 @@ public class DateDt extends BaseDateTimeDt {
 	@Override
 	protected boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
-			case YEAR:
-			case MONTH:
-			case DAY:
-				return true;
-			default:
-				return false;
+		case YEAR:
+		case MONTH:
+		case DAY:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -151,4 +150,5 @@ public class DateDt extends BaseDateTimeDt {
 		retVal.set(Calendar.DATE, theDay);
 		return retVal;
 	}
+
 }

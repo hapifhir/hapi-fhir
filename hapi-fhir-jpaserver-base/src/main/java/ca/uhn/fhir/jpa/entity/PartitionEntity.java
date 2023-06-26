@@ -28,13 +28,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(
-		name = "HFJ_PARTITION",
-		uniqueConstraints = {
-			@UniqueConstraint(
-					name = "IDX_PART_NAME",
-					columnNames = {"PART_NAME"})
-		})
+@Table(name = "HFJ_PARTITION", uniqueConstraints = {
+	@UniqueConstraint(name = "IDX_PART_NAME", columnNames = {"PART_NAME"})
+})
 public class PartitionEntity {
 
 	public static final int MAX_NAME_LENGTH = 200;
@@ -47,10 +43,8 @@ public class PartitionEntity {
 	@Id
 	@Column(name = "PART_ID", nullable = false)
 	private Integer myId;
-
 	@Column(name = "PART_NAME", length = MAX_NAME_LENGTH, nullable = false)
 	private String myName;
-
 	@Column(name = "PART_DESC", length = MAX_DESC_LENGTH, nullable = true)
 	private String myDescription;
 

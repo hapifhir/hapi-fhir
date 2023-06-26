@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FhirValidatorTest {
 	private static final String PREFIX = "Brakebills";
 	public static final String MESSAGE = "Fillory";
-
 	@Mock
 	FhirContext myFhirContext;
 
@@ -91,4 +90,6 @@ class FhirValidatorTest {
 		tasks.add(task);
 		return tasks;
 	}
+
+
 }

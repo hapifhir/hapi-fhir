@@ -33,8 +33,7 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-	private static final org.slf4j.Logger ourLog =
-			org.slf4j.LoggerFactory.getLogger(SearchWithServerAddressStrategyDstu2_1Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithServerAddressStrategyDstu2_1Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
@@ -42,7 +41,7 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 	@Test
 	public void testIncomingRequestAddressStrategy() throws Exception {
 		ourServlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
-
+		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -55,7 +54,7 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 
 	@Test
 	public void testApacheProxyAddressStrategy() throws Exception {
-
+		
 		ourServlet.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -65,7 +64,7 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/Patient/1\"/>"));
-
+		
 		ourServlet.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		httpGet.addHeader("x-forwarded-host", "foo.com");
@@ -99,12 +98,13 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<given value=\"FAMILY\""));
 		assertThat(responseContent, containsString("<fullUrl value=\"https://foo.com/Patient/1\"/>"));
+
 	}
 
 	@Test
 	public void testHardcodedAddressStrategy() throws Exception {
 		ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://example.com/fhir/base"));
-
+		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -115,11 +115,14 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 		assertThat(responseContent, containsString("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>"));
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
+	
+	 @AfterAll
+	  public static void afterClassClearContext() throws Exception {
+	    JettyUtil.closeServer(ourServer);
+	    TestUtil.randomizeLocaleAndTimezone();
+	  }
+
+	
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
@@ -137,13 +140,13 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager =
-				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -153,17 +156,17 @@ public class SearchWithServerAddressStrategyDstu2_1Test {
 			return Patient.class;
 		}
 
-		// @formatter:off
+		//@formatter:off
 		@Search()
 		public List<Patient> searchByIdentifier() {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().addGiven("FAMILY")).setId("1"));
-			retVal.add((Patient)
-					new Patient().addName(new HumanName().addGiven("FAMILY")).setId("2"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addGiven("FAMILY")).setId("1"));
+			retVal.add((Patient) new Patient().addName(new HumanName().addGiven("FAMILY")).setId("2"));
 			return retVal;
 		}
-		// @formatter:on
+		//@formatter:on
+
 
 	}
+
 }

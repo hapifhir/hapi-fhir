@@ -9,13 +9,13 @@ import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,9 +36,10 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		// uri info
 		queryParameters = new MultivaluedHashMap<>();
 		// headers
-		//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
-		//				new MapPropertiesDelegate());
+//		headers = new ContainerRequest(new URI(BASEURI), new URI(REQUESTURI), HttpMethod.GET, null,
+//				new MapPropertiesDelegate());
 		headers = new ResteasyHttpHeaders(queryParameters);
+
 
 		providers = new ConcurrentHashMap<>();
 		provider = createConformanceProvider(providers);
@@ -85,15 +86,14 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		System.out.println(response.getEntity());
 	}
 
-	private AbstractJaxRsConformanceProvider createConformanceProvider(
-			final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers) throws Exception {
-		AbstractJaxRsConformanceProvider result =
-				new AbstractJaxRsConformanceProvider(FhirContext.forDstu2_1(), null, null, null) {
-					@Override
-					protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
-						return providers;
-					}
-				};
+	private AbstractJaxRsConformanceProvider createConformanceProvider(final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers)
+		throws Exception {
+		AbstractJaxRsConformanceProvider result = new AbstractJaxRsConformanceProvider(FhirContext.forDstu2_1(), null, null, null) {
+			@Override
+			protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {
+				return providers;
+			}
+		};
 		// mocks
 		UriInfo uriInfo = mock(UriInfo.class);
 		when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
@@ -104,4 +104,5 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		result.buildCapabilityStatement();
 		return result;
 	}
+
 }

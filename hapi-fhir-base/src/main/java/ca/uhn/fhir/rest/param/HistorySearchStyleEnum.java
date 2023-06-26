@@ -38,14 +38,12 @@ public enum HistorySearchStyleEnum {
 		this.myValue = theValue;
 	}
 
-	public static HistorySearchStyleEnum parse(String value) {
+	public static HistorySearchStyleEnum parse(String value){
 		return Arrays.stream(HistorySearchStyleEnum.values())
-				.filter(type -> type.myValue.equals(value))
-				.findAny()
-				.orElse(null);
+			.filter(type -> type.myValue.equals(value)).findAny().orElse(null);
 	}
 
-	public boolean isAt() {
+	public boolean isAt(){
 		return this == HistorySearchStyleEnum.AT;
 	}
 }

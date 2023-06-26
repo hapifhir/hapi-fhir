@@ -13,7 +13,6 @@ public class FavouritePizzaExtension extends BackboneElement {
 	@Child(name = "childBazExtension")
 	@ca.uhn.fhir.model.api.annotation.Extension(url = "toppings")
 	private StringType myToppings;
-
 	@Child(name = "childBarExtension")
 	@ca.uhn.fhir.model.api.annotation.Extension(url = "size")
 	private Quantity mySize;

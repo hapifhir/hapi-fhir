@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -33,7 +34,6 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNAsyncIT.class);
 	private List<Integer> originalPreFetchThresholds;
-
 	@Autowired
 	private ISearchDao mySearchDao;
 
@@ -48,8 +48,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		when(mySrd.getServer()).thenReturn(myServer);
 
 		// Set pre-fetch sizes small so that most tests are forced to do multiple fetches.
-		// This will allow testing a common use case where result set is larger than first fetch size but smaller than
-		// the normal query chunk size.
+		// This will allow testing a common use case where result set is larger than first fetch size but smaller than the normal query chunk size.
 		originalPreFetchThresholds = myStorageSettings.getSearchPreFetchThresholds();
 		List<Integer> mySmallerPreFetchThresholds = new ArrayList<>();
 		mySmallerPreFetchThresholds.add(20);
@@ -60,6 +59,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		SearchBuilder.setMaxPageSize50ForTest(true);
 
 		myStorageSettings.setLastNEnabled(true);
+
 	}
 
 	@AfterEach
@@ -104,13 +104,14 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		myStorageSettings.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
 
 		myCaptureQueriesListener.clear();
-		List<String> results =
-				toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
+		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 		assertEquals(75, results.size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		List<String> queries = myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
-				.map(t -> t.getSql(true, false))
-				.collect(Collectors.toList());
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
 
 		ourLog.info("Queries:\n * " + String.join("\n * ", queries));
 
@@ -136,5 +137,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		}
 		secondQueryPattern.append("\\).*");
 		assertThat(queries.get(5), matchesPattern(secondQueryPattern.toString()));
+
 	}
+
 }
