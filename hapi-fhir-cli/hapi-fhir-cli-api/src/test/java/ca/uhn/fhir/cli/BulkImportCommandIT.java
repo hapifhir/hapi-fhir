@@ -62,14 +62,19 @@ public class BulkImportCommandIT {
 
 	@RegisterExtension
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
+
 	@Mock
 	private IJobCoordinator myJobCoordinator;
+
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider)
-		.registerInterceptor(new LoggingInterceptor());
+	public RestfulServerExtension myRestfulServerExtension =
+			new RestfulServerExtension(myCtx, myProvider).registerInterceptor(new LoggingInterceptor());
+
 	private Path myTempDir;
+
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartCaptor;
 
@@ -97,9 +102,9 @@ public class BulkImportCommandIT {
 	public void testBulkImport() throws IOException {
 
 		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.COMPLETED)
-			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+				.setStatus(StatusEnum.COMPLETED)
+				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
@@ -111,13 +116,18 @@ public class BulkImportCommandIT {
 		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
-			BulkImportCommand.BULK_IMPORT,
-			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
-			"--" + BulkImportCommand.PORT, "0",
-			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
-			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		new Thread(() -> App.main(new String[] {
+					BulkImportCommand.BULK_IMPORT,
+					"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT,
+					"r4",
+					"--" + BulkImportCommand.PORT,
+					"0",
+					"--" + BulkImportCommand.SOURCE_DIRECTORY,
+					myTempDir.toAbsolutePath().toString(),
+					"--" + BulkImportCommand.TARGET_BASE,
+					myRestfulServerExtension.getBaseUrl()
+				}))
+				.start();
 
 		ourLog.info("Waiting for initiation requests");
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
@@ -138,9 +148,9 @@ public class BulkImportCommandIT {
 	public void testBulkImport_GzippedFile() throws IOException {
 
 		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.COMPLETED)
-			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+				.setStatus(StatusEnum.COMPLETED)
+				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
@@ -149,17 +159,21 @@ public class BulkImportCommandIT {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json.gz");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json.gz");
 
-		when(myJobCoordinator.startInstance(any()))
-			.thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
-			BulkImportCommand.BULK_IMPORT,
-			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
-			"--" + BulkImportCommand.PORT, "0",
-			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
-			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		new Thread(() -> App.main(new String[] {
+					BulkImportCommand.BULK_IMPORT,
+					"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT,
+					"r4",
+					"--" + BulkImportCommand.PORT,
+					"0",
+					"--" + BulkImportCommand.SOURCE_DIRECTORY,
+					myTempDir.toAbsolutePath().toString(),
+					"--" + BulkImportCommand.TARGET_BASE,
+					myRestfulServerExtension.getBaseUrl()
+				}))
+				.start();
 
 		ourLog.info("Waiting for initiation requests");
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
@@ -180,9 +194,9 @@ public class BulkImportCommandIT {
 	public void testBulkImport_FAILED() throws IOException {
 
 		JobInstance jobInfo = new JobInstance()
-			.setStatus(StatusEnum.FAILED)
-			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
-			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+				.setStatus(StatusEnum.FAILED)
+				.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+				.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 
 		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
@@ -194,13 +208,18 @@ public class BulkImportCommandIT {
 		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
-		new Thread(() -> App.main(new String[]{
-			BulkImportCommand.BULK_IMPORT,
-			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
-			"--" + BulkImportCommand.PORT, "0",
-			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
-			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-		})).start();
+		new Thread(() -> App.main(new String[] {
+					BulkImportCommand.BULK_IMPORT,
+					"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT,
+					"r4",
+					"--" + BulkImportCommand.PORT,
+					"0",
+					"--" + BulkImportCommand.SOURCE_DIRECTORY,
+					myTempDir.toAbsolutePath().toString(),
+					"--" + BulkImportCommand.TARGET_BASE,
+					myRestfulServerExtension.getBaseUrl()
+				}))
+				.start();
 
 		ourLog.info("Waiting for initiation requests");
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
@@ -208,7 +227,7 @@ public class BulkImportCommandIT {
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
 
-		try{
+		try {
 			JobInstanceStartRequest startRequest = myStartCaptor.getValue();
 			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
@@ -216,8 +235,7 @@ public class BulkImportCommandIT {
 			assertEquals(2, jobParameters.getNdJsonUrls().size());
 			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
 			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
-		}
-		catch(InternalErrorException e) {
+		} catch (InternalErrorException e) {
 			ourLog.error(e.getMessage());
 		}
 	}
@@ -242,9 +260,8 @@ public class BulkImportCommandIT {
 			}
 		}
 	}
+
 	private Date parseDate(String theString) {
 		return new InstantType(theString).getValue();
 	}
-
-
 }

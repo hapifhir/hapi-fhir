@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.Test;
@@ -89,15 +89,20 @@ public class RestfulServerUtilsTest {
 		"         ,     , delete; max-rounds=10 , DELETE  , 10",
 		"         ,     , delete; max-rounds=10 , DELETE  , 10",
 	})
-	public void testParseCascade(String theCascadeParam, String theCascadeMaxRoundsParam, String theCascadeHeader, DeleteCascadeModeEnum theExpectedMode, Integer theExpectedMaxRounds) {
+	public void testParseCascade(
+			String theCascadeParam,
+			String theCascadeMaxRoundsParam,
+			String theCascadeHeader,
+			DeleteCascadeModeEnum theExpectedMode,
+			Integer theExpectedMaxRounds) {
 		HashMap<String, String[]> params = new HashMap<>();
 		when(myRequestDetails.getParameters()).thenReturn(params);
 
 		if (isNotBlank(theCascadeParam)) {
-			params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{theCascadeParam.trim()});
+			params.put(Constants.PARAMETER_CASCADE_DELETE, new String[] {theCascadeParam.trim()});
 		}
 		if (isNotBlank(theCascadeMaxRoundsParam)) {
-			params.put(Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[]{theCascadeMaxRoundsParam.trim()});
+			params.put(Constants.PARAMETER_CASCADE_DELETE_MAX_ROUNDS, new String[] {theCascadeMaxRoundsParam.trim()});
 		}
 
 		if (isNotBlank(theCascadeHeader)) {
@@ -112,21 +117,21 @@ public class RestfulServerUtilsTest {
 				// good
 			}
 		} else {
-			RestfulServerUtils.DeleteCascadeDetails outcome = RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
+			RestfulServerUtils.DeleteCascadeDetails outcome =
+					RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
 			assertEquals(theExpectedMode, outcome.getMode());
 			assertEquals(theExpectedMaxRounds, outcome.getMaxRounds());
 		}
 	}
 
-
 	@Test
 	public void testCreateSelfLinks() {
-		//Given
+		// Given
 		String baseUrl = "http://localhost:8000";
 		Map<String, String[]> parameters = new HashMap<>();
-		parameters.put("_format", new String[]{"json"});
-		parameters.put("_count", new String[]{"10"});
-		parameters.put("_offset", new String[]{"100"});
+		parameters.put("_format", new String[] {"json"});
+		parameters.put("_count", new String[] {"10"});
+		parameters.put("_offset", new String[] {"100"});
 		List<String> paramsToRemove = Arrays.asList("_count", "_offset");
 
 		ServletRequestDetails servletRequestDetails = new ServletRequestDetails();
@@ -135,20 +140,19 @@ public class RestfulServerUtilsTest {
 		servletRequestDetails.setRequestType(GET);
 		servletRequestDetails.setParameters(parameters);
 
-		//When
+		// When
 		String linkSelf = RestfulServerUtils.createLinkSelf(baseUrl, servletRequestDetails);
-		//Then
+		// Then
 		assertThat(linkSelf, is(containsString("http://localhost:8000/$my-operation?")));
 		assertThat(linkSelf, is(containsString("_format=json")));
 		assertThat(linkSelf, is(containsString("_count=10")));
 		assertThat(linkSelf, is(containsString("_offset=100")));
 
-
-		//When
-		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, paramsToRemove);
-		//Then
+		// When
+		String linkSelfWithoutGivenParameters =
+				RestfulServerUtils.createLinkSelfWithoutGivenParameters(baseUrl, servletRequestDetails, paramsToRemove);
+		// Then
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("http://localhost:8000/$my-operation?")));
 		assertThat(linkSelfWithoutGivenParameters, is(containsString("_format=json")));
-
 	}
 }

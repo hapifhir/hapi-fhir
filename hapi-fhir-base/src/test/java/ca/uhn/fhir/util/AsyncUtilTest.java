@@ -27,7 +27,7 @@ public class AsyncUtilTest {
 		thread.start();
 		sleepAtLeast(1000);
 		thread.interrupt();
-		await().until(()-> outcomeHolder.get() == false);
+		await().until(() -> outcomeHolder.get() == false);
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class AsyncUtilTest {
 		});
 		thread.start();
 		thread.interrupt();
-		await().until(()-> outcomeHolder.get());
+		await().until(() -> outcomeHolder.get());
 	}
 
 	@Test
@@ -58,7 +58,6 @@ public class AsyncUtilTest {
 		});
 		thread.start();
 		thread.interrupt();
-		await().until(()-> outcomeHolder.get() == false);
+		await().until(() -> outcomeHolder.get() == false);
 	}
-
 }

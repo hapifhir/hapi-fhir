@@ -23,8 +23,5 @@ public class FhirVersionEnumTest {
 		assertEquals(FhirVersionEnum.R4B, FhirVersionEnum.forVersionString("4.3.0"));
 
 		assertEquals(FhirVersionEnum.R5, FhirVersionEnum.forVersionString("R5"));
-
 	}
-
-
 }

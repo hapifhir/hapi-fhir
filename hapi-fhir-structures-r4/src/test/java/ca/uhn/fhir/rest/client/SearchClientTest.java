@@ -70,9 +70,12 @@ public class SearchClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(ourHttpResponse.getEntity().getContent()).thenAnswer(t->new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(ourHttpResponse.getEntity().getContent())
+				.thenAnswer(t -> new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Set<Include> includes = new HashSet<Include>();
@@ -127,9 +130,12 @@ public class SearchClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
-		when(ourHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML_NEW + "; charset=UTF-8"));
+		when(ourHttpResponse.getEntity().getContent())
+				.thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Encounter> found = client.search();
@@ -157,16 +163,20 @@ public class SearchClientTest {
 		List<Encounter> search();
 
 		@Search
-		List<Encounter> searchByList(@RequiredParam(name = Encounter.SP_IDENTIFIER) TokenOrListParam tokenOrListParam, @IncludeParam Set<Include> theIncludes) throws BaseServerResponseException;
+		List<Encounter> searchByList(
+				@RequiredParam(name = Encounter.SP_IDENTIFIER) TokenOrListParam tokenOrListParam,
+				@IncludeParam Set<Include> theIncludes)
+				throws BaseServerResponseException;
 
 		@Search
-		List<Encounter> searchByList(@RequiredParam(name = Encounter.SP_IDENTIFIER) TokenAndListParam tokenOrListParam, @IncludeParam Set<Include> theIncludes) throws BaseServerResponseException;
-
+		List<Encounter> searchByList(
+				@RequiredParam(name = Encounter.SP_IDENTIFIER) TokenAndListParam tokenOrListParam,
+				@IncludeParam Set<Include> theIncludes)
+				throws BaseServerResponseException;
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

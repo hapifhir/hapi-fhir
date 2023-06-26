@@ -19,19 +19,18 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IBundleProvider {
 
@@ -107,7 +106,6 @@ public interface IBundleProvider {
 		return null;
 	}
 
-
 	/**
 	 * Returns the instant as of which this result was created. The
 	 * result of this value is used to populate the <code>lastUpdated</code>
@@ -147,7 +145,9 @@ public interface IBundleProvider {
 
 		Integer size = size();
 		if (size == null) {
-			throw new ConfigurationException(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+			throw new ConfigurationException(
+					Msg.code(464)
+							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		if (size > 0) {
 			retval.addAll(getResources(0, size));
@@ -219,6 +219,8 @@ public interface IBundleProvider {
 	 * @return the list of ids of all resources in the bundle
 	 */
 	default List<String> getAllResourceIds() {
-		return getAllResources().stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
+		return getAllResources().stream()
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
 	}
 }

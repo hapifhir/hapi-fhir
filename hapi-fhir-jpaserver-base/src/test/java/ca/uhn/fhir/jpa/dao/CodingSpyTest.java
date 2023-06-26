@@ -9,8 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.annotation.Nonnull;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -22,10 +22,9 @@ class CodingSpyTest {
 	/**
 	 * Ensure we can read the default null value of userSelected on Coding
 	 */
-
 	@ParameterizedTest
 	@MethodSource("getCases")
-	void canReadValueUserSelected(IBaseCoding theObject, Boolean theValue)  {
+	void canReadValueUserSelected(IBaseCoding theObject, Boolean theValue) {
 		IBaseCoding value = theObject.setSystem("http://example.com").setCode("value");
 		if (theValue != null) {
 			theObject.setUserSelected(theValue);
@@ -37,7 +36,7 @@ class CodingSpyTest {
 	}
 
 	@Test
-	void canReadNullUserSelected()  {
+	void canReadNullUserSelected() {
 		Coding value = new Coding().setSystem("http://example.com").setCode("value");
 
 		Boolean result = new CodingSpy().getBooleanObject(value);
@@ -47,15 +46,13 @@ class CodingSpyTest {
 
 	static List<Arguments> getCases() {
 		var classes = List.of(
-			org.hl7.fhir.r4.model.Coding.class,
-			org.hl7.fhir.r5.model.Coding.class,
-			ca.uhn.fhir.model.api.Tag.class
-		);
+				org.hl7.fhir.r4.model.Coding.class,
+				org.hl7.fhir.r5.model.Coding.class,
+				ca.uhn.fhir.model.api.Tag.class);
 		var values = Lists.newArrayList(true, false, null);
 		return classes.stream()
-			.flatMap(k-> values.stream()
-				.map(v-> Arguments.of(getNewInstance(k), v)))
-			.toList();
+				.flatMap(k -> values.stream().map(v -> Arguments.of(getNewInstance(k), v)))
+				.toList();
 	}
 
 	@Nonnull
@@ -67,17 +64,14 @@ class CodingSpyTest {
 		}
 	}
 
-
 	@Test
 	void booleanNulls() {
-	    // given
+		// given
 		BooleanType b = new BooleanType();
 
-	    // when
+		// when
 		var s = b.asStringValue();
 
 		assertThat(s, blankOrNullString());
 	}
-
-
 }

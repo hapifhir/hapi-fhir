@@ -15,29 +15,30 @@ public class SchemaInitializationProviderTest {
 	public void testParseSqlFileIntoIndividualStatements() {
 		SchemaInitializationProvider svc = new SchemaInitializationProvider(null, null, null, true);
 
-		String input = """
+		String input =
+				"""
 				create sequence foo;
 				
 				alter table if exists CDR_XACT_LOG_STEP
-			      add constraint FK_XACTLOGSTEP_XACTLOG
-			      foreign key (LOG_PID)
-			      -- comment in a weird spot
-			      references CDR_XACT_LOG;
-			  
-			    -- we can't use convering index until the autovacuum runs for those rows, which kills index performance
-			  ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01);
-			  ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01);
+				add constraint FK_XACTLOGSTEP_XACTLOG
+				foreign key (LOG_PID)
+				-- comment in a weird spot
+				references CDR_XACT_LOG;
+			
+				-- we can't use convering index until the autovacuum runs for those rows, which kills index performance
+			ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01);
+			ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01);
 			""";
 		List<String> listToPopulate = new ArrayList<>();
 		svc.parseSqlFileIntoIndividualStatements(DriverTypeEnum.POSTGRES_9_4, listToPopulate, input);
 
-		assertThat(listToPopulate.toString(), listToPopulate, contains(
-			"create sequence foo",
-			"alter table if exists CDR_XACT_LOG_STEP add constraint FK_XACTLOGSTEP_XACTLOG foreign key (LOG_PID) references CDR_XACT_LOG",
-			"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
-			"ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01)"
-		));
-
+		assertThat(
+				listToPopulate.toString(),
+				listToPopulate,
+				contains(
+						"create sequence foo",
+						"alter table if exists CDR_XACT_LOG_STEP add constraint FK_XACTLOGSTEP_XACTLOG foreign key (LOG_PID) references CDR_XACT_LOG",
+						"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
+						"ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01)"));
 	}
-
 }

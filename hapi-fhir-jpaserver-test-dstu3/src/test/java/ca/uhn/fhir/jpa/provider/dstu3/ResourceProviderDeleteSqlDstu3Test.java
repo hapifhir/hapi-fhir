@@ -35,11 +35,10 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 		myCaptureQueriesListener.clear();
 		myObservationDao.delete(observationId);
 		myCaptureQueriesListener.logDeleteQueries();
-		long deleteCount = myCaptureQueriesListener.getDeleteQueries()
-			.stream()
-			.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
-			.collect(Collectors.summarizingInt(SqlQuery::getSize))
-			.getSum();
+		long deleteCount = myCaptureQueriesListener.getDeleteQueries().stream()
+				.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
+				.collect(Collectors.summarizingInt(SqlQuery::getSize))
+				.getSum();
 		assertEquals(1, deleteCount);
 	}
 }

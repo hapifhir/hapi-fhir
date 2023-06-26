@@ -35,6 +35,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Autowired
 	public BasicDataSource myBasicDataSource;
+
 	private int myMaxTotal;
 
 	@AfterEach
@@ -51,9 +52,8 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 	@Test
 	public void testMultipleConcurrentWritesToSameResource() throws InterruptedException {
 
-		ThreadPoolExecutor exec = new ThreadPoolExecutor(10, 10,
-			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<>());
+		ThreadPoolExecutor exec =
+				new ThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
 		final AtomicInteger errors = new AtomicInteger();
 
@@ -80,16 +80,8 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 
 			final Bundle t = new Bundle();
 			t.setType(BundleType.TRANSACTION);
-			t.addEntry()
-				.setResource(p)
-				.getRequest()
-				.setUrl("Patient/PID")
-				.setMethod(HTTPVerb.PUT);
-			t.addEntry()
-				.setResource(o)
-				.getRequest()
-				.setUrl("Organization")
-				.setMethod(HTTPVerb.POST);
+			t.addEntry().setResource(p).getRequest().setUrl("Patient/PID").setMethod(HTTPVerb.PUT);
+			t.addEntry().setResource(o).getRequest().setUrl("Organization").setMethod(HTTPVerb.POST);
 
 			if (i == 0) {
 				mySystemDao.transaction(mySrd, t);
@@ -136,10 +128,7 @@ public class FhirDaoConcurrencyDstu3Test extends BaseJpaDstu3SystemTest {
 		Long lastVersion = versions.get(0);
 		ourLog.info("Last version: {}", lastVersion);
 
-		//assertEquals(message, currentVersion.intValue(), versions.size());
+		// assertEquals(message, currentVersion.intValue(), versions.size());
 		assertEquals(currentVersion, lastVersion, message);
-
 	}
-
-
 }

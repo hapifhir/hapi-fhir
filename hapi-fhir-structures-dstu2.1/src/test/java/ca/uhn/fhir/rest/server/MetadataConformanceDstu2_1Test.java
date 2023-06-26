@@ -46,9 +46,9 @@ public class MetadataConformanceDstu2_1Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu2_1Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu2_1Test.class);
 
-	
 	@Test
 	public void testSummary() throws Exception {
 		String output;
@@ -86,7 +86,8 @@ public class MetadataConformanceDstu2_1Test {
 	public void testElements() throws Exception {
 		String output;
 
-		HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_elements=fhirVersion&_pretty=true");
+		HttpRequestBase httpPost =
+				new HttpGet("http://localhost:" + ourPort + "/metadata?_elements=fhirVersion&_pretty=true");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -109,8 +110,14 @@ public class MetadataConformanceDstu2_1Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<Conformance"));
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
+			assertThat(
+					status.getFirstHeader("X-Powered-By").getValue(),
+					containsString("HAPI FHIR " + VersionUtil.getVersion()));
+			assertThat(
+					status.getFirstHeader("X-Powered-By").getValue(),
+					containsString("REST Server (FHIR Server; FHIR "
+							+ ourCtx.getVersion().getVersion().getFhirVersionString() + "/"
+							+ ourCtx.getVersion().getVersion().name() + ")"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -120,7 +127,11 @@ public class MetadataConformanceDstu2_1Test {
 			status = ourClient.execute(httpPost);
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
+			assertThat(
+					status.getFirstHeader("X-Powered-By").getValue(),
+					containsString("REST Server (FHIR Server; FHIR "
+							+ ourCtx.getVersion().getVersion().getFhirVersionString() + "/"
+							+ ourCtx.getVersion().getVersion().name() + ")"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -160,13 +171,13 @@ public class MetadataConformanceDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	@SuppressWarnings("unused")
@@ -178,14 +189,13 @@ public class MetadataConformanceDstu2_1Test {
 		}
 
 		@Search
-		public List<Patient> search(@OptionalParam(name="foo") StringParam theFoo) {
+		public List<Patient> search(@OptionalParam(name = "foo") StringParam theFoo) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		@Validate()
 		public MethodOutcome validate(@ResourceParam Patient theResource) {
 			return new MethodOutcome();
 		}
 	}
-
 }

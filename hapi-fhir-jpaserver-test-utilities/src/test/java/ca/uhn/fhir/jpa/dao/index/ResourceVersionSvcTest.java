@@ -20,16 +20,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -41,8 +41,10 @@ public class ResourceVersionSvcTest {
 
 	@Mock
 	DaoRegistry myDaoRegistry;
+
 	@Mock
 	IResourceTableDao myResourceTableDao;
+
 	@Mock
 	IIdHelperService myIdHelperService;
 
@@ -60,7 +62,7 @@ public class ResourceVersionSvcTest {
 	 * @return
 	 */
 	private Object[] getResourceTableRecordForResourceTypeAndPid(String resourceType, long pid, long version) {
-		return new Object[]{
+		return new Object[] {
 			pid, // long
 			resourceType, // string
 			version // long
@@ -95,17 +97,16 @@ public class ResourceVersionSvcTest {
 			resourcePersistentIds.add(pack.myPid);
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
-				pack.MyResourceId.getResourceType(),
-				pack.myPid.getId(),
-				pack.MyVersion
-			));
+					pack.MyResourceId.getResourceType(), pack.myPid.getId(), pack.MyVersion));
 		}
 
 		IResourcePersistentId first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
-			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
+			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any()))
+					.thenReturn(Collections.singletonList(first));
 		} else {
-			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(resourcePersistentIds);
+			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any()))
+					.thenReturn(resourcePersistentIds);
 		}
 	}
 
@@ -122,8 +123,8 @@ public class ResourceVersionSvcTest {
 		mockReturnsFor_getIdsOfExistingResources(pack);
 
 		// test
-		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
-			Collections.singletonList(type));
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
+				RequestPartitionId.allPartitions(), Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
 		Assertions.assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
@@ -137,8 +138,8 @@ public class ResourceVersionSvcTest {
 		mock_resolveResourcePersistentIdsWithCache_toReturnNothing();
 
 		// test
-		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
-			Collections.singletonList(type));
+		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
+				RequestPartitionId.allPartitions(), Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.isEmpty());
 	}
@@ -160,9 +161,7 @@ public class ResourceVersionSvcTest {
 
 		// test
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
-			RequestPartitionId.allPartitions(),
-			Arrays.asList(type, type2)
-		);
+				RequestPartitionId.allPartitions(), Arrays.asList(type, type2));
 
 		// verify
 		Assertions.assertEquals(1, retMap.size());
@@ -200,13 +199,10 @@ public class ResourceVersionSvcTest {
 		public JpaPid myPid;
 		public Long MyVersion;
 
-		public ResourceIdPackage(IIdType id,
-										 JpaPid pid,
-										 Long version) {
+		public ResourceIdPackage(IIdType id, JpaPid pid, Long version) {
 			MyResourceId = id;
 			myPid = pid;
 			MyVersion = version;
 		}
 	}
-
 }

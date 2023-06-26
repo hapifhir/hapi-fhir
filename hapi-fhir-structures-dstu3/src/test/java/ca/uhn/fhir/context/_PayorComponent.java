@@ -13,28 +13,43 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 	/**
 	 * payorCode (extension)
 	 */
-	@Child(name = FIELD_PAYORCODE, min = 1, max = 1, type = {Coding.class})
+	@Child(
+			name = FIELD_PAYORCODE,
+			min = 1,
+			max = 1,
+			type = {Coding.class})
 	@Description(shortDefinition = "", formalDefinition = "The payor code for the duration")
 	@Extension(url = EXTURL_PAYORCODE, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.Coding ourPayorCode;
+
 	public static final String EXTURL_PAYORCODE = "http://myfhir.dk/x/MyEpisodeOfCare-payor/payorCode";
 	public static final String FIELD_PAYORCODE = "payorCode";
 	/**
 	 * period (extension)
 	 */
-	@Child(name = FIELD_PERIOD, min = 1, max = 1, type = {Period.class})
+	@Child(
+			name = FIELD_PERIOD,
+			min = 1,
+			max = 1,
+			type = {Period.class})
 	@Description(shortDefinition = "", formalDefinition = "The duration for the responsible payor.")
 	@Extension(url = EXTURL_PERIOD, definedLocally = false, isModifier = false)
 	protected Period ourPeriod;
+
 	public static final String EXTURL_PERIOD = "http://myfhir.dk/x/MyEpisodeOfCare-payor/period";
 	public static final String FIELD_PERIOD = "period";
 	/**
 	 * userDefined (extension)
 	 */
-	@Child(name = FIELD_USERDEFINED, min = 1, max = 1, type = {BooleanType.class})
+	@Child(
+			name = FIELD_USERDEFINED,
+			min = 1,
+			max = 1,
+			type = {BooleanType.class})
 	@Description(shortDefinition = "", formalDefinition = "True if the payor information is defined by a user.")
 	@Extension(url = EXTURL_USERDEFINED, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.BooleanType ourUserDefined;
+
 	public static final String EXTURL_USERDEFINED = "http://myfhir.dk/x/MyEpisodeOfCare-payor/userDefined";
 	public static final String FIELD_USERDEFINED = "userDefined";
 
@@ -65,7 +80,9 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 			return false;
 		}
 		_PayorComponent that = (_PayorComponent) other;
-		return compareDeep(ourPayorCode, that.ourPayorCode, true) && compareDeep(ourPeriod, that.ourPeriod, true) && compareDeep(ourUserDefined, that.ourUserDefined, true);
+		return compareDeep(ourPayorCode, that.ourPayorCode, true)
+				&& compareDeep(ourPeriod, that.ourPeriod, true)
+				&& compareDeep(ourUserDefined, that.ourUserDefined, true);
 	}
 
 	@Override
@@ -84,8 +101,7 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 	}
 
 	public org.hl7.fhir.dstu3.model.Coding _getPayorCode() {
-		if (ourPayorCode == null)
-			ourPayorCode = new org.hl7.fhir.dstu3.model.Coding();
+		if (ourPayorCode == null) ourPayorCode = new org.hl7.fhir.dstu3.model.Coding();
 		return ourPayorCode;
 	}
 
@@ -95,8 +111,7 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 	}
 
 	public Period _getPeriod() {
-		if (ourPeriod == null)
-			ourPeriod = new Period();
+		if (ourPeriod == null) ourPeriod = new Period();
 		return ourPeriod;
 	}
 
@@ -106,8 +121,7 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 	}
 
 	public org.hl7.fhir.dstu3.model.BooleanType _getUserDefined() {
-		if (ourUserDefined == null)
-			ourUserDefined = new org.hl7.fhir.dstu3.model.BooleanType();
+		if (ourUserDefined == null) ourUserDefined = new org.hl7.fhir.dstu3.model.BooleanType();
 		return ourUserDefined;
 	}
 
@@ -115,5 +129,4 @@ public class _PayorComponent extends BackboneElement implements org.hl7.fhir.ins
 		ourUserDefined = theValue;
 		return this;
 	}
-
 }

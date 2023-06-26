@@ -25,25 +25,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HoverflyExtension.class)
 class MeasureOperationsProviderTest extends BaseCrR4Test {
 	@Autowired
-    MeasureOperationsProvider myMeasureOperationsProvider;
+	MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
 		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", "measure-EXM104-8.2.000"),
+				"2019-01-01",
+				"2020-01-01",
+				"subject",
+				"Patient/numer-EXM104",
+				null,
+				"2019-12-12",
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReport);
 	}
@@ -53,41 +52,47 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
 		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", "measure-EXM104-8.2.000"),
+				"2019-01-01",
+				"2020-01-01",
+				"subject",
+				"Patient/numer-EXM104",
+				null,
+				"2019-12-12",
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReport);
 	}
 
-	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
-										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
-										 String participationPeriod) {
+	private void runWithPatient(
+			String measureId,
+			String patientId,
+			int initialPopulationCount,
+			int denominatorCount,
+			int denominatorExclusionCount,
+			int numeratorCount,
+			boolean enrolledDuringParticipationPeriod,
+			String participationPeriod) {
 		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", measureId),
-			"2022-01-01",
-			"2022-12-31",
-			"subject",
-			patientId,
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", measureId),
+				"2022-01-01",
+				"2022-12-31",
+				"subject",
+				patientId,
+				null,
+				"2019-12-12",
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReport);
 
-		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
-			.getPopulation()) {
+		for (MeasureReport.MeasureReportGroupPopulationComponent population :
+				returnMeasureReport.getGroupFirstRep().getPopulation()) {
 			switch (population.getCode().getCodingFirstRep().getCode()) {
 				case "initial-population":
 					assertEquals(initialPopulationCount, population.getCount());
@@ -117,28 +122,79 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		}
 
 		assertNotNull(enrolledDuringParticipationPeriodObs);
-		assertEquals(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
-			enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
+		assertEquals(
+				Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
+				enrolledDuringParticipationPeriodObs
+						.getValueCodeableConcept()
+						.getCodingFirstRep()
+						.getCode());
 
 		assertNotNull(participationPeriodObs);
-		assertEquals(participationPeriod, participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
+		assertEquals(
+				participationPeriod,
+				participationPeriodObs
+						.getValueCodeableConcept()
+						.getCodingFirstRep()
+						.getCode());
 	}
 
 	@Test
 	void testBCSEHEDISMY2022() {
 		this.loadBundle("BCSEHEDISMY2022-bundle.json");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-7", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-9", 0, 0, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-21", 1, 0, 1, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-23", 1, 1, 0, 0, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
-		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-65", 1, 1, 0, 1, true,
-			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-5",
+				0,
+				0,
+				0,
+				0,
+				false,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-7",
+				1,
+				1,
+				0,
+				0,
+				true,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-9",
+				0,
+				0,
+				0,
+				0,
+				true,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-21",
+				1,
+				0,
+				1,
+				0,
+				true,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-23",
+				1,
+				1,
+				0,
+				0,
+				true,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
+		runWithPatient(
+				"BCSEHEDISMY2022",
+				"Patient/Patient-65",
+				1,
+				1,
+				0,
+				1,
+				true,
+				"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 	}
 
 	@Test
@@ -149,30 +205,36 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		assertNotNull(measure);
 
 		MeasureReport returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "InitialInpatientPopulation"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47",
-			null,
-			null,
-			null, null, null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", "InitialInpatientPopulation"),
+				"2019-01-01",
+				"2020-01-01",
+				"subject",
+				"Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47",
+				null,
+				null,
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReport);
 
 		String populationName = "initial-population";
 		int expectedCount = 2;
 
-		Optional<MeasureReport.MeasureReportGroupPopulationComponent> population = returnMeasureReport.getGroup().get(0)
-			.getPopulation().stream().filter(x -> x.hasCode() && x.getCode().hasCoding()
-				&& x.getCode().getCoding().get(0).getCode().equals(populationName))
-			.findFirst();
+		Optional<MeasureReport.MeasureReportGroupPopulationComponent> population =
+				returnMeasureReport.getGroup().get(0).getPopulation().stream()
+						.filter(x -> x.hasCode()
+								&& x.getCode().hasCoding()
+								&& x.getCode().getCoding().get(0).getCode().equals(populationName))
+						.findFirst();
 
-		assertTrue(population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
-		assertEquals(population.get().getCount(), expectedCount,
-			String.format("expected count for population \"%s\" did not match", populationName));
+		assertTrue(
+				population.isPresent(), String.format("Unable to locate a population with id \"%s\"", populationName));
+		assertEquals(
+				population.get().getCount(),
+				expectedCount,
+				String.format("expected count for population \"%s\" did not match", populationName));
 	}
 
 	@Test
@@ -181,32 +243,33 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		this.loadBundle("multiversion/EXM124-9.0.000-bundle.json");
 
 		MeasureReport returnMeasureReportVersion7 = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM124-7.0.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM124",
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", "measure-EXM124-7.0.000"),
+				"2019-01-01",
+				"2020-01-01",
+				"subject",
+				"Patient/numer-EXM124",
+				null,
+				"2019-12-12",
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReportVersion7);
 
 		MeasureReport returnMeasureReportVersion9 = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM124-9.0.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM124",
-			null,
-			"2019-12-12",
-			null, null, null,
-			new SystemRequestDetails()
-		);
+				new IdType("Measure", "measure-EXM124-9.0.000"),
+				"2019-01-01",
+				"2020-01-01",
+				"subject",
+				"Patient/numer-EXM124",
+				null,
+				"2019-12-12",
+				null,
+				null,
+				null,
+				new SystemRequestDetails());
 
 		assertNotNull(returnMeasureReportVersion9);
 	}
-
 }

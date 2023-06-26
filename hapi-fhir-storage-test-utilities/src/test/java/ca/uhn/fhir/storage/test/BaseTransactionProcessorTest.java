@@ -35,7 +35,8 @@ public class BaseTransactionProcessorTest {
 	void testPerformIdSubstitutionsInMatchUrl_MatchAtStart() {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
-		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=urn:uuid:1234&bar=baz");
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(
+				idSubstitutions, "Patient?foo=urn:uuid:1234&bar=baz");
 		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 
@@ -45,8 +46,10 @@ public class BaseTransactionProcessorTest {
 	@Test
 	void testPerformIdSubstitutionsInMatchUrl_MatchAtEnd() {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-		idSubstitutions.put(new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123/_history/1"));
-		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?name=FAMILY1&organization=urn%3Auuid%3A7ea4f3a6-d2a3-4105-9f31-374d525085d4");
+		idSubstitutions.put(
+				new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123/_history/1"));
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(
+				idSubstitutions, "Patient?name=FAMILY1&organization=urn%3Auuid%3A7ea4f3a6-d2a3-4105-9f31-374d525085d4");
 		assertEquals("Patient?name=FAMILY1&organization=Patient/123", outcome);
 	}
 
@@ -54,7 +57,8 @@ public class BaseTransactionProcessorTest {
 	void testPerformIdSubstitutionsInMatchUrl_MatchEscapedParam() {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
-		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=" + UrlUtil.escapeUrlParam("urn:uuid:1234") + "&bar=baz");
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(
+				idSubstitutions, "Patient?foo=" + UrlUtil.escapeUrlParam("urn:uuid:1234") + "&bar=baz");
 		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 
@@ -62,7 +66,8 @@ public class BaseTransactionProcessorTest {
 	void testPerformIdSubstitutionsInMatchUrl_MatchInParamNameShouldntBeReplaced() {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
-		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?urn:uuid:1234=foo&bar=baz");
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(
+				idSubstitutions, "Patient?urn:uuid:1234=foo&bar=baz");
 		assertEquals("Patient?urn:uuid:1234=foo&bar=baz", outcome);
 	}
 
@@ -90,7 +95,8 @@ public class BaseTransactionProcessorTest {
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/abcdefghijklmnopqrstuvwxyz0123456789"));
 		String input = "Patient?foo=urn:uuid:1234&bar=urn:uuid:1234&baz=urn:uuid:1234";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
-		String expected = "Patient?foo=Patient/abcdefghijklmnopqrstuvwxyz0123456789&bar=Patient/abcdefghijklmnopqrstuvwxyz0123456789&baz=Patient/abcdefghijklmnopqrstuvwxyz0123456789";
+		String expected =
+				"Patient?foo=Patient/abcdefghijklmnopqrstuvwxyz0123456789&bar=Patient/abcdefghijklmnopqrstuvwxyz0123456789&baz=Patient/abcdefghijklmnopqrstuvwxyz0123456789";
 		assertEquals(expected, outcome);
 	}
 
@@ -106,8 +112,9 @@ public class BaseTransactionProcessorTest {
 	@Test
 	void testUnqualifiedMatchUrlStart_RegexPatternMatches() {
 		String matchUrl = "patient-first-identifier=MRN%7C123456789";
-		boolean matchResult = BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START.matcher(matchUrl).find();
+		boolean matchResult = BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START
+				.matcher(matchUrl)
+				.find();
 		assertTrue(matchResult, "Failed to find a Regex match using Url '" + matchUrl + "'");
 	}
-
 }

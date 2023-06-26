@@ -47,9 +47,6 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +55,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEachCallback, AfterEachCallback {
 	protected final MyRestfulServer myRestServer;
@@ -104,10 +104,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		// Make a copy to avoid synchronization issues
 		transactions = new ArrayList<>(transactions);
 
-		return transactions
-			.stream()
-			.map(t -> (Bundle) t)
-			.collect(Collectors.toList());
+		return transactions.stream().map(t -> (Bundle) t).collect(Collectors.toList());
 	}
 
 	@Override
@@ -233,7 +230,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		Observation observation = new Observation();
 		observation.setSubject(new Reference(thePatientId));
 		return this.createObservation(observation);
-		//TODO maybe add some data to this obs?
+		// TODO maybe add some data to this obs?
 	}
 
 	@Override
@@ -297,12 +294,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		public RestServerDstu3Helper.MyPlainProvider getPlainProvider() {
 			return myPlainProvider;
 		}
+
 		protected boolean isTransactionLatchEnabled() {
 			if (getPlainProvider() == null) {
 				return false;
 			}
 			return getPlainProvider().isTransactionLatchEnabled();
 		}
+
 		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
 			getPlainProvider().setTransactionLatchEnabled(theTransactionLatchEnabled);
 		}
@@ -312,9 +311,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		}
 
 		@Override
-		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-			// emulate a GET request invocation in the case of a POST paging request, as POST paging is not supported by FHIR RestServer
-			RequestTypeEnum requestType = myPagingHttpMethod == PagingHttpMethodEnum.POST ? RequestTypeEnum.GET : RequestTypeEnum.POST;
+		protected void doPost(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			// emulate a GET request invocation in the case of a POST paging request, as POST paging is not supported by
+			// FHIR RestServer
+			RequestTypeEnum requestType =
+					myPagingHttpMethod == PagingHttpMethodEnum.POST ? RequestTypeEnum.GET : RequestTypeEnum.POST;
 			super.handleRequest(requestType, request, response);
 		}
 
@@ -343,7 +345,8 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		}
 
 		@Override
-		protected void service(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		protected void service(HttpServletRequest theReq, HttpServletResponse theResp)
+				throws ServletException, IOException {
 			Request request = (Request) theReq;
 
 			Map<String, String> headers = pullOutHeaders(theReq);

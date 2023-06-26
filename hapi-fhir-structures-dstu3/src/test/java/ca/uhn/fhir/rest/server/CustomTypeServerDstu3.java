@@ -59,7 +59,6 @@ public class CustomTypeServerDstu3 {
 		ourLastRequestWasSearch = false;
 	}
 
-
 	@Test
 	public void testCreateWithIdInBody() throws Exception {
 
@@ -68,8 +67,10 @@ public class CustomTypeServerDstu3 {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
+		httpPost.setEntity(new StringEntity(
+				ourCtx.newXmlParser().encodeResourceToString(patient),
+				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -88,8 +89,10 @@ public class CustomTypeServerDstu3 {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2");
-//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		//		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
+		httpPost.setEntity(new StringEntity(
+				ourCtx.newXmlParser().encodeResourceToString(patient),
+				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -100,7 +103,9 @@ public class CustomTypeServerDstu3 {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(
+				"HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
+				oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -111,7 +116,9 @@ public class CustomTypeServerDstu3 {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2");
 		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(
+				ourCtx.newXmlParser().encodeResourceToString(patient),
+				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -122,9 +129,10 @@ public class CustomTypeServerDstu3 {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(
+				"HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
+				oo.getIssue().get(0).getDiagnostics());
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -145,19 +153,22 @@ public class CustomTypeServerDstu3 {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {
 
 		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
+		public MethodOutcome createPatient(
+				@ResourceParam Patient thePatient,
+				@ConditionalUrlParam String theConditional,
+				@IdParam IdType theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getIdElement();
 			ourLastIdParam = theIdParam;
@@ -174,7 +185,5 @@ public class CustomTypeServerDstu3 {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<>();
 		}
-
 	}
-
 }

@@ -41,7 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OperationGenericServerR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServerR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(OperationGenericServerR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 	private static IdType ourLastId;
@@ -60,7 +61,6 @@ public class OperationGenericServerR4Test {
 		ourLastMethod = "";
 		ourLastResourceParam = null;
 	}
-
 
 	@Test
 	public void testOperationOnInstance() throws Exception {
@@ -88,9 +88,7 @@ public class OperationGenericServerR4Test {
 		} finally {
 			status.getEntity().getContent().close();
 		}
-
 	}
-
 
 	@Test
 	public void testOperationOnServer() throws Exception {
@@ -117,7 +115,6 @@ public class OperationGenericServerR4Test {
 			status.getEntity().getContent().close();
 		}
 	}
-
 
 	@Test
 	public void testOperationOnType() throws Exception {
@@ -147,7 +144,6 @@ public class OperationGenericServerR4Test {
 		}
 	}
 
-
 	@Test
 	public void testOperationWithGetUsingParams() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
@@ -171,7 +167,6 @@ public class OperationGenericServerR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchGetsClassifiedAppropriately() throws Exception {
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient");
@@ -186,7 +181,6 @@ public class OperationGenericServerR4Test {
 		assertEquals("Patient/search", ourLastMethod);
 	}
 
-
 	@SuppressWarnings("unused")
 	public static class PatientProvider implements IResourceProvider {
 
@@ -197,11 +191,10 @@ public class OperationGenericServerR4Test {
 
 		@Operation(name = Operation.NAME_MATCH_ALL)
 		public Parameters opInstance(
-			@ResourceParam() IBaseResource theResourceParam,
-			@IdParam IdType theId,
-			@OperationParam(name = "PARAM1") StringType theParam1,
-			@OperationParam(name = "PARAM2") Patient theParam2
-		) {
+				@ResourceParam() IBaseResource theResourceParam,
+				@IdParam IdType theId,
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2) {
 
 			ourLastMethod = "$OP_INSTANCE";
 			ourLastId = theId;
@@ -217,12 +210,11 @@ public class OperationGenericServerR4Test {
 		@SuppressWarnings("unused")
 		@Operation(name = Operation.NAME_MATCH_ALL, idempotent = true)
 		public Parameters opType(
-			@ResourceParam() IBaseResource theResourceParam,
-			@OperationParam(name = "PARAM1") StringType theParam1,
-			@OperationParam(name = "PARAM2") Patient theParam2,
-			@OperationParam(name = "PARAM3", min = 2, max = 5) List<StringType> theParam3,
-			@OperationParam(name = "PARAM4", min = 1) List<StringType> theParam4
-		) {
+				@ResourceParam() IBaseResource theResourceParam,
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2,
+				@OperationParam(name = "PARAM3", min = 2, max = 5) List<StringType> theParam3,
+				@OperationParam(name = "PARAM4", min = 1) List<StringType> theParam4) {
 
 			ourLastMethod = "$OP_TYPE";
 			ourLastParam1 = theParam1;
@@ -239,8 +231,6 @@ public class OperationGenericServerR4Test {
 			ourLastMethod = "Patient/search";
 			return new ArrayList<>();
 		}
-
-
 	}
 
 	@SuppressWarnings("unused")
@@ -248,10 +238,9 @@ public class OperationGenericServerR4Test {
 
 		@Operation(name = Operation.NAME_MATCH_ALL)
 		public Parameters opServer(
-			@ResourceParam() IBaseResource theResourceParam,
-			@OperationParam(name = "PARAM1") StringType theParam1,
-			@OperationParam(name = "PARAM2") Patient theParam2
-		) {
+				@ResourceParam() IBaseResource theResourceParam,
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2) {
 
 			ourLastMethod = "$OP_SERVER";
 			ourLastParam1 = theParam1;
@@ -263,14 +252,11 @@ public class OperationGenericServerR4Test {
 			return retVal;
 		}
 
-
 		@Search
 		public List<IBaseResource> search() {
 			ourLastMethod = "/search";
 			return new ArrayList<>();
 		}
-
-
 	}
 
 	@AfterAll
@@ -297,13 +283,12 @@ public class OperationGenericServerR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-
 }

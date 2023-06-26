@@ -22,20 +22,21 @@ public class JsonLikeParserDstu2Test {
 	public void testJsonLikeParseAndEncodeBundleFromXmlToJson() throws Exception {
 		String content = IOUtils.toString(JsonLikeParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
 
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed =
+				ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		
+
 		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
 		jsonLikeStructure.load(new StringReader(encoded));
-		
-		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
-		
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = jsonLikeparser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, jsonLikeStructure);
-		
+
+		IJsonLikeParser jsonLikeparser = (IJsonLikeParser) ourCtx.newJsonParser();
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle =
+				jsonLikeparser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, jsonLikeStructure);
 	}
-	
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();

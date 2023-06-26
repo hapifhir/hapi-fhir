@@ -24,21 +24,27 @@ import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_MAP_URL", columnNames = {"URL", "VER"})
-}, indexes = {
-	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
-	@Index(name = "FK_TRMCONCEPTMAP_RES", columnList = "RES_ID")
-})
+@Table(
+		name = "TRM_CONCEPT_MAP",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CONCEPT_MAP_URL",
+					columnNames = {"URL", "VER"})
+		},
+		indexes = {
+			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
+			// automatically
+			@Index(name = "FK_TRMCONCEPTMAP_RES", columnList = "RES_ID")
+		})
 public class TermConceptMap implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -59,7 +65,12 @@ public class TermConceptMap implements Serializable {
 	private Long myId;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
+	@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(name = "FK_TRMCONCEPTMAP_RES"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
@@ -76,7 +87,7 @@ public class TermConceptMap implements Serializable {
 
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
-	
+
 	@OneToMany(mappedBy = "myConceptMap")
 	private List<TermConceptMapGroup> myConceptMapGroups;
 
@@ -115,8 +126,10 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setSource(String theSource) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSource, TermValueSet.MAX_URL_LENGTH,
-			"Source exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theSource));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theSource,
+				TermValueSet.MAX_URL_LENGTH,
+				"Source exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theSource));
 		mySource = theSource;
 		return this;
 	}
@@ -126,8 +139,10 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setTarget(String theTarget) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theTarget, TermValueSet.MAX_URL_LENGTH,
-			"Target exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theTarget));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theTarget,
+				TermValueSet.MAX_URL_LENGTH,
+				"Target exceeds maximum length (" + TermValueSet.MAX_URL_LENGTH + "): " + length(theTarget));
 		myTarget = theTarget;
 		return this;
 	}
@@ -138,8 +153,8 @@ public class TermConceptMap implements Serializable {
 
 	public TermConceptMap setUrl(@Nonnull String theUrl) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
-			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theUrl, MAX_URL_LENGTH, "URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
 		myUrl = theUrl;
 		return this;
 	}
@@ -149,23 +164,28 @@ public class TermConceptMap implements Serializable {
 	}
 
 	public TermConceptMap setVersion(String theVersion) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theVersion, MAX_VER_LENGTH,
-			"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theVersion,
+				MAX_VER_LENGTH,
+				"Version exceeds maximum length (" + MAX_VER_LENGTH + "): " + length(theVersion));
 		myVersion = theVersion;
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
-			.append("myResourcePid", myResourcePid)
-			.append("mySource", mySource)
-			.append("myTarget", myTarget)
-			.append("myUrl", myUrl)
-			.append("myVersion", myVersion)
-			.append(myConceptMapGroups != null ? ("myConceptMapGroups - size=" + myConceptMapGroups.size()) : ("myConceptMapGroups=(null)"))
-			.toString();
+				.append("myId", myId)
+				.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
+				.append("myResourcePid", myResourcePid)
+				.append("mySource", mySource)
+				.append("myTarget", myTarget)
+				.append("myUrl", myUrl)
+				.append("myVersion", myVersion)
+				.append(
+						myConceptMapGroups != null
+								? ("myConceptMapGroups - size=" + myConceptMapGroups.size())
+								: ("myConceptMapGroups=(null)"))
+				.toString();
 	}
 }

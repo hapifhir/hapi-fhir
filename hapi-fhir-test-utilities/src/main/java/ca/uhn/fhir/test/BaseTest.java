@@ -41,7 +41,8 @@ public abstract class BaseTest {
 		return ClasspathUtil.loadCompressedResource(theClasspath);
 	}
 
-	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
+	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath)
+			throws IOException {
 		return ClasspathUtil.loadResource(theCtx, theType, theClasspath);
 	}
 }

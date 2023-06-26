@@ -83,22 +83,43 @@ public class IncludeTest {
 
 			assertEquals(3, bundle.getEntry().size());
 
-			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			assertEquals(
+					("Patient/p1"),
+					bundle.getEntry()
+							.get(0)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Patient/p2"),
+					bundle.getEntry()
+							.get(1)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Organization/o1"),
+					bundle.getEntry()
+							.get(2)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 			assertEquals(0, p1.getContained().size());
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
 			assertEquals(0, p2.getContained().size());
-
 		}
 	}
 
 	@Test
 	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 
@@ -108,17 +129,44 @@ public class IncludeTest {
 			ourLog.info(responseContent);
 
 			assertEquals(4, bundle.getEntry().size());
-			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			assertEquals(
+					("Patient/p1"),
+					bundle.getEntry()
+							.get(0)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Patient/p2"),
+					bundle.getEntry()
+							.get(1)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Organization/o1"),
+					bundle.getEntry()
+							.get(2)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Organization/o2"),
+					bundle.getEntry()
+							.get(3)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 			assertEquals(0, p1.getContained().size());
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
 			assertEquals(0, p2.getContained().size());
-
 		}
 	}
 
@@ -134,22 +182,43 @@ public class IncludeTest {
 			ourLog.info(responseContent);
 
 			assertEquals(3, bundle.getEntry().size());
-			assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			assertEquals(
+					("Patient/p1"),
+					bundle.getEntry()
+							.get(0)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Patient/p2"),
+					bundle.getEntry()
+							.get(1)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					("Organization/o1"),
+					bundle.getEntry()
+							.get(2)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 			assertEquals(0, p1.getContained().size());
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
 			assertEquals(0, p2.getContained().size());
-
 		}
 	}
 
 	@Test
 	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 
@@ -159,29 +228,74 @@ public class IncludeTest {
 			ourLog.info(responseContent);
 
 			assertEquals(3, bundle.getEntry().size());
-			assertEquals("Patient/p1", bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals("Patient/p2", bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			assertEquals("Organization/o1", bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			assertEquals(
+					"Patient/p1",
+					bundle.getEntry()
+							.get(0)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					"Patient/p2",
+					bundle.getEntry()
+							.get(1)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
+			assertEquals(
+					"Organization/o1",
+					bundle.getEntry()
+							.get(2)
+							.getResource()
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 
 			Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 			assertEquals(0, p1.getContained().size());
 
 			Patient p2 = (Patient) bundle.getEntry().get(1).getResource();
 			assertEquals(0, p2.getContained().size());
-
 		}
 	}
 
 	@Test
 	public void testIncludeWithType() {
-		assertEquals("Patient:careProvider:Practitioner", new Include("Patient:careProvider", true).withType("Practitioner").getValue());
-		assertEquals(true, new Include("Patient:careProvider", true).withType("Practitioner").isRecurse());
-		assertEquals(false, new Include("Patient:careProvider:Organization", true).withType("Practitioner").isLocked());
-		assertEquals("Practitioner", new Include("Patient:careProvider", true).withType("Practitioner").getParamTargetType());
+		assertEquals(
+				"Patient:careProvider:Practitioner",
+				new Include("Patient:careProvider", true)
+						.withType("Practitioner")
+						.getValue());
+		assertEquals(
+				true,
+				new Include("Patient:careProvider", true)
+						.withType("Practitioner")
+						.isRecurse());
+		assertEquals(
+				false,
+				new Include("Patient:careProvider:Organization", true)
+						.withType("Practitioner")
+						.isLocked());
+		assertEquals(
+				"Practitioner",
+				new Include("Patient:careProvider", true)
+						.withType("Practitioner")
+						.getParamTargetType());
 		assertEquals(null, new Include("Patient:careProvider", true).getParamTargetType());
 
-		assertEquals("Patient:careProvider:Practitioner", new Include("Patient:careProvider:Organization", true).withType("Practitioner").getValue());
-		assertEquals(true, new Include("Patient:careProvider:Organization", true).toLocked().withType("Practitioner").isLocked());
+		assertEquals(
+				"Patient:careProvider:Practitioner",
+				new Include("Patient:careProvider:Organization", true)
+						.withType("Practitioner")
+						.getValue());
+		assertEquals(
+				true,
+				new Include("Patient:careProvider:Organization", true)
+						.toLocked()
+						.withType("Practitioner")
+						.isLocked());
 
 		try {
 			new Include("").withType("Patient");
@@ -213,7 +327,8 @@ public class IncludeTest {
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(1, bundle.getEntry().size());
 
-			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+					.get(0);
 			assertEquals(0, p.getName().size());
 			assertEquals("Hello", p.getIdElement().getIdPart());
 		}
@@ -229,7 +344,8 @@ public class IncludeTest {
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(1, bundle.getEntry().size());
 
-			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+					.get(0);
 			assertEquals(1, p.getName().size());
 			assertEquals("Hello", p.getIdElement().getIdPart());
 			assertEquals("foo-false", p.getName().get(0).getFamily());
@@ -238,7 +354,8 @@ public class IncludeTest {
 
 	@Test
 	public void testOneIncludeIterate() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&" + Constants.PARAM_INCLUDE_ITERATE + "=foo");
+		HttpGet httpGet = new HttpGet(
+				"http://localhost:" + ourPort + "/Patient?name=Hello&" + Constants.PARAM_INCLUDE_ITERATE + "=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 
@@ -246,7 +363,8 @@ public class IncludeTest {
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(1, bundle.getEntry().size());
 
-			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+					.get(0);
 			assertEquals(1, p.getName().size());
 			assertEquals("Hello", p.getIdElement().getIdPart());
 			assertEquals("foo-true", p.getName().get(0).getFamily());
@@ -263,7 +381,8 @@ public class IncludeTest {
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(1, bundle.getEntry().size());
 
-			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+					.get(0);
 			assertEquals(2, p.getName().size());
 			assertEquals("Hello", p.getIdElement().getIdPart());
 
@@ -271,7 +390,6 @@ public class IncludeTest {
 			values.add(p.getName().get(0).getFamily());
 			values.add(p.getName().get(1).getFamily());
 			assertThat(values, containsInAnyOrder("foo-false", "bar-false"));
-
 		}
 	}
 
@@ -285,7 +403,8 @@ public class IncludeTest {
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(1, bundle.getEntry().size());
 
-			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+			Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+					.get(0);
 			assertEquals("foo", p.getIdentifierFirstRep().getValue());
 		}
 	}
@@ -332,7 +451,6 @@ public class IncludeTest {
 
 			return Collections.singletonList(rep);
 		}
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -399,7 +517,9 @@ public class IncludeTest {
 		}
 
 		@Search
-		public List<Patient> findPatientWithSimpleNames(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = {"foo", "bar"}) Set<Include> theIncludes) {
+		public List<Patient> findPatientWithSimpleNames(
+				@RequiredParam(name = Patient.SP_NAME) StringDt theName,
+				@IncludeParam(allow = {"foo", "bar"}) Set<Include> theIncludes) {
 			ArrayList<Patient> retVal = new ArrayList<>();
 
 			Patient p = new Patient();
@@ -417,7 +537,6 @@ public class IncludeTest {
 			return retVal;
 		}
 
-
 		@Search(queryName = "stringInclude")
 		public List<Patient> stringInclude(@IncludeParam String theInclude) {
 			Patient p = new Patient();
@@ -426,7 +545,6 @@ public class IncludeTest {
 
 			return Arrays.asList(p);
 		}
-
 
 		@Override
 		public Class<Patient> getResourceType() {
@@ -451,7 +569,6 @@ public class IncludeTest {
 
 			return Arrays.asList(p1, p2);
 		}
-
 	}
 
 	@ResourceDef(name = "Patient")
@@ -473,7 +590,6 @@ public class IncludeTest {
 		public boolean isEmpty() {
 			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
 		}
-
 	}
 
 	@AfterAll
@@ -501,11 +617,10 @@ public class IncludeTest {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-	
 }

@@ -59,7 +59,9 @@ public class BundleValidationTest {
 	}
 
 	private Appointment createAppointment() {
-		Appointment.Participant participant = new Appointment.Participant().setStatus(ParticipationStatusEnum.ACCEPTED).setType(ParticipantTypeEnum.PART);
+		Appointment.Participant participant = new Appointment.Participant()
+				.setStatus(ParticipationStatusEnum.ACCEPTED)
+				.setType(ParticipantTypeEnum.PART);
 		return new Appointment().setStatus(AppointmentStatusEnum.BOOKED).addParticipant(participant);
 	}
 

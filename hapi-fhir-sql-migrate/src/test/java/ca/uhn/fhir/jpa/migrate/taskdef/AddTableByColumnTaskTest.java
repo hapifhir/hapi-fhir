@@ -28,11 +28,10 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("FOO_TABLE", "TGT_TABLE"));
-		Set<String> indexes = JdbcUtils.getIndexNames(getConnectionProperties(), "FOO_TABLE")
-			.stream()
-			.filter(s -> !s.startsWith("FK_REF_INDEX_"))
-			.filter(s -> !s.startsWith("PRIMARY_KEY_"))
-			.collect(Collectors.toSet());
+		Set<String> indexes = JdbcUtils.getIndexNames(getConnectionProperties(), "FOO_TABLE").stream()
+				.filter(s -> !s.startsWith("FK_REF_INDEX_"))
+				.filter(s -> !s.startsWith("PRIMARY_KEY_"))
+				.collect(Collectors.toSet());
 
 		// Derby auto-creates constraints with a system name for unique indexes
 		if (getDriverType().equals(DriverTypeEnum.DERBY_EMBEDDED)) {
@@ -59,7 +58,10 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			fooTable.addIndex("6", "IDX_GOODBYE").unique(true).withColumnsStub("GOODBYE");
 			fooTable.dropIndexStub("7", "IDX_HELLO");
 			fooTable.addForeignKey("8", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
-			fooTable.addForeignKey("9", "FK_REF_INVALID").toColumn("COL_REF_INVALID").references("TGT_TABLE", "PID2").failureAllowed();
+			fooTable.addForeignKey("9", "FK_REF_INVALID")
+					.toColumn("COL_REF_INVALID")
+					.references("TGT_TABLE", "PID2")
+					.failureAllowed();
 
 			Builder.BuilderWithTableName renameIndexTable = v.onTable("FOO_TABLE");
 			renameIndexTable.renameIndex("10", "IDX_HELLO", "IDX_BONJOUR");

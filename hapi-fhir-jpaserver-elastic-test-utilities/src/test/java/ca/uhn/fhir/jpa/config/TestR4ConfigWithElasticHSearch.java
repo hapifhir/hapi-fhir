@@ -12,9 +12,5 @@ import org.springframework.context.annotation.Import;
  * so let's try to use the same config as much as we can.
  */
 @Configuration
-@Import({
-	TestR4Config.class,
-	TestHSearchAddInConfig.Elasticsearch.class
-})
-public class TestR4ConfigWithElasticHSearch {
-}
+@Import({TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+public class TestR4ConfigWithElasticHSearch {}

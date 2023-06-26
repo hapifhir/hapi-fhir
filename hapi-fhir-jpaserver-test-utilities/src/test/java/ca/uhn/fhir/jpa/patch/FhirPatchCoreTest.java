@@ -14,12 +14,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.annotation.Nonnull;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.xml.transform.TransformerException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -30,7 +30,13 @@ public class FhirPatchCoreTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("parameters")
-	public void testApply(String myName, String myMode, IBaseResource myInput, IBaseResource myPatch, IBaseResource myOutput, FhirContext theContext) {
+	public void testApply(
+			String myName,
+			String myMode,
+			IBaseResource myInput,
+			IBaseResource myPatch,
+			IBaseResource myOutput,
+			FhirContext theContext) {
 		ourLog.info("Testing diff in {} mode: {}", myMode, myName);
 
 		if (myMode.equals("both") || myMode.equals("forwards")) {
@@ -45,7 +51,6 @@ public class FhirPatchCoreTest extends BaseTest {
 		} else {
 			fail("Unknown mode: " + myMode);
 		}
-
 	}
 
 	public static List<Object[]> parameters() throws TransformerException, SAXException, IOException {
@@ -62,9 +67,9 @@ public class FhirPatchCoreTest extends BaseTest {
 		return retVal;
 	}
 
-
 	@Nonnull
-	public static Collection<Object[]> loadTestSpec(FhirContext theContext, String theTestSpec) throws IOException, SAXException, TransformerException {
+	public static Collection<Object[]> loadTestSpec(FhirContext theContext, String theTestSpec)
+			throws IOException, SAXException, TransformerException {
 		List<Object[]> retVal = new ArrayList<>();
 
 		String testsString = ClasspathUtil.loadResource(theTestSpec);
@@ -88,13 +93,13 @@ public class FhirPatchCoreTest extends BaseTest {
 			String inputEncoded = XmlUtil.encodeDocument(inputResourceElement);
 			IBaseResource input = theContext.newXmlParser().parseResource(inputEncoded);
 
-			Element outputElement = (Element) next.getElementsByTagName("output").item(0);
+			Element outputElement =
+					(Element) next.getElementsByTagName("output").item(0);
 			Element outputResourceElement = getFirstChildElement(outputElement);
 			String outputEncoded = XmlUtil.encodeDocument(outputResourceElement);
 			IBaseResource output = theContext.newXmlParser().parseResource(outputEncoded);
 
-			retVal.add(new Object[]{name, mode, input, diff, output, theContext});
-
+			retVal.add(new Object[] {name, mode, input, diff, output, theContext});
 		}
 
 		return retVal;

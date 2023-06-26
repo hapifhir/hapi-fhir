@@ -60,14 +60,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -81,7 +81,8 @@ import static org.mockito.Mockito.when;
 
 public class ServerConformanceProviderDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
 	private static FhirContext ourCtx;
 	private static FhirValidator ourValidator;
 
@@ -107,7 +108,9 @@ public class ServerConformanceProviderDstu2Test {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
 		when(req.getServletPath()).thenReturn("/fhir");
-		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getRequestURL())
+				.thenReturn(
+						new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
 		when(req.getContextPath()).thenReturn("/FhirStorm");
 		return req;
 	}
@@ -150,7 +153,9 @@ public class ServerConformanceProviderDstu2Test {
 		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED, res.getConditionalDeleteElement().getValueAsEnum());
+		assertEquals(
+				ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED,
+				res.getConditionalDeleteElement().getValueAsEnum());
 		assertTrue(res.getConditionalUpdate());
 	}
 
@@ -171,8 +176,18 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertEquals(
+				"everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals(
+				"OperationDefinition/Patient-i-everything",
+				conformance
+						.getRest()
+						.get(0)
+						.getOperation()
+						.get(0)
+						.getDefinition()
+						.getReference()
+						.getValue());
 	}
 
 	@Test
@@ -181,13 +196,13 @@ public class ServerConformanceProviderDstu2Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
-		};
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
+		OperationDefinition opDef = sc.readOperationDefinition(
+				new IdDt("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
 		assertEquals("everything", opDef.getCode());
@@ -210,9 +225,11 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_INSTANCE.getCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_INSTANCE.getCode()
+						+ "\"/></interaction>"));
 	}
-
 
 	@Test
 	public void testMultiOptionalDocumentation() throws Exception {
@@ -231,7 +248,8 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
 				found = true;
 			}
@@ -289,14 +307,17 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		assertEquals(2, conformance.getRest().get(0).getOperation().size());
-		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
+		List<String> operationNames =
+				toOperationNames(conformance.getRest().get(0).getOperation());
 		assertThat(operationNames, containsInAnyOrder("someOp", "validate"));
 
-		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
+		List<String> operationIdParts =
+				toOperationIdParts(conformance.getRest().get(0).getOperation());
 		assertThat(operationIdParts, containsInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate"));
 
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
+			OperationDefinition opDef = sc.readOperationDefinition(
+					new IdDt("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
@@ -327,9 +348,9 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info("AAAAAA" + conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(
+				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
-
 	}
 
 	@Test
@@ -351,7 +372,9 @@ public class ServerConformanceProviderDstu2Test {
 
 				conformance.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_ELEMENTS_AND_EXTENSIONS);
 				restSecurity.addService(RestfulSecurityServiceEnum.SMART_ON_FHIR);
-				restSecurity.getServiceFirstRep().setText("OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org)");
+				restSecurity
+						.getServiceFirstRep()
+						.setText("OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org)");
 				extensionDt.setUrl("http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris");
 				extensionDtToken.setUrl("token");
 				extensionDtToken.setValue(new UriDt("https://SERVERNAME/token"));
@@ -476,9 +499,9 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(
+				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
-
 	}
 
 	/**
@@ -501,7 +524,8 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(24);
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().get(24);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
@@ -511,9 +535,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
-
 	}
-
 
 	/**
 	 * See #286
@@ -535,7 +557,8 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
@@ -571,7 +594,8 @@ public class ServerConformanceProviderDstu2Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
@@ -609,7 +633,10 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteractionEnum.HISTORY_SYSTEM.getCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + SystemRestfulInteractionEnum.HISTORY_SYSTEM.getCode()
+						+ "\"/></interaction>"));
 	}
 
 	@Test
@@ -628,7 +655,10 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_TYPE.getCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + TypeRestfulInteractionEnum.HISTORY_TYPE.getCode()
+						+ "\"/></interaction>"));
 	}
 
 	@Test
@@ -687,7 +717,8 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
+		public MethodOutcome delete(
+				@IdParam IdDt theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
 			return null;
 		}
 
@@ -697,10 +728,10 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome update(
+				@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
-
 	}
 
 	public static class InstanceHistoryProvider implements IResourceProvider {
@@ -713,7 +744,6 @@ public class ServerConformanceProviderDstu2Test {
 		public List<IBaseResource> history(@IdParam IdDt theId) {
 			return null;
 		}
-
 	}
 
 	/**
@@ -722,17 +752,23 @@ public class ServerConformanceProviderDstu2Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER)
+						IdentifierDt theIdentifier,
+				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME)
+						StringDt theName) {
 			return null;
 		}
-
 	}
 
 	public static class MultiTypeEncounterProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
-													 @OperationParam(name = "someOpParam1") DateDt theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+		public IBundleProvider everything(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam IdDt theId,
+				@OperationParam(name = "someOpParam1") DateDt theStart,
+				@OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
 
@@ -742,17 +778,22 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Encounter thePatient) {
+		public IBundleProvider validate(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam IdDt theId,
+				@ResourceParam Encounter thePatient) {
 			return null;
 		}
-
 	}
 
 	public static class MultiTypePatientProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId,
-													 @OperationParam(name = "someOpParam1") DateDt theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
+		public IBundleProvider everything(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam IdDt theId,
+				@OperationParam(name = "someOpParam1") DateDt theStart,
+				@OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
 
@@ -762,10 +803,12 @@ public class ServerConformanceProviderDstu2Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdDt theId, @ResourceParam Patient thePatient) {
+		public IBundleProvider validate(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam IdDt theId,
+				@ResourceParam Patient thePatient) {
 			return null;
 		}
-
 	}
 
 	public static class NonConditionalProvider implements IResourceProvider {
@@ -789,22 +832,31 @@ public class ServerConformanceProviderDstu2Test {
 		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
-
 	}
 
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class)})
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		@Operation(
+				name = "plain",
+				idempotent = true,
+				returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringDt.class)})
+		public IBundleProvider everything(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
+				@OperationParam(name = "start") DateDt theStart,
+				@OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
-
 	}
 
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public IBundleProvider everything(
+				javax.servlet.http.HttpServletRequest theServletRequest,
+				@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
+				@OperationParam(name = "start") DateDt theStart,
+				@OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -812,24 +864,30 @@ public class ServerConformanceProviderDstu2Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 	}
 
 	public static class ProviderWithRequiredAndOptional {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
-																						 @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(
+				@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER)
+						IdentifierDt thePatientId,
+				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes)
+				throws Exception {
 			return null;
 		}
-
 	}
 
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						IdentifierDt theIdentifier) {
 			return null;
 		}
 
@@ -837,46 +895,53 @@ public class ServerConformanceProviderDstu2Test {
 		public Patient readPatient(@IdParam IdDt theId) {
 			return null;
 		}
-
 	}
 
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient1(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						IdentifierDt theIdentifier) {
 			return null;
 		}
 
 		@Search(type = Patient.class)
-		public Patient findPatient2(@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = {Patient.class}) ReferenceAndListParam theLink) {
+		public Patient findPatient2(
+				@Description(shortDefinition = "All patients linked to the given patient")
+						@OptionalParam(
+								name = "link",
+								targetTypes = {Patient.class})
+						ReferenceAndListParam theLink) {
 			return null;
 		}
-
 	}
 
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
 		public Patient findPatient1(
-			@Description(shortDefinition = "The organization at which this person is a patient")
-			@RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = {"foo", "bar"})
-				ReferenceAndListParam theIdentifier) {
+				@Description(shortDefinition = "The organization at which this person is a patient")
+						@RequiredParam(
+								name = Patient.SP_ORGANIZATION,
+								chainWhitelist = {"foo", "bar"})
+						ReferenceAndListParam theIdentifier) {
 			return null;
 		}
-
 	}
 
 	public static class SearchProviderWithExplicitChains {
 
 		@Search(type = Patient.class)
 		public Patient findPatient1(
-			@Description(shortDefinition = "The organization at which this person is a patient")
-			@RequiredParam(name = "organization.foo") ReferenceAndListParam theFoo,
-			@RequiredParam(name = "organization.bar") ReferenceAndListParam theBar,
-			@RequiredParam(name = "organization.baz.bob") ReferenceAndListParam theBazbob) {
+				@Description(shortDefinition = "The organization at which this person is a patient")
+						@RequiredParam(name = "organization.foo")
+						ReferenceAndListParam theFoo,
+				@RequiredParam(name = "organization.bar") ReferenceAndListParam theBar,
+				@RequiredParam(name = "organization.baz.bob") ReferenceAndListParam theBazbob) {
 			return null;
 		}
-
 	}
 
 	public static class SystemHistoryProvider {
@@ -885,7 +950,6 @@ public class ServerConformanceProviderDstu2Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
-
 	}
 
 	public static class TypeHistoryProvider implements IResourceProvider {
@@ -899,7 +963,6 @@ public class ServerConformanceProviderDstu2Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
-
 	}
 
 	/**
@@ -908,7 +971,10 @@ public class ServerConformanceProviderDstu2Test {
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						IdentifierDt theIdentifier) {
 			return null;
 		}
 
@@ -916,13 +982,10 @@ public class ServerConformanceProviderDstu2Test {
 		public Patient readPatient(@IdParam IdDt theId) {
 			return null;
 		}
-
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
-
 }

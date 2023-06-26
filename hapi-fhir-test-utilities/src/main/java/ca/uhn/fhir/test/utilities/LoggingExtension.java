@@ -55,12 +55,14 @@ public class LoggingExtension implements BeforeEachCallback, AfterEachCallback {
 	@Override
 	public void afterEach(ExtensionContext context) {
 		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-		logger.info(MessageFormat.format("Finished test case [{0}]", context.getTestMethod().get().getName()));
+		logger.info(MessageFormat.format(
+				"Finished test case [{0}]", context.getTestMethod().get().getName()));
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
 		final Logger logger = LoggerFactory.getLogger(context.getTestClass().get());
-		logger.info(MessageFormat.format("Starting test case [{0}]", context.getTestMethod().get().getName()));
+		logger.info(MessageFormat.format(
+				"Starting test case [{0}]", context.getTestMethod().get().getName()));
 	}
 }

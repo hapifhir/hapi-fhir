@@ -51,6 +51,7 @@ public class StorageSettings {
 	 */
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -61,7 +62,13 @@ public class StorageSettings {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			"http://hl7.org/fhir/ValueSet/*",
+			"http://hl7.org/fhir/CodeSystem/*",
+			"http://hl7.org/fhir/valueset-*",
+			"http://hl7.org/fhir/codesystem-*",
+			"http://hl7.org/fhir/StructureDefinition/*")));
+
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	/*
 	 * <p>
@@ -82,6 +89,7 @@ public class StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowContainsSearches = false;
+
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
@@ -102,6 +110,7 @@ public class StorageSettings {
 	 * Update setter javadoc if default changes.
 	 */
 	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
+
 	private boolean mySuppressStringIndexingInTokens = false;
 	private Class<? extends ISequenceValueMassager> mySequenceValueMassagerClass;
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
@@ -728,12 +737,12 @@ public class StorageSettings {
 		return this;
 	}
 
-
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
 	 */
-	public StorageSettings addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+	public StorageSettings addSupportedSubscriptionType(
+			Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
 		return this;
 	}
@@ -754,7 +763,6 @@ public class StorageSettings {
 	/**
 	 * If e-mail subscriptions are supported, the From address used when sending e-mails
 	 */
-
 	public String getEmailFromAddress() {
 		return myEmailFromAddress;
 	}
@@ -762,7 +770,6 @@ public class StorageSettings {
 	/**
 	 * If e-mail subscriptions are supported, the From address used when sending e-mails
 	 */
-
 	public void setEmailFromAddress(String theEmailFromAddress) {
 		myEmailFromAddress = theEmailFromAddress;
 	}
@@ -770,7 +777,6 @@ public class StorageSettings {
 	/**
 	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
-
 	public String getWebsocketContextPath() {
 		return myWebsocketContextPath;
 	}
@@ -778,7 +784,6 @@ public class StorageSettings {
 	/**
 	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
-
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myWebsocketContextPath = theWebsocketContextPath;
 	}
@@ -1071,7 +1076,6 @@ public class StorageSettings {
 			byType.computeIfAbsent(type, t -> new HashSet<>()).add(nextPath);
 		}
 
-
 		myAutoVersionReferenceAtPaths = paths;
 		myTypeToAutoVersionReferenceAtPaths = byType;
 	}
@@ -1255,23 +1259,20 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
-
-
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
 		int starIdx = theUrl.indexOf('*');
 		if (starIdx != -1) {
 			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+				throw new IllegalArgumentException(Msg.code(1525)
+						+ "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
 			}
 		}
-
 	}
 
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
 	}
-
 }

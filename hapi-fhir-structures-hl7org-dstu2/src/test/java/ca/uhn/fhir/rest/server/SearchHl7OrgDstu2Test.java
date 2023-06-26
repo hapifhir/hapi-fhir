@@ -23,9 +23,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -37,155 +37,162 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SearchHl7OrgDstu2Test {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchHl7OrgDstu2Test.class);
-  private static CloseableHttpClient ourClient;
-  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-  private static int ourPort;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchHl7OrgDstu2Test.class);
+	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static int ourPort;
 
-  private static InstantDt ourReturnPublished;
+	private static InstantDt ourReturnPublished;
 
-  private static Server ourServer;
+	private static Server ourServer;
 
-  @Test
-  public void testEncodeConvertsReferencesToRelative() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    ourLog.info(responseContent);
+	@Test
+	public void testEncodeConvertsReferencesToRelative() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent, not(containsString("text")));
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
-    String ref = patient.getManagingOrganization().getReference();
-    assertEquals("Organization/555", ref);
-    assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
-  }
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser()
+				.parseResource(Bundle.class, responseContent)
+				.getEntry()
+				.get(0)
+				.getResource();
+		String ref = patient.getManagingOrganization().getReference();
+		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+	}
 
-  @Test
-  public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef&_format=json");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    ourLog.info(responseContent);
+	@Test
+	public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
 
-    assertThat(responseContent, not(containsString("text")));
+		assertThat(responseContent, not(containsString("text")));
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
-    String ref = patient.getManagingOrganization().getReference();
-    assertEquals("Organization/555", ref);
-    assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
-  }
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newJsonParser()
+				.parseResource(Bundle.class, responseContent)
+				.getEntry()
+				.get(0)
+				.getResource();
+		String ref = patient.getManagingOrganization().getReference();
+		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+	}
 
-  @Test
-  public void testResultBundleHasUuid() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    ourLog.info(responseContent);
+	@Test
+	public void testResultBundleHasUuid() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
-  }
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
+	}
 
-  @Test
-  public void testResultBundleHasUpdateTime() throws Exception {
-    ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
-    assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
+	@Test
+	public void testResultBundleHasUpdateTime() throws Exception {
+		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
+		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    ourLog.info(responseContent);
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithBundleProvider&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
 
-    assertThat(responseContent, stringContainsInOrder("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>"));
-  }
+		assertThat(responseContent, stringContainsInOrder("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>"));
+	}
 
-  /**
-   * Created by dsotnikov on 2/25/2014.
-   */
-  public static class DummyPatientResourceProvider implements IResourceProvider {
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
 
-    @Override
-    public Class<Patient> getResourceType() {
-      return Patient.class;
-    }
+		@Search(queryName = "searchWithBundleProvider")
+		public IBundleProvider searchWithBundleProvider() {
+			return new IBundleProvider() {
 
-    @Search(queryName = "searchWithBundleProvider")
-    public IBundleProvider searchWithBundleProvider() {
-      return new IBundleProvider() {
+				@Override
+				public InstantDt getPublished() {
+					return ourReturnPublished;
+				}
 
-        @Override
-        public InstantDt getPublished() {
-          return ourReturnPublished;
-        }
+				@Nonnull
+				@Override
+				public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+					throw new IllegalStateException();
+				}
 
-        @Nonnull
-        @Override
-        public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-          throw new IllegalStateException();
-        }
+				@Override
+				public Integer preferredPageSize() {
+					return null;
+				}
 
-        @Override
-        public Integer preferredPageSize() {
-          return null;
-        }
+				@Override
+				public Integer size() {
+					return 0;
+				}
 
-        @Override
-        public Integer size() {
-          return 0;
-        }
+				@Override
+				public String getUuid() {
+					return null;
+				}
+			};
+		}
 
-        @Override
-        public String getUuid() {
-          return null;
-        }
-      };
-    }
+		@Search(queryName = "searchWithRef")
+		public Patient searchWithRef() {
+			Patient patient = new Patient();
+			patient.setId("Patient/1/_history/1");
+			patient.getManagingOrganization()
+					.setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
+			return patient;
+		}
+	}
 
-    @Search(queryName = "searchWithRef")
-    public Patient searchWithRef() {
-      Patient patient = new Patient();
-      patient.setId("Patient/1/_history/1");
-      patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
-      return patient;
-    }
+	@AfterAll
+	public static void afterClass() throws Exception {
+		JettyUtil.closeServer(ourServer);
+	}
 
-  }
+	@BeforeAll
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
 
-  @AfterAll
-  public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
-  }
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
-  @BeforeAll
-  public static void beforeClass() throws Exception {
-    ourServer = new Server(0);
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(patientProvider);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
-    DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-    ServletHandler proxyHandler = new ServletHandler();
-    RestfulServer servlet = new RestfulServer(ourCtx);
-    servlet.setResourceProviders(patientProvider);
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    proxyHandler.addServletWithMapping(servletHolder, "/*");
-    ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setConnectionManager(connectionManager);
-    ourClient = builder.build();
-
-  }
-
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+	}
 }

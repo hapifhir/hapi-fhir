@@ -35,14 +35,18 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 
 public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtTest.class);
 	private TermLoaderSvcImpl mySvc;
 
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
+
 	private ZipCollectionBuilder myFiles;
+
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
@@ -59,7 +63,8 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 			retVal.add(new ITermLoaderSvc.FileDescriptor() {
 				@Override
 				public String getFilename() {
-					return "aaa.zip";				}
+					return "aaa.zip";
+				}
 
 				@Override
 				public InputStream getInputStream() {
@@ -82,7 +87,9 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 
 		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+		verify(myTermCodeSystemStorageSvc)
+				.storeNewCodeSystemVersion(
+						any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);
@@ -105,7 +112,9 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
 		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
+		verify(myTermCodeSystemStorageSvc)
+				.storeNewCodeSystemVersion(
+						any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);
@@ -126,7 +135,8 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	@Disabled("for manual testing")
 	@Test
 	public void testLoadSnomedCtAgainstRealFile() throws Exception {
-		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
+		byte[] bytes = IOUtils.toByteArray(
+				new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));
 
 		mySvc.loadSnomedCt(list(bytes), mySrd);
 	}
@@ -164,6 +174,4 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 			}
 		}
 	}
-
-
 }

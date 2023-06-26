@@ -40,5 +40,4 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		assertFalse(servletRequestDetails.isRewriteHistory());
 	}
-
 }

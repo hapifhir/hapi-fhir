@@ -14,6 +14,4 @@ public class VersionUtilTest {
 		assertThat(VersionUtil.getBuildNumber(), not(blankOrNullString()));
 		assertThat(VersionUtil.getBuildTime(), not(blankOrNullString()));
 	}
-
-
 }

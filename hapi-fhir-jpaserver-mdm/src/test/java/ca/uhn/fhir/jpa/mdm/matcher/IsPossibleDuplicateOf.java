@@ -21,7 +21,8 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	 */
 	private IResourcePersistentId incomingGoldenResourcePid;
 
-	protected IsPossibleDuplicateOf(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsPossibleDuplicateOf(
+			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
@@ -30,19 +31,23 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 		incomingGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
 		List<IResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
-			.map(this::getMatchedResourcePidFromResource)
-			.collect(Collectors.toList());
+				.map(this::getMatchedResourcePidFromResource)
+				.collect(Collectors.toList());
 
-
-		//Returns true if there is a POSSIBLE_DUPLICATE between the incoming resource, and all of the resources passed in via the constructor.
+		// Returns true if there is a POSSIBLE_DUPLICATE between the incoming resource, and all of the resources passed
+		// in via the constructor.
 		return goldenResourcePidsToMatch.stream()
-			.map(baseResourcePid -> {
-				Optional<? extends IMdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
-				if (!duplicateLink.isPresent()) {
-					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
-				}
-				return duplicateLink;
-			}).allMatch(Optional::isPresent);
+				.map(baseResourcePid -> {
+					Optional<? extends IMdmLink> duplicateLink =
+							myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(
+									baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+					if (!duplicateLink.isPresent()) {
+						duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(
+								incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+					}
+					return duplicateLink;
+				})
+				.allMatch(Optional::isPresent);
 	}
 
 	@Override
@@ -56,7 +61,8 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText("No MdmLink With POSSIBLE_DUPLICATE was found");
 	}
 
-	public static Matcher<IAnyResource> possibleDuplicateOf(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleDuplicateOf(
+			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleDuplicateOf(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

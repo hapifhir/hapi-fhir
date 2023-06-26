@@ -2,14 +2,11 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -49,42 +46,40 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Assert;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsentInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
+
 	@RegisterExtension
 	private final HttpClientExtension myClient = new HttpClientExtension();
+
 	@RegisterExtension
 	private final LoggingExtension myLoggingExtension = new LoggingExtension();
+
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private int myPort;
 	private static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
@@ -92,17 +87,21 @@ public class ConsentInterceptorTest {
 
 	@RegisterExtension
 	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
-		.registerProvider(ourPatientProvider)
-		.registerProvider(ourSystemProvider)
-		.withPagingProvider(new FifoMemoryPagingProvider(10));
+			.registerProvider(ourPatientProvider)
+			.registerProvider(ourSystemProvider)
+			.withPagingProvider(new FifoMemoryPagingProvider(10));
 
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc;
+
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc2;
+
 	private ConsentInterceptor myInterceptor;
+
 	@Captor
 	private ArgumentCaptor<BaseServerResponseException> myExceptionCaptor;
+
 	private IGenericClient myFhirClient;
 
 	@AfterEach
@@ -176,7 +175,9 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2037) + "_total=accurate is not permitted on this server"));
+			assertThat(
+					responseContent,
+					containsString(Msg.code(2037) + "_total=accurate is not permitted on this server"));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -222,7 +223,8 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2038) + "_summary=count is not permitted on this server"));
+			assertThat(
+					responseContent, containsString(Msg.code(2038) + "_summary=count is not permitted on this server"));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -244,11 +246,10 @@ public class ConsentInterceptorTest {
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent, containsString("\"total\""));
 		}
-
 	}
 
 	@Test
-	public void testMetadataCallHasChecksSkipped() throws IOException{
+	public void testMetadataCallHasChecksSkipped() throws IOException {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/metadata");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -269,15 +270,15 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(2000).times(2)).completeOperationSuccess(any(), any());
 	}
 
-
 	@Test
 	public void testSearch_ShouldProcessCanSeeResourcesReturnsFalse() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(), any())).thenReturn(false);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.AUTHORIZED);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -297,15 +298,16 @@ public class ConsentInterceptorTest {
 		verifyNoMoreInteractions(myConsentSvc);
 	}
 
-
 	@Test
 	public void testSearch_SeeResourceAuthorizesOuterBundle() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.AUTHORIZED);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -325,7 +327,6 @@ public class ConsentInterceptorTest {
 		verifyNoMoreInteractions(myConsentSvc);
 	}
 
-
 	@Test
 	public void testSearch_SeeResourceRejectsOuterBundle_ProvidesOperationOutcome() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
@@ -333,11 +334,12 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDiagnostics("A DIAG");
-			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					OperationOutcome oo = new OperationOutcome();
+					oo.addIssue().setDiagnostics("A DIAG");
+					return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
+				});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -355,7 +357,6 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(10000).times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, timeout(10000).times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
-
 	}
 
 	@Test
@@ -364,10 +365,12 @@ public class ConsentInterceptorTest {
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> {
-			return ConsentOutcome.REJECT;
-		});
+		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					return ConsentOutcome.REJECT;
+				});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -380,7 +383,8 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
 		verify(myConsentSvc, timeout(2000).times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, timeout(2000).times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, timeout(2000).times(3)).willSeeResource(any(), any(), any()); // the two patients + the bundle
+		verify(myConsentSvc, timeout(2000).times(3))
+				.willSeeResource(any(), any(), any()); // the two patients + the bundle
 		verify(myConsentSvc, timeout(2000).times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, timeout(2000).times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -394,15 +398,16 @@ public class ConsentInterceptorTest {
 		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			if ("PTA".equals(resource.getIdElement().getIdPart())) {
-				OperationOutcome oo = new OperationOutcome();
-				oo.addIssue().setDiagnostics("A DIAG");
-				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = (IBaseResource) t.getArguments()[1];
+					if ("PTA".equals(resource.getIdElement().getIdPart())) {
+						OperationOutcome oo = new OperationOutcome();
+						oo.addIssue().setDiagnostics("A DIAG");
+						return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
+					}
+					return ConsentOutcome.PROCEED;
+				});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -411,10 +416,19 @@ public class ConsentInterceptorTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertEquals(OperationOutcome.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("A DIAG", ((OperationOutcome)response.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics());
+			assertEquals(
+					OperationOutcome.class,
+					response.getEntry().get(0).getResource().getClass());
+			assertEquals(
+					"A DIAG",
+					((OperationOutcome) response.getEntry().get(0).getResource())
+							.getIssue()
+							.get(0)
+							.getDiagnostics());
 			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"PTB",
+					response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(1000).times(1)).startOperation(any(), any());
@@ -433,16 +447,17 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			if (resource.getIdElement().getIdPart().equals("PTA")) {
-				Patient replacement = new Patient();
-				replacement.setId("PTA");
-				replacement.addIdentifier().setSystem("REPLACEMENT");
-				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = (IBaseResource) t.getArguments()[1];
+					if (resource.getIdElement().getIdPart().equals("PTA")) {
+						Patient replacement = new Patient();
+						replacement.setId("PTA");
+						replacement.addIdentifier().setSystem("REPLACEMENT");
+						return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+					}
+					return ConsentOutcome.PROCEED;
+				});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -452,10 +467,18 @@ public class ConsentInterceptorTest {
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
-			assertEquals("REPLACEMENT", ((Patient)response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(
+					"PTA",
+					response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"REPLACEMENT",
+					((Patient) response.getEntry().get(0).getResource())
+							.getIdentifierFirstRep()
+							.getSystem());
 			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"PTB",
+					response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -474,13 +497,14 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			if (resource.getIdElement().getIdPart().equals("PTA")) {
-				((Patient)resource).addIdentifier().setSystem("REPLACEMENT");
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = (IBaseResource) t.getArguments()[1];
+					if (resource.getIdElement().getIdPart().equals("PTA")) {
+						((Patient) resource).addIdentifier().setSystem("REPLACEMENT");
+					}
+					return ConsentOutcome.PROCEED;
+				});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -490,10 +514,18 @@ public class ConsentInterceptorTest {
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
-			assertEquals("REPLACEMENT", ((Patient)response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(
+					"PTA",
+					response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"REPLACEMENT",
+					((Patient) response.getEntry().get(0).getResource())
+							.getIdentifierFirstRep()
+							.getSystem());
 			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"PTB",
+					response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -516,9 +548,10 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenReturn(ConsentOutcome.PROCEED);
 
-			String nextPageLink;
+		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -531,16 +564,17 @@ public class ConsentInterceptorTest {
 		// Now perform a page request
 		reset(myConsentSvc);
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
-			IBaseResource resource = (IBaseResource) t.getArguments()[1];
-			if (resource.getIdElement().getIdPart().equals("PTB")) {
-				Patient replacement = new Patient();
-				replacement.setId("PTB");
-				replacement.addIdentifier().setSystem("REPLACEMENT");
-				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = (IBaseResource) t.getArguments()[1];
+					if (resource.getIdElement().getIdPart().equals("PTB")) {
+						Patient replacement = new Patient();
+						replacement.setId("PTB");
+						replacement.addIdentifier().setSystem("REPLACEMENT");
+						return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+					}
+					return ConsentOutcome.PROCEED;
+				});
 
 		httpGet = new HttpGet(nextPageLink);
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
@@ -549,13 +583,18 @@ public class ConsentInterceptorTest {
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
-			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
-			assertEquals("REPLACEMENT", ((Patient)response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(
+					"PTB",
+					response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(
+					"REPLACEMENT",
+					((Patient) response.getEntry().get(0).getResource())
+							.getIdentifierFirstRep()
+							.getSystem());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
 	}
-
 
 	@Test
 	public void testTwoServices_FirstRejectsCanSee() {
@@ -570,10 +609,10 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		Bundle response = myFhirClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertNull(response.getTotalElement().getValue());
 		assertEquals(0, response.getEntry().size());
@@ -606,11 +645,13 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
-		when(myConsentSvc2.shouldProcessCanSeeResource(any(),any())).thenReturn(true);
-		when(myConsentSvc2.canSeeResource(any(),any(),any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
-		when(myConsentSvc2.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.REJECT);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(), any())).thenReturn(false);
+		when(myConsentSvc2.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+		when(myConsentSvc2.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc2.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> ConsentOutcome.REJECT);
 
 		// Execute
 
@@ -654,10 +695,10 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		Bundle response = myFhirClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertNull(response.getTotalElement().getValue());
 		assertEquals(1, response.getEntry().size());
@@ -692,10 +733,10 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		Bundle response = myFhirClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertNull(response.getTotalElement().getValue());
 		assertEquals(0, response.getEntry().size());
@@ -726,16 +767,22 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc2.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
-		when(myConsentSvc2.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc.willSeeResource(any(), any(Patient.class), any()))
+				.thenAnswer(t -> new ConsentOutcome(
+						ConsentOperationStatusEnum.PROCEED,
+						t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc2.willSeeResource(any(), any(Patient.class), any()))
+				.thenAnswer(t -> new ConsentOutcome(
+						ConsentOperationStatusEnum.PROCEED,
+						t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
 		when(myConsentSvc.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc2.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		Bundle response = myFhirClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertNull(response.getTotalElement().getValue());
 		assertEquals(1, response.getEntry().size());
@@ -761,10 +808,13 @@ public class ConsentInterceptorTest {
 
 	@Mock
 	private HttpServletRequest myRequest;
+
 	@Mock
 	private HttpServletResponse myResponse;
+
 	@Mock
 	private PrintWriter myWriter;
+
 	private HashMap<String, String> myHeaders;
 
 	private void initRequestMocks() {
@@ -861,11 +911,13 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, timeout(2000).times(0)).completeOperationSuccess(any(), any());
-		verify(myConsentSvc, timeout(2000).times(1)).completeOperationFailure(any(), myExceptionCaptor.capture(), any());
+		verify(myConsentSvc, timeout(2000).times(1))
+				.completeOperationFailure(any(), myExceptionCaptor.capture(), any());
 
-		assertEquals(Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
+		assertEquals(
+				Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE",
+				myExceptionCaptor.getValue().getMessage());
 	}
-
 
 	@Test
 	public void testNoServicesRegistered() throws IOException {
@@ -886,10 +938,10 @@ public class ConsentInterceptorTest {
 		ourPatientProvider.store(patientB);
 
 		Bundle response = myFhirClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.execute();
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(2, response.getTotal());
 	}
 
@@ -903,17 +955,18 @@ public class ConsentInterceptorTest {
 		 * searchThrowNullPointerException
 		 */
 		@Search
-		public List<IBaseResource> searchWithWildcardRetVal(@RequiredParam(name = "searchThrowNullPointerException") StringParam theValue) {
+		public List<IBaseResource> searchWithWildcardRetVal(
+				@RequiredParam(name = "searchThrowNullPointerException") StringParam theValue) {
 			throw new NullPointerException("A MESSAGE");
 		}
-
 	}
 
-	private static class DummySystemProvider{
+	private static class DummySystemProvider {
 
-		@Operation(name = "$meta", idempotent = true, returnParameters = {
-			@OperationParam(name = "return", typeName = "Meta")
-		})
+		@Operation(
+				name = "$meta",
+				idempotent = true,
+				returnParameters = {@OperationParam(name = "return", typeName = "Meta")})
 		public IBaseParameters meta(ServletRequestDetails theRequestDetails) {
 			Parameters retval = new Parameters();
 			retval.addParameter("Meta", "Yes");

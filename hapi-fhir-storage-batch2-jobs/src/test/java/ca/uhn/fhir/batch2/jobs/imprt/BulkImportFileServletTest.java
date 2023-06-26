@@ -18,14 +18,14 @@ public class BulkImportFileServletTest {
 
 	private BulkImportFileServlet mySvc = new BulkImportFileServlet();
 
-	static final String ourInput = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
-		"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
+	static final String ourInput = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n"
+			+ "{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
 
 	@RegisterExtension
 	private HttpServletExtension myServletExtension = new HttpServletExtension()
-		.withServlet(mySvc)
-		.withContextPath("/context")
-		.withServletPath("/base/path/*");
+			.withServlet(mySvc)
+			.withContextPath("/context")
+			.withServletPath("/base/path/*");
 
 	@BeforeEach
 	public void beforeEach() {
@@ -40,23 +40,21 @@ public class BulkImportFileServletTest {
 		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
 
 		executeBulkImportAndCheckReturnedContentType(url);
-
 	}
 
-
-	private void executeBulkImportAndCheckReturnedContentType(String theUrl)  throws IOException{
+	private void executeBulkImportAndCheckReturnedContentType(String theUrl) throws IOException {
 		CloseableHttpClient client = myServletExtension.getHttpClient();
 
 		try (CloseableHttpResponse response = client.execute(new HttpGet(theUrl))) {
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			String responseHeaderContentType = response.getFirstHeader("content-type").getValue();
+			String responseHeaderContentType =
+					response.getFirstHeader("content-type").getValue();
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertEquals(BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE, responseHeaderContentType);
 			assertEquals(ourInput, responseBody);
 		}
 	}
-
 
 	@Test
 	public void testInvalidRequests() throws IOException {
@@ -112,7 +110,5 @@ public class BulkImportFileServletTest {
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
-
 	}
-
 }

@@ -5,7 +5,8 @@ package ca.uhn.fhir.jaxrs.server.test;
  */
 public class TestJaxRsDummyPatientProviderR4 extends AbstractDummyPatientProvider {
 
-	@Override public String getBaseForServer() {
+	@Override
+	public String getBaseForServer() {
 		return "https://fhirserver/fhir/r4";
 	}
 }

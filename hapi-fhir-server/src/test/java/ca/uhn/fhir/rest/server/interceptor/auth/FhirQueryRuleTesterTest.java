@@ -17,21 +17,24 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParam
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-class FhirQueryRuleTesterTest  {
+class FhirQueryRuleTesterTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleTesterTest.class);
 	FhirQueryRuleTester myTester = new FhirQueryRuleTester("code=foo");
 
 	IAuthRuleTester.RuleTestRequest myTestRequest;
+
 	@Mock
 	IBaseResource myObservation;
+
 	@Mock
 	RequestDetails myRequestDetails;
+
 	@Mock
 	IRuleApplier myRuleApplier;
+
 	@Mock
 	IAuthorizationSearchParamMatcher mySearchParamMatcher;
 
@@ -39,7 +42,6 @@ class FhirQueryRuleTesterTest  {
 	void stubConfig() {
 		lenient().when(myRuleApplier.getSearchParamMatcher()).thenReturn(mySearchParamMatcher);
 		lenient().when(myObservation.fhirType()).thenReturn("Observation");
-
 	}
 
 	void stubMatchResult(IAuthorizationSearchParamMatcher.MatchResult result) {
@@ -50,12 +52,16 @@ class FhirQueryRuleTesterTest  {
 		when(myRuleApplier.getTroubleshootingLog()).thenReturn(ourLog);
 	}
 
-
 	@Test
 	public void matchesFilter_true() {
 
-		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(
+				PolicyEnum.ALLOW,
+				RestOperationTypeEnum.SEARCH_TYPE,
+				myRequestDetails,
+				new IdDt("Observation/1"),
+				myObservation,
+				myRuleApplier);
 		stubMatchResult(buildMatched());
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
@@ -63,12 +69,16 @@ class FhirQueryRuleTesterTest  {
 		assertTrue(matches);
 	}
 
-
 	@Test
 	public void notMatchesFilter_false() {
 
-		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(
+				PolicyEnum.ALLOW,
+				RestOperationTypeEnum.SEARCH_TYPE,
+				myRequestDetails,
+				new IdDt("Observation/1"),
+				myObservation,
+				myRuleApplier);
 		stubMatchResult(buildUnmatched());
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
@@ -79,8 +89,13 @@ class FhirQueryRuleTesterTest  {
 	@Test
 	public void unsupportedAllow_false() {
 
-		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(
+				PolicyEnum.ALLOW,
+				RestOperationTypeEnum.SEARCH_TYPE,
+				myRequestDetails,
+				new IdDt("Observation/1"),
+				myObservation,
+				myRuleApplier);
 		stubMatchResult(buildUnsupported("a message"));
 		stubLogForWarning();
 
@@ -92,8 +107,13 @@ class FhirQueryRuleTesterTest  {
 	@Test
 	public void unsupportedDeny_true() {
 
-		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.DENY, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(
+				PolicyEnum.DENY,
+				RestOperationTypeEnum.SEARCH_TYPE,
+				myRequestDetails,
+				new IdDt("Observation/1"),
+				myObservation,
+				myRuleApplier);
 		stubMatchResult(buildUnsupported("a message"));
 		stubLogForWarning();
 
@@ -105,14 +125,12 @@ class FhirQueryRuleTesterTest  {
 	@Test
 	public void preHandledCheckHasNoResource_true() {
 
-		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.DENY, RestOperationTypeEnum.READ,
-			myRequestDetails, null, null, myRuleApplier);
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(
+				PolicyEnum.DENY, RestOperationTypeEnum.READ, myRequestDetails, null, null, myRuleApplier);
 		// no stubs needed since we don't have a resource
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
 		assertTrue(matches);
 	}
-
-
 }

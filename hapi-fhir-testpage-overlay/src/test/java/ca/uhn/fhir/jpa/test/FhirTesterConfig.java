@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.test;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * This spring config file configures the web testing module. It serves two
@@ -37,30 +36,28 @@ public class FhirTesterConfig {
 	@Bean
 	public TesterConfig testerConfig() {
 		TesterConfig retVal = new TesterConfig();
-		retVal
-			.addServer()
+		retVal.addServer()
 				.withId("internal")
 				.withFhirVersion(FhirVersionEnum.R4)
 				.withBaseUrl("http://localhost:8888/fhir")
 				.withName("Localhost Server")
 				.allowsApiKey()
-			.addServer()
+				.addServer()
 				.withId("hapi")
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("http://hapi.fhir.org/baseDstu2")
 				.withName("Public HAPI Test Server")
 				.allowsApiKey()
-			.addServer()
+				.addServer()
 				.withId("home3")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
 				.withBaseUrl("http://hapi.fhir.org/baseDstu3")
 				.withName("Public HAPI Test Server (STU3)")
-			.addServer()
+				.addServer()
 				.withId("home")
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("${serverBase}/baseDstu2")
 				.withName("Local Tester");
 		return retVal;
 	}
-
 }

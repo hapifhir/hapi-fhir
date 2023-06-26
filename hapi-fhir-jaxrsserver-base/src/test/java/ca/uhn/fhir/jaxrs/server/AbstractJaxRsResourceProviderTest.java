@@ -88,7 +88,7 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-        JettyUtil.closeServer(jettyServer);
+		JettyUtil.closeServer(jettyServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -143,13 +143,19 @@ public class AbstractJaxRsResourceProviderTest {
 		toCreate.getIdentifierFirstRep().setValue("myIdentifier");
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), eq("/Patient?_format=json&identifier=2"))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), eq("/Patient?_format=json&identifier=2")))
+				.thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 
-		MethodOutcome response = client.create().resource(toCreate).conditional()
-				.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome response = client.create()
+				.resource(toCreate)
+				.conditional()
+				.where(Patient.IDENTIFIER.exactly().identifier("2"))
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute();
 
-		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifierFirstRep().getValue());
+		assertEquals(
+				"myIdentifier", patientCaptor.getValue().getIdentifierFirstRep().getValue());
 		IResource resource = (IResource) response.getResource();
 		compareResultId(1, resource);
 	}
@@ -157,7 +163,8 @@ public class AbstractJaxRsResourceProviderTest {
 	/** Conformance - Server */
 	@Test
 	public void testConformance() {
-		final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+		final Conformance conf =
+				client.fetchConformance().ofType(Conformance.class).execute();
 		assertEquals(conf.getRest().get(0).getResource().get(0).getType(), "Patient");
 	}
 
@@ -170,24 +177,31 @@ public class AbstractJaxRsResourceProviderTest {
 
 		when(mock.create(patientCaptor.capture(), isNull())).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
-		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferReturnEnum.REPRESENTATION)
+		final MethodOutcome response = client.create()
+				.resource(toCreate)
+				.prefer(PreferReturnEnum.REPRESENTATION)
 				.execute();
 		IResource resource = (IResource) response.getResource();
 		compareResultId(1, resource);
-		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifierFirstRep().getValue());
+		assertEquals(
+				"myIdentifier", patientCaptor.getValue().getIdentifierFirstRep().getValue());
 	}
 
 	@Test
 	public void testDeletePatient() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
+		final IBaseOperationOutcome results =
+				client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 
 	@Test
 	public void testConditionalDelete() {
 		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+		client.delete()
+				.resourceConditionalByType("Patient")
+				.where(Patient.IDENTIFIER.exactly().identifier("2"))
+				.execute();
 		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
 	}
 
@@ -196,16 +210,24 @@ public class AbstractJaxRsResourceProviderTest {
 	public void testExtendedOperations() {
 		// prepare mock
 		Parameters resultParameters = new Parameters();
-		resultParameters.addParameter().setName("return").setResource(createPatient(1)).setValue(new StringDt("outputValue"));
-		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);
+		resultParameters
+				.addParameter()
+				.setName("return")
+				.setResource(createPatient(1))
+				.setValue(new StringDt("outputValue"));
+		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue"))))
+				.thenReturn(resultParameters);
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
 		inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
 		inParams.addParameter().setName("dummy").setValue(new StringDt("myAwesomeDummyValue"));
 		// invoke
-		Parameters outParams = client.operation().onInstance(new IdDt("Patient", "1")).named("$someCustomOperation")
-				.withParameters(inParams).execute();
+		Parameters outParams = client.operation()
+				.onInstance(new IdDt("Patient", "1"))
+				.named("$someCustomOperation")
+				.withParameters(inParams)
+				.execute();
 		// verify
 		assertEquals("outputValue", ((StringDt) outParams.getParameter().get(0).getValue()).getValueAsString());
 	}
@@ -214,8 +236,13 @@ public class AbstractJaxRsResourceProviderTest {
 	public void testExtendedOperationsUsingGet() {
 		// prepare mock
 		Parameters resultParameters = new Parameters();
-		resultParameters.addParameter().setName("return").setResource(createPatient(1)).setValue(new StringDt("outputValue"));
-		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue")))).thenReturn(resultParameters);
+		resultParameters
+				.addParameter()
+				.setName("return")
+				.setResource(createPatient(1))
+				.setValue(new StringDt("outputValue"));
+		when(mock.someCustomOperation(any(IdDt.class), eq(new StringDt("myAwesomeDummyValue"))))
+				.thenReturn(resultParameters);
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
@@ -223,8 +250,12 @@ public class AbstractJaxRsResourceProviderTest {
 		inParams.addParameter().setName("dummy").setValue(new StringDt("myAwesomeDummyValue"));
 
 		// invoke
-		Parameters outParams = client.operation().onInstance(new IdDt("Patient", "1")).named("$someCustomOperation")
-				.withParameters(inParams).useHttpGet().execute();
+		Parameters outParams = client.operation()
+				.onInstance(new IdDt("Patient", "1"))
+				.named("$someCustomOperation")
+				.withParameters(inParams)
+				.useHttpGet()
+				.execute();
 		// verify
 		assertEquals("outputValue", ((StringDt) outParams.getParameter().get(0).getValue()).getValueAsString());
 	}
@@ -242,8 +273,11 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testSearchCompartements() {
 		when(mock.searchCompartment(any(IdDt.class))).thenReturn(Arrays.asList((IResource) createPatient(1)));
-		Bundle response = client.search().forResource(Patient.class).withIdAndCompartment("1", "Condition")
-				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).execute();
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.withIdAndCompartment("1", "Condition")
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
 		IResource resource = response.getEntry().get(0).getResource();
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
@@ -252,13 +286,12 @@ public class AbstractJaxRsResourceProviderTest {
 	/** */
 	@Test
 	public void testSearchPost() {
-		when(mock.search(isNull(), isNull()))
-				.thenReturn(createPatients(1, 13));
-		Bundle result = client
-			.search()
-			.forResource("Patient")
-			.usingStyle(SearchStyleEnum.POST)
-				.returnBundle(Bundle.class).execute();
+		when(mock.search(isNull(), isNull())).thenReturn(createPatients(1, 13));
+		Bundle result = client.search()
+				.forResource("Patient")
+				.usingStyle(SearchStyleEnum.POST)
+				.returnBundle(Bundle.class)
+				.execute();
 		IResource resource = result.getEntry().get(0).getResource();
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
@@ -268,10 +301,12 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testSearchUsingGenericClientBySearch() {
 		// Perform a search
-		when(mock.search(any(StringParam.class), isNull()))
-				.thenReturn(Arrays.asList(createPatient(1)));
-		Bundle results = client.search().forResource(Patient.class)
-				.where(Patient.NAME.matchesExactly().value(PATIENT_NAME)).returnBundle(Bundle.class).execute();
+		when(mock.search(any(StringParam.class), isNull())).thenReturn(Arrays.asList(createPatient(1)));
+		Bundle results = client.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matchesExactly().value(PATIENT_NAME))
+				.returnBundle(Bundle.class)
+				.execute();
 		verify(mock).search(any(StringParam.class), isNull());
 		IResource resource = results.getEntry().get(0).getResource();
 
@@ -284,10 +319,14 @@ public class AbstractJaxRsResourceProviderTest {
 	public void testSearchUsingGenericClientBySearchWithMultiValues() {
 		when(mock.search(any(StringParam.class), any(StringAndListParam.class)))
 				.thenReturn(Arrays.asList(createPatient(1)));
-		Bundle results = client.search().forResource(Patient.class)
-				.where(Patient.ADDRESS.matches().values("Toronto")).and(Patient.ADDRESS.matches().values("Ontario"))
+		Bundle results = client.search()
+				.forResource(Patient.class)
+				.where(Patient.ADDRESS.matches().values("Toronto"))
+				.and(Patient.ADDRESS.matches().values("Ontario"))
 				.and(Patient.ADDRESS.matches().values("Canada"))
-				.where(Patient.NAME.matches().value("SHORTNAME")).returnBundle(Bundle.class).execute();
+				.where(Patient.NAME.matches().value("SHORTNAME"))
+				.returnBundle(Bundle.class)
+				.execute();
 		IResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);
@@ -298,9 +337,11 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testSearchWithPaging() {
 		// Perform a search
-		when(mock.search(isNull(), isNull()))
-				.thenReturn(createPatients(1, 13));
-		final Bundle results = client.search().forResource(Patient.class).limitTo(8).returnBundle(Bundle.class)
+		when(mock.search(isNull(), isNull())).thenReturn(createPatients(1, 13));
+		final Bundle results = client.search()
+				.forResource(Patient.class)
+				.limitTo(8)
+				.returnBundle(Bundle.class)
 				.execute();
 
 		assertEquals(results.getEntry().size(), 8);
@@ -326,13 +367,16 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	@Disabled
 	public void testSummary() {
-		Object response = client.search().forResource(Patient.class)
-				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).execute();
+		Object response = client.search()
+				.forResource(Patient.class)
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
 	}
 
 	@Test
 	public void testUpdateById() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture()))
+				.thenReturn(new MethodOutcome());
 		client.update("1", createPatient(1));
 		assertEquals("1", idCaptor.getValue().getIdPart());
 		compareResultId(1, patientCaptor.getValue());
@@ -340,8 +384,13 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testConditionalUpdate() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture()))
+				.thenReturn(new MethodOutcome());
+		client.update()
+				.resource(createPatient(1))
+				.conditional()
+				.where(Patient.IDENTIFIER.exactly().identifier("2"))
+				.execute();
 
 		assertEquals(null, patientCaptor.getValue().getId().getIdPart());
 		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
@@ -351,7 +400,8 @@ public class AbstractJaxRsResourceProviderTest {
 	@Disabled
 	@Test
 	public void testResourceNotFound() throws Exception {
-		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenThrow(ResourceNotFoundException.class);
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture()))
+				.thenThrow(ResourceNotFoundException.class);
 		try {
 			client.update("1", createPatient(2));
 			fail();
@@ -372,8 +422,12 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testInstanceHistory() {
-		when(mock.getHistoryForInstance(idCaptor.capture())).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
-		final Bundle bundle = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
+		when(mock.getHistoryForInstance(idCaptor.capture()))
+				.thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history()
+				.onInstance(new IdDt("Patient", 1L))
+				.returnBundle(Bundle.class)
+				.execute();
 		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1/_history/1", patient);
@@ -383,8 +437,12 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testTypeHistory() {
-		when(mock.getHistoryForType()).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
-		final Bundle bundle = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		when(mock.getHistoryForType())
+				.thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history()
+				.onType(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1/_history/1", patient);
@@ -393,7 +451,8 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testXFindUnknownPatient() {
 		try {
-			JaxRsResponseException notFoundException = new JaxRsResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
+			JaxRsResponseException notFoundException =
+					new JaxRsResponseException(new ResourceNotFoundException(new IdDt("999955541264")));
 			when(mock.find(idCaptor.capture())).thenThrow(notFoundException);
 			client.read(Patient.class, "999955541264");
 			fail();
@@ -439,20 +498,23 @@ public class AbstractJaxRsResourceProviderTest {
 		context.setContextPath("/");
 		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
-		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher.class, "/*");
+		ServletHolder jerseyServlet =
+				context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
 
-		//@formatter:off
-		jerseyServlet.setInitParameter("resteasy.resources",
-				StringUtils.join(Arrays.asList(
-					TestJaxRsMockPatientRestProvider.class.getCanonicalName(),
-					TestJaxRsConformanceRestProvider.class.getCanonicalName(),
-					TestJaxRsMockPageProvider.class.getCanonicalName()
-						), ","));
-		//@formatter:on
+		// @formatter:off
+		jerseyServlet.setInitParameter(
+				"resteasy.resources",
+				StringUtils.join(
+						Arrays.asList(
+								TestJaxRsMockPatientRestProvider.class.getCanonicalName(),
+								TestJaxRsConformanceRestProvider.class.getCanonicalName(),
+								TestJaxRsMockPageProvider.class.getCanonicalName()),
+						","));
+		// @formatter:on
 
 		JettyUtil.startServer(jettyServer);
-        ourPort = JettyUtil.getPortForStartedServer(jettyServer);
+		ourPort = JettyUtil.getPortForStartedServer(jettyServer);
 
 		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -462,5 +524,4 @@ public class AbstractJaxRsResourceProviderTest {
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
 	}
-
 }

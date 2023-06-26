@@ -33,7 +33,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
+abstract class BaseJavaPrimitiveBinder<T> implements IParamBinder<T> {
 
 	public BaseJavaPrimitiveBinder() {
 		super();
@@ -55,16 +55,17 @@ abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 	}
 
 	@Override
-	public T parse(FhirContext theContext, String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public T parse(FhirContext theContext, String theName, List<QualifiedParamList> theParams)
+			throws InternalErrorException, InvalidRequestException {
 		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
 			return null;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException(Msg.code(1955) + "Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
+			throw new InvalidRequestException(Msg.code(1955) + "Multiple values detected for non-repeatable parameter '"
+					+ theName + "'. This server is not configured to allow multiple (AND) values for this param.");
 		}
-	
+
 		T value = doParse(theParams.get(0).get(0));
 		return value;
 	}
-
 }

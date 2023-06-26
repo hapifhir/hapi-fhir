@@ -39,8 +39,10 @@ public class ReadR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx);
+
 	private int myPort;
 
 	@BeforeEach
@@ -52,7 +54,6 @@ public class ReadR4Test {
 	public void testRead() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_format=xml&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
@@ -61,21 +62,24 @@ public class ReadR4Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(
+					"http://localhost:" + myPort + "/Patient/2/_history/2",
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
-			assertThat(responseContent, stringContainsInOrder(
-				"<Patient xmlns=\"http://hl7.org/fhir\">",
-				" <id value=\"2\"/>",
-				" <meta>",
-				"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
-				" </meta>",
-				" <modifierExtension url=\"http://example.com/ext/date\">",
-				"  <valueDate value=\"2011-01-01\"/>",
-				" </modifierExtension>",
-				"</Patient>"));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<Patient xmlns=\"http://hl7.org/fhir\">",
+							" <id value=\"2\"/>",
+							" <meta>",
+							"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+							" </meta>",
+							" <modifierExtension url=\"http://example.com/ext/date\">",
+							"  <valueDate value=\"2011-01-01\"/>",
+							" </modifierExtension>",
+							"</Patient>"));
 		}
 	}
-
 
 	@Test
 	public void testReadUsingPlainProvider() throws Exception {
@@ -89,18 +93,22 @@ public class ReadR4Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(
+					"http://localhost:" + myPort + "/Patient/2/_history/2",
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
-			assertThat(responseContent, stringContainsInOrder(
-				"<Patient xmlns=\"http://hl7.org/fhir\">",
-				" <id value=\"2\"/>",
-				" <meta>",
-				"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
-				" </meta>",
-				" <modifierExtension url=\"http://example.com/ext/date\">",
-				"  <valueDate value=\"2011-01-01\"/>",
-				" </modifierExtension>",
-				"</Patient>"));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<Patient xmlns=\"http://hl7.org/fhir\">",
+							" <id value=\"2\"/>",
+							" <meta>",
+							"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+							" </meta>",
+							" <modifierExtension url=\"http://example.com/ext/date\">",
+							"  <valueDate value=\"2011-01-01\"/>",
+							" </modifierExtension>",
+							"</Patient>"));
 		}
 	}
 
@@ -117,32 +125,37 @@ public class ReadR4Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_containedType=contained&_format=xml&_pretty=true");
+		httpGet = new HttpGet(
+				"http://localhost:" + myPort + "/Patient/2?_containedType=contained&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_count=10&_format=xml&_pretty=true");
@@ -151,49 +164,57 @@ public class ReadR4Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_include=Patient:organization&_format=xml&_pretty=true");
+		httpGet = new HttpGet(
+				"http://localhost:" + myPort + "/Patient/2?_include=Patient:organization&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384)+ "Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true");
+		httpGet = new HttpGet(
+				"http://localhost:" + myPort + "/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_sort=family&_format=xml&_pretty=true");
@@ -202,15 +223,17 @@ public class ReadR4Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_total=accurate&_format=xml&_pretty=true");
@@ -219,15 +242,17 @@ public class ReadR4Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent, stringContainsInOrder(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			));
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+							" <issue>",
+							"  <severity value=\"error\"/>",
+							"  <code value=\"processing\"/>",
+							"  <diagnostics value=\"" + Msg.code(384)
+									+ "Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
+							" </issue>",
+							"</OperationOutcome>"));
 		}
 	}
 
@@ -241,7 +266,9 @@ public class ReadR4Test {
 		// thus it hasn't changed after the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304 (Not Modified)
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		httpGet.addHeader(
+				Constants.HEADER_IF_MODIFIED_SINCE,
+				DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(304, status.getStatusLine().getStatusCode());
 		}
@@ -250,7 +277,9 @@ public class ReadR4Test {
 		// thus it hasn't changed after the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304 (Not Modified)
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		httpGet.addHeader(
+				Constants.HEADER_IF_MODIFIED_SINCE,
+				DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(304, status.getStatusLine().getStatusCode());
 		}
@@ -259,11 +288,12 @@ public class ReadR4Test {
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		httpGet.addHeader(
+				Constants.HEADER_IF_MODIFIED_SINCE,
+				DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 		}
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -284,7 +314,6 @@ public class ReadR4Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
-
 	}
 
 	public static class PlainGenericPatientProvider {
@@ -300,13 +329,12 @@ public class ReadR4Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
-
 	}
-
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();

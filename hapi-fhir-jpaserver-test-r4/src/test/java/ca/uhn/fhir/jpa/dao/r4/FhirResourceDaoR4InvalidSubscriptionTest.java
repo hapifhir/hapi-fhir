@@ -37,7 +37,6 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
-
 	@Test
 	public void testCreateInvalidSubscriptionOkButCanNotActivate() {
 		Subscription s = new Subscription();
@@ -53,8 +52,9 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 			mySubscriptionDao.update(s);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
+			assertEquals(
+					Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO",
+					e.getMessage());
 		}
 	}
-
 }

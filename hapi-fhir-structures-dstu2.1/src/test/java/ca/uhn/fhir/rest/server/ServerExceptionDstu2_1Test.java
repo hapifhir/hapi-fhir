@@ -43,13 +43,12 @@ public class ServerExceptionDstu2_1Test {
 
 	@Test
 	public void testAddHeadersNotFound() throws Exception {
-		
+
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
-		
+
 		ourException = new ResourceNotFoundException("SOME MESSAGE");
 		ourException.addResponseHeader("X-Foo", "BAR BAR");
-		
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -57,37 +56,37 @@ public class ServerExceptionDstu2_1Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			
+
 			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
 			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	@Test
 	public void testAuthorize() throws Exception {
-		
+
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
-		
+
 		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			
+
 			assertEquals(401, status.getStatusLine().getStatusCode());
-			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
+			assertEquals(
+					"Basic realm=\"REALM\"",
+					status.getFirstHeader("WWW-Authenticate").getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	@AfterAll
@@ -111,13 +110,13 @@ public class ServerExceptionDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -131,7 +130,5 @@ public class ServerExceptionDstu2_1Test {
 		public List<Patient> search() {
 			throw ourException;
 		}
-
 	}
-
 }

@@ -59,5 +59,4 @@ public class XmlUtilTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

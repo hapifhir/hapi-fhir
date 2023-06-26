@@ -15,7 +15,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 public class UrlListParametersValidatorTest {
 
@@ -41,8 +40,9 @@ public class UrlListParametersValidatorTest {
 	public void testAllResourceTypeSupportedFalse() {
 		when(myBatch2DaoSvc.isAllResourceTypeSupported()).thenReturn(false);
 
-		assertThat(mySvc.validateUrls(Collections.emptyList()), Matchers.contains("At least one type-specific search URL must be provided for TESTOP on this server"));
+		assertThat(
+				mySvc.validateUrls(Collections.emptyList()),
+				Matchers.contains("At least one type-specific search URL must be provided for TESTOP on this server"));
 		assertThat(mySvc.validateUrls(List.of("Patient?")), empty());
 	}
-
 }

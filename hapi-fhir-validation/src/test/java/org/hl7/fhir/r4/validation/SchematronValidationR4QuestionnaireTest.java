@@ -66,7 +66,7 @@ public class SchematronValidationR4QuestionnaireTest {
 
 		QuestionnaireItemEnableWhenComponent enableWhen = new QuestionnaireItemEnableWhenComponent();
 		enableWhen.setQuestion("q1");
-//		enableWhen.setHasAnswer(true);
+		//		enableWhen.setHasAnswer(true);
 		child1.addEnableWhen(enableWhen);
 
 		QuestionnaireItemComponent child21 = createItem(QuestionnaireItemType.STRING);
@@ -90,7 +90,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		QuestionnaireItemEnableWhenComponent enableWhen = new QuestionnaireItemEnableWhenComponent();
 		enableWhen.setQuestion("q1");
 		enableWhen.setAnswer(new StringType("a value"));
-//		enableWhen.setHasAnswer(true);
+		//		enableWhen.setHasAnswer(true);
 		child1.addEnableWhen(enableWhen);
 
 		QuestionnaireItemComponent child21 = createItem(QuestionnaireItemType.STRING);
@@ -118,7 +118,8 @@ public class SchematronValidationR4QuestionnaireTest {
 		val.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = val.validateWithResult(resource);
 
-		String outcomeXml = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		String outcomeXml =
+				ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(outcomeXml);
 		return result;
 	}

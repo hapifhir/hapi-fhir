@@ -26,7 +26,6 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.MedicationRequest;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
-import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
@@ -62,7 +61,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
@@ -87,35 +87,43 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
-		String pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+		String pt1id =
+				myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("fghijk");
-		String pt2id = myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
+		String pt2id =
+				myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
 
 		Patient pt3 = new Patient();
 		pt3.addName().setFamily("zzzzz");
 		myPatientDao.create(pt3).getId().toUnqualifiedVersionless().getValue();
 
-
-		Bundle output = myClient
-			.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("ZAB"))
-			.returnBundle(Bundle.class)
-			.execute();
-		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		Bundle output = myClient.search()
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("ZAB"))
+				.returnBundle(Bundle.class)
+				.execute();
+		List<String> ids = output.getEntry().stream()
+				.map(t -> t.getResource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
 
-		output = myClient
-			.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("zab"))
-			.returnBundle(Bundle.class)
-			.execute();
-		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		output = myClient.search()
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("zab"))
+				.returnBundle(Bundle.class)
+				.execute();
+		ids = output.getEntry().stream()
+				.map(t -> t.getResource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
-
 	}
 
 	@Test
@@ -126,18 +134,18 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// Perform the search
 		Bundle response0 = myClient.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
-			.returnBundle(Bundle.class)
-			.execute();
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(1, response0.getEntry().size());
 
 		// Perform the search again (should return the same)
 		Bundle response1 = myClient.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
-			.returnBundle(Bundle.class)
-			.execute();
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(1, response1.getEntry().size());
 		assertEquals(response0.getId(), response1.getId());
 
@@ -146,13 +154,12 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// Perform the search again (shouldn't return the errored out search)
 		Bundle response3 = myClient.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
-			.returnBundle(Bundle.class)
-			.execute();
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(1, response3.getEntry().size());
 		assertNotEquals(response0.getId(), response3.getId());
-
 	}
 
 	private void markSearchErrored() {
@@ -186,11 +193,11 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// Perform a search for the first page
 		Bundle response0 = myClient.search()
-			.forResource("Patient")
-			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
+				.forResource("Patient")
+				.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
+				.returnBundle(Bundle.class)
+				.count(1)
+				.execute();
 		assertEquals(1, response0.getEntry().size());
 
 		// Make sure it works for now
@@ -206,7 +213,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			assertEquals(501, e.getStatusCode());
 			assertThat(e.getMessage(), containsString("Some Failure Message"));
 		}
-
 	}
 
 	@Test
@@ -219,7 +225,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			input = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(input);
 		}
-
 
 		HttpPost post = new HttpPost(myServerBase + "/CapabilityStatement/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
@@ -243,15 +248,15 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		observation.setEffective(new DateTimeType("1965-08-09"));
 		IIdType oid = myObservationDao.create(observation).getId().toUnqualified();
 		String nowParam = UrlUtil.escapeUrlParam("%now");
-		Bundle output = myClient
-			.search()
-			.byUrl("Observation?date=lt" + nowParam)
-			.returnBundle(Bundle.class)
-			.execute();
-		List<IIdType> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualified()).collect(Collectors.toList());
+		Bundle output = myClient.search()
+				.byUrl("Observation?date=lt" + nowParam)
+				.returnBundle(Bundle.class)
+				.execute();
+		List<IIdType> ids = output.getEntry().stream()
+				.map(t -> t.getResource().getIdElement().toUnqualified())
+				.collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(oid));
 	}
-
 
 	@Test
 	public void testCount0() {
@@ -264,12 +269,12 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myObservationDao.create(observation).getId().toUnqualified();
 
 		myCaptureQueriesListener.clear();
-		Bundle output = myClient
-			.search()
-			.byUrl("Observation?_count=0")
-			.returnBundle(Bundle.class)
-			.execute();
-		ourLog.debug("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle output = myClient.search()
+				.byUrl("Observation?_count=0")
+				.returnBundle(Bundle.class)
+				.execute();
+		ourLog.debug(
+				"Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(2, output.getTotal());
@@ -278,7 +283,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testSearchWithCompositeSort() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -294,76 +299,81 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
-			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
-			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
-			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
-			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
-		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
+		ourLog.debug(
+				"Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
 		assertEquals(oid3, list.get(0));
@@ -376,20 +386,24 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testEverythingPatientInstanceWithTypeParameter() {
 		String methodName = "testEverythingPatientInstanceWithTypeParameter";
 
-		//Patient 1 stuff.
+		// Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
-		//Test for only one patient
+		// Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		Parameters output = myClient.operation()
+				.onInstance(p1Id)
+				.named("everything")
+				.withParameters(parameters)
+				.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
@@ -407,20 +421,24 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testEverythingPatientTypeWithTypeParameter() {
 		String methodName = "testEverythingPatientTypeWithTypeParameter";
 
-		//Patient 1 stuff.
+		// Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
-		//Test for only one patient
+		// Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		Parameters output = myClient.operation()
+				.onType(Patient.class)
+				.named("everything")
+				.withParameters(parameters)
+				.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
@@ -438,28 +456,32 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
 		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
 
-		//Patient 1 stuff.
+		// Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
-		//Patient 2 stuff.
+		// Patient 2 stuff.
 		IIdType o2Id = createOrganization(methodName, "2");
 		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
 		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
 		IIdType obs2Id = createObservationForPatient(p2Id, "2");
 		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
 
-		//Test for only patient 1
+		// Test for only patient 1
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 		parameters.addParameter("_id", p1Id.getIdPart());
 
 		myCaptureQueriesListener.clear();
 
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		Parameters output = myClient.operation()
+				.onType(Patient.class)
+				.named("everything")
+				.withParameters(parameters)
+				.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
@@ -475,7 +497,6 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertThat(ids, Matchers.not(hasItem(o2Id)));
 	}
 
-
 	@Test
 	void testTransactionBundleEntryUri() {
 		CarePlan carePlan = new CarePlan();
@@ -485,8 +506,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(myServerBase + "/CarePlan")
-			.returnBundle(Bundle.class).execute();
+				.byUrl(myServerBase + "/CarePlan")
+				.returnBundle(Bundle.class)
+				.execute();
 
 		// Create and populate list of CarePlans
 		List<CarePlan> carePlans = new ArrayList<>();
@@ -502,7 +524,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
 	}
 
-	public IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
+	public IIdType createPatientWithIndexAtOrganization(
+			String theMethodName, String theIndex, IIdType theOrganizationId) {
 		Patient p1 = new Patient();
 		p1.addName().setFamily(theMethodName + theIndex);
 		p1.getManagingOrganization().setReferenceElement(theOrganizationId);
@@ -543,7 +566,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
-			if (next.getResource()!= null) {
+			if (next.getResource() != null) {
 				retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			}
 		}

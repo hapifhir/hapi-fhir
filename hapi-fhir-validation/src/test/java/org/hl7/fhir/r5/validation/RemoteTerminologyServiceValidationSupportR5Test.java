@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public class RemoteTerminologyServiceValidationSupportR5Test {
 	private static final String ANY_NONBLANK_VALUE = "anything";
 	private static FhirContext ourCtx = FhirContext.forR5Cached();
+
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
@@ -29,7 +30,9 @@ public class RemoteTerminologyServiceValidationSupportR5Test {
 	public void testLookupCode_R5_ThrowsException() {
 		Assertions.assertThrows(UnsupportedOperationException.class, () -> {
 			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(
-				new ValidationSupportContext(ourCtx.getValidationSupport()), ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE);
+					new ValidationSupportContext(ourCtx.getValidationSupport()),
+					ANY_NONBLANK_VALUE,
+					ANY_NONBLANK_VALUE);
 		});
 	}
 }

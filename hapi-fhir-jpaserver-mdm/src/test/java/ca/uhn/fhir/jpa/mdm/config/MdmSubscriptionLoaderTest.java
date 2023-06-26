@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -16,11 +15,9 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 
@@ -96,7 +92,7 @@ class MdmSubscriptionLoaderTest {
 		subscription.setIdElement(id);
 		when(mySubscriptionDao.read(eq(id), any())).thenReturn(subscription);
 		mySvc.updateIfNotPresent(subscription);
-		verify(mySubscriptionDao, never()).update(any(),  any(RequestDetails.class));
+		verify(mySubscriptionDao, never()).update(any(), any(RequestDetails.class));
 	}
 
 	@Test
@@ -111,12 +107,13 @@ class MdmSubscriptionLoaderTest {
 		mySvc.daoUpdateMdmSubscriptions();
 
 		ArgumentCaptor<Subscription> subscriptionCaptor = ArgumentCaptor.forClass(Subscription.class);
-		verify(mySubscriptionDao).update(subscriptionCaptor.capture(),  any(RequestDetails.class));
+		verify(mySubscriptionDao).update(subscriptionCaptor.capture(), any(RequestDetails.class));
 
-		IBaseExtension extension = ExtensionUtil.getExtensionByUrl(subscriptionCaptor.getValue(), HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION);
+		IBaseExtension extension = ExtensionUtil.getExtensionByUrl(
+				subscriptionCaptor.getValue(), HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION);
 
 		assertNotNull(extension);
 
-		assertTrue(((BooleanType)extension.getValue()).booleanValue());
+		assertTrue(((BooleanType) extension.getValue()).booleanValue());
 	}
 }

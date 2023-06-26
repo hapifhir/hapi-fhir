@@ -25,7 +25,8 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
 public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StorageInterceptorEventsR5Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(StorageInterceptorEventsR5Test.class);
 
 	@BeforeEach
 	public void before() {
@@ -52,15 +53,18 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		myPatientDao.update(p2);
 
 		AtomicInteger showedCounter = new AtomicInteger(0);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, (thePointcut, theArgs) -> {
-			int showedCountThisPass = theArgs.get(IPreResourceShowDetails.class).size();
-			showedCounter.addAndGet(showedCountThisPass);
-		});
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESHOW_RESOURCES, (thePointcut, theArgs) -> {
+					int showedCountThisPass =
+							theArgs.get(IPreResourceShowDetails.class).size();
+					showedCounter.addAndGet(showedCountThisPass);
+				});
 
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertTrue(search instanceof PersistedJpaBundleProvider, search.getClass().toString());
+		assertTrue(
+				search instanceof PersistedJpaBundleProvider, search.getClass().toString());
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertEquals(3, found.size());
 		assertEquals(3, showedCounter.get());
@@ -95,10 +99,12 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		myPatientDao.update(p2);
 
 		AtomicInteger showedCounter = new AtomicInteger(0);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, (thePointcut, theArgs) -> {
-			int showedCountThisPass = theArgs.get(IPreResourceShowDetails.class).size();
-			showedCounter.addAndGet(showedCountThisPass);
-		});
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESHOW_RESOURCES, (thePointcut, theArgs) -> {
+					int showedCountThisPass =
+							theArgs.get(IPreResourceShowDetails.class).size();
+					showedCounter.addAndGet(showedCountThisPass);
+				});
 
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
@@ -126,6 +132,4 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		myInterceptorRegistry.unregisterAllInterceptors();
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
-
-
 }

@@ -34,7 +34,9 @@ public class AddColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
+		assertThat(
+				JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"),
+				containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -72,7 +74,9 @@ public class AddColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
+		assertThat(
+				JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"),
+				containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -81,22 +85,23 @@ public class AddColumnTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
-		tasks
-			.forVersion(VersionEnum.V4_0_0)
-			.onTable("FOO_TABLE")
-			.addColumn("2001.01", "FOO_COLUMN")
-			.nullable()
-			.type(ColumnTypeEnum.INT);
+		tasks.forVersion(VersionEnum.V4_0_0)
+				.onTable("FOO_TABLE")
+				.addColumn("2001.01", "FOO_COLUMN")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
 
 		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: "));
+			assertThat(
+					e.getMessage(),
+					startsWith(
+							"HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: "));
 		}
 	}
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -104,17 +109,14 @@ public class AddColumnTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
-		tasks
-			.forVersion(VersionEnum.V4_0_0)
-			.onTable("FOO_TABLE")
-			.addColumn("2001.01", "FOO_COLUMN")
-			.nullable()
-			.type(ColumnTypeEnum.INT)
-			.failureAllowed();
+		tasks.forVersion(VersionEnum.V4_0_0)
+				.onTable("FOO_TABLE")
+				.addColumn("2001.01", "FOO_COLUMN")
+				.nullable()
+				.type(ColumnTypeEnum.INT)
+				.failureAllowed();
 
 		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
-
 	}
-
 }

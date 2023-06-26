@@ -31,13 +31,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -52,29 +52,41 @@ import static org.mockito.Mockito.*;
 public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
 	@Order(0)
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
-		.withPagingProvider(new FifoMemoryPagingProvider(10))
-		.keepAliveBetweenTests();
+			.withPagingProvider(new FifoMemoryPagingProvider(10))
+			.keepAliveBetweenTests();
+
 	private static FhirValidator ourValidator;
+
 	@RegisterExtension
 	@Order(1)
-	public final HashMapResourceProviderExtension<Patient> myPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
+	public final HashMapResourceProviderExtension<Patient> myPatientProvider =
+			new HashMapResourceProviderExtension<>(ourServer, Patient.class);
+
 	@RegisterExtension
 	@Order(1)
-	public final HashMapResourceProviderExtension<Observation> myObservationProvider = new HashMapResourceProviderExtension<>(ourServer, Observation.class);
+	public final HashMapResourceProviderExtension<Observation> myObservationProvider =
+			new HashMapResourceProviderExtension<>(ourServer, Observation.class);
+
 	@RegisterExtension
 	@Order(1)
-	public final HashMapResourceProviderExtension<CodeSystem> myCodeSystemProvider = new HashMapResourceProviderExtension<>(ourServer, CodeSystem.class);
+	public final HashMapResourceProviderExtension<CodeSystem> myCodeSystemProvider =
+			new HashMapResourceProviderExtension<>(ourServer, CodeSystem.class);
+
 	@RegisterExtension
 	@Order(1)
-	public final HashMapResourceProviderExtension<ListResource> myListProvider = new HashMapResourceProviderExtension<>(ourServer, ListResource.class);
+	public final HashMapResourceProviderExtension<ListResource> myListProvider =
+			new HashMapResourceProviderExtension<>(ourServer, ListResource.class);
 
 	@Mock
 	private IBalpAuditEventSink myAuditEventSink;
+
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IBalpAuditContextServices myContextServices;
+
 	@Captor
 	private ArgumentCaptor<AuditEvent> myAuditEventCaptor;
 
@@ -83,28 +95,24 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 	@Nonnull
 	private static List<String> getQueries(AuditEvent theAuditEvent) {
-		return theAuditEvent
-			.getEntity()
-			.stream()
-			.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
-			.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
-			.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
-			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_24_QUERY))
-			.map(t -> new String(t.getQuery(), StandardCharsets.UTF_8))
-			.toList();
+		return theAuditEvent.getEntity().stream()
+				.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
+				.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
+				.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
+				.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_24_QUERY))
+				.map(t -> new String(t.getQuery(), StandardCharsets.UTF_8))
+				.toList();
 	}
 
 	@Nonnull
 	private static List<String> getDescriptions(AuditEvent theAuditEvent) {
-		return theAuditEvent
-			.getEntity()
-			.stream()
-			.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
-			.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
-			.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
-			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_24_QUERY))
-			.map(AuditEvent.AuditEventEntityComponent::getDescription)
-			.toList();
+		return theAuditEvent.getEntity().stream()
+				.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
+				.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
+				.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
+				.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_24_QUERY))
+				.map(AuditEvent.AuditEventEntityComponent::getDescription)
+				.toList();
 	}
 
 	private static void assertType(AuditEvent theAuditEvent) {
@@ -120,42 +128,39 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 	private static void assertAuditEventValidatesAgainstBalpProfile(AuditEvent auditEvent) {
 		ValidationResult outcome = ourValidator.validateWithResult(auditEvent);
-		ourLog.info("Validation outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome()));
+		ourLog.info(
+				"Validation outcome: {}",
+				ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome()));
 
-		List<SingleValidationMessage> issues = outcome
-			.getMessages()
-			.stream()
-			.filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.WARNING.ordinal())
-			.toList();
+		List<SingleValidationMessage> issues = outcome.getMessages().stream()
+				.filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.WARNING.ordinal())
+				.toList();
 		if (!issues.isEmpty()) {
-			fail("Issues:\n * " + issues.stream().map(SingleValidationMessage::toString).collect(Collectors.joining("\n * ")));
+			fail("Issues:\n * "
+					+ issues.stream().map(SingleValidationMessage::toString).collect(Collectors.joining("\n * ")));
 		}
 	}
 
 	private static void assertHasSystemObjectEntities(AuditEvent theAuditEvent, String... theResourceIds) {
-		List<String> systemObjects = theAuditEvent
-			.getEntity()
-			.stream()
-			.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
-			.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
-			.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
-			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE))
-			.map(t -> t.getWhat().getReference())
-			.toList();
+		List<String> systemObjects = theAuditEvent.getEntity().stream()
+				.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
+				.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT))
+				.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
+				.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE))
+				.map(t -> t.getWhat().getReference())
+				.toList();
 		assertThat(Arrays.asList(theResourceIds).toString(), systemObjects, containsInAnyOrder(theResourceIds));
 	}
 
 	private static void assertHasPatientEntities(AuditEvent theAuditEvent, String... theResourceIds) {
-		List<String> patients = theAuditEvent
-			.getEntity()
-			.stream()
-			.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
-			.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_1_PERSON))
-			.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
-			.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_1_PATIENT))
-			.map(t -> t.getWhat().getReference())
-			.map(t -> new IdType(t).toUnqualified().getValue())
-			.toList();
+		List<String> patients = theAuditEvent.getEntity().stream()
+				.filter(t -> t.getType().getSystem().equals(CS_AUDIT_ENTITY_TYPE))
+				.filter(t -> t.getType().getCode().equals(CS_AUDIT_ENTITY_TYPE_1_PERSON))
+				.filter(t -> t.getRole().getSystem().equals(CS_OBJECT_ROLE))
+				.filter(t -> t.getRole().getCode().equals(CS_OBJECT_ROLE_1_PATIENT))
+				.map(t -> t.getWhat().getReference())
+				.map(t -> new IdType(t).toUnqualified().getValue())
+				.toList();
 		assertThat(patients.toString(), patients, containsInAnyOrder(theResourceIds));
 	}
 
@@ -165,12 +170,11 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		npmPackageSupport.loadPackageFromClasspath("classpath:balp/balp-1.1.1.tgz");
 
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
-			npmPackageSupport,
-			new DefaultProfileValidationSupport(ourCtx),
-			new CommonCodeSystemsTerminologyService(ourCtx),
-			new InMemoryTerminologyServerValidationSupport(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx)
-		);
+				npmPackageSupport,
+				new DefaultProfileValidationSupport(ourCtx),
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				new InMemoryTerminologyServerValidationSupport(ourCtx),
+				new SnapshotGeneratingValidationSupport(ourCtx));
 		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
 
 		ourValidator = ourCtx.newValidator();
@@ -186,8 +190,14 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		myClient.capabilities().ofType(CapabilityStatement.class).execute(); // pre-validate this
 		myClient.registerInterceptor(new LoggingInterceptor(false));
 
-		when(myContextServices.getAgentClientWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://clients").setValue("123")));
-		when(myContextServices.getAgentUserWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://users").setValue("abc")));
+		when(myContextServices.getAgentClientWho(any()))
+				.thenReturn(new Reference()
+						.setIdentifier(
+								new Identifier().setSystem("http://clients").setValue("123")));
+		when(myContextServices.getAgentUserWho(any()))
+				.thenReturn(new Reference()
+						.setIdentifier(
+								new Identifier().setSystem("http://users").setValue("abc")));
 		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenCallRealMethod();
 		when(myContextServices.getNetworkAddressType(any())).thenCallRealMethod();
 
@@ -202,10 +212,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://foo");
-		MethodOutcome outcome = myClient
-			.create()
-			.resource(cs)
-			.execute();
+		MethodOutcome outcome = myClient.create().resource(cs).execute();
 		IIdType csId = outcome.getId();
 
 		// Verify
@@ -215,7 +222,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_CREATE);
 		assertType(auditEvent);
@@ -232,10 +240,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		Observation obs = buildResource("Observation", withSubject("Patient/P1"));
-		MethodOutcome outcome = myClient
-			.create()
-			.resource(obs)
-			.execute();
+		MethodOutcome outcome = myClient.create().resource(obs).execute();
 		IIdType obsId = outcome.getId();
 
 		// Verify
@@ -245,7 +250,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_CREATE);
 		assertType(auditEvent);
@@ -262,10 +268,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		Patient p = buildResource("Patient", withId("P1"), withFamily("Simpson"), withGiven("Homer"));
-		MethodOutcome outcome = myClient
-			.create()
-			.resource(p)
-			.execute();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
 		IIdType patientId = outcome.getId();
 
 		// Verify
@@ -275,7 +278,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_CREATE);
 		assertType(auditEvent);
@@ -297,10 +301,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		cs.setUrl("http://foo2");
-		MethodOutcome outcome = myClient
-			.delete()
-			.resource(cs)
-			.execute();
+		MethodOutcome outcome = myClient.delete().resource(cs).execute();
 		IIdType csId = outcome.getId();
 
 		// Verify
@@ -308,7 +309,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_DELETE);
 		assertType(auditEvent);
@@ -329,10 +331,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		obs.setStatus(Observation.ObservationStatus.FINAL);
-		MethodOutcome outcome = myClient
-			.delete()
-			.resource(obs)
-			.execute();
+		MethodOutcome outcome = myClient.delete().resource(obs).execute();
 		IIdType obsId = outcome.getId();
 
 		// Verify
@@ -340,7 +339,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_DELETE);
 		assertType(auditEvent);
@@ -361,10 +361,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		p.setActive(false);
-		MethodOutcome outcome = myClient
-			.delete()
-			.resource(p)
-			.execute();
+		MethodOutcome outcome = myClient.delete().resource(p).execute();
 		IIdType patientId = outcome.getId();
 
 		// Verify
@@ -372,7 +369,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_DELETE);
 		assertType(auditEvent);
@@ -380,7 +378,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patientId.withVersion("1").getValue());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
-		assertHasPatientEntities(auditEvent, patientId.toUnqualified().withVersion("1").getValue());
+		assertHasPatientEntities(
+				auditEvent, patientId.toUnqualified().withVersion("1").getValue());
 	}
 
 	@Test
@@ -391,11 +390,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Patient patient = myClient
-			.read()
-			.resource(Patient.class)
-			.withId("P1")
-			.execute();
+		Patient patient = myClient.read().resource(Patient.class).withId("P1").execute();
 
 		// Verify
 
@@ -404,7 +399,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_READ);
 		assertType(auditEvent);
@@ -412,7 +408,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patient.getId());
 		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
-		assertHasPatientEntities(auditEvent, patient.getIdElement().toUnqualified().getValue());
+		assertHasPatientEntities(
+				auditEvent, patient.getIdElement().toUnqualified().getValue());
 	}
 
 	@Test
@@ -425,11 +422,10 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		CodeSystem actual = myClient
-			.read()
-			.resource(CodeSystem.class)
-			.withId(csId.toUnqualifiedVersionless())
-			.execute();
+		CodeSystem actual = myClient.read()
+				.resource(CodeSystem.class)
+				.withId(csId.toUnqualifiedVersionless())
+				.execute();
 
 		// Verify
 
@@ -438,7 +434,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_READ);
 		assertType(auditEvent);
@@ -457,11 +454,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Observation observation = myClient
-			.read()
-			.resource(Observation.class)
-			.withId("O1")
-			.execute();
+		Observation observation =
+				myClient.read().resource(Observation.class).withId("O1").execute();
 
 		// Verify
 
@@ -470,7 +464,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "read");
@@ -493,11 +488,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		ListResource outcome = myClient
-			.read()
-			.resource(ListResource.class)
-			.withId(listId)
-			.execute();
+		ListResource outcome =
+				myClient.read().resource(ListResource.class).withId(listId).execute();
 
 		// Verify
 
@@ -506,7 +498,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getAllValues().get(0);
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "vread");
@@ -524,12 +517,11 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Observation.class)
-			.where(Observation.SUBJECT.hasId("Patient/P1"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/P1"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		// Verify
 
@@ -538,7 +530,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
@@ -562,11 +555,10 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(CodeSystem.class)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(CodeSystem.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		// Verify
 
@@ -575,7 +567,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_QUERY);
 		assertType(auditEvent);
@@ -592,20 +585,16 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Setup
 
 		create10Observations("Patient/P1");
-		Bundle outcome = myClient
-			.search()
-			.forResource(Observation.class)
-			.where(Observation.SUBJECT.hasId("Patient/P1"))
-			.count(5)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/P1"))
+				.count(5)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		// Test
 
-		outcome = myClient
-			.loadPage()
-			.next(outcome)
-			.execute();
+		outcome = myClient.loadPage().next(outcome).execute();
 
 		// Verify
 
@@ -615,7 +604,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verifyNoMoreInteractions(myAuditEventSink);
 
 		AuditEvent auditEvent = myAuditEventCaptor.getAllValues().get(0);
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
@@ -627,7 +617,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertQueryDescription(auditEvent, "GET /Observation?subject=Patient%2FP1&_count=5");
 
 		auditEvent = myAuditEventCaptor.getAllValues().get(1);
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
@@ -645,13 +636,12 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Observation.class)
-			.where(Observation.SUBJECT.hasId("Patient/P1"))
-			.returnBundle(Bundle.class)
-			.usingStyle(SearchStyleEnum.POST)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/P1"))
+				.returnBundle(Bundle.class)
+				.usingStyle(SearchStyleEnum.POST)
+				.execute();
 
 		// Verify
 
@@ -660,7 +650,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
@@ -680,13 +671,12 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Observation.class)
-			.where(Observation.SUBJECT.hasId("Patient/P1"))
-			.returnBundle(Bundle.class)
-			.usingStyle(SearchStyleEnum.GET_WITH_SEARCH)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Observation.class)
+				.where(Observation.SUBJECT.hasId("Patient/P1"))
+				.returnBundle(Bundle.class)
+				.usingStyle(SearchStyleEnum.GET_WITH_SEARCH)
+				.execute();
 
 		// Verify
 
@@ -695,7 +685,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
@@ -718,10 +709,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		cs.setUrl("http://foo2");
-		MethodOutcome outcome = myClient
-			.update()
-			.resource(cs)
-			.execute();
+		MethodOutcome outcome = myClient.update().resource(cs).execute();
 		IIdType csId = outcome.getId();
 
 		// Verify
@@ -729,7 +717,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_UPDATE);
 		assertType(auditEvent);
@@ -750,10 +739,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		obs.setStatus(Observation.ObservationStatus.FINAL);
-		MethodOutcome outcome = myClient
-			.update()
-			.resource(obs)
-			.execute();
+		MethodOutcome outcome = myClient.update().resource(obs).execute();
 		IIdType obsId = outcome.getId();
 
 		// Verify
@@ -761,7 +747,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_UPDATE);
 		assertType(auditEvent);
@@ -782,10 +769,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		// Test
 
 		p.setActive(false);
-		MethodOutcome outcome = myClient
-			.update()
-			.resource(p)
-			.execute();
+		MethodOutcome outcome = myClient.update().resource(p).execute();
 		IIdType patientId = outcome.getId();
 
 		// Verify
@@ -793,7 +777,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
-		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+		ourLog.info(
+				"Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_UPDATE);
 		assertType(auditEvent);
@@ -821,23 +806,24 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	}
 
 	private void assertHasProfile(AuditEvent theAuditEvent, BalpProfileEnum theProfile) {
-		List<String> profiles = theAuditEvent
-			.getMeta()
-			.getProfile()
-			.stream()
-			.map(PrimitiveType::asStringValue)
-			.toList();
+		List<String> profiles = theAuditEvent.getMeta().getProfile().stream()
+				.map(PrimitiveType::asStringValue)
+				.toList();
 		assertThat(profiles, contains(theProfile.getProfileUrl()));
 	}
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
-		return getProvider(theResource).create(theResource, new SystemRequestDetails()).getId();
+		return getProvider(theResource)
+				.create(theResource, new SystemRequestDetails())
+				.getId();
 	}
 
 	@Override
 	public IIdType doUpdateResource(IBaseResource theResource) {
-		return getProvider(theResource).update(theResource, null, new SystemRequestDetails()).getId();
+		return getProvider(theResource)
+				.update(theResource, null, new SystemRequestDetails())
+				.getId();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -854,5 +840,4 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	public FhirContext getFhirContext() {
 		return ourCtx;
 	}
-
 }

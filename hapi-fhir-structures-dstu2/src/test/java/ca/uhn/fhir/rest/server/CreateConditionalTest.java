@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class CreateConditionalTest {
 	private static CloseableHttpClient ourClient;
-	
+
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static String ourLastConditionalUrl;
 	private static IdDt ourLastId;
@@ -54,7 +54,6 @@ public class CreateConditionalTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateConditionalTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	
 
 	@BeforeEach
 	public void before() {
@@ -64,8 +63,6 @@ public class CreateConditionalTest {
 		ourLastRequestWasSearch = false;
 	}
 
-
-	
 	@Test
 	public void testCreateWithConditionalUrl() throws Exception {
 
@@ -74,7 +71,9 @@ public class CreateConditionalTest {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(
+				ourCtx.newXmlParser().encodeResourceToString(patient),
+				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -84,13 +83,16 @@ public class CreateConditionalTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
+		assertEquals(
+				"http://localhost:" + ourPort + "/Patient/001/_history/002",
+				status.getFirstHeader("location").getValue());
+		assertEquals(
+				"http://localhost:" + ourPort + "/Patient/001/_history/002",
+				status.getFirstHeader("content-location").getValue());
+
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
-
 	}
 
 	@Test
@@ -100,7 +102,9 @@ public class CreateConditionalTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient?_format=true&_pretty=true");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(
+				ourCtx.newXmlParser().encodeResourceToString(patient),
+				ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -110,13 +114,16 @@ public class CreateConditionalTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
+		assertEquals(
+				"http://localhost:" + ourPort + "/Patient/001/_history/002",
+				status.getFirstHeader("location").getValue());
+		assertEquals(
+				"http://localhost:" + ourPort + "/Patient/001/_history/002",
+				status.getFirstHeader("content-location").getValue());
+
 		assertEquals(null, ourLastId.toUnqualified().getValue());
 		assertEquals(null, ourLastIdParam);
 		assertNull(ourLastConditionalUrl);
-
 	}
 
 	@Test
@@ -138,17 +145,14 @@ public class CreateConditionalTest {
 		assertNull(ourLastId);
 		assertNull(ourLastIdParam);
 		assertNull(ourLastConditionalUrl);
-
 	}
 
-	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-		
-	
+
 	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -162,19 +166,22 @@ public class CreateConditionalTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-	
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome createPatient(
+				@ResourceParam Patient thePatient,
+				@ConditionalUrlParam String theConditional,
+				@IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;
@@ -185,13 +192,11 @@ public class CreateConditionalTest {
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-		
+
 		@Search
-		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
+		public List<IResource> search(@OptionalParam(name = "foo") StringDt theString) {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<>();
 		}
-
 	}
-
 }

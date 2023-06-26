@@ -66,14 +66,15 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		// Search on Token
 		addReadDefaultPartition();
-		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(
+				SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
 		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
 
 		// Search on All Resources
 		addReadDefaultPartition();
-		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		outcome = toUnqualifiedVersionlessIdValues(
+				mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome, Matchers.contains("SearchParameter/" + id));
-
 	}
 
 	@Test
@@ -100,14 +101,15 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		// Search on Token
 		addReadDefaultPartition();
-		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(
+				SearchParameterMap.newSynchronous().add("code", new TokenParam("extpatorg")), mySrd));
 		assertThat(outcome, Matchers.contains("SearchParameter/A"));
 
 		// Search on All Resources
 		addReadDefaultPartition();
-		outcome = toUnqualifiedVersionlessIdValues(mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
+		outcome = toUnqualifiedVersionlessIdValues(
+				mySearchParameterDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome, Matchers.contains("SearchParameter/A"));
-
 	}
 
 	@Test
@@ -126,16 +128,15 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		// Search on Token
 		addReadDefaultPartition();
-		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(
+				SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/A"));
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/A"));
-
 	}
-
 
 	@Test
 	public void testCreateAndSearch_Partitionable() {
@@ -155,22 +156,21 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		// Search on Token
 		addReadDefaultPartition();
-		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(
+				SearchParameterMap.newSynchronous().add("identifier", new TokenParam("http://foo", "123")), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/" + id));
 
 		// Search on Tag
 		addReadDefaultPartition();
-		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous().add("_tag", new TokenParam("http://foo", "TAG")), mySrd));
+		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(
+				SearchParameterMap.newSynchronous().add("_tag", new TokenParam("http://foo", "TAG")), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/" + id));
 
 		// Search on All Resources
 		addReadDefaultPartition();
 		outcome = toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd));
 		assertThat(outcome, Matchers.contains("Patient/" + id));
-
 	}
-
-
 
 	@Test
 	public void testRead_Partitionable() {
@@ -193,8 +193,5 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-
 	}
-
-
 }

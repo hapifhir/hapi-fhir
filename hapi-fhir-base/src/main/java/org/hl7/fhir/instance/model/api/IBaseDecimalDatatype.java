@@ -21,6 +21,4 @@ package org.hl7.fhir.instance.model.api;
 
 import java.math.BigDecimal;
 
-public interface IBaseDecimalDatatype extends IPrimitiveType<BigDecimal> {
-
-}
+public interface IBaseDecimalDatatype extends IPrimitiveType<BigDecimal> {}

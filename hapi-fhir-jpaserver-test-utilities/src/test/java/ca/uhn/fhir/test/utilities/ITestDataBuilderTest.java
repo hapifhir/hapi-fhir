@@ -47,8 +47,7 @@ public class ITestDataBuilderTest {
 	class ObservationCreation {
 		@Test
 		void createObservation_withEffective_setsDate() {
-			myTDB.createObservation(
-				myTDB.withEffectiveDate("2020-01-01T12:34:56"));
+			myTDB.createObservation(myTDB.withEffectiveDate("2020-01-01T12:34:56"));
 
 			assertEquals(1, myCreatedList.size());
 			Observation o = (Observation) myCreatedList.get(0);
@@ -61,27 +60,24 @@ public class ITestDataBuilderTest {
 
 			// when
 			myTDB.createObservation(
-				myTDB.withObservationCode("http://example.com", "a-code-value", "a code description")
-			);
+					myTDB.withObservationCode("http://example.com", "a-code-value", "a code description"));
 
 			assertEquals(1, myCreatedList.size());
 			Observation o = (Observation) myCreatedList.get(0);
 
 			CodeableConcept codeable = o.getCode();
 			assertNotNull(codeable);
-			assertEquals(1,codeable.getCoding().size(), "has one coding");
+			assertEquals(1, codeable.getCoding().size(), "has one coding");
 			Coding coding = codeable.getCoding().get(0);
 
 			assertEquals("http://example.com", coding.getSystem());
 			assertEquals("a-code-value", coding.getCode());
 			assertEquals("a code description", coding.getDisplay());
-
 		}
 
 		@Test
 		void createObservation_withValueQuantity_createsQuantity() {
-			myTDB.createObservation(
-				myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
+			myTDB.createObservation(myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
 
 			assertEquals(1, myCreatedList.size());
 			Observation o = (Observation) myCreatedList.get(0);
@@ -94,40 +90,39 @@ public class ITestDataBuilderTest {
 			assertEquals("bpm", valueQuantity.getCode());
 		}
 
-
 		@Test
 		void createObservation_withComponents_createsComponents() {
 
 			// when
 			myTDB.createObservation(
-				myTDB.withObservationCode("http://example.com", "a-code-value", "a code description"),
-				myTDB.withEffectiveDate("2020-01-01T12:34:56"),
-				myTDB.withObservationComponent(
-					myTDB.withObservationCode("http://example.com", "another-code-value"),
-					myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm")),
-				myTDB.withObservationComponent(
-					myTDB.withObservationCode("http://example.com", "yet-another-code-value"),
-					myTDB.withQuantityAtPath("valueQuantity", 1000000, "hulla", "sik"))
-			);
+					myTDB.withObservationCode("http://example.com", "a-code-value", "a code description"),
+					myTDB.withEffectiveDate("2020-01-01T12:34:56"),
+					myTDB.withObservationComponent(
+							myTDB.withObservationCode("http://example.com", "another-code-value"),
+							myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm")),
+					myTDB.withObservationComponent(
+							myTDB.withObservationCode("http://example.com", "yet-another-code-value"),
+							myTDB.withQuantityAtPath("valueQuantity", 1000000, "hulla", "sik")));
 
 			assertEquals(1, myCreatedList.size());
 			Observation o = (Observation) myCreatedList.get(0);
 
 			assertEquals(2, o.getComponent().size());
-			Observation.ObservationComponentComponent secondComponent = o.getComponent().get(1);
+			Observation.ObservationComponentComponent secondComponent =
+					o.getComponent().get(1);
 
-			assertEquals("yet-another-code-value", secondComponent.getCode().getCoding().get(0).getCode());
-			assertEquals(1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
+			assertEquals(
+					"yet-another-code-value",
+					secondComponent.getCode().getCoding().get(0).getCode());
+			assertEquals(
+					1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
 		}
-
 	}
 
 	@Test
 	void createGroup_withPatients_createsElementAndReference() {
 
-		myTDB.createGroup(
-			myTDB.withGroupMember("Patient/123")
-		);
+		myTDB.createGroup(myTDB.withGroupMember("Patient/123"));
 
 		assertEquals(1, myCreatedList.size());
 		Group g = (Group) myCreatedList.get(0);
@@ -135,5 +130,4 @@ public class ITestDataBuilderTest {
 		assertTrue(g.getMember().get(0).hasEntity());
 		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
 	}
-
 }

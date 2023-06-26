@@ -27,18 +27,17 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class TestElasticsearchContainerHelper {
 
-
 	public static final String ELASTICSEARCH_VERSION = "7.17.3";
-	public static final String ELASTICSEARCH_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
+	public static final String ELASTICSEARCH_IMAGE =
+			"docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
 
 		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
-			// the default is 4GB which is too much for our little tests
-			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
-			// turn off security warnings
-			.withEnv("xpack.security.enabled", "false")
-			.withStartupTimeout(Duration.of(300, SECONDS));
+				// the default is 4GB which is too much for our little tests
+				.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+				// turn off security warnings
+				.withEnv("xpack.security.enabled", "false")
+				.withStartupTimeout(Duration.of(300, SECONDS));
 	}
-
 }

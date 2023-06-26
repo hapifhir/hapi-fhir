@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.servlet.ServletException;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -104,14 +104,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(myObservationIds.subList(0, 50), interceptedResourceIds);
 	}
 
-
 	@Test
 	public void testSearchAndBlockSome() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -125,7 +125,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIds.subList(0, 20), interceptedResourceIds, "Wrong response from " + outcome.getClass());
+		assertEquals(
+				myObservationIds.subList(0, 20), interceptedResourceIds, "Wrong response from " + outcome.getClass());
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		String searchId = outcome.getUuid();
@@ -135,15 +136,20 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		if (!myObservationIdsEvenOnly.subList(10, 25).equals(returnedIdValues)) {
 			if (resources.size() != 1) {
 				runInTransaction(() -> {
-					Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
-					fail("Failed to load - " + mySearchResultDao.countForSearch(search.getId()) + " results in " + search);
+					Search search = mySearchEntityDao
+							.findByUuidAndFetchIncludes(searchId)
+							.get();
+					fail("Failed to load - " + mySearchResultDao.countForSearch(search.getId()) + " results in "
+							+ search);
 				});
 			}
 		}
-		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues, "Wrong response from " + outcome.getClass());
+		assertEquals(
+				myObservationIdsEvenOnly.subList(10, 25),
+				returnedIdValues,
+				"Wrong response from " + outcome.getClass());
 		assertEquals(3, hitCount.get());
 	}
-
 
 	@Test
 	public void testSearchAndBlockSome_LoadSynchronous() {
@@ -151,7 +157,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -175,7 +182,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, hitCount.get());
 	}
 
-
 	@Test
 	public void testSearchAndBlockSomeOnRevIncludes() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
@@ -184,7 +190,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -199,7 +206,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
-
 	}
 
 	@Test
@@ -209,7 +215,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -228,7 +235,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
-
 	}
 
 	@Test
@@ -237,7 +243,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -253,7 +260,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		// This should probably be 4
 		assertEquals(5, hitCount.get());
-
 	}
 
 	@Test
@@ -276,7 +282,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
 		assertEquals(4, hitCount.get());
-
 	}
 
 	@Test
@@ -285,7 +290,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
@@ -300,7 +306,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
-
 	}
 
 	@Test
@@ -309,7 +314,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a history
@@ -328,9 +334,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * returned results because we create it then update it in create50Observations()
 		 */
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
+		assertEquals(
+				myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()),
+				sort(interceptedResourceIds));
 		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
-
 	}
 
 	@Test
@@ -339,7 +346,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
-		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		IAnonymousInterceptor interceptor =
+				new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		myObservationDao.read(new IdType(myObservationIdsEvenOnly.get(0)), mySrd);
@@ -357,7 +365,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-
 	}
 
 	private void create50Observations() {
@@ -395,18 +402,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 			myObservationDao.update(obs1);
 			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
-
 		}
 
-		myPatientIdsEvenOnly =
-			myPatientIds
-				.stream()
+		myPatientIdsEvenOnly = myPatientIds.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
 
-		myObservationIdsEvenOnly =
-			myObservationIds
-				.stream()
+		myObservationIdsEvenOnly = myObservationIds.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
 
@@ -436,7 +438,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			for (int i = 0; i < accessDetails.size(); i++) {
 				IBaseResource nextResource = accessDetails.getResource(i);
 				if (nextResource != null) {
-					currentPassIds.add(nextResource.getIdElement().toUnqualifiedVersionless().getValue());
+					currentPassIds.add(nextResource
+							.getIdElement()
+							.toUnqualifiedVersionless()
+							.getValue());
 				}
 			}
 
@@ -451,7 +456,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			super(theHitCount, theInterceptedResourceIds);
 		}
 
-
 		@Override
 		public void invoke(IPointcut thePointcut, HookParams theArgs) {
 			super.invoke(thePointcut, theArgs);
@@ -462,7 +466,11 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			List<String> ids = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
-				ids.add(accessDetails.getResource(i).getIdElement().toUnqualifiedVersionless().getValue());
+				ids.add(accessDetails
+						.getResource(i)
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue());
 			}
 			ourLog.info("Invoking {} for {} results: {}", thePointcut, count, ids);
 
@@ -473,13 +481,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 					if (idPart % 2 == 1) {
 						accessDetails.setDontReturnResourceAtIndex(i);
 					} else {
-						nonBlocked.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
+						nonBlocked.add(resource.getIdElement()
+								.toUnqualifiedVersionless()
+								.getValue());
 					}
 				}
 			}
 
 			ourLog.info("Allowing IDs: {}", nonBlocked);
-
 		}
 	}
 
@@ -495,6 +504,4 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		});
 		return retVal;
 	}
-
-
 }

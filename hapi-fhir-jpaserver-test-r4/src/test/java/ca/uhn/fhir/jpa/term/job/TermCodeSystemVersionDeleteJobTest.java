@@ -78,7 +78,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-
 public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 	private final ServletRequestDetails myRequestDetails = new ServletRequestDetails();
@@ -86,8 +85,10 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 	@Autowired
 	private TermLoaderSvcImpl myTermLoaderSvc;
+
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
+
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
@@ -106,14 +107,15 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		String firstCurrentVer = "2.67";
 		uploadLoincCodeSystem(firstCurrentVer, true);
 
-		long[] termCodeSystemVersionPidVect = new long[1];  //bypass final restriction
+		long[] termCodeSystemVersionPidVect = new long[1]; // bypass final restriction
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 			assertNotNull(termCodeSystem);
 
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(termCodeSystem.getPid());
+			TermCodeSystemVersion termCodeSystemVersion =
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(termCodeSystem.getPid());
 			assertNotNull(termCodeSystemVersion);
 			termCodeSystemVersionPidVect[0] = termCodeSystemVersion.getPid();
 
@@ -141,25 +143,20 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		});
 	}
 
-
 	@Test
 	public void runWithParameterZeroFailsValidation() {
-		InvalidRequestException thrown = Assertions.assertThrows(
-			InvalidRequestException.class,
-			() -> {
-				TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
-				jobParameters.setCodeSystemVersionPid(0);
+		InvalidRequestException thrown = Assertions.assertThrows(InvalidRequestException.class, () -> {
+			TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
+			jobParameters.setCodeSystemVersionPid(0);
 
-				JobInstanceStartRequest request = new JobInstanceStartRequest();
-				request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-				request.setParameters(jobParameters);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+			request.setParameters(jobParameters);
 
-				Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-			}
-		);
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		});
 		assertTrue(thrown.getMessage().contains("Invalid code system version PID 0"));
 	}
-
 
 	private IIdType uploadLoincCodeSystem(String theVersion, boolean theMakeItCurrent) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
@@ -168,8 +165,11 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), Boolean.toString(theMakeItCurrent));
 
 		assertTrue(
-			theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69"),
-			"Version supported are: 2.67, 2.68, 2.69 and null" );
+				theVersion == null
+						|| theVersion.equals("2.67")
+						|| theVersion.equals("2.68")
+						|| theVersion.equals("2.69"),
+				"Version supported are: 2.67, 2.68, 2.69 and null");
 
 		if (StringUtils.isBlank(theVersion)) {
 			uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
@@ -185,7 +185,6 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		return stats.getTarget();
 	}
 
-
 	public void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theVersion) throws IOException {
 		String theClassPathPrefix = getClassPathPrefix(theVersion);
 		addBaseLoincMandatoryFilesToZip(theFiles, true, theClassPathPrefix);
@@ -194,9 +193,8 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
-
 	private static void addBaseLoincMandatoryFilesToZip(
-		ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
+			ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
 		theFiles.addFileZip(theClassPathPrefix, LOINC_XML_FILE.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip(theClassPathPrefix, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
@@ -221,13 +219,12 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	private String getClassPathPrefix(String theVersion) {
 		String theClassPathPrefix = "/loinc-ver/v-no-version/";
 
-		if (StringUtils.isBlank(theVersion))   return theClassPathPrefix;
+		if (StringUtils.isBlank(theVersion)) return theClassPathPrefix;
 
-		switch(theVersion) {
+		switch (theVersion) {
 			case "2.67":
 				return "/loinc-ver/v267/";
 			case "2.68":
@@ -239,8 +236,4 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
 	}
-
-
-
-
 }

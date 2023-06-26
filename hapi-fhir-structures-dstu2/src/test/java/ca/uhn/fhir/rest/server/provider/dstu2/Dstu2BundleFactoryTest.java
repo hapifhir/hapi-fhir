@@ -76,17 +76,17 @@ public class Dstu2BundleFactoryTest {
 
 		diagnosticReport.setPerformer(new ResourceReferenceDt(practitioner));
 		diagnosticReport.setSubject(new ResourceReferenceDt(patient));
-		diagnosticReport.setResult(Arrays.asList(new ResourceReferenceDt[] { new ResourceReferenceDt(observation) }));
+		diagnosticReport.setResult(Arrays.asList(new ResourceReferenceDt[] {new ResourceReferenceDt(observation)}));
 		diagnosticReport.setSpecimen(Arrays.asList(new ResourceReferenceDt(specimen2)));
 
 		observation.setSpecimen(new ResourceReferenceDt(specimen1));
 		observation.setSubject(new ResourceReferenceDt(patient));
-		observation.setPerformer(Arrays.asList(new ResourceReferenceDt[] { new ResourceReferenceDt(practitioner) }));
+		observation.setPerformer(Arrays.asList(new ResourceReferenceDt[] {new ResourceReferenceDt(practitioner)}));
 
 		specimen1.setSubject(new ResourceReferenceDt(patient));
 		specimen1.getCollection().setCollector(new ResourceReferenceDt(practitioner));
 
-		myResourceList = Arrays.asList(new IBaseResource[] { diagnosticReport });
+		myResourceList = Arrays.asList(new IBaseResource[] {diagnosticReport});
 
 		myBundleFactory = new Dstu2BundleFactory(ourCtx);
 	}
@@ -115,13 +115,16 @@ public class Dstu2BundleFactoryTest {
 		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
 		assertEquals(1, numberOfEntriesOfType(bundle, Patient.class));
 	}
-	
+
 	@Test
-	public void whenAChainedResourceIsIncludedAndItsParentIsAlsoIncluded_bundle_shouldContainTheChainedResource() throws Exception {
-		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(DiagnosticReport.INCLUDE_RESULT.getValue(), Observation.INCLUDE_SPECIMEN.getValue()));
+	public void whenAChainedResourceIsIncludedAndItsParentIsAlsoIncluded_bundle_shouldContainTheChainedResource()
+			throws Exception {
+		Bundle bundle = makeBundle(
+				BundleInclusionRule.BASED_ON_INCLUDES,
+				includes(DiagnosticReport.INCLUDE_RESULT.getValue(), Observation.INCLUDE_SPECIMEN.getValue()));
 
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		
+
 		assertEquals(3, bundle.getEntry().size());
 		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
 		assertEquals(1, numberOfEntriesOfType(bundle, Observation.class));
@@ -132,8 +135,10 @@ public class Dstu2BundleFactoryTest {
 	}
 
 	@Test
-	public void whenAChainedResourceIsIncludedButItsParentIsNot_bundle_shouldNotContainTheChainedResource() throws Exception {
-		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(Observation.INCLUDE_SPECIMEN.getValue()));
+	public void whenAChainedResourceIsIncludedButItsParentIsNot_bundle_shouldNotContainTheChainedResource()
+			throws Exception {
+		Bundle bundle =
+				makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(Observation.INCLUDE_SPECIMEN.getValue()));
 
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
@@ -163,8 +168,7 @@ public class Dstu2BundleFactoryTest {
 	private <T extends IResource> int numberOfEntriesOfType(Bundle theBundle, Class<T> theResourceClass) {
 		int count = 0;
 		for (Bundle.Entry entry : theBundle.getEntry()) {
-			if (theResourceClass.isAssignableFrom(entry.getResource().getClass()))
-				count++;
+			if (theResourceClass.isAssignableFrom(entry.getResource().getClass())) count++;
 		}
 		return count;
 	}

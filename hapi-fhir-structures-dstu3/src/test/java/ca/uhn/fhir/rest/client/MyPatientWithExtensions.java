@@ -1,26 +1,22 @@
 package ca.uhn.fhir.rest.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DomainResource;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.StringType;
 
+import java.util.ArrayList;
+import java.util.List;
 
-@ResourceDef(name="Patient", profile="http://example.com/StructureDefinition/patient_with_extensions")
+@ResourceDef(name = "Patient", profile = "http://example.com/StructureDefinition/patient_with_extensions")
 public class MyPatientWithExtensions extends DomainResource {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@Extension(url = "http://example.com/ext/date", definedLocally = false, isModifier = true)
@@ -31,11 +27,18 @@ public class MyPatientWithExtensions extends DomainResource {
 	@Child(name = "extAtt")
 	private StringType myStringExt;
 
-   @Child(name = "name", type = {HumanName.class}, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-   @Description(shortDefinition="A name associated with the patient", formalDefinition="A name associated with the individual." )
+	@Child(
+			name = "name",
+			type = {HumanName.class},
+			min = 0,
+			max = Child.MAX_UNLIMITED,
+			modifier = false,
+			summary = true)
+	@Description(
+			shortDefinition = "A name associated with the patient",
+			formalDefinition = "A name associated with the individual.")
 	private List<HumanName> myName;
-	
-	
+
 	public List<HumanName> getName() {
 		if (myName == null) {
 			myName = new ArrayList<HumanName>();
@@ -89,6 +92,4 @@ public class MyPatientWithExtensions extends DomainResource {
 		getName().add(retVal);
 		return retVal;
 	}
-
-
 }

@@ -59,7 +59,8 @@ public class RequestValidatingInterceptorDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static boolean ourLastRequestWasSearch;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorDstu3Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorDstu3Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -259,9 +260,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), Matchers.containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
+		assertThat(
+				status.toString(),
+				Matchers.containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -273,8 +275,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+		Mockito.doThrow(new NullPointerException("SOME MESSAGE"))
+				.when(module)
+				.validateResource(Mockito.any(IValidationContext.class));
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -290,7 +294,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, Matchers.containsString("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
+		assertThat(
+				responseContent,
+				Matchers.containsString(
+						"<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -303,8 +310,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+		Mockito.doThrow(NullPointerException.class)
+				.when(module)
+				.validateResource(Mockito.any(IValidationContext.class));
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -333,8 +342,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+		Mockito.doThrow(new InternalErrorException("FOO"))
+				.when(module)
+				.validateResource(Mockito.any(IValidationContext.class));
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -363,8 +374,10 @@ public class RequestValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
-		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+		Mockito.doThrow(InternalErrorException.class)
+				.when(module)
+				.validateResource(Mockito.any(IValidationContext.class));
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -483,13 +496,13 @@ public class RequestValidatingInterceptorDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -514,7 +527,5 @@ public class RequestValidatingInterceptorDstu3Test {
 			ourLastRequestWasSearch = true;
 			return new ArrayList<IResource>();
 		}
-
 	}
-
 }

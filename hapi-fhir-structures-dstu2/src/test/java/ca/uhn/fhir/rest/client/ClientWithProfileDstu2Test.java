@@ -47,7 +47,6 @@ public class ClientWithProfileDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
@@ -67,8 +66,10 @@ public class ClientWithProfileDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -93,7 +94,5 @@ public class ClientWithProfileDstu2Test {
 	public static class MyPatient extends Patient {
 
 		private static final long serialVersionUID = 1L;
-
 	}
-
 }

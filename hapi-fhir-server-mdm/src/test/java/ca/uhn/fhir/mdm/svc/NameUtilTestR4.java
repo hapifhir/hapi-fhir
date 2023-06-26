@@ -32,7 +32,7 @@ public class NameUtilTestR4 {
 		IBase name = names.get(0);
 
 		{
-			String familyName = NameUtil.extractFamilyName(myFhirContext, name );
+			String familyName = NameUtil.extractFamilyName(myFhirContext, name);
 			assertThat(familyName, is(equalTo("family")));
 		}
 

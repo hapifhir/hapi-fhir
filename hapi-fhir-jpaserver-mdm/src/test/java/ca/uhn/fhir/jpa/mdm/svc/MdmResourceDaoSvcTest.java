@@ -4,8 +4,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
+
 	@Autowired
 	MdmResourceDaoSvc myResourceDaoSvc;
 
@@ -38,14 +39,19 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		myPatientDao.update(goodSourcePatient);
 
-
 		Patient badSourcePatient = addExternalEID(createRedirectedGoldenPatient(new Patient()), TEST_EID);
 		MdmResourceUtil.setGoldenResourceRedirected(badSourcePatient);
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundGoldenResource.isPresent());
-		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(
+				foundGoldenResource
+						.get()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue(),
+				is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
 	@Test
@@ -58,7 +64,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(
+				foundSourcePatient
+						.get()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue(),
+				is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
 	@Test
@@ -72,9 +84,16 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		systemRequestDetails.setRequestPartitionId(requestPartitionId);
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
-		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
+		Optional<IAnyResource> foundSourcePatient =
+				myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
 		assertTrue(foundSourcePatient.isPresent());
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(
+				foundSourcePatient
+						.get()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue(),
+				is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
 	@Test
@@ -90,7 +109,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		systemRequestDetails.setRequestPartitionId(requestPartitionId1);
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
-		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId2);
+		Optional<IAnyResource> foundSourcePatient =
+				myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId2);
 		assertFalse(foundSourcePatient.isPresent());
 	}
 }

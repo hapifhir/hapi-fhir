@@ -45,14 +45,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, ExpandedResourcesList, BulkExportBinaryFileId> {
+public class WriteBinaryStep
+		implements IJobStepWorker<BulkExportJobParameters, ExpandedResourcesList, BulkExportBinaryFileId> {
 	private static final Logger ourLog = getLogger(WriteBinaryStep.class);
 
 	@Autowired
@@ -63,11 +64,14 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<BulkExportBinaryFileId> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkExportBinaryFileId> theDataSink)
+			throws JobExecutionFailedException {
 
 		ExpandedResourcesList expandedResources = theStepExecutionDetails.getData();
-		final int numResourcesProcessed = expandedResources.getStringifiedResources().size();
+		final int numResourcesProcessed =
+				expandedResources.getStringifiedResources().size();
 
 		ourLog.info("Write binary step of Job Export");
 		ourLog.info("Writing {} resources to binary file", numResourcesProcessed);
@@ -98,9 +102,9 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			}
 			binary.setContent(outputStream.toByteArray());
 		} catch (IOException ex) {
-			String errorMsg = String.format("Failure to process resource of type %s : %s",
-				expandedResources.getResourceType(),
-				ex.getMessage());
+			String errorMsg = String.format(
+					"Failure to process resource of type %s : %s",
+					expandedResources.getResourceType(), ex.getMessage());
 			ourLog.error(errorMsg);
 
 			throw new JobExecutionFailedException(Msg.code(2238) + errorMsg);
@@ -108,12 +112,12 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 
 		SystemRequestDetails srd = new SystemRequestDetails();
 		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
-		if (partitionId == null){
+		if (partitionId == null) {
 			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		} else {
 			srd.setRequestPartitionId(partitionId);
 		}
-		DaoMethodOutcome outcome = binaryDao.create(binary,srd);
+		DaoMethodOutcome outcome = binaryDao.create(binary, srd);
 		IIdType id = outcome.getId();
 
 		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
@@ -121,9 +125,10 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		bulkExportBinaryFileId.setResourceType(expandedResources.getResourceType());
 		theDataSink.accept(bulkExportBinaryFileId);
 
-		ourLog.info("Binary writing complete for {} resources of type {}.",
-			processedRecordsCount,
-			expandedResources.getResourceType());
+		ourLog.info(
+				"Binary writing complete for {} resources of type {}.",
+				processedRecordsCount,
+				expandedResources.getResourceType());
 
 		return new RunOutcome(numResourcesProcessed);
 	}
@@ -135,13 +140,16 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 	 * 2. the job_id of the job instance.
 	 * 3. the resource type of the resources contained in the binary
 	 */
-	private void addMetadataExtensionsToBinary(@Nonnull  StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails, ExpandedResourcesList expandedResources, IBaseBinary binary) {
+	private void addMetadataExtensionsToBinary(
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails,
+			ExpandedResourcesList expandedResources,
+			IBaseBinary binary) {
 		// Note that this applies only to hl7.org structures, so these extensions will not be added
 		// to DSTU2 structures
 		if (binary.getMeta() instanceof IBaseHasExtensions) {
 			IBaseHasExtensions meta = (IBaseHasExtensions) binary.getMeta();
 
-			//export identifier, potentially null.
+			// export identifier, potentially null.
 			String exportIdentifier = theStepExecutionDetails.getParameters().getExportIdentifier();
 			if (!StringUtils.isBlank(exportIdentifier)) {
 				IBaseExtension<?, ?> exportIdentifierExtension = meta.addExtension();
@@ -149,17 +157,19 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 				exportIdentifierExtension.setValue(myFhirContext.newPrimitiveString(exportIdentifier));
 			}
 
-			//job id
+			// job id
 			IBaseExtension<?, ?> jobExtension = meta.addExtension();
 			jobExtension.setUrl(JpaConstants.BULK_META_EXTENSION_JOB_ID);
-			jobExtension.setValue(myFhirContext.newPrimitiveString(theStepExecutionDetails.getInstance().getInstanceId()));
+			jobExtension.setValue(myFhirContext.newPrimitiveString(
+					theStepExecutionDetails.getInstance().getInstanceId()));
 
-			//resource type
+			// resource type
 			IBaseExtension<?, ?> typeExtension = meta.addExtension();
 			typeExtension.setUrl(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
 			typeExtension.setValue(myFhirContext.newPrimitiveString(expandedResources.getResourceType()));
 		} else {
-			ourLog.warn("Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
+			ourLog.warn(
+					"Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
 		}
 	}
 

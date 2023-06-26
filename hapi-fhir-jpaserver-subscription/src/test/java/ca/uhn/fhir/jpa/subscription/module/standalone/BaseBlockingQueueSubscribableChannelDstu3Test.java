@@ -50,54 +50,76 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
-	public static final ChannelConsumerSettings CONSUMER_OPTIONS = new ChannelConsumerSettings().setConcurrentConsumers(1);
-	protected static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	public static final ChannelConsumerSettings CONSUMER_OPTIONS =
+			new ChannelConsumerSettings().setConcurrentConsumers(1);
+	protected static final List<Observation> ourCreatedObservations =
+			Collections.synchronizedList(Lists.newArrayList());
+	protected static final List<Observation> ourUpdatedObservations =
+			Collections.synchronizedList(Lists.newArrayList());
 	protected static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
 
-	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, subscriptionDeliveringRestHookSubscriber, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
+	// Caused by: java.lang.IllegalStateException: Unable to register mock bean
+	// org.springframework.messaging.MessageHandler expected a single matching bean to replace but found
+	// [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber,
+	// subscriptionDeliveringRestHookSubscriber, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
 	protected static ObservationListener ourObservationListener;
 	protected static String ourListenerServerBase;
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static SubscribableChannel ourSubscribableChannel;
-	protected final PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
-	protected final PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+	protected final PointcutLatch mySubscriptionMatchingPost =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected final PointcutLatch mySubscriptionActivatedPost =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 	protected final PointcutLatch mySubscriptionAfterDelivery = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_DELIVERY);
-	protected final PointcutLatch mySubscriptionResourceMatched = new PointcutLatch(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED);
-	protected final PointcutLatch mySubscriptionResourceNotMatched = new PointcutLatch(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS);
+	protected final PointcutLatch mySubscriptionResourceMatched =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED);
+	protected final PointcutLatch mySubscriptionResourceNotMatched =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS);
+
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
+
 	@Autowired
 	protected StorageSettings myStorageSettings;
+
 	protected String myCode = "1000000050";
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	@Qualifier("subscriptionActivatingSubscriber")
 	MessageHandler mySubscriptionActivatingSubscriber;
+
 	@Autowired
 	@Qualifier("subscriptionRegisteringSubscriber")
 	MessageHandler subscriptionRegisteringSubscriber;
+
 	@Autowired
 	@Qualifier("subscriptionMatchingSubscriber")
 	MessageHandler subscriptionMatchingSubscriber;
+
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@Autowired
 	IInterceptorService myInterceptorRegistry;
+
 	@Autowired
 	private ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
 
@@ -110,15 +132,21 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		canonicalSubscription.setIdElement(new IdDt("test"));
 		canonicalSubscription.setChannelType(CanonicalSubscriptionChannelType.RESTHOOK);
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), CONSUMER_OPTIONS);
+		ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryReceivingChannel(
+				mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalSubscription), CONSUMER_OPTIONS);
 		ourSubscribableChannel.subscribe(mySubscriptionActivatingSubscriber);
 		ourSubscribableChannel.subscribe(subscriptionMatchingSubscriber);
 		ourSubscribableChannel.subscribe(subscriptionRegisteringSubscriber);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY, mySubscriptionAfterDelivery);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, mySubscriptionResourceMatched);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, mySubscriptionResourceNotMatched);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_AFTER_DELIVERY, mySubscriptionAfterDelivery);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, mySubscriptionResourceMatched);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, mySubscriptionResourceNotMatched);
 	}
 
 	@AfterEach
@@ -137,8 +165,14 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return sendResource(theResource, null);
 	}
 
-	public <T extends IBaseResource> T sendResource(T theResource, RequestPartitionId theRequestPartitionId) throws InterruptedException {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, null, theRequestPartitionId);
+	public <T extends IBaseResource> T sendResource(T theResource, RequestPartitionId theRequestPartitionId)
+			throws InterruptedException {
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(
+				myFhirContext,
+				theResource,
+				ResourceModifiedMessage.OperationTypeEnum.CREATE,
+				null,
+				theRequestPartitionId);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(msg);
 		mySubscriptionMatchingPost.setExpectedCount(1);
 		ourSubscribableChannel.send(message);
@@ -146,7 +180,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
-	protected Subscription sendSubscription(Subscription theSubscription, RequestPartitionId theRequestPartitionId, Boolean mockDao) throws InterruptedException {
+	protected Subscription sendSubscription(
+			Subscription theSubscription, RequestPartitionId theRequestPartitionId, Boolean mockDao)
+			throws InterruptedException {
 		mySubscriptionResourceNotMatched.setExpectedCount(1);
 		mySubscriptionActivatedPost.setExpectedCount(1);
 		Subscription retVal = sendResource(theSubscription, theRequestPartitionId);
@@ -159,7 +195,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return sendObservation(code, system, null);
 	}
 
-	protected Observation sendObservation(String code, String system, RequestPartitionId theRequestPartitionId) throws InterruptedException {
+	protected Observation sendObservation(String code, String system, RequestPartitionId theRequestPartitionId)
+			throws InterruptedException {
 		Observation observation = new Observation();
 		IdType id = new IdType("Observation", nextId());
 		observation.setId(id);
@@ -182,7 +219,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
-			ourContentTypes.add(theRequest.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(theRequest
+					.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE)
+					.replaceAll(";.*", ""));
 			ourCreatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
@@ -194,7 +233,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourContentTypes.add(
+					theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
 			updateLatch.invoke(null, new HookParams().add(Observation.class, theObservation));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
@@ -238,7 +278,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 		FhirContext context = ourListenerRestServer.getFhirContext();
-		//Preload structure definitions so the load doesn't happen during the test (first load can be a little slow)
+		// Preload structure definitions so the load doesn't happen during the test (first load can be a little slow)
 		context.getValidationSupport().fetchAllStructureDefinitions();
 	}
 

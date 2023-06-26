@@ -44,24 +44,25 @@ public class SearchWithDstu2BundleTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		responseContent = responseContent.replace("_pretty=true&amp;_format=xml", "_format=xml&amp;_pretty=true");
-		
+
 		ourLog.info(responseContent);
 
-		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
-				"<type value=\"searchset\"/>", 
-				"<link>" ,
-				"<relation value=\"self\"/>", 
-				"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>", 
-				"</link>" ,
-				"<entry>" , 
-				"<resource>" , 
-				"<Patient xmlns=\"http://hl7.org/fhir\">"));
 		// @formatter:off
-		
+		assertThat(
+				responseContent,
+				stringContainsInOrder(
+						"<Bundle xmlns=\"http://hl7.org/fhir\">",
+						"<type value=\"searchset\"/>",
+						"<link>",
+						"<relation value=\"self\"/>",
+						"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>",
+						"</link>",
+						"<entry>",
+						"<resource>",
+						"<Patient xmlns=\"http://hl7.org/fhir\">"));
+		// @formatter:off
+
 	}
-
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -83,13 +84,13 @@ public class SearchWithDstu2BundleTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	/**
@@ -105,16 +106,14 @@ public class SearchWithDstu2BundleTest {
 		@Search
 		public Bundle search() {
 			Bundle retVal = new Bundle();
-			
+
 			Patient p1 = new Patient();
 			p1.setId("Patient/123/_history/456");
 			p1.addIdentifier().setValue("p1ReadValue");
-			
+
 			retVal.addEntry().setResource(p1);
-			
+
 			return retVal;
 		}
-
 	}
-
 }

@@ -25,7 +25,8 @@ public class ParserWithValidationDstu3Test {
 
 	@Test
 	public void testActivityDefinitionElementsOrder() {
-		final String origContent = "{\"resourceType\":\"ActivityDefinition\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"timingDateTime\":\"2011-02-03\"}";
+		final String origContent =
+				"{\"resourceType\":\"ActivityDefinition\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"timingDateTime\":\"2011-02-03\"}";
 		final IParser parser = ourCtx.newJsonParser();
 		IValidationSupport validationSupport = getValidationSupport();
 
@@ -64,7 +65,8 @@ public class ParserWithValidationDstu3Test {
 	 */
 	@Test
 	public void testChildOrderWithChoiceTypeXml() {
-		final String origContent = "<ActivityDefinition xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><timingDateTime value=\"2011-02-03\"/></ActivityDefinition>";
+		final String origContent =
+				"<ActivityDefinition xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><timingDateTime value=\"2011-02-03\"/></ActivityDefinition>";
 		final IParser parser = ourCtx.newXmlParser();
 		IValidationSupport validationSupport = getValidationSupport();
 
@@ -100,7 +102,8 @@ public class ParserWithValidationDstu3Test {
 
 	@Test
 	public void testConceptMapElementsOrder() {
-		final String origContent = "{\"resourceType\":\"ConceptMap\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"sourceUri\":\"http://y1\"}";
+		final String origContent =
+				"{\"resourceType\":\"ConceptMap\",\"id\":\"x1\",\"url\":\"http://testing.org\",\"status\":\"draft\",\"sourceUri\":\"http://y1\"}";
 		final IParser parser = ourCtx.newJsonParser();
 		IValidationSupport validationSupport = getValidationSupport();
 
@@ -135,12 +138,14 @@ public class ParserWithValidationDstu3Test {
 	}
 
 	private IValidationSupport getValidationSupport() {
-		return new ValidationSupportChain(new DefaultProfileValidationSupport(ourCtx), new InMemoryTerminologyServerValidationSupport(ourCtx));
+		return new ValidationSupportChain(
+				new DefaultProfileValidationSupport(ourCtx), new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	@Test
 	public void testConceptMapElementsOrderXml() {
-		final String origContent = "<ConceptMap xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><sourceUri value=\"http://url1\"/></ConceptMap>";
+		final String origContent =
+				"<ConceptMap xmlns=\"http://hl7.org/fhir\"><id value=\"x1\"/><url value=\"http://testing.org\"/><status value=\"draft\"/><sourceUri value=\"http://url1\"/></ConceptMap>";
 		final IParser parser = ourCtx.newXmlParser();
 		IValidationSupport validationSupport = getValidationSupport();
 
@@ -178,5 +183,4 @@ public class ParserWithValidationDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

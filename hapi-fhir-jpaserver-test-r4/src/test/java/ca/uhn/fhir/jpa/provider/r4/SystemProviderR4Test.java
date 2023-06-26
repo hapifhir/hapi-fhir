@@ -68,7 +68,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
@@ -129,8 +128,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setDeleteExpungeEnabled(new JpaStorageSettings().isDeleteExpungeEnabled());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(
+				new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(
+				new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -166,7 +167,17 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			practitionerRoleRp.setDao(myPractitionerRoleDao);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp, practitionerRoleRp);
+			restServer.setResourceProviders(
+					patientRp,
+					questionnaireRp,
+					observationRp,
+					organizationRp,
+					locationRp,
+					binaryRp,
+					diagnosticReportRp,
+					diagnosticOrderRp,
+					practitionerRp,
+					practitionerRoleRp);
 
 			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
@@ -187,7 +198,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			int myPort = JettyUtil.getPortForStartedServer(ourServer);
 			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager =
+					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -304,14 +316,14 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
-
 	}
 
 	@Test
 	public void testMarkResourcesForReindexingTyped() throws Exception {
 
 		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
-		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("Patient"))));
+		post.setEntity(
+				new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("Patient"))));
 		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -331,7 +343,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -340,7 +351,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpGet get = new HttpGet(ourServerBase);
-//		get.addHeader("Accept", "application/xml, text/html");
+		//		get.addHeader("Accept", "application/xml, text/html");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
 	}
@@ -370,10 +381,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
-		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		Bundle resp1 = (Bundle)
+				myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
 		assertEquals(1, resp1.getTotal());
-		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
+		Bundle resp2 = (Bundle)
+				myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		assertEquals(1, resp2.getTotal());
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
@@ -397,7 +410,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		// Prefer return=minimal
 		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
-		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		mySimpleHeaderInterceptor.setHeaderValue(
+				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
@@ -407,7 +421,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		// Prefer return=representation
 		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
-		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		mySimpleHeaderInterceptor.setHeaderValue(
+				Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		req = new Bundle();
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
@@ -416,18 +431,21 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
 
-
 	@Test
 	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
 
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext
+					.newJsonParser()
+					.parseResource(
+							Bundle.class,
+							IOUtils.toString(
+									getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
 			myClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
-
 
 			SearchParameterMap params = new SearchParameterMap();
 			params.add("subject", new ReferenceParam("Patient1063259"));
@@ -453,16 +471,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			result = myDiagnosticReportDao.search(params);
 			assertEquals(0, result.size().intValue());
-
 		}
-
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirContext, myClient.search().forResource(theType).execute())
-			.forEach(t -> {
-				myClient.delete().resourceById(t.getIdElement()).execute();
-			});
+		BundleUtil.toListOfResources(
+						myFhirContext, myClient.search().forResource(theType).execute())
+				.forEach(t -> {
+					myClient.delete().resourceById(t.getIdElement()).execute();
+				});
 	}
 
 	@Test
@@ -505,7 +522,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
-
 	}
 
 	/**
@@ -539,7 +555,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 			private static final Logger ourLog = LoggerFactory.getLogger(MySearchNarrowingInterceptor.class);
 
-
 			@Override
 			protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
 				int count = counter2.incrementAndGet();
@@ -563,9 +578,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle input = (Bundle) bb.getBundle();
 
 		MyAnonymousInterceptor0 interceptor0 = new MyAnonymousInterceptor0();
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor0);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor0);
 		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
 		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
@@ -578,7 +597,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
 		}
 	}
-
 
 	@Test
 	public void testTransactionWithModifyingInterceptor() {
@@ -599,12 +617,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				pt.setId("B");
 				pt.setActive(false);
 				transactionBundle
-					.addEntry()
-					.setResource(pt)
-					.getRequest()
-					.setMethod(HTTPVerb.PUT)
-					.setUrl("Patient/B");
-
+						.addEntry()
+						.setResource(pt)
+						.getRequest()
+						.setMethod(HTTPVerb.PUT)
+						.setUrl("Patient/B");
 			}
 		};
 
@@ -612,7 +629,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
 			output = mySystemDao.transaction(mySrd, input);
-		}finally {
+		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
@@ -621,21 +638,23 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
 	}
 
-
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
 
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 
-		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		InputStream bundleRes =
+				SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -671,7 +690,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				myClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdType id = new IdType(bundleResp.getEntry().get(0).getResponse().getLocation());
@@ -691,7 +711,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(
+					Msg.code(533)
+							+ "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'",
+					oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode().toCode());
 		}
 	}
@@ -699,7 +722,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test
 	@Disabled("Stress test only")
 	public void testTransactionWithPlaceholderIds() {
-
 
 		for (int pass = 0; pass < 10000; pass++) {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -718,7 +740,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourLog.info("Starting pass {}", pass);
 			mySystemDao.transaction(null, bundle);
 		}
-
 	}
 
 	@Test
@@ -730,7 +751,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		// fail();
 		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the
+		// form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());
 		// }
 	}
@@ -788,36 +810,35 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		o.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.2.4.6.1").setValue("07-8975469");
 		myOrganizationDao.create(o, mySrd);
 
-		//@formatter:off
-		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
-			"    <id value=\"20160113160203\"/>\n" +
-			"    <type value=\"transaction\"/>\n" +
-			"    <entry>\n" +
-			"        <fullUrl value=\"urn:uuid:c72aa430-2ddc-456e-7a09-dea8264671d8\"/>\n" +
-			"        <resource>\n" +
-			"            <Encounter>\n" +
-			"                <identifier>\n" +
-			"                    <use value=\"official\"/>\n" +
-			"                    <system value=\"http://healthcare.example.org/identifiers/encounter\"/>\n" +
-			"                    <value value=\"845962.8975469\"/>\n" +
-			"                </identifier>\n" +
-			"                <status value=\"in-progress\"/>\n" +
-			"                <class value=\"inpatient\"/>\n" +
-			"                <patient>\n" +
-			"                    <reference value=\"Patient?family=van%20de%20Heuvelcx85ioqWJbI&amp;given=Pietercx85ioqWJbI\"/>\n" +
-			"                </patient>\n" +
-			"                <serviceProvider>\n" +
-			"                    <reference value=\"Organization?identifier=urn:oid:2.16.840.1.113883.2.4.6.1|07-8975469\"/>\n" +
-			"                </serviceProvider>\n" +
-			"            </Encounter>\n" +
-			"        </resource>\n" +
-			"        <request>\n" +
-			"            <method value=\"POST\"/>\n" +
-			"            <url value=\"Encounter\"/>\n" +
-			"        </request>\n" +
-			"    </entry>\n" +
-			"</Bundle>";
-		//@formatter:off
+		// @formatter:off
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + "    <id value=\"20160113160203\"/>\n"
+				+ "    <type value=\"transaction\"/>\n"
+				+ "    <entry>\n"
+				+ "        <fullUrl value=\"urn:uuid:c72aa430-2ddc-456e-7a09-dea8264671d8\"/>\n"
+				+ "        <resource>\n"
+				+ "            <Encounter>\n"
+				+ "                <identifier>\n"
+				+ "                    <use value=\"official\"/>\n"
+				+ "                    <system value=\"http://healthcare.example.org/identifiers/encounter\"/>\n"
+				+ "                    <value value=\"845962.8975469\"/>\n"
+				+ "                </identifier>\n"
+				+ "                <status value=\"in-progress\"/>\n"
+				+ "                <class value=\"inpatient\"/>\n"
+				+ "                <patient>\n"
+				+ "                    <reference value=\"Patient?family=van%20de%20Heuvelcx85ioqWJbI&amp;given=Pietercx85ioqWJbI\"/>\n"
+				+ "                </patient>\n"
+				+ "                <serviceProvider>\n"
+				+ "                    <reference value=\"Organization?identifier=urn:oid:2.16.840.1.113883.2.4.6.1|07-8975469\"/>\n"
+				+ "                </serviceProvider>\n"
+				+ "            </Encounter>\n"
+				+ "        </resource>\n"
+				+ "        <request>\n"
+				+ "            <method value=\"POST\"/>\n"
+				+ "            <url value=\"Encounter\"/>\n"
+				+ "        </request>\n"
+				+ "    </entry>\n"
+				+ "</Bundle>";
+		// @formatter:off
 
 		HttpPost req = new HttpPost(ourServerBase);
 		req.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
@@ -831,7 +852,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
-
 	}
 
 	/**
@@ -848,7 +868,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.registerInterceptor(interceptor);
 		try {
 
-			InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
+			InputStream bundleRes =
+					SystemProviderR4Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
 			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 
 			HttpPost req = new HttpPost(ourServerBase);
@@ -859,9 +880,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(encoded);
 
-				//@formatter:off
+				// @formatter:off
 				assertThat(encoded, containsString("Questionnaire/54127-6/_history/"));
-				//@formatter:on
+				// @formatter:on
 
 				for (Header next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
 					ourLog.info(next.toString());
@@ -896,11 +917,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			Bundle b = new Bundle();
 			b.setType(Bundle.BundleType.TRANSACTION);
 			b.addEntry()
-				.setResource(p)
-				.setFullUrl("Patient")
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("Patient");
+					.setResource(p)
+					.setFullUrl("Patient")
+					.getRequest()
+					.setMethod(Bundle.HTTPVerb.POST)
+					.setUrl("Patient");
 
 			myClient.transaction().withBundle(b).execute();
 
@@ -908,7 +929,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
-
 		}
 	}
 
@@ -961,12 +981,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		// execute
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
-			.withParameters(input)
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
+				.withParameters(input)
+				.execute();
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
@@ -979,26 +998,29 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
-		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
+		List<Observation> observations =
+				BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
 		assertThat(observations, hasSize(1));
 		assertEquals(oKeepId, observations.get(0).getIdElement());
 
 		Bundle diagBundle = getAllResourcesOfType("DiagnosticReport");
-		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
+		List<DiagnosticReport> diags =
+				BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
 		assertThat(diags, hasSize(1));
 		assertEquals(dKeepId, diags.get(0).getIdElement());
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
-		return myClient.search().forResource(theResourceName)
-			.totalMode(SearchTotalModeEnum.ACCURATE)
-			.cacheControl(new CacheControlDirective().setNoCache(true))
-			.returnBundle(Bundle.class).execute();
+		return myClient.search()
+				.forResource(theResourceName)
+				.totalMode(SearchTotalModeEnum.ACCURATE)
+				.cacheControl(new CacheControlDirective().setNoCache(true))
+				.returnBundle(Bundle.class)
+				.execute();
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
-
 }

@@ -24,11 +24,11 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
@@ -59,8 +59,9 @@ public class ResourceValidatorDstu3Test {
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}",
-				new Object[]{index, next.getSeverity(), next.getLocationString(), next.getMessage()});
+			ourLog.info(
+					"Result {}: {} - {} - {}",
+					new Object[] {index, next.getSeverity(), next.getLocationString(), next.getMessage()});
 			index++;
 
 			if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
@@ -92,14 +93,18 @@ public class ResourceValidatorDstu3Test {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertEquals(
+				2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
 
 		try {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals(
+					Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821)
+							+ "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"",
+					e.getMessage());
 		}
 	}
 
@@ -108,10 +113,9 @@ public class ResourceValidatorDstu3Test {
 	public void testValidateCareTeamProfile() {
 
 		CareTeam careTeam = new CareTeam();
-		careTeam
-			.addParticipant()
-			.setMember(new Reference("Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
-			.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
+		careTeam.addParticipant()
+				.setMember(new Reference("Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
+				.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = parser.encodeResourceToString(careTeam);
@@ -119,24 +123,22 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
 
-
 		ValidationResult result = val.validateWithResult(encoded);
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertEquals(
+				2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
-
 	}
 
 	@Test
 	public void testValidateCareTeamXsd() {
 
 		CareTeam careTeam = new CareTeam();
-		careTeam
-			.addParticipant()
-			.setMember(new Reference("http://example.com/Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
-			.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
+		careTeam.addParticipant()
+				.setMember(new Reference("http://example.com/Practitioner/1647bbb2-3b12-43cc-923c-a475f817e881"))
+				.setOnBehalfOf(new Reference("Organization/5859a28f-01e7-42d8-a8ba-48b31679a828"));
 
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String encoded = parser.encodeResourceToString(careTeam);
@@ -150,13 +152,15 @@ public class ResourceValidatorDstu3Test {
 		ourLog.info(resultString);
 
 		assertThat(resultString, containsString("No issues detected during validation"));
-
 	}
 
 	@Test
 	public void testValidateCodeableConceptContainingOnlyBadCode() {
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("FOO");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://hl7.org/fhir/v3/MaritalStatus")
+				.setCode("FOO");
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -166,14 +170,19 @@ public class ResourceValidatorDstu3Test {
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(output.getMessages().get(0).getMessage(), containsString("None of the codings provided are in the value set 'Marital Status Codes'"));
+		assertThat(
+				output.getMessages().get(0).getMessage(),
+				containsString("None of the codings provided are in the value set 'Marital Status Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test
 	public void testValidateCodeableConceptContainingOnlyGoodCode() {
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://hl7.org/fhir/v3/MaritalStatus").setCode("M");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://hl7.org/fhir/v3/MaritalStatus")
+				.setCode("M");
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -200,18 +209,26 @@ public class ResourceValidatorDstu3Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(support));
 
-		Consent input = ourCtx.newJsonParser().parseResource(Consent.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream("/dstu3/myconsent-resource.json")));
+		Consent input = ourCtx.newJsonParser()
+				.parseResource(
+						Consent.class,
+						IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(
+								"/dstu3/myconsent-resource.json")));
 
 		ValidationResult output = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, all.size());
 		assertEquals(0, output.getMessages().size());
-
 	}
 
-	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
-		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
-		StructureDefinition base = (StructureDefinition) theDefaultValSupport.fetchStructureDefinition(derived.getBaseDefinition());
+	private StructureDefinition loadStructureDefinition(
+			DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
+		StructureDefinition derived = ourCtx.newXmlParser()
+				.parseResource(
+						StructureDefinition.class,
+						IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
+		StructureDefinition base =
+				(StructureDefinition) theDefaultValSupport.fetchStructureDefinition(derived.getBaseDefinition());
 		Validate.notNull(base);
 
 		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
@@ -222,7 +239,6 @@ public class ResourceValidatorDstu3Test {
 		return derived;
 	}
 
-
 	@Test
 	@Disabled
 	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
@@ -230,7 +246,7 @@ public class ResourceValidatorDstu3Test {
 		EligibilityResponse fhirObj = new EligibilityResponse();
 		BenefitComponent benComp = fhirObj.addInsurance().addBenefitBalance().addFinancial();
 		// Test between .benefit[x] and benefitUsed[x]
-//		benComp.setBenefitUsed(new UnsignedIntType(2));
+		//		benComp.setBenefitUsed(new UnsignedIntType(2));
 
 		String input = ourCtx.newXmlParser().encodeResourceToString(fhirObj);
 
@@ -244,26 +260,25 @@ public class ResourceValidatorDstu3Test {
 
 	@Test
 	public void testValidateJsonNumericId() {
-		String input = "{\"resourceType\": \"Patient\",\n" +
-			"  \"id\": 123,\n" +
-			"  \"meta\": {\n" +
-			"    \"versionId\": \"29\",\n" +
-			"    \"lastUpdated\": \"2015-12-22T19:53:11.000Z\"\n" +
-			"  },\n" +
-			"  \"communication\": {\n" +
-			"    \"language\": {\n" +
-			"      \"coding\": [\n" +
-			"        {\n" +
-			"          \"system\": \"urn:ietf:bcp:47\",\n" +
-			"          \"code\": \"hi\",\n" +
-			"          \"display\": \"Hindi\",\n" +
-			"          \"userSelected\": false\n" +
-			"        }],\n" +
-			"      \"text\": \"Hindi\"\n" +
-			"    },\n" +
-			"    \"preferred\": true\n" +
-			"  }\n" +
-			"}";
+		String input = "{\"resourceType\": \"Patient\",\n" + "  \"id\": 123,\n"
+				+ "  \"meta\": {\n"
+				+ "    \"versionId\": \"29\",\n"
+				+ "    \"lastUpdated\": \"2015-12-22T19:53:11.000Z\"\n"
+				+ "  },\n"
+				+ "  \"communication\": {\n"
+				+ "    \"language\": {\n"
+				+ "      \"coding\": [\n"
+				+ "        {\n"
+				+ "          \"system\": \"urn:ietf:bcp:47\",\n"
+				+ "          \"code\": \"hi\",\n"
+				+ "          \"display\": \"Hindi\",\n"
+				+ "          \"userSelected\": false\n"
+				+ "        }],\n"
+				+ "      \"text\": \"Hindi\"\n"
+				+ "    },\n"
+				+ "    \"preferred\": true\n"
+				+ "  }\n"
+				+ "}";
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
@@ -274,7 +289,6 @@ public class ResourceValidatorDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
-
 	}
 
 	/**
@@ -283,7 +297,8 @@ public class ResourceValidatorDstu3Test {
 	@Test
 	@Disabled
 	public void testValidateQuestionnaire() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"), StandardCharsets.UTF_8);
+		String input = IOUtils.toString(
+				getClass().getResourceAsStream("/questionnaire_jon_z_20160506.xml"), StandardCharsets.UTF_8);
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(ourCtx));
@@ -302,24 +317,23 @@ public class ResourceValidatorDstu3Test {
 	 */
 	@Test
 	public void testValidateQuestionnaireWithCanonicalUrl() {
-		String input = "{\n" +
-			"  \"resourceType\": \"Questionnaire\",\n" +
-			"  \"url\": \"http://some.example.url\",\n" +
-			"  \"status\": \"active\",\n" +
-			"  \"subjectType\": [\n" +
-			"    \"Patient\"\n" +
-			"  ],\n" +
-			"  \"item\": [\n" +
-			"    {\n" +
-			"      \"linkId\": \"example-question\",\n" +
-			"      \"text\": \"Is the sky blue?\",\n" +
-			"      \"type\": \"choice\",\n" +
-			"      \"options\": {\n" +
-			"        \"reference\": \"http://loinc.org/vs/LL3044-6\"\n" +
-			"      }\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}";
+		String input = "{\n" + "  \"resourceType\": \"Questionnaire\",\n"
+				+ "  \"url\": \"http://some.example.url\",\n"
+				+ "  \"status\": \"active\",\n"
+				+ "  \"subjectType\": [\n"
+				+ "    \"Patient\"\n"
+				+ "  ],\n"
+				+ "  \"item\": [\n"
+				+ "    {\n"
+				+ "      \"linkId\": \"example-question\",\n"
+				+ "      \"text\": \"Is the sky blue?\",\n"
+				+ "      \"type\": \"choice\",\n"
+				+ "      \"options\": {\n"
+				+ "        \"reference\": \"http://loinc.org/vs/LL3044-6\"\n"
+				+ "      }\n"
+				+ "    }\n"
+				+ "  ]\n"
+				+ "}";
 
 		Questionnaire q = new Questionnaire();
 		q = ourCtx.newJsonParser().parseResource(Questionnaire.class, input);
@@ -334,7 +348,6 @@ public class ResourceValidatorDstu3Test {
 		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
-
 	}
 
 	/**
@@ -389,28 +402,30 @@ public class ResourceValidatorDstu3Test {
 	public void testValidateWithExtensionsJson() {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
-		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
+		myPatient.setColorPrimary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
+		myPatient.setColorSecondary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
 
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(myPatient);
-//		ourLog.info(messageString);
+		//		ourLog.info(messageString);
 
-		assertThat(messageString, stringContainsInOrder(
-			"meta",
-			"String Extension",
-			"Organization/2.25.79433498044103547197447759549862032393",
-			"furry-grey",
-			"furry-white",
-			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"meta",
+						"String Extension",
+						"Organization/2.25.79433498044103547197447759549862032393",
+						"furry-grey",
+						"furry-white",
+						"FamilyName"));
+		assertThat(messageString, not(stringContainsInOrder("extension", "meta")));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -436,8 +451,12 @@ public class ResourceValidatorDstu3Test {
 	public void testValidateWithExtensionsXml() {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
-		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
+		myPatient.setColorPrimary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
+		myPatient.setColorSecondary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
@@ -446,22 +465,23 @@ public class ResourceValidatorDstu3Test {
 		String messageString = p.encodeResourceToString(myPatient);
 		ourLog.info(messageString);
 
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"meta",
-			"Organization/2.25.79433498044103547197447759549862032393",
-			"furry-grey",
-			"furry-white",
-			"String Extension",
-			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"meta",
+						"Organization/2.25.79433498044103547197447759549862032393",
+						"furry-grey",
+						"furry-white",
+						"String Extension",
+						"FamilyName"));
+		assertThat(messageString, not(stringContainsInOrder("extension", "meta")));
+		assertThat(
+				messageString,
+				containsString(
+						"url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
 		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
-		//@formatter:on
+		// @formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -491,7 +511,10 @@ public class ResourceValidatorDstu3Test {
 		private static final long serialVersionUID = 1L;
 
 		@Child(name = "testCondition")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://testCondition", definedLocally = true, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://testCondition",
+				definedLocally = true,
+				isModifier = false)
 		private List<Reference> testConditions = null;
 
 		public List<Reference> getConditions() {
@@ -502,5 +525,4 @@ public class ResourceValidatorDstu3Test {
 			this.testConditions = ref;
 		}
 	}
-
 }

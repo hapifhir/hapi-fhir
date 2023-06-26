@@ -50,8 +50,8 @@ class MemoryCacheServiceTest {
 		String version = "Ver 3.0";
 		Boolean userSelected = true;
 
-		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(
-			type, system, code, version, userSelected);
+		MemoryCacheService.TagDefinitionCacheKey cacheKey =
+				new MemoryCacheService.TagDefinitionCacheKey(type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
@@ -72,7 +72,7 @@ class MemoryCacheServiceTest {
 		List<SlowFastJob> mySlowJobs;
 		List<SlowFastJob> myFastJobs;
 		ExecutorService myExecutor;
-		final boolean[] canProceed = new boolean[]{ false };
+		final boolean[] canProceed = new boolean[] {false};
 
 		@AfterEach
 		public void tearDown() {
@@ -102,7 +102,7 @@ class MemoryCacheServiceTest {
 
 			// when we spill the cache, and have delayed calculation.
 			// block all but 1 of the workers with a slow job
-			startJobs(1000, (j) ->  (j < nThreads - 1));
+			startJobs(1000, (j) -> (j < nThreads - 1));
 
 			// wait for results to start appearing.
 			SlowFastJob firstFastJob = myFastJobs.get(0);
@@ -119,7 +119,7 @@ class MemoryCacheServiceTest {
 			// blocked items released
 			canProceed[0] = true;
 
-			for(SlowFastJob job: mySlowJobs) {
+			for (SlowFastJob job : mySlowJobs) {
 				job.getOrTimeout("released job doesn't complete");
 			}
 		}
@@ -145,7 +145,7 @@ class MemoryCacheServiceTest {
 
 			// when we spill the cache, and have delayed calculation.
 			// block only a single thread
-			startJobs(1000, (j) ->  (j == nThreads));
+			startJobs(1000, (j) -> (j == nThreads));
 
 			// wait for results to start appearing.
 			SlowFastJob firstFastJob = myFastJobs.get(0);
@@ -157,7 +157,7 @@ class MemoryCacheServiceTest {
 			// blocked items released
 			canProceed[0] = true;
 
-			for(SlowFastJob job: mySlowJobs) {
+			for (SlowFastJob job : mySlowJobs) {
 				job.getOrTimeout("released job doesn't complete");
 			}
 		}
@@ -167,7 +167,7 @@ class MemoryCacheServiceTest {
 			myFastJobs = new ArrayList<>();
 			for (int i = 0; i < jobCount; i++) {
 				boolean slow = slowPredicate.test(i);
-				//boolean slow = i == 0;
+				// boolean slow = i == 0;
 				SlowFastJob job = new SlowFastJob(i, slow, myCache, canProceed);
 				if (job.mySlowFlag) {
 					mySlowJobs.add(job);
@@ -203,7 +203,7 @@ class MemoryCacheServiceTest {
 
 			private int computeValue() {
 				if (mySlowFlag) {
-					while(!myProceedFlag[0]) {
+					while (!myProceedFlag[0]) {
 						try {
 							Thread.sleep(100);
 							ourLog.debug("yawn " + myValue);
@@ -237,6 +237,4 @@ class MemoryCacheServiceTest {
 			}
 		}
 	}
-
-
 }

@@ -19,14 +19,15 @@ class RegexpGsonBuilderUtilTest {
 	// a valid regex string which breaks gson
 	private static final String GSON_FAILING_REGEX = ".*\\^Donor$";
 
-
 	@Test
 	void testBuildUsingTestedClass() {
 		String propertyValue = "propAAA";
 		String expectedGson = "{\"regexp\":{\"P:" + PROP_NAME + "\":{\"value\":\"" + propertyValue + "\"}}}";
 
-		assertEquals(expectedGson, RegexpGsonBuilderUtil.toGson(
-			CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue).toString());
+		assertEquals(
+				expectedGson,
+				RegexpGsonBuilderUtil.toGson(CONCEPT_PROPERTY_PREFIX_NAME + PROP_NAME, propertyValue)
+						.toString());
 	}
 
 	/**
@@ -45,13 +46,9 @@ class RegexpGsonBuilderUtilTest {
 		// same json structure fails with some valid regex strings
 		String failingRegexQuery = "{'regexp':{'P:SYSTEM':{'value':'" + GSON_FAILING_REGEX + "'}}}";
 
-		JsonSyntaxException thrown = assertThrows(
-			JsonSyntaxException.class,
-			() -> new Gson().fromJson(failingRegexQuery, JsonObject.class));
+		JsonSyntaxException thrown =
+				assertThrows(JsonSyntaxException.class, () -> new Gson().fromJson(failingRegexQuery, JsonObject.class));
 
 		assertTrue(thrown.getCause() instanceof MalformedJsonException);
 	}
-
-
-
 }

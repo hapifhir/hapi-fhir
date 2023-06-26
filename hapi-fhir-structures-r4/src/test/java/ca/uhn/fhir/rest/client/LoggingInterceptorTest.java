@@ -86,19 +86,19 @@ public class LoggingInterceptorTest {
 				System.out.flush();
 				System.out.println("** Got Message: " + formattedMessage);
 				System.out.flush();
-				return
-					formattedMessage.contains("Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1") ||
-					formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1) in ");
+				return formattedMessage.contains(
+								"Client request: GET http://localhost:" + ourPort + "/Patient/1 HTTP/1.1")
+						|| formattedMessage.contains("Client response: HTTP 200 OK (Patient/1/_history/1) in ");
 			}
 		}));
 	}
 
-		@Test
+	@Test
 	public void testLoggerVerbose() {
 		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		
+
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
@@ -109,13 +109,16 @@ public class LoggingInterceptorTest {
 			public boolean matches(final ILoggingEvent argument) {
 				String formattedMessage = argument.getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
-				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
+				return formattedMessage
+						.replace("; ", ";")
+						.toLowerCase()
+						.contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
 		}));
 
 		// Unregister the interceptor
 		client.unregisterInterceptor(interceptor);
-		
+
 		patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
@@ -124,10 +127,12 @@ public class LoggingInterceptorTest {
 			public boolean matches(final ILoggingEvent argument) {
 				String formattedMessage = argument.getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
-				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
+				return formattedMessage
+						.replace("; ", ";")
+						.toLowerCase()
+						.contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
 		}));
-
 	}
 
 	@AfterAll
@@ -159,11 +164,10 @@ public class LoggingInterceptorTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}
-
 
 	public static class DummyProvider implements IResourceProvider {
 
@@ -179,7 +183,5 @@ public class LoggingInterceptorTest {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
-
 	}
-
 }

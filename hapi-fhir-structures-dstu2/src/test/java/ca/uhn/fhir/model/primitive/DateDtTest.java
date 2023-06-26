@@ -17,12 +17,11 @@ public class DateDtTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@Test
 	public void testPrecision() {
 
-//		ourLog.info(""+ new TreeSet<String>(Arrays.asList(TimeZone.getAvailableIDs())));
-		
+		//		ourLog.info(""+ new TreeSet<String>(Arrays.asList(TimeZone.getAvailableIDs())));
+
 		final Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("GMT"));
 		cal.set(1990, Calendar.JANUARY, 1, 0, 0, 0);
@@ -55,7 +54,4 @@ public class DateDtTest {
 		dateDt = new DateDt(1990, 0, 5);
 		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
-	
-	
-	
 }

@@ -22,7 +22,8 @@ class MdmSurvivorshipSvcImplTest extends BaseMdmR4Test {
 		Patient p1 = buildFrankPatient();
 		Patient p2 = new Patient();
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+				p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
 		assertFalse(p2.hasIdElement());
 		assertTrue(p2.getIdentifier().isEmpty());
@@ -41,7 +42,8 @@ class MdmSurvivorshipSvcImplTest extends BaseMdmR4Test {
 		Patient p2 = buildPaulPatient();
 		String p2Name = p2.getNameFirstRep().getNameAsSingleString();
 
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
+				p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
 
 		assertFalse(p2.hasIdElement());
 		assertFalse(p2.getIdentifier().isEmpty());
@@ -55,5 +57,4 @@ class MdmSurvivorshipSvcImplTest extends BaseMdmR4Test {
 		assertEquals(p1.getTelecom().size(), p1.getTelecom().size());
 		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
 	}
-
 }

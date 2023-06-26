@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.r4.model.Patient;
@@ -29,11 +29,15 @@ import static org.mockito.Mockito.when;
 class CandidateSearcherTest {
 	@Mock
 	DaoRegistry myDaoRegistry;
+
 	@Mock
 	private IMdmRuleValidator myMdmRuleValidator;
+
 	private final MdmSettings myMdmSettings = new MdmSettings(myMdmRuleValidator);
+
 	@Mock
 	private MdmSearchParamSvc myMdmSearchParamSvc;
+
 	private CandidateSearcher myCandidateSearcher;
 
 	@BeforeEach

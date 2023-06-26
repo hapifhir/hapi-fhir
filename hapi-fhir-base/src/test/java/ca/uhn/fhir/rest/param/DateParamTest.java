@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DateParamTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateParamTest.class);
 
-
 	@Test
 	public void testBasicDateParse() {
 		DateParam input = new DateParam("2020-01-01");
@@ -30,9 +29,9 @@ public class DateParamTest {
 		// too bad value is a j.u.Date instead of a new JSR-310 type
 		// DataParam parses using default tz, so go backwards.
 		ZonedDateTime zonedDateTime = input.getValue().toInstant().atZone(ZoneId.systemDefault());
-		assertEquals(2020,zonedDateTime.getYear());
-		assertEquals(Month.JANUARY,zonedDateTime.getMonth());
-		assertEquals(1,zonedDateTime.getDayOfMonth());
+		assertEquals(2020, zonedDateTime.getYear());
+		assertEquals(Month.JANUARY, zonedDateTime.getMonth());
+		assertEquals(1, zonedDateTime.getDayOfMonth());
 		assertNull(input.getPrefix());
 	}
 
@@ -57,7 +56,7 @@ public class DateParamTest {
 	 * We support legacy prefixes in addition to the standard ParamPrefixEnum values.
 	 *
 	 * Testing here since BaseParamWithPrefix is abstract.
- 	 */
+	 */
 	@Test
 	public void testLegacyPrefixParse() {
 		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, translateLegacyPrefix(">="));
@@ -95,7 +94,6 @@ public class DateParamTest {
 		new DateParam(ParamPrefixEnum.GREATERTHAN, new DateTimeDt("2011-01-02"));
 		new DateParam(ParamPrefixEnum.GREATERTHAN, InstantDt.withCurrentTime());
 		new DateParam(ParamPrefixEnum.GREATERTHAN, "2011-01-02");
-
 	}
 
 	@Test

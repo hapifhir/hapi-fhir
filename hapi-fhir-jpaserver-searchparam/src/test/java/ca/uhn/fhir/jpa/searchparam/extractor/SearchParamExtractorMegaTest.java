@@ -56,16 +56,20 @@ public class SearchParamExtractorMegaTest {
 		BaseSearchParamExtractor extractor;
 		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU2:
-				extractor = new SearchParamExtractorDstu2(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorDstu2(
+						new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case DSTU3:
-				extractor = new SearchParamExtractorDstu3(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorDstu3(
+						new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R4:
-				extractor = new SearchParamExtractorR4(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorR4(
+						new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R5:
-				extractor = new SearchParamExtractorR5(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorR5(
+						new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R4B:
 			case DSTU2_HL7ORG:
@@ -75,7 +79,6 @@ public class SearchParamExtractorMegaTest {
 		}
 
 		process(theFhirContext, extractor);
-
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {
@@ -93,16 +96,23 @@ public class SearchParamExtractorMegaTest {
 		ourLog.info("Found {} indexes", indexesCounter.get());
 	}
 
-	private void processElement(FhirContext theCtx, BaseSearchParamExtractor theExtractor, BaseRuntimeElementDefinition<?> theElementDef, List<BaseRuntimeElementDefinition<?>> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) throws Exception {
+	private void processElement(
+			FhirContext theCtx,
+			BaseSearchParamExtractor theExtractor,
+			BaseRuntimeElementDefinition<?> theElementDef,
+			List<BaseRuntimeElementDefinition<?>> theElementStack,
+			List<BaseRuntimeChildDefinition> theChildStack,
+			AtomicInteger theIndexesCounter)
+			throws Exception {
 		if (theElementDef.getName().equals("ElementDefinition")) {
 			return;
 		}
 
-
 		theElementStack.add(theElementDef);
 
 		if (theElementDef instanceof BaseRuntimeElementCompositeDefinition) {
-			BaseRuntimeElementCompositeDefinition<?> composite = (BaseRuntimeElementCompositeDefinition<?>) theElementDef;
+			BaseRuntimeElementCompositeDefinition<?> composite =
+					(BaseRuntimeElementCompositeDefinition<?>) theElementDef;
 
 			for (BaseRuntimeChildDefinition nextChild : composite.getChildren()) {
 				if (theChildStack.contains(nextChild)) {
@@ -150,7 +160,12 @@ public class SearchParamExtractorMegaTest {
 		theElementStack.remove(theElementStack.size() - 1);
 	}
 
-	private void handlePathToPrimitive(FhirContext theCtx, BaseSearchParamExtractor theExtractor, List<BaseRuntimeElementDefinition<?>> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) {
+	private void handlePathToPrimitive(
+			FhirContext theCtx,
+			BaseSearchParamExtractor theExtractor,
+			List<BaseRuntimeElementDefinition<?>> theElementStack,
+			List<BaseRuntimeChildDefinition> theChildStack,
+			AtomicInteger theIndexesCounter) {
 		IBase previousObject = null;
 		IBaseResource resource = null;
 		StringBuilder path = new StringBuilder(theElementStack.get(0).getName());
@@ -180,7 +195,9 @@ public class SearchParamExtractorMegaTest {
 			return;
 		}
 
-		String typeName = theCtx.getElementDefinition(leaf.getClass()).getRootParentDefinition().getName();
+		String typeName = theCtx.getElementDefinition(leaf.getClass())
+				.getRootParentDefinition()
+				.getName();
 		switch (typeName) {
 			case "boolean":
 				leaf.setValueAsString("true");
@@ -214,7 +231,8 @@ public class SearchParamExtractorMegaTest {
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamNumber(resource);
 			List<String> warnings = set.getWarnings();
 			// This is an R5 parameter that needs special handling
-			warnings.remove("Search param [Patient]#age is unable to index value of type date as a NUMBER at path: Patient.birthDate");
+			warnings.remove(
+					"Search param [Patient]#age is unable to index value of type date as a NUMBER at path: Patient.birthDate");
 			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
 			theIndexesCounter.addAndGet(set.size());
 		}
@@ -234,8 +252,10 @@ public class SearchParamExtractorMegaTest {
 			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamTokens(resource);
 			List<String> warnings = set.getWarnings();
 			// Two invalid params in draft R5
-			warnings.remove("Search param [MedicationUsage]#adherence is unable to index value of type org.hl7.fhir.r5.model.MedicationUsage.MedicationUsageAdherenceComponent as a TOKEN at path: MedicationUsage.adherence");
-			warnings.remove("Search param [ResearchStudy]#focus is unable to index value of type org.hl7.fhir.r5.model.ResearchStudy.ResearchStudyFocusComponent as a TOKEN at path: ResearchStudy.focus");
+			warnings.remove(
+					"Search param [MedicationUsage]#adherence is unable to index value of type org.hl7.fhir.r5.model.MedicationUsage.MedicationUsageAdherenceComponent as a TOKEN at path: MedicationUsage.adherence");
+			warnings.remove(
+					"Search param [ResearchStudy]#focus is unable to index value of type org.hl7.fhir.r5.model.ResearchStudy.ResearchStudyFocusComponent as a TOKEN at path: ResearchStudy.focus");
 			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
 			theIndexesCounter.addAndGet(set.size());
 		}
@@ -249,11 +269,9 @@ public class SearchParamExtractorMegaTest {
 
 	public static List<FhirContext> provideContexts() {
 		return Lists.newArrayList(
-			FhirContext.forDstu2Cached(),
-			FhirContext.forDstu3Cached(),
-			FhirContext.forR4Cached(),
-			FhirContext.forR5Cached()
-		);
+				FhirContext.forDstu2Cached(),
+				FhirContext.forDstu3Cached(),
+				FhirContext.forR4Cached(),
+				FhirContext.forR5Cached());
 	}
-
 }

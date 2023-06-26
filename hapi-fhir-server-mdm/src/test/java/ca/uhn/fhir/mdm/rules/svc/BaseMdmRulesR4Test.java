@@ -19,7 +19,7 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN_FIRST = "patient-given-first";
 	public static final String PATIENT_FAMILY = "patient-last";
 	public static final String PATIENT_EID_FOR_TEST = "http://hello.com/naming/patient-eid";
-	public static final String MEDICATION_EID_FOR_TEST= "http://hello.com/naming/medication-eid";
+	public static final String MEDICATION_EID_FOR_TEST = "http://hello.com/naming/medication-eid";
 	public static final String PRACTITIONER_EID_FOR_TEST = "http://hello.com/naming/practitioner-eid";
 
 	public static final double NAME_THRESHOLD = 0.8;
@@ -37,33 +37,34 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 		myMdmRulesJson.setMdmTypes(myLegalMdmTypes);
 
 		myGivenNameMatchField = new MdmFieldMatchJson()
-			.setName(PATIENT_GIVEN)
-			.setResourceType("Patient")
-			.setResourcePath("name.given")
-			.setSimilarity(new MdmSimilarityJson().setAlgorithm(MdmSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
+				.setName(PATIENT_GIVEN)
+				.setResourceType("Patient")
+				.setResourcePath("name.given")
+				.setSimilarity(new MdmSimilarityJson()
+						.setAlgorithm(MdmSimilarityEnum.COSINE)
+						.setMatchThreshold(NAME_THRESHOLD));
 
 		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_FAMILY);
 	}
 
 	protected MdmRulesJson buildActiveBirthdateIdRules() {
 		MdmFilterSearchParamJson activePatientsBlockingFilter = new MdmFilterSearchParamJson()
-			.setResourceType("Patient")
-			.setSearchParam(Patient.SP_ACTIVE)
-			.setFixedValue("true");
+				.setResourceType("Patient")
+				.setSearchParam(Patient.SP_ACTIVE)
+				.setFixedValue("true");
 
-		MdmResourceSearchParamJson patientBirthdayBlocking = new MdmResourceSearchParamJson()
-			.setResourceType("Patient")
-			.addSearchParam(Patient.SP_BIRTHDATE);
-		MdmResourceSearchParamJson patientIdentifierBlocking = new MdmResourceSearchParamJson()
-			.setResourceType("Patient")
-			.addSearchParam(Patient.SP_IDENTIFIER);
-
+		MdmResourceSearchParamJson patientBirthdayBlocking =
+				new MdmResourceSearchParamJson().setResourceType("Patient").addSearchParam(Patient.SP_BIRTHDATE);
+		MdmResourceSearchParamJson patientIdentifierBlocking =
+				new MdmResourceSearchParamJson().setResourceType("Patient").addSearchParam(Patient.SP_IDENTIFIER);
 
 		MdmFieldMatchJson lastNameMatchField = new MdmFieldMatchJson()
-			.setName(PATIENT_FAMILY)
-			.setResourceType("Patient")
-			.setResourcePath("name.family")
-			.setSimilarity(new MdmSimilarityJson().setAlgorithm(MdmSimilarityEnum.JARO_WINKLER).setMatchThreshold(NAME_THRESHOLD));
+				.setName(PATIENT_FAMILY)
+				.setResourceType("Patient")
+				.setResourcePath("name.family")
+				.setSimilarity(new MdmSimilarityJson()
+						.setAlgorithm(MdmSimilarityEnum.JARO_WINKLER)
+						.setMatchThreshold(NAME_THRESHOLD));
 
 		MdmRulesJson retval = new MdmRulesJson();
 		retval.setVersion("test version");

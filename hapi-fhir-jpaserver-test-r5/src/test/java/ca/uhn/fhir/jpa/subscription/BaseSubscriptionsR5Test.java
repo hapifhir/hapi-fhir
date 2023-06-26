@@ -44,9 +44,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -55,6 +52,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,30 +64,40 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR5Test.class);
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "http://example.com/topic/test";
 
-
 	protected static int ourListenerPort;
 	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
 	private static String ourListenerServerBase;
 	protected static RestfulServer ourListenerRestServer;
+
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
+
 	@Autowired
 	protected SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+
 	@Autowired
 	private SingleQueryCountHolder myCountHolder;
+
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+
 	@Autowired
 	private IInterceptorService myInterceptorService;
-	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider = new SubscriptionTopicR5Test.TestSystemProvider();
+
+	private static final SubscriptionTopicR5Test.TestSystemProvider ourTestSystemProvider =
+			new SubscriptionTopicR5Test.TestSystemProvider();
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
-	protected final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
-	protected final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
+	protected final PointcutLatch mySubscriptionTopicsCheckedLatch =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected final PointcutLatch mySubscriptionDeliveredLatch =
+			new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@Override
 	@BeforeEach
@@ -103,7 +113,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		// Delete all Subscriptions
 		if (myClient != null) {
-			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
+			Bundle allSubscriptions = myClient.search()
+					.forResource(Subscription.class)
+					.returnBundle(Bundle.class)
+					.execute();
 			for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
 				myClient.delete().resource(next).execute();
 			}
@@ -118,9 +131,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		if (processingChannel != null) {
 			processingChannel.addInterceptor(myCountingInterceptor);
 		}
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
-
+		myInterceptorService.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
+		myInterceptorService.registerAnonymousInterceptor(
+				Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
 	}
 
 	@AfterEach
@@ -136,7 +150,9 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete()
+				.resourceConditionalByUrl("Observation?code:missing=false")
+				.execute();
 		ourLog.info("Done deleting all subscriptions");
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
@@ -167,10 +183,10 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	protected Set<Observation> getReceivedObservations() {
 		return ourTestSystemProvider.receivedBundles.stream()
-			.flatMap(t -> t.getEntry().stream())
-			.filter(t -> t.getResource() instanceof Observation)
-			.map(t -> (Observation) t.getResource())
-			.collect(Collectors.toSet());
+				.flatMap(t -> t.getEntry().stream())
+				.filter(t -> t.getResource() instanceof Observation)
+				.map(t -> (Observation) t.getResource())
+				.collect(Collectors.toSet());
 	}
 
 	@Nonnull
@@ -196,16 +212,18 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 			filterComponentFromQueryString(nextFilter).forEach(subscription::addFilterBy);
 		}
 
-		subscription.getChannelType()
-			.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
-			.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
+		subscription
+				.getChannelType()
+				.setSystem(CanonicalSubscriptionChannelType.RESTHOOK.getSystem())
+				.setCode(CanonicalSubscriptionChannelType.RESTHOOK.toCode());
 		subscription.setContentType(thePayload);
 		subscription.setEndpoint(ourListenerServerBase);
 		return subscription;
 	}
 
 	private Stream<Subscription.SubscriptionFilterByComponent> filterComponentFromQueryString(String theNextFilter) {
-		return CanonicalTopicSubscriptionFilter.fromQueryUrl(theNextFilter).stream().map(CanonicalTopicSubscriptionFilter::toSubscriptionFilterByComponent);
+		return CanonicalTopicSubscriptionFilter.fromQueryUrl(theNextFilter).stream()
+				.map(CanonicalTopicSubscriptionFilter::toSubscriptionFilterByComponent);
 	}
 
 	@PostConstruct
@@ -218,7 +236,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	// TODO KHS consolidate with lambda
-	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount) throws InterruptedException {
+	protected IIdType createResource(IBaseResource theResource, boolean theExpectDelivery, int theCount)
+			throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(theCount);
@@ -232,7 +251,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return id;
 	}
 
-	protected DaoMethodOutcome updateResource(IBaseResource theResource, boolean theExpectDelivery) throws InterruptedException {
+	protected DaoMethodOutcome updateResource(IBaseResource theResource, boolean theExpectDelivery)
+			throws InterruptedException {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.setExpectedCount(1);
@@ -241,7 +261,8 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		DaoMethodOutcome retval = dao.update(theResource, mySrd);
 
 		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
-		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
+		ResourceModifiedMessage lastMessage =
+				PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
 		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
 
 		if (theExpectDelivery) {
@@ -273,7 +294,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return ourCountHolder.getQueryCountMap().get("");
 	}
 
-
 	protected void waitForRegisteredSubscriptionTopicCount(int theTarget) {
 		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
 	}
@@ -287,25 +307,35 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
-	protected SubscriptionTopic createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic) throws InterruptedException {
+	protected SubscriptionTopic createSubscriptionTopic(SubscriptionTopic theSubscriptionTopic)
+			throws InterruptedException {
 		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
-		SubscriptionTopic retval = (SubscriptionTopic) myClient.create().resource(theSubscriptionTopic).execute().getResource();
+		SubscriptionTopic retval = (SubscriptionTopic)
+				myClient.create().resource(theSubscriptionTopic).execute().getResource();
 		mySubscriptionTopicsCheckedLatch.awaitExpected();
 		return retval;
 	}
 
-	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
+	protected static void validateSubscriptionStatus(
+			Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
 		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
-		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+		assertEquals(
+				theExpectedEventNumber.toString(),
+				ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
-		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
+		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents =
+				ss.getNotificationEvent();
 		assertEquals(1, notificationEvents.size());
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
-		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
+		assertEquals(
+				sentResource.getIdElement().toUnqualifiedVersionless(),
+				notificationEvent.getFocus().getReferenceElement());
 
-		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
+		assertEquals(
+				subscription.getIdElement().toUnqualifiedVersionless(),
+				ss.getSubscription().getReferenceElement());
 		assertEquals(subscription.getTopic(), ss.getTopic());
 	}
 
@@ -332,7 +362,6 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		JettyUtil.closeServer(ourListenerServer);
 	}
 
-
 	static class TestSystemProvider {
 		AtomicInteger count = new AtomicInteger(0);
 		final List<Bundle> receivedBundles = new ArrayList<>();
@@ -341,9 +370,11 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		@Transaction
 		public Bundle transaction(@TransactionParam Bundle theBundle, HttpServletRequest theRequest) {
-			ourLog.info("Received Transaction with {} entries", theBundle.getEntry().size());
+			ourLog.info(
+					"Received Transaction with {} entries", theBundle.getEntry().size());
 			count.incrementAndGet();
-			receivedContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			receivedContentTypes.add(
+					theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			receivedBundles.add(theBundle);
 			extractHeaders(theRequest);
 			return theBundle;

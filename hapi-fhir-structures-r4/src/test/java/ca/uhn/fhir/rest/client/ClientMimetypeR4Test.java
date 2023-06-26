@@ -65,11 +65,25 @@ public class ClientMimetypeR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).encodedXml().execute();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>", extractBodyAsString(capt));
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				Constants.CT_FHIR_XML_NEW,
+				capt.getAllValues()
+						.get(0)
+						.getFirstHeader("content-type")
+						.getValue()
+						.replaceAll(";.*", ""));
+		assertEquals(
+				Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY,
+				capt.getAllValues().get(0).getFirstHeader("accept").getValue());
+		assertEquals(
+				"<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>",
+				extractBodyAsString(capt));
 	}
 
 	@Test
@@ -85,11 +99,25 @@ public class ClientMimetypeR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).encodedXml().execute();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>", extractBodyAsString(capt));
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				Constants.CT_FHIR_XML_NEW,
+				capt.getAllValues()
+						.get(0)
+						.getFirstHeader("content-type")
+						.getValue()
+						.replaceAll(";.*", ""));
+		assertEquals(
+				Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY,
+				capt.getAllValues().get(0).getFirstHeader("accept").getValue());
+		assertEquals(
+				"<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div></text></Patient>",
+				extractBodyAsString(capt));
 	}
 
 	@Test
@@ -105,11 +133,25 @@ public class ClientMimetypeR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).encodedJson().execute();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
-		assertEquals("{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}", extractBodyAsString(capt));
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				Constants.CT_FHIR_JSON_NEW,
+				capt.getAllValues()
+						.get(0)
+						.getFirstHeader("content-type")
+						.getValue()
+						.replaceAll(";.*", ""));
+		assertEquals(
+				Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY,
+				capt.getAllValues().get(0).getFirstHeader("accept").getValue());
+		assertEquals(
+				"{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}",
+				extractBodyAsString(capt));
 	}
 
 	@Test
@@ -125,19 +167,38 @@ public class ClientMimetypeR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).encodedJson().execute();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getFirstHeader("accept").getValue());
-		assertEquals("{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}", extractBodyAsString(capt));
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				Constants.CT_FHIR_JSON_NEW,
+				capt.getAllValues()
+						.get(0)
+						.getFirstHeader("content-type")
+						.getValue()
+						.replaceAll(";.*", ""));
+		assertEquals(
+				Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY,
+				capt.getAllValues().get(0).getFirstHeader("accept").getValue());
+		assertEquals(
+				"{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">A PATIENT</div>\"}}",
+				extractBodyAsString(capt));
 	}
 
 	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
+		String body = IOUtils.toString(
+				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0))
+						.getEntity()
+						.getContent(),
+				"UTF-8");
 		return body;
 	}
 
-	private ArgumentCaptor<HttpUriRequest> prepareMimetypePostTest(String requestCt, boolean theXml) throws IOException, ClientProtocolException {
+	private ArgumentCaptor<HttpUriRequest> prepareMimetypePostTest(String requestCt, boolean theXml)
+			throws IOException, ClientProtocolException {
 		final IParser p = theXml ? ourCtx.newXmlParser() : ourCtx.newJsonParser();
 
 		final Patient resp1 = new Patient();
@@ -145,18 +206,23 @@ public class ClientMimetypeR4Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] {
+					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
+				};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", requestCt + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", requestCt + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+				return new ReaderInputStream(
+						new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
 			}
 		});
 		return capt;
@@ -171,5 +237,4 @@ public class ClientMimetypeR4Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 	}
-
 }

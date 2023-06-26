@@ -53,10 +53,10 @@ public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 			}
 
 			for (String beanName : beanFactory.getBeanNamesForType(ExecutorConfigurationSupport.class)) {
-				ExecutorConfigurationSupport executorConfigSupport = beanFactory.getBean(beanName, ExecutorConfigurationSupport.class);
+				ExecutorConfigurationSupport executorConfigSupport =
+						beanFactory.getBean(beanName, ExecutorConfigurationSupport.class);
 				executorConfigSupport.shutdown();
 			}
 		}
-
 	}
 }

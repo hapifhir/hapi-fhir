@@ -35,7 +35,8 @@ import static org.mockito.Mockito.when;
 public class QuestionnaireValidatorR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
+	private static DefaultProfileValidationSupport myDefaultValidationSupport =
+			new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 
@@ -48,7 +49,8 @@ public class QuestionnaireValidatorR4Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+				myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -56,7 +58,7 @@ public class QuestionnaireValidatorR4Test {
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCoding() {
-		String[] extensionDomainsToTest = new String[]{
+		String[] extensionDomainsToTest = new String[] {
 			"http://example.org/questionnaire-color-control-1",
 			"https://example.org/questionnaire-color-control-2",
 			"http://acme.com/questionnaire-color-control-3",
@@ -64,37 +66,41 @@ public class QuestionnaireValidatorR4Test {
 			"http://nema.org/questionnaire-color-control-5",
 			"https://nema.org/questionnaire-color-control-6",
 			"http://hl7.org/fhir/StructureDefinition/structuredefinition-expression",
-
 		};
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = minimalValidQuestionnaire();
 			q.addItem()
-				.setLinkId("link0")
-				.setType(QuestionnaireItemType.STRING)
-				.addExtension()
-				.setUrl(extensionDomainToTest)
-				.setValue(new CodeType("text-box"));
+					.setLinkId("link0")
+					.setType(QuestionnaireItemType.STRING)
+					.addExtension()
+					.setUrl(extensionDomainToTest)
+					.setValue(new CodeType("text-box"));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertThat(
+					errors.getMessages().stream()
+							.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+							.collect(Collectors.toList()),
+					Matchers.empty());
 		}
 	}
 
 	@Test
 	public void testQuestionnaireWithPredefinedExtensionDomainsForCodeableConcept() {
-		String[] extensionDomainsToTest = new String[]{
+		String[] extensionDomainsToTest = new String[] {
 			"http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
 		};
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = minimalValidQuestionnaire();
 			q.addItem()
-				.setLinkId("link0")
-				.setType(QuestionnaireItemType.STRING)
-				.addExtension()
-				.setUrl(extensionDomainToTest)
-				.setValue(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
+					.setLinkId("link0")
+					.setType(QuestionnaireItemType.STRING)
+					.addExtension()
+					.setUrl(extensionDomainToTest)
+					.setValue(new CodeableConcept()
+							.addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
@@ -108,11 +114,11 @@ public class QuestionnaireValidatorR4Test {
 		String extensionUrl = "http://my.own.domain/StructureDefinition/";
 		Questionnaire q = minimalValidQuestionnaire();
 		q.addItem()
-			.setLinkId("link0")
-			.setType(QuestionnaireItemType.STRING)
-			.addExtension()
-			.setUrl(extensionUrl + "questionnaire-itemControl")
-			.setValue(new CodeType("text-box"));
+				.setLinkId("link0")
+				.setType(QuestionnaireItemType.STRING)
+				.addExtension()
+				.setUrl(extensionUrl + "questionnaire-itemControl")
+				.setValue(new CodeType("text-box"));
 
 		ValidationResult errors = myVal.validateWithResult(q);
 

@@ -34,6 +34,7 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 	@Autowired
 	private ConsumeFilesStep mySvc;
+
 	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "PART-1");
 
 	@BeforeEach
@@ -65,7 +66,6 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		patient.setActive(false);
 		myPatientDao.update(patient);
 
-
 		List<IBaseResource> resources = new ArrayList<>();
 
 		patient = new Patient();
@@ -87,7 +87,12 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread(), myCaptureQueriesListener.getInsertQueriesForCurrentThread().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertEquals(
+				0,
+				myCaptureQueriesListener.countInsertQueriesForCurrentThread(),
+				myCaptureQueriesListener.getInsertQueriesForCurrentThread().stream()
+						.map(t -> t.getSql(true, false))
+						.collect(Collectors.joining("\n")));
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
@@ -97,7 +102,6 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"));
 		assertFalse(patient.getActive());
-
 	}
 
 	@ParameterizedTest
@@ -119,7 +123,6 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		patient.setId("B");
 		patient.setActive(true);
 		myPatientDao.update(patient, mySrd);
-
 
 		List<IBaseResource> resources = new ArrayList<>();
 		patient = new Patient();
@@ -157,7 +160,6 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"), mySrd);
 		assertFalse(patient.getActive());
-
 	}
 
 	@Test
@@ -185,21 +187,24 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
-			either(containsString("forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null)"))
-				.or(containsString("forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null)")));
+		assertThat(
+				myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
+				either(
+								containsString(
+										"forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null)"))
+						.or(
+								containsString(
+										"forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='A' and (forcedid0_.PARTITION_ID is null) or forcedid0_.RESOURCE_TYPE='Patient' and forcedid0_.FORCED_ID='B' and (forcedid0_.PARTITION_ID is null)")));
 		assertEquals(52, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-
 		patient = myPatientDao.read(new IdType("Patient/A"));
 		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"));
 		assertFalse(patient.getActive());
-
 	}
 
 	@Test
@@ -229,11 +234,8 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		} catch (JobExecutionFailedException e) {
 
 			// Validate
-			assertThat(e.getMessage(), containsString("no resource with this ID exists and clients may only assign IDs"));
-
+			assertThat(
+					e.getMessage(), containsString("no resource with this ID exists and clients may only assign IDs"));
 		}
-
-
 	}
-
 }

@@ -65,7 +65,7 @@ class HSearchElementCacheTest {
 
 	@Test
 	public void deeperPathRemembered() {
-		DocumentElement child = mySvc.getObjectElement("child",  "grandchild");
+		DocumentElement child = mySvc.getObjectElement("child", "grandchild");
 
 		assertThat(mySvc.getObjectElement("child", "grandchild"), Matchers.sameInstance(child));
 	}
@@ -76,5 +76,4 @@ class HSearchElementCacheTest {
 		TestDocumentElement grandChild = (TestDocumentElement) mySvc.getObjectElement("child", "grandchild");
 		assertThat(grandChild.myParent, Matchers.sameInstance(child));
 	}
-
 }

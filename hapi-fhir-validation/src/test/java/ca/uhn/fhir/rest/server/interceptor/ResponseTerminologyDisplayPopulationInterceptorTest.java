@@ -21,12 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
 	@Order(0)
 	@RegisterExtension
 	protected RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
+
 	@Order(1)
 	@RegisterExtension
-	protected HashMapResourceProviderExtension<Patient> myProviderPatientExtension = new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
+	protected HashMapResourceProviderExtension<Patient> myProviderPatientExtension =
+			new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
+
 	private IGenericClient myClient;
 
 	@BeforeEach
@@ -41,10 +45,15 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testPopulateCoding_Read() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("A");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
@@ -54,10 +63,16 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testDontPopulateCodingIfLookupReturnsNull_Read() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(
+						new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("zz");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("zz");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
@@ -67,13 +82,21 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testPopulateCoding_Search() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("A");
 		myClient.create().resource(p).execute();
 
-		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		Bundle bundle = myClient.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(1, bundle.getEntry().size());
 		p = (Patient) bundle.getEntry().get(0).getResource();
 		assertEquals(1, p.getMaritalStatus().getCoding().size());
@@ -82,13 +105,22 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testDontPopulateCodingIfLookupReturnsNull_Search() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(
+						new ResponseTerminologyDisplayPopulationInterceptor(new NullableValidationSupport(myCtx)));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("zz");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("zz");
 		myClient.create().resource(p).execute();
 
-		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+		Bundle bundle = myClient.search()
+				.forResource(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(1, bundle.getEntry().size());
 		p = (Patient) bundle.getEntry().get(0).getResource();
 		assertEquals(1, p.getMaritalStatus().getCoding().size());
@@ -97,10 +129,16 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testDontPopulateCodingIfAlreadyPopulated() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("A").setDisplay("FOO");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("A")
+				.setDisplay("FOO");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
@@ -110,10 +148,15 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
 	@Test
 	public void testDontPopulateCodingIfNoneFound() {
-		myServerExtension.getRestfulServer().registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
+		myServerExtension
+				.getRestfulServer()
+				.registerInterceptor(new ResponseTerminologyDisplayPopulationInterceptor(myCtx.getValidationSupport()));
 
 		Patient p = new Patient();
-		p.getMaritalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").setCode("ZZZZZZ");
+		p.getMaritalStatus()
+				.addCoding()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+				.setCode("ZZZZZZ");
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
@@ -140,14 +183,18 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		}
 
 		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		public LookupCodeResult lookupCode(
+				ValidationSupportContext theValidationSupportContext,
+				String theSystem,
+				String theCode,
+				String theDisplayLanguage) {
 			return null;
 		}
-		
+
 		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		public LookupCodeResult lookupCode(
+				ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 			return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 		}
 	}
-
 }

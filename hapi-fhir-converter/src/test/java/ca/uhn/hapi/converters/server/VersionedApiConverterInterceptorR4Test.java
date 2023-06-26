@@ -34,13 +34,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class VersionedApiConverterInterceptorR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionedApiConverterInterceptorR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(VersionedApiConverterInterceptorR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 
 	private static Server ourServer;
-
 
 	@Test
 	public void testSearchNormal() throws Exception {
@@ -65,7 +65,8 @@ public class VersionedApiConverterInterceptorR4Test {
 
 	@Test
 	public void testSearchConvertToR2ByFormatParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + UrlUtil.escapeUrlParam("application/fhir+json; fhirVersion=1.0"));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format="
+				+ UrlUtil.escapeUrlParam("application/fhir+json; fhirVersion=1.0"));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
@@ -96,13 +97,13 @@ public class VersionedApiConverterInterceptorR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -124,7 +125,5 @@ public class VersionedApiConverterInterceptorR4Test {
 
 			return retVal;
 		}
-
 	}
-
 }

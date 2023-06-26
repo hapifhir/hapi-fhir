@@ -44,13 +44,12 @@ public class SearchMethodPriorityTest {
 	public void testDateRangeSelectedWhenMultipleParametersProvided() {
 		ourServerRule.getRestfulServer().registerProviders(new DateStrengthsWithRequiredResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.where(Patient.BIRTHDATE.after().day("2001-01-01"))
-			.and(Patient.BIRTHDATE.before().day("2002-01-01"))
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search()
+				.forResource("Patient")
+				.where(Patient.BIRTHDATE.after().day("2001-01-01"))
+				.and(Patient.BIRTHDATE.before().day("2002-01-01"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals("findDateRangeParam", myLastMethod);
 	}
@@ -59,12 +58,11 @@ public class SearchMethodPriorityTest {
 	public void testDateRangeNotSelectedWhenSingleParameterProvided() {
 		ourServerRule.getRestfulServer().registerProviders(new DateStrengthsWithRequiredResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.where(Patient.BIRTHDATE.after().day("2001-01-01"))
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search()
+				.forResource("Patient")
+				.where(Patient.BIRTHDATE.after().day("2001-01-01"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals("findDateParam", myLastMethod);
 	}
@@ -73,11 +71,7 @@ public class SearchMethodPriorityTest {
 	public void testEmptyDateSearchProvidedWithNoParameters() {
 		ourServerRule.getRestfulServer().registerProviders(new DateStrengthsWithRequiredResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
 		assertEquals("find", myLastMethod);
 	}
@@ -86,13 +80,12 @@ public class SearchMethodPriorityTest {
 	public void testStringAndListSelectedWhenMultipleParametersProvided() {
 		ourServerRule.getRestfulServer().registerProviders(new StringStrengthsWithOptionalResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.where(Patient.NAME.matches().value("hello"))
-			.and(Patient.NAME.matches().value("goodbye"))
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search()
+				.forResource("Patient")
+				.where(Patient.NAME.matches().value("hello"))
+				.and(Patient.NAME.matches().value("goodbye"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals("findStringAndListParam", myLastMethod);
 	}
@@ -101,12 +94,11 @@ public class SearchMethodPriorityTest {
 	public void testStringAndListNotSelectedWhenSingleParameterProvided() {
 		ourServerRule.getRestfulServer().registerProviders(new StringStrengthsWithOptionalResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.where(Patient.NAME.matches().value("hello"))
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search()
+				.forResource("Patient")
+				.where(Patient.NAME.matches().value("hello"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals("findString", myLastMethod);
 	}
@@ -115,24 +107,18 @@ public class SearchMethodPriorityTest {
 	public void testEmptyStringSearchProvidedWithNoParameters() {
 		ourServerRule.getRestfulServer().registerProviders(new StringStrengthsWithOptionalResourceProvider());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
 		assertEquals("find", myLastMethod);
 	}
 
 	@Test
 	public void testEmptyStringSearchProvidedWithNoParameters2() {
-		ourServerRule.getRestfulServer().registerProviders(new StringStrengthsWithOptionalResourceProviderReverseOrder());
+		ourServerRule
+				.getRestfulServer()
+				.registerProviders(new StringStrengthsWithOptionalResourceProviderReverseOrder());
 
-		myClient
-			.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.execute();
+		myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
 		assertEquals("find", myLastMethod);
 	}
@@ -151,19 +137,16 @@ public class SearchMethodPriorityTest {
 		}
 
 		@Search()
-		public List<Patient> findDateParam(
-			@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theDate) {
+		public List<Patient> findDateParam(@RequiredParam(name = Patient.SP_BIRTHDATE) DateParam theDate) {
 			myLastMethod = "findDateParam";
 			return Lists.newArrayList();
 		}
 
 		@Search()
-		public List<Patient> findDateRangeParam(
-			@RequiredParam(name = Patient.SP_BIRTHDATE) DateRangeParam theRange) {
+		public List<Patient> findDateRangeParam(@RequiredParam(name = Patient.SP_BIRTHDATE) DateRangeParam theRange) {
 			myLastMethod = "findDateRangeParam";
 			return Lists.newArrayList();
 		}
-
 	}
 
 	public class StringStrengthsWithOptionalResourceProvider implements IResourceProvider {
@@ -174,15 +157,14 @@ public class SearchMethodPriorityTest {
 		}
 
 		@Search()
-		public List<Patient> findString(
-			@OptionalParam(name = Patient.SP_NAME) String theDate) {
+		public List<Patient> findString(@OptionalParam(name = Patient.SP_NAME) String theDate) {
 			myLastMethod = "findString";
 			return Lists.newArrayList();
 		}
 
 		@Search()
 		public List<Patient> findStringAndListParam(
-			@OptionalParam(name = Patient.SP_NAME) StringAndListParam theRange) {
+				@OptionalParam(name = Patient.SP_NAME) StringAndListParam theRange) {
 			myLastMethod = "findStringAndListParam";
 			return Lists.newArrayList();
 		}
@@ -192,9 +174,7 @@ public class SearchMethodPriorityTest {
 			myLastMethod = "find";
 			return Lists.newArrayList();
 		}
-
 	}
-
 
 	public class StringStrengthsWithOptionalResourceProviderReverseOrder implements IResourceProvider {
 
@@ -204,8 +184,7 @@ public class SearchMethodPriorityTest {
 		}
 
 		@Search()
-		public List<Patient> findA(
-			@OptionalParam(name = Patient.SP_NAME) String theDate) {
+		public List<Patient> findA(@OptionalParam(name = Patient.SP_NAME) String theDate) {
 			myLastMethod = "findString";
 			return Lists.newArrayList();
 		}
@@ -215,7 +194,5 @@ public class SearchMethodPriorityTest {
 			myLastMethod = "find";
 			return Lists.newArrayList();
 		}
-
 	}
-
 }

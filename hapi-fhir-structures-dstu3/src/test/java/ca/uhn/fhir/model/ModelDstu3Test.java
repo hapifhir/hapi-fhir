@@ -39,7 +39,7 @@ public class ModelDstu3Test {
 	public void testElementHasInterface() {
 		assertTrue(IBaseElement.class.isAssignableFrom(Element.class));
 	}
-	
+
 	/**
 	 * See #354
 	 */
@@ -59,11 +59,18 @@ public class ModelDstu3Test {
 	public void testModelBindings() {
 		FhirTerser t = ourCtx.newTerser();
 		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
-		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("gender")).getBindingValueSet());
-		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition)t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
+		assertEquals(
+				"http://hl7.org/fhir/ValueSet/administrative-gender",
+				((BaseRuntimeDeclaredChildDefinition) def.getChildByName("gender")).getBindingValueSet());
+		assertEquals(
+				"http://hl7.org/fhir/ValueSet/link-type",
+				((BaseRuntimeDeclaredChildDefinition) t.getDefinition(Patient.class, "Patient.link.type"))
+						.getBindingValueSet());
 
 		def = ourCtx.getResourceDefinition(Appointment.class);
-		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("status")).getBindingValueSet());
+		assertEquals(
+				"http://hl7.org/fhir/ValueSet/appointmentstatus",
+				((BaseRuntimeDeclaredChildDefinition) def.getChildByName("status")).getBindingValueSet());
 	}
 
 	/**
@@ -82,11 +89,10 @@ public class ModelDstu3Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	/**
 	 * See #304
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	public void testPopulateWrongGenericType() {
 		Patient p = new Patient();
@@ -98,59 +104,75 @@ public class ModelDstu3Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
+			assertEquals(
+					Msg.code(1748)
+							+ "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase",
+					e.getMessage());
 		}
 	}
-	
-	
-//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelDstu3Test.class);
 
-	
+	//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelDstu3Test.class);
+
 	/**
 	 * See #325
 	 */
 	@Test
 	public void testEqualsDeep() throws Exception {
-		
+
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		Date date = dateFormat.parse("19920925");
 		FhirContext context = FhirContext.forDstu3();
 
 		Patient patient1 = new Patient();
 		patient1.setBirthDate(date)
-		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family");
+				.setGender(Enumerations.AdministrativeGender.MALE)
+				.addName()
+				.setUse(HumanName.NameUse.OFFICIAL)
+				.addGiven("first")
+				.addGiven("second")
+				.setFamily("family");
 
-		Patient patient2 = context.newJsonParser().parseResource(Patient.class,
-		        context.newJsonParser().encodeResourceToString(patient1));
+		Patient patient2 = context.newJsonParser()
+				.parseResource(Patient.class, context.newJsonParser().encodeResourceToString(patient1));
 
 		assertTrue(patient1.equalsDeep(patient2));
 		assertTrue(patient1.equalsShallow(patient2));
 
 		Patient patient3 = new Patient();
 		patient3.setBirthDate(date)
-		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family");
+				.setGender(Enumerations.AdministrativeGender.MALE)
+				.addName()
+				.setUse(HumanName.NameUse.OFFICIAL)
+				.addGiven("first")
+				.addGiven("second")
+				.setFamily("family");
 
 		assertTrue(patient1.equalsDeep(patient3));
 		assertTrue(patient1.equalsShallow(patient3));
 
 		Patient patient4 = new Patient();
 		patient4.setBirthDate(date)
-		        .setGender(Enumerations.AdministrativeGender.MALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
+				.setGender(Enumerations.AdministrativeGender.MALE)
+				.addName()
+				.setUse(HumanName.NameUse.OFFICIAL)
+				.addGiven("first")
+				.addGiven("second")
+				.setFamily("family2");
 
 		assertTrue(patient1.equalsShallow(patient4));
 		assertFalse(patient1.equalsDeep(patient4));
 
 		Patient patient5 = new Patient();
 		patient5.setBirthDate(date)
-		        .setGender(Enumerations.AdministrativeGender.FEMALE)
-		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
+				.setGender(Enumerations.AdministrativeGender.FEMALE)
+				.addName()
+				.setUse(HumanName.NameUse.OFFICIAL)
+				.addGiven("first")
+				.addGiven("second")
+				.setFamily("family2");
 
 		assertFalse(patient1.equalsShallow(patient5));
 		assertFalse(patient1.equalsDeep(patient5));
-
 	}
 
 	@Test
@@ -165,6 +187,4 @@ public class ModelDstu3Test {
 			// good
 		}
 	}
-
-
 }

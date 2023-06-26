@@ -67,7 +67,8 @@ public class SubscriptionRegistryTest {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		Assertions.assertNotNull(activeSubscription.getRetryConfigurationParameters());
 		assertEquals(channelName, activeSubscription.getChannelName());
-		assertEquals(retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
+		assertEquals(
+				retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
 	}
 
 	@Test
@@ -118,7 +119,8 @@ public class SubscriptionRegistryTest {
 
 		// verify
 		assertTrue(registered);
-		List<ActiveSubscription> subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
+		List<ActiveSubscription> subscriptions =
+				mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
 		assertThat(subscriptions, hasSize(1));
 
 		Subscription topicSubscription2 = SubscriptionTestDataHelper.buildR4TopicSubscription();
@@ -154,14 +156,12 @@ public class SubscriptionRegistryTest {
 		assertEquals(topicSubscription4Id, subscriptions.get(0).getId());
 	}
 
-
 	private Subscription createSubscription(Extension... theExtensions) {
 		Subscription subscription = new Subscription();
 		subscription.setId(SUBSCRIPTION_ID);
 		subscription.setCriteria("Patient");
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-		Subscription.SubscriptionChannelComponent channel
-			= new Subscription.SubscriptionChannelComponent();
+		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload("application/json");
 		channel.setEndpoint("http://unused.test.endpoint/");

@@ -39,7 +39,6 @@ public class ModelSerializationDstu3Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@Test
 	public void testBoundCodeSerialization() {
 		Patient p = new Patient();
@@ -53,7 +52,6 @@ public class ModelSerializationDstu3Test {
 		assertEquals(AdministrativeGender.MALE, out.getGender());
 		out.getGenderElement().setValueAsString("female");
 		assertEquals(AdministrativeGender.FEMALE, out.getGender());
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,11 +76,18 @@ public class ModelSerializationDstu3Test {
 		Patient patient = new Patient();
 		patient.addName(new HumanName().addGiven("George").setFamily("Washington"));
 		patient.addName(new HumanName().addGiven("George2").setFamily("Washington2"));
-		patient.addAddress(new Address().addLine("line 1").addLine("line 2").setCity("city").setState("UT"));
-		patient.addAddress(new Address().addLine("line 1b").addLine("line 2b").setCity("cityb").setState("UT"));
+		patient.addAddress(new Address()
+				.addLine("line 1")
+				.addLine("line 2")
+				.setCity("city")
+				.setState("UT"));
+		patient.addAddress(new Address()
+				.addLine("line 1b")
+				.addLine("line 2b")
+				.setCity("cityb")
+				.setState("UT"));
 		patient.setBirthDate(new Date());
 
 		testIsSerializable(patient);
 	}
-
 }

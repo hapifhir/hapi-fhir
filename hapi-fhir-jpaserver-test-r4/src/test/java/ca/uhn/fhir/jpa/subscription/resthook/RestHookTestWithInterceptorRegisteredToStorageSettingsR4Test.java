@@ -1,4 +1,3 @@
-
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -47,7 +46,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test.class);
 	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 
 	@Autowired
@@ -80,7 +80,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		ourUpdatedObservations.clear();
 	}
 
-	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint)
+			throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -149,8 +150,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-
+		myClient.update()
+				.resource(subscriptionTemp)
+				.withId(subscriptionTemp.getIdElement())
+				.execute();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -159,7 +162,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt(Enumerations.ResourceTypeEnum.SUBSCRIPTION.toCode(), subscription2.getId())).execute();
+		myClient.delete()
+				.resourceById(new IdDt(Enumerations.ResourceTypeEnum.SUBSCRIPTION.toCode(), subscription2.getId()))
+				.execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -174,7 +179,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3)
+				.withId(observation3.getIdElement())
+				.execute();
 
 		// Should see no subscription notification
 		Thread.sleep(500);
@@ -188,7 +196,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3a)
+				.withId(observation3a.getIdElement())
+				.execute();
 
 		// Should see only one subscription notification
 		Thread.sleep(500);
@@ -223,8 +234,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-
+		myClient.update()
+				.resource(subscriptionTemp)
+				.withId(subscriptionTemp.getIdElement())
+				.execute();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -233,7 +246,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+		myClient.delete()
+				.resourceById(new IdDt("Subscription", subscription2.getId()))
+				.execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -248,7 +263,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3)
+				.withId(observation3.getIdElement())
+				.execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
@@ -262,7 +280,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3a)
+				.withId(observation3a.getIdElement())
+				.execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -294,8 +315,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterAll
@@ -323,7 +344,5 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 			ourUpdatedObservations.add(theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
-
 	}
-
 }

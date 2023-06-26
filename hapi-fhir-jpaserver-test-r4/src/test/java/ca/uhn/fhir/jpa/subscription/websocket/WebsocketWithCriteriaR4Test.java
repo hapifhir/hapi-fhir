@@ -20,14 +20,16 @@ import org.slf4j.Logger;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Disabled
 public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaR4Test.class);
+
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension =
+			new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
+
 	private String myPatientId;
 	private String mySubscriptionId;
 
@@ -95,7 +97,9 @@ public class WebsocketWithCriteriaR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("WS Messages: {}", myWebsocketClientExtension.getMessages());
 		waitForSize(2, myWebsocketClientExtension.getMessages());
-		assertThat(myWebsocketClientExtension.getMessages(), contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
+		assertThat(
+				myWebsocketClientExtension.getMessages(),
+				contains("bound " + mySubscriptionId, "ping " + mySubscriptionId));
 	}
 
 	@Test

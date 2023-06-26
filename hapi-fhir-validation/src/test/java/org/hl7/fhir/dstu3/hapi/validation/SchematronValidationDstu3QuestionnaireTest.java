@@ -113,7 +113,8 @@ public class SchematronValidationDstu3QuestionnaireTest {
 		val.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = val.validateWithResult(resource);
 
-		String outcomeXml = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		String outcomeXml =
+				ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(outcomeXml);
 		return result;
 	}

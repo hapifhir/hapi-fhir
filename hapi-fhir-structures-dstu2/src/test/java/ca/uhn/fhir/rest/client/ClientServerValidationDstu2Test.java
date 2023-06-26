@@ -49,7 +49,8 @@ import static org.mockito.Mockito.when;
 
 public class ClientServerValidationDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientServerValidationDstu2Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ClientServerValidationDstu2Test.class);
 	private FhirContext myCtx;
 	private boolean myFirstResponse;
 	private HttpClient myHttpClient;
@@ -59,7 +60,6 @@ public class ClientServerValidationDstu2Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 
 	@BeforeEach
 	public void before() {
@@ -81,8 +81,10 @@ public class ClientServerValidationDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -92,7 +94,9 @@ public class ClientServerValidationDstu2Test {
 				} else {
 					Patient resource = new Patient();
 					resource.addName().addFamily().setValue("FAM");
-					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(
+							new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)),
+							Charset.forName("UTF-8"));
 				}
 			}
 		});
@@ -125,8 +129,10 @@ public class ClientServerValidationDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -136,7 +142,9 @@ public class ClientServerValidationDstu2Test {
 				} else {
 					Patient resource = new Patient();
 					resource.addName().addFamily().setValue("FAM");
-					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)), Charset.forName("UTF-8"));
+					return new ReaderInputStream(
+							new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)),
+							Charset.forName("UTF-8"));
 				}
 			}
 		});
@@ -169,8 +177,10 @@ public class ClientServerValidationDstu2Test {
 	public void testServerReturnsAnHttp401() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 401, "Unauthorized"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 401, "Unauthorized"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -197,8 +207,10 @@ public class ClientServerValidationDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -206,7 +218,9 @@ public class ClientServerValidationDstu2Test {
 					myFirstResponse = false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
 				} else {
-					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())), Charset.forName("UTF-8"));
+					return new ReaderInputStream(
+							new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())),
+							Charset.forName("UTF-8"));
 				}
 			}
 		});
@@ -237,8 +251,10 @@ public class ClientServerValidationDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -246,7 +262,9 @@ public class ClientServerValidationDstu2Test {
 					myFirstResponse = false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
 				} else {
-					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())), Charset.forName("UTF-8"));
+					return new ReaderInputStream(
+							new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())),
+							Charset.forName("UTF-8"));
 				}
 			}
 		});
@@ -270,16 +288,25 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		String wrongFhirVersion = FhirVersionEnum.DSTU3.getFhirVersionString();
-		assertThat(wrongFhirVersion, is(FhirVersionEnum.DSTU3.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version is still correct
+		assertThat(
+				wrongFhirVersion,
+				is(
+						FhirVersionEnum.DSTU3
+								.getFhirVersionString())); // asserting that what we assume to be the DSTU3 FHIR version
+		// is
+		// still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent())
+				.thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
@@ -289,11 +316,13 @@ public class ClientServerValidationDstu2Test {
 			fail();
 		} catch (FhirClientInappropriateForServerException e) {
 			String out = e.toString();
-			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"" + wrongFhirVersion + "\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
+			String want =
+					"The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \""
+							+ wrongFhirVersion
+							+ "\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
 			ourLog.info(out);
 			ourLog.info(want);
 			assertThat(out, containsString(want));
 		}
 	}
-
 }

@@ -20,7 +20,8 @@ public class CacheControlDirectiveTest {
 
 	@Test
 	public void testParseNoCacheNoStore() {
-		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_CACHE + "  ,   " + Constants.CACHE_CONTROL_NO_STORE);
+		List<String> values =
+				Arrays.asList(Constants.CACHE_CONTROL_NO_CACHE + "  ,   " + Constants.CACHE_CONTROL_NO_STORE);
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
 		assertTrue(ccd.isNoCache());
@@ -30,7 +31,8 @@ public class CacheControlDirectiveTest {
 
 	@Test
 	public void testParseNoCacheNoStoreMaxResults() {
-		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", "+ Constants.CACHE_CONTROL_MAX_RESULTS + "=5");
+		List<String> values =
+				Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", " + Constants.CACHE_CONTROL_MAX_RESULTS + "=5");
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
 		assertFalse(ccd.isNoCache());
@@ -40,7 +42,8 @@ public class CacheControlDirectiveTest {
 
 	@Test
 	public void testParseNoCacheNoStoreMaxResultsInvalid() {
-		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", "+ Constants.CACHE_CONTROL_MAX_RESULTS + "=A");
+		List<String> values =
+				Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", " + Constants.CACHE_CONTROL_MAX_RESULTS + "=A");
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
 		assertFalse(ccd.isNoCache());

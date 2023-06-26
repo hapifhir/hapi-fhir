@@ -10,8 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class ResourceIndexedSearchParamQuantityTest {
 
-	private ResourceIndexedSearchParamQuantity createParam(String theParamName, String theValue, String theSystem, String theUnits) {
-		ResourceIndexedSearchParamQuantity token = new ResourceIndexedSearchParamQuantity(new PartitionSettings(), "Patient", theParamName, new BigDecimal(theValue), theSystem, theUnits);
+	private ResourceIndexedSearchParamQuantity createParam(
+			String theParamName, String theValue, String theSystem, String theUnits) {
+		ResourceIndexedSearchParamQuantity token = new ResourceIndexedSearchParamQuantity(
+				new PartitionSettings(), "Patient", theParamName, new BigDecimal(theValue), theSystem, theUnits);
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 		return token;
 	}
@@ -26,15 +28,14 @@ public class ResourceIndexedSearchParamQuantityTest {
 		assertEquals(-1970227166134682431L, token.getHashIdentityAndUnits().longValue());
 	}
 
-
 	@Test
 	public void testEquals() {
-		ResourceIndexedSearchParamQuantity val1 = new ResourceIndexedSearchParamQuantity()
-			.setValue(new BigDecimal(123));
+		ResourceIndexedSearchParamQuantity val1 =
+				new ResourceIndexedSearchParamQuantity().setValue(new BigDecimal(123));
 		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
-		ResourceIndexedSearchParamQuantity val2 = new ResourceIndexedSearchParamQuantity()
-			.setValue(new BigDecimal(123));
+		ResourceIndexedSearchParamQuantity val2 =
+				new ResourceIndexedSearchParamQuantity().setValue(new BigDecimal(123));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
@@ -42,6 +43,4 @@ public class ResourceIndexedSearchParamQuantityTest {
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
 	}
-
-
 }

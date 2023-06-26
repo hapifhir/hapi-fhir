@@ -40,21 +40,26 @@ class LoincCodingPropertiesHandlerTest {
 
 	private static LoincCodingPropertiesHandler testedHandler;
 
-	@Mock private CSVRecord myCsvRecord;
-	@Mock private TermConcept myTargetTermConcept;
-	@Mock private TermConcept myRefTermConcept1;
-	@Mock private TermConcept myRefTermConcept2;
+	@Mock
+	private CSVRecord myCsvRecord;
+
+	@Mock
+	private TermConcept myTargetTermConcept;
+
+	@Mock
+	private TermConcept myRefTermConcept1;
+
+	@Mock
+	private TermConcept myRefTermConcept2;
 
 	private final Map<String, TermConcept> myCode2concept = new HashMap<>();
 	private final Map<String, CodeSystem.PropertyType> myPropertyNameTypeMap = new HashMap<>();
-
 
 	@BeforeEach
 	void setUp() {
 		myCode2concept.put(CODE_A, myTargetTermConcept);
 		testedHandler = new LoincCodingPropertiesHandler(myCode2concept, myPropertyNameTypeMap);
 	}
-
 
 	@Test
 	void not_any_property_valid_does_nothing() {
@@ -66,7 +71,6 @@ class LoincCodingPropertiesHandlerTest {
 		verify(myTargetTermConcept, never()).addPropertyCoding(anyString(), anyString(), anyString(), anyString());
 	}
 
-
 	@Test
 	void record_no_loinc_num_property_does_nothing() {
 		myPropertyNameTypeMap.put(ASK_AT_ORDER_ENTRY_PROP_NAME, CodeSystem.PropertyType.CODING); // wrong property type
@@ -77,7 +81,6 @@ class LoincCodingPropertiesHandlerTest {
 		verify(myTargetTermConcept, never()).addPropertyCoding(anyString(), anyString(), anyString(), anyString());
 	}
 
-
 	@Test
 	void no_property_valid_value_does_nothing() {
 		myPropertyNameTypeMap.put(ASK_AT_ORDER_ENTRY_PROP_NAME, CodeSystem.PropertyType.CODING); // wrong property type
@@ -87,7 +90,6 @@ class LoincCodingPropertiesHandlerTest {
 
 		verify(myTargetTermConcept, never()).addPropertyCoding(anyString(), anyString(), anyString(), anyString());
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {ASK_AT_ORDER_ENTRY_PROP_NAME, ASSOCIATED_OBSERVATIONS_PROP_NAME})
@@ -103,13 +105,12 @@ class LoincCodingPropertiesHandlerTest {
 
 		testedHandler.accept(myCsvRecord);
 
-		verify(myTargetTermConcept, times(1)).addPropertyCoding(
-			thePropName, ITermLoaderSvc.LOINC_URI, "ref-code-01", "display-value-01");
+		verify(myTargetTermConcept, times(1))
+				.addPropertyCoding(thePropName, ITermLoaderSvc.LOINC_URI, "ref-code-01", "display-value-01");
 
-		verify(myTargetTermConcept, times(1)).addPropertyCoding(
-			thePropName, ITermLoaderSvc.LOINC_URI, "ref-code-02", "display-value-02");
+		verify(myTargetTermConcept, times(1))
+				.addPropertyCoding(thePropName, ITermLoaderSvc.LOINC_URI, "ref-code-02", "display-value-02");
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {ASK_AT_ORDER_ENTRY_PROP_NAME, ASSOCIATED_OBSERVATIONS_PROP_NAME})
@@ -132,14 +133,15 @@ class LoincCodingPropertiesHandlerTest {
 			List<ILoggingEvent> logsList = testListAppender.list;
 			assertEquals(1, logsList.size());
 			assertEquals(Level.ERROR, logsList.get(0).getLevel());
-			assertTrue(logsList.get(0).getFormattedMessage().startsWith("Couldn't find TermConcept for code: 'ref-code-02'"));
+			assertTrue(logsList.get(0)
+					.getFormattedMessage()
+					.startsWith("Couldn't find TermConcept for code: 'ref-code-02'"));
 			assertTrue(logsList.get(0).getFormattedMessage().contains(thePropName));
 
 		} finally {
 			testLogger.detachAppender(testListAppender);
 		}
 	}
-
 
 	private ListAppender<ILoggingEvent> addTestLogAppenderForClass(Logger theLogger) {
 		// create and start a ListAppender
@@ -148,8 +150,7 @@ class LoincCodingPropertiesHandlerTest {
 
 		// add the appender to the logger
 		theLogger.addAppender(testListAppender);
-		
+
 		return testListAppender;
 	}
-
 }

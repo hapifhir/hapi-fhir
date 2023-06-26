@@ -39,10 +39,13 @@ public class FetchFilesStepTest {
 	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 	public static final String CHUNK_ID = "chunk-id";
 
-	private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet = new ContentTypeHeaderModifiableBulkImportFileServlet();
+	private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet =
+			new ContentTypeHeaderModifiableBulkImportFileServlet();
+
 	@RegisterExtension
-	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
-		.withServlet(myBulkImportFileServlet);
+	private final HttpServletExtension myHttpServletExtension =
+			new HttpServletExtension().withServlet(myBulkImportFileServlet);
+
 	private final FetchFilesStep mySvc = new FetchFilesStep();
 
 	@Mock
@@ -57,9 +60,10 @@ public class FetchFilesStepTest {
 		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+				.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+				.setHttpBasicCredentials("admin:password");
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+				new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -69,8 +73,12 @@ public class FetchFilesStepTest {
 
 		assertEquals(1, myHttpServletExtension.getRequestHeaders().size());
 
-		String expectedAuthHeader = "Authorization: Basic " + Base64Utils.encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
-		assertThat(myHttpServletExtension.toString(), myHttpServletExtension.getRequestHeaders().get(0), hasItem(expectedAuthHeader));
+		String expectedAuthHeader =
+				"Authorization: Basic " + Base64Utils.encodeToString("admin:password".getBytes(StandardCharsets.UTF_8));
+		assertThat(
+				myHttpServletExtension.toString(),
+				myHttpServletExtension.getRequestHeaders().get(0),
+				hasItem(expectedAuthHeader));
 	}
 
 	@Test
@@ -86,9 +94,10 @@ public class FetchFilesStepTest {
 		String index = myBulkImportFileServlet.registerFileByContents(resource);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+				.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+				.setMaxBatchResourceCount(3);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+				new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -97,7 +106,6 @@ public class FetchFilesStepTest {
 		// Verify
 
 		verify(myJobDataSink, times(4)).accept(any(NdJsonFileJson.class));
-
 	}
 
 	@Test
@@ -108,19 +116,19 @@ public class FetchFilesStepTest {
 		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
-			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
+				.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+				.setHttpBasicCredentials("admin");
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details =
+				new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test & Verify
 
 		assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
 	}
 
-	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet{
+	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet {
 
 		public String myContentTypeValue;
-
 
 		public void setHeaderContentTypeValue(String theContentTypeValue) {
 			myContentTypeValue = theContentTypeValue;
@@ -131,5 +139,4 @@ public class FetchFilesStepTest {
 			return Objects.nonNull(myContentTypeValue) ? myContentTypeValue : super.getHeaderContentType();
 		}
 	}
-
 }

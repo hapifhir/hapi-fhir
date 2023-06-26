@@ -5,8 +5,8 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -54,14 +54,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderCustomSearchParamDstu3Test.class);
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(
+				new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -69,11 +71,13 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(
+				new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegistry.forceRefresh();
 	}
 
-	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(CapabilityStatement conformance, String resType) {
+	private Map<String, CapabilityStatementRestResourceSearchParamComponent> extractSearchParams(
+			CapabilityStatement conformance, String resType) {
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = new HashMap<>();
 		for (CapabilityStatementRestComponent nextRest : conformance.getRest()) {
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
@@ -100,7 +104,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
+			assertEquals(
+					"HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid",
+					e.getMessage());
 		}
 	}
 
@@ -108,11 +114,10 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testConformanceOverrideAllowed() {
 		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
-		CapabilityStatement conformance = myClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
-		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
+		CapabilityStatement conformance =
+				myClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		Map<String, CapabilityStatementRestResourceSearchParamComponent> map =
+				extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
 		assertNull(param);
@@ -161,10 +166,8 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			}
 		});
 
-		conformance = myClient
-				.fetchConformance()
-				.ofType(CapabilityStatement.class)
-				.execute();
+		conformance =
+				myClient.fetchConformance().ofType(CapabilityStatement.class).execute();
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
@@ -172,9 +175,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		param = map.get("gender");
 		assertNull(param);
-
 	}
-
 
 	@Test
 	public void testCreatingParamMarksCorrectResourcesForReindexing() {
@@ -186,7 +187,8 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+		ResourceTable res =
+				myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
@@ -201,11 +203,22 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 			assertEquals(1, allJobs.size());
-			assertEquals(1, allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().size());
-			assertEquals("Patient?", allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().get(0).getUrl());
+			assertEquals(
+					1,
+					allJobs.get(0)
+							.getParameters(ReindexJobParameters.class)
+							.getPartitionedUrls()
+							.size());
+			assertEquals(
+					"Patient?",
+					allJobs.get(0)
+							.getParameters(ReindexJobParameters.class)
+							.getPartitionedUrls()
+							.get(0)
+							.getUrl());
 		});
 	}
 
@@ -241,14 +254,18 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IBundleProvider results;
 		List<String> foundResources;
 
-		HttpGet get = new HttpGet(myServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
+		HttpGet get = new HttpGet(
+				myServerBase
+						+ "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
+			assertThat(
+					resp,
+					containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -267,10 +284,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
-		myClient
-				.create()
-				.resource(eyeColourSp)
-				.execute();
+		myClient.create().resource(eyeColourSp).execute();
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -286,8 +300,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		Bundle bundle = myClient
-				.search()
+		Bundle bundle = myClient.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
 				.returnBundle(Bundle.class)
@@ -297,7 +310,6 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
-
 	}
 
 	@SuppressWarnings("unused")
@@ -333,15 +345,14 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		List<String> foundResources;
 		Bundle result;
 
-		result = myClient
-				.search()
+		result = myClient.search()
 				.forResource(Observation.class)
-				.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
+				.where(new ReferenceClientParam("foo")
+						.hasChainedProperty(Patient.GENDER.exactly().code("male")))
 				.returnBundle(Bundle.class)
 				.execute();
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(obsId1.getValue()));
-
 	}
 
 	@SuppressWarnings("unused")
@@ -373,8 +384,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		List<String> foundResources;
 		Bundle result;
 
-		result = myClient
-				.search()
+		result = myClient.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("foo").exactly().code("male"))
 				.returnBundle(Bundle.class)
@@ -382,8 +392,5 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		foundResources = toUnqualifiedVersionlessIdValues(result);
 		assertThat(foundResources, contains(patId.getValue()));
-
 	}
-
-
 }

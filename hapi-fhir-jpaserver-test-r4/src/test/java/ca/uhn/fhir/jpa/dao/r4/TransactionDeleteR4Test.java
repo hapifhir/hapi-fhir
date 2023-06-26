@@ -23,7 +23,6 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 	}
 
-
 	@Test
 	public void testDeleteInTransactionShouldFailWhenReferencesExist() {
 		final Observation obs1 = new Observation();
@@ -32,7 +31,8 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
 		final Observation obs2 = new Observation();
 		obs2.setStatus(Observation.ObservationStatus.FINAL);
-		org.hl7.fhir.instance.model.api.IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+		org.hl7.fhir.instance.model.api.IIdType obs2id =
+				myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
 
 		final DiagnosticReport rpt = new DiagnosticReport();
 		rpt.addResult(new Reference(obs2id));
@@ -83,7 +83,6 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
-
 	@Test
 	public void testDeleteWithHas_SourceModifiedToNoLongerIncludeReference() {
 
@@ -107,8 +106,15 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
+		b.addEntry()
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.DELETE)
+				.setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry()
+				.setResource(rpt)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		mySystemDao.transaction(mySrd, b);
 
 		myObservationDao.read(obs1id);
@@ -146,7 +152,11 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
 		Bundle b = new Bundle();
 		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs1id.getValue());
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(rptId.getValue());
+		b.addEntry()
+				.setResource(rpt)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl(rptId.getValue());
 		mySystemDao.transaction(mySrd, b);
 
 		myObservationDao.read(obs2id);
@@ -157,9 +167,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		} catch (ResourceGoneException e) {
 			// good
 		}
-
 	}
-
 
 	@Test
 	public void testDeleteWithHas_SourceModifiedToStillIncludeReference() {
@@ -185,13 +193,24 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		rpt.addResult(new Reference(obs2id));
 
 		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
+		b.addEntry()
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.DELETE)
+				.setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
+		b.addEntry()
+				.setResource(rpt)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
 			mySystemDao.transaction(mySrd, b);
 			fail();
-		} catch (ResourceVersionConflictException e ) {
-			assertThat(e.getMessage(), matchesPattern(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
+		} catch (ResourceVersionConflictException e) {
+			assertThat(
+					e.getMessage(),
+					matchesPattern(
+							Msg.code(550) + Msg.code(515)
+									+ "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result"));
 		}
 
 		myObservationDao.read(obs1id);

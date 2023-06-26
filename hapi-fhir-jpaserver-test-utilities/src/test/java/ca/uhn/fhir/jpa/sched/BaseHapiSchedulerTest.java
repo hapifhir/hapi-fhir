@@ -11,8 +11,7 @@ public class BaseHapiSchedulerTest {
 
 	@Test
 	public void testMissingConfig() {
-		BaseHapiScheduler sched = new BaseHapiScheduler("hello", new AutowiringSpringBeanJobFactory()) {
-		};
+		BaseHapiScheduler sched = new BaseHapiScheduler("hello", new AutowiringSpringBeanJobFactory()) {};
 		try {
 			sched.init();
 			fail();
@@ -20,6 +19,4 @@ public class BaseHapiSchedulerTest {
 			assertEquals(Msg.code(1633) + "java.lang.NullPointerException: No instance name supplied", e.getMessage());
 		}
 	}
-
-
 }

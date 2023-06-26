@@ -65,8 +65,10 @@ public class OperationClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -78,7 +80,8 @@ public class OperationClientTest {
 
 		int idx = 0;
 
-		Parameters response = client.opInstance(new IdType("222"), new StringType("PARAM1str"), new Patient().setActive(true));
+		Parameters response =
+				client.opInstance(new IdType("222"), new StringType("PARAM1str"), new Patient().setActive(true));
 		assertEquals("FOO", response.getParameter().get(0).getName());
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
@@ -102,8 +105,10 @@ public class OperationClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -151,7 +156,6 @@ public class OperationClientTest {
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals(0, request.getParameter().size());
 		idx++;
-
 	}
 
 	@Test
@@ -162,8 +166,10 @@ public class OperationClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -175,7 +181,9 @@ public class OperationClientTest {
 
 		int idx = 0;
 
-		Parameters response = client.opServerListParam(new Patient().setActive(true), Arrays.asList(new StringType("PARAM3str1"), new StringType("PARAM3str2")));
+		Parameters response = client.opServerListParam(
+				new Patient().setActive(true),
+				Arrays.asList(new StringType("PARAM3str1"), new StringType("PARAM3str2")));
 		assertEquals("FOO", response.getParameter().get(0).getName());
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
@@ -192,7 +200,8 @@ public class OperationClientTest {
 		assertEquals("PARAM3str2", ((StringType) request.getParameter().get(2).getValue()).getValue());
 		idx++;
 
-		response = client.opServerListParam(null, Arrays.asList(new StringType("PARAM3str1"), new StringType("PARAM3str2")));
+		response = client.opServerListParam(
+				null, Arrays.asList(new StringType("PARAM3str1"), new StringType("PARAM3str2")));
 		assertEquals("FOO", response.getParameter().get(0).getName());
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
@@ -228,8 +237,6 @@ public class OperationClientTest {
 		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
 		assertEquals(0, request.getParameter().size());
 		idx++;
-
-
 	}
 
 	@Test
@@ -240,8 +247,10 @@ public class OperationClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(ourHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -270,38 +279,34 @@ public class OperationClientTest {
 	}
 
 	public interface IOpClient extends IBasicClient {
-		//@formatter:off
-		@Operation(name="$OP_INSTANCE", type=Patient.class)
+		// @formatter:off
+		@Operation(name = "$OP_INSTANCE", type = Patient.class)
 		public Parameters opInstance(
 				@IdParam IdType theId,
-				@OperationParam(name="PARAM1") StringType theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
-				);
-		//@formatter:on
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2);
+		// @formatter:on
 
-		//@formatter:off
-		@Operation(name="$OP_SERVER")
+		// @formatter:off
+		@Operation(name = "$OP_SERVER")
 		public Parameters opServer(
-				@OperationParam(name="PARAM1") StringType theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
-				);
-		//@formatter:on
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2);
+		// @formatter:on
 
-		//@formatter:off
-		@Operation(name="$OP_SERVER_LIST_PARAM")
+		// @formatter:off
+		@Operation(name = "$OP_SERVER_LIST_PARAM")
 		public Parameters opServerListParam(
-				@OperationParam(name="PARAM2") Patient theParam2,
-				@OperationParam(name="PARAM3") List<StringType> theParam3
-				);
-		//@formatter:on
+				@OperationParam(name = "PARAM2") Patient theParam2,
+				@OperationParam(name = "PARAM3") List<StringType> theParam3);
+		// @formatter:on
 
-		//@formatter:off
-		@Operation(name="$OP_TYPE", type=Patient.class)
+		// @formatter:off
+		@Operation(name = "$OP_TYPE", type = Patient.class)
 		public Parameters opType(
-				@OperationParam(name="PARAM1") StringType theParam1,
-				@OperationParam(name="PARAM2") Patient theParam2
-				);
-		//@formatter:on
+				@OperationParam(name = "PARAM1") StringType theParam1,
+				@OperationParam(name = "PARAM2") Patient theParam2);
+		// @formatter:on
 
 	}
 }

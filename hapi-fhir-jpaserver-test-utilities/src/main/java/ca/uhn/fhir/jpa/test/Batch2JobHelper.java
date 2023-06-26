@@ -52,7 +52,10 @@ public class Batch2JobHelper {
 	private final IJobCoordinator myJobCoordinator;
 	private final IJobPersistence myJobPersistence;
 
-	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
+	public Batch2JobHelper(
+			IJobMaintenanceService theJobMaintenanceService,
+			IJobCoordinator theJobCoordinator,
+			IJobPersistence theJobPersistence) {
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
@@ -90,53 +93,53 @@ public class Batch2JobHelper {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		try {
-			await()
-				.atMost(theSecondsToWait, TimeUnit.SECONDS)
-				.until(() -> {
-					boolean inFinalStatus = false;
-					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
-						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED);
-					}
-					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)) {
-						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.COMPLETED);
-					}
-					boolean retVal = checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus);
-					if (!retVal && inFinalStatus) {
-						// Fail fast - If we hit one of these statuses and it's not the one we want, abort
-						throw new ConditionTimeoutException("Already in failed/completed status");
-					}
-					return retVal;
-				});
+			await().atMost(theSecondsToWait, TimeUnit.SECONDS).until(() -> {
+				boolean inFinalStatus = false;
+				if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)
+						&& !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
+					inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED);
+				}
+				if (ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)
+						&& !ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)) {
+					inFinalStatus = hasStatus(theBatchJobId, StatusEnum.COMPLETED);
+				}
+				boolean retVal = checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus);
+				if (!retVal && inFinalStatus) {
+					// Fail fast - If we hit one of these statuses and it's not the one we want, abort
+					throw new ConditionTimeoutException("Already in failed/completed status");
+				}
+				return retVal;
+			});
 		} catch (ConditionTimeoutException e) {
-			String statuses = myJobPersistence.fetchInstances(100, 0)
-				.stream()
-				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
-				.collect(Collectors.joining("\n"));
-			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
+			String statuses = myJobPersistence.fetchInstances(100, 0).stream()
+					.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
+					.collect(Collectors.joining("\n"));
+			String currentStatus =
+					myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
 			fail("Job " + theBatchJobId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	public JobInstance awaitJobawaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
+	public JobInstance awaitJobawaitJobHasStatusWithoutMaintenancePass(
+			String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		try {
-			await()
-				.atMost(theSecondsToWait, TimeUnit.SECONDS)
-				.until(() -> hasStatus(theBatchJobId, theExpectedStatus));
+			await().atMost(theSecondsToWait, TimeUnit.SECONDS).until(() -> hasStatus(theBatchJobId, theExpectedStatus));
 		} catch (ConditionTimeoutException e) {
-			String statuses = myJobPersistence.fetchInstances(100, 0)
-				.stream()
-				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
-				.collect(Collectors.joining("\n"));
-			String currentStatus = myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
+			String statuses = myJobPersistence.fetchInstances(100, 0).stream()
+					.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
+					.collect(Collectors.joining("\n"));
+			String currentStatus =
+					myJobCoordinator.getInstance(theBatchJobId).getStatus().name();
 			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) throws InterruptedException {
+	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses)
+			throws InterruptedException {
 		if (hasStatus(theBatchJobId, theExpectedStatuses)) {
 			return true;
 		}
@@ -175,7 +178,8 @@ public class Batch2JobHelper {
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
-		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+		await().until(() -> theExpectedGatedStepId.equals(
+				myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
 	}
 
 	public long getCombinedRecordsProcessed(String theJobId) {
@@ -185,10 +189,8 @@ public class Batch2JobHelper {
 
 	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
 		// fetch all jobs of any status type
-		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
-			theJobDefinitionId,
-			BATCH_SIZE,
-			0);
+		List<JobInstance> instances =
+				myJobCoordinator.getJobInstancesByJobDefinitionId(theJobDefinitionId, BATCH_SIZE, 0);
 		// then await completion status
 		awaitJobCompletions(instances);
 	}
@@ -206,9 +208,9 @@ public class Batch2JobHelper {
 				msg.append("Statuses:");
 				for (JobInstance instance : theJobInstances) {
 					msg.append("\n * Execution ")
-						.append(instance.getInstanceId())
-						.append(" has status ")
-						.append(instance.getStatus());
+							.append(instance.getInstanceId())
+							.append(" has status ")
+							.append(instance.getStatus());
 				}
 				fail(msg.toString());
 			}
@@ -225,29 +227,29 @@ public class Batch2JobHelper {
 
 	public void awaitNoJobsRunning(boolean theExpectAtLeastOneJobToExist) {
 		HashMap<String, String> map = new HashMap<>();
-		Awaitility.await().atMost(10, TimeUnit.SECONDS)
-			.until(() -> {
-				myJobMaintenanceService.runMaintenancePass();
+		Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> {
+			myJobMaintenanceService.runMaintenancePass();
 
-				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
-				// "All Jobs" assumes at least one job exists
-				if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
-					ourLog.warn("No jobs found yet...");
-					return false;
+			List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+			// "All Jobs" assumes at least one job exists
+			if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
+				ourLog.warn("No jobs found yet...");
+				return false;
+			}
+
+			for (JobInstance job : jobs) {
+				if (job.getStatus() != StatusEnum.COMPLETED) {
+					map.put(job.getInstanceId(), job.getStatus().name());
+				} else {
+					map.remove(job.getInstanceId());
 				}
+			}
+			return map.isEmpty();
+		});
 
-				for (JobInstance job : jobs) {
-					if (job.getStatus() != StatusEnum.COMPLETED) {
-						map.put(job.getInstanceId(), job.getStatus().name());
-					} else {
-						map.remove(job.getInstanceId());
-					}
-				}
-				return map.isEmpty();
-			});
-
-
-		String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
+		String msg = map.entrySet().stream()
+				.map(e -> e.getKey() + "=" + e.getValue())
+				.collect(Collectors.joining(", \n "));
 		ourLog.info("The following jobs did not complete as expected: {}", msg);
 	}
 

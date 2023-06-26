@@ -134,5 +134,4 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
-
 }

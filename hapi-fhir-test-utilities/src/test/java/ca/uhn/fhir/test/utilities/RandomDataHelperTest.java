@@ -36,5 +36,4 @@ class RandomDataHelperTest {
 		assertThat(object.myUUID, notNullValue());
 		assertThat(object.myEnum, notNullValue());
 	}
-
 }

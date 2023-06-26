@@ -71,44 +71,59 @@ import static org.mockito.Mockito.when;
 public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	protected static final String CS_URL = "http://example.com/my_code_system";
+
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
+
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
 	@Autowired
 	protected ITermReadSvc myTermSvc;
+
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	PlatformTransactionManager myTxManager;
+
 	@Autowired
 	private IFhirSystemDao mySystemDao;
+
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
+
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
+
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
 	@BeforeEach
 	public void beforeEach() {
-		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);
+		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
+				.thenReturn(Boolean.TRUE);
 	}
-
 
 	@AfterEach
 	public void after() {
@@ -117,7 +132,13 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
+		purgeDatabase(
+				myStorageSettings,
+				mySystemDao,
+				myResourceReindexingSvc,
+				mySearchCoordinatorSvc,
+				mySearchParamRegistry,
+				myBulkDataExportJobSchedulingHelper);
 	}
 
 	void createCodeSystem() {
@@ -128,7 +149,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable table =
+				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
@@ -156,10 +178,10 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
 		childAAB.addDesignation()
-			.setUseSystem("D1S")
-			.setUseCode("D1C")
-			.setUseDisplay("D1D")
-			.setValue("D1V");
+				.setUseSystem("D1S")
+				.setUseCode("D1C")
+				.setUseDisplay("D1D")
+				.setValue("D1V");
 		childAA.addChild(childAAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 
 		TermConcept childAB = new TermConcept(cs, "childAB");
@@ -168,8 +190,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
+				JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 	}
 
 	@Test
@@ -183,7 +205,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
 
-
 		// Codes available exceeds the max
 		myStorageSettings.setMaximumExpansionSize(50);
 		ValueSet vs = new ValueSet();
@@ -193,7 +214,10 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
+			assertThat(
+					e.getMessage(),
+					containsString(Msg.code(832)
+							+ "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
 		}
 
 		// Increase the max so it won't exceed
@@ -203,7 +227,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
 		assertEquals(109, outcome.getExpansion().getContains().size());
-
 	}
 
 	@Test
@@ -217,7 +240,15 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class), nullable(String.class));
+		verify(myValueSetCodeAccumulator, times(9))
+				.includeConceptWithDesignations(
+						anyString(),
+						anyString(),
+						nullable(String.class),
+						anyCollection(),
+						nullable(Long.class),
+						nullable(String.class),
+						nullable(String.class));
 	}
 
 	/**
@@ -231,7 +262,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource =
+				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
@@ -241,8 +273,12 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
+				codeSystem,
+				codeSystemVersion,
+				new SystemRequestDetails(),
+				Collections.singletonList(valueSet),
+				Collections.emptyList());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
@@ -250,11 +286,10 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
-		Slice<TermValueSet> page = runInTransaction(() ->
-			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
+		Slice<TermValueSet> page = runInTransaction(() -> myTermValueSetDao.findByExpansionStatus(
+				PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(1, page.getContent().size());
 	}
-
 
 	private ValueSet getValueSetWithAllCodeSystemConcepts(String theCodeSystemVersionId) {
 		ValueSet vs = new ValueSet();
@@ -268,7 +303,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		vs.getCompose().addInclude().setSystem(CS_URL).setVersion(theCodeSystemVersionId);
 		return vs;
 	}
-
 
 	private void addTermConcepts(TermCodeSystemVersion theCs, int theTermConceptQty) {
 		for (int i = 0; i < theTermConceptQty; i++) {
@@ -288,17 +322,20 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystem.setName("SYSTEM NAME");
 		codeSystem.setVersion("SYSTEM VERSION");
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+		ResourceTable csResource =
+				myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		codeSystemVersion.setResource(csResource);
 
 		TermConcept tc = new TermConcept(codeSystemVersion, "test-code-1");
 
-//		 need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
-//		 however, the new mapping (not nested, multivalued) groups properties by key, and there can't be more than 1000
-//		 properties (keys), so we test here with a number of properties > 10_000 but grouped in max 200 property keys
-//		 (current loinc version (2.73) has 82 property keys maximum in a TermConcept)
+		//		 need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
+		//		 however, the new mapping (not nested, multivalued) groups properties by key, and there can't be more than
+		// 1000
+		//		 properties (keys), so we test here with a number of properties > 10_000 but grouped in max 200 property
+		// keys
+		//		 (current loinc version (2.73) has 82 property keys maximum in a TermConcept)
 		addTermConceptProperties(tc, 10_100, 200);
 
 		codeSystemVersion.getConcepts().add(tc);
@@ -313,12 +350,16 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		valueSet.setDescription("A value set that includes all LOINC codes");
 		valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		assertDoesNotThrow(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList()));
-
+		assertDoesNotThrow(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
+				codeSystem,
+				codeSystemVersion,
+				new SystemRequestDetails(),
+				Collections.singletonList(valueSet),
+				Collections.emptyList()));
 	}
 
-	private void addTermConceptProperties(TermConcept theTermConcept, int thePropertiesCount, int thePropertyKeysCount) {
+	private void addTermConceptProperties(
+			TermConcept theTermConcept, int thePropertiesCount, int thePropertyKeysCount) {
 		int valuesPerPropKey = thePropertiesCount / thePropertyKeysCount;
 
 		int propsCreated = 0;
@@ -335,7 +376,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			}
 		}
 	}
-
 
 	@Override
 	protected FhirContext getFhirContext() {

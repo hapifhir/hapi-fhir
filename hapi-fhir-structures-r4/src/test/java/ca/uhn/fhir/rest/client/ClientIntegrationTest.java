@@ -22,10 +22,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -46,7 +46,6 @@ public class ClientIntegrationTest {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		myServer.setHandler(proxyHandler);
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -54,12 +53,13 @@ public class ClientIntegrationTest {
 	public void testClientSecurity() throws Exception {
 
 		JettyUtil.startServer(myServer);
-        int myPort = JettyUtil.getPortForStartedServer(myServer);
+		int myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		FhirContext ctx = FhirContext.forR4();
 
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
+		// TimeUnit.MILLISECONDS);
 		// builder.setConnectionManager(connectionManager);
 		builder.addInterceptorFirst(new HttpBasicAuthInterceptor("foobar", "boobear"));
 
@@ -93,7 +93,10 @@ public class ClientIntegrationTest {
 		}
 
 		@Search
-		public List<Patient> searchForPatients(@RequiredParam(name = "fooParam") StringDt theFooParam, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+		public List<Patient> searchForPatients(
+				@RequiredParam(name = "fooParam") StringDt theFooParam,
+				HttpServletRequest theRequest,
+				HttpServletResponse theResponse) {
 			Validate.notNull(theRequest);
 			Validate.notNull(theResponse);
 
@@ -104,20 +107,16 @@ public class ClientIntegrationTest {
 			retVal.addName().setFamily(theFooParam.getValue());
 			return Collections.singletonList(retVal);
 		}
-
 	}
 
 	private static interface PatientClient extends IBasicClient {
 
 		@Search
 		public List<Patient> searchForPatients(@RequiredParam(name = "fooParam") StringDt theFooParam);
-
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

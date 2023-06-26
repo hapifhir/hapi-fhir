@@ -43,7 +43,6 @@ public class MessageSupplierTest {
 		myLoggerRoot.addAppender(myMockAppender);
 	}
 
-
 	@Test
 	public void testLog() {
 
@@ -56,9 +55,5 @@ public class MessageSupplierTest {
 			System.out.flush();
 			return formattedMessage.equals("Hello: Goodbye");
 		}));
-
-
 	}
-
-
 }

@@ -66,40 +66,57 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
 	private TermLoaderSvcImpl mySvc;
 
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
+
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor_267_first;
+
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor_267_second;
+
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor_268;
+
 	@Captor
 	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_267_first;
+
 	@Captor
 	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_267_second;
+
 	@Captor
 	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_268;
+
 	@Captor
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_267_first;
+
 	@Captor
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_267_second;
+
 	@Captor
 	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_268;
+
 	@Captor
 	private ArgumentCaptor<RequestDetails> myRequestDetailsCaptor;
+
 	private ZipCollectionBuilder myFiles;
+
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
-	public static final String expectedLoincCopyright = "This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2021, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc.";
-	public static final String partMappingsExternalCopyright = "The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
-	public static final String expectedWhoExternalCopyrightNotice = "Copyright © 2006 World Health Organization. Used with permission. Publications of the World Health Organization can be obtained from WHO Press, World Health Organization, 20 Avenue Appia, 1211 Geneva 27, Switzerland (tel: +41 22 791 2476; fax: +41 22 791 4857; email: bookorders@who.int). Requests for permission to reproduce or translate WHO publications – whether for sale or for noncommercial distribution – should be addressed to WHO Press, at the above address (fax: +41 22 791 4806; email: permissions@who.int). The designations employed and the presentation of the material in this publication do not imply the expression of any opinion whatsoever on the part of the World Health Organization concerning the legal status of any country, territory, city or area or of its authorities, or concerning the delimitation of its frontiers or boundaries. Dotted lines on maps represent approximate border lines for which there may not yet be full agreement. The mention of specific companies or of certain manufacturers’ products does not imply that they are endorsed or recommended by the World Health Organization in preference to others of a similar nature that are not mentioned. Errors and omissions excepted, the names of proprietary products are distinguished by initial capital letters. All reasonable precautions have been taken by WHO to verify the information contained in this publication. However, the published material is being distributed without warranty of any kind, either express or implied. The responsibility for the interpretation and use of the material lies with the reader. In no event shall the World Health Organization be liable for damages arising from its use.";
+	public static final String expectedLoincCopyright =
+			"This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2021, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc.";
+	public static final String partMappingsExternalCopyright =
+			"The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
+	public static final String expectedWhoExternalCopyrightNotice =
+			"Copyright © 2006 World Health Organization. Used with permission. Publications of the World Health Organization can be obtained from WHO Press, World Health Organization, 20 Avenue Appia, 1211 Geneva 27, Switzerland (tel: +41 22 791 2476; fax: +41 22 791 4857; email: bookorders@who.int). Requests for permission to reproduce or translate WHO publications – whether for sale or for noncommercial distribution – should be addressed to WHO Press, at the above address (fax: +41 22 791 4806; email: permissions@who.int). The designations employed and the presentation of the material in this publication do not imply the expression of any opinion whatsoever on the part of the World Health Organization concerning the legal status of any country, territory, city or area or of its authorities, or concerning the delimitation of its frontiers or boundaries. Dotted lines on maps represent approximate border lines for which there may not yet be full agreement. The mention of specific companies or of certain manufacturers’ products does not imply that they are endorsed or recommended by the World Health Organization in preference to others of a similar nature that are not mentioned. Errors and omissions excepted, the names of proprietary products are distinguished by initial capital letters. All reasonable precautions have been taken by WHO to verify the information contained in this publication. However, the published material is being distributed without warranty of any kind, either express or implied. The responsibility for the interpretation and use of the material lies with the reader. In no event shall the World Health Organization be liable for damages arising from its use.";
 
 	@BeforeEach
 	public void before() {
@@ -136,7 +153,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals(
+					Msg.code(863)
+							+ "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]",
+					e.getMessage());
 		}
 
 		// Missing LoincPartLink_Supplementary
@@ -145,7 +165,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals(
+					Msg.code(863)
+							+ "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]",
+					e.getMessage());
 		}
 
 		// Both Split and Single PartLink files
@@ -155,9 +178,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(863) + "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
+			assertEquals(
+					Msg.code(863)
+							+ "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -165,7 +190,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		TermTestUtil.addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
 		verifyLoadLoinc(false, true);
 	}
-
 
 	private void verifyLoadLoinc() {
 		verifyLoadLoinc(true, false);
@@ -175,7 +199,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1))
+				.storeNewCodeSystemVersion(
+						mySystemCaptor.capture(),
+						myCsvCaptor.capture(),
+						any(RequestDetails.class),
+						myValueSetsCaptor.capture(),
+						myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -189,14 +219,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
 		// Coding Property
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		// String Property
 		assertEquals("2", code.getStringProperty("CLASSTYPE"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 		// Coding Property from Part File
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("TIME_ASPCT").get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties("TIME_ASPCT").get(0).getSystem());
 		assertEquals("LP6960-1", code.getCodingProperties("TIME_ASPCT").get(0).getCode());
 		assertEquals("Pt", code.getCodingProperties("TIME_ASPCT").get(0).getDisplay());
 		// Code with component that has a divisor
@@ -230,14 +264,19 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		vs = valueSets.get("LL1001-8");
 		assertEquals("Beta.1", vs.getVersion());
 		assertEquals("urn:ietf:rfc:3986", vs.getIdentifier().get(0).getSystem());
-		assertEquals("urn:oid:1.3.6.1.4.1.12009.10.1.166", vs.getIdentifier().get(0).getValue());
+		assertEquals(
+				"urn:oid:1.3.6.1.4.1.12009.10.1.166", vs.getIdentifier().get(0).getValue());
 		assertEquals("PhenX05_14_30D freq amts", vs.getName());
 		assertEquals("http://loinc.org/vs/LL1001-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(7, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
-		assertEquals("LA6270-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				"LA6270-8",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertEquals("Beta.1", vs.getVersion());
 
 		// External AnswerList
@@ -267,24 +306,34 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Interferon.beta", group.getElement().get(0).getDisplay());
 		assertEquals(1, group.getElement().get(0).getTarget().size());
 		assertEquals("420710006", group.getElement().get(0).getTarget().get(0).getCode());
-		assertEquals("Interferon beta (substance)", group.getElement().get(0).getTarget().get(0).getDisplay());
+		assertEquals(
+				"Interferon beta (substance)",
+				group.getElement().get(0).getTarget().get(0).getDisplay());
 
 		// Document Ontology ValueSet
 		vs = valueSets.get(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_ID);
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME, vs.getName());
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI, vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("11488-4", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("Consult note", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals(
+				"11488-4",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"Consult note",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertNull(vs.getVersion());
 
 		// Document ontology parts
 		code = concepts.get("11488-4");
 		assertEquals(1, code.getCodingProperties("document-kind").size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("document-kind").get(0).getSystem());
-		assertEquals("LP173418-7", code.getCodingProperties("document-kind").get(0).getCode());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties("document-kind").get(0).getSystem());
+		assertEquals(
+				"LP173418-7", code.getCodingProperties("document-kind").get(0).getCode());
 		assertEquals("Note", code.getCodingProperties("document-kind").get(0).getDisplay());
 
 		// RSNA Playbook ValueSet
@@ -293,30 +342,42 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(LoincRsnaPlaybookHandler.RSNA_CODES_VS_URI, vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
-		assertEquals("17787-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("NM Thyroid gland Study report", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				"17787-3",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"NM Thyroid gland Study report",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertNull(vs.getVersion());
 
 		// RSNA Playbook Code Parts - Region Imaged
 		code = concepts.get("17787-3");
 		String propertyName = "rad-anatomic-location-region-imaged";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP199995-4", code.getCodingProperties(propertyName).get(0).getCode());
 		assertEquals("Neck", code.getCodingProperties(propertyName).get(0).getDisplay());
 		// RSNA Playbook Code Parts - Imaging Focus
 		code = concepts.get("17787-3");
 		propertyName = "rad-anatomic-location-imaging-focus";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP206648-0", code.getCodingProperties(propertyName).get(0).getCode());
-		assertEquals("Thyroid gland", code.getCodingProperties(propertyName).get(0).getDisplay());
+		assertEquals(
+				"Thyroid gland", code.getCodingProperties(propertyName).get(0).getDisplay());
 		// RSNA Playbook Code Parts - Modality Type
 		code = concepts.get("17787-3");
 		propertyName = "rad-modality-modality-type";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP208891-4", code.getCodingProperties(propertyName).get(0).getCode());
 		assertEquals("NM", code.getCodingProperties(propertyName).get(0).getDisplay());
 
@@ -336,7 +397,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(1, group.getElement().get(0).getTarget().size());
 		assertEquals("RID7488", group.getElement().get(0).getTarget().get(0).getCode());
 		assertEquals("neck", group.getElement().get(0).getTarget().get(0).getDisplay());
-		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
+		assertEquals(
+				Enumerations.ConceptMapEquivalence.EQUAL,
+				group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID);
@@ -353,8 +416,12 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("US Retroperitoneum", group.getElement().get(0).getDisplay());
 		assertEquals(1, group.getElement().get(0).getTarget().size());
 		assertEquals("RPID2142", group.getElement().get(0).getTarget().get(0).getCode());
-		assertEquals("US Retroperitoneum", group.getElement().get(0).getTarget().get(0).getDisplay());
-		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
+		assertEquals(
+				"US Retroperitoneum",
+				group.getElement().get(0).getTarget().get(0).getDisplay());
+		assertEquals(
+				Enumerations.ConceptMapEquivalence.EQUAL,
+				group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		if (theIncludeTop2000) {
 			// TOP 2000 - US
@@ -362,12 +429,22 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertEquals(vs.getName(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME);
 			assertEquals(vs.getUrl(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI);
 			assertEquals(1, vs.getCompose().getInclude().size());
-			assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+			assertEquals(
+					ITermLoaderSvc.LOINC_URI,
+					vs.getCompose().getInclude().get(0).getSystem());
 			assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-			assertEquals("2160-0", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-			assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
-			assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
-			assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+			assertEquals(
+					"2160-0",
+					vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+			assertEquals(
+					"Creatinine [Mass/volume] in Serum or Plasma",
+					vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+			assertEquals(
+					"718-7",
+					vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+			assertEquals(
+					"Hemoglobin [Mass/volume] in Blood",
+					vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
 			assertNull(vs.getVersion());
 
 			// TOP 2000 - SI
@@ -375,22 +452,37 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertEquals(vs.getName(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_NAME);
 			assertEquals(vs.getUrl(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_URI);
 			assertEquals(1, vs.getCompose().getInclude().size());
-			assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+			assertEquals(
+					ITermLoaderSvc.LOINC_URI,
+					vs.getCompose().getInclude().get(0).getSystem());
 			assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-			assertEquals("14682-9", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-			assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
-			assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
-			assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+			assertEquals(
+					"14682-9",
+					vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+			assertEquals(
+					"Creatinine [Moles/volume] in Serum or Plasma",
+					vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+			assertEquals(
+					"718-7",
+					vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+			assertEquals(
+					"Hemoglobin [Mass/volume] in Blood",
+					vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
 			assertNull(vs.getVersion());
 		}
 
 		// Universal lab order VS
 		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID_BASE);
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("42176-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("1,3 beta glucan [Mass/volume] in Serum", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals(
+				"42176-8",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"1,3 beta glucan [Mass/volume] in Serum",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertNull(vs.getVersion());
 
 		// All LOINC codes
@@ -407,68 +499,186 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertTrue(vs.hasCompose());
 		assertTrue(vs.getCompose().hasInclude());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertNull(vs.getVersion());
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
-		ourLog.debug(FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(
+				FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, conceptMap.getGroup().get(0).getSource());
-		assertEquals(ITermLoaderSvc.IEEE_11073_10101_URI, conceptMap.getGroup().get(0).getTarget());
+		assertEquals(
+				ITermLoaderSvc.IEEE_11073_10101_URI,
+				conceptMap.getGroup().get(0).getTarget());
 		assertEquals(7, conceptMap.getGroup().get(0).getElement().size());
 		assertEquals("14749-6", conceptMap.getGroup().get(0).getElement().get(4).getCode());
-		assertEquals("Glucose [Moles/volume] in Serum or Plasma", conceptMap.getGroup().get(0).getElement().get(4).getDisplay());
-		assertEquals(2, conceptMap.getGroup().get(0).getElement().get(4).getTarget().size());
-		assertEquals("160196", conceptMap.getGroup().get(0).getElement().get(4).getTarget().get(0).getCode());
-		assertEquals("MDC_CONC_GLU_VENOUS_PLASMA", conceptMap.getGroup().get(0).getElement().get(4).getTarget().get(0).getDisplay());
+		assertEquals(
+				"Glucose [Moles/volume] in Serum or Plasma",
+				conceptMap.getGroup().get(0).getElement().get(4).getDisplay());
+		assertEquals(
+				2, conceptMap.getGroup().get(0).getElement().get(4).getTarget().size());
+		assertEquals(
+				"160196",
+				conceptMap
+						.getGroup()
+						.get(0)
+						.getElement()
+						.get(4)
+						.getTarget()
+						.get(0)
+						.getCode());
+		assertEquals(
+				"MDC_CONC_GLU_VENOUS_PLASMA",
+				conceptMap
+						.getGroup()
+						.get(0)
+						.getElement()
+						.get(4)
+						.getTarget()
+						.get(0)
+						.getDisplay());
 
 		// Imaging Document Codes
 		vs = valueSets.get(LoincImagingDocumentCodeHandler.VS_ID_BASE);
 		assertEquals(LoincImagingDocumentCodeHandler.VS_URI, vs.getUrl());
 		assertEquals(LoincImagingDocumentCodeHandler.VS_NAME, vs.getName());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("11525-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("US Pelvis Fetus for pregnancy", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals(
+				"11525-3",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"US Pelvis Fetus for pregnancy",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
 		// Group - Parent
 		vs = valueSets.get("LG100-4");
-		ourLog.debug(FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
-		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
+		ourLog.debug(
+				FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		assertEquals(
+				"Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>",
+				vs.getName());
 		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(1, vs.getCompose().getInclude().get(0).getValueSet().size());
-		assertEquals("http://loinc.org/vs/LG1695-8", vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
+		assertEquals(
+				"http://loinc.org/vs/LG1695-8",
+				vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
 
 		// Group - Child
 		vs = valueSets.get("LG1695-8");
-		ourLog.debug(FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.debug(
+				FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
 		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
-		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
+		assertEquals(
+				"17424-3",
+				vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals(
+				"13006-2",
+				vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
 
 		// Consumer Name
 		if (theIncludeConsumerNameAndLinguisticVariants) {
-		    code = concepts.get("61438-8");
-		    assertEquals(8, code.getDesignations().size());
-		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
-		    code = concepts.get("17787-3");
-		    assertEquals(5, code.getDesignations().size());
-		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+			code = concepts.get("61438-8");
+			assertEquals(8, code.getDesignations().size());
+			TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"de-AT",
+					"Entlassungsbrief Ärztlich",
+					"Ergebnis",
+					"Zeitpunkt",
+					"{Setting}",
+					"Dokument",
+					"Dermatologie",
+					"DOC.ONTOLOGY",
+					"de shortname",
+					"de long common name",
+					"de related names 2",
+					"de linguistic variant display name");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"fr-CA",
+					"Cellules de Purkinje cytoplasmique type 2 , IgG",
+					"Titre",
+					"Temps ponctuel",
+					"Sérum",
+					"Quantitatif",
+					"Immunofluorescence",
+					"Sérologie",
+					"",
+					"",
+					"",
+					"");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"zh-CN",
+					"血流速度.收缩期.最大值",
+					"速度",
+					"时间点",
+					"大脑中动脉",
+					"定量型",
+					"超声.多普勒",
+					"产科学检查与测量指标.超声",
+					"",
+					"",
+					"Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)",
+					"");
+			code = concepts.get("17787-3");
+			assertEquals(5, code.getDesignations().size());
+			TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"de-AT",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"CoV OC43 RNA ql/SM P",
+					"Coronavirus OC43 RNA ql. /Sondermaterial PCR");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"fr-CA",
+					"Virus respiratoire syncytial bovin",
+					"Présence-Seuil",
+					"Temps ponctuel",
+					"XXX",
+					"Ordinal",
+					"Culture spécifique à un microorganisme",
+					"Microbiologie",
+					"",
+					"",
+					"",
+					"");
+			TermTestUtil.verifyLinguisticVariant(
+					code.getDesignations(),
+					"zh-CN",
+					"血流速度.收缩期.最大值",
+					"速度",
+					"时间点",
+					"二尖瓣^胎儿",
+					"定量型",
+					"超声.多普勒",
+					"产科学检查与测量指标.超声",
+					"",
+					"",
+					"僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)",
+					"");
 		}
 	}
 
@@ -480,7 +690,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_first.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_first.capture(), myConceptMapCaptor_267_first.capture());
+		verify(myTermCodeSystemStorageSvc, times(2))
+				.storeNewCodeSystemVersion(
+						mySystemCaptor_267_first.capture(),
+						myCsvCaptor.capture(),
+						any(RequestDetails.class),
+						myValueSetsCaptor_267_first.capture(),
+						myConceptMapCaptor_267_first.capture());
 		List<CodeSystem> loincCSResources = mySystemCaptor_267_first.getAllValues();
 		assertEquals(2, loincCSResources.size());
 		assertEquals("2.67", loincCSResources.get(0).getVersion());
@@ -490,7 +706,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, loincVS_resourceLists.size());
 		List<ValueSet> loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1-2.67", loincVS.getVersion());
 			} else {
 				assertEquals("2.67", loincVS.getVersion());
@@ -498,7 +716,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 		loincVS_resources = loincVS_resourceLists.get(1);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
@@ -531,7 +751,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_second.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_second.capture(), myConceptMapCaptor_267_second.capture());
+		verify(myTermCodeSystemStorageSvc, times(2))
+				.storeNewCodeSystemVersion(
+						mySystemCaptor_267_second.capture(),
+						myCsvCaptor.capture(),
+						any(RequestDetails.class),
+						myValueSetsCaptor_267_second.capture(),
+						myConceptMapCaptor_267_second.capture());
 		loincCSResources = mySystemCaptor_267_second.getAllValues();
 		assertEquals(2, loincCSResources.size());
 		assertEquals("2.67", loincCSResources.get(0).getVersion());
@@ -541,7 +767,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, loincVS_resourceLists.size());
 		loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1-2.67", loincVS.getVersion());
 			} else {
 				assertEquals("2.67", loincVS.getVersion());
@@ -549,7 +777,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 		loincVS_resources = loincVS_resourceLists.get(1);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
@@ -582,7 +812,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_268.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_268.capture(), myConceptMapCaptor_268.capture());
+		verify(myTermCodeSystemStorageSvc, times(2))
+				.storeNewCodeSystemVersion(
+						mySystemCaptor_268.capture(),
+						myCsvCaptor.capture(),
+						any(RequestDetails.class),
+						myValueSetsCaptor_268.capture(),
+						myConceptMapCaptor_268.capture());
 		loincCSResources = mySystemCaptor_268.getAllValues();
 		assertEquals(2, loincCSResources.size());
 		assertEquals("2.68", loincCSResources.get(0).getVersion());
@@ -592,7 +828,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(2, loincVS_resourceLists.size());
 		loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1-2.68", loincVS.getVersion());
 			} else {
 				assertEquals("2.68", loincVS.getVersion());
@@ -600,7 +838,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 		loincVS_resources = loincVS_resourceLists.get(1);
 		for (ValueSet loincVS : loincVS_resources) {
-			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+			if (loincVS.getId().startsWith("LL1000-0")
+					|| loincVS.getId().startsWith("LL1001-8")
+					|| loincVS.getId().startsWith("LL1892-0")) {
 				assertEquals("Beta.1", loincVS.getVersion());
 			} else {
 				assertNull(loincVS.getVersion());
@@ -625,7 +865,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 			assertNull(group.getSourceVersion());
 		}
-
 	}
 
 	@Test
@@ -644,7 +883,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 	}
 
-
 	@Test
 	public void testLoadLoincMultiaxialHierarchySupport() throws Exception {
 		TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
@@ -652,7 +890,13 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1))
+				.storeNewCodeSystemVersion(
+						mySystemCaptor.capture(),
+						myCsvCaptor.capture(),
+						any(RequestDetails.class),
+						myValueSetsCaptor.capture(),
+						myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		TermConcept code;
@@ -660,10 +904,14 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
-		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals(
+				ITermLoaderSvc.LOINC_URI,
+				code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		assertEquals("2", code.getStringProperty("CLASSTYPE"));
@@ -697,7 +945,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Bacteria", properties.get(1).getDisplay());
 		assertEquals(1, childCode.getParents().size());
 		assertEquals(1, childCode.getChildren().size());
-		assertEquals(code.getCode(), new ArrayList<>(childCode.getParents()).get(0).getParent().getCode());
+		assertEquals(
+				code.getCode(),
+				new ArrayList<>(childCode.getParents()).get(0).getParent().getCode());
 
 		TermConcept nestedChildCode = childCode.getChildren().get(0).getChild();
 		assertEquals("LP98185-9", nestedChildCode.getCode());
@@ -715,7 +965,9 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Bacteria", properties.get(1).getDisplay());
 		assertEquals(1, nestedChildCode.getParents().size());
 		assertEquals(1, nestedChildCode.getChildren().size());
-		assertEquals(childCode.getCode(), new ArrayList<>(nestedChildCode.getParents()).get(0).getParent().getCode());
+		assertEquals(
+				childCode.getCode(),
+				new ArrayList<>(nestedChildCode.getParents()).get(0).getParent().getCode());
 
 		TermConcept doublyNestedChildCode = nestedChildCode.getChildren().get(0).getChild();
 		assertEquals("LP14082-9", doublyNestedChildCode.getCode());
@@ -741,26 +993,39 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Bacteria | Cervix", properties.get(3).getDisplay());
 		assertEquals(1, doublyNestedChildCode.getParents().size());
 		assertEquals(3, doublyNestedChildCode.getChildren().size());
-		assertEquals(nestedChildCode.getCode(), new ArrayList<>(doublyNestedChildCode.getParents()).get(0).getParent().getCode());
-		assertEquals("LP52258-8", doublyNestedChildCode.getChildren().get(0).getChild().getCode());
-		assertEquals("LP52260-4", doublyNestedChildCode.getChildren().get(1).getChild().getCode());
-		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
+		assertEquals(
+				nestedChildCode.getCode(),
+				new ArrayList<>(doublyNestedChildCode.getParents())
+						.get(0)
+						.getParent()
+						.getCode());
+		assertEquals(
+				"LP52258-8",
+				doublyNestedChildCode.getChildren().get(0).getChild().getCode());
+		assertEquals(
+				"LP52260-4",
+				doublyNestedChildCode.getChildren().get(1).getChild().getCode());
+		assertEquals(
+				"LP52960-9",
+				doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
-
-
-
 
 	@Nested
 	public class LoadLoincCurrentVersion {
 		private TermLoaderSvcImpl testedSvc;
 		private final Properties testProps = new Properties();
 
-		@Mock private final LoadedFileDescriptors mockFileDescriptors = mock(LoadedFileDescriptors.class);
-		@SuppressWarnings("unchecked")
-		@Mock private final List<ITermLoaderSvc.FileDescriptor> mockFileDescriptorList = mock(List.class);
-		@Mock private final ITermCodeSystemStorageSvc mockCodeSystemStorageSvc = mock(ITermCodeSystemStorageSvc.class);
-		private final RequestDetails requestDetails = new ServletRequestDetails();
+		@Mock
+		private final LoadedFileDescriptors mockFileDescriptors = mock(LoadedFileDescriptors.class);
 
+		@SuppressWarnings("unchecked")
+		@Mock
+		private final List<ITermLoaderSvc.FileDescriptor> mockFileDescriptorList = mock(List.class);
+
+		@Mock
+		private final ITermCodeSystemStorageSvc mockCodeSystemStorageSvc = mock(ITermCodeSystemStorageSvc.class);
+
+		private final RequestDetails requestDetails = new ServletRequestDetails();
 
 		@BeforeEach
 		void beforeEach() {
@@ -768,7 +1033,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			doReturn(testProps).when(testedSvc).getProperties(any(), eq(LOINC_UPLOAD_PROPERTIES_FILE.getCode()));
 			requestDetails.setOperation(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
 		}
-
 
 		@Test
 		public void testDontMakeCurrentVersion() throws IOException {
@@ -778,76 +1042,81 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 			testedSvc.loadLoinc(myFiles.getFiles(), requestDetails);
 
-			verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(
-				any(CodeSystem.class), any(TermCodeSystemVersion.class), myRequestDetailsCaptor.capture(), any(), any());
+			verify(myTermCodeSystemStorageSvc, times(1))
+					.storeNewCodeSystemVersion(
+							any(CodeSystem.class),
+							any(TermCodeSystemVersion.class),
+							myRequestDetailsCaptor.capture(),
+							any(),
+							any());
 
-			myRequestDetailsCaptor.getAllValues().forEach( rd ->
-				assertFalse(rd.getUserData() == null ||
-					(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE))
-			);
+			myRequestDetailsCaptor
+					.getAllValues()
+					.forEach(rd -> assertFalse(rd.getUserData() == null
+							|| (boolean) requestDetails
+									.getUserData()
+									.getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)));
 		}
-
 
 		@Test
 		public void testMakeCurrentVersionPropertySet() {
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
 			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
-			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
-				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+			doReturn(mock(UploadStatistics.class))
+					.when(testedSvc)
+					.processLoincFiles(eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
 
 			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
 
-			boolean isMakeCurrent = requestDetails.getUserData() == null ||
-				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			boolean isMakeCurrent = requestDetails.getUserData() == null
+					|| (boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 			assertTrue(isMakeCurrent);
 		}
-
 
 		@Test
 		public void testMakeCurrentVersionByDefaultPropertySet() {
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
 			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
-			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
-				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+			doReturn(mock(UploadStatistics.class))
+					.when(testedSvc)
+					.processLoincFiles(eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
 
 			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
 
-			boolean isMakeCurrent = requestDetails.getUserData() == null ||
-				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			boolean isMakeCurrent = requestDetails.getUserData() == null
+					|| (boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 			assertTrue(isMakeCurrent);
 		}
-
 
 		@Test
 		public void testDontMakeCurrentVersionPropertySet() {
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
 			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
-			doReturn(mock(UploadStatistics.class)).when(testedSvc).processLoincFiles(
-				eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
+			doReturn(mock(UploadStatistics.class))
+					.when(testedSvc)
+					.processLoincFiles(eq(mockFileDescriptors), eq(requestDetails), eq(testProps), any());
 
 			testedSvc.loadLoinc(mockFileDescriptorList, requestDetails);
 
-			boolean isMakeCurrent = requestDetails.getUserData() == null ||
-				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+			boolean isMakeCurrent = requestDetails.getUserData() == null
+					|| (boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 			assertFalse(isMakeCurrent);
 		}
-
 
 		@Test
 		public void testNoVersionAndNoMakeCurrentThrows() {
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			doReturn(mockFileDescriptors).when(testedSvc).getLoadedFileDescriptors(mockFileDescriptorList);
 
-			InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
-				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
+			InvalidRequestException thrown = assertThrows(
+					InvalidRequestException.class, () -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd));
 
-			assertEquals(Msg.code(864) + "'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +
-				LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'", thrown.getMessage());
+			assertEquals(
+					Msg.code(864) + "'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '"
+							+ LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'",
+					thrown.getMessage());
 		}
-
 	}
-
-
 }

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TimeDtTest {
 
@@ -11,5 +11,4 @@ public class TimeDtTest {
 		TimeDt dt = new TimeDt("11:33:01.123");
 		assertEquals("11:33:01.123", dt.getValue());
 	}
-	
 }

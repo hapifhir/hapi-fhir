@@ -12,8 +12,6 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import static ca.uhn.fhirtest.config.TestDstu3Config.FHIR_LUCENE_LOCATION_DSTU3;
-
 public class UhnFhirTestApp {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UhnFhirTestApp.class);
@@ -97,10 +95,10 @@ public class UhnFhirTestApp {
 			client.create().resource(subs).execute();
 
 			//			for (int i = 0; i < 1000; i++) {
-			//				
+			//
 			//				Patient p = (Patient) resources.get(0);
 			//				p.addName().addFamily("Transaction"+i);
-			//				
+			//
 			//				ourLog.info("Transaction count {}", i);
 			//				client.transaction(resources);
 			//			}
@@ -121,8 +119,6 @@ public class UhnFhirTestApp {
 			client.create().resource(p1).execute();
 
 			client.create().resource(p1).execute();
-
 		}
-
 	}
 }

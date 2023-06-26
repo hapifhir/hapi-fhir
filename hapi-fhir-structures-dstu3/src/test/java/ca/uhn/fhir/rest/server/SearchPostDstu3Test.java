@@ -32,12 +32,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,8 +50,6 @@ public class SearchPostDstu3Test {
 			ourLog.info("Params: {}", theRequest.getParameterMap());
 			return true;
 		}
-
-
 	}
 
 	private static CloseableHttpClient ourClient;
@@ -77,14 +75,15 @@ public class SearchPostDstu3Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
-		httpPost.addHeader("Cache-Control","no-cache");
+		HttpPost httpPost =
+				new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
+		httpPost.addHeader("Cache-Control", "no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -94,13 +93,27 @@ public class SearchPostDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(null, ourLastSortSpec);
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(
+					1,
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.size());
+			assertEquals(
+					"Smith",
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValue());
+			assertEquals(
+					Constants.CT_FHIR_JSON_NEW,
+					status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	/**
@@ -109,13 +122,13 @@ public class SearchPostDstu3Test {
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsNoParams() throws Exception {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
-		httpPost.addHeader("Cache-Control","no-cache");
+		httpPost.addHeader("Cache-Control", "no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -125,13 +138,27 @@ public class SearchPostDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(null, ourLastSortSpec);
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(
+					1,
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.size());
+			assertEquals(
+					"Smith",
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValue());
+			assertEquals(
+					Constants.CT_FHIR_XML_NEW,
+					status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	/**
@@ -140,15 +167,16 @@ public class SearchPostDstu3Test {
 	@Test
 	public void testSearchWithMixedParamsYesInterceptorsYesParams() throws Exception {
 		ourServlet.registerInterceptor(new ParamLoggingInterceptor());
-		
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
-		httpPost.addHeader("Cache-Control","no-cache");
+
+		HttpPost httpPost =
+				new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
+		httpPost.addHeader("Cache-Control", "no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -158,13 +186,27 @@ public class SearchPostDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(null, ourLastSortSpec);
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(
+					1,
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.size());
+			assertEquals(
+					"Smith",
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValue());
+			assertEquals(
+					Constants.CT_FHIR_JSON_NEW,
+					status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	/**
@@ -173,15 +215,15 @@ public class SearchPostDstu3Test {
 	@Test
 	public void testSearchWithMixedParamsYesInterceptorsNoParams() throws Exception {
 		ourServlet.registerInterceptor(new ParamLoggingInterceptor());
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
-		httpPost.addHeader("Cache-Control","no-cache");
+		httpPost.addHeader("Cache-Control", "no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -191,15 +233,29 @@ public class SearchPostDstu3Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(null, ourLastSortSpec);
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(
+					1,
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.size());
+			assertEquals(
+					"Smith",
+					ourLastName
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValue());
+			assertEquals(
+					Constants.CT_FHIR_XML_NEW,
+					status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
-	
+
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -222,13 +278,13 @@ public class SearchPostDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -238,22 +294,20 @@ public class SearchPostDstu3Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
+		// @formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-				@Sort SortSpec theSortSpec,
-				@OptionalParam(name=Patient.SP_NAME) StringAndListParam theName
-				) {
+				@Sort SortSpec theSortSpec, @OptionalParam(name = Patient.SP_NAME) StringAndListParam theName) {
 			ourLastMethod = "search";
 			ourLastSortSpec = theSortSpec;
 			ourLastName = theName;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			retVal.add((Patient) new Patient().addName(new HumanName().setFamily("FAMILY")).setId("foo"));
+			retVal.add((Patient)
+					new Patient().addName(new HumanName().setFamily("FAMILY")).setId("foo"));
 			return retVal;
 		}
-		//@formatter:on
+		// @formatter:on
 
 	}
-
 }

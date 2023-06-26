@@ -53,18 +53,16 @@ public class CompartmentDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
 		ourLastId = null;
 	}
 
-
 	@Test
 	public void testReadFirst() throws Exception {
 		init(new TempPatientResourceProvider());
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -79,7 +77,7 @@ public class CompartmentDstu2Test {
 	@Test
 	public void testCompartmentSecond() throws Exception {
 		init(new TempPatientResourceProvider());
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/Encounter");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -95,7 +93,7 @@ public class CompartmentDstu2Test {
 	@Test
 	public void testCompartmentSecond2() throws Exception {
 		init(new TempPatientResourceProvider());
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/Observation");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -126,13 +124,13 @@ public class CompartmentDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class TempPatientResourceProvider implements IResourceProvider {
@@ -175,7 +173,5 @@ public class CompartmentDstu2Test {
 			encounters.add(obs);
 			return encounters;
 		}
-
 	}
-
 }

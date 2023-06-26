@@ -27,10 +27,10 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.opencds.cqf.cql.engine.exception.CqlException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class represents clinical reasoning interceptor used for cql exception handling and logging
@@ -39,8 +39,12 @@ import java.lang.reflect.InvocationTargetException;
 public class CqlExceptionHandlingInterceptor {
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException,
-											 HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
+	public boolean handleException(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws IOException {
 
 		CqlException cqlException = getCqlException(theException);
 		if (cqlException == null) {
@@ -84,7 +88,8 @@ public class CqlExceptionHandlingInterceptor {
 		String message = theCqlException.getMessage();
 
 		if (theCqlException.getSourceLocator() != null) {
-			message += "\nat CQL source location: " + theCqlException.getSourceLocator().toString();
+			message += "\nat CQL source location: "
+					+ theCqlException.getSourceLocator().toString();
 		}
 
 		if (theCqlException.getCause() != null) {
@@ -98,7 +103,7 @@ public class CqlExceptionHandlingInterceptor {
 		if (theException.getCause() instanceof CqlException) {
 			return (CqlException) theException.getCause();
 		} else if (theException.getCause() instanceof InvocationTargetException) {
-			InvocationTargetException ite = (InvocationTargetException)theException.getCause();
+			InvocationTargetException ite = (InvocationTargetException) theException.getCause();
 			if (ite.getCause() instanceof CqlException) {
 				return (CqlException) ite.getCause();
 			}

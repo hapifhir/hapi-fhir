@@ -59,8 +59,10 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		final Patient patient1 = createPatient(buildJanePatient());
 		buildUpdateLinkMdmTransactionContext();
 
-		MdmMatchOutcome matchOutcome = new MdmMatchOutcome(61L, 5.0).setMdmRuleCount(6).setMatchResultEnum(POSSIBLE_MATCH);
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, matchOutcome, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		MdmMatchOutcome matchOutcome =
+				new MdmMatchOutcome(61L, 5.0).setMdmRuleCount(6).setMatchResultEnum(POSSIBLE_MATCH);
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+				goldenPatient, patient1, matchOutcome, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertFalse(targets.isEmpty());
@@ -79,7 +81,12 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		final MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
 
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+				goldenPatient,
+				patient1,
+				MdmMatchOutcome.NO_MATCH,
+				MdmLinkSourceEnum.MANUAL,
+				createContextForCreate("Patient"));
 
 		myMdmSettings.getMdmRules().setVersion("2");
 
@@ -91,6 +98,8 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		final MdmLink mdmLink = targets.get(0);
 
-		assertEquals(patient1.getIdElement().toVersionless().getIdPart(), mdmLink.getSourcePersistenceId().getId().toString());
+		assertEquals(
+				patient1.getIdElement().toVersionless().getIdPart(),
+				mdmLink.getSourcePersistenceId().getId().toString());
 	}
 }

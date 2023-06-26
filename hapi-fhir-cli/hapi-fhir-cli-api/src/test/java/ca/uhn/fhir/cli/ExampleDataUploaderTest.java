@@ -30,6 +30,7 @@ class ExampleDataUploaderTest {
 
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newWithTransactionLatch();
+
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -52,13 +53,18 @@ class ExampleDataUploaderTest {
 		String headerValue = "test header value";
 
 		String[] args = myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-			new String[]{
-				"-v", "r4",  // BaseRequestGeneratingCommandTest required
-				"-d", inputFilePath,
-				"-hp", headerKey + ":" + headerValue // optional
-			},
-			"-t", theIncludeTls, myRestServerR4Helper	// BaseRequestGeneratingCommandTest required
-		);
+				new String[] {
+					"-v",
+					"r4", // BaseRequestGeneratingCommandTest required
+					"-d",
+					inputFilePath,
+					"-hp",
+					headerKey + ":" + headerValue // optional
+				},
+				"-t",
+				theIncludeTls,
+				myRestServerR4Helper // BaseRequestGeneratingCommandTest required
+				);
 
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 
@@ -67,7 +73,8 @@ class ExampleDataUploaderTest {
 
 		// validate
 		assertNotNull(myCapturingInterceptor.getLastRequest());
-		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
+		Map<String, List<String>> allHeaders =
+				myCapturingInterceptor.getLastRequest().getAllHeaders();
 		assertFalse(allHeaders.isEmpty());
 
 		assertTrue(allHeaders.containsKey(headerKey));
@@ -104,5 +111,4 @@ class ExampleDataUploaderTest {
 			return client;
 		}
 	}
-
 }

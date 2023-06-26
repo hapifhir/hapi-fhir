@@ -22,10 +22,13 @@ import static org.mockito.Mockito.when;
 public class RuleBulkExportImplTest {
 	private RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 	private Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
+
 	@Mock
 	private RequestDetails myRequestDetails;
+
 	@Mock
 	private IRuleApplier myRuleApplier;
+
 	@Mock
 	private Set<AuthorizationFlagsEnum> myFlags;
 
@@ -43,10 +46,11 @@ public class RuleBulkExportImplTest {
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(myWantTypes);
-		
+
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertEquals(PolicyEnum.DENY, verdict.getDecision());
 	}
 
@@ -65,10 +69,11 @@ public class RuleBulkExportImplTest {
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(myWantTypes);
-		
+
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertNull(verdict);
 	}
 
@@ -84,7 +89,8 @@ public class RuleBulkExportImplTest {
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertEquals(null, verdict);
 	}
 
@@ -100,13 +106,14 @@ public class RuleBulkExportImplTest {
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesInBounds() {
-		//Given
+		// Given
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -115,16 +122,17 @@ public class RuleBulkExportImplTest {
 		options.setPatientIds(Set.of(new IdDt("Patient/123")));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We permit the request, as a patient ID that was requested is honoured by this rule.
+		// Then: We permit the request, as a patient ID that was requested is honoured by this rule.
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOutOfBounds() {
-		//Given
+		// Given
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -133,16 +141,17 @@ public class RuleBulkExportImplTest {
 		options.setPatientIds(Set.of(new IdDt("Patient/456")));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: we should deny the request, as the requested export does not contain the patient permitted.
+		// Then: we should deny the request, as the requested export does not contain the patient permitted.
 		assertEquals(PolicyEnum.DENY, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExport() {
-		//Given
+		// Given
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -150,16 +159,17 @@ public class RuleBulkExportImplTest {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: We make no claims about type-level export on Patient.
+		// Then: We make no claims about type-level export on Patient.
 		assertEquals(null, verdict);
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatient() {
-		//Given
+		// Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -169,16 +179,17 @@ public class RuleBulkExportImplTest {
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		final AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: The patient IDs match so this is permitted
+		// Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypePatientAndFilterHasResources() {
-		//Given
+		// Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -188,16 +199,17 @@ public class RuleBulkExportImplTest {
 		options.setResourceTypes(Set.of("Patient", "Condition", "Immunization"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		final AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: The patient IDs match so this is permitted
+		// Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterResourceTypeObservation() {
-		//Given
+		// Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -207,16 +219,17 @@ public class RuleBulkExportImplTest {
 		options.setResourceTypes(Set.of("Observation"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		final AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: The patient IDs match so this is permitted
+		// Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterNoResourceType() {
-		//Given
+		// Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -225,16 +238,17 @@ public class RuleBulkExportImplTest {
 		options.setFilters(Set.of("Patient?_id=123"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		final AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: The patient IDs match so this is permitted
+		// Then: The patient IDs match so this is permitted
 		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 	@Test
 	public void testPatientExportRulesOnTypeLevelExportWithTypeFilterMismatch() {
-		//Given
+		// Given
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -244,10 +258,11 @@ public class RuleBulkExportImplTest {
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
-		//When
-		final AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		// When
+		final AuthorizationInterceptor.Verdict verdict =
+				myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 
-		//Then: The patient IDs do NOT match so this is not permitted.
+		// Then: The patient IDs do NOT match so this is not permitted.
 		assertEquals(PolicyEnum.DENY, verdict.getDecision());
 	}
 }

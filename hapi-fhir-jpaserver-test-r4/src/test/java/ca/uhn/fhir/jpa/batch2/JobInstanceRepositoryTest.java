@@ -24,8 +24,10 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
+
 	@Autowired
 	private IJobPersistence myJobPersistenceSvc;
+
 	private static final String PARAMS = "{\"param1\":\"value1\"}";
 	private static final String JOB_DEFINITION_ID = "my-job-def-id";
 	private static final String INSTANCE_ID = "abc-123";
@@ -33,20 +35,26 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus =
+				runInTransaction(() -> myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+						JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
 	}
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_MultiStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
-		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instances =
+				runInTransaction(() -> myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+						JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(2));
 	}
 
 	@Test
 	public void testSearchByJobParamsWithoutStatuses() {
-		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdAndParams(JOB_DEFINITION_ID, PARAMS, PageRequest.of(0, 10)));
+		List<Batch2JobInstanceEntity> instances =
+				runInTransaction(() -> myJobInstanceRepository.findInstancesByJobIdAndParams(
+						JOB_DEFINITION_ID, PARAMS, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(4));
 	}
 
@@ -59,20 +67,21 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Test
 	public void testServiceLogicIsCorrectWithStatuses() {
-		//Given
-		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
+		// Given
+		FetchJobInstancesRequest request =
+				new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 
-		//When
+		// When
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
 
-		//Then
+		// Then
 		assertThat(jobInstances, hasSize(2));
 	}
 
 	@BeforeEach
 	public void beforeEach() {
-		//Create in-progress job.
-		Batch2JobInstanceEntity instance= new Batch2JobInstanceEntity();
+		// Create in-progress job.
+		Batch2JobInstanceEntity instance = new Batch2JobInstanceEntity();
 		instance.setId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
 		instance.setCreateTime(new Date());
@@ -109,5 +118,4 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	public void afterEach() {
 		myJobInstanceRepository.deleteAll();
 	}
-
 }

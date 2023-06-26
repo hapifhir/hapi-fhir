@@ -41,7 +41,6 @@ public class CompressOutgoingContentInterceptorTest {
 		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
-
 	@Test
 	public void testCreate() {
 		ourClient.registerInterceptor(new GZipContentInterceptor());
@@ -55,7 +54,6 @@ public class CompressOutgoingContentInterceptorTest {
 		assertEquals("gzip", ourLastReq);
 		assertEquals("gzip", ourLastResponseEncoding);
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -78,7 +76,7 @@ public class CompressOutgoingContentInterceptorTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -95,7 +93,5 @@ public class CompressOutgoingContentInterceptorTest {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
-
 	}
-
 }

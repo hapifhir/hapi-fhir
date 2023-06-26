@@ -13,7 +13,8 @@ class SubscriptionTopicCanonicalizerTest {
 		SubscriptionTopic topic = new SubscriptionTopic();
 		topic.setId("123");
 		topic.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		org.hl7.fhir.r5.model.SubscriptionTopic canonicalized = SubscriptionTopicCanonicalizer.canonicalizeTopic(FhirContext.forR4BCached(), topic);
+		org.hl7.fhir.r5.model.SubscriptionTopic canonicalized =
+				SubscriptionTopicCanonicalizer.canonicalizeTopic(FhirContext.forR4BCached(), topic);
 		assertEquals("123", canonicalized.getId());
 		assertEquals(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE, canonicalized.getStatus());
 	}

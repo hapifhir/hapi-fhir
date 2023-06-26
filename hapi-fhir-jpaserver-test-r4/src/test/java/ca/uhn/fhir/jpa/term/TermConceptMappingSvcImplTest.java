@@ -18,8 +18,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,9 +29,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,7 +54,6 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		conceptMap.setSource(new CanonicalType("http://hl7.org/fhir/uv/livd/StructureDefinition/loinc-livd"));
 
 		persistConceptMap(conceptMap, HttpVerb.POST);
-
 	}
 
 	@Test
@@ -67,7 +64,6 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		conceptMap.setId("ConceptMap/cm");
 
 		persistConceptMap(conceptMap, HttpVerb.PUT);
-
 	}
 
 	@Test
@@ -75,18 +71,22 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -129,18 +129,22 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -171,18 +175,22 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("BOGUS");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("BOGUS");
 				translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertTrue(targets.isEmpty());
 			}
@@ -196,23 +204,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		conceptMap.setUrl(CM_URL);
 		conceptMap.setSource(null);
 		conceptMap.setTarget(null);
-		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup()
-			.setSource(CS_URL)
-			.setTarget(CS_URL_2);
-		group.addElement()
-			.setCode("12345")
-			.addTarget()
-			.setCode("34567");
-		group.addElement()
-			.setCode("888")
-			.addTarget()
-			.setCode("999");
+		ConceptMap.ConceptMapGroupComponent group =
+				conceptMap.addGroup().setSource(CS_URL).setTarget(CS_URL_2);
+		group.addElement().setCode("12345").addTarget().setCode("34567");
+		group.addElement().setCode("888").addTarget().setCode("999");
 
 		myConceptMapDao.create(conceptMap);
 
-		TranslationRequest translationRequest = new TranslationRequest()
-			.addCode(CS_URL, "12345")
-			.setTargetSystem(CS_URL_2);
+		TranslationRequest translationRequest =
+				new TranslationRequest().addCode(CS_URL, "12345").setTargetSystem(CS_URL_2);
 
 		TranslateConceptResults resp = myConceptMappingSvc.translate(translationRequest);
 		assertEquals(1, resp.size());
@@ -224,7 +224,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -234,10 +235,10 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   source code
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
+				translationRequest.getCodeableConcept().addCoding().setCode("12345");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -292,7 +293,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -304,12 +306,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   target code system #2
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -340,7 +345,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -352,12 +358,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   target code system #3
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345");
 				translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -400,7 +409,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -411,11 +421,14 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   source code system
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -470,7 +483,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -482,12 +496,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   source code system version #1
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345")
-					.setVersion("Version 1");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345")
+						.setVersion("Version 1");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -518,7 +535,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -530,12 +548,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   source code system version #3
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345")
-					.setVersion("Version 3");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL)
+						.setCode("12345")
+						.setVersion("Version 3");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -578,7 +599,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -589,11 +611,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   source value set
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
+				translationRequest.getCodeableConcept().addCoding().setCode("12345");
 				translationRequest.setSource(VS_URL);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -648,7 +670,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -659,11 +682,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   target value set
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
+				translationRequest.getCodeableConcept().addCoding().setCode("12345");
 				translationRequest.setTarget(VS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				List<TranslateConceptResult> targets =
+						myConceptMappingSvc.translate(translationRequest).getResults();
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
 				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
@@ -718,7 +741,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -731,9 +755,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_2)
+						.setCode("34567");
 				translationRequest.setTargetSystem(CS_URL_4);
 				translationRequest.setReverse(true);
 
@@ -767,15 +793,18 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_3)
-					.setCode("BOGUS");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_3)
+						.setCode("BOGUS");
 				translationRequest.setTargetSystem(CS_URL);
 
 				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
@@ -790,7 +819,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -801,8 +831,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
+				translationRequest.getCodeableConcept().addCoding().setCode("34567");
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
@@ -846,7 +875,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -859,9 +889,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_2)
+						.setCode("34567");
 				translationRequest.setTargetSystem(CS_URL);
 				translationRequest.setReverse(true);
 
@@ -895,7 +927,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -908,9 +941,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_2)
+						.setCode("34567");
 				translationRequest.setTargetSystem(CS_URL_4);
 				translationRequest.setReverse(true);
 
@@ -944,7 +979,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -956,9 +992,11 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_2)
+						.setCode("34567");
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
@@ -1002,7 +1040,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1015,10 +1054,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567")
-					.setVersion("Version 2");
+				translationRequest
+						.getCodeableConcept()
+						.addCoding()
+						.setSystem(CS_URL_2)
+						.setCode("34567")
+						.setVersion("Version 2");
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
@@ -1062,7 +1103,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1074,8 +1116,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
+				translationRequest.getCodeableConcept().addCoding().setCode("34567");
 				translationRequest.setSource(VS_URL_2);
 				translationRequest.setReverse(true);
 
@@ -1120,7 +1161,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1132,8 +1174,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				 *   reverse = true
 				 */
 				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
+				translationRequest.getCodeableConcept().addCoding().setCode("34567");
 				translationRequest.setTarget(VS_URL);
 				translationRequest.setReverse(true);
 
@@ -1181,9 +1222,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertEquals(
+					Msg.code(840)
+							+ "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/"
+							+ myConceptMapId.getIdPart(),
+					e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -1194,24 +1238,28 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap("v1");
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertEquals(
+					Msg.code(841)
+							+ "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/"
+							+ myConceptMapId.getIdPart(),
+					e.getMessage());
 		}
-
 	}
-
 
 	@Test
 	public void testStoreTermConceptMapAndChildren() {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+				List<TermConceptMap> optionalConceptMap =
+						myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
 				assertEquals(1, optionalConceptMap.size());
 
 				TermConceptMap conceptMap = optionalConceptMap.get(0);
@@ -1236,7 +1284,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(CM_URL, group.getConceptMapUrl());
 				assertEquals(2, group.getConceptMapGroupElements().size());
 
-				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+				TermConceptMapGroupElement element =
+						group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
@@ -1248,7 +1297,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(CM_URL, element.getConceptMapUrl());
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+				TermConceptMapGroupElementTarget target =
+						element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
@@ -1384,13 +1434,15 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+				List<TermConceptMap> optionalConceptMap =
+						myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
 				assertEquals(1, optionalConceptMap.size());
 
 				TermConceptMap conceptMap = optionalConceptMap.get(0);
@@ -1415,7 +1467,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(CM_URL, group.getConceptMapUrl());
 				assertEquals(2, group.getConceptMapGroupElements().size());
 
-				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+				TermConceptMapGroupElement element =
+						group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
@@ -1427,7 +1480,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(CM_URL, element.getConceptMapUrl());
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+				TermConceptMapGroupElementTarget target =
+						element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
@@ -1565,21 +1619,17 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		codeableConcept.addCoding(coding);
 
 		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
-			Collections.unmodifiableList(codeableConcept.getCoding()),
-			"theTargetSystemUrl",
-			"theConceptMapUrl",
-			"theConceptMapVersion",
-			"theSourceValueSetUrl",
-			"theTargetValueSetUrl",
-			new IdType("ConceptMap/2"),
-			false
-		);
+				Collections.unmodifiableList(codeableConcept.getCoding()),
+				"theTargetSystemUrl",
+				"theConceptMapUrl",
+				"theConceptMapVersion",
+				"theSourceValueSetUrl",
+				"theTargetValueSetUrl",
+				new IdType("ConceptMap/2"),
+				false);
 
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
-		sourceCodeableConcept
-			.addCoding()
-			.setSystem(coding.getSystem())
-			.setCode(coding.getCode());
+		sourceCodeableConcept.addCoding().setSystem(coding.getSystem()).setCode(coding.getCode());
 
 		TranslationRequest expected = new TranslationRequest();
 		expected.setCodeableConcept(sourceCodeableConcept);
@@ -1607,21 +1657,17 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		codeableConcept.addCoding(coding);
 
 		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
-			Collections.unmodifiableList(codeableConcept.getCoding()),
-			"theTargetSystemUrl",
-			"theConceptMapUrl",
-			"theConceptMapVersion",
-			"theSourceValueSetUrl",
-			"theTargetValueSetUrl",
-			new IdType("ConceptMap/A"),
-			true
-		);
+				Collections.unmodifiableList(codeableConcept.getCoding()),
+				"theTargetSystemUrl",
+				"theConceptMapUrl",
+				"theConceptMapVersion",
+				"theSourceValueSetUrl",
+				"theTargetValueSetUrl",
+				new IdType("ConceptMap/A"),
+				true);
 
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
-		sourceCodeableConcept
-			.addCoding()
-			.setSystem(coding.getSystem())
-			.setCode(coding.getCode());
+		sourceCodeableConcept.addCoding().setSystem(coding.getSystem()).setCode(coding.getCode());
 
 		TranslationRequest expected = new TranslationRequest();
 		expected.setCodeableConcept(sourceCodeableConcept);
@@ -1673,7 +1719,10 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myConceptMapId = myConceptMapDao.create(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
+						myConceptMapId = myConceptMapDao
+								.create(theConceptMap, mySrd)
+								.getId()
+								.toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -1681,7 +1730,10 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myConceptMapId = myConceptMapDao.update(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
+						myConceptMapId = myConceptMapDao
+								.update(theConceptMap, mySrd)
+								.getId()
+								.toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -1689,5 +1741,4 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
 	}
-
 }

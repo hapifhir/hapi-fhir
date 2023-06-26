@@ -37,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ResourceValidatorDstu2_1Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu2_1Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu2_1Test.class);
 
 	@AfterAll
-	
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
@@ -56,7 +56,7 @@ public class ResourceValidatorDstu2_1Test {
 		// Put in an invalid date
 		IParser parser = ourCtx.newXmlParser();
 		parser.setParserErrorHandler(new StrictErrorHandler());
-		
+
 		String encoded = parser.setPrettyPrint(true).encodeResourceToString(p).replace("2000-12-31", "2000-15-31");
 		ourLog.info(encoded);
 
@@ -66,18 +66,20 @@ public class ResourceValidatorDstu2_1Test {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertEquals(
+				2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
-		
+
 		try {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals(
+					Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821)
+							+ "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"",
+					e.getMessage());
 		}
 	}
-
-	
 
 	/**
 	 * See https://groups.google.com/d/msgid/hapi-fhir/a266083f-6454-4cf0-a431-c6500f052bea%40googlegroups.com?utm_medium= email&utm_source=footer
@@ -86,8 +88,12 @@ public class ResourceValidatorDstu2_1Test {
 	public void testValidateWithExtensionsXml() {
 		PatientProfileDstu2_1 myPatient = new PatientProfileDstu2_1();
 		myPatient.setId("1");
-		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorPrimary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
+		myPatient.setColorSecondary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().addFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
@@ -96,22 +102,23 @@ public class ResourceValidatorDstu2_1Test {
 		String messageString = p.encodeResourceToString(myPatient);
 		ourLog.info(messageString);
 
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"meta",
-			"Organization/2.25.79433498044103547197447759549862032393",
-			"furry-grey",
-			"furry-white",
-			"String Extension",
-			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"meta",
+						"Organization/2.25.79433498044103547197447759549862032393",
+						"furry-grey",
+						"furry-white",
+						"String Extension",
+						"FamilyName"));
+		assertThat(messageString, not(stringContainsInOrder("extension", "meta")));
+		assertThat(
+				messageString,
+				containsString(
+						"url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
 		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
-		//@formatter:on
+		// @formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -155,8 +162,12 @@ public class ResourceValidatorDstu2_1Test {
 	public void testValidateWithExtensionsJson() {
 		PatientProfileDstu2_1 myPatient = new PatientProfileDstu2_1();
 		myPatient.setId("1");
-		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorPrimary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
+		myPatient.setColorSecondary(new CodeableConcept()
+				.addCoding(
+						new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().addFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
@@ -165,20 +176,18 @@ public class ResourceValidatorDstu2_1Test {
 		String messageString = p.encodeResourceToString(myPatient);
 		ourLog.info(messageString);
 
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"meta",
-			"String Extension",
-			"Organization/2.25.79433498044103547197447759549862032393",
-			"furry-grey",
-			"furry-white",
-			"FamilyName"
-		));
-		assertThat(messageString, not(stringContainsInOrder(
-			"extension",
-			"meta"
-		)));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"meta",
+						"String Extension",
+						"Organization/2.25.79433498044103547197447759549862032393",
+						"furry-grey",
+						"furry-white",
+						"FamilyName"));
+		assertThat(messageString, not(stringContainsInOrder("extension", "meta")));
+		// @formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -194,5 +203,4 @@ public class ResourceValidatorDstu2_1Test {
 		assertThat(messageString, containsString("valueReference"));
 		assertThat(messageString, not(containsString("valueResource")));
 	}
-
 }

@@ -59,5 +59,4 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		mySubscriptionRegistry.unregisterSubscriptionIfRegistered(subscription.getId());
 		assertRegistrySize(0);
 	}
-
 }

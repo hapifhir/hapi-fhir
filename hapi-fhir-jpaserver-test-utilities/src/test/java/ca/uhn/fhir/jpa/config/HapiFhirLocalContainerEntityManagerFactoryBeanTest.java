@@ -6,7 +6,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
-	HapiFhirLocalContainerEntityManagerFactoryBean myBean = new HapiFhirLocalContainerEntityManagerFactoryBean(new DefaultListableBeanFactory());
+	HapiFhirLocalContainerEntityManagerFactoryBean myBean =
+			new HapiFhirLocalContainerEntityManagerFactoryBean(new DefaultListableBeanFactory());
 
 	@Test
 	void testAddHibernateHookToEmptyProperty() {
@@ -26,5 +27,4 @@ class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 
 		assertEquals("hook1,hook2,theHookClass", myBean.getJpaPropertyMap().get("theKey"));
 	}
-
 }

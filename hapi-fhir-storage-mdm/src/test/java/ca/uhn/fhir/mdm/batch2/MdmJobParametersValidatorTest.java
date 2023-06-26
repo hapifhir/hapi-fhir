@@ -22,8 +22,10 @@ import static org.mockito.Mockito.when;
 class MdmClearJobParametersValidatorTest {
 
 	MdmClearJobParametersValidator myMdmClearJobParametersValidator;
+
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
 	@Mock
 	private IMdmSettings myMdmSettings;
 
@@ -93,5 +95,4 @@ class MdmClearJobParametersValidatorTest {
 		// verify
 		assertThat(result, hasSize(0));
 	}
-
 }

@@ -74,7 +74,7 @@ public class LoggingInterceptorDstu2Test {
 	public void before() {
 		servlet.getInterceptorService().unregisterAllInterceptors();
 		ourThrowException = null;
-		ourDelayMs=0;
+		ourDelayMs = 0;
 	}
 
 	@Test
@@ -97,7 +97,9 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getAllValues().get(0), StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
+		assertThat(
+				captor.getAllValues().get(0),
+				StringContains.containsString("ERROR - GET http://localhost:" + ourPort + "/Patient/EX"));
 	}
 
 	@Test
@@ -112,8 +114,6 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
-		
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -134,13 +134,10 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		
-
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("extended-operation-instance - $everything - Patient/123", captor.getValue());
 	}
-
 
 	@Test
 	public void testRequestBodyRead() throws Exception {
@@ -219,8 +216,6 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		
-
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), matchesPattern("[1-9][0-9]{1,3}"));
@@ -267,11 +262,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-
-		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertEquals(
+				"create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>",
+				captor.getValue());
 	}
 
 	@Test
@@ -279,7 +274,8 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setMessageFormat("${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
-		interceptor.setErrorMessageFormat("ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
+		interceptor.setErrorMessageFormat(
+				"ERROR - ${operationType} - ${operationName} - ${idOrResourceName} - ${requestBodyFhir}");
 		servlet.getInterceptorService().registerInterceptor(interceptor);
 
 		Logger logger = mock(Logger.class);
@@ -297,11 +293,11 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		
-
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertEquals(
+				"ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>",
+				captor.getValue());
 	}
 
 	@Test
@@ -317,8 +313,6 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -338,9 +332,7 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$everything");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
-		
-		
+
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
@@ -358,8 +350,6 @@ public class LoggingInterceptorDstu2Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -380,8 +370,6 @@ public class LoggingInterceptorDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		
-		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
 		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
@@ -407,13 +395,13 @@ public class LoggingInterceptorDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	/**
@@ -459,17 +447,17 @@ public class LoggingInterceptorDstu2Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
+		 *
 		 * @param theId
 		 *           The resource identity
 		 * @return The resource
 		 */
 		@Read()
 		public Patient getResourceById(@IdParam IdDt theId) throws InterruptedException {
-			if (ourDelayMs>0) {
+			if (ourDelayMs > 0) {
 				Thread.sleep(ourDelayMs);
 			}
-			
+
 			if (theId.getIdPart().equals("EX")) {
 				throw new InvalidRequestException("FOO");
 			}
@@ -480,7 +468,7 @@ public class LoggingInterceptorDstu2Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
+		 *
 		 * @param theId
 		 *           The resource identity
 		 * @return The resource
@@ -509,7 +497,8 @@ public class LoggingInterceptorDstu2Test {
 		}
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(
+				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
@@ -517,25 +506,26 @@ public class LoggingInterceptorDstu2Test {
 		}
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@IdParam IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(
+				@IdParam IdDt theId,
+				@OperationParam(name = "start") DateDt theStart,
+				@OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
 			return retVal;
 		}
-
 	}
 
 	public static class PlainProvider {
 
 		@Operation(name = "$everything", idempotent = true)
-		public Bundle patientTypeOperation(@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
+		public Bundle patientTypeOperation(
+				@OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 
 			Bundle retVal = new Bundle();
 			// Populate bundle with matching resources
 			return retVal;
 		}
-
 	}
-
 }

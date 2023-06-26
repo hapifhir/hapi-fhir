@@ -28,11 +28,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Nonnull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -47,14 +47,19 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
+
 	@MockBean
 	private DaoRegistry myDaoRegistry;
+
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+
 	@MockBean
 	private JpaStorageSettings myStorageSettings;
+
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
@@ -70,7 +75,11 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			assertThat(
+					e.getMessage(),
+					is(
+							Msg.code(8)
+									+ "Can not process submitted Subscription - Subscription.status must be populated on this server"));
 			ourLog.info("Expected exception", e);
 		}
 	}
@@ -96,7 +105,9 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
+			assertThat(
+					e.getMessage(),
+					is(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
 		}
 	}
 
@@ -141,7 +152,10 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertThat(
+					e.getMessage(),
+					is(Msg.code(17)
+							+ "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
 		channel.setEndpoint("channel");
@@ -149,7 +163,10 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertThat(
+					e.getMessage(),
+					is(Msg.code(17)
+							+ "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
 		channel.setEndpoint("channel:");
@@ -176,10 +193,15 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testInvalidPointcut() {
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(createSubscription(), null, null, Pointcut.TEST_RB);
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(
+					createSubscription(), null, null, Pointcut.TEST_RB);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB));
+			assertThat(
+					e.getMessage(),
+					is(Msg.code(2267)
+							+ "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: "
+							+ Pointcut.TEST_RB));
 		}
 	}
 
@@ -193,13 +215,16 @@ public class SubscriptionValidatingInterceptorTest {
 		org.hl7.fhir.r4b.model.Subscription badSub = new org.hl7.fhir.r4b.model.Subscription();
 		badSub.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 		badSub.getMeta().getProfile().add(new CanonicalType(new URI("http://other.profile")));
-		badSub.getMeta().getProfile().add(new CanonicalType(new URI(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL)));
+		badSub.getMeta()
+				.getProfile()
+				.add(new CanonicalType(new URI(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL)));
 		badSub.setCriteria("http://topic.url");
 		Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:my-queue-name");
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(
+					badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(2322) + "No SubscriptionTopic exists with topic: http://topic.url"));
@@ -209,7 +234,8 @@ public class SubscriptionValidatingInterceptorTest {
 		SubscriptionTopic topic = new SubscriptionTopic();
 		SimpleBundleProvider simpleBundleProvider = new SimpleBundleProvider(List.of(topic));
 		when(mySubscriptionTopicDao.search(any(), any())).thenReturn(simpleBundleProvider);
-		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(
+				badSub, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 	}
 
 	@Configuration
@@ -230,7 +256,8 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 
 		@Bean
-		SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		SubscriptionQueryValidator subscriptionQueryValidator(
+				DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 			return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 		}
 	}

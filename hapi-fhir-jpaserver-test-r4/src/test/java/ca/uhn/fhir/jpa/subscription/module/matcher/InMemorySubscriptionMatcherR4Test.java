@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -38,13 +38,9 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -54,15 +50,12 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.InsurancePlan;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
@@ -86,17 +79,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,39 +93,49 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
 public class InMemorySubscriptionMatcherR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherR4Test.class);
 
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
+
 	@Autowired
 	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
+
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
 	@Autowired
-    StorageSettings myStorageSettings;
+	StorageSettings myStorageSettings;
 
 	@AfterEach
 	public void after() throws Exception {
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 	}
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
 		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertTrue(result.matched());
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
+		assertEquals(
+				SubscriptionMatchingStrategy.IN_MEMORY,
+				mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	private void assertNotMatched(Resource theResource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(theResource, theParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
 		assertFalse(result.matched(), "Failed on ID: " + theResource.getId());
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
+		assertEquals(
+				SubscriptionMatchingStrategy.IN_MEMORY,
+				mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
 	}
 
 	private InMemoryMatchResult match(Resource theResource, SearchParameterMap theParams) {
@@ -156,12 +154,14 @@ public class InMemorySubscriptionMatcherR4Test {
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(resource, theParams);
 		assertFalse(result.supported());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
+		assertEquals(
+				SubscriptionMatchingStrategy.DATABASE,
+				mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
 	}
 
 	/*
-	 The following tests are copied from FhirResourceDaoR4SearchNoFtTest
-	  */
+	The following tests are copied from FhirResourceDaoR4SearchNoFtTest
+	 */
 
 	@Test
 	public void testChainReferenceUnsupported() {
@@ -180,7 +180,10 @@ public class InMemorySubscriptionMatcherR4Test {
 		ma.setMedication(new Reference(mid1));
 
 		map = new SearchParameterMap();
-		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
+		map.add(
+				MedicationAdministration.SP_MEDICATION,
+				new ReferenceAndListParam()
+						.addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
 		assertUnsupported(ma, map);
 	}
 
@@ -214,9 +217,10 @@ public class InMemorySubscriptionMatcherR4Test {
 		params.add(Subscription.SP_TYPE, new TokenParam(null, Subscription.SubscriptionChannelType.WEBSOCKET.toCode()));
 		params.add(Subscription.SP_STATUS, new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode() + "2"));
 		assertNotMatched(subs, params);
-//		// Wrong param
+		//		// Wrong param
 		params = new SearchParameterMap();
-		params.add(Subscription.SP_STATUS, new TokenParam(null, Subscription.SubscriptionChannelType.WEBSOCKET.toCode()));
+		params.add(
+				Subscription.SP_STATUS, new TokenParam(null, Subscription.SubscriptionChannelType.WEBSOCKET.toCode()));
 		assertNotMatched(subs, params);
 	}
 
@@ -229,7 +233,8 @@ public class InMemorySubscriptionMatcherR4Test {
 		TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
 		StringParam v1 = new StringParam("testSearchCompositeParamS01");
 		CompositeParam<TokenParam, StringParam> val = new CompositeParam<>(v0, v1);
-		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_CODE_VALUE_STRING, val);
+		SearchParameterMap params =
+				new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_CODE_VALUE_STRING, val);
 		assertUnsupported(o1, params);
 	}
 
@@ -237,115 +242,146 @@ public class InMemorySubscriptionMatcherR4Test {
 	public void testComponentQuantityWithPrefixUnsupported() {
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code1").setValue(200));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code1").setValue(200));
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code2")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
 		String param = Observation.SP_COMPONENT_VALUE_QUANTITY;
 		QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
-		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
+		SearchParameterMap params =
+				new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 		assertUnsupported(o1, params);
 	}
-
 
 	@Test
 	public void testComponentQuantityEquals() {
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code1").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code1").setValue(150));
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code2")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code2").setValue(150));
 
 		String param = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v1 = new QuantityParam(null, 150, "http://bar", "code1");
-		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
+		SearchParameterMap params =
+				new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 		assertMatched(o1, params);
 	}
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() {
 
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
-			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+				.setValue(new Quantity()
+						.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL)
+						.setCode("cm")
+						.setValue(150));
 
 		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v1 = new QuantityParam(null, 1.5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m");
-		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		SearchParameterMap params1 =
+				new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 
 		Observation o2 = new Observation();
 		o2.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
-			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+				.setValue(new Quantity()
+						.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL)
+						.setCode("cm")
+						.setValue(150));
 
 		String param2 = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v2 = new QuantityParam(null, 15, UcumServiceUtil.UCUM_CODESYSTEM_URL, "dm");
-		SearchParameterMap params2 = new SearchParameterMap().setLoadSynchronous(true).add(param2, v2);
+		SearchParameterMap params2 =
+				new SearchParameterMap().setLoadSynchronous(true).add(param2, v2);
 		assertMatched(o2, params2);
 
 		v2 = new QuantityParam(null, 150, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm");
 		params2 = new SearchParameterMap().setLoadSynchronous(true).add(param2, v2);
 		assertMatched(o2, params2);
-
 	}
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_InvalidUCUMUnit() {
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
-			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("foo").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://bar").setCode("foo")))
+				.setValue(new Quantity()
+						.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL)
+						.setCode("foo")
+						.setValue(150));
 
 		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v1 = new QuantityParam(null, 150, UcumServiceUtil.UCUM_CODESYSTEM_URL, "foo");
-		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		SearchParameterMap params1 =
+				new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NoSystem() {
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
-			.setValue(new Quantity().setCode("foo").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://bar").setCode("foo")))
+				.setValue(new Quantity().setCode("foo").setValue(150));
 
 		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v1 = new QuantityParam(null, 150, null, "foo");
-		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		SearchParameterMap params1 =
+				new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NotUcumSystem() {
 
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("cm").setValue(150));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+				.setValue(new Quantity().setSystem("http://bar").setCode("cm").setValue(150));
 
 		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		QuantityParam v1 = new QuantityParam(null, 150, "http://bar", "cm");
-		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		SearchParameterMap params1 =
+				new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
 
@@ -362,14 +398,15 @@ public class InMemorySubscriptionMatcherR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 		SearchParameterMap params = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
-				+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-				bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
+				"Location?" + Location.SP_NEAR
+						+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
+						+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" + bigEnoughDistance,
+				myFhirContext.getResourceDefinition("Location"));
 		assertUnsupported(loc, params);
 	}
 
@@ -385,13 +422,8 @@ public class InMemorySubscriptionMatcherR4Test {
 		assertUnsupported(patient, params);
 	}
 
-
 	@ParameterizedTest
-	@CsvSource({
-		"true,   http://profile1",
-		"true,   http://profile2",
-		"false,  http://profile99"
-	})
+	@CsvSource({"true,   http://profile1", "true,   http://profile2", "false,  http://profile99"})
 	public void testSearchMetaProfile(boolean theExpectMatched, String theProfile) {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://profile1");
@@ -534,7 +566,8 @@ public class InMemorySubscriptionMatcherR4Test {
 		MolecularSequence ir1 = new MolecularSequence();
 		ir1.addVariant().setStart(1);
 
-		SearchParameterMap params = new SearchParameterMap().add(MolecularSequence.SP_VARIANT_START, new NumberParam("1"));
+		SearchParameterMap params =
+				new SearchParameterMap().add(MolecularSequence.SP_VARIANT_START, new NumberParam("1"));
 		assertMatched(ir1, params);
 		params = new SearchParameterMap().add(MolecularSequence.SP_VARIANT_END, new NumberParam("1"));
 		assertNotMatched(ir1, params);
@@ -572,8 +605,11 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testSearchQuantityWrongParam() {
 		Condition c1 = new Condition();
-		c1.setAbatement(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
-		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(Condition.SP_ABATEMENT_AGE, new QuantityParam("1"));
+		c1.setAbatement(
+				new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
+		SearchParameterMap params = new SearchParameterMap()
+				.setLoadSynchronous(true)
+				.add(Condition.SP_ABATEMENT_AGE, new QuantityParam("1"));
 		assertMatched(c1, params);
 
 		Condition c2 = new Condition();
@@ -605,7 +641,10 @@ public class InMemorySubscriptionMatcherR4Test {
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(patientId02));
 
-		SearchParameterMap params = new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"));
+		SearchParameterMap params = new SearchParameterMap()
+				.add(
+						Observation.SP_SUBJECT,
+						new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"));
 		assertUnsupported(obs01, params);
 	}
 
@@ -633,15 +672,20 @@ public class InMemorySubscriptionMatcherR4Test {
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(patientId02));
 
-		SearchParameterMap params = new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(patientName01));
+		SearchParameterMap params =
+				new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(patientName01));
 		assertMatched(obs01, params);
 		assertNotMatched(obs02, params);
 
-		params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"));
+		params = new SearchParameterMap()
+				.setLoadSynchronous(true)
+				.add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"));
 		assertNotMatched(obs01, params);
 		assertNotMatched(obs02, params);
 
-		params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("999999999999999"));
+		params = new SearchParameterMap()
+				.setLoadSynchronous(true)
+				.add(Observation.SP_SUBJECT, new ReferenceParam("999999999999999"));
 		assertNotMatched(obs01, params);
 		assertNotMatched(obs02, params);
 	}
@@ -662,13 +706,17 @@ public class InMemorySubscriptionMatcherR4Test {
 			CanonicalSubscription subscription = new CanonicalSubscription();
 			subscription.setCriteriaString(criteria);
 			subscription.setIdElement(new IdType("Subscription", 123L));
-			ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+			ResourceModifiedMessage msg = new ResourceModifiedMessage(
+					myFhirContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (AssertionError e) {
-			assertEquals(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
+			assertEquals(
+					Msg.code(320)
+							+ "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954",
+					e.getMessage());
 		}
 	}
 
@@ -769,8 +817,13 @@ public class InMemorySubscriptionMatcherR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
-			.setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication()
+				.getLanguage()
+				.setText("testSearchTokenParamComText")
+				.addCoding()
+				.setCode("testSearchTokenParamCode")
+				.setSystem("testSearchTokenParamSystem")
+				.setDisplay("testSearchTokenParamDisplay");
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
@@ -802,7 +855,6 @@ public class InMemorySubscriptionMatcherR4Test {
 			assertUnsupported(patient, map);
 		}
 
-
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			TokenOrListParam listParam = new TokenOrListParam();
@@ -829,8 +881,13 @@ public class InMemorySubscriptionMatcherR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
-			.setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication()
+				.getLanguage()
+				.setText("testSearchTokenParamComText")
+				.addCoding()
+				.setCode("testSearchTokenParamCode")
+				.setSystem("testSearchTokenParamSystem")
+				.setDisplay("testSearchTokenParamDisplay");
 
 		Patient patient2 = new Patient();
 		patient2.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
@@ -872,7 +929,9 @@ public class InMemorySubscriptionMatcherR4Test {
 			assertNotMatched(p2, map);
 		}
 		{
-			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam(null, "male"));
+			SearchParameterMap map = new SearchParameterMap()
+					.setLoadSynchronous(true)
+					.add(Patient.SP_IDENTIFIER, new TokenParam(null, "male"));
 			assertNotMatched(p1, map);
 		}
 	}
@@ -886,12 +945,15 @@ public class InMemorySubscriptionMatcherR4Test {
 		v2.getExpansion().getIdentifierElement().setValue("http://foo");
 
 		{
-			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_URL, new UriParam("http://foo"));
+			SearchParameterMap map =
+					new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_URL, new UriParam("http://foo"));
 			assertMatched(v1, map);
 			assertNotMatched(v2, map);
 		}
 		{
-			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_EXPANSION, new UriParam("http://foo"));
+			SearchParameterMap map = new SearchParameterMap()
+					.setLoadSynchronous(true)
+					.add(ValueSet.SP_EXPANSION, new UriParam("http://foo"));
 			assertNotMatched(v1, map);
 			assertMatched(v2, map);
 		}
@@ -903,11 +965,17 @@ public class InMemorySubscriptionMatcherR4Test {
 
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
-		Quantity q1 = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(10);
+		Quantity q1 = new Quantity()
+				.setSystem("urn:bar:" + methodName)
+				.setCode(methodName + "units")
+				.setValue(10);
 		o1.setValue(q1);
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
-		Quantity q2 = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(5);
+		Quantity q2 = new Quantity()
+				.setSystem("urn:bar:" + methodName)
+				.setCode(methodName + "units")
+				.setValue(5);
 		o2.setValue(q2);
 
 		SearchParameterMap map;
@@ -1044,12 +1112,10 @@ public class InMemorySubscriptionMatcherR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchWithVeryLongUrlLonger() {
 		Patient p = new Patient();
 		p.addName().setFamily("A1");
-
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -1113,7 +1179,10 @@ public class InMemorySubscriptionMatcherR4Test {
 			assertNotMatched(obs, map);
 		}
 		for (Observation obs : ylist) {
-			ourLog.info("Obs {} has time {}", obs.getId(), obs.getEffectiveDateTimeType().getValue().toString());
+			ourLog.info(
+					"Obs {} has time {}",
+					obs.getId(),
+					obs.getEffectiveDateTimeType().getValue().toString());
 			assertMatched(obs, map);
 		}
 	}
@@ -1150,7 +1219,6 @@ public class InMemorySubscriptionMatcherR4Test {
 		assertMatched(p, map);
 	}
 
-
 	@Autowired
 	private IFhirResourceDao<SearchParameter> mySearchParameterDao;
 
@@ -1178,5 +1246,4 @@ public class InMemorySubscriptionMatcherR4Test {
 		params = SearchParameterMap.newSynchronous("display-contracted", new TokenParam("false"));
 		assertNotMatched(pr, params);
 	}
-
 }

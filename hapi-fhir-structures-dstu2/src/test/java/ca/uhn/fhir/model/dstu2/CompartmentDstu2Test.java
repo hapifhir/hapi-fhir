@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CompartmentDstu2Test {
-	
+
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
 	@AfterAll
@@ -21,17 +21,16 @@ public class CompartmentDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@Test
 	public void testMembership() {
-		
+
 		Observation o = new Observation();
 		o.getSubject().setReference("Patient/PID1");
-		
+
 		assertTrue(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID1")));
 		assertFalse(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID2")));
 	}
-	
+
 	@Test
 	public void testBadArguments() {
 		try {
@@ -40,8 +39,9 @@ public class CompartmentDstu2Test {
 			ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("123"));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("theTarget must have a populated resource type (theTarget.getResourceType() does not return a value)", e.getMessage());
+			assertEquals(
+					"theTarget must have a populated resource type (theTarget.getResourceType() does not return a value)",
+					e.getMessage());
 		}
 	}
-
 }

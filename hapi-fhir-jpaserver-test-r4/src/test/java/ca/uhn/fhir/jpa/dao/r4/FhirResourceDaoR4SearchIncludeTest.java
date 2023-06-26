@@ -44,7 +44,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchIncludeTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchIncludeTest.class);
 
 	@AfterEach
 	public void afterEach() {
@@ -56,9 +57,9 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		createOrganizationWithReferencingEpisodesOfCare(10);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.add("_id", new TokenParam("EOC-0"))
-			.addInclude(new Include("*"))
-			.addRevInclude(new Include("*").setRecurse(true));
+				.add("_id", new TokenParam("EOC-0"))
+				.addInclude(new Include("*"))
+				.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myEpisodeOfCareDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids.toString(), ids, containsInAnyOrder("EpisodeOfCare/EOC-0", "Organization/ORG-0"));
@@ -69,12 +70,14 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		createOrganizationWithReferencingEpisodesOfCare(10);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.setCount(10)
-			.addInclude(new Include("*"))
-			.addRevInclude(new Include("*").setRecurse(true));
+				.setCount(10)
+				.addInclude(new Include("*"))
+				.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		Collection<Matcher<String>> expected = IntStream.range(0, 10).mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t)).collect(Collectors.toList());
+		Collection<Matcher<String>> expected = IntStream.range(0, 10)
+				.mapToObj(t -> equalTo("EpisodeOfCare/EOC-" + t))
+				.collect(Collectors.toList());
 		expected.add(equalTo("Organization/ORG-0"));
 		expected.add(equalTo("Organization/ORG-P"));
 		assertThat(ids.toString(), ids, new IsIterableContainingInAnyOrder(expected));
@@ -88,19 +91,21 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		logAllResourceLinks();
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.add("_id", new TokenParam("ORG-0"))
-			.addInclude(new Include("*"))
-			.addRevInclude(new Include("*").setRecurse(true));
+				.add("_id", new TokenParam("ORG-0"))
+				.addInclude(new Include("*"))
+				.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"EpisodeOfCare/EOC-4",
-			"Organization/ORG-0"
-		));
+		assertThat(
+				ids.toString(),
+				ids,
+				containsInAnyOrder(
+						"EpisodeOfCare/EOC-0",
+						"EpisodeOfCare/EOC-1",
+						"EpisodeOfCare/EOC-2",
+						"EpisodeOfCare/EOC-3",
+						"EpisodeOfCare/EOC-4",
+						"Organization/ORG-0"));
 	}
 
 	@Test
@@ -108,8 +113,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		createPatientWithReferencingCarePlan(1);
 
 		// First verify it with the "." syntax
-		SearchParameterMap map = SearchParameterMap.newSynchronous()
-			.addInclude(new Include("CarePlan.patient"));
+		SearchParameterMap map = SearchParameterMap.newSynchronous().addInclude(new Include("CarePlan.patient"));
 		try {
 			myCarePlanDao.search(map);
 			fail();
@@ -118,8 +122,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		}
 
 		// Next verify it with the ":" syntax
-		SearchParameterMap map2 = SearchParameterMap.newSynchronous()
-			.addInclude(new Include("CarePlan:patient"));
+		SearchParameterMap map2 = SearchParameterMap.newSynchronous().addInclude(new Include("CarePlan:patient"));
 		try {
 			IBundleProvider results = myCarePlanDao.search(map2);
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
@@ -128,7 +131,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			fail();
 		}
 	}
-
 
 	@Test
 	public void testRevIncludeOnIncludedResource() {
@@ -170,7 +172,11 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myProcedureDao.search(map, mySrd);
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, outcome.getClass());
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
+		assertThat(
+				ids.toString(),
+				ids,
+				Matchers.containsInAnyOrder(
+						"Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
 
 		// Synchronous
 		map = new SearchParameterMap().setLoadSynchronous(true);
@@ -180,9 +186,12 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		outcome = myProcedureDao.search(map, mySrd);
 		assertEquals(SimpleBundleProvider.class, outcome.getClass());
 		ids = toUnqualifiedVersionlessIdValues(outcome);
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
+		assertThat(
+				ids.toString(),
+				ids,
+				Matchers.containsInAnyOrder(
+						"Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689"));
 	}
-
 
 	@Test
 	public void testRevIncludesPaged_AsyncSearch() {
@@ -192,20 +201,21 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		createOrganizationWithReferencingEpisodesOfCare(eocCount);
 
 		SearchParameterMap map = new SearchParameterMap()
-			.setCount(10)
-			.addInclude(new Include("*"))
-			.addRevInclude(new Include("*").setRecurse(true));
+				.setCount(10)
+				.addInclude(new Include("*"))
+				.addRevInclude(new Include("*").setRecurse(true));
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"Organization/ORG-0",
-			"Organization/ORG-P"
-		));
-
+		assertThat(
+				ids.toString(),
+				ids,
+				containsInAnyOrder(
+						"EpisodeOfCare/EOC-0",
+						"EpisodeOfCare/EOC-1",
+						"EpisodeOfCare/EOC-2",
+						"EpisodeOfCare/EOC-3",
+						"Organization/ORG-0",
+						"Organization/ORG-P"));
 	}
 
 	@Test
@@ -215,28 +225,27 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		createOrganizationWithReferencingEpisodesOfCare(eocCount);
 
 		SearchParameterMap map = new SearchParameterMap()
-			.add("_id", new TokenParam("ORG-0"))
-			.addRevInclude(EpisodeOfCare.INCLUDE_ORGANIZATION);
+				.add("_id", new TokenParam("ORG-0"))
+				.addRevInclude(EpisodeOfCare.INCLUDE_ORGANIZATION);
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myOrganizationDao.search(map);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids.toString(), ids, containsInAnyOrder(
-			"EpisodeOfCare/EOC-0",
-			"EpisodeOfCare/EOC-1",
-			"EpisodeOfCare/EOC-2",
-			"EpisodeOfCare/EOC-3",
-			"EpisodeOfCare/EOC-4",
-			"EpisodeOfCare/EOC-5",
-			"EpisodeOfCare/EOC-6",
-			"EpisodeOfCare/EOC-7",
-			"EpisodeOfCare/EOC-8",
-			"EpisodeOfCare/EOC-9",
-			"Organization/ORG-0"
-		));
-
-
-
+		assertThat(
+				ids.toString(),
+				ids,
+				containsInAnyOrder(
+						"EpisodeOfCare/EOC-0",
+						"EpisodeOfCare/EOC-1",
+						"EpisodeOfCare/EOC-2",
+						"EpisodeOfCare/EOC-3",
+						"EpisodeOfCare/EOC-4",
+						"EpisodeOfCare/EOC-5",
+						"EpisodeOfCare/EOC-6",
+						"EpisodeOfCare/EOC-7",
+						"EpisodeOfCare/EOC-8",
+						"EpisodeOfCare/EOC-9",
+						"Organization/ORG-0"));
 	}
 
 	private void createOrganizationWithReferencingEpisodesOfCare(int theEocCount) {
@@ -277,7 +286,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	 */
 	@Test
 	void testLastUpdatedDoesNotApplyToForwardOrRevIncludes() {
-	    // given
+		// given
 		Instant now = Instant.now();
 		IIdType org = createOrganization();
 		IIdType patId = createPatient(withReference("managingOrganization", org));
@@ -285,14 +294,14 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IIdType careTeam = createResource("CareTeam", withSubject(patId));
 
 		// backdate the Group and CareTeam
-		int updatedCount = new TransactionTemplate(myTxManager).execute((status)->
-			myEntityManager
+		int updatedCount = new TransactionTemplate(myTxManager).execute((status) -> myEntityManager
 				.createQuery("update ResourceTable set myUpdated = :new_updated where myId in (:target_ids)")
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
-				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
+				.setParameter(
+						"target_ids",
+						List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
 				.executeUpdate());
 		assertEquals(3, updatedCount, "backdated the Organization, CareTeam and Group");
-
 
 		// when
 		// "Patient?_lastUpdated=gt2023-01-01&_revinclude=Group:member&_revinclude=CareTeam:subject&_include=Patient:organization");
@@ -305,9 +314,9 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		IBundleProvider outcome = myPatientDao.search(map, mySrd);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 
-
 		// then
-		assertThat(ids, Matchers.containsInAnyOrder(patId.getValue(), groupId.getValue(), careTeam.getValue(), org.getValue()));
+		assertThat(
+				ids,
+				Matchers.containsInAnyOrder(patId.getValue(), groupId.getValue(), careTeam.getValue(), org.getValue()));
 	}
-
 }

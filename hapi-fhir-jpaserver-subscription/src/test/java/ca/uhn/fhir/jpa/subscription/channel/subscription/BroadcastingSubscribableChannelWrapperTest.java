@@ -31,7 +31,6 @@ class BroadcastingSubscribableChannelWrapperTest {
 		}
 	}
 
-
 	@Test
 	public void testWrappedChannelDestroyed() throws Exception {
 		BroadcastingSubscribableChannelWrapper svc = new BroadcastingSubscribableChannelWrapper(myReceiver);
@@ -40,5 +39,4 @@ class BroadcastingSubscribableChannelWrapperTest {
 
 		verify(myReceiver, times(1)).destroy();
 	}
-
 }

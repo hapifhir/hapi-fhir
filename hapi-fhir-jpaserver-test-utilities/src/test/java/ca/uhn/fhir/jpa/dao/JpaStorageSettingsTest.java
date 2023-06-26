@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -26,13 +25,19 @@ public class JpaStorageSettingsTest {
 			new JpaStorageSettings().setTreatBaseUrlsAsLocal(new HashSet<>(List.of("http://*foo")));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://*foo", e.getMessage());
+			assertEquals(
+					Msg.code(1525)
+							+ "Base URL wildcard character (*) can only appear at the end of the string: http://*foo",
+					e.getMessage());
 		}
 		try {
 			new JpaStorageSettings().setTreatBaseUrlsAsLocal(new HashSet<>(List.of("http://foo**")));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://foo**", e.getMessage());
+			assertEquals(
+					Msg.code(1525)
+							+ "Base URL wildcard character (*) can only appear at the end of the string: http://foo**",
+					e.getMessage());
 		}
 	}
 
@@ -43,5 +48,4 @@ public class JpaStorageSettingsTest {
 		assertEquals(true, new JpaStorageSettings().isStatusBasedReindexingDisabled());
 		HapiSystemProperties.enableStatusBasedReindex();
 	}
-
 }

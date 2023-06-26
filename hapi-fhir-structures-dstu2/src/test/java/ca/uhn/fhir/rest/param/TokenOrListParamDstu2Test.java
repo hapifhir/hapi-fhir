@@ -55,5 +55,4 @@ public class TokenOrListParamDstu2Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

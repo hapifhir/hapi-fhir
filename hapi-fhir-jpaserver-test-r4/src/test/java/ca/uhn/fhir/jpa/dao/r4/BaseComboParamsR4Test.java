@@ -27,8 +27,10 @@ import static org.mockito.Mockito.when;
 public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseComboParamsR4Test.class);
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	protected List<String> myMessages = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -44,39 +46,50 @@ public abstract class BaseComboParamsR4Test extends BaseJpaR4Test {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(myInterceptorBroadcaster);
 		when(mySrd.getServer().getPagingProvider()).thenReturn(new DatabaseBackedPagingProvider());
 
-		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING))).thenReturn(true);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_WARNING)))
+				.thenReturn(true);
 		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.JPA_PERFTRACE_INFO))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_INFO), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("INFO " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("WARN " + params.get(StorageProcessingMessage.class).getMessage());
-			return null;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams params = t.getArgument(1, HookParams.class);
-			myMessages.add("REUSING CACHED SEARCH");
-			return null;
-		});
+		when(myInterceptorBroadcaster.callHooks(
+						eq(Pointcut.JPA_PERFTRACE_INFO), ArgumentMatchers.any(HookParams.class)))
+				.thenAnswer(t -> {
+					HookParams params = t.getArgument(1, HookParams.class);
+					myMessages.add(
+							"INFO " + params.get(StorageProcessingMessage.class).getMessage());
+					return null;
+				});
+		when(myInterceptorBroadcaster.callHooks(
+						eq(Pointcut.JPA_PERFTRACE_WARNING), ArgumentMatchers.any(HookParams.class)))
+				.thenAnswer(t -> {
+					HookParams params = t.getArgument(1, HookParams.class);
+					myMessages.add(
+							"WARN " + params.get(StorageProcessingMessage.class).getMessage());
+					return null;
+				});
+		when(myInterceptorBroadcaster.callHooks(
+						eq(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED), ArgumentMatchers.any(HookParams.class)))
+				.thenAnswer(t -> {
+					HookParams params = t.getArgument(1, HookParams.class);
+					myMessages.add("REUSING CACHED SEARCH");
+					return null;
+				});
 	}
 
 	@AfterEach
 	public void after() throws Exception {
-		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
-		myStorageSettings.setUniqueIndexesCheckedBeforeSave(new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(
+				new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(
+				new JpaStorageSettings().isUniqueIndexesCheckedBeforeSave());
 		myStorageSettings.setSchedulingDisabled(new JpaStorageSettings().isSchedulingDisabled());
 		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
 		myStorageSettings.setReindexThreadCount(new JpaStorageSettings().getReindexThreadCount());
 
-		ResourceReindexingSvcImpl svc = SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
+		ResourceReindexingSvcImpl svc =
+				SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
 		svc.initExecutor();
 	}
 
 	protected void logCapturedMessages() {
 		ourLog.info("Messages:\n  {}", String.join("\n  ", myMessages));
 	}
-
 }

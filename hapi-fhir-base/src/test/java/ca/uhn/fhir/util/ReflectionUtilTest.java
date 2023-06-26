@@ -1,26 +1,29 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.i18n.Msg;
-import org.junit.jupiter.api.Test;
-
-import ca.uhn.fhir.context.ConfigurationException;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstance() {
-		assertEquals(ArrayList.class, ReflectionUtil.newInstance(ArrayList.class).getClass());
+		assertEquals(
+				ArrayList.class, ReflectionUtil.newInstance(ArrayList.class).getClass());
 	}
 
 	@Test
 	public void testNewInstanceOrReturnNullString() {
-		assertEquals(ArrayList.class, ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class).getClass());
+		assertEquals(
+				ArrayList.class,
+				ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class)
+						.getClass());
 	}
 
 	@Test
@@ -34,7 +37,8 @@ public class ReflectionUtilTest {
 			ReflectionUtil.newInstanceOrReturnNull("java.lang.String", List.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List", e.getMessage());
+			assertEquals(
+					Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List", e.getMessage());
 		}
 	}
 
@@ -60,5 +64,4 @@ public class ReflectionUtilTest {
 		String description = ReflectionUtil.describeMethodInSortFriendlyWay(method);
 		assertEquals("startsWith returns(boolean) params(java.lang.String, int)", description);
 	}
-
 }

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.not;
 
 public class DropIndexTest extends BaseTest {
 
-
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testIndexAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -61,7 +60,6 @@ public class DropIndexTest extends BaseTest {
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), contains("IDX_DIFINDEX"));
 	}
 
-
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testConstraintAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -84,7 +82,8 @@ public class DropIndexTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testConstraintDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testConstraintDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
+			throws SQLException {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -155,9 +154,11 @@ public class DropIndexTest extends BaseTest {
 					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX on SOMETABLE")));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList(
-						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
-						"drop index if exists IDX_ANINDEX cascade")));
+					assertThat(
+							mySql,
+							equalTo(asList(
+									"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
+									"drop index if exists IDX_ANINDEX cascade")));
 					break;
 				case COCKROACHDB_21_1:
 					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
@@ -220,9 +221,11 @@ public class DropIndexTest extends BaseTest {
 					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX on SOMETABLE WITH (ONLINE = ON)")));
 					break;
 				case POSTGRES_9_4:
-					assertThat(mySql, equalTo(asList(
-						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
-						"drop index CONCURRENTLY if exists IDX_ANINDEX cascade")));
+					assertThat(
+							mySql,
+							equalTo(asList(
+									"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
+									"drop index CONCURRENTLY if exists IDX_ANINDEX cascade")));
 					break;
 				case COCKROACHDB_21_1:
 					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
@@ -262,6 +265,4 @@ public class DropIndexTest extends BaseTest {
 			}
 		}
 	}
-
-
 }

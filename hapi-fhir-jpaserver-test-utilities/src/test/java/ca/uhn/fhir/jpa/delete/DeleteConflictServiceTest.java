@@ -37,9 +37,11 @@ public class DeleteConflictServiceTest {
 	@SuppressWarnings("unused")
 	@MockBean
 	private IResourceLinkDao myResourceLinkDao;
+
 	@SuppressWarnings("unused")
 	@MockBean
 	private FhirContext myFhirContext;
+
 	@MockBean
 	@SuppressWarnings("unused")
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -57,7 +59,8 @@ public class DeleteConflictServiceTest {
 		link.setSourceResource(entity);
 		list.add(link);
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
-		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, new TransactionDetails());
+		int retryCount = myDeleteConflictService.validateOkToDelete(
+				deleteConflicts, entity, false, null, new TransactionDetails());
 		assertEquals(0, retryCount);
 	}
 

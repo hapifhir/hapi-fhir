@@ -30,25 +30,19 @@ public class ParametersUtilR4Test {
 		ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "someDate", "date", "2019");
 
 		String encoded = ourFhirContext.newJsonParser().encodeResourceToString(parameters);
-		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}", encoded);
+		assertEquals(
+				"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}",
+				encoded);
 	}
 
 	@Test
 	public void testGetValues() {
 		Parameters p = new Parameters();
-		p.addParameter()
-			.setName("foo")
-			.setValue(new StringType("VALUE1"));
-		p.addParameter()
-			.setName("foo")
-			.setValue(new StringType("VALUE2"));
-		p.addParameter()
-			.setName("foo");
-		p.addParameter()
-			.setName("bar")
-			.setValue(new StringType("VALUE3"));
-		p.addParameter()
-			.setValue(new StringType("VALUE4"));
+		p.addParameter().setName("foo").setValue(new StringType("VALUE1"));
+		p.addParameter().setName("foo").setValue(new StringType("VALUE2"));
+		p.addParameter().setName("foo");
+		p.addParameter().setName("bar").setValue(new StringType("VALUE3"));
+		p.addParameter().setValue(new StringType("VALUE4"));
 
 		List<String> values = ParametersUtil.getNamedParameterValuesAsString(FhirContext.forR4(), p, "foo");
 		assertThat(values, Matchers.contains("VALUE1", "VALUE2"));
@@ -57,9 +51,7 @@ public class ParametersUtilR4Test {
 	@Test
 	public void testGetValueAsInteger() {
 		Parameters p = new Parameters();
-		p.addParameter()
-			.setName("foo")
-			.setValue(new IntegerType(123));
+		p.addParameter().setName("foo").setValue(new IntegerType(123));
 
 		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(FhirContext.forR4(), p, "foo");
 		assertTrue(value.isPresent());
@@ -73,7 +65,8 @@ public class ParametersUtilR4Test {
 			IBase resultPart = ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "link");
 			ParametersUtil.addPartString(ourFhirContext, resultPart, "personId", TEST_PERSON_ID);
 		}
-		List<String> values = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "personId");
+		List<String> values =
+				ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "personId");
 		assertThat(values, hasSize(3));
 		assertThat(values.get(0), is(TEST_PERSON_ID));
 		assertThat(values.get(1), is(TEST_PERSON_ID));

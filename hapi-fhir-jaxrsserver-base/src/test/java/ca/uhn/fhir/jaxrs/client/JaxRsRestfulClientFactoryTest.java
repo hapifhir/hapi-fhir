@@ -12,12 +12,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.net.ssl.SSLException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.Response;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -76,10 +75,9 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());
 		Client client = factory.getNativeClientClient();
 
-		Response response = client
-			.target(fhirVersionParams.getPatientEndpoint())
-			.request(MediaType.JSON_UTF_8.toString())
-			.get(Response.class);
+		Response response = client.target(fhirVersionParams.getPatientEndpoint())
+				.request(MediaType.JSON_UTF_8.toString())
+				.get(Response.class);
 
 		assertEquals(200, response.getStatus());
 		String json = response.readEntity(String.class);
@@ -96,9 +94,9 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 
 		try {
 			unauthenticatedClient
-				.target(fhirVersionParams.getSecuredPatientEndpoint())
-				.request(MediaType.JSON_UTF_8.toString())
-				.get(Response.class);
+					.target(fhirVersionParams.getSecuredPatientEndpoint())
+					.request(MediaType.JSON_UTF_8.toString())
+					.get(Response.class);
 			fail();
 		} catch (Exception e) {
 			assertTrue(e.getCause() instanceof SSLException);

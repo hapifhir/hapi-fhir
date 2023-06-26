@@ -56,7 +56,9 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(MyBundle.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle", e.getMessage());
+			assertEquals(
+					Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle",
+					e.getMessage());
 		}
 	}
 
@@ -87,7 +89,10 @@ public class ModelScannerDstu3Test {
 			FhirContext.forDstu3().getResourceDefinition(NoResourceDef.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1716) + "Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+			assertEquals(
+					Msg.code(1716)
+							+ "Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations",
+					e.getMessage());
 		}
 	}
 
@@ -96,7 +101,8 @@ public class ModelScannerDstu3Test {
 		try {
 			FhirContext.forDstu3().getResourceDefinition(InheritedResourceDef.class);
 		} catch (ConfigurationException e) {
-			fail("The InheritedResourceDef class should contain a valid HAPI-FHIR annotation inherited from superclass");
+			fail(
+					"The InheritedResourceDef class should contain a valid HAPI-FHIR annotation inherited from superclass");
 		}
 	}
 
@@ -106,7 +112,9 @@ public class ModelScannerDstu3Test {
 		FhirContext ctx = FhirContext.forDstu3();
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsDstu3A.class);
 
-		assertEquals(RuntimeChildCompositeDatatypeDefinition.class, def.getChildByNameOrThrowDataFormatException("identifier").getClass());
+		assertEquals(
+				RuntimeChildCompositeDatatypeDefinition.class,
+				def.getChildByNameOrThrowDataFormatException("identifier").getClass());
 
 		RuntimeChildDeclaredExtensionDefinition ext = def.getDeclaredExtension("http://foo/#f1", "");
 		assertNotNull(ext);
@@ -130,7 +138,6 @@ public class ModelScannerDstu3Test {
 		assertNotNull(childExt);
 		valueDate = childExt.getChildByName("valueDate");
 		assertNotNull(valueDate);
-
 	}
 
 	@Test
@@ -140,7 +147,10 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(CustomDstu3ClassWithDstu2Base.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1717) + "@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1", e.getMessage());
+			assertEquals(
+					Msg.code(1717)
+							+ "@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1",
+					e.getMessage());
 		}
 	}
 
@@ -154,7 +164,8 @@ public class ModelScannerDstu3Test {
 			FhirContext.forDstu3().getResourceDefinition(CompartmentForNonReferenceParam.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Search param foo provides compartment membershit but is not of type 'reference'", e.getMessage());
+			assertEquals(
+					"Search param foo provides compartment membershit but is not of type 'reference'", e.getMessage());
 		}
 	}
 
@@ -178,7 +189,10 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(LetterTemplate.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1733) + "Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
+			assertEquals(
+					Msg.code(1733)
+							+ "Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions",
+					e.getMessage());
 		}
 	}
 
@@ -210,7 +224,10 @@ public class ModelScannerDstu3Test {
 			scanner.scan(BadPatient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1714) + "Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient", e.getMessage());
+			assertEquals(
+					Msg.code(1714)
+							+ "Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient",
+					e.getMessage());
 		}
 	}
 
@@ -227,13 +244,15 @@ public class ModelScannerDstu3Test {
 			scanner.scan(clazz);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1716) + "Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+			assertEquals(
+					Msg.code(1716)
+							+ "Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations",
+					e.getMessage());
 		}
 	}
 
 	@Test
 	public void testScanInvalidBlock() {
-
 
 		FhirContext ctx = FhirContext.forDstu3();
 		FhirVersionEnum version = FhirVersionEnum.DSTU3;
@@ -245,13 +264,17 @@ public class ModelScannerDstu3Test {
 			scanner.scan(BadPatient.BadBlock.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1715) + "Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock", e.getMessage());
+			assertEquals(
+					Msg.code(1715)
+							+ "Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock",
+					e.getMessage());
 		}
 	}
 
 	class NoResourceDef extends DomainResource {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
+
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -266,8 +289,7 @@ public class ModelScannerDstu3Test {
 	}
 
 	static class InheritedResourceDef extends Patient {
-		public InheritedResourceDef() {
-		}
+		public InheritedResourceDef() {}
 	}
 
 	@ResourceDef(name = "Patient")
@@ -302,9 +324,7 @@ public class ModelScannerDstu3Test {
 		}
 
 		@Override
-		public void setUserData(String theName, Object theValue) {
-
-		}
+		public void setUserData(String theName, Object theValue) {}
 
 		@Block
 		public static class BadBlock implements IBase {
@@ -335,27 +355,28 @@ public class ModelScannerDstu3Test {
 			}
 
 			@Override
-			public void setUserData(String theName, Object theValue) {
-
-			}
+			public void setUserData(String theName, Object theValue) {}
 		}
-
 	}
 
 	@ResourceDef(name = "Patient")
 	public static class CompartmentForNonReferenceParam extends Patient {
-		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "string", providesMembershipIn = {@Compartment(name = "Patient"), @Compartment(name = "Device")})
+		@SearchParamDefinition(
+				name = "foo",
+				path = "Patient.telecom",
+				type = "string",
+				providesMembershipIn = {@Compartment(name = "Patient"), @Compartment(name = "Device")})
 		public static final String SP_TELECOM = "foo";
-		private static final long serialVersionUID = 1L;
 
+		private static final long serialVersionUID = 1L;
 	}
 
 	@ResourceDef(name = "Patient")
 	public static class InvalidParamType extends Patient {
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
-		private static final long serialVersionUID = 1L;
 
+		private static final long serialVersionUID = 1L;
 	}
 
 	@ResourceDef(name = "Bundle")
@@ -411,10 +432,12 @@ public class ModelScannerDstu3Test {
 		public ResourceType getResourceType() {
 			return null;
 		}
-
 	}
 
-	@ResourceDef(name = "Binary", id = "letter-template", profile = "http://www.something.org/StructureDefinition/letter-template")
+	@ResourceDef(
+			name = "Binary",
+			id = "letter-template",
+			profile = "http://www.something.org/StructureDefinition/letter-template")
 	public static class LetterTemplate extends Binary {
 
 		private static final long serialVersionUID = 1L;
@@ -424,8 +447,7 @@ public class ModelScannerDstu3Test {
 		@Description(shortDefinition = "The name of the template")
 		private StringDt myName;
 
-		public LetterTemplate() {
-		}
+		public LetterTemplate() {}
 
 		public StringDt getName() {
 			return myName;
@@ -440,5 +462,4 @@ public class ModelScannerDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

@@ -22,5 +22,4 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.InterceptableChannel;
 
-public interface IChannelProducer extends MessageChannel, InterceptableChannel {
-}
+public interface IChannelProducer extends MessageChannel, InterceptableChannel {}

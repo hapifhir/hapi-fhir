@@ -10,8 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -60,5 +60,4 @@ public class ServletRestfulResponseTest {
 		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB"));
 		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("AB"));
 	}
-
 }

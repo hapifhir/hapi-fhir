@@ -26,11 +26,11 @@ public class MailConfigTest {
 
 	private MailConfig withMainConfig() {
 		return new MailConfig()
-			.setSmtpHostname(SMTP_HOST_NAME)
-			.setSmtpPort(SMTP_PORT)
-			.setSmtpUsername(SMTP_USERNAME)
-			.setSmtpPassword(SMTP_PASSWORD)
-			.setSmtpUseStartTLS(true);
+				.setSmtpHostname(SMTP_HOST_NAME)
+				.setSmtpPort(SMTP_PORT)
+				.setSmtpUsername(SMTP_USERNAME)
+				.setSmtpPassword(SMTP_PASSWORD)
+				.setSmtpUseStartTLS(true);
 	}
 
 	@Test
@@ -104,5 +104,4 @@ public class MailConfigTest {
 		assertNull(fixture.setSmtpPassword("").getSmtpPassword());
 		assertNull(fixture.setSmtpPassword("  ").getSmtpPassword());
 	}
-
 }

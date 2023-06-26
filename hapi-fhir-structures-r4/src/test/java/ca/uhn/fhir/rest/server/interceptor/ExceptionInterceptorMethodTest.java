@@ -27,10 +27,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,12 +43,13 @@ public class ExceptionInterceptorMethodTest {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
-	
+
 	@BeforeEach
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
@@ -59,22 +60,36 @@ public class ExceptionInterceptorMethodTest {
 	public void after() {
 		servlet.getInterceptorService().unregisterInterceptor(myInterceptor);
 	}
-	
+
 	@Test
 	public void testThrowUnprocessableEntityException() throws Exception {
 
-		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class)))
+				.thenReturn(true);
+		when(myInterceptor.incomingRequestPostProcessed(
+						any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class)))
+				.thenReturn(true);
+		when(myInterceptor.handleException(
+						any(RequestDetails.class),
+						any(BaseServerResponseException.class),
+						any(HttpServletRequest.class),
+						any(HttpServletResponse.class)))
+				.thenReturn(true);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
 			assertEquals(422, status.getStatusLine().getStatusCode());
 		}
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
-		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		verify(myInterceptor, times(1))
+				.handleException(
+						any(RequestDetails.class),
+						captor.capture(),
+						any(HttpServletRequest.class),
+						any(HttpServletResponse.class));
 
 		assertEquals(UnprocessableEntityException.class, captor.getValue().getClass());
 	}
@@ -82,26 +97,35 @@ public class ExceptionInterceptorMethodTest {
 	@Test
 	public void testThrowUnprocessableEntityExceptionAndOverrideResponse() throws Exception {
 
-		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		
-		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(theInvocation -> {
-			HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[3];
-			resp.setStatus(405);
-			resp.setContentType("text/plain");
-			resp.getWriter().write("HELP IM A BUG");
-			resp.getWriter().close();
-			return false;
-		});
+		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class)))
+				.thenReturn(true);
+		when(myInterceptor.incomingRequestPostProcessed(
+						any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class)))
+				.thenReturn(true);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
+		when(myInterceptor.handleException(
+						any(RequestDetails.class),
+						any(BaseServerResponseException.class),
+						any(HttpServletRequest.class),
+						any(HttpServletResponse.class)))
+				.thenAnswer(theInvocation -> {
+					HttpServletResponse resp =
+							(HttpServletResponse) theInvocation.getArguments()[3];
+					resp.setStatus(405);
+					resp.setContentType("text/plain");
+					resp.getWriter().write("HELP IM A BUG");
+					resp.getWriter().close();
+					return false;
+				});
+
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(405, status.getStatusLine().getStatusCode());
 			assertEquals("HELP IM A BUG", responseContent);
 		}
-
 	}
 
 	@AfterAll
@@ -123,13 +147,13 @@ public class ExceptionInterceptorMethodTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -141,15 +165,12 @@ public class ExceptionInterceptorMethodTest {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
+		 *
 		 * @return The resource
 		 */
 		@Search(queryName = "throwUnprocessableEntityException")
 		public List<Patient> throwUnprocessableEntityException() {
 			throw new UnprocessableEntityException("Unprocessable!");
 		}
-
 	}
-
-
 }

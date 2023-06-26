@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.PartitionHelper;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
@@ -51,22 +50,22 @@ public class CqlProviderR4Test extends BaseCrR4Test {
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(
-			MEASURE_ID,
-			PERIOD_START,
-			PERIOD_END,
-			"subject",
-			PATIENT_ID,
-			null,
-			null,
-			null,
-			null,
-			null,
-			myRequestDetails);
+				MEASURE_ID,
+				PERIOD_START,
+				PERIOD_END,
+				"subject",
+				PATIENT_ID,
+				null,
+				null,
+				null,
+				null,
+				null,
+				myRequestDetails);
 
 		// Assert it worked
 		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
-		//assertThat(report.getGroup().get(0).getPopulation(), hasSize(3)); WIP on Practitioner
+		// assertThat(report.getGroup().get(0).getPopulation(), hasSize(3)); WIP on Practitioner
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 	}
 
@@ -80,22 +79,12 @@ public class CqlProviderR4Test extends BaseCrR4Test {
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(
-			MEASURE_ID,
-			null,
-			null,
-			"subject",
-			PATIENT_ID,
-			null,
-			null,
-			null,
-			null,
-			null,
-			myRequestDetails);
+				MEASURE_ID, null, null, "subject", PATIENT_ID, null, null, null, null, null, myRequestDetails);
 
 		// Assert it worked
 		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
-		//assertThat(report.getGroup().get(0).getPopulation(), hasSize(3)); WIP on Practitioner
+		// assertThat(report.getGroup().get(0).getPopulation(), hasSize(3)); WIP on Practitioner
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 	}
 }

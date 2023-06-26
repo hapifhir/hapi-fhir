@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +28,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,12 +53,16 @@ public class PartitionManagementProviderTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionManagementProviderTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
+
 	@MockBean
 	private IPartitionLookupSvc myPartitionConfigSvc;
+
 	@Autowired
 	private PartitionManagementProvider myPartitionManagementProvider;
+
 	private IGenericClient myClient;
 
 	@BeforeEach
@@ -81,21 +84,31 @@ public class PartitionManagementProviderTest {
 		Parameters input = createInputPartition();
 		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-			.withParameters(input)
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+				.withParameters(input)
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).createPartition(any(), any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(
+				123,
+				((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID))
+						.getValue()
+						.intValue());
+		assertEquals(
+				"PARTITION-123",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME))
+						.getValue());
+		assertEquals(
+				"a description",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC))
+						.getValue());
 	}
 
 	@Test
@@ -103,18 +116,19 @@ public class PartitionManagementProviderTest {
 
 		when(myPartitionConfigSvc.createPartition(any(), any())).thenAnswer(createAnswer());
 
-		Parameters input = createInputPartitionWithoutId();;
+		Parameters input = createInputPartitionWithoutId();
+		;
 		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-			.withParameters(input)
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+				.withParameters(input)
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		ArgumentCaptor<PartitionEntity> entityCaptor = ArgumentCaptor.forClass(PartitionEntity.class);
 		verify(myPartitionConfigSvc, times(1)).createPartition(entityCaptor.capture(), any());
 		verify(myPartitionConfigSvc, times(1)).generateRandomUnusedPartitionId();
@@ -146,13 +160,12 @@ public class PartitionManagementProviderTest {
 	@Test
 	public void testCreatePartition_InvalidInput() {
 		try {
-			myClient
-				.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-				.withNoParameters(Parameters.class)
-				.encodedXml()
-				.execute();
+			myClient.operation()
+					.onServer()
+					.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+					.withNoParameters(Parameters.class)
+					.encodedXml()
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
@@ -168,34 +181,44 @@ public class PartitionManagementProviderTest {
 		partition.setDescription("a description");
 		when(myPartitionConfigSvc.getPartitionById(eq(123))).thenReturn(partition);
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_READ_PARTITION)
-			.withParameter(Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123))
-			.useHttpGet()
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_READ_PARTITION)
+				.withParameter(
+						Parameters.class, ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123))
+				.useHttpGet()
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(
+				123,
+				((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID))
+						.getValue()
+						.intValue());
+		assertEquals(
+				"PARTITION-123",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME))
+						.getValue());
+		assertEquals(
+				"a description",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC))
+						.getValue());
 	}
 
 	@Test
 	public void testReadPartition_InvalidInput() {
 		try {
-			myClient
-				.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_READ_PARTITION)
-				.withNoParameters(Parameters.class)
-				.encodedXml()
-				.execute();
+			myClient.operation()
+					.onServer()
+					.named(ProviderConstants.PARTITION_MANAGEMENT_READ_PARTITION)
+					.withNoParameters(Parameters.class)
+					.encodedXml()
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
@@ -210,33 +233,42 @@ public class PartitionManagementProviderTest {
 		Parameters input = createInputPartition();
 		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
-			.withParameters(input)
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
+				.withParameters(input)
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(
+				123,
+				((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID))
+						.getValue()
+						.intValue());
+		assertEquals(
+				"PARTITION-123",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME))
+						.getValue());
+		assertEquals(
+				"a description",
+				((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC))
+						.getValue());
 	}
 
 	@Test
 	public void testUpdatePartition_InvalidInput() {
 		try {
-			myClient
-				.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
-				.withNoParameters(Parameters.class)
-				.encodedXml()
-				.execute();
+			myClient.operation()
+					.onServer()
+					.named(ProviderConstants.PARTITION_MANAGEMENT_UPDATE_PARTITION)
+					.withNoParameters(Parameters.class)
+					.encodedXml()
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
@@ -250,15 +282,15 @@ public class PartitionManagementProviderTest {
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
 		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_DELETE_PARTITION)
-			.withParameters(input)
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_DELETE_PARTITION)
+				.withParameters(input)
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).deletePartition(eq(123));
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 	}
@@ -266,13 +298,12 @@ public class PartitionManagementProviderTest {
 	@Test
 	public void testDeletePartition_InvalidInput() {
 		try {
-			myClient
-				.operation()
-				.onServer()
-				.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
-				.withNoParameters(Parameters.class)
-				.encodedXml()
-				.execute();
+			myClient.operation()
+					.onServer()
+					.named(ProviderConstants.PARTITION_MANAGEMENT_CREATE_PARTITION)
+					.withNoParameters(Parameters.class)
+					.encodedXml()
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
@@ -297,16 +328,16 @@ public class PartitionManagementProviderTest {
 		partitionList.add(partition2);
 		when(myPartitionConfigSvc.listPartitions()).thenReturn(partitionList);
 
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS)
-			.withNoParameters(Parameters.class)
-			.useHttpGet()
-			.encodedXml()
-			.execute();
+		Parameters response = myClient.operation()
+				.onServer()
+				.named(ProviderConstants.PARTITION_MANAGEMENT_LIST_PARTITIONS)
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.encodedXml()
+				.execute();
 
-		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).listPartitions();
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -341,7 +372,6 @@ public class PartitionManagementProviderTest {
 		public FhirContext fhirContext() {
 			return ourCtx;
 		}
-
 	}
 
 	@Nonnull
@@ -350,6 +380,8 @@ public class PartitionManagementProviderTest {
 	}
 
 	private List<Parameters.ParametersParameterComponent> getParametersByName(Parameters theParams, String theName) {
-		return theParams.getParameter().stream().filter(p -> p.getName().equals(theName)).collect(Collectors.toList());
+		return theParams.getParameter().stream()
+				.filter(p -> p.getName().equals(theName))
+				.collect(Collectors.toList());
 	}
 }

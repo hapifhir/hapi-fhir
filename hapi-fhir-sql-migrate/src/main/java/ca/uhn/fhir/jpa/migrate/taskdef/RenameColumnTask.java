@@ -84,16 +84,26 @@ public class RenameColumnTask extends BaseTableTask {
 					return jdbcTemplate.query(sql, new ColumnMapRowMapper()).size();
 				});
 				if (rowsWithData != null && rowsWithData > 0) {
-					throw new SQLException(Msg.code(54) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
+					throw new SQLException(Msg.code(54) + "Can not rename " + getTableName() + "." + myOldName + " to "
+							+ myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
 				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || mySimulateMySQLForTest) {
-					// Some DBs such as MYSQL require that foreign keys depending on the column be explicitly dropped before the column itself is dropped.
-					logInfo(ourLog, "Table {} has columns {} and {} - Going to drop any foreign keys depending on column {} before renaming", getTableName(), myOldName, myNewName, myNewName);
-					Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), myNewName, getTableName());
+					// Some DBs such as MYSQL require that foreign keys depending on the column be explicitly dropped
+					// before the column itself is dropped.
+					logInfo(
+							ourLog,
+							"Table {} has columns {} and {} - Going to drop any foreign keys depending on column {} before renaming",
+							getTableName(),
+							myOldName,
+							myNewName,
+							myNewName);
+					Set<String> foreignKeys =
+							JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), myNewName, getTableName());
 					if (foreignKeys != null) {
 						for (String foreignKey : foreignKeys) {
-							List<String> dropFkSqls = DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
+							List<String> dropFkSqls =
+									DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
 							for (String dropFkSql : dropFkSqls) {
 								executeSql(getTableName(), dropFkSql);
 							}
@@ -101,17 +111,25 @@ public class RenameColumnTask extends BaseTableTask {
 					}
 				}
 
-				logInfo(ourLog, "Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+				logInfo(
+						ourLog,
+						"Table {} has columns {} and {} - Going to drop {} before renaming",
+						getTableName(),
+						myOldName,
+						myNewName,
+						myNewName);
 				String sql = DropColumnTask.createSql(getTableName(), myNewName);
 				executeSql(getTableName(), sql);
 			} else {
-				throw new SQLException(Msg.code(55) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
+				throw new SQLException(Msg.code(55) + "Can not rename " + getTableName() + "." + myOldName + " to "
+						+ myNewName + " because both columns exist!");
 			}
 		} else if (!haveOldName && !haveNewName) {
 			if (isOkayIfNeitherColumnExists()) {
 				return;
 			}
-			throw new SQLException(Msg.code(56) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
+			throw new SQLException(Msg.code(56) + "Can not rename " + getTableName() + "." + myOldName + " to "
+					+ myNewName + " because neither column exists!");
 		} else if (haveNewName) {
 			logInfo(ourLog, "Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
@@ -120,9 +138,12 @@ public class RenameColumnTask extends BaseTableTask {
 		String existingType;
 		String notNull;
 		try {
-			JdbcUtils.ColumnType existingColumnType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), myOldName);
+			JdbcUtils.ColumnType existingColumnType =
+					JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), myOldName);
 			existingType = getSqlType(existingColumnType.getColumnTypeEnum(), existingColumnType.getLength());
-			notNull = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), myOldName) ? " null " : " not null";
+			notNull = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), myOldName)
+					? " null "
+					: " not null";
 		} catch (SQLException e) {
 			throw new InternalErrorException(Msg.code(57) + e);
 		}
@@ -130,7 +151,6 @@ public class RenameColumnTask extends BaseTableTask {
 
 		logInfo(ourLog, "Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
 		executeSql(getTableName(), sql);
-
 	}
 
 	String buildRenameColumnSqlStatement(String theExistingType, String theExistingNotNull) {
@@ -142,7 +162,8 @@ public class RenameColumnTask extends BaseTableTask {
 			case MYSQL_5_7:
 			case MARIADB_10_1:
 				// Quote the column names as "SYSTEM" is a reserved word in MySQL
-				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN `" + myOldName + "` `" + myNewName + "` " + theExistingType + " " + theExistingNotNull;
+				sql = "ALTER TABLE " + getTableName() + " CHANGE COLUMN `" + myOldName + "` `" + myNewName + "` "
+						+ theExistingType + " " + theExistingNotNull;
 				break;
 			case POSTGRES_9_4:
 			case ORACLE_12C:

@@ -49,7 +49,6 @@ public class BundleTypeDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
@@ -67,15 +66,21 @@ public class BundleTypeDstu2Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(ourHttpClient.execute(capt.capture())).thenReturn(ourHttpResponse);
-		when(ourHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(ourHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(ourHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(retVal), Charset.forName("UTF-8")));
+		when(ourHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(ourHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(ourHttpResponse.getEntity().getContent())
+				.thenReturn(new ReaderInputStream(new StringReader(retVal), Charset.forName("UTF-8")));
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("value");
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
-		client.transaction().withResources(Arrays.asList((IBaseResource) p1)).encodedXml().execute();
+		client.transaction()
+				.withResources(Arrays.asList((IBaseResource) p1))
+				.encodedXml()
+				.execute();
 
 		HttpUriRequest value = capt.getValue();
 
@@ -87,18 +92,19 @@ public class BundleTypeDstu2Test {
 
 		assertThat(body, Matchers.containsString("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode()));
 	}
-	
-	
+
 	public static void main(String[] args) {
-		
+
 		FhirContext ctx = FhirContext.forDstu2();
 		IGenericClient client = ctx.newRestfulGenericClient("http://54.165.58.158:8081/FHIRServer/fhir");
 		client.registerInterceptor(new BearerTokenAuthInterceptor("AN3uCTC5B"));
 		client.registerInterceptor(new LoggingInterceptor(true));
-		Bundle result = client.search().forResource(Patient.class).where(Patient.NAME.matches().value("Alice")).returnBundle(Bundle.class).execute();
-		
+		Bundle result = client.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("Alice"))
+				.returnBundle(Bundle.class)
+				.execute();
+
 		System.out.println(result.getEntry().size());
-		
 	}
-	
 }

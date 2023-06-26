@@ -48,16 +48,20 @@ public class SearchParameterDaoValidatorTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR5Cached();
+
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
+
 	@Spy
 	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
+
 	@InjectMocks
 	private SearchParameterDaoValidator mySvc;
 
 	private final VersionCanonicalizer myVersionCanonicalizer = new VersionCanonicalizer(myFhirContext);
 
-	private final SearchParameterCanonicalizer mySearchParameterCanonicalizer = new SearchParameterCanonicalizer(myFhirContext);
+	private final SearchParameterCanonicalizer mySearchParameterCanonicalizer =
+			new SearchParameterCanonicalizer(myFhirContext);
 
 	private static final String SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN = "SearchParameter/observation-code";
 	private static final String SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE = "SearchParameter/observation-patient";
@@ -69,19 +73,45 @@ public class SearchParameterDaoValidatorTest {
 
 	@BeforeEach
 	public void before() {
-		createAndMockSearchParameter(TOKEN, SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN, "observation-code", "Observation.code");
-		createAndMockSearchParameter(REFERENCE, SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE, "observation-patient", "Observation.subject.where(resolve() is Patient");
-		createAndMockSearchParameter(STRING, SP_COMPONENT_DEFINITION_OF_TYPE_DATE, "observation-category", "Observation.value.ofType(markdown)");
-		createAndMockSearchParameter(DATE, SP_COMPONENT_DEFINITION_OF_TYPE_STRING, "observation-date", "Observation.value.ofType(dateTime)");
-		createAndMockSearchParameter(QUANTITY, SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY, "observation-quantity", "Observation.value.ofType(Quantity)");
-		createAndMockSearchParameter(URI, SP_COMPONENT_DEFINITION_OF_TYPE_URI, "observation-component-value-canonical", "Observation.component.value.ofType(canonical)");
-		createAndMockSearchParameter(NUMBER, SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER, "observation-component-value-number", "Observation.component.valueInteger");
+		createAndMockSearchParameter(
+				TOKEN, SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN, "observation-code", "Observation.code");
+		createAndMockSearchParameter(
+				REFERENCE,
+				SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE,
+				"observation-patient",
+				"Observation.subject.where(resolve() is Patient");
+		createAndMockSearchParameter(
+				STRING,
+				SP_COMPONENT_DEFINITION_OF_TYPE_DATE,
+				"observation-category",
+				"Observation.value.ofType(markdown)");
+		createAndMockSearchParameter(
+				DATE, SP_COMPONENT_DEFINITION_OF_TYPE_STRING, "observation-date", "Observation.value.ofType(dateTime)");
+		createAndMockSearchParameter(
+				QUANTITY,
+				SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY,
+				"observation-quantity",
+				"Observation.value.ofType(Quantity)");
+		createAndMockSearchParameter(
+				URI,
+				SP_COMPONENT_DEFINITION_OF_TYPE_URI,
+				"observation-component-value-canonical",
+				"Observation.component.value.ofType(canonical)");
+		createAndMockSearchParameter(
+				NUMBER,
+				SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER,
+				"observation-component-value-number",
+				"Observation.component.valueInteger");
 	}
 
-	private void createAndMockSearchParameter(Enumerations.SearchParamType theType, String theDefinition, String theCodeValue, String theExpression) {
+	private void createAndMockSearchParameter(
+			Enumerations.SearchParamType theType, String theDefinition, String theCodeValue, String theExpression) {
 		SearchParameter observationCodeSp = createSearchParameter(theType, theDefinition, theCodeValue, theExpression);
-		RuntimeSearchParam observationCodeRuntimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationCodeSp);
-		lenient().when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(theDefinition))).thenReturn(observationCodeRuntimeSearchParam);
+		RuntimeSearchParam observationCodeRuntimeSearchParam =
+				mySearchParameterCanonicalizer.canonicalizeSearchParameter(observationCodeSp);
+		lenient()
+				.when(mySearchParamRegistry.getActiveSearchParamByUrl(eq(theDefinition)))
+				.thenReturn(observationCodeRuntimeSearchParam);
 	}
 
 	@Test
@@ -105,8 +135,10 @@ public class SearchParameterDaoValidatorTest {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/meal-chef");
 		sp.setUrl("http://example.org/SearchParameter/meal-chef");
-		sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE).setValue(new StringType("Meal")));
-		sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE).setValue(new StringType("Chef")));
+		sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE)
+				.setValue(new StringType("Meal")));
+		sp.addExtension(new Extension(HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE)
+				.setValue(new StringType("Chef")));
 		sp.setCode("chef");
 		sp.setType(REFERENCE);
 		sp.setStatus(ACTIVE);
@@ -118,49 +150,57 @@ public class SearchParameterDaoValidatorTest {
 
 	@ParameterizedTest
 	@MethodSource("extensionProvider")
-	public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(Extension theExtension) {
-		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
+	public void testMethodValidate_nonUniqueComboAndCompositeSearchParamWithComponentOfTypeReference_isNotAllowed(
+			Extension theExtension) {
+		SearchParameter sp =
+				createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
 		sp.addExtension(theExtension);
 
 		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
-		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
+		sp.addComponent(
+				new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
 
 		try {
 			mySvc.validate(sp);
 			fail();
 		} catch (UnprocessableEntityException ex) {
 			assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
-			assertTrue(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient"));
+			assertTrue(
+					ex.getMessage()
+							.contains(
+									"Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient"));
 		}
 	}
 
 	@Test
 	public void testMethodValidate_uniqueComboSearchParamWithComponentOfTypeReference_isValid() {
-		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
+		SearchParameter sp =
+				createSearchParameter(COMPOSITE, "SearchParameter/patient-code", "patient-code", "Observation");
 		sp.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true)));
 
-		sp.addComponent(new SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
-		sp.addComponent(new SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
+		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN));
+		sp.addComponent(
+				new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_REFERENCE));
 
 		mySvc.validate(sp);
 	}
 
 	@ParameterizedTest
 	@MethodSource("comboSpProvider")
-	public void testMethodValidate_comboSearchParamsWithNumberUriComponents_isValid(SearchParameter theSearchParameter) {
-		theSearchParameter.addComponent(new SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_URI));
-		theSearchParameter.addComponent(new SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER));
+	public void testMethodValidate_comboSearchParamsWithNumberUriComponents_isValid(
+			SearchParameter theSearchParameter) {
+		theSearchParameter.addComponent(
+				new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_URI));
+		theSearchParameter.addComponent(
+				new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER));
 
 		mySvc.validate(theSearchParameter);
 	}
 
 	@Test
 	public void testMethodValidate_compositeSearchParamsWithNumberUriComponents_isNotAllowed() {
-		SearchParameter sp = createSearchParameter(COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
+		SearchParameter sp = createSearchParameter(
+				COMPOSITE, "SearchParameter/component-value-uri-number", "component-value-uri-number", "Observation");
 
 		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_URI));
 		sp.addComponent(new SearchParameterComponentComponent().setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_NUMBER));
@@ -170,7 +210,10 @@ public class SearchParameterDaoValidatorTest {
 			fail();
 		} catch (UnprocessableEntityException ex) {
 			assertTrue(ex.getMessage().startsWith("HAPI-2347: "));
-			assertTrue(ex.getMessage().contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical"));
+			assertTrue(
+					ex.getMessage()
+							.contains(
+									"Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical"));
 		}
 	}
 
@@ -180,21 +223,27 @@ public class SearchParameterDaoValidatorTest {
 	// SP of type composite,
 	// SP of type combo composite non-unique,
 	// SP of type combo composite unique,
-	public void testMethodValidate_allCompositeSpTypesWithComponentOfValidType_isValid(SearchParameter theSearchParameter) {
+	public void testMethodValidate_allCompositeSpTypesWithComponentOfValidType_isValid(
+			SearchParameter theSearchParameter) {
 
 		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN).setExpression("Observation"));
+				.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_TOKEN)
+				.setExpression("Observation"));
 		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY).setExpression("Observation"));
+				.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_QUANTITY)
+				.setExpression("Observation"));
 		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_STRING).setExpression("Observation"));
+				.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_STRING)
+				.setExpression("Observation"));
 		theSearchParameter.addComponent(new SearchParameter.SearchParameterComponentComponent()
-			.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_DATE).setExpression("Observation"));
+				.setDefinition(SP_COMPONENT_DEFINITION_OF_TYPE_DATE)
+				.setExpression("Observation"));
 
 		mySvc.validate(theSearchParameter);
 	}
 
-	private static SearchParameter createSearchParameter(Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
+	private static SearchParameter createSearchParameter(
+			Enumerations.SearchParamType theType, String theId, String theCodeValue, String theExpression) {
 
 		SearchParameter retVal = new SearchParameter();
 		retVal.setId(theId);
@@ -210,25 +259,43 @@ public class SearchParameterDaoValidatorTest {
 
 	static Stream<Arguments> extensionProvider() {
 		return Stream.of(
-			Arguments.of(
-				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false))), // composite SP of type combo with non-unique index
-			Arguments.of((Object) null) // composite SP
-		);
+				Arguments.of(new Extension(
+						HapiExtensions.EXT_SP_UNIQUE,
+						new BooleanType(false))), // composite SP of type combo with non-unique index
+				Arguments.of((Object) null) // composite SP
+				);
 	}
 
 	static Stream<Arguments> comboSpProvider() {
 		return Stream.of(
-			Arguments.of(createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
-				.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false)))), // composite SP of type combo with non-unique index
-
-			Arguments.of(createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")
-				.addExtension(new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true)))) // composite SP of type combo with unique index
-		);
+				Arguments.of(createSearchParameter(
+								Enumerations.SearchParamType.COMPOSITE,
+								"SearchParameter/any-type",
+								"any-type",
+								"Observation")
+						.addExtension(new Extension(
+								HapiExtensions.EXT_SP_UNIQUE,
+								new BooleanType(false)))), // composite SP of type combo with non-unique index
+				Arguments.of(createSearchParameter(
+								Enumerations.SearchParamType.COMPOSITE,
+								"SearchParameter/any-type",
+								"any-type",
+								"Observation")
+						.addExtension(new Extension(
+								HapiExtensions.EXT_SP_UNIQUE,
+								new BooleanType(true)))) // composite SP of type combo with unique index
+				);
 	}
 
 	static Stream<Arguments> compositeSpProvider() {
-		return Stream.concat(comboSpProvider(), Stream.of(
-			Arguments.of(createSearchParameter(Enumerations.SearchParamType.COMPOSITE, "SearchParameter/any-type", "any-type", "Observation")) // composite SP
-		));
+		return Stream.concat(
+				comboSpProvider(),
+				Stream.of(
+						Arguments.of(createSearchParameter(
+								Enumerations.SearchParamType.COMPOSITE,
+								"SearchParameter/any-type",
+								"any-type",
+								"Observation")) // composite SP
+						));
 	}
 }

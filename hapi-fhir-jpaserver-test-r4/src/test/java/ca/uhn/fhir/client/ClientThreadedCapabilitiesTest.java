@@ -49,13 +49,34 @@ public class ClientThreadedCapabilitiesTest {
 
 	private static final FhirContext fhirContext = FhirContext.forR4();
 	private static final IClientInterceptor myCountingMetaClientInterceptor = new CountingMetaClientInterceptor();
-	private static final Collection<String> lastNames = Lists.newArrayList("Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-		"Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee");
+	private static final Collection<String> lastNames = Lists.newArrayList(
+			"Johnson",
+			"Williams",
+			"Brown",
+			"Jones",
+			"Garcia",
+			"Miller",
+			"Davis",
+			"Rodriguez",
+			"Martinez",
+			"Hernandez",
+			"Lopez",
+			"Gonzalez",
+			"Wilson",
+			"Anderson",
+			"Thomas",
+			"Taylor",
+			"Moore",
+			"Jackson",
+			"Martin",
+			"Lee");
+
 	@RegisterExtension
 	public static RestfulServerExtension ourServer = new RestfulServerExtension(fhirContext)
-		.registerProvider(new TestPatientResourceProvider())
-		.withValidationMode(ServerValidationModeEnum.ONCE)
-		.registerInterceptor(new SearchPreferHandlingInterceptor());
+			.registerProvider(new TestPatientResourceProvider())
+			.withValidationMode(ServerValidationModeEnum.ONCE)
+			.registerInterceptor(new SearchPreferHandlingInterceptor());
+
 	private IGenericClient myClient;
 
 	@BeforeEach
@@ -63,7 +84,6 @@ public class ClientThreadedCapabilitiesTest {
 		myClient = ourServer.getFhirClient();
 		myClient.registerInterceptor(myCountingMetaClientInterceptor);
 	}
-
 
 	@Test
 	public void capabilityRequestSentOnlyOncePerClient() {
@@ -77,8 +97,8 @@ public class ClientThreadedCapabilitiesTest {
 		});
 
 		Collection<CompletableFuture<Object>> futures = lastNames.stream()
-			.map(last -> CompletableFuture.supplyAsync(() -> searchPatient(last), executor)).collect(toList());
-
+				.map(last -> CompletableFuture.supplyAsync(() -> searchPatient(last), executor))
+				.collect(toList());
 
 		final StopWatch sw = new StopWatch();
 		futures.forEach(CompletableFuture::join);
@@ -88,15 +108,13 @@ public class ClientThreadedCapabilitiesTest {
 		assertEquals(1, metaClientRequestCount);
 	}
 
-
 	private Object searchPatient(String last) {
 		return myClient.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.where(Patient.FAMILY.matches().value(last))
-			.execute();
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.where(Patient.FAMILY.matches().value(last))
+				.execute();
 	}
-
 
 	private static class CountingMetaClientInterceptor implements IClientInterceptor {
 		AtomicInteger counter = new AtomicInteger();
@@ -107,7 +125,7 @@ public class ClientThreadedCapabilitiesTest {
 
 		@Override
 		public void interceptRequest(IHttpRequest theRequest) {
-//			ourLog.info("Request: {}", theRequest.getUri());
+			//			ourLog.info("Request: {}", theRequest.getUri());
 			if (theRequest.getUri().endsWith("/metadata")) {
 				counter.getAndIncrement();
 			} else {
@@ -119,8 +137,7 @@ public class ClientThreadedCapabilitiesTest {
 		}
 
 		@Override
-		public void interceptResponse(IHttpResponse theResponse) {
-		}
+		public void interceptResponse(IHttpResponse theResponse) {}
 	}
 
 	public static class TestPatientResourceProvider implements IResourceProvider {
@@ -141,8 +158,5 @@ public class ClientThreadedCapabilitiesTest {
 			patient.setActive(true);
 			return patient;
 		}
-
 	}
-
-
 }

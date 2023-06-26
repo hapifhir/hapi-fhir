@@ -48,7 +48,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
 	@AfterEach
@@ -56,7 +57,6 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		myServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
 	}
-
 
 	@Override
 	@BeforeEach
@@ -67,7 +67,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourValidatingInterceptor = new RequestValidatingInterceptor();
 			ourValidatingInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
 
-			Collection<IValidatorModule> validators = myAppCtx.getBeansOfType(IValidatorModule.class).values();
+			Collection<IValidatorModule> validators =
+					myAppCtx.getBeansOfType(IValidatorModule.class).values();
 			for (IValidatorModule next : validators) {
 				ourValidatingInterceptor.addValidatorModule(next);
 			}
@@ -118,7 +119,9 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of the type string"));
+			assertThat(
+					myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()),
+					containsString("Answer value must be of the type string"));
 		}
 	}
 
@@ -131,34 +134,52 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setId("xl-54127-6-hapi");
 		questionnaire.setUrl(questionnaireCanonicalUrl);
-		questionnaire.addIdentifier(new Identifier().setSystem("http://loinc.org").setValue("54127-6"));
+		questionnaire.addIdentifier(
+				new Identifier().setSystem("http://loinc.org").setValue("54127-6"));
 		questionnaire.setName("US Surgeon General family health portrait");
 		questionnaire.setTitle(questionnaire.getName());
 		questionnaire.setStatus(Enumerations.PublicationStatus.DRAFT);
 		questionnaire.addSubjectType("Patient").addSubjectType("Person");
 		questionnaire.addCode(new Coding("http://loinc.org", "54127-6", questionnaire.getName()));
-		questionnaire.addItem().setLinkId("/54126-8")
-			.setType(QuestionnaireItemType.GROUP)
-			.setRequired(false)
-			.setText("My health history")
-			.addCode(new Coding("http://loinc.org", "54126-8", "My health history"));
-		IIdType qIdType = myQuestionnaireDao.create(questionnaire, mySrd).getId().toUnqualifiedVersionless();
+		questionnaire
+				.addItem()
+				.setLinkId("/54126-8")
+				.setType(QuestionnaireItemType.GROUP)
+				.setRequired(false)
+				.setText("My health history")
+				.addCode(new Coding("http://loinc.org", "54126-8", "My health history"));
+		IIdType qIdType =
+				myQuestionnaireDao.create(questionnaire, mySrd).getId().toUnqualifiedVersionless();
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
 		questionnaireResponse.setId("xl-54127-6-hapi-response");
 		questionnaireResponse.setQuestionnaire(questionnaireCanonicalUrl);
 		questionnaireResponse.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		questionnaireResponse.addItem().setLinkId("/54126-8")
-			.setText("My health history")
-			.addItem().setLinkId("/54126-8/54125-0").setText("Name").addAnswer().setValue(new StringType("TAMBRA AGARWAL"))
-			.addItem().setLinkId("/54126-8/21112-8").setText("Birth Date").addAnswer().setValue(new DateType("1994-01-01"));
-		IIdType qrIdType = myQuestionnaireResponseDao.create(questionnaireResponse, mySrd).getId().toUnqualifiedVersionless();
+		questionnaireResponse
+				.addItem()
+				.setLinkId("/54126-8")
+				.setText("My health history")
+				.addItem()
+				.setLinkId("/54126-8/54125-0")
+				.setText("Name")
+				.addAnswer()
+				.setValue(new StringType("TAMBRA AGARWAL"))
+				.addItem()
+				.setLinkId("/54126-8/21112-8")
+				.setText("Birth Date")
+				.addAnswer()
+				.setValue(new DateType("1994-01-01"));
+		IIdType qrIdType = myQuestionnaireResponseDao
+				.create(questionnaireResponse, mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
 
 		// Search
 		Bundle results = myClient.search()
-			.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()  + "&_include=QuestionnaireResponse:questionnaire")
-			.returnBundle(Bundle.class)
-			.execute();
+				.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()
+						+ "&_include=QuestionnaireResponse:questionnaire")
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(results.getEntry().size(), is(equalTo(2)));
 
 		List<String> expectedIds = new ArrayList<>();
@@ -166,70 +187,73 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		expectedIds.add(qIdType.getValue());
 
 		List<String> actualIds = results.getEntry().stream()
-			.map(Bundle.BundleEntryComponent::getResource)
-			.map(resource -> resource.getIdElement().toUnqualifiedVersionless().toString())
-			.collect(Collectors.toList());
+				.map(Bundle.BundleEntryComponent::getResource)
+				.map(resource ->
+						resource.getIdElement().toUnqualifiedVersionless().toString())
+				.collect(Collectors.toList());
 		assertEquals(expectedIds, actualIds);
 	}
 
 	@Test
 	public void testSaveQuestionnaire() throws Exception {
-		String input = "<QuestionnaireResponse xmlns=\"http://hl7.org/fhir\">\n" +
-			"    <status value=\"completed\"/>\n" +
-			"    <authored value=\"2016-05-03T13:05:20-04:00\"/>\n" +
-			"    <item>\n" +
-			"        <linkId value=\"breast-feeding-intention\"/>\n" +
-			"        <text value=\"Breast Feeding Intention:\"/>\n" +
-			"        <answer>\n" +
-			"            <valueCoding>\n" +
-			"                <system value=\"http://example.org/codesystem-breastfeeding-intention\"/>\n" +
-			"                <code value=\"true\"/>\n" +
-			"                <display value=\"Mother wants to provide formula exclusively\"/>\n" +
-			"            </valueCoding>\n" +
-			"        </answer>\n" +
-			"    </item>\n" +
-			"    <item>\n" +
-			"        <linkId value=\"breast-feeding-education\"/>\n" +
-			"        <text value=\"Answer if not exclusive BM:\"/>\n" +
-			"        <answer>\n" +
-			"            <valueCoding>\n" +
-			"                <system value=\"http://example.org/codesystem-breastfeeding-education\"/>\n" +
-			"                <code value=\"true\"/>\n" +
-			"                <display value=\"Mother not given comprehensive education per protocol\"/>\n" +
-			"            </valueCoding>\n" +
-			"        </answer>\n" +
-			"    </item>\n" +
-			"    <item>\n" +
-			"        <linkId value=\"breast-feeding-exclusion\"/>\n" +
-			"        <text value=\"Exclusion Criteria:\"/>\n" +
-			"        <answer>\n" +
-			"            <valueCoding>\n" +
-			"                <system value=\"http://example.org/codesystem-breastfeeding-exclusion\"/>\n" +
-			"                <code value=\"true\"/>\n" +
-			"                <display\n" +
-			"                    value=\"Maternal use of drugs of abuse, antimetabolites, chemotherapeutic agents, or radioisotopes\"\n" +
-			"                />\n" +
-			"            </valueCoding>\n" +
-			"        </answer>\n" +
-			"    </item>\n" +
-			"</QuestionnaireResponse>";
+		String input = "<QuestionnaireResponse xmlns=\"http://hl7.org/fhir\">\n" + "    <status value=\"completed\"/>\n"
+				+ "    <authored value=\"2016-05-03T13:05:20-04:00\"/>\n"
+				+ "    <item>\n"
+				+ "        <linkId value=\"breast-feeding-intention\"/>\n"
+				+ "        <text value=\"Breast Feeding Intention:\"/>\n"
+				+ "        <answer>\n"
+				+ "            <valueCoding>\n"
+				+ "                <system value=\"http://example.org/codesystem-breastfeeding-intention\"/>\n"
+				+ "                <code value=\"true\"/>\n"
+				+ "                <display value=\"Mother wants to provide formula exclusively\"/>\n"
+				+ "            </valueCoding>\n"
+				+ "        </answer>\n"
+				+ "    </item>\n"
+				+ "    <item>\n"
+				+ "        <linkId value=\"breast-feeding-education\"/>\n"
+				+ "        <text value=\"Answer if not exclusive BM:\"/>\n"
+				+ "        <answer>\n"
+				+ "            <valueCoding>\n"
+				+ "                <system value=\"http://example.org/codesystem-breastfeeding-education\"/>\n"
+				+ "                <code value=\"true\"/>\n"
+				+ "                <display value=\"Mother not given comprehensive education per protocol\"/>\n"
+				+ "            </valueCoding>\n"
+				+ "        </answer>\n"
+				+ "    </item>\n"
+				+ "    <item>\n"
+				+ "        <linkId value=\"breast-feeding-exclusion\"/>\n"
+				+ "        <text value=\"Exclusion Criteria:\"/>\n"
+				+ "        <answer>\n"
+				+ "            <valueCoding>\n"
+				+ "                <system value=\"http://example.org/codesystem-breastfeeding-exclusion\"/>\n"
+				+ "                <code value=\"true\"/>\n"
+				+ "                <display\n"
+				+ "                    value=\"Maternal use of drugs of abuse, antimetabolites, chemotherapeutic agents, or radioisotopes\"\n"
+				+ "                />\n"
+				+ "            </valueCoding>\n"
+				+ "        </answer>\n"
+				+ "    </item>\n"
+				+ "</QuestionnaireResponse>";
 
 		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse");
-		post.setEntity(new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
+		post.setEntity(
+				new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id2;
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC)
+					.getValue();
 			assertThat(newIdString, startsWith(myServerBase + "/QuestionnaireResponse/"));
 			id2 = new IdType(newIdString);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
 
-		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
+		HttpGet get =
+				new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
 		response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -238,8 +262,6 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
-
-
 	}
 
 	@Test
@@ -254,9 +276,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
-
 	}
-
 
 	/**
 	 * From a Skype message from Brian Postlethwaite
@@ -264,7 +284,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
+		String input =
+				"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
 		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -275,7 +296,6 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
-
 	}
 
 	/**
@@ -284,7 +304,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	@Test
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
-		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
+		String input =
+				"{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
 		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -296,8 +317,5 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
-
 	}
-
-
 }

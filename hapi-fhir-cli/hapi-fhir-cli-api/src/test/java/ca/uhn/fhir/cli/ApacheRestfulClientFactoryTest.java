@@ -44,12 +44,11 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
 		HttpClient unauthenticatedClient = clientFactory.getNativeHttpClient();
 
-		try{
+		try {
 			HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
 			unauthenticatedClient.execute(request);
 			fail();
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			assertEquals(SSLHandshakeException.class, e.getClass());
 		}
 	}
@@ -61,7 +60,10 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		String base = fhirVersionParams.getBase();
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
-		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
+		IBaseResource bundle = context.newRestfulGenericClient(base)
+				.search()
+				.forResource("Patient")
+				.execute();
 		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 
@@ -73,10 +75,16 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
 		try {
-			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
+			context.newRestfulGenericClient(secureBase)
+					.search()
+					.forResource("Patient")
+					.execute();
 			fail();
 		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
+			assertTrue(
+					e.getMessage()
+							.contains(
+									"HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
 			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
 	}

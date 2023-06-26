@@ -53,11 +53,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,13 +65,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.theInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Specification tests for batch2 storage and event system.
@@ -116,7 +114,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
 			assertNotNull(id);
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
 
 			WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 			assertEquals(36, chunk.getInstanceId().length());
@@ -125,7 +124,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 			assertEquals(CHUNK_DATA, chunk.getData());
 
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, freshFetchWorkChunk(id).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.IN_PROGRESS, freshFetchWorkChunk(id).getStatus()));
 		}
 
 		/**
@@ -142,7 +142,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			void setUp() {
 				JobInstance jobInstance = createInstance();
 				myInstanceId = mySvc.storeNewInstance(jobInstance);
-
 			}
 
 			private String createChunk() {
@@ -227,6 +226,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			@Nested
 			class ErrorActions {
 				public static final String FIRST_ERROR_MESSAGE = ERROR_MESSAGE_A;
+
 				@BeforeEach
 				void setUp() {
 					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
@@ -260,10 +260,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					// setup - the consumer is re-trying, and marks it IN_PROGRESS
 					mySvc.onWorkChunkDequeue(myChunkId);
 
-
 					// when another error happens
 					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
-
 
 					// verify the state, new message, and error count
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -311,8 +309,14 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 					assertEquals(4, chunk.getErrorCount());
-					assertThat("Error message contains last error", chunk.getErrorMessage(), containsString(ERROR_MESSAGE_C));
-					assertThat("Error message contains error count and complaint", chunk.getErrorMessage(), containsString("many errors: 4"));
+					assertThat(
+							"Error message contains last error",
+							chunk.getErrorMessage(),
+							containsString(ERROR_MESSAGE_C));
+					assertThat(
+							"Error message contains error count and complaint",
+							chunk.getErrorMessage(),
+							containsString("many errors: 4"));
 				}
 			}
 		}
@@ -324,7 +328,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA);
 			assertNotNull(chunkId);
 
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
 
 			sleepUntilTimeChanges();
 
@@ -336,7 +341,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertNull(chunk.getEndTime());
 			assertNull(chunk.getRecordsProcessed());
 			assertNotNull(chunk.getData());
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, freshFetchWorkChunk(chunkId).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.IN_PROGRESS,
+					freshFetchWorkChunk(chunkId).getStatus()));
 
 			sleepUntilTimeChanges();
 
@@ -353,7 +360,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		}
 
-
 		@Test
 		public void testMarkChunkAsCompleted_Error() {
 			JobInstance instance = createInstance();
@@ -361,7 +367,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
 			assertNotNull(chunkId);
 
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
 
 			sleepUntilTimeChanges();
 
@@ -381,7 +388,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				assertNotNull(entity.getStartTime());
 				assertNotNull(entity.getEndTime());
 				assertEquals(1, entity.getErrorCount());
-				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(
+						entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 			});
 
@@ -397,7 +405,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				assertNotNull(entity.getStartTime());
 				assertNotNull(entity.getEndTime());
 				assertEquals(2, entity.getErrorCount());
-				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(
+						entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 			});
 
@@ -413,7 +422,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
 			assertNotNull(chunkId);
 
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
+			runInTransaction(() -> assertEquals(
+					WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
 
 			sleepUntilTimeChanges();
 
@@ -431,7 +441,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				assertNotNull(entity.getCreateTime());
 				assertNotNull(entity.getStartTime());
 				assertNotNull(entity.getEndTime());
-				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(
+						entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 			});
 		}
@@ -442,19 +453,13 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			String instanceId = mySvc.storeNewInstance(instance);
 			ArrayList<String> chunkIds = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
-				WorkChunkCreateEvent chunk = new WorkChunkCreateEvent(
-					"defId",
-					1,
-					"stepId",
-					instanceId,
-					0,
-					"{}"
-				);
+				WorkChunkCreateEvent chunk = new WorkChunkCreateEvent("defId", 1, "stepId", instanceId, 0, "{}");
 				String id = mySvc.onWorkChunkCreate(chunk);
 				chunkIds.add(id);
 			}
 
-			runInTransaction(() -> mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null));
+			runInTransaction(() -> mySvc.markWorkChunksWithStatusAndWipeData(
+					instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null));
 
 			Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
 
@@ -472,16 +477,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 	 */
 	@Nested
 	class InstanceStateTransitions {
-		
+
 		@Test
 		void createInstance_createsInQueuedWithChunk() {
-		    // given
+			// given
 			JobDefinition<?> jd = withJobDefinition();
 
-		    // when
+			// when
 			IJobPersistence.CreateResult createResult =
-			newTxTemplate().execute(status->
-				mySvc.onCreateWithFirstChunk(jd, "{}"));
+					newTxTemplate().execute(status -> mySvc.onCreateWithFirstChunk(jd, "{}"));
 
 			// then
 			ourLog.info("job and chunk created {}", createResult);
@@ -500,21 +504,19 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 		@Test
 		void testCreateInstance_firstChunkDequeued_movesToInProgress() {
-		    // given
+			// given
 			JobDefinition<?> jd = withJobDefinition();
-			IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
-					mySvc.onCreateWithFirstChunk(jd, "{}"));
+			IJobPersistence.CreateResult createResult =
+					newTxTemplate().execute(status -> mySvc.onCreateWithFirstChunk(jd, "{}"));
 			assertNotNull(createResult);
 
 			// when
 			newTxTemplate().execute(status -> mySvc.onChunkDequeued(createResult.jobInstanceId));
 
-		    // then
+			// then
 			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
 			assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
 		}
-
-		
 
 		@ParameterizedTest
 		@EnumSource(StatusEnum.class)
@@ -532,11 +534,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
 			jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition());
 
-
 			// when
-			runInTransaction(()-> new JobInstanceProcessor(mySvc, null, instanceId1, new JobChunkProgressAccumulator(), null, jobDefinitionRegistry)
-				.process());
-
+			runInTransaction(() -> new JobInstanceProcessor(
+							mySvc, null, instanceId1, new JobChunkProgressAccumulator(), null, jobDefinitionRegistry)
+					.process());
 
 			// then
 			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();
@@ -554,10 +555,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 	@Test
 	void testDeleteChunksAndMarkInstanceAsChunksPurged_doesWhatItSays() {
-	    // given
+		// given
 		JobDefinition<?> jd = withJobDefinition();
-		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
-				mySvc.onCreateWithFirstChunk(jd, "{}"));
+		IJobPersistence.CreateResult createResult =
+				newTxTemplate().execute(status -> mySvc.onCreateWithFirstChunk(jd, "{}"));
 		String instanceId = createResult.jobInstanceId;
 		for (int i = 0; i < 10; i++) {
 			storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
@@ -569,24 +570,24 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		// when
 		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
 
-	    // then
+		// then
 		readback = freshFetchJobInstance(instanceId);
 		assertTrue(readback.isWorkChunksPurged(), "purged set");
 		assertFalse(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext(), "chunks gone");
 	}
-	
+
 	@Test
 	void testInstanceUpdate_modifierApplied() {
-	    // given
+		// given
 		String instanceId = mySvc.storeNewInstance(createInstance());
 
 		// when
-		mySvc.updateInstance(instanceId, instance ->{
+		mySvc.updateInstance(instanceId, instance -> {
 			instance.setErrorCount(42);
 			return true;
 		});
 
-	    // then
+		// then
 		JobInstance jobInstance = freshFetchJobInstance(instanceId);
 		assertEquals(42, jobInstance.getErrorCount());
 	}
@@ -600,7 +601,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		String instanceId = mySvc.storeNewInstance(instance1);
 
 		// when
-		mySvc.updateInstance(instanceId, instance ->{
+		mySvc.updateInstance(instanceId, instance -> {
 			instance.setFastTracking(false);
 			return false;
 		});
@@ -612,16 +613,24 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 	private JobDefinition<TestJobParameters> withJobDefinition() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_DEFINITION_ID)
-			.setJobDefinitionVersion(JOB_DEF_VER)
-			.setJobDescription("A job description")
-			.setParametersType(TestJobParameters.class)
-			.addFirstStep(TARGET_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addIntermediateStep("2nd-step-id", "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addLastStep("last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.build();
+				.setJobDefinitionId(JOB_DEFINITION_ID)
+				.setJobDefinitionVersion(JOB_DEF_VER)
+				.setJobDescription("A job description")
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep(
+						TARGET_STEP_ID,
+						"the first step",
+						TestJobStep2InputType.class,
+						(theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+				.addIntermediateStep(
+						"2nd-step-id",
+						"the second step",
+						TestJobStep3InputType.class,
+						(theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+				.addLastStep(
+						"last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+				.build();
 	}
-
 
 	@Nonnull
 	private JobInstance createInstance() {
@@ -634,14 +643,21 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		return instance;
 	}
 
-	private String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
+	private String storeWorkChunk(
+			String theJobDefinitionId,
+			String theTargetStepId,
+			String theInstanceId,
+			int theSequence,
+			String theSerializedData) {
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
+				theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
-
 	protected abstract PlatformTransactionManager getTxManager();
+
 	protected abstract WorkChunk freshFetchWorkChunk(String theChunkId);
+
 	protected JobInstance freshFetchJobInstance(String theInstanceId) {
 		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
 	}
@@ -672,7 +688,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		});
 	}
 
-
 	/**
 	 * Sleep until at least 1 ms has elapsed
 	 */
@@ -680,7 +695,4 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		StopWatch sw = new StopWatch();
 		await().until(() -> sw.getMillis() > 0);
 	}
-
-
-
 }

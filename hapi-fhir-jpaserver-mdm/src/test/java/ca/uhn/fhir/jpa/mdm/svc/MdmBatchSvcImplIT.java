@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +30,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	public void before() {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
 	}
+
 	@Override
 	@AfterEach
 	public void after() throws IOException {
@@ -42,23 +43,24 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	@Test
 	public void testMdmBatchRunWorksOverMultipleTargetTypes() throws InterruptedException {
 
-		for (int i =0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createPatient(buildJanePatient());
 		}
 
-		for(int i = 0; i< 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createPractitioner(buildPractitionerWithNameAndId("test", "id"));
 		}
 
 		createDummyOrganization();
-		for(int i = 0; i< 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createMedication(buildMedicationWithDummyOrganization());
 		}
 
 		assertLinkCount(0);
 
-		//SUT
-		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.forAllPartitions()));
+		// SUT
+		afterMdmLatch.runWithExpectedCount(
+				30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.forAllPartitions()));
 
 		assertLinkCount(30);
 	}
@@ -66,15 +68,18 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	@Test
 	public void testMdmBatchOnPatientType() throws Exception {
 
-		for (int i =0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createPatient(buildPatientWithNameAndId("test", "id"));
 		}
 
 		assertLinkCount(0);
 
-		//SUT
+		// SUT
 		myMdmSubmitSvc.setBufferSize(5);
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", null, SystemRequestDetails.newSystemRequestAllPartitions()));
+		afterMdmLatch.runWithExpectedCount(
+				10,
+				() -> myMdmSubmitSvc.submitSourceResourceTypeToMdm(
+						"Patient", null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -84,14 +89,16 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 
 		createDummyOrganization();
 
-
-		for(int i = 0; i< 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createMedication(buildMedicationWithDummyOrganization());
 		}
 		assertLinkCount(0);
 
-		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Medication", null, SystemRequestDetails.newSystemRequestAllPartitions()));
+		// SUT
+		afterMdmLatch.runWithExpectedCount(
+				10,
+				() -> myMdmSubmitSvc.submitSourceResourceTypeToMdm(
+						"Medication", null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -99,14 +106,17 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 	@Test
 	public void testMdmBatchOnPractitionerType() throws Exception {
 
-		for (int i =0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createPractitioner(buildPractitionerWithNameAndId("test", "id"));
 		}
 
 		assertLinkCount(0);
 
-		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.newSystemRequestAllPartitions()));
+		// SUT
+		afterMdmLatch.runWithExpectedCount(
+				10,
+				() -> myMdmSubmitSvc.submitAllSourceTypesToMdm(
+						null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -118,8 +128,11 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 
 		assertLinkCount(0);
 
-		//SUT
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", "Patient?name=gary", SystemRequestDetails.newSystemRequestAllPartitions()));
+		// SUT
+		afterMdmLatch.runWithExpectedCount(
+				1,
+				() -> myMdmSubmitSvc.submitSourceResourceTypeToMdm(
+						"Patient", "Patient?name=gary", SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(1);
 	}

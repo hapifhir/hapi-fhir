@@ -11,9 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = {
-	SubscriptionRegistrySharedTest.SpringConfig.class
-})
+@ContextConfiguration(classes = {SubscriptionRegistrySharedTest.SpringConfig.class})
 public class SubscriptionRegistrySharedTest extends BaseSubscriptionRegistryTest {
 
 	private static final String OTHER_ID = "OTHER_ID";

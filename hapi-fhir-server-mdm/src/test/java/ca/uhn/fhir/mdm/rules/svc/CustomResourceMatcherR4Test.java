@@ -33,10 +33,14 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
+				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier"))
+				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier"))
+				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier"))
+				.thenReturn(null);
 	}
 
 	@Test
@@ -69,10 +73,12 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 
 	@Test
 	public void testExactNameFirstAndLast() {
-		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, true));
+		MdmResourceMatcherSvc nameAnyOrderMatcher =
+				buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, true));
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
-		assertMatchResult(MdmMatchResultEnum.MATCH, 1L, 1.0, false, false, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
+		assertMatchResult(
+				MdmMatchResultEnum.MATCH, 1L, 1.0, false, false, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertMatch(MdmMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
 		assertMatch(MdmMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJOHN));
 		assertMatch(MdmMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHENRY));
@@ -84,7 +90,8 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 
 	@Test
 	public void testNormalizedNameFirstAndLast() {
-		MdmResourceMatcherSvc nameAnyOrderMatcher = buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, false));
+		MdmResourceMatcherSvc nameAnyOrderMatcher =
+				buildMatcher(buildNameRules(MatchTypeEnum.NAME_FIRST_AND_LAST, false));
 
 		assertMatch(MdmMatchResultEnum.MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourJohnHenry));
 		assertMatch(MdmMatchResultEnum.NO_MATCH, nameAnyOrderMatcher.match(ourJohnHenry, ourHenryJohn));
@@ -97,12 +104,13 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	}
 
 	private MdmRulesJson buildNameRules(MatchTypeEnum theAlgorithm, boolean theExact) {
-		MdmMatcherJson matcherJson = new MdmMatcherJson().setAlgorithm(theAlgorithm).setExact(theExact);
+		MdmMatcherJson matcherJson =
+				new MdmMatcherJson().setAlgorithm(theAlgorithm).setExact(theExact);
 		MdmFieldMatchJson nameAnyOrderFieldMatch = new MdmFieldMatchJson()
-			.setName(FIELD_EXACT_MATCH_NAME)
-			.setResourceType("Patient")
-			.setResourcePath("name")
-			.setMatcher(matcherJson);
+				.setName(FIELD_EXACT_MATCH_NAME)
+				.setResourceType("Patient")
+				.setResourcePath("name")
+				.setMatcher(matcherJson);
 
 		MdmRulesJson retval = new MdmRulesJson();
 		retval.addMatchField(nameAnyOrderFieldMatch);

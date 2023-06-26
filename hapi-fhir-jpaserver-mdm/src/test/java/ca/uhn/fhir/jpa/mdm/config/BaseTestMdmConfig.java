@@ -29,10 +29,10 @@ public abstract class BaseTestMdmConfig {
 		Resource resource = resourceLoader.getResource("mdm/mdm-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		return new MdmSettings(theMdmRuleValidator)
-			.setEnabled(false)
-			.setScriptText(json)
-			.setPreventEidUpdates(myPreventEidUpdates)
-			.setPreventMultipleEids(myPreventMultipleEids);
+				.setEnabled(false)
+				.setScriptText(json)
+				.setPreventEidUpdates(myPreventEidUpdates)
+				.setPreventMultipleEids(myPreventMultipleEids);
 	}
 
 	@Bean

@@ -28,7 +28,8 @@ import org.springframework.messaging.MessagingException;
 import java.util.concurrent.CountDownLatch;
 
 public class StoppableSubscriptionDeliveringRestHookSubscriber extends SubscriptionDeliveringRestHookSubscriber {
-	private static final Logger ourLog = LoggerFactory.getLogger(StoppableSubscriptionDeliveringRestHookSubscriber.class);
+	private static final Logger ourLog =
+			LoggerFactory.getLogger(StoppableSubscriptionDeliveringRestHookSubscriber.class);
 
 	private boolean myPauseEveryMessage = false;
 	private CountDownLatch myCountDownLatch;

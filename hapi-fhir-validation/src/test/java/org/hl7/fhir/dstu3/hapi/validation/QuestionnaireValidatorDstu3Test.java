@@ -35,13 +35,13 @@ import static org.mockito.Mockito.when;
 public class QuestionnaireValidatorDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(QuestionnaireValidatorDstu3Test.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
+	private static DefaultProfileValidationSupport myDefaultValidationSupport =
+			new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 
 	@BeforeEach
 	public void before() {
-
 
 		IValidationSupport myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
@@ -50,7 +50,8 @@ public class QuestionnaireValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+				myDefaultValidationSupport, myValSupport, new InMemoryTerminologyServerValidationSupport(ourCtx));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -70,19 +71,22 @@ public class QuestionnaireValidatorDstu3Test {
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = new Questionnaire();
 			q.setStatus(PublicationStatus.ACTIVE)
-				.addItem()
-				.setLinkId("link0")
-				.setType(QuestionnaireItemType.STRING)
-				.addExtension()
-				.setUrl(extensionDomainToTest)
-				.setValue(new CodeType("text-box"));
+					.addItem()
+					.setLinkId("link0")
+					.setType(QuestionnaireItemType.STRING)
+					.addExtension()
+					.setUrl(extensionDomainToTest)
+					.setValue(new CodeType("text-box"));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().stream().filter(t->t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList()), Matchers.empty());
+			assertThat(
+					errors.getMessages().stream()
+							.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+							.collect(Collectors.toList()),
+					Matchers.empty());
 		}
-
 	}
 
 	@Test
@@ -93,12 +97,13 @@ public class QuestionnaireValidatorDstu3Test {
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = new Questionnaire();
 			q.setStatus(PublicationStatus.ACTIVE)
-				.addItem()
-				.setLinkId("link0")
-				.setType(QuestionnaireItemType.STRING)
-				.addExtension()
-				.setUrl(extensionDomainToTest)
-				.setValue(new CodeableConcept().addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
+					.addItem()
+					.setLinkId("link0")
+					.setType(QuestionnaireItemType.STRING)
+					.addExtension()
+					.setUrl(extensionDomainToTest)
+					.setValue(new CodeableConcept()
+							.addCoding(new Coding("http://hl7.org/fhir/questionnaire-item-control", "text-box", null)));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
@@ -108,17 +113,20 @@ public class QuestionnaireValidatorDstu3Test {
 		for (String extensionDomainToTest : extensionDomainsToTest) {
 			Questionnaire q = new Questionnaire();
 			q.setStatus(PublicationStatus.ACTIVE)
-				.addItem()
-				.setLinkId("link0")
-				.setType(QuestionnaireItemType.STRING)
-				.addExtension()
-				.setUrl(extensionDomainToTest)
-				.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
+					.addItem()
+					.setLinkId("link0")
+					.setType(QuestionnaireItemType.STRING)
+					.addExtension()
+					.setUrl(extensionDomainToTest)
+					.setValue(new CodeableConcept().addCoding(new Coding(null, "text-box", null)));
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().get(0).getMessage(), containsString("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)"));
+			assertThat(
+					errors.getMessages().get(0).getMessage(),
+					containsString(
+							"and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)"));
 		}
 	}
 
@@ -127,12 +135,12 @@ public class QuestionnaireValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		String extensionUrl = "http://my.own.domain/StructureDefinition/";
 		q.setStatus(PublicationStatus.ACTIVE)
-			.addItem()
+				.addItem()
 				.setLinkId("link0")
 				.setType(QuestionnaireItemType.STRING)
 				.addExtension()
-					.setUrl(extensionUrl + "questionnaire-itemControl")
-					.setValue(new CodeType("text-box"));
+				.setUrl(extensionUrl + "questionnaire-itemControl")
+				.setValue(new CodeType("text-box"));
 
 		ValidationResult errors = myVal.validateWithResult(q);
 

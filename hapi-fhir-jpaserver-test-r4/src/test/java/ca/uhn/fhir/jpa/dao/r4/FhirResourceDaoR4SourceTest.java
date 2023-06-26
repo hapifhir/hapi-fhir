@@ -38,7 +38,8 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
-		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myStorageSettings.setStoreMetaSourceInformation(
+				JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
 
 	@Test
@@ -78,11 +79,10 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		params.add(Constants.PARAM_SOURCE, new TokenParam("urn:source:0#a_request_id"));
 		result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
-
 	}
 
 	@Test
-	public void testSearchSource_whenSameSourceForMultipleResourceTypes_willMatchSearchResourceTypeOnly(){
+	public void testSearchSource_whenSameSourceForMultipleResourceTypes_willMatchSearchResourceTypeOnly() {
 		String sourceUrn = "urn:source:0";
 		String requestId = "a_request_id";
 
@@ -103,7 +103,6 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IBundleProvider result = myPatientDao.search(params);
 
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(ptId.getValue()));
-
 	}
 
 	@Test
@@ -129,12 +128,11 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		// Search
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(Constants.PARAM_SOURCE, new TokenOrListParam()
-			.addOr(new TokenParam("urn:source:0"))
-			.addOr(new TokenParam("urn:source:1")));
+		params.add(
+				Constants.PARAM_SOURCE,
+				new TokenOrListParam().addOr(new TokenParam("urn:source:0")).addOr(new TokenParam("urn:source:1")));
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue(), pt1id.getValue()));
-
 	}
 
 	@Test
@@ -160,11 +158,11 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		// Search
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
-			.addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
+		params.add(
+				Constants.PARAM_SOURCE,
+				new TokenAndListParam().addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
-
 	}
 
 	@Test
@@ -180,11 +178,11 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		// Search
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
-			.addAnd(new TokenParam("urn:source:0"), new TokenParam("#" + requestId)));
+		params.add(
+				Constants.PARAM_SOURCE,
+				new TokenAndListParam().addAnd(new TokenParam("urn:source:0"), new TokenParam("#" + requestId)));
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
-
 	}
 
 	@Test
@@ -204,7 +202,6 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
 		assertEquals(null, pt0.getMeta().getSource());
-
 	}
 
 	@Test
@@ -234,10 +231,11 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
 
 		// Search with source param
-		 params = new SearchParameterMap();
+		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
-			.addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
+		params.add(
+				Constants.PARAM_SOURCE,
+				new TokenAndListParam().addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
@@ -267,13 +265,13 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.logSelectQueries();
 			assertEquals(0, result.size());
 		}
-
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern(
-			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource " + theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
-
+		assertThat(
+				e.getMessage(),
+				matchesPattern(
+						"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource "
+								+ theResourceType + "/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
 	}
-
 }

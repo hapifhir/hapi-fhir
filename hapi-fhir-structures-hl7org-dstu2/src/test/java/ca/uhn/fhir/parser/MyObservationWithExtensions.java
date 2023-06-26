@@ -12,10 +12,9 @@ import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-
-@ResourceDef(name="Patient")
+@ResourceDef(name = "Patient")
 public class MyObservationWithExtensions extends Patient {
-	
+
 	@Extension(url = "urn:patientext:att", definedLocally = false, isModifier = false)
 	@Child(name = "extAtt", order = 0)
 	private Attachment myExtAtt;
@@ -59,7 +58,7 @@ public class MyObservationWithExtensions extends Patient {
 
 	/**
 	 * Block class for child element: <b>Observation.referenceRange</b> (Provides guide for interpretation)
-	 * 
+	 *
 	 * <p>
 	 * <b>Definition:</b> Guidance on how to interpret the value by comparison to a normal or recommended range
 	 * </p>
@@ -100,7 +99,5 @@ public class MyObservationWithExtensions extends Patient {
 		public BackboneElement copy() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
-
 }

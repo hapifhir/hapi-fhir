@@ -21,8 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,8 +31,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 class MdmClearStepTest extends BaseMdmR4Test {
 	private static final String GOLDEN_ID = "Patient/GOLDEN-ID";
 	private static final String SOURCE_ID = "Patient/SOURCE-ID";
+
 	@Autowired
 	MdmClearStep myMdmClearStep;
+
 	@Autowired
 	MdmHelperR4 myMdmHelperR4;
 
@@ -77,7 +79,8 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	public void testWithReferenceToGoldenResource() {
 		Patient husband = new Patient();
 		husband.addLink().setOther(new Reference(myGoldenId));
-		String husbandId = myPatientDao.create(husband).getId().toUnqualifiedVersionless().getValue();
+		String husbandId =
+				myPatientDao.create(husband).getId().toUnqualifiedVersionless().getValue();
 
 		assertPatientCount(3);
 		assertLinkCount(1);
@@ -87,11 +90,10 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(
-				String.format("HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
-					myGoldenId,
-					husbandId
-				),
-				e.getMessage());
+					String.format(
+							"HAPI-0822: DELETE with _expunge=true failed.  Unable to delete %s because %s refers to it via the path Patient.link.other",
+							myGoldenId, husbandId),
+					e.getMessage());
 		}
 	}
 
@@ -112,29 +114,35 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = buildStepExecutionDetails(chunk);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails =
+				buildStepExecutionDetails(chunk);
 
-		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
+		myMdmClearStep.myHapiTransactionService.execute(
+				requestDetails,
+				transactionDetails,
+				myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
 	}
 
 	@Nonnull
-	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
+	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(
+			ResourceIdListWorkChunkJson chunk) {
 		String instanceId = UUID.randomUUID().toString();
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkid = UUID.randomUUID().toString();
 		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, jobInstance, chunkid);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails =
+				new StepExecutionDetails<>(parms, chunk, jobInstance, chunkid);
 		return stepExecutionDetails;
 	}
 
 	private MdmLink buildMdmLink(Long sourcePid, Long goldenPid) {
 		return new MdmLink()
-			.setSourcePid(sourcePid)
-			.setGoldenResourcePid(goldenPid)
-			.setLinkSource(MdmLinkSourceEnum.MANUAL)
-			.setMatchResult(MdmMatchResultEnum.MATCH)
-			.setVersion("1");
+				.setSourcePid(sourcePid)
+				.setGoldenResourcePid(goldenPid)
+				.setLinkSource(MdmLinkSourceEnum.MANUAL)
+				.setMatchResult(MdmMatchResultEnum.MATCH)
+				.setVersion("1");
 	}
 
 	private void assertPatientExists(String theSourceId) {
@@ -142,6 +150,8 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	private void assertPatientCount(int theExpectedCount) {
-		assertEquals(theExpectedCount, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(
+				theExpectedCount,
+				myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 	}
 }

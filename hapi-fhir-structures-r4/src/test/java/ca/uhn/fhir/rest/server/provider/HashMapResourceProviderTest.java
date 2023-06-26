@@ -45,15 +45,20 @@ import static org.mockito.Mockito.verify;
 public class HashMapResourceProviderTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
 	@Order(0)
 	private static final RestfulServerExtension ourRestServer = new RestfulServerExtension(ourCtx);
+
 	@RegisterExtension
 	@Order(1)
-	private static final HashMapResourceProviderExtension<Patient> myPatientResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Patient.class);
+	private static final HashMapResourceProviderExtension<Patient> myPatientResourceProvider =
+			new HashMapResourceProviderExtension<>(ourRestServer, Patient.class);
+
 	@RegisterExtension
 	@Order(2)
-	private static final HashMapResourceProviderExtension<Observation> myObservationResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Observation.class);
+	private static final HashMapResourceProviderExtension<Observation> myObservationResourceProvider =
+			new HashMapResourceProviderExtension<>(ourRestServer, Observation.class);
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderTest.class);
 
@@ -62,21 +67,32 @@ public class HashMapResourceProviderTest {
 
 	@Test
 	public void testCreateAndRead() {
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myAnonymousInterceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, myAnonymousInterceptor);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myAnonymousInterceptor);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, myAnonymousInterceptor);
 
 		// Create
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id.getVersionIdPart());
 
-		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), any());
+		verify(myAnonymousInterceptor, Mockito.times(1))
+				.invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), any());
 		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 
 		// Read
-		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id).execute();
+		p = (Patient) ourRestServer
+				.getFhirClient()
+				.read()
+				.resource("Patient")
+				.withId(id)
+				.execute();
 		assertTrue(p.getActive());
 
 		assertEquals(1, myPatientResourceProvider.getCountRead());
@@ -88,12 +104,18 @@ public class HashMapResourceProviderTest {
 		Patient p = new Patient();
 		p.setId("ABC");
 		p.setActive(true);
-		IIdType id = ourRestServer.getFhirClient().update().resource(p).execute().getId();
+		IIdType id =
+				ourRestServer.getFhirClient().update().resource(p).execute().getId();
 		assertEquals("ABC", id.getIdPart());
 		assertEquals("1", id.getVersionIdPart());
 
 		// Read
-		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id).execute();
+		p = (Patient) ourRestServer
+				.getFhirClient()
+				.read()
+				.resource("Patient")
+				.withId(id)
+				.execute();
 		assertTrue(p.getActive());
 	}
 
@@ -102,23 +124,43 @@ public class HashMapResourceProviderTest {
 		// Create
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId().toUnqualified();
+		IIdType id = ourRestServer
+				.getFhirClient()
+				.create()
+				.resource(p)
+				.execute()
+				.getId()
+				.toUnqualified();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id.getVersionIdPart());
 
 		assertEquals(0, myPatientResourceProvider.getCountDelete());
 
-		ourRestServer.getFhirClient().delete().resourceById(id.toUnqualifiedVersionless()).execute();
+		ourRestServer
+				.getFhirClient()
+				.delete()
+				.resourceById(id.toUnqualifiedVersionless())
+				.execute();
 		ourLog.info("About to execute");
 
 		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
 		// VRead original version
-		ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("1")).execute();
+		ourRestServer
+				.getFhirClient()
+				.read()
+				.resource("Patient")
+				.withId(id.withVersion("1"))
+				.execute();
 
 		// Vread gone version
 		try {
-			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("2")).execute();
+			ourRestServer
+					.getFhirClient()
+					.read()
+					.resource("Patient")
+					.withId(id.withVersion("2"))
+					.execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -126,25 +168,44 @@ public class HashMapResourceProviderTest {
 
 		// Read (non vread) gone version
 		try {
-			ourRestServer.getFhirClient().read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+			ourRestServer
+					.getFhirClient()
+					.read()
+					.resource("Patient")
+					.withId(id.toUnqualifiedVersionless())
+					.execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		// History should include deleted entry
-		Bundle history = ourRestServer.getFhirClient().history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		Bundle history = ourRestServer
+				.getFhirClient()
+				.history()
+				.onType(Patient.class)
+				.returnBundle(Bundle.class)
+				.execute();
 		ourLog.info("History:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(history));
-		assertEquals(id.withVersion("2").getValue(), history.getEntry().get(0).getRequest().getUrl());
-		assertEquals("DELETE", history.getEntry().get(0).getRequest().getMethod().toCode());
-		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(1).getRequest().getUrl());
+		assertEquals(
+				id.withVersion("2").getValue(),
+				history.getEntry().get(0).getRequest().getUrl());
+		assertEquals(
+				"DELETE", history.getEntry().get(0).getRequest().getMethod().toCode());
+		assertEquals(
+				id.withVersion("1").getValue(),
+				history.getEntry().get(1).getRequest().getUrl());
 		assertEquals("POST", history.getEntry().get(1).getRequest().getMethod().toCode());
 
 		// Search should not include deleted entry
-		Bundle search = ourRestServer.getFhirClient().search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle search = ourRestServer
+				.getFhirClient()
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
 		ourLog.info("Search:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(search));
 		assertEquals(0, search.getEntry().size());
-
 	}
 
 	@Test
@@ -152,14 +213,16 @@ public class HashMapResourceProviderTest {
 		// Create Res 1
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id1 = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id1 =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id1.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id1.getVersionIdPart());
 
 		// Create Res 2
 		p = new Patient();
 		p.setActive(true);
-		IIdType id2 = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id2 =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id2.getVersionIdPart());
 
@@ -171,24 +234,23 @@ public class HashMapResourceProviderTest {
 		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("2", id2.getVersionIdPart());
 
-		Bundle history = ourRestServer.getFhirClient()
-			.history()
-			.onInstance(id2.toUnqualifiedVersionless())
-			.andReturnBundle(Bundle.class)
-			.encodedJson()
-			.prettyPrint()
-			.execute();
+		Bundle history = ourRestServer
+				.getFhirClient()
+				.history()
+				.onInstance(id2.toUnqualifiedVersionless())
+				.andReturnBundle(Bundle.class)
+				.encodedJson()
+				.prettyPrint()
+				.execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(history));
-		List<String> ids = history
-			.getEntry()
-			.stream()
-			.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
-			.collect(Collectors.toList());
-		assertThat(ids, contains(
-			id2.toUnqualified().withVersion("2").getValue(),
-			id2.toUnqualified().withVersion("1").getValue()
-		));
-
+		List<String> ids = history.getEntry().stream()
+				.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
+				.collect(Collectors.toList());
+		assertThat(
+				ids,
+				contains(
+						id2.toUnqualified().withVersion("2").getValue(),
+						id2.toUnqualified().withVersion("1").getValue()));
 	}
 
 	@Test
@@ -196,14 +258,16 @@ public class HashMapResourceProviderTest {
 		// Create Res 1
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id1 = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id1 =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id1.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id1.getVersionIdPart());
 
 		// Create Res 2
 		p = new Patient();
 		p.setActive(true);
-		IIdType id2 = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id2 =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id2.getVersionIdPart());
 
@@ -215,23 +279,22 @@ public class HashMapResourceProviderTest {
 		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("2", id2.getVersionIdPart());
 
-		Bundle history = ourRestServer.getFhirClient()
-			.history()
-			.onType(Patient.class)
-			.andReturnBundle(Bundle.class)
-			.execute();
-		List<String> ids = history
-			.getEntry()
-			.stream()
-			.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
-			.collect(Collectors.toList());
+		Bundle history = ourRestServer
+				.getFhirClient()
+				.history()
+				.onType(Patient.class)
+				.andReturnBundle(Bundle.class)
+				.execute();
+		List<String> ids = history.getEntry().stream()
+				.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
+				.collect(Collectors.toList());
 		ourLog.info("Received IDs: {}", ids);
-		assertThat(ids, contains(
-			id2.toUnqualified().withVersion("2").getValue(),
-			id2.toUnqualified().withVersion("1").getValue(),
-			id1.toUnqualified().withVersion("1").getValue()
-		));
-
+		assertThat(
+				ids,
+				contains(
+						id2.toUnqualified().withVersion("2").getValue(),
+						id2.toUnqualified().withVersion("1").getValue(),
+						id1.toUnqualified().withVersion("1").getValue()));
 	}
 
 	@Test
@@ -241,17 +304,19 @@ public class HashMapResourceProviderTest {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
 			ourRestServer.getFhirClient().registerInterceptor(new LoggingInterceptor(true));
-			IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+			IIdType id =
+					ourRestServer.getFhirClient().create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());
 		}
 
 		// Search
-		Bundle resp = ourRestServer.getFhirClient()
-			.search()
-			.forResource("Patient")
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle resp = ourRestServer
+				.getFhirClient()
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
 		ourLog.info("Search:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertEquals(100, resp.getTotal());
 		assertEquals(100, resp.getEntry().size());
@@ -259,7 +324,6 @@ public class HashMapResourceProviderTest {
 		assertFalse(resp.getEntry().get(1).hasRequest());
 
 		assertEquals(1, myPatientResourceProvider.getCountSearch());
-
 	}
 
 	@Test
@@ -268,45 +332,66 @@ public class HashMapResourceProviderTest {
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
-			IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+			IIdType id =
+					ourRestServer.getFhirClient().create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());
 		}
 
 		// Search
-		Bundle resp = ourRestServer.getFhirClient()
-			.search()
-			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.returnBundle(Bundle.class).execute();
+		Bundle resp = ourRestServer
+				.getFhirClient()
+				.search()
+				.forResource("Patient")
+				.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
-		List<String> respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		List<String> respIds = resp.getEntry().stream()
+				.map(t -> t.getResource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(Collectors.toList());
 		assertThat(respIds, containsInAnyOrder("Patient/2", "Patient/3"));
 
 		// Search
-		resp = ourRestServer.getFhirClient()
-			.search()
-			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.returnBundle(Bundle.class).execute();
+		resp = ourRestServer
+				.getFhirClient()
+				.search()
+				.forResource("Patient")
+				.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+				.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
-		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		respIds = resp.getEntry().stream()
+				.map(t -> t.getResource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(Collectors.toList());
 		assertThat(respIds, containsInAnyOrder("Patient/2", "Patient/3"));
 
-		resp = ourRestServer.getFhirClient()
-			.search()
-			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.where(IAnyResource.RES_ID.exactly().codes("4", "3"))
-			.returnBundle(Bundle.class).execute();
-		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		resp = ourRestServer
+				.getFhirClient()
+				.search()
+				.forResource("Patient")
+				.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+				.where(IAnyResource.RES_ID.exactly().codes("4", "3"))
+				.returnBundle(Bundle.class)
+				.execute();
+		respIds = resp.getEntry().stream()
+				.map(t -> t.getResource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(Collectors.toList());
 		assertThat(respIds, containsInAnyOrder("Patient/3"));
 		assertEquals(1, resp.getTotal());
 		assertEquals(1, resp.getEntry().size());
-
 	}
 
 	@Test
@@ -314,13 +399,18 @@ public class HashMapResourceProviderTest {
 		// Create
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = ourRestServer.getFhirClient().create().resource(p).execute().getId();
+		IIdType id =
+				ourRestServer.getFhirClient().create().resource(p).execute().getId();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id.getVersionIdPart());
 
 		// Update
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, myAnonymousInterceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, myAnonymousInterceptor);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, myAnonymousInterceptor);
+		ourRestServer
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, myAnonymousInterceptor);
 
 		p = new Patient();
 		p.setId(id);
@@ -329,19 +419,35 @@ public class HashMapResourceProviderTest {
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("2", id.getVersionIdPart());
 
-		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), any());
+		verify(myAnonymousInterceptor, Mockito.times(1))
+				.invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), any());
 		verify(myAnonymousInterceptor, Mockito.times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
 
 		assertEquals(1, myPatientResourceProvider.getCountCreate());
 		assertEquals(1, myPatientResourceProvider.getCountUpdate());
 
 		// Read
-		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("1")).execute();
+		p = (Patient) ourRestServer
+				.getFhirClient()
+				.read()
+				.resource("Patient")
+				.withId(id.withVersion("1"))
+				.execute();
 		assertTrue(p.getActive());
-		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("2")).execute();
+		p = (Patient) ourRestServer
+				.getFhirClient()
+				.read()
+				.resource("Patient")
+				.withId(id.withVersion("2"))
+				.execute();
 		assertFalse(p.getActive());
 		try {
-			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("3")).execute();
+			ourRestServer
+					.getFhirClient()
+					.read()
+					.resource("Patient")
+					.withId(id.withVersion("3"))
+					.execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
@@ -354,7 +460,8 @@ public class HashMapResourceProviderTest {
 		patient.setActive(true);
 		SystemRequestDetails srd = new SystemRequestDetails();
 
-		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
+		IIdType patientId =
+				myPatientResourceProvider.create(patient, srd).getId().toVersionless();
 		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
 		assertFalse(readPatient.isDeleted());
 	}
@@ -365,7 +472,8 @@ public class HashMapResourceProviderTest {
 		patient.setActive(true);
 		SystemRequestDetails srd = new SystemRequestDetails();
 
-		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
+		IIdType patientId =
+				myPatientResourceProvider.create(patient, srd).getId().toVersionless();
 		myPatientResourceProvider.delete(patientId, srd);
 		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
 		assertTrue(readPatient.isDeleted());
@@ -375,5 +483,4 @@ public class HashMapResourceProviderTest {
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

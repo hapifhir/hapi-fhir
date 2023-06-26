@@ -37,7 +37,6 @@ public class DeleteDstu2Test {
 	private static IdDt ourLastIdParam;
 	private static int ourPort;
 	private static Server ourServer;
-	
 
 	@BeforeEach
 	public void before() {
@@ -46,8 +45,6 @@ public class DeleteDstu2Test {
 		ourInvoked = false;
 	}
 
-
-	
 	@Test
 	public void testDeleteWithConditionalUrl() throws Exception {
 		Patient patient = new Patient();
@@ -58,7 +55,7 @@ public class DeleteDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
-		
+
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
 	}
@@ -74,19 +71,17 @@ public class DeleteDstu2Test {
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
-		
+
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-		
-	
+
 	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -100,15 +95,15 @@ public class DeleteDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-	
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Delete()
@@ -119,12 +114,9 @@ public class DeleteDstu2Test {
 			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
 		}
 
-		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-
 	}
-
 }

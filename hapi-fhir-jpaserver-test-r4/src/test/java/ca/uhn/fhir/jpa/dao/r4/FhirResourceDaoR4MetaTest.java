@@ -73,7 +73,12 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		patient = myPatientDao.read(id, mySrd);
 		assertTrue(patient.getActive());
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
-		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+		assertEquals(
+				"hello",
+				patient.getMeta()
+						.getExtensionByUrl("http://foo")
+						.getValueAsPrimitive()
+						.getValueAsString());
 	}
 
 	/**
@@ -102,7 +107,12 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
 		assertEquals("22", patient.getMeta().getVersionId());
 		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
-		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+		assertEquals(
+				"hello",
+				patient.getMeta()
+						.getExtensionByUrl("http://foo")
+						.getValueAsPrimitive()
+						.getValueAsString());
 	}
 
 	/**
@@ -161,7 +171,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	 */
 	@Test
 	void testAddTag_userSelectedStaysNull() {
-	    // given
+		// given
 		Patient patient1 = new Patient();
 		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		patient1.setActive(true);
@@ -176,7 +186,6 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertNotNull(tag);
 		assertNull(tag.getUserSelectedElement().asStringValue());
 	}
-
 
 	@Nested
 	public class TestTagWithVersionAndUserSelected {
@@ -205,17 +214,17 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			}
 		}
 
-		private static final Map<JpaStorageSettings.TagStorageModeEnum, TagQtyExpectations> expectedTagCountMap = Map.of(
-			JpaStorageSettings.TagStorageModeEnum.INLINE, 			new TagQtyExpectations(0, 1),
-			JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED, 	new TagQtyExpectations(1, 1),
-			JpaStorageSettings.TagStorageModeEnum.VERSIONED, 		new TagQtyExpectations(1, 1)
-		);
+		private static final Map<JpaStorageSettings.TagStorageModeEnum, TagQtyExpectations> expectedTagCountMap =
+				Map.of(
+						JpaStorageSettings.TagStorageModeEnum.INLINE, new TagQtyExpectations(0, 1),
+						JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED, new TagQtyExpectations(1, 1),
+						JpaStorageSettings.TagStorageModeEnum.VERSIONED, new TagQtyExpectations(1, 1));
 
-		private static final Map<JpaStorageSettings.TagStorageModeEnum, TagQtyExpectations> expectedHistoryTagCountMap = Map.of(
-			JpaStorageSettings.TagStorageModeEnum.INLINE, 			new TagQtyExpectations(0, 0),
-			JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED, 	new TagQtyExpectations(0, 0),
-			JpaStorageSettings.TagStorageModeEnum.VERSIONED, 		new TagQtyExpectations(2, 1)
-		);
+		private static final Map<JpaStorageSettings.TagStorageModeEnum, TagQtyExpectations> expectedHistoryTagCountMap =
+				Map.of(
+						JpaStorageSettings.TagStorageModeEnum.INLINE, new TagQtyExpectations(0, 0),
+						JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED, new TagQtyExpectations(0, 0),
+						JpaStorageSettings.TagStorageModeEnum.VERSIONED, new TagQtyExpectations(2, 1));
 
 		@ParameterizedTest
 		@EnumSource(JpaStorageSettings.TagStorageModeEnum.class)
@@ -224,17 +233,20 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			myStorageSettings.setTagStorageMode(theTagStorageModeEnum);
 
 			final Patient savedPatient = new Patient();
-			final Coding newTag = savedPatient.getMeta()
-				.addTag()
-				.setSystem(expectedSystem1)
-				.setCode(expectedCode1)
-				.setDisplay(expectedDisplay1);
+			final Coding newTag = savedPatient
+					.getMeta()
+					.addTag()
+					.setSystem(expectedSystem1)
+					.setCode(expectedCode1)
+					.setDisplay(expectedDisplay1);
 			assertNull(newTag.getUserSelectedElement().asStringValue());
 			assertFalse(newTag.getUserSelected());
-			newTag.setVersion(expectedVersion1)
-				.setUserSelected(expectedUserSelected1);
+			newTag.setVersion(expectedVersion1).setUserSelected(expectedUserSelected1);
 			savedPatient.setActive(true);
-			final IIdType pid1 = myPatientDao.create(savedPatient, new SystemRequestDetails()).getId().toVersionless();
+			final IIdType pid1 = myPatientDao
+					.create(savedPatient, new SystemRequestDetails())
+					.getId()
+					.toVersionless();
 
 			final Patient retrievedPatient = myPatientDao.read(pid1, new SystemRequestDetails());
 			validateSavedPatientTags(retrievedPatient);
@@ -243,23 +255,34 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			final List<Coding> tagsFromDbPatient = retrievedPatient.getMeta().getTag();
 			assertEquals(1, tagsFromDbPatient.size());
 
-			tagsFromDbPatient.get(0)
-				.setCode(expectedCode2)
-				.setSystem(expectedSystem2)
-				.setVersion(expectedVersion2)
-				.setDisplay(expectedDisplay2)
-				.setUserSelected(expectedUserSelected2);
+			tagsFromDbPatient
+					.get(0)
+					.setCode(expectedCode2)
+					.setSystem(expectedSystem2)
+					.setVersion(expectedVersion2)
+					.setDisplay(expectedDisplay2)
+					.setUserSelected(expectedUserSelected2);
 
 			myPatientDao.update(retrievedPatient, new SystemRequestDetails());
 			final Patient retrievedUpdatedPatient = myPatientDao.read(pid1, new SystemRequestDetails());
 
 			final Meta meta = retrievedUpdatedPatient.getMeta();
 			final List<Coding> tags = meta.getTag();
-			tags.forEach(innerTag -> ourLog.info("TAGS: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
-				innerTag.getVersion(), innerTag.getUserSelected(), innerTag.getCode(), innerTag.getDisplay(), innerTag.getSystem()));
+			tags.forEach(innerTag -> ourLog.info(
+					"TAGS: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
+					innerTag.getVersion(),
+					innerTag.getUserSelected(),
+					innerTag.getCode(),
+					innerTag.getDisplay(),
+					innerTag.getSystem()));
 			final Coding tagFirstRep = meta.getTagFirstRep();
-			ourLog.info("TAG FIRST REP: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
-				tagFirstRep.getVersion(), tagFirstRep.getUserSelected(), tagFirstRep.getCode(), tagFirstRep.getDisplay(), tagFirstRep.getSystem());
+			ourLog.info(
+					"TAG FIRST REP: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
+					tagFirstRep.getVersion(),
+					tagFirstRep.getUserSelected(),
+					tagFirstRep.getCode(),
+					tagFirstRep.getDisplay(),
+					tagFirstRep.getSystem());
 
 			TagQtyExpectations expectedCounts = expectedTagCountMap.get(theTagStorageModeEnum);
 			validateUpdatedPatientTags(expectedCounts, tags);
@@ -268,74 +291,98 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 			resourceHistoryTags2.forEach(historyTag -> {
 				final TagDefinition tag = historyTag.getTag();
-				ourLog.info("tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}",
-					historyTag.getTagId(), historyTag.getResourceId(), /*tag.getVersion()*/ null, /*tag.getUserSelected()*/ null, tag.getSystem(), tag.getCode(), tag.getDisplay());
+				ourLog.info(
+						"tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}",
+						historyTag.getTagId(),
+						historyTag.getResourceId(), /*tag.getVersion()*/
+						null, /*tag.getUserSelected()*/
+						null,
+						tag.getSystem(),
+						tag.getCode(),
+						tag.getDisplay());
 			});
 
 			TagQtyExpectations expectedHistoryCounts = expectedHistoryTagCountMap.get(theTagStorageModeEnum);
 			validateHistoryTags(expectedHistoryCounts, resourceHistoryTags2);
 		}
 
-
-		private  void validateSavedPatientTags(Patient thePatient) {
+		private void validateSavedPatientTags(Patient thePatient) {
 			assertAll(
-				() -> assertEquals(1, thePatient.getMeta().getTag().size()),
-				() -> assertEquals(0, thePatient.getMeta().getSecurity().size()),
-				() -> assertEquals(0, thePatient.getMeta().getProfile().size()),
-
-				() -> assertEquals(expectedSystem1, thePatient.getMeta().getTagFirstRep().getSystem()),
-				() -> assertTrue(thePatient.getMeta().getTagFirstRep().getUserSelected()),
-				() -> assertEquals(expectedCode1, thePatient.getMeta().getTagFirstRep().getCode()),
-				() -> assertEquals(expectedVersion1, thePatient.getMeta().getTagFirstRep().getVersion()),
-				() -> assertEquals(expectedUserSelected1, thePatient.getMeta().getTagFirstRep().getUserSelected())
-			);
+					() -> assertEquals(1, thePatient.getMeta().getTag().size()),
+					() -> assertEquals(0, thePatient.getMeta().getSecurity().size()),
+					() -> assertEquals(0, thePatient.getMeta().getProfile().size()),
+					() -> assertEquals(
+							expectedSystem1,
+							thePatient.getMeta().getTagFirstRep().getSystem()),
+					() -> assertTrue(thePatient.getMeta().getTagFirstRep().getUserSelected()),
+					() -> assertEquals(
+							expectedCode1, thePatient.getMeta().getTagFirstRep().getCode()),
+					() -> assertEquals(
+							expectedVersion1,
+							thePatient.getMeta().getTagFirstRep().getVersion()),
+					() -> assertEquals(
+							expectedUserSelected1,
+							thePatient.getMeta().getTagFirstRep().getUserSelected()));
 		}
-
 
 		private void validateUpdatedPatientTags(TagQtyExpectations theExpectedCounts, List<Coding> tags) {
 			assertAll(
-				() -> assertEquals(theExpectedCounts.theTagQty, tags.size()),
-				() -> assertEquals(theExpectedCounts.theTagV1Qty, tags.stream()
-					.filter(tag -> expectedSystem1.equals(tag.getSystem()))
-					.filter(tag -> expectedCode1.equals(tag.getCode()))
-					.filter(tag -> expectedDisplay1.equals(tag.getDisplay()))
-					.filter(tag -> expectedVersion1.equals(tag.getVersion()))
-					.filter(tag -> expectedUserSelected1 == tag.getUserSelected())
-					.count()),
-				() -> assertEquals(theExpectedCounts.theTagV2Qty, tags.stream()
-					.filter(tag -> expectedSystem2.equals(tag.getSystem()))
-					.filter(tag -> expectedCode2.equals(tag.getCode()))
-					.filter(tag -> expectedDisplay2.equals(tag.getDisplay()))
-					.filter(tag -> expectedVersion2.equals(tag.getVersion()))
-					.filter(tag -> expectedUserSelected2 == tag.getUserSelected())
-					.count())
-			);
+					() -> assertEquals(theExpectedCounts.theTagQty, tags.size()),
+					() -> assertEquals(
+							theExpectedCounts.theTagV1Qty,
+							tags.stream()
+									.filter(tag -> expectedSystem1.equals(tag.getSystem()))
+									.filter(tag -> expectedCode1.equals(tag.getCode()))
+									.filter(tag -> expectedDisplay1.equals(tag.getDisplay()))
+									.filter(tag -> expectedVersion1.equals(tag.getVersion()))
+									.filter(tag -> expectedUserSelected1 == tag.getUserSelected())
+									.count()),
+					() -> assertEquals(
+							theExpectedCounts.theTagV2Qty,
+							tags.stream()
+									.filter(tag -> expectedSystem2.equals(tag.getSystem()))
+									.filter(tag -> expectedCode2.equals(tag.getCode()))
+									.filter(tag -> expectedDisplay2.equals(tag.getDisplay()))
+									.filter(tag -> expectedVersion2.equals(tag.getVersion()))
+									.filter(tag -> expectedUserSelected2 == tag.getUserSelected())
+									.count()));
 		}
 
-		private void validateHistoryTags(TagQtyExpectations theExpectedHistoryCounts, List<ResourceHistoryTag> theHistoryTags) {
+		private void validateHistoryTags(
+				TagQtyExpectations theExpectedHistoryCounts, List<ResourceHistoryTag> theHistoryTags) {
 			// validating this way because tags are a set so can be in any order
 			assertAll(
-				() -> assertEquals(theExpectedHistoryCounts.theTagQty, theHistoryTags.size()),
-				() -> assertEquals(theExpectedHistoryCounts.theTagV1Qty, theHistoryTags.stream()
-					.filter(resourceHistoryTag -> expectedSystem1.equals(resourceHistoryTag.getTag().getSystem()))
-					.filter(resourceHistoryTag -> expectedCode1.equals(resourceHistoryTag.getTag().getCode()))
-					.filter(resourceHistoryTag -> expectedDisplay1.equals(resourceHistoryTag.getTag().getDisplay()))
-					.filter(resourceHistoryTag -> expectedVersion1.equals(resourceHistoryTag.getTag().getVersion()))
-					.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getTag().getUserSelected())
-					.count()),
-				() -> assertEquals(theExpectedHistoryCounts.theTagV2Qty, theHistoryTags.stream()
-					.filter(resourceHistoryTag -> expectedSystem2.equals(resourceHistoryTag.getTag().getSystem()))
-					.filter(resourceHistoryTag -> expectedCode2.equals(resourceHistoryTag.getTag().getCode()))
-					.filter(resourceHistoryTag -> expectedDisplay2.equals(resourceHistoryTag.getTag().getDisplay()))
-					.filter(resourceHistoryTag -> expectedVersion2.equals(resourceHistoryTag.getTag().getVersion()))
-					.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getTag().getUserSelected())
-					.count())
-			);
+					() -> assertEquals(theExpectedHistoryCounts.theTagQty, theHistoryTags.size()),
+					() -> assertEquals(
+							theExpectedHistoryCounts.theTagV1Qty,
+							theHistoryTags.stream()
+									.filter(resourceHistoryTag -> expectedSystem1.equals(
+											resourceHistoryTag.getTag().getSystem()))
+									.filter(resourceHistoryTag -> expectedCode1.equals(
+											resourceHistoryTag.getTag().getCode()))
+									.filter(resourceHistoryTag -> expectedDisplay1.equals(
+											resourceHistoryTag.getTag().getDisplay()))
+									.filter(resourceHistoryTag -> expectedVersion1.equals(
+											resourceHistoryTag.getTag().getVersion()))
+									.filter(resourceHistoryTag -> expectedUserSelected1
+											== resourceHistoryTag.getTag().getUserSelected())
+									.count()),
+					() -> assertEquals(
+							theExpectedHistoryCounts.theTagV2Qty,
+							theHistoryTags.stream()
+									.filter(resourceHistoryTag -> expectedSystem2.equals(
+											resourceHistoryTag.getTag().getSystem()))
+									.filter(resourceHistoryTag -> expectedCode2.equals(
+											resourceHistoryTag.getTag().getCode()))
+									.filter(resourceHistoryTag -> expectedDisplay2.equals(
+											resourceHistoryTag.getTag().getDisplay()))
+									.filter(resourceHistoryTag -> expectedVersion2.equals(
+											resourceHistoryTag.getTag().getVersion()))
+									.filter(resourceHistoryTag -> expectedUserSelected2
+											== resourceHistoryTag.getTag().getUserSelected())
+									.count()));
 		}
-
-
 	}
-
 
 	@Disabled("This test fails regularly, need to get a dedicated connection pool for tag creation") // TODO JA:
 	@Test
@@ -371,12 +418,16 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			}
 		}
 
-		runInTransaction(() -> ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(TagDefinition::toString).collect(Collectors.joining("\n * "))));
+		runInTransaction(() -> ourLog.info(
+				"Tag definitions:\n * {}",
+				myTagDefinitionDao.findAll().stream()
+						.map(TagDefinition::toString)
+						.collect(Collectors.joining("\n * "))));
 
 		IBundleProvider bundle = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		assertEquals(10, bundle.sizeOrThrowNpe());
-		IBundleProvider tagBundle = myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")), mySrd);
+		IBundleProvider tagBundle = myPatientDao.search(
+				SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")), mySrd);
 		assertEquals(10, tagBundle.sizeOrThrowNpe());
-
 	}
 }

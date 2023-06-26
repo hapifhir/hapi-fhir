@@ -25,6 +25,4 @@ public class IoUtilTest {
 		// Should throw no exception
 		IoUtil.closeQuietly(myCloseable);
 	}
-
-
 }

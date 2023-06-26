@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -29,7 +28,7 @@ public class ResourceCountCacheTest {
 	@Test
 	public void testCache() throws Exception {
 		AtomicLong id = new AtomicLong();
-		when(myFetcher.call()).thenAnswer(t->{
+		when(myFetcher.call()).thenAnswer(t -> {
 			Map<String, Long> retVal = new HashMap<>();
 			retVal.put("A", id.incrementAndGet());
 			return retVal;
@@ -56,7 +55,6 @@ public class ResourceCountCacheTest {
 		ResourceCountCache.setNowForUnitTest(start + 800);
 		cache.update();
 		assertEquals(Long.valueOf(2), cache.get().get("A"));
-
 	}
 
 	@Test
@@ -84,7 +82,5 @@ public class ResourceCountCacheTest {
 		ResourceCountCache.setNowForUnitTest(start + 80000);
 		cache.update();
 		assertEquals(null, cache.get());
-
 	}
-
 }

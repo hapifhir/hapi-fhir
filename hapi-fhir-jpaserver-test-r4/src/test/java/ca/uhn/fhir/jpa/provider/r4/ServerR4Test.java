@@ -47,12 +47,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			try {
 				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
 			} catch (PreconditionFailedException e) {
-				ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				ourLog.debug(myFhirContext
+						.newJsonParser()
+						.setPrettyPrint(true)
+						.encodeResourceToString(e.getOperationOutcome()));
 				fail();
 			}
 		}
 	}
-
 
 	/**
 	 * See #519
@@ -70,12 +72,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
-			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
+			for (CapabilityStatementRestResourceComponent nextResource :
+					cs.getRest().get(0).getResource()) {
 				ourLog.info("Testing resource: " + nextResource.getType());
 				Set<String> sps = new HashSet<String>();
 				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
 					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
+						fail("Duplicate search parameter " + nextSp.getName() + " for resource "
+								+ nextResource.getType());
 					}
 				}
 
@@ -87,7 +91,6 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
 	}
-
 
 	@Test
 	public void testMetadataIncludesResourceCounts() {
@@ -101,20 +104,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		myResourceCountsCache.clear();
 
-		CapabilityStatement capabilityStatement = myClient
-			.capabilities()
-			.ofType(CapabilityStatement.class)
-			.execute();
+		CapabilityStatement capabilityStatement =
+				myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
-		Extension patientCountExt = capabilityStatement
-			.getRest()
-			.get(0)
-			.getResource()
-			.stream()
-			.filter(t -> t.getType().equals("Patient"))
-			.findFirst()
-			.orElseThrow(() -> new InternalErrorException("No patient"))
-			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+		Extension patientCountExt = capabilityStatement.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new InternalErrorException("No patient"))
+				.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
 		assertNull(patientCountExt);
 
 		/*
@@ -123,22 +120,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		myResourceCountsCache.update();
 
-		capabilityStatement = myClient
-			.capabilities()
-			.ofType(CapabilityStatement.class)
-			.execute();
+		capabilityStatement =
+				myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
-		patientCountExt = capabilityStatement
-			.getRest()
-			.get(0)
-			.getResource()
-			.stream()
-			.filter(t -> t.getType().equals("Patient"))
-			.findFirst()
-			.orElseThrow(() -> new InternalErrorException("No patient"))
-			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
+		patientCountExt = capabilityStatement.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new InternalErrorException("No patient"))
+				.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
 		assertEquals("1", patientCountExt.getValueAsPrimitive().getValueAsString());
-
 	}
-
 }

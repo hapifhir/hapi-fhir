@@ -75,12 +75,12 @@ public class PlainProviderR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
 		myServer.setHandler(proxyHandler);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		
+
 		builder.setConnectionManager(connectionManager);
 		myClient = builder.build();
-
 	}
 
 	@Test
@@ -88,10 +88,11 @@ public class PlainProviderR4Test {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		myRestfulServer.setProviders(provider);
 		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
-		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
+		HttpResponse status =
+				myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -99,7 +100,7 @@ public class PlainProviderR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(3, bundle.getEntry().size());
-		
+
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
 
@@ -111,8 +112,8 @@ public class PlainProviderR4Test {
 		assertEquals(3, bundle.getEntry().size());
 		assertNull(provider.myLastSince);
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
-		
-		status =myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
+
+		status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -127,7 +128,7 @@ public class PlainProviderR4Test {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		myRestfulServer.setProviders(provider);
 		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
 		CloseableHttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history"));
@@ -138,14 +139,13 @@ public class PlainProviderR4Test {
 		assertEquals(3, bundle.getEntry().size());
 		assertNull(provider.myLastSince);
 		assertNull(provider.myLastCount);
-		
 	}
 
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
 		myRestfulServer.setProviders(new SearchProvider());
 		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
 		String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
@@ -162,13 +162,15 @@ public class PlainProviderR4Test {
 			assertEquals(1, bundle.getEntry().size());
 
 			Patient patient = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+			assertEquals(
+					"PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-			assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
+			assertEquals(
+					uri.replace(":hapitest:", "%3Ahapitest%3A"),
+					bundle.getLink("self").getUrl());
 		}
-
 	}
-	
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
@@ -230,9 +232,7 @@ public class PlainProviderR4Test {
 
 			return retVal;
 		}
-
 	}
-
 
 	public static class SearchProvider {
 
@@ -240,7 +240,8 @@ public class PlainProviderR4Test {
 		public Patient findPatient(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
 			for (Patient next : getIdToPatient().values()) {
 				for (Identifier nextId : next.getIdentifier()) {
-					if (nextId.getSystem().equals(theIdentifier.getSystem()) && nextId.getValue().equals(theIdentifier.getValue())) {
+					if (nextId.getSystem().equals(theIdentifier.getSystem())
+							&& nextId.getValue().equals(theIdentifier.getValue())) {
 						return next;
 					}
 				}
@@ -271,7 +272,7 @@ public class PlainProviderR4Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
+		 *
 		 * @param theId
 		 *            The resource identity
 		 * @return The resource
@@ -280,7 +281,5 @@ public class PlainProviderR4Test {
 		public Patient getPatientById(@IdParam IdType theId) {
 			return getIdToPatient().get(theId.getValue());
 		}
-
 	}
-
 }

@@ -11,11 +11,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +22,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType NO_MATCH_RESULT = new StringType(MdmMatchResultEnum.NO_MATCH.name());
 	protected static final StringType MATCH_RESULT = new StringType(MdmMatchResultEnum.MATCH.name());
 	protected static final StringType POSSIBLE_MATCH_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_MATCH.name());
-	protected static final StringType POSSIBLE_DUPLICATE_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_DUPLICATE.name());
+	protected static final StringType POSSIBLE_DUPLICATE_RESULT =
+			new StringType(MdmMatchResultEnum.POSSIBLE_DUPLICATE.name());
 
 	protected Patient myPatient;
 	protected IAnyResource mySourcePatient;
@@ -42,7 +42,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 		mySourcePatient = getGoldenResourceFromTargetResource(myPatient);
 		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
-		myVersionlessGodlenResourceId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
+		myVersionlessGodlenResourceId =
+				new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 
 		myLink = (MdmLink) getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH

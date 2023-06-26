@@ -23,5 +23,4 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT extend
 	public void disableAdvancedHSearchIndex() {
 		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 	}
-
 }

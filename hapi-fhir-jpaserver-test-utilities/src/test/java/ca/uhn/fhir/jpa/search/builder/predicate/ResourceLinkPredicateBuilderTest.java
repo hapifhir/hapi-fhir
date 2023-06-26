@@ -25,11 +25,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ResourceLinkPredicateBuilderTest {
 
-    private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
+	private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
 
-    @Mock
-    private SearchQueryBuilder mySearchQueryBuilder;
+	@Mock
+	private SearchQueryBuilder mySearchQueryBuilder;
 
 	@BeforeEach
 	public void init() {
@@ -37,26 +37,31 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
-        myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
+		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
 	}
 
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1", PLACEHOLDER_BASE+"2"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
-        assertEquals(InCondition.class, condition.getClass());
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection()))
+				.thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
+		Condition condition =
+				myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
+		assertEquals(InCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1"));
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection()))
+				.thenReturn(List.of(PLACEHOLDER_BASE + "1"));
+		Condition condition =
+				myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-        Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
-        assertEquals(BinaryCondition.class, condition.getClass());
+		Condition condition =
+				myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 }

@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 	private RepositoryValidatingInterceptor myValInterceptor;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
@@ -56,9 +57,9 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireAtLeastProfile_Allowed() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.requireAtLeastProfile("http://foo/Profile1")
-			.build();
+				.forResourcesOfType("Patient")
+				.requireAtLeastProfile("http://foo/Profile1")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Create with correct profile allowed
@@ -72,9 +73,9 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireAtLeastOneProfileOf_Allowed() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
-			.build();
+				.forResourcesOfType("Patient")
+				.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Create with correct profile allowed
@@ -106,9 +107,9 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireAtLeastOneProfileOf_CreateBlocked() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
-			.build();
+				.forResourcesOfType("Patient")
+				.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Disallowed profile blocked
@@ -118,7 +119,10 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]",
+					e.getMessage());
 		}
 
 		// No profile blocked
@@ -128,18 +132,20 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
 	public void testRequireAtLeastOneProfileOf_UpdateBlocked() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
-			.build();
+				.forResourcesOfType("Patient")
+				.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Create a resource with an allowable profile
@@ -154,21 +160,25 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaDeleteOperation(id, metaDel, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]",
+					e.getMessage());
 		}
 
 		patient = myPatientDao.read(id);
-		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()), containsInAnyOrder("http://foo/Profile1"));
-
+		assertThat(
+				patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()),
+				containsInAnyOrder("http://foo/Profile1"));
 	}
 
 	@Test
 	public void testDisallowProfile_CreateBlocked() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.disallowProfile("http://profile-bad")
-			.build();
+				.forResourcesOfType("Patient")
+				.disallowProfile("http://profile-bad")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Disallowed profile blocked
@@ -178,18 +188,20 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
 	public void testDisallowProfile_UpdateBlocked() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Patient")
-			.disallowProfiles("http://profile-bad", "http://profile-bad2")
-			.build();
+				.forResourcesOfType("Patient")
+				.disallowProfiles("http://profile-bad", "http://profile-bad2")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Create a resource with an allowable profile
@@ -204,7 +216,10 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaAddOperation(id, metaDel, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad",
+					e.getMessage());
 		}
 
 		// Explicitly adding the profile is blocked using patch
@@ -212,53 +227,45 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			Parameters patch = new Parameters();
 			Parameters.ParametersParameterComponent operation = patch.addParameter();
 			operation.setName("operation");
-			operation
-				.addPart()
-				.setName("type")
-				.setValue(new CodeType("insert"));
-			operation
-				.addPart()
-				.setName("path")
-				.setValue(new StringType("Patient.meta.profile"));
-			operation
-				.addPart()
-				.setName("index")
-				.setValue(new IntegerType(0));
-			operation
-				.addPart()
-				.setName("value")
-				.setValue(new CanonicalType("http://profile-bad2"));
+			operation.addPart().setName("type").setValue(new CodeType("insert"));
+			operation.addPart().setName("path").setValue(new StringType("Patient.meta.profile"));
+			operation.addPart().setName("index").setValue(new IntegerType(0));
+			operation.addPart().setName("value").setValue(new CanonicalType("http://profile-bad2"));
 			myCaptureQueriesListener.clear();
 			myPatientDao.patch(id, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2", e.getMessage());
+			assertEquals(
+					Msg.code(575)
+							+ "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2",
+					e.getMessage());
 		} catch (Exception e) {
 			myCaptureQueriesListener.logAllQueriesForCurrentThread();
 			fail(e.toString());
 		}
 
 		patient = myPatientDao.read(id);
-		assertThat(patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()), containsInAnyOrder("http://foo/Profile1"));
-
+		assertThat(
+				patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList()),
+				containsInAnyOrder("http://foo/Profile1"));
 	}
 
 	@Test
 	public void testRequireValidationDoesNotApplyToPlaceholders() {
 
-		//Given
+		// Given
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Organization")
-			.requireValidationToDeclaredProfiles()
-			.build();
+				.forResourcesOfType("Organization")
+				.requireValidationToDeclaredProfiles()
+				.build();
 		myValInterceptor.setRules(rules);
 
-		//When
+		// When
 		PractitionerRole pr = new PractitionerRole();
 		pr.setOrganization(new Reference("Organization/400-40343834-7383-54b4-abfe-95281da21062-ProviderOrganiz"));
 
-		//Then
+		// Then
 		try {
 			IIdType id = myPractitionerRoleDao.create(pr).getId();
 			assertEquals("1", id.getVersionIdPart());
@@ -270,19 +277,19 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testRequireAtLeastProfilesDoesNotApplyToPlaceholders() {
-		//Given
+		// Given
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Organization")
-			.requireAtLeastOneProfileOf("http://example.com/profile1", "http://example.com/profile2")
-			.build();
+				.forResourcesOfType("Organization")
+				.requireAtLeastOneProfileOf("http://example.com/profile1", "http://example.com/profile2")
+				.build();
 		myValInterceptor.setRules(rules);
 
-		//When
+		// When
 		PractitionerRole pr = new PractitionerRole();
 		pr.setOrganization(new Reference("Organization/400-40343834-7383-54b4-abfe-95281da21062-ProviderOrganiz"));
 
-		//Then
+		// Then
 		try {
 			IIdType id = myPractitionerRoleDao.create(pr).getId();
 			assertEquals("1", id.getVersionIdPart());
@@ -292,19 +299,18 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testRequireValidation_AdditionalOptions() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
-			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel("IGNORE")
-			.allowAnyExtensions()
-			.disableTerminologyChecks()
-			.errorOnUnknownProfiles()
-			.suppressNoBindingMessage()
-			.suppressWarningForExtensibleValueSetValidation()
-			.build();
+				.forResourcesOfType("Observation")
+				.requireValidationToDeclaredProfiles()
+				.withBestPracticeWarningLevel("IGNORE")
+				.allowAnyExtensions()
+				.disableTerminologyChecks()
+				.errorOnUnknownProfiles()
+				.suppressNoBindingMessage()
+				.suppressWarningForExtensibleValueSetValidation()
+				.build();
 
 		myValInterceptor.setRules(rules);
 
@@ -323,15 +329,15 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@Test
 	public void testRequireValidation_AdditionalOptions_Reject_UnKnown_Extensions() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
-			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel("IGNORE")
-			.rejectUnknownExtensions()
-			.disableTerminologyChecks()
-			.errorOnUnknownProfiles()
-			.suppressNoBindingMessage()
-			.suppressWarningForExtensibleValueSetValidation()
-			.build();
+				.forResourcesOfType("Observation")
+				.requireValidationToDeclaredProfiles()
+				.withBestPracticeWarningLevel("IGNORE")
+				.rejectUnknownExtensions()
+				.disableTerminologyChecks()
+				.errorOnUnknownProfiles()
+				.suppressNoBindingMessage()
+				.suppressWarningForExtensibleValueSetValidation()
+				.build();
 
 		myValInterceptor.setRules(rules);
 
@@ -350,12 +356,12 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@Test
 	public void testRequireValidation_FailNoRejectAndTag() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
-			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel("IGNORE")
-			.neverReject()
-			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://foo", "validation-error")
-			.build();
+				.forResourcesOfType("Observation")
+				.requireValidationToDeclaredProfiles()
+				.withBestPracticeWarningLevel("IGNORE")
+				.neverReject()
+				.tagOnSeverity(ResultSeverityEnum.ERROR, "http://foo", "validation-error")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
@@ -371,11 +377,11 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@Test
 	public void testRequireValidation_Blocked() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
-			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel("IGNORE")
-			.rejectOnSeverity("error")
-			.build();
+				.forResourcesOfType("Observation")
+				.requireValidationToDeclaredProfiles()
+				.withBestPracticeWarningLevel("IGNORE")
+				.rejectOnSeverity("error")
+				.build();
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
@@ -386,23 +392,22 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertThat(oo.getIssue().get(0).getDiagnostics(),
-				containsString("Observation.status: minimum required = 1, but only found 0"));
+			assertThat(
+					oo.getIssue().get(0).getDiagnostics(),
+					containsString("Observation.status: minimum required = 1, but only found 0"));
 		}
-
 	}
-
 
 	@Test
 	public void testMultipleTypedRules() {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
-			.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")
-			.and()
-			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
-			.build();
+				.forResourcesOfType("Observation")
+				.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")
+				.and()
+				.requireValidationToDeclaredProfiles()
+				.withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
+				.build();
 		myValInterceptor.setRules(rules);
 
 		// Create with correct profile allowed
@@ -416,9 +421,9 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 	}
 
-
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
-		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
+		return myApplicationContext.getBean(
+				RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER,
+				RepositoryValidatingRuleBuilder.class);
 	}
-
 }

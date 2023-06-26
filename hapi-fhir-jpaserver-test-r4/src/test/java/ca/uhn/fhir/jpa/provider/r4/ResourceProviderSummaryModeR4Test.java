@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressWarnings("Duplicates")
 public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderSummaryModeR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderSummaryModeR4Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
 	@Override
@@ -57,7 +58,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 				myPatientDao.create(p);
 			}
 		});
-
 	}
 
 	/**
@@ -65,13 +65,12 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithCount() {
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.summaryMode(SummaryEnum.COUNT)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ACTIVE.exactly().code("true"))
+				.summaryMode(SummaryEnum.COUNT)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
 		assertEquals(0, outcome.getEntry().size());
@@ -82,13 +81,12 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithTotalAccurate() {
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.totalMode(SearchTotalModeEnum.ACCURATE)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ACTIVE.exactly().code("true"))
+				.totalMode(SearchTotalModeEnum.ACCURATE)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
@@ -101,12 +99,11 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void testSearchWithTotalAccurateSpecifiedAsDefault() {
 		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ACTIVE.exactly().code("true"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
@@ -119,12 +116,11 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void testSearchNoHitsWithTotalAccurateSpecifiedAsDefault() {
 		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(new StringClientParam(Patient.SP_RES_ID).matches().value("non-existent-id"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(new StringClientParam(Patient.SP_RES_ID).matches().value("non-existent-id"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(new Integer(0), outcome.getTotalElement().getValue());
 		assertEquals(0, outcome.getEntry().size());
@@ -136,12 +132,11 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithNoSummaryMode() {
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ACTIVE.exactly().code("true"))
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(null, outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
@@ -155,17 +150,14 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void testSearchTotalNoneOverridingDefault() {
 		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		Bundle outcome = myClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.totalMode(SearchTotalModeEnum.NONE)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = myClient.search()
+				.forResource(Patient.class)
+				.where(Patient.ACTIVE.exactly().code("true"))
+				.totalMode(SearchTotalModeEnum.NONE)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(null, outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
 	}
-
-
 }

@@ -13,9 +13,9 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
@@ -27,26 +27,52 @@ public class CapabilityStatementCacheR4Test {
 
 	@RegisterExtension
 	protected final RestfulServerExtension myServerExtension = new RestfulServerExtension(myFhirContext)
-		.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class))
-		.withServer(t -> t.setServerConformanceProvider(new MyCapabilityStatementProvider(t)));
+			.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class))
+			.withServer(t -> t.setServerConformanceProvider(new MyCapabilityStatementProvider(t)));
 
 	@Test
 	public void testCacheThreadShutsDownWhenServerShutsDown() throws Exception {
-		CapabilityStatement response = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement response = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
 		sleepAtLeast(20);
-		CapabilityStatement response2 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		CapabilityStatement response3 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		CapabilityStatement response4 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement response2 = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		CapabilityStatement response3 = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
+		CapabilityStatement response4 = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
 
 		assertEquals(response.getId(), response2.getId());
 
-		List<String> threadNames = Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList());
+		List<String> threadNames = Thread.getAllStackTraces().keySet().stream()
+				.map(t -> t.getName())
+				.filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX))
+				.sorted()
+				.collect(Collectors.toList());
 		assertEquals(1, threadNames.size());
 
 		// Shut down the server
 		myServerExtension.stopServer();
 
-		await().until(() -> Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList()), empty());
+		await().until(
+						() -> Thread.getAllStackTraces().keySet().stream()
+								.map(t -> t.getName())
+								.filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX))
+								.sorted()
+								.collect(Collectors.toList()),
+						empty());
 	}
 
 	private static class MyCapabilityStatementProvider extends ServerCapabilityStatementProvider {
@@ -75,5 +101,4 @@ public class CapabilityStatementCacheR4Test {
 			}
 		}
 	}
-
 }

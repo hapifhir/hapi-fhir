@@ -42,13 +42,13 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
+import javax.persistence.EntityManager;
 
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -60,10 +60,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @RequiresDocker
 @ContextHierarchy({
 	@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class),
-	@ContextConfiguration(classes = {
-		DaoTestDataBuilder.Config.class,
-		TestDaoSearch.Config.class
-	})
+	@ContextConfiguration(classes = {DaoTestDataBuilder.Config.class, TestDaoSearch.Config.class})
 })
 @Disabled
 public class HSearchSandboxTest extends BaseJpaTest {
@@ -97,13 +94,11 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
 
-
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myStorageSettings.setAllowContainsSearches(true);
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
-
 
 	@Nested
 	public class NotNestedObjectQueries {
@@ -124,20 +119,20 @@ public class HSearchSandboxTest extends BaseJpaTest {
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> f.bool(b -> {
-						b.must(f.match().field("myResourceType").matching("Observation"));
-						b.must(f.match().field("sp.code.token.system").matching("http://loinc.org"));
-						b.should(f.match().field("sp.code.token.code").matching("obs3"));
-						b.should(f.match().field("sp.code.token.code").matching("obs1"));
-						b.minimumShouldMatchNumber(1);
-					}))
-					.fetchAll();
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.match().field("sp.code.token.system").matching("http://loinc.org"));
+							b.should(f.match().field("sp.code.token.code").matching("obs3"));
+							b.should(f.match().field("sp.code.token.code").matching("obs1"));
+							b.minimumShouldMatchNumber(1);
+						}))
+						.fetchAll();
 				long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				//			List<ResourceTable> hits = result.hits();
 			});
 		}
-
 
 		/**
 		 * Shows that when there is multiple "and" clause with "or" entries, we need to group each one in a "must" clause
@@ -156,30 +151,29 @@ public class HSearchSandboxTest extends BaseJpaTest {
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> f.bool(b -> {
-						b.must(f.match().field("myResourceType").matching("Observation"));
-						b.must(f.match().field("sp.code.token.system").matching("http://loinc.org"));
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.match().field("sp.code.token.system").matching("http://loinc.org"));
 
-						b.must(f.bool(p -> {
-							p.should(f.match().field("sp.code.token.code").matching("obs3"));
-							p.should(f.match().field("sp.code.token.code").matching("obs1"));
-							p.minimumShouldMatchNumber(1);
-						}));
+							b.must(f.bool(p -> {
+								p.should(f.match().field("sp.code.token.code").matching("obs3"));
+								p.should(f.match().field("sp.code.token.code").matching("obs1"));
+								p.minimumShouldMatchNumber(1);
+							}));
 
-						b.must(f.bool(p -> {
-							p.should(f.match().field("sp.code.token.code").matching("obs5"));
-							p.should(f.match().field("sp.code.token.code").matching("obs1"));
-							p.minimumShouldMatchNumber(1);
-						}));
-					}))
-					.fetchAll();
+							b.must(f.bool(p -> {
+								p.should(f.match().field("sp.code.token.code").matching("obs5"));
+								p.should(f.match().field("sp.code.token.code").matching("obs1"));
+								p.minimumShouldMatchNumber(1);
+							}));
+						}))
+						.fetchAll();
 				long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				//			List<ResourceTable> hits = result.hits();
 			});
 		}
-
-
 	}
 
 	@Nested
@@ -191,31 +185,37 @@ public class HSearchSandboxTest extends BaseJpaTest {
 		 */
 		@Test
 		public void searchModelingAndMultipleAndWithOneOringClauseTest() {
-			IIdType myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
-				myTestDataBuilder.withPrimitiveAttribute("value", 0.6)
-//			myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
-//			myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-			));
+			IIdType myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt(
+					"valueQuantity", myTestDataBuilder.withPrimitiveAttribute("value", 0.6)
+					//			myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
+					//			myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+					));
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> f.bool(b -> {
-						b.must(f.match().field("myResourceType").matching("Observation"));
-						b.must(f.nested().objectField("nsp.value-quantity")
-							.nest(f.bool()
-								.must(f.range().field("nsp.value-quantity.quantity.value").lessThan(0.7))
-								.should(f.range().field("nsp.value-quantity.quantity.value").between(0.475, 0.525))
-								.should(f.range().field("nsp.value-quantity.quantity.value").between(0.57, 0.63))
-								.minimumShouldMatchNumber(1)
-							));
-					}))
-					.fetchAll();
-//			long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.nested()
+									.objectField("nsp.value-quantity")
+									.nest(f.bool()
+											.must(f.range()
+													.field("nsp.value-quantity.quantity.value")
+													.lessThan(0.7))
+											.should(f.range()
+													.field("nsp.value-quantity.quantity.value")
+													.between(0.475, 0.525))
+											.should(f.range()
+													.field("nsp.value-quantity.quantity.value")
+													.between(0.57, 0.63))
+											.minimumShouldMatchNumber(1)));
+						}))
+						.fetchAll();
+				//			long totalHitCount = result.total().hitCount();
+				//			List<ResourceTable> hits = result.hits();
 			});
 		}
-
 
 		/**
 		 * Shows that when there is multiple "and" clause with "or" entries, we need to group each one in a "must" clause
@@ -223,71 +223,78 @@ public class HSearchSandboxTest extends BaseJpaTest {
 		 */
 		@Test
 		public void searchModelingMultipleAndWithMultipleOrClausesTest() {
-			IIdType myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
-				myTestDataBuilder.withPrimitiveAttribute("value", 0.6)
-//			myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
-//			myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-			));
+			IIdType myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt(
+					"valueQuantity", myTestDataBuilder.withPrimitiveAttribute("value", 0.6)
+					//			myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
+					//			myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+					));
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> f.bool(b -> {
-						b.must(f.match().field("myResourceType").matching("Observation"));
-						b.must(f.nested().objectField("nsp.value-quantity")
-							.nest(f.bool()
-								.must(f.range().field("nsp.value-quantity.quantity.value").lessThan(0.7))
-
-								.must(f.bool(p -> {
-									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.475, 0.525));
-									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.57, 0.63));
-									p.minimumShouldMatchNumber(1);
-								}))
-
-								.must(f.bool(p -> {
-									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.2, 0.8));
-									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.7, 0.9));
-									p.minimumShouldMatchNumber(1);
-								}))
-
-								.minimumShouldMatchNumber(1)
-							));
-					}))
-					.fetchAll();
-//			long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.nested()
+									.objectField("nsp.value-quantity")
+									.nest(f.bool()
+											.must(f.range()
+													.field("nsp.value-quantity.quantity.value")
+													.lessThan(0.7))
+											.must(f.bool(p -> {
+												p.should(f.range()
+														.field("nsp.value-quantity.quantity.value")
+														.between(0.475, 0.525));
+												p.should(f.range()
+														.field("nsp.value-quantity.quantity.value")
+														.between(0.57, 0.63));
+												p.minimumShouldMatchNumber(1);
+											}))
+											.must(f.bool(p -> {
+												p.should(f.range()
+														.field("nsp.value-quantity.quantity.value")
+														.between(0.2, 0.8));
+												p.should(f.range()
+														.field("nsp.value-quantity.quantity.value")
+														.between(0.7, 0.9));
+												p.minimumShouldMatchNumber(1);
+											}))
+											.minimumShouldMatchNumber(1)));
+						}))
+						.fetchAll();
+				//			long totalHitCount = result.total().hitCount();
+				//			List<ResourceTable> hits = result.hits();
 			});
-//			runInTransaction(() -> {
-//				SearchSession searchSession = Search.session(myEntityManager);
-//				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-//					.where(f -> f.bool(b -> {
-//						b.must(f.match().field("myResourceType").matching("Observation"));
-//						b.must(f.bool()
-//								.must(f.range().field("nsp.value-quantity.quantity.value").lessThan(0.7))
-//
-//								.must(f.bool(p -> {
-//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.475, 0.525));
-//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.57, 0.63));
-//									p.minimumShouldMatchNumber(1);
-//								}))
-//
-//								.must(f.bool(p -> {
-//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.2, 0.8));
-//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.7, 0.9));
-//									p.minimumShouldMatchNumber(1);
-//								}))
-//
-//								.minimumShouldMatchNumber(1)
-//							);
-//					}))
-//					.fetchAll();
-////			long totalHitCount = result.total().hitCount();
-////			List<ResourceTable> hits = result.hits();
-//			});
+			//			runInTransaction(() -> {
+			//				SearchSession searchSession = Search.session(myEntityManager);
+			//				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
+			//					.where(f -> f.bool(b -> {
+			//						b.must(f.match().field("myResourceType").matching("Observation"));
+			//						b.must(f.bool()
+			//								.must(f.range().field("nsp.value-quantity.quantity.value").lessThan(0.7))
+			//
+			//								.must(f.bool(p -> {
+			//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.475, 0.525));
+			//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.57, 0.63));
+			//									p.minimumShouldMatchNumber(1);
+			//								}))
+			//
+			//								.must(f.bool(p -> {
+			//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.2, 0.8));
+			//									p.should(f.range().field("nsp.value-quantity.quantity.value").between(0.7, 0.9));
+			//									p.minimumShouldMatchNumber(1);
+			//								}))
+			//
+			//								.minimumShouldMatchNumber(1)
+			//							);
+			//					}))
+			//					.fetchAll();
+			////			long totalHitCount = result.total().hitCount();
+			////			List<ResourceTable> hits = result.hits();
+			//			});
 
 		}
 	}
-
 
 	/**
 	 * Following code is the beginning of refactoring the queries for cleaner structure, which means
@@ -297,7 +304,6 @@ public class HSearchSandboxTest extends BaseJpaTest {
 	public class FragmentedCodeNotNested {
 
 		private SearchPredicateFactory fact;
-
 
 		@Test
 		public void searchModelingMultipleAndOneOrClauseTest() {
@@ -313,27 +319,24 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			String paramName = "value-quantity";
 			List<List<IQueryParameterType>> theQuantityAndOrTerms = Lists.newArrayList();
 
-			theQuantityAndOrTerms.add(Collections.singletonList(
-				new QuantityParam().setValue(0.7)));
+			theQuantityAndOrTerms.add(Collections.singletonList(new QuantityParam().setValue(0.7)));
 
-			theQuantityAndOrTerms.add(Lists.newArrayList(
-				new QuantityParam().setValue(0.5),
-				new QuantityParam().setValue(0.6)
-			));
+			theQuantityAndOrTerms.add(
+					Lists.newArrayList(new QuantityParam().setValue(0.5), new QuantityParam().setValue(0.6)));
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> {
-						TestPredBuilder builder = new TestPredBuilder(f);
-						return builder.buildAndOrPredicates(paramName, theQuantityAndOrTerms);
-					})
-					.fetchAll();
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> {
+							TestPredBuilder builder = new TestPredBuilder(f);
+							return builder.buildAndOrPredicates(paramName, theQuantityAndOrTerms);
+						})
+						.fetchAll();
 				long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				//			List<ResourceTable> hits = result.hits();
 			});
 		}
-
 
 		@Test
 		public void searchModelingMultipleAndMultipleOrClauseTest() {
@@ -349,37 +352,28 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			String paramName = "value-quantity";
 			List<List<IQueryParameterType>> theQuantityAndOrTerms = Lists.newArrayList();
 
-			theQuantityAndOrTerms.add(Collections.singletonList(
-				new QuantityParam().setValue(0.7)));
+			theQuantityAndOrTerms.add(Collections.singletonList(new QuantityParam().setValue(0.7)));
 
-			theQuantityAndOrTerms.add(Lists.newArrayList(
-				new QuantityParam().setValue(0.5),
-				new QuantityParam().setValue(0.6)
-			));
+			theQuantityAndOrTerms.add(
+					Lists.newArrayList(new QuantityParam().setValue(0.5), new QuantityParam().setValue(0.6)));
 
-			theQuantityAndOrTerms.add(Lists.newArrayList(
-				new QuantityParam().setValue(0.9),
-				new QuantityParam().setValue(0.6)
-			));
+			theQuantityAndOrTerms.add(
+					Lists.newArrayList(new QuantityParam().setValue(0.9), new QuantityParam().setValue(0.6)));
 
 			runInTransaction(() -> {
 				SearchSession searchSession = Search.session(myEntityManager);
-				SearchResult<ResourceTable> result = searchSession.search(ResourceTable.class)
-					.where(f -> {
-						TestPredBuilder builder = new TestPredBuilder(f);
-						return builder.buildAndOrPredicates(paramName, theQuantityAndOrTerms);
-					})
-					.fetchAll();
+				SearchResult<ResourceTable> result = searchSession
+						.search(ResourceTable.class)
+						.where(f -> {
+							TestPredBuilder builder = new TestPredBuilder(f);
+							return builder.buildAndOrPredicates(paramName, theQuantityAndOrTerms);
+						})
+						.fetchAll();
 				long totalHitCount = result.total().hitCount();
-//			List<ResourceTable> hits = result.hits();
+				//			List<ResourceTable> hits = result.hits();
 			});
 		}
-
-
 	}
-
-
-
 
 	private static class TestPredBuilder {
 
@@ -388,16 +382,19 @@ public class HSearchSandboxTest extends BaseJpaTest {
 
 		SearchPredicateFactory myPredicateFactory;
 
-		public TestPredBuilder(SearchPredicateFactory theF) { myPredicateFactory = theF; }
-
+		public TestPredBuilder(SearchPredicateFactory theF) {
+			myPredicateFactory = theF;
+		}
 
 		public PredicateFinalStep buildAndOrPredicates(
 				String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms) {
 
 			boolean isNested = isNested(theSearchParamName);
 
-			// we need to know if there is more than one "and" predicate (outer list) with more than one "or" predicate (inner list)
-			long maxOrPredicateSize = theAndOrTerms.stream().map(List::size).filter(s -> s > 1).count();
+			// we need to know if there is more than one "and" predicate (outer list) with more than one "or" predicate
+			// (inner list)
+			long maxOrPredicateSize =
+					theAndOrTerms.stream().map(List::size).filter(s -> s > 1).count();
 
 			BooleanPredicateClausesStep<?> topBool = myPredicateFactory.bool();
 			topBool.must(myPredicateFactory.match().field("myResourceType").matching("Observation"));
@@ -411,7 +408,8 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			for (List<IQueryParameterType> andTerm : theAndOrTerms) {
 				if (andTerm.size() == 1) {
 					// buildSinglePredicate
-//					activeBool.must(myPredicateFactory.match().field("nsp.value-quantity.quantity.value").matching(0.7));
+					//
+					//	activeBool.must(myPredicateFactory.match().field("nsp.value-quantity.quantity.value").matching(0.7));
 					addOnePredicate(activeBool, true, theSearchParamName, andTerm.get(0));
 					continue;
 				}
@@ -437,12 +435,13 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			}
 
 			if (isNested) {
-				topBool.must(myPredicateFactory.nested().objectField("nsp.value-quantity").nest(activeBool));
+				topBool.must(myPredicateFactory
+						.nested()
+						.objectField("nsp.value-quantity")
+						.nest(activeBool));
 			}
 			return topBool;
 		}
-
-
 
 		private boolean isNested(String theSearchParamName) {
 			if (theSearchParamName.equals("value-quantity")) {
@@ -452,9 +451,11 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			return false;
 		}
 
-
-		private void addOnePredicate(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
-				String theParamName, IQueryParameterType theParameterType) {
+		private void addOnePredicate(
+				BooleanPredicateClausesStep<?> theTopBool,
+				boolean theIsMust,
+				String theParamName,
+				IQueryParameterType theParameterType) {
 
 			if (theParameterType instanceof QuantityParam) {
 				addQuantityOrClauses(theTopBool, theIsMust, theParamName, theParameterType);
@@ -464,9 +465,11 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			throw new IllegalStateException("Shouldn't reach this code");
 		}
 
-
-		private void addQuantityOrClauses(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
-				String theSearchParamName, IQueryParameterType theParamType) {
+		private void addQuantityOrClauses(
+				BooleanPredicateClausesStep<?> theTopBool,
+				boolean theIsMust,
+				String theSearchParamName,
+				IQueryParameterType theParamType) {
 
 			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + INDEX_TYPE_QUANTITY;
 
@@ -477,9 +480,12 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			addQuantityTerms(theTopBool, theIsMust, activePrefix, qtyParam, fieldPath);
 		}
 
-
-		private void addQuantityTerms(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
-				ParamPrefixEnum theActivePrefix, QuantityParam theQtyParam, String theFieldPath) {
+		private void addQuantityTerms(
+				BooleanPredicateClausesStep<?> theTopBool,
+				boolean theIsMust,
+				ParamPrefixEnum theActivePrefix,
+				QuantityParam theQtyParam,
+				String theFieldPath) {
 
 			String valueFieldPath = theFieldPath + "." + QTY_VALUE;
 			PredicateFinalStep rangePred = getPrefixedRangePredicate(theActivePrefix, theQtyParam, valueFieldPath);
@@ -494,21 +500,21 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			}
 		}
 
-
-		private void addFieldPredicate(boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, String theFieldPath, String theValue) {
-			MatchPredicateOptionsStep<?> pred = myPredicateFactory.match().field(theFieldPath).matching(theValue);
+		private void addFieldPredicate(
+				boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, String theFieldPath, String theValue) {
+			MatchPredicateOptionsStep<?> pred =
+					myPredicateFactory.match().field(theFieldPath).matching(theValue);
 			addMustOrShould(theIsMust, theTopBool, pred);
 		}
 
-		private void addMustOrShould(boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, PredicateFinalStep thePredicate) {
+		private void addMustOrShould(
+				boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, PredicateFinalStep thePredicate) {
 			if (theIsMust) {
 				theTopBool.must(thePredicate);
 			} else {
 				theTopBool.should(thePredicate);
 			}
-
 		}
-
 
 		private PredicateFinalStep getPrefixedRangePredicate(
 				ParamPrefixEnum thePrefix, QuantityParam theQuantity, String valueFieldPath) {
@@ -518,61 +524,55 @@ public class HSearchSandboxTest extends BaseJpaTest {
 			double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
 
 			switch (thePrefix) {
-				//	searches for resource quantity between passed param value +/- 10%
+					//	searches for resource quantity between passed param value +/- 10%
 				case APPROXIMATE:
-						return myPredicateFactory.range()
+					return myPredicateFactory
+							.range()
 							.field(valueFieldPath)
 							.between(value - approxTolerance, value + approxTolerance);
 
-				// searches for resource quantity between passed param value +/- 5%
+					// searches for resource quantity between passed param value +/- 5%
 				case EQUAL:
-					return myPredicateFactory.range()
+					return myPredicateFactory
+							.range()
 							.field(valueFieldPath)
 							.between(value - defaultTolerance, value + defaultTolerance);
 
-				// searches for resource quantity > param value
+					// searches for resource quantity > param value
 				case GREATERTHAN:
-				case STARTS_AFTER:  // treated as GREATERTHAN because search doesn't handle ranges
-					return myPredicateFactory.range()
-							.field(valueFieldPath)
-							.greaterThan(value);
+				case STARTS_AFTER: // treated as GREATERTHAN because search doesn't handle ranges
+					return myPredicateFactory.range().field(valueFieldPath).greaterThan(value);
 
-				// searches for resource quantity not < param value
+					// searches for resource quantity not < param value
 				case GREATERTHAN_OR_EQUALS:
-					return myPredicateFactory.range()
-							.field(valueFieldPath)
-							.atLeast(value);
+					return myPredicateFactory.range().field(valueFieldPath).atLeast(value);
 
-				// searches for resource quantity < param value
+					// searches for resource quantity < param value
 				case LESSTHAN:
-				case ENDS_BEFORE:  // treated as LESSTHAN because search doesn't handle ranges
-					return myPredicateFactory.range()
-							.field(valueFieldPath)
-							.lessThan(value);
+				case ENDS_BEFORE: // treated as LESSTHAN because search doesn't handle ranges
+					return myPredicateFactory.range().field(valueFieldPath).lessThan(value);
 
-				// searches for resource quantity not > param value
+					// searches for resource quantity not > param value
 				case LESSTHAN_OR_EQUALS:
-					return myPredicateFactory.range()
-							.field(valueFieldPath)
-							.atMost(value);
+					return myPredicateFactory.range().field(valueFieldPath).atMost(value);
 
-				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+					// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 				case NOT_EQUAL:
 					return myPredicateFactory.bool(b -> {
-							b.should(myPredicateFactory.range()
+						b.should(myPredicateFactory
+								.range()
 								.field(valueFieldPath)
 								.between(null, value - defaultTolerance));
-							b.should(myPredicateFactory.range()
+						b.should(myPredicateFactory
+								.range()
 								.field(valueFieldPath)
 								.between(value + defaultTolerance, null));
-							b.minimumShouldMatchNumber(1);
-						});
+						b.minimumShouldMatchNumber(1);
+					});
 			}
 			throw new IllegalStateException("Should not reach here");
 		}
-
 	}
-
 
 	@Override
 	protected FhirContext getFhirContext() {

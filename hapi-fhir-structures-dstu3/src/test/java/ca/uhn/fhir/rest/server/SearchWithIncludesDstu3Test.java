@@ -43,31 +43,29 @@ public class SearchWithIncludesDstu3Test {
 
 	@Test
 	public void testSearchIncludesReferences() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true&_include=Patient:organization&_include=Organization:" + Organization.SP_PARTOF);
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort
+				+ "/Patient?_pretty=true&_include=Patient:organization&_include=Organization:"
+				+ Organization.SP_PARTOF);
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		// Response should include both the patient, and the organization that was referred to
 		// by a linked resource
-		
+
 		assertThat(responseContent, containsString("<name value=\"child\"/>"));
 		assertThat(responseContent, containsString("<name value=\"parent\"/>"));
 		assertThat(responseContent, containsString("<name value=\"grandparent\"/>"));
 		assertThat(responseContent, containsString("<mode value=\"include\"/>"));
-		
 	}
 
-
-	 @AfterAll
-	  public static void afterClassClearContext() throws Exception {
-	    JettyUtil.closeServer(ourServer);
-	    TestUtil.randomizeLocaleAndTimezone();
-	  }
-
-	
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.randomizeLocaleAndTimezone();
+	}
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
@@ -85,13 +83,13 @@ public class SearchWithIncludesDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -101,24 +99,24 @@ public class SearchWithIncludesDstu3Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
+		// @formatter:off
 		@Search()
 		public List<Patient> search(@IncludeParam() Set<Include> theIncludes) {
 			ourLog.info("Includes: {}", theIncludes);
-			
+
 			// Grandparent has ID, other orgs don't
 			Organization gp = new Organization();
 			gp.setId("Organization/GP");
 			gp.setName("grandparent");
-			
+
 			Organization parent = new Organization();
 			parent.setName("parent");
 			parent.getPartOf().setResource(gp);
-			
+
 			Organization child = new Organization();
 			child.setName("child");
 			child.getPartOf().setResource(parent);
-			
+
 			Patient patient = new Patient();
 			patient.setId("Patient/FOO");
 			patient.getManagingOrganization().setResource(child);
@@ -127,9 +125,7 @@ public class SearchWithIncludesDstu3Test {
 			retVal.add(patient);
 			return retVal;
 		}
-		//@formatter:on
-
+		// @formatter:on
 
 	}
-
 }

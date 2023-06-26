@@ -27,42 +27,44 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
+
 	protected int myPort;
 	protected String myServerBase;
 	protected IGenericClient myClient;
+
 	@Autowired
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-		.withServerBeforeAll(s -> {
-			s.registerProviders(myResourceProviders.createProviders());
-			s.registerProvider(mySystemProvider);
-			s.setDefaultResponseEncoding(EncodingEnum.XML);
-			s.setDefaultPrettyPrint(false);
+			.withServerBeforeAll(s -> {
+				s.registerProviders(myResourceProviders.createProviders());
+				s.registerProvider(mySystemProvider);
+				s.setDefaultResponseEncoding(EncodingEnum.XML);
+				s.setDefaultPrettyPrint(false);
 
-			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
-			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+				myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+				s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
+				s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(s, mySystemDao, myStorageSettings);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			s.setServerConformanceProvider(confProvider);
+				JpaConformanceProviderDstu2 confProvider =
+						new JpaConformanceProviderDstu2(s, mySystemDao, myStorageSettings);
+				confProvider.setImplementationDescription("THIS IS THE DESC");
+				s.setServerConformanceProvider(confProvider);
 
-			DatabaseBackedPagingProvider pagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
-			s.setPagingProvider(pagingProvider);
-
-		}).withServerBeforeEach(s -> {
-			myPort = myServer.getPort();
-			myServerBase = myServer.getBaseUrl();
-			myClient = myServer.getFhirClient();
-		});
+				DatabaseBackedPagingProvider pagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+				s.setPagingProvider(pagingProvider);
+			})
+			.withServerBeforeEach(s -> {
+				myPort = myServer.getPort();
+				myServerBase = myServer.getBaseUrl();
+				myClient = myServer.getFhirClient();
+			});
 
 	public BaseResourceProviderDstu2Test() {
 		super();
 	}
-
 
 	@AfterEach
 	public void after() throws Exception {
@@ -81,12 +83,12 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		List<String> names = new ArrayList<>();
 		for (Entry next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
-			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
+			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " "
+					+ nextPt.getNameFirstRep().getFamilyAsSingleString();
 			if (isNotBlank(nextStr)) {
 				names.add(nextStr);
 			}
 		}
 		return names;
 	}
-
 }

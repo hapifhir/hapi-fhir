@@ -18,9 +18,11 @@ public class StaticCapabilityStatementInterceptorTest {
 	@RegisterExtension
 	@Order(0)
 	protected RestfulServerExtension myRestfulServer = new RestfulServerExtension(FhirVersionEnum.R4);
+
 	@RegisterExtension
 	@Order(1)
-	protected HashMapResourceProviderExtension<Patient> myResourceProvider = new HashMapResourceProviderExtension<>(myRestfulServer, Patient.class);
+	protected HashMapResourceProviderExtension<Patient> myResourceProvider =
+			new HashMapResourceProviderExtension<>(myRestfulServer, Patient.class);
 
 	@Test
 	public void testCapabilityStatementResource() throws IOException {
@@ -30,13 +32,15 @@ public class StaticCapabilityStatementInterceptorTest {
 		myRestfulServer.getRestfulServer().registerInterceptor(interceptor);
 		try {
 
-			CapabilityStatement cs = myRestfulServer.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+			CapabilityStatement cs = myRestfulServer
+					.getFhirClient()
+					.capabilities()
+					.ofType(CapabilityStatement.class)
+					.execute();
 			assertEquals("Help I'm a Bug", cs.getSoftware().getName());
 
 		} finally {
 			myRestfulServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
 	}
-
-
 }

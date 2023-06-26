@@ -26,9 +26,12 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
-		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate"))
+				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier"))
+				.thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active"))
+				.thenReturn(mock(RuntimeSearchParam.class));
 
 		{
 			myLeft = new Patient();
@@ -80,7 +83,6 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 
 		result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH, 1L, 1.0, false, false, result);
-
 	}
 
 	@Test
@@ -92,16 +94,16 @@ public class FhirPathResourceMatcherR4Test extends BaseMdmRulesR4Test {
 
 	protected MdmRulesJson buildOrderedGivenNameRules(MatchTypeEnum theMatcherEnum) {
 		MdmFieldMatchJson firstGivenNameMatchField = new MdmFieldMatchJson()
-			.setName(PATIENT_GIVEN_FIRST)
-			.setResourceType("Patient")
-			.setFhirPath("name.given.first()")
-			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
+				.setName(PATIENT_GIVEN_FIRST)
+				.setResourceType("Patient")
+				.setFhirPath("name.given.first()")
+				.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmFieldMatchJson secondGivenNameMatchField = new MdmFieldMatchJson()
-			.setName(PATIENT_GIVEN)
-			.setResourceType("Patient")
-			.setFhirPath("name.given[1]")
-			.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
+				.setName(PATIENT_GIVEN)
+				.setResourceType("Patient")
+				.setFhirPath("name.given[1]")
+				.setMatcher(new MdmMatcherJson().setAlgorithm(theMatcherEnum));
 
 		MdmRulesJson retval = new MdmRulesJson();
 		retval.setVersion("test version");

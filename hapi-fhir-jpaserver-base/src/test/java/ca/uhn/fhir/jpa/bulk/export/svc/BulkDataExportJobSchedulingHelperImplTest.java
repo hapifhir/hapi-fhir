@@ -29,7 +29,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -39,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
 
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,22 +53,31 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class BulkDataExportJobSchedulingHelperImplTest {
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
+
 	@Mock
 	private JpaStorageSettings myStorageSettings;
+
 	@Mock
 	private PlatformTransactionManager myTxManager;
+
 	@Mock
 	private TransactionTemplate myTxTemplate;
+
 	@Mock
 	private IJobPersistence myJpaJobPersistence;
+
 	@Mock
 	private BulkExportHelperService myBulkExportHelperSvc;
+
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
 	@Mock
 	private IFhirResourceDao<IBaseBinary> myBinaryDao;
+
 	@Captor
 	private ArgumentCaptor<Date> myCutoffCaptor;
+
 	private BulkDataExportJobSchedulingHelperImpl myBulkDataExportJobSchedulingHelper;
 
 	@Test
@@ -90,14 +99,15 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-
 		verify(myJpaJobPersistence, never()).fetchInstance(anyString());
 		verify(myBulkExportHelperSvc, never()).toId(anyString());
 		verify(myBinaryDao, never()).delete(any(IIdType.class), any(SystemRequestDetails.class));
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
+		assertEquals(
+				DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND),
+				DateUtils.truncate(cutoffDate, Calendar.SECOND));
 	}
 
 	@Test
@@ -160,7 +170,10 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
 				verify(myBulkExportHelperSvc).toId(jobInstance.getInstanceId() + "-binary-" + index);
-				verify(myBinaryDao).delete(eq(toId(jobInstance.getInstanceId() + "-binary-" + index)), any(SystemRequestDetails.class));
+				verify(myBinaryDao)
+						.delete(
+								eq(toId(jobInstance.getInstanceId() + "-binary-" + index)),
+								any(SystemRequestDetails.class));
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
@@ -183,7 +196,10 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
 				verify(myBulkExportHelperSvc).toId(jobInstance.getInstanceId() + "-binary-" + index);
-				verify(myBinaryDao).delete(eq(toId(jobInstance.getInstanceId() + "-binary-" + index)), any(SystemRequestDetails.class));
+				verify(myBinaryDao)
+						.delete(
+								eq(toId(jobInstance.getInstanceId() + "-binary-" + index)),
+								any(SystemRequestDetails.class));
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
@@ -206,7 +222,10 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
 				verify(myBulkExportHelperSvc).toId(jobInstance.getInstanceId() + "-binary-" + index);
-				verify(myBinaryDao).delete(eq(toId(jobInstance.getInstanceId() + "-binary-" + index)), any(SystemRequestDetails.class));
+				verify(myBinaryDao)
+						.delete(
+								eq(toId(jobInstance.getInstanceId() + "-binary-" + index)),
+								any(SystemRequestDetails.class));
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
@@ -220,7 +239,8 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	public void purgeExpiredFilesMultipleJobsMultipleBinariesTwoHourRetention() {
 		final int expectedRetentionHours = 2;
 		final int numBinariesPerJob = 3;
-		final List<JobInstance> jobInstances = getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED, StatusEnum.COMPLETED, StatusEnum.COMPLETED);
+		final List<JobInstance> jobInstances =
+				getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED, StatusEnum.COMPLETED, StatusEnum.COMPLETED);
 
 		setupTestEnabled(expectedRetentionHours, jobInstances);
 
@@ -230,7 +250,10 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
 				verify(myBulkExportHelperSvc).toId(jobInstance.getInstanceId() + "-binary-" + index);
-				verify(myBinaryDao).delete(eq(toId(jobInstance.getInstanceId() + "-binary-" + index)), any(SystemRequestDetails.class));
+				verify(myBinaryDao)
+						.delete(
+								eq(toId(jobInstance.getInstanceId() + "-binary-" + index)),
+								any(SystemRequestDetails.class));
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
@@ -244,7 +267,8 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	public void purgeExpiredFilesMultipleJobsMultipleBinariesTwoHourRetentionMixedStatuses() {
 		final int expectedRetentionHours = 2;
 		final int numBinariesPerJob = 3;
-		final List<JobInstance> jobInstances = getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.COMPLETED);
+		final List<JobInstance> jobInstances =
+				getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED, StatusEnum.FAILED, StatusEnum.COMPLETED);
 
 		setupTestEnabled(expectedRetentionHours, jobInstances);
 
@@ -255,7 +279,10 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			if (StatusEnum.FAILED != jobInstance.getStatus()) {
 				for (int index = 0; index < numBinariesPerJob; index++) {
 					verify(myBulkExportHelperSvc).toId(jobInstance.getInstanceId() + "-binary-" + index);
-					verify(myBinaryDao).delete(eq(toId(jobInstance.getInstanceId() + "-binary-" + index)), any(SystemRequestDetails.class));
+					verify(myBinaryDao)
+							.delete(
+									eq(toId(jobInstance.getInstanceId() + "-binary-" + index)),
+									any(SystemRequestDetails.class));
 				}
 
 				verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
@@ -270,9 +297,9 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	@Nonnull
 	private Date computeDateFromConfig(int theExpectedRetentionHours) {
 		return Date.from(LocalDateTime.now()
-			.minusHours(theExpectedRetentionHours)
-			.atZone(ZoneId.systemDefault())
-			.toInstant());
+				.minusHours(theExpectedRetentionHours)
+				.atZone(ZoneId.systemDefault())
+				.toInstant());
 	}
 
 	private void setupTestDisabled() {
@@ -287,15 +314,24 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		setupTest(true, 1, theJobInstances, false);
 	}
 
-	private void setupTest(boolean theIsEnabled, int theRetentionHours, List<JobInstance> theJobInstances, boolean theIsEnableBinaryMocks) {
-		myBulkDataExportJobSchedulingHelper = new BulkDataExportJobSchedulingHelperImpl(myDaoRegistry, myTxManager, myStorageSettings, myBulkExportHelperSvc, myJpaJobPersistence, myTxTemplate);
+	private void setupTest(
+			boolean theIsEnabled,
+			int theRetentionHours,
+			List<JobInstance> theJobInstances,
+			boolean theIsEnableBinaryMocks) {
+		myBulkDataExportJobSchedulingHelper = new BulkDataExportJobSchedulingHelperImpl(
+				myDaoRegistry,
+				myTxManager,
+				myStorageSettings,
+				myBulkExportHelperSvc,
+				myJpaJobPersistence,
+				myTxTemplate);
 
 		when(myStorageSettings.isEnableTaskBulkExportJobExecution()).thenReturn(theIsEnabled);
 
 		if (!theIsEnabled) {
 			return;
 		}
-
 
 		final Answer<List<JobInstance>> fetchInstancesAnswer = theInvocationOnMock -> {
 			final TransactionCallback<List<JobInstance>> transactionCallback = theInvocationOnMock.getArgument(0);
@@ -310,17 +346,16 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			return null;
 		};
 
-		when(myJpaJobPersistence.fetchInstances(eq(Batch2JobDefinitionConstants.BULK_EXPORT),
-			eq(StatusEnum.getEndedStatuses()),
-			myCutoffCaptor.capture(),
-			any(PageRequest.class)))
-			.thenReturn(theJobInstances);
+		when(myJpaJobPersistence.fetchInstances(
+						eq(Batch2JobDefinitionConstants.BULK_EXPORT),
+						eq(StatusEnum.getEndedStatuses()),
+						myCutoffCaptor.capture(),
+						any(PageRequest.class)))
+				.thenReturn(theJobInstances);
 
-		when(myTxTemplate.execute(any()))
-			.thenAnswer(fetchInstancesAnswer).thenAnswer(purgeExpiredJobsAnswer);
+		when(myTxTemplate.execute(any())).thenAnswer(fetchInstancesAnswer).thenAnswer(purgeExpiredJobsAnswer);
 
-		when(myStorageSettings.getBulkExportFileRetentionPeriodHours())
-			.thenReturn(theRetentionHours);
+		when(myStorageSettings.getBulkExportFileRetentionPeriodHours()).thenReturn(theRetentionHours);
 
 		if (theJobInstances.isEmpty()) {
 			return;
@@ -337,7 +372,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		when(myBulkExportHelperSvc.toId(anyString()))
-			.thenAnswer(theInvocationOnMock -> toId(theInvocationOnMock.getArgument(0)));
+				.thenAnswer(theInvocationOnMock -> toId(theInvocationOnMock.getArgument(0)));
 
 		when(myDaoRegistry.getResourceDao(Binary.class.getSimpleName())).thenReturn(myBinaryDao);
 	}
@@ -351,16 +386,17 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	@Nonnull
 	private static List<JobInstance> getJobInstances(int theNumBinaries, StatusEnum... theStatusEnums) {
 		return IntStream.range(0, theStatusEnums.length)
-			.mapToObj(index -> Pair.of(index, theStatusEnums[index]))
-			.map(pair -> {
-				final JobInstance jobInstance = new JobInstance();
-				final StatusEnum status = pair.getSecond();
-				final String instanceId = status.name() + pair.getFirst();
-				jobInstance.setInstanceId(instanceId);
-				jobInstance.setReport(serialize(getBulkExportJobResults(instanceId, theNumBinaries)));
-				jobInstance.setStatus(status);
-				return jobInstance;
-			}).toList();
+				.mapToObj(index -> Pair.of(index, theStatusEnums[index]))
+				.map(pair -> {
+					final JobInstance jobInstance = new JobInstance();
+					final StatusEnum status = pair.getSecond();
+					final String instanceId = status.name() + pair.getFirst();
+					jobInstance.setInstanceId(instanceId);
+					jobInstance.setReport(serialize(getBulkExportJobResults(instanceId, theNumBinaries)));
+					jobInstance.setStatus(status);
+					return jobInstance;
+				})
+				.toList();
 	}
 
 	private static String serialize(BulkExportJobResults theBulkExportJobResults) {
@@ -370,10 +406,11 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	@Nonnull
 	private static BulkExportJobResults getBulkExportJobResults(String theInstanceId, int theNumBinaries) {
 		final BulkExportJobResults bulkExportJobResults = new BulkExportJobResults();
-		bulkExportJobResults.setResourceTypeToBinaryIds(Map.of("Patient",
-			IntStream.range(0, theNumBinaries)
-				.mapToObj(theInt -> theInstanceId + "-binary-" + theInt)
-				.toList()));
+		bulkExportJobResults.setResourceTypeToBinaryIds(Map.of(
+				"Patient",
+				IntStream.range(0, theNumBinaries)
+						.mapToObj(theInt -> theInstanceId + "-binary-" + theInt)
+						.toList()));
 		return bulkExportJobResults;
 	}
 }

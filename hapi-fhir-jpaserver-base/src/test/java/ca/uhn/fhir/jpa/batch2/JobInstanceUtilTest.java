@@ -23,8 +23,5 @@ class JobInstanceUtilTest {
 		JobInstance instanceCopyBack = JobInstanceUtil.fromEntityToInstance(entity);
 
 		assertTrue(EqualsBuilder.reflectionEquals(instance, instanceCopyBack));
-
-
 	}
-
 }

@@ -26,7 +26,10 @@ class InMemoryMatchResultTest {
 
 		assertNoMatchWithReason(InMemoryMatchResult.and(unsupported1, success), unsupported1.getUnsupportedReason());
 		assertNoMatchWithReason(InMemoryMatchResult.and(unsupported1, noMatch), unsupported1.getUnsupportedReason());
-		assertNoMatchWithReason(InMemoryMatchResult.and(unsupported1, unsupported2), List.of(unsupported1.getUnsupportedReason(), unsupported2.getUnsupportedReason()).toString());
+		assertNoMatchWithReason(
+				InMemoryMatchResult.and(unsupported1, unsupported2),
+				List.of(unsupported1.getUnsupportedReason(), unsupported2.getUnsupportedReason())
+						.toString());
 	}
 
 	@Test
@@ -41,7 +44,10 @@ class InMemoryMatchResultTest {
 
 		assertMatch(InMemoryMatchResult.or(unsupported1, success));
 		assertNoMatchWithReason(InMemoryMatchResult.or(unsupported1, noMatch), unsupported1.getUnsupportedReason());
-		assertNoMatchWithReason(InMemoryMatchResult.or(unsupported1, unsupported2), List.of(unsupported1.getUnsupportedReason(), unsupported2.getUnsupportedReason()).toString());
+		assertNoMatchWithReason(
+				InMemoryMatchResult.or(unsupported1, unsupported2),
+				List.of(unsupported1.getUnsupportedReason(), unsupported2.getUnsupportedReason())
+						.toString());
 	}
 
 	private void assertNoMatchWithReason(InMemoryMatchResult theMerged, String theExpectedUnsupportedReason) {
@@ -52,8 +58,8 @@ class InMemoryMatchResultTest {
 	private void assertMatch(InMemoryMatchResult theMerged) {
 		assertTrue(theMerged.matched());
 	}
+
 	private void assertNoMatch(InMemoryMatchResult theMerged) {
 		assertFalse(theMerged.matched());
 	}
 }
-

@@ -38,7 +38,6 @@ public class ReadDstu2_1Test {
 	private static int ourPort;
 	private static Server ourServer;
 
-
 	@Test
 	public void testRead() throws Exception {
 
@@ -52,22 +51,25 @@ public class ReadDstu2_1Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
-		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		assertEquals(
+				"http://localhost:" + ourPort + "/Patient/2/_history/2",
+				status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
-		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"2\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				responseContent,
+				stringContainsInOrder(
+						"<Patient xmlns=\"http://hl7.org/fhir\">",
+						"<id value=\"2\"/>",
+						"<meta>",
+						"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+						"</meta>",
+						"<modifierExtension url=\"http://example.com/ext/date\">",
+						"<valueDate value=\"2011-01-01\"/>",
+						"</modifierExtension>",
+						"</Patient>"));
+		// @formatter:on
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -89,13 +91,13 @@ public class ReadDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -105,7 +107,7 @@ public class ReadDstu2_1Test {
 			return Patient.class;
 		}
 
-		@Read(version=true)
+		@Read(version = true)
 		public MyPatientWithExtensions read(@IdParam IdType theIdParam) {
 			MyPatientWithExtensions p0 = new MyPatientWithExtensions();
 			p0.setId(theIdParam);
@@ -115,8 +117,5 @@ public class ReadDstu2_1Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
-
-
 	}
-
 }

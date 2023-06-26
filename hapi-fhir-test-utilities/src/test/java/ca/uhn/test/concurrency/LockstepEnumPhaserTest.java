@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.FINISHED;
 import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.ONE;
@@ -38,14 +38,17 @@ class LockstepEnumPhaserTest {
 	final Comparator<Pair<Integer, Stages>> myProgressStageComparator = Comparator.comparing(Pair::getRight);
 
 	enum Stages {
-		ONE, TWO, THREE, FINISHED
+		ONE,
+		TWO,
+		THREE,
+		FINISHED
 	}
 
 	LockstepEnumPhaser<Stages> myPhaser;
 
 	@Test
 	void phaserWithOnePariticpant_worksFine() {
-	    // given
+		// given
 		myPhaser = new LockstepEnumPhaser<>(1, Stages.class);
 
 		myPhaser.assertInPhase(ONE);
@@ -66,7 +69,7 @@ class LockstepEnumPhaserTest {
 
 		// run two copies of the same schedule
 		AtomicInteger i = new AtomicInteger(0);
-		Callable<Integer> schedule = ()->{
+		Callable<Integer> schedule = () -> {
 			// get unique ids for each thread.
 			int threadId = i.getAndIncrement();
 
@@ -111,7 +114,7 @@ class LockstepEnumPhaserTest {
 		// run one simple schedule
 		Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
 		// this schedule will start half-way in
-		Callable<Integer> schedule2 = ()->{
+		Callable<Integer> schedule2 = () -> {
 			int threadId = 2;
 			ourLog.info("Starting schedule2");
 
@@ -131,7 +134,7 @@ class LockstepEnumPhaserTest {
 			return 2;
 		};
 		// this schedule will start schedule 2 half-way
-		Callable<Integer> schedule3 = ()->{
+		Callable<Integer> schedule3 = () -> {
 			int threadId = 3;
 			myPhaser.assertInPhase(ONE);
 			ourLog.info("Starting schedule3");
@@ -163,12 +166,11 @@ class LockstepEnumPhaserTest {
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
-
 	}
 
 	@Nonnull
 	private Callable<Integer> buildSimpleCountingSchedule(int theThreadId) {
-		Callable<Integer> schedule = ()->{
+		Callable<Integer> schedule = () -> {
 			ourLog.info("Starting schedule - {}", theThreadId);
 
 			myPhaser.assertInPhase(ONE);
@@ -192,7 +194,8 @@ class LockstepEnumPhaserTest {
 	}
 
 	@Test
-	void aShortScheduleDeregister_allowsRemainingParticipantsToContinue() throws ExecutionException, InterruptedException {
+	void aShortScheduleDeregister_allowsRemainingParticipantsToContinue()
+			throws ExecutionException, InterruptedException {
 		// given
 		myPhaser = new LockstepEnumPhaser<>(3, Stages.class);
 
@@ -228,8 +231,6 @@ class LockstepEnumPhaserTest {
 		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2*3 + 2));
-
+		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2 * 3 + 2));
 	}
-
 }

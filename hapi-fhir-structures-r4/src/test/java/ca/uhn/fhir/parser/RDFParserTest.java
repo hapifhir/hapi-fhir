@@ -17,7 +17,6 @@
  * run test:
  *   hapi-fhir/hapi-fhir-structures-r4$ mvn -Dtest=ca.uhn.fhir.parser.RDFParserTest test
  */
-
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -36,7 +35,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,7 +42,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +86,7 @@ public class RDFParserTest extends BaseTest {
 	@ParameterizedTest
 	@MethodSource("getInputFiles")
 	public void testRDFRoundTrip(String referenceFilePath) throws IOException {
-		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/")+1);
+		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/") + 1);
 		IBaseResource referenceResource = parseJson(new FileInputStream(referenceFilePath));
 		String referenceJson = serializeJson(ourCtx, referenceResource);
 
@@ -103,14 +100,11 @@ public class RDFParserTest extends BaseTest {
 
 		// Compare original JSON-based resource against RDF-based resource
 		String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
-		if (!((Base)viaTurtleResource).equalsDeep((Base)referenceResource)) {
+		if (!((Base) viaTurtleResource).equalsDeep((Base) referenceResource)) {
 			String failMessage = referenceFileName + ": failed to round-trip Turtle ";
 			if (referenceJson.equals(viaTurtleJson))
-				throw new Error(failMessage
-					+ "\nttl: " + turtleString
-					+ "\nexp: " + referenceJson);
-			else
-				assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
+				throw new Error(failMessage + "\nttl: " + turtleString + "\nexp: " + referenceJson);
+			else assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
 		}
 	}
 
@@ -118,9 +112,8 @@ public class RDFParserTest extends BaseTest {
 		ClassLoader cl = RDFParserTest.class.getClassLoader();
 		List<String> resourceList = new ArrayList<>();
 		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
-		Resource[] resources = resolver.getResources("classpath:rdf-test-input/*.json") ;
-		for (Resource resource: resources)
-			resourceList.add(resource.getFile().getPath());
+		Resource[] resources = resolver.getResources("classpath:rdf-test-input/*.json");
+		for (Resource resource : resources) resourceList.add(resource.getFile().getPath());
 
 		return resourceList.stream();
 	}
@@ -160,21 +153,22 @@ public class RDFParserTest extends BaseTest {
 		return ret;
 	}
 
-	public void validateRdf(String rdfContent, String referenceFileName, IBaseResource referenceResource) throws IOException {
+	public void validateRdf(String rdfContent, String referenceFileName, IBaseResource referenceResource)
+			throws IOException {
 		String baseIRI = "http://a.example/shex/";
 		RDF4J factory = new RDF4J();
-		GlobalFactory.RDFFactory = factory; //set the global factory used in shexjava
+		GlobalFactory.RDFFactory = factory; // set the global factory used in shexjava
 		Model data = Rio.parse(new StringReader(rdfContent), baseIRI, RDFFormat.TURTLE);
 		FixedShapeMapEntry fixedMapEntry = new FixedShapeMapEntry(factory, data, referenceResource.fhirType(), baseIRI);
 		Graph dataGraph = factory.asGraph(data); // create the graph
 		ValidationAlgorithm validation = new RecursiveValidation(fhirSchema, dataGraph);
 		validation.validate(fixedMapEntry.node, fixedMapEntry.shape);
 		boolean result = validation.getTyping().isConformant(fixedMapEntry.node, fixedMapEntry.shape);
-		assertTrue(result,
-			   referenceFileName + ": failed to validate " + fixedMapEntry
-			   + "\n" + referenceFileName
-			   + "\n" + rdfContent
-			   );
+		assertTrue(
+				result,
+				referenceFileName + ": failed to validate " + fixedMapEntry
+						+ "\n" + referenceFileName
+						+ "\n" + rdfContent);
 	}
 
 	// Shape Expressions functions
@@ -186,25 +180,29 @@ public class RDFParserTest extends BaseTest {
 			String rootSubjectIri = null;
 			// StmtIterator i = data.listStatements();
 			for (org.eclipse.rdf4j.model.Resource resourceStream : data.subjects()) {
-//				if (resourceStream instanceof SimpleIRI) {
-					Model filteredModel = data.filter(resourceStream, factory.getValueFactory().createIRI(NODE_ROLE_IRI), factory.getValueFactory().createIRI(TREE_ROOT_IRI), (org.eclipse.rdf4j.model.Resource)null);
-					if (filteredModel != null && filteredModel.subjects().size() == 1) {
-						Optional<org.eclipse.rdf4j.model.Resource> rootResource = filteredModel.subjects().stream().findFirst();
-						if (rootResource.isPresent()) {
-							rootSubjectIri = rootResource.get().stringValue();
-							break;
-						}
-
+				//				if (resourceStream instanceof SimpleIRI) {
+				Model filteredModel = data.filter(
+						resourceStream,
+						factory.getValueFactory().createIRI(NODE_ROLE_IRI),
+						factory.getValueFactory().createIRI(TREE_ROOT_IRI),
+						(org.eclipse.rdf4j.model.Resource) null);
+				if (filteredModel != null && filteredModel.subjects().size() == 1) {
+					Optional<org.eclipse.rdf4j.model.Resource> rootResource =
+							filteredModel.subjects().stream().findFirst();
+					if (rootResource.isPresent()) {
+						rootSubjectIri = rootResource.get().stringValue();
+						break;
 					}
-//				}
+				}
+				//				}
 			}
 
 			// choose focus node and shapelabel
 			this.node = rootSubjectIri.indexOf(":") == -1
-				? factory.createBlankNode(rootSubjectIri)
-			 	: factory.createIRI(rootSubjectIri);
+					? factory.createBlankNode(rootSubjectIri)
+					: factory.createIRI(rootSubjectIri);
 			Label shapeLabel = new Label(factory.createIRI(FHIR_SHAPE_PREFIX + resourceType));
-//			this.node = focusNode;
+			//			this.node = focusNode;
 			this.shape = shapeLabel;
 		}
 
@@ -212,5 +210,4 @@ public class RDFParserTest extends BaseTest {
 			return "<" + node.toString() + ">@" + shape.toPrettyString();
 		}
 	}
-
 }

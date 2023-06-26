@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -36,14 +35,15 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + "|" + longitude,
-			myFhirContext.getResourceDefinition("Location"));
+				"Location?" + Location.SP_NEAR + "=" + latitude + "|" + longitude,
+				myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
@@ -54,7 +54,8 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		Location location = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		location.setPosition(position);
 
 		IIdType id = myLocationDao.create(location).getId();
@@ -62,7 +63,9 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		OrganizationAffiliation aff = new OrganizationAffiliation();
 		aff.addLocation(new Reference(id));
 		IIdType affId = myOrganizationAffiliationDao.create(aff).getId();
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl("OrganizationAffiliation?location." + Location.SP_NEAR + "=" + latitude + "|" + longitude, myFhirContext.getResourceDefinition("OrganizationAffiliation"));
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"OrganizationAffiliation?location." + Location.SP_NEAR + "=" + latitude + "|" + longitude,
+				myFhirContext.getResourceDefinition("OrganizationAffiliation"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myOrganizationAffiliationDao.search(map));
 		assertThat(ids, contains(affId.toUnqualifiedVersionless().toString()));
@@ -70,7 +73,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testNearSearchDistanceOnSpecialParameterChained() {
-		//Given a special SP exists
+		// Given a special SP exists
 		SearchParameter parameter = new SearchParameter();
 		parameter.setId("location-postalcode-near");
 		parameter.setName("arbitrary-name");
@@ -82,7 +85,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		mySearchParameterDao.update(parameter, new SystemRequestDetails());
 		mySearchParamRegistry.forceRefresh();
 
-		//And given an OrganizationAffiliation->Location reference
+		// And given an OrganizationAffiliation->Location reference
 		Location location = new Location();
 		location.getAddress().setPostalCode("60108");
 		IIdType locId = myLocationDao.create(location).getId();
@@ -92,19 +95,22 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		IIdType affId = myOrganizationAffiliationDao.create(aff).getId();
 
 		{
-			//When: We search on the location
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl("Location?postalcode-near=60108", myFhirContext.getResourceDefinition("Location"));
+			// When: We search on the location
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+					"Location?postalcode-near=60108", myFhirContext.getResourceDefinition("Location"));
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			//Then: it should find the location
+			// Then: it should find the location
 			assertThat(ids, contains(locId.toUnqualifiedVersionless().toString()));
 		}
 
 		{
-			//When: We search on the OrganizationAffiliation via its location in a chain
-			SearchParameterMap map = myMatchUrlService.translateMatchUrl("OrganizationAffiliation?location.postalcode-near=60108", myFhirContext.getResourceDefinition("OrganizationAffiliation"));
+			// When: We search on the OrganizationAffiliation via its location in a chain
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+					"OrganizationAffiliation?location.postalcode-near=60108",
+					myFhirContext.getResourceDefinition("OrganizationAffiliation"));
 			List<String> ids = toUnqualifiedVersionlessIdValues(myOrganizationAffiliationDao.search(map));
 
-			//Then: It should find the OrganizationAffiliation
+			// Then: It should find the OrganizationAffiliation
 			assertThat(ids, contains(affId.toUnqualifiedVersionless().toString()));
 		}
 	}
@@ -114,23 +120,23 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 		{
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0",
-				myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0",
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
 		}
 		{
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0.0",
-				myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0.0",
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -142,17 +148,19 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-					bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
+							+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" + bigEnoughDistance,
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -161,15 +169,14 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
 
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
+							+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" + tooSmallDistance,
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
 		}
-
 	}
 
 	@Test
@@ -177,17 +184,19 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_TAVEUNI;
 		double longitude = CoordCalculatorTestUtil.LONGITIDE_TAVEUNI;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		{ // We match even when the box crosses the anti-meridian
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_TAVEUNI;
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_TAVEUNI + "|"
-					+ CoordCalculatorTestUtil.LONGITIDE_TAVEUNI + "|" +
-					bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_TAVEUNI + "|"
+							+ CoordCalculatorTestUtil.LONGITIDE_TAVEUNI + "|" + bigEnoughDistance,
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -195,14 +204,13 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		{ // We don't match outside a box that crosses the anti-meridian
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_TAVEUNI;
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
-					+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
+							+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" + tooSmallDistance,
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
 		}
 	}
-
 }

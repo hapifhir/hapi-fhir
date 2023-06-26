@@ -20,7 +20,6 @@ public class SchemaBaseValidatorTest {
 		assertNotNull(schema);
 	}
 
-
 	@Test
 	public void testLoadXmlFail() {
 		SchemaBaseValidator validator = new SchemaBaseValidator(FhirContext.forR4());

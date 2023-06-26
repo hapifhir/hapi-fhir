@@ -37,7 +37,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
-public class TransactionCapturingProviderExtension<T extends IBaseBundle> implements BeforeEachCallback, AfterEachCallback {
+public class TransactionCapturingProviderExtension<T extends IBaseBundle>
+		implements BeforeEachCallback, AfterEachCallback {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionCapturingProviderExtension.class);
 	private final RestfulServerExtension myRestfulServerExtension;
@@ -46,7 +47,8 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 	/**
 	 * Constructor
 	 */
-	public TransactionCapturingProviderExtension(RestfulServerExtension theRestfulServerExtension, Class<T> theBundleType) {
+	public TransactionCapturingProviderExtension(
+			RestfulServerExtension theRestfulServerExtension, Class<T> theBundleType) {
 		myRestfulServerExtension = theRestfulServerExtension;
 	}
 
@@ -63,7 +65,7 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 
 	public void waitForTransactionCount(int theCount) {
 		assertThat(theCount, greaterThanOrEqualTo(myProvider.size()));
-		await().until(()->myProvider.size(), equalTo(theCount));
+		await().until(() -> myProvider.size(), equalTo(theCount));
 	}
 
 	public List<T> getTransactions() {
@@ -92,6 +94,4 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 			return Collections.unmodifiableList(myInputBundles);
 		}
 	}
-
-
 }

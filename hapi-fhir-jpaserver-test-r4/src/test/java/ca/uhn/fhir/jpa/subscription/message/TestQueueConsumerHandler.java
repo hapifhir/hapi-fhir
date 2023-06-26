@@ -13,13 +13,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class TestQueueConsumerHandler<T> implements MessageHandler {
 	private static final Logger ourLog = getLogger(TestQueueConsumerHandler.class);
 	List<T> myMessages;
+
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
-		getMessages().add((T)message);
+		getMessages().add((T) message);
 		ourLog.info("Received message: {}", message);
 	}
+
 	public void clearMessages() {
-		myMessages.clear();;
+		myMessages.clear();
+		;
 	}
 
 	public List<T> getMessages() {

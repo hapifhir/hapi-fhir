@@ -37,11 +37,11 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,11 +57,18 @@ public interface ITestDataBuilder {
 	/**
 	 * Name chosen to avoid potential for conflict. This is an internal API to this interface.
 	 */
-	static void __setPrimitiveChild(FhirContext theFhirContext, IBase theTarget, String theElementName, String theElementType, String theValue) {
-		BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) theFhirContext.getElementDefinition(theTarget.getClass());
+	static void __setPrimitiveChild(
+			FhirContext theFhirContext,
+			IBase theTarget,
+			String theElementName,
+			String theElementType,
+			String theValue) {
+		BaseRuntimeElementCompositeDefinition def =
+				(BaseRuntimeElementCompositeDefinition) theFhirContext.getElementDefinition(theTarget.getClass());
 		BaseRuntimeChildDefinition activeChild = def.getChildByName(theElementName);
 
-		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
+		IPrimitiveType<?> booleanType =
+				(IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
@@ -82,14 +89,17 @@ public interface ITestDataBuilder {
 
 	default ICreationArgument withFamily(String theFamily) {
 		return t -> {
-			IPrimitiveType<?> family = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
+			IPrimitiveType<?> family = (IPrimitiveType<?>)
+					getFhirContext().getElementDefinition("string").newInstance();
 			family.setValueAsString(theFamily);
 
-			BaseRuntimeElementCompositeDefinition<?> humanNameDef = (BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition("HumanName");
+			BaseRuntimeElementCompositeDefinition<?> humanNameDef =
+					(BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition("HumanName");
 			ICompositeType humanName = (ICompositeType) humanNameDef.newInstance();
 			humanNameDef.getChildByName("family").getMutator().addValue(humanName, family);
 
-			BaseRuntimeElementCompositeDefinition resourceDef = (BaseRuntimeElementCompositeDefinition) getFhirContext().getElementDefinition(t.getClass());
+			BaseRuntimeElementCompositeDefinition resourceDef =
+					(BaseRuntimeElementCompositeDefinition) getFhirContext().getElementDefinition(t.getClass());
 			resourceDef.getChildByName("name").getMutator().addValue(t, humanName);
 		};
 	}
@@ -134,18 +144,22 @@ public interface ITestDataBuilder {
 	 */
 	default ICreationArgument withIdentifier(String theSystem, String theValue) {
 		return t -> {
-			IPrimitiveType<?> system = (IPrimitiveType<?>) getFhirContext().getElementDefinition("uri").newInstance();
+			IPrimitiveType<?> system = (IPrimitiveType<?>)
+					getFhirContext().getElementDefinition("uri").newInstance();
 			system.setValueAsString(theSystem);
 
-			IPrimitiveType<?> value = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
+			IPrimitiveType<?> value = (IPrimitiveType<?>)
+					getFhirContext().getElementDefinition("string").newInstance();
 			value.setValueAsString(theValue);
 
-			BaseRuntimeElementCompositeDefinition<?> identifierDef = (BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition("Identifier");
+			BaseRuntimeElementCompositeDefinition<?> identifierDef =
+					(BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition("Identifier");
 			ICompositeType identifier = (ICompositeType) identifierDef.newInstance();
 			identifierDef.getChildByName("system").getMutator().addValue(identifier, system);
 			identifierDef.getChildByName("value").getMutator().addValue(identifier, value);
 
-			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((Class<? extends IBaseResource>) t.getClass());
+			RuntimeResourceDefinition resourceDef =
+					getFhirContext().getResourceDefinition((Class<? extends IBaseResource>) t.getClass());
 			resourceDef.getChildByName("identifier").getMutator().addValue(t, identifier);
 		};
 	}
@@ -160,36 +174,37 @@ public interface ITestDataBuilder {
 	default ICreationArgument withId(String theId) {
 		return t -> {
 			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
-			((IBaseResource)t).setId(theId);
+			((IBaseResource) t).setId(theId);
 		};
 	}
 
 	default ICreationArgument withId(IIdType theId) {
-		return t -> ((IBaseResource)t).setId(theId.toUnqualifiedVersionless());
+		return t -> ((IBaseResource) t).setId(theId.toUnqualifiedVersionless());
 	}
 
 	default ICreationArgument withTag(String theSystem, String theCode) {
-		return t -> ((IBaseResource)t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
+		return t -> ((IBaseResource) t).getMeta().addTag().setSystem(theSystem).setCode(theCode);
 	}
 
 	default ICreationArgument withSecurity(String theSystem, String theCode) {
-		return t -> ((IBaseResource)t).getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
+		return t ->
+				((IBaseResource) t).getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
 
 	default ICreationArgument withProfile(String theProfile) {
-		return t -> ((IBaseResource)t).getMeta().addProfile(theProfile);
+		return t -> ((IBaseResource) t).getMeta().addProfile(theProfile);
 	}
 
 	default ICreationArgument withSource(FhirContext theContext, String theSource) {
-		return t -> MetaUtil.setSource(theContext, ((IBaseResource)t).getMeta(), theSource);
+		return t -> MetaUtil.setSource(theContext, ((IBaseResource) t).getMeta(), theSource);
 	}
 
 	default ICreationArgument withLastUpdated(Date theLastUpdated) {
-		return t -> ((IBaseResource)t).getMeta().setLastUpdated(theLastUpdated);
+		return t -> ((IBaseResource) t).getMeta().setLastUpdated(theLastUpdated);
 	}
 
 	default ICreationArgument withLastUpdated(String theIsoDate) {
-		return t -> ((IBaseResource)t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
+		return t -> ((IBaseResource) t).getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
 	default IIdType createEncounter(ICreationArgument... theModifiers) {
@@ -250,7 +265,8 @@ public interface ITestDataBuilder {
 	}
 
 	default <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
-		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
+		IBaseResource resource =
+				getFhirContext().getResourceDefinition(theResourceType).newInstance();
 		applyElementModifiers(resource, theModifiers);
 		return (T) resource;
 	}
@@ -287,7 +303,8 @@ public interface ITestDataBuilder {
 	default ICreationArgument withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
 			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
+				IBaseReference reference = (IBaseReference)
+						getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
 				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition((IBaseResource) t);
@@ -319,11 +336,11 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
-		return withElementAt(thePath,
-			withPrimitiveAttribute("value", theValue),
-			withPrimitiveAttribute("system", theSystem),
-			withPrimitiveAttribute("code", theCode)
-		);
+		return withElementAt(
+				thePath,
+				withPrimitiveAttribute("value", theValue),
+				withPrimitiveAttribute("system", theSystem),
+				withPrimitiveAttribute("code", theCode));
 	}
 
 	/**
@@ -349,20 +366,23 @@ public interface ITestDataBuilder {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+	default ICreationArgument withObservationCode(
+			@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
 		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
-	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
+	default <T extends IBase> ICreationArgument withCodingAt(
+			String thePath, @Nullable String theSystem, @Nullable String theValue) {
 		return withCodingAt(thePath, theSystem, theValue, null);
 	}
 
-	default <T extends IBase> ICreationArgument withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
-		return withElementAt(thePath,
-			withPrimitiveAttribute("system", theSystem),
-			withPrimitiveAttribute("code", theValue),
-			withPrimitiveAttribute("display", theDisplay)
-		);
+	default <T extends IBase> ICreationArgument withCodingAt(
+			String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
+		return withElementAt(
+				thePath,
+				withPrimitiveAttribute("system", theSystem),
+				withPrimitiveAttribute("code", theValue),
+				withPrimitiveAttribute("display", theDisplay));
 	}
 
 	default ICreationArgument withObservationComponent(ICreationArgument... theModifiers) {
@@ -393,7 +413,7 @@ public interface ITestDataBuilder {
 	FhirContext getFhirContext();
 
 	default ICreationArgument[] asArray(ICreationArgument theIBaseResourceConsumer) {
-		return new ICreationArgument[]{theIBaseResourceConsumer};
+		return new ICreationArgument[] {theIBaseResourceConsumer};
 	}
 
 	interface Support {
@@ -410,7 +430,6 @@ public interface ITestDataBuilder {
 		@Override
 		default FhirContext getFhirContext() {
 			return getTestDataBuilderSupport().getFhirContext();
-
 		}
 
 		@Override
@@ -455,6 +474,4 @@ public interface ITestDataBuilder {
 			return null;
 		}
 	}
-
-
 }

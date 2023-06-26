@@ -92,15 +92,13 @@ public class SubscriptionActivatingSubscriberTest {
 
 		// when
 		Mockito.when(mySubscriptionCanonicallizer.getChannelType(Mockito.any(IBaseResource.class)))
-			.thenReturn(type);
-		Mockito.when(myStorageSettings.getSupportedSubscriptionTypes())
-			.thenReturn(Sets.newSet(type.toCanonical()));
+				.thenReturn(type);
+		Mockito.when(myStorageSettings.getSupportedSubscriptionTypes()).thenReturn(Sets.newSet(type.toCanonical()));
 		Mockito.when(mySubscriptionCanonicallizer.getSubscriptionStatus(Mockito.any(IBaseResource.class)))
-			.thenReturn(SubscriptionConstants.REQUESTED_STATUS);
-		Mockito.when(myDaoRegistry.getSubscriptionDao())
-			.thenReturn(dao);
+				.thenReturn(SubscriptionConstants.REQUESTED_STATUS);
+		Mockito.when(myDaoRegistry.getSubscriptionDao()).thenReturn(dao);
 		Mockito.when(dao.read(Mockito.any(IIdType.class), Mockito.any(SystemRequestDetails.class)))
-			.thenThrow(new ResourceGoneException(exceptionMsg));
+				.thenThrow(new ResourceGoneException(exceptionMsg));
 
 		// test
 		boolean isActivated = mySubscriptionActivatingSubscriber.activateSubscriptionIfRequired(subscription);
@@ -111,11 +109,10 @@ public class SubscriptionActivatingSubscriberTest {
 		Mockito.verify(dao).update(captor.capture(), Mockito.any(SystemRequestDetails.class));
 		IBaseResource savedResource = captor.getValue();
 		Assertions.assertTrue(savedResource instanceof Subscription);
-		Assertions.assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription)savedResource).getStatus());
+		Assertions.assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription) savedResource).getStatus());
 
 		ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		Mockito.verify(myAppender, Mockito.times(totalInfoLogs))
-			.doAppend(appenderCaptor.capture());
+		Mockito.verify(myAppender, Mockito.times(totalInfoLogs)).doAppend(appenderCaptor.capture());
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
 		Assertions.assertEquals(totalInfoLogs, events.size());
 		Assertions.assertTrue(events.get(0).getMessage().contains(exceptionMsg));

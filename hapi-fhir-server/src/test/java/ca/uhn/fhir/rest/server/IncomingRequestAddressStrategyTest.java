@@ -12,5 +12,4 @@ public class IncomingRequestAddressStrategyTest {
 		String result = s.determineServerBase(null, null);
 		assertNull(result);
 	}
-
 }

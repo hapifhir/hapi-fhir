@@ -28,7 +28,8 @@ public class FhirObjectPrinter implements Function<Object, String> {
 	public String apply(Object object) {
 		if (object instanceof IBaseResource) {
 			IBaseResource resource = (IBaseResource) object;
-			return resource.getClass().getSimpleName() + " { " + resource.getIdElement().getValue() + " }";
+			return resource.getClass().getSimpleName() + " { "
+					+ resource.getIdElement().getValue() + " }";
 		} else if (object != null) {
 			return object.toString();
 		} else {

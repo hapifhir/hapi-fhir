@@ -67,5 +67,4 @@ public class TestJobParameters implements IModelJson {
 		myParam2 = theParam2;
 		return this;
 	}
-
 }

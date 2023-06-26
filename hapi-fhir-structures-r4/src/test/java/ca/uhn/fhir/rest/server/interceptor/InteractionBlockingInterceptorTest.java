@@ -22,9 +22,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -37,40 +37,47 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	public static final String INSTANCE_OP = "$instance-op";
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final Logger ourLog = LoggerFactory.getLogger(InteractionBlockingInterceptorTest.class);
+
 	@RegisterExtension
 	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
-	private final HashMapResourceProvider<Patient> myPatientProvider = new HashMapResourceProvider<>(ourCtx, Patient.class);
-	private final HashMapResourceProvider<Observation> myObservationProvider = new HashMapResourceProvider<>(ourCtx, Observation.class);
-	private final HashMapResourceProvider<Organization> myOrganizationProvider = new HashMapResourceProvider<>(ourCtx, Organization.class);
+
+	private final HashMapResourceProvider<Patient> myPatientProvider =
+			new HashMapResourceProvider<>(ourCtx, Patient.class);
+	private final HashMapResourceProvider<Observation> myObservationProvider =
+			new HashMapResourceProvider<>(ourCtx, Observation.class);
+	private final HashMapResourceProvider<Organization> myOrganizationProvider =
+			new HashMapResourceProvider<>(ourCtx, Organization.class);
 	private InteractionBlockingInterceptor mySvc;
 
 	@Test
 	public void testAllowInteractions() {
 		// Setup
 		mySvc = new InteractionBlockingInterceptor.Builder(ourCtx)
-			.addAllowedSpec("Patient:read")
-			.addAllowedSpec("Patient:search")
-			.addAllowedSpec("Patient:history")
-			.addAllowedSpec("Observation:read")
-			.addAllowedSpec("Observation:create")
-			.build();
+				.addAllowedSpec("Patient:read")
+				.addAllowedSpec("Patient:search")
+				.addAllowedSpec("Patient:history")
+				.addAllowedSpec("Observation:read")
+				.addAllowedSpec("Observation:create")
+				.build();
 
 		// Test
 		registerProviders();
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"Observation:create",
-			"Observation:read",
-			"Observation:vread",
-			"OperationDefinition:read",
-			"Patient:read",
-			"Patient:vread",
-			"Patient:search-type",
-			"Patient:history-instance",
-			"Patient:history-type"
-		));
+		assertThat(
+				supportedOps.toString(),
+				supportedOps,
+				containsInAnyOrder(
+						"Observation:create",
+						"Observation:read",
+						"Observation:vread",
+						"OperationDefinition:read",
+						"Patient:read",
+						"Patient:vread",
+						"Patient:search-type",
+						"Patient:history-instance",
+						"Patient:history-type"));
 
 		// Verify Server
 		verifyCreateObservationOk();
@@ -84,27 +91,25 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	public void testAllowOperations() {
 		// Setup
 		mySvc = new InteractionBlockingInterceptor.Builder(ourCtx)
-			.addAllowedSpec(SERVER_OP)
-			.addAllowedSpec(TYPE_OP)
-			.addAllowedSpec(INSTANCE_OP)
-			.build();
+				.addAllowedSpec(SERVER_OP)
+				.addAllowedSpec(TYPE_OP)
+				.addAllowedSpec(INSTANCE_OP)
+				.build();
 
 		// Test
 		registerProviders();
 
 		// Verify CapabilityStatement
 		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"OperationDefinition:read",
-			"Patient:$instance-op",
-			"Patient:$type-op",
-			"server:$server-op"
-		));
+		assertThat(
+				supportedOps.toString(),
+				supportedOps,
+				containsInAnyOrder(
+						"OperationDefinition:read", "Patient:$instance-op", "Patient:$type-op", "server:$server-op"));
 
 		// Verify Server
 		verifyCreateObservationFails();
 	}
-
 
 	private void verifyReadEncounterFails() {
 		try {
@@ -124,8 +129,16 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	}
 
 	private void verifyHistoryObservationOk() {
-		myServer.getFhirClient().history().onInstance("Patient/P0").returnBundle(Bundle.class).execute();
-		myServer.getFhirClient().history().onType("Patient").returnBundle(Bundle.class).execute();
+		myServer.getFhirClient()
+				.history()
+				.onInstance("Patient/P0")
+				.returnBundle(Bundle.class)
+				.execute();
+		myServer.getFhirClient()
+				.history()
+				.onType("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
 	}
 
 	private void verifyCreateObservationOk() {
@@ -154,7 +167,10 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 	@Nonnull
 	private Set<String> fetchCapabilityInteractions() {
-		CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement cs = myServer.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
 		TreeSet<String> supportedOps = new TreeSet<>();
 		// Type level
 		for (var nextResource : cs.getRestFirstRep().getResource()) {
@@ -199,7 +215,6 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 		return ourCtx;
 	}
 
-
 	@SuppressWarnings("unused")
 	private static class DummyOperationProvider {
 
@@ -217,7 +232,5 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 		public Parameters serverOp(@IdParam IdType theId, @ResourceParam Parameters theParameters) {
 			return null;
 		}
-
 	}
-
 }

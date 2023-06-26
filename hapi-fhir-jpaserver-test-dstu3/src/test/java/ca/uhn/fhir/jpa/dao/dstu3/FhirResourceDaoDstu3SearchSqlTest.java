@@ -36,7 +36,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	@Test
 	public void testSearchCondition_ByPatientAndCategories() {
 		Patient patient = new Patient();
-		//patient.addIdentifier().setSystem("http://mydomain.com/patient-identifier").setValue("PID1");
+		// patient.addIdentifier().setSystem("http://mydomain.com/patient-identifier").setValue("PID1");
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		int numResources = 3000;
@@ -44,12 +44,10 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 			Condition condition = new Condition();
 			condition.setSubject(new Reference(patientId));
 			List<CodeableConcept> categories = new ArrayList<>();
-			categories.add(new CodeableConcept()
-				.addCoding(new Coding("acc_condcat_fkc", "ACCEVN", "Access Event")));
-			categories.add(new CodeableConcept()
-				.addCoding(new Coding("acc_careplncat_fkc", "ACCMNTRG", "Access Monitoring")));
-			categories.add(new CodeableConcept()
-				.addCoding(new Coding("acc_condcat_fkc", "MIDTX", "During Tx")));
+			categories.add(new CodeableConcept().addCoding(new Coding("acc_condcat_fkc", "ACCEVN", "Access Event")));
+			categories.add(
+					new CodeableConcept().addCoding(new Coding("acc_careplncat_fkc", "ACCMNTRG", "Access Monitoring")));
+			categories.add(new CodeableConcept().addCoding(new Coding("acc_condcat_fkc", "MIDTX", "During Tx")));
 			condition.setCategory(categories);
 			IIdType conditionId = myConditionDao.create(condition).getId().toUnqualifiedVersionless();
 			if (i % 500 == 0) {
@@ -71,7 +69,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 		String uuid = null;
 		for (int i = 0; i < 3000; i += 300) {
 
-			ourLog.info("Starting batch {}-{}", i, i+300);
+			ourLog.info("Starting batch {}-{}", i, i + 300);
 			myCaptureQueriesListener.clear();
 			if (outcome == null) {
 				outcome = myConditionDao.search(map);
@@ -81,7 +79,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 			}
 
 			List<IBaseResource> resources = outcome.getResources(i, i + 300);
-			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
+			ourLog.info("Batch {}-{} returned {} resources", i, i + 300, resources.size());
 			assertEquals(300, resources.size());
 
 			List<SqlQuery> query = myCaptureQueriesListener.getSelectQueries();
@@ -95,8 +93,6 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 					ourLog.info("SQL: {}", sql);
 				}
 			}
-
 		}
-		
 	}
 }

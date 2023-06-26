@@ -52,13 +52,13 @@ public class CreateBinaryDstu3Test {
 	@Test
 	public void testRawBytesBinaryContentType() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[] { 0, 1, 2, 3, 4 }));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinaryBytes);
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinaryBytes);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -72,7 +72,7 @@ public class CreateBinaryDstu3Test {
 
 		Binary b = new Binary();
 		b.setContentType("application/foo");
-		b.setContent(new byte[] { 0, 1, 2, 3, 4 });
+		b.setContent(new byte[] {0, 1, 2, 3, 4});
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
@@ -81,7 +81,7 @@ public class CreateBinaryDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -115,11 +115,11 @@ public class CreateBinaryDstu3Test {
 	@Test
 	public void testRawBytesNoContentType() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[] { 0, 1, 2, 3, 4 }));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -144,9 +144,10 @@ public class CreateBinaryDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -155,7 +156,10 @@ public class CreateBinaryDstu3Test {
 	public static class BinaryProvider implements IResourceProvider {
 
 		@Create()
-		public MethodOutcome createBinary(@ResourceParam Binary theBinary, @ResourceParam String theBinaryString, @ResourceParam byte[] theBinaryBytes) {
+		public MethodOutcome createBinary(
+				@ResourceParam Binary theBinary,
+				@ResourceParam String theBinaryString,
+				@ResourceParam byte[] theBinaryBytes) {
 			ourLastBinary = theBinary;
 			ourLastBinaryString = theBinaryString;
 			ourLastBinaryBytes = theBinaryBytes;
@@ -166,7 +170,5 @@ public class CreateBinaryDstu3Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Binary.class;
 		}
-
 	}
-
 }

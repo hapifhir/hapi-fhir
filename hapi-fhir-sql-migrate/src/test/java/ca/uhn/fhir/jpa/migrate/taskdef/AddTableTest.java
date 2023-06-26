@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 
 public class AddTableTest extends BaseTest {
 
-
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testTableDoesntAlreadyExist(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -44,5 +43,4 @@ public class AddTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
 	}
-
 }

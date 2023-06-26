@@ -42,6 +42,7 @@ public class SubscriptionTestConfig {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IChannelNamer myChannelNamer;
 
@@ -57,9 +58,8 @@ public class SubscriptionTestConfig {
 	}
 
 	@Bean
-	public SubscriptionChannelFactory subscriptionChannelFactory(IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
+	public SubscriptionChannelFactory subscriptionChannelFactory(
+			IChannelNamer theChannelNamer, IChannelFactory theQueueChannelFactory) {
 		return new SubscriptionChannelFactory(theQueueChannelFactory);
 	}
-
-
 }

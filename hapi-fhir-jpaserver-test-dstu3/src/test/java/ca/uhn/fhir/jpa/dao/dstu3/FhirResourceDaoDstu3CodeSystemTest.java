@@ -17,34 +17,31 @@ import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TER
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 
-	@Autowired private Batch2JobHelper myBatchJobHelper;
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
-	
 	@Test
 	public void testIndexContained() throws Exception {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
-		
-		String input = IOUtils.toString(getClass().getResource("/dstu3_codesystem_complete.json"), StandardCharsets.UTF_8);
+
+		String input =
+				IOUtils.toString(getClass().getResource("/dstu3_codesystem_complete.json"), StandardCharsets.UTF_8);
 		CodeSystem cs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, input);
 		myCodeSystemDao.create(cs, mySrd);
 
-
 		myResourceReindexingSvc.markAllResourcesForReindexing();
-		int outcome= myResourceReindexingSvc.forceReindexingPass();
+		int outcome = myResourceReindexingSvc.forceReindexingPass();
 		assertNotEquals(-1, outcome); // -1 means there was a failure
-		
+
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		
 	}
 
 	@Test
@@ -58,7 +55,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		cs.addConcept().setCode("A");
 		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1, myConceptDao.count());
 		});
 
@@ -73,7 +70,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		myCodeSystemDao.update(cs, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(2, myConceptDao.count());
 		});
 
@@ -87,20 +84,18 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		myCodeSystemDao.update(cs, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1, myConceptDao.count());
 		});
 
 		// Delete the code system
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			myCodeSystemDao.delete(id);
 		});
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0L, myConceptDao.count());
 		});
-
 	}
-
 }

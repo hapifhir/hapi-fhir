@@ -32,9 +32,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
  */
 public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
 	private static final String DISPLAY_BODY_MASS_INDEX = "Body mass index (BMI) [Ratio]";
 	private static final String CODE_BODY_MASS_INDEX = "39156-5";
@@ -61,8 +62,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx, myCodeSystemProvider,
-		myValueSetProvider);
+	public RestfulServerExtension myRestfulServerExtension =
+			new RestfulServerExtension(ourCtx, myCodeSystemProvider, myValueSetProvider);
 
 	private RemoteTerminologyServiceValidationSupport mySvc;
 
@@ -86,13 +87,15 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	@Test
 	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereSystemIsDifferent_throwsException() {
 		assertThrows(InvalidRequestException.class, () -> {
-			Parameters respParam = myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named(JpaConstants.OPERATION_VALIDATE_CODE)
-				.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
-				.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
-				.execute();
+			Parameters respParam = myClient.operation()
+					.onType(CodeSystem.class)
+					.named(JpaConstants.OPERATION_VALIDATE_CODE)
+					.withParameter(
+							Parameters.class,
+							"coding",
+							new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+					.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
+					.execute();
 		});
 	}
 
@@ -104,18 +107,20 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		logAllConcepts();
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
-			.andParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(
+						Parameters.class,
+						"coding",
+						new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+				.andParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
+				.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
@@ -123,108 +128,119 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	public void testValidateCodeOperationOnCodeSystem_byCodingAndUrlWhereCodeSystemIsUnknown_returnsFalse() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "coding", new Coding()
-				.setSystem(INVALID_CODE_SYSTEM_URI).setCode("P"))
-			.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(
+						Parameters.class,
+						"coding",
+						new Coding().setSystem(INVALID_CODE_SYSTEM_URI).setCode("P"))
+				.andParameter("url", new UriType(INVALID_CODE_SYSTEM_URI))
+				.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
-		assertEquals("Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI +
-			"#P", respParam.getParameterValue("message").toString());
+		assertEquals(
+				"Terminology service was unable to provide validation for " + INVALID_CODE_SYSTEM_URI + "#P",
+				respParam.getParameterValue("message").toString());
 	}
 
 	@Test
 	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereSystemIsDifferent_throwsException() {
 		try {
 			myClient.operation()
-				.onType(ValueSet.class)
-				.named(JpaConstants.OPERATION_VALIDATE_CODE)
-				.withParameter(Parameters.class, "coding", new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
-				.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
-				.andParameter("system", new UriType(INVALID_CODE_SYSTEM_URI))
-				.execute();
+					.onType(ValueSet.class)
+					.named(JpaConstants.OPERATION_VALIDATE_CODE)
+					.withParameter(
+							Parameters.class,
+							"coding",
+							new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+					.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
+					.andParameter("system", new UriType(INVALID_CODE_SYSTEM_URI))
+					.execute();
 			fail();
 		} catch (InvalidRequestException exception) {
-			assertEquals("HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' " +
-				"does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.", exception.getMessage());
+			assertEquals(
+					"HTTP 400 Bad Request: HAPI-2352: Coding.system '" + CODE_SYSTEM_V2_0247_URI + "' "
+							+ "does not equal param system '" + INVALID_CODE_SYSTEM_URI + "'. Unable to validate-code.",
+					exception.getMessage());
 		}
 	}
 
 	@Test
 	public void testValidateCodeOperationOnValueSet_byUrlAndSystem_usingBuiltInCodeSystems() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
-		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myCodeSystemProvider.myNextReturnCodeSystems.add(
+				(CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(ValueSet.class)
-			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "code", new CodeType("alerts"))
-			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/list-example-use-codes"))
-			.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
-			.useHttpGet()
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(ValueSet.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(Parameters.class, "code", new CodeType("alerts"))
+				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/list-example-use-codes"))
+				.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
+				.useHttpGet()
+				.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
 	public void testValidateCodeOperationOnValueSet_byUrlSystemAndCode() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
-		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myCodeSystemProvider.myNextReturnCodeSystems.add(
+				(CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
 		createNextValueSetReturnParameters(true, DISPLAY_BODY_MASS_INDEX, null);
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(ValueSet.class)
-			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "code", new CodeType(CODE_BODY_MASS_INDEX))
-			.andParameter("url", new UriType("https://loinc.org"))
-			.andParameter("system", new UriType("http://loinc.org"))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(ValueSet.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(Parameters.class, "code", new CodeType(CODE_BODY_MASS_INDEX))
+				.andParameter("url", new UriType("https://loinc.org"))
+				.andParameter("system", new UriType("http://loinc.org"))
+				.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
-		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals(
+				DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
 	public void testValidateCodeOperationOnValueSet_byCodingAndUrlWhereValueSetIsUnknown_returnsFalse() {
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(ValueSet.class)
-			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-			.withParameter(Parameters.class, "coding", new Coding()
-				.setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
-			.andParameter("url", new UriType(UNKNOWN_VALUE_SYSTEM_URI))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(ValueSet.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(
+						Parameters.class,
+						"coding",
+						new Coding().setSystem(CODE_SYSTEM_V2_0247_URI).setCode("P"))
+				.andParameter("url", new UriType(UNKNOWN_VALUE_SYSTEM_URI))
+				.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
-		assertEquals("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
-			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]", respParam.getParameterValue("message").toString());
+		assertEquals(
+				"Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI
+						+ " - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]",
+				respParam.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
@@ -255,18 +271,20 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		private StringType myLastDisplay;
 		private Parameters myNextReturnParams;
 
-		@Operation(name = "validate-code", idempotent = true, returnParameters = {
-			@OperationParam(name = "result", type = BooleanType.class, min = 1),
-			@OperationParam(name = "message", type = StringType.class),
-			@OperationParam(name = "display", type = StringType.class)
-		})
+		@Operation(
+				name = "validate-code",
+				idempotent = true,
+				returnParameters = {
+					@OperationParam(name = "result", type = BooleanType.class, min = 1),
+					@OperationParam(name = "message", type = StringType.class),
+					@OperationParam(name = "display", type = StringType.class)
+				})
 		public Parameters validateCode(
-			HttpServletRequest theServletRequest,
-			@IdParam(optional = true) IdType theId,
-			@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
-			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
-		) {
+				HttpServletRequest theServletRequest,
+				@IdParam(optional = true) IdType theId,
+				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
+				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay) {
 			myInvocationCount++;
 			myLastUrl = theCodeSystemUrl;
 			myLastCode = theCode;
@@ -298,20 +316,22 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		private ValueSet myLastValueSet;
 		private UriParam myLastUrlParam;
 
-		@Operation(name = "validate-code", idempotent = true, returnParameters = {
-			@OperationParam(name = "result", type = BooleanType.class, min = 1),
-			@OperationParam(name = "message", type = StringType.class),
-			@OperationParam(name = "display", type = StringType.class)
-		})
+		@Operation(
+				name = "validate-code",
+				idempotent = true,
+				returnParameters = {
+					@OperationParam(name = "result", type = BooleanType.class, min = 1),
+					@OperationParam(name = "message", type = StringType.class),
+					@OperationParam(name = "display", type = StringType.class)
+				})
 		public Parameters validateCode(
-			HttpServletRequest theServletRequest,
-			@IdParam(optional = true) IdType theId,
-			@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
-			@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
-			@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
-			@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
-			@OperationParam(name = "valueSet") ValueSet theValueSet
-		) {
+				HttpServletRequest theServletRequest,
+				@IdParam(optional = true) IdType theId,
+				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
+				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
+				@OperationParam(name = "valueSet") ValueSet theValueSet) {
 			myInvocationCount++;
 			myLastUrl = theValueSetUrl;
 			myLastCode = theCode;
@@ -332,6 +352,5 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		public Class<? extends IBaseResource> getResourceType() {
 			return ValueSet.class;
 		}
-
 	}
 }

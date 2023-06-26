@@ -36,16 +36,18 @@ import static org.mockito.Mockito.when;
 public class ReductionStepDataSinkTest {
 
 	private static final String INSTANCE_ID = "instanceId";
+
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
-	private static class TestJobParameters implements IModelJson { }
+	private static class TestJobParameters implements IModelJson {}
 
-	private static class StepInputData implements IModelJson { }
+	private static class StepInputData implements IModelJson {}
 
 	private static class StepOutputData implements IModelJson {
 		@JsonProperty("data")
 		final String myData;
+
 		public StepOutputData(String theData) {
 			myData = theData;
 		}
@@ -67,19 +69,12 @@ public class ReductionStepDataSinkTest {
 
 	private Logger ourLogger;
 
-
 	@BeforeEach
 	public void init() {
-		when(myJobDefinition.getJobDefinitionId())
-			.thenReturn("jobDefinition");
-		when(myWorkCursor.getJobDefinition())
-			.thenReturn(myJobDefinition);
+		when(myJobDefinition.getJobDefinitionId()).thenReturn("jobDefinition");
+		when(myWorkCursor.getJobDefinition()).thenReturn(myJobDefinition);
 
-		myDataSink = new ReductionStepDataSink<>(
-			INSTANCE_ID,
-			myWorkCursor,
-			myJobPersistence,
-			myJobDefinitionRegistry);
+		myDataSink = new ReductionStepDataSink<>(INSTANCE_ID, myWorkCursor, myJobPersistence, myJobDefinitionRegistry);
 		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();
 		ourLogger.addAppender(myListAppender);
 	}
@@ -121,13 +116,11 @@ public class ReductionStepDataSinkTest {
 
 		// test
 		myDataSink.accept(firstData);
-		assertThrows(IllegalStateException.class, ()->
-			myDataSink.accept(secondData));
-
+		assertThrows(IllegalStateException.class, () -> myDataSink.accept(secondData));
 	}
 
 	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
-		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
+		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call -> {
 			IJobPersistence.JobInstanceUpdateCallback callback = call.getArgument(1);
 			return callback.doUpdate(theJobInstance);
 		});
@@ -151,5 +144,4 @@ public class ReductionStepDataSinkTest {
 			fail("Unexpected exception", anyOtherEx);
 		}
 	}
-
 }

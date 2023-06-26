@@ -13,6 +13,4 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 @RequiresDocker
-public class ValueSetHSearchExpansionR4ElasticIT extends BaseValueSetHSearchExpansionR4Test {
-
-}
+public class ValueSetHSearchExpansionR4ElasticIT extends BaseValueSetHSearchExpansionR4Test {}

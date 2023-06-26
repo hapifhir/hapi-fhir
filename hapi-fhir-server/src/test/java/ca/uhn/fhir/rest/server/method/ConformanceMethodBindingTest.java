@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -16,8 +15,8 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -33,17 +32,19 @@ public class ConformanceMethodBindingTest {
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
+
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private FhirContext myFhirContext;
+
 	private ConformanceMethodBinding conformanceMethodBinding;
 
 	@BeforeEach
-	public void setUp() {
-	}
+	public void setUp() {}
 
 	private <T> T init(T theCapabilityStatementProvider) throws NoSuchMethodException {
 		T provider = spy(theCapabilityStatementProvider);
-		Method method = provider.getClass().getDeclaredMethod("getServerConformance", HttpServletRequest.class, RequestDetails.class);
+		Method method = provider.getClass()
+				.getDeclaredMethod("getServerConformance", HttpServletRequest.class, RequestDetails.class);
 		conformanceMethodBinding = new ConformanceMethodBinding(method, myFhirContext, provider);
 		return provider;
 	}
@@ -52,9 +53,13 @@ public class ConformanceMethodBindingTest {
 	public void invokeServerCached() throws NoSuchMethodException {
 		TestResourceProvider provider = init(new TestResourceProvider());
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
 	}
 
@@ -62,12 +67,16 @@ public class ConformanceMethodBindingTest {
 	public void invokeServerCacheExpires() throws NoSuchMethodException {
 		TestResourceProviderSmallCache provider = init(new TestResourceProviderSmallCache());
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
 
 		sleepAtLeast(20);
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 
 		verify(provider, timeout(10000).times(2)).getServerConformance(any(), any());
 	}
@@ -76,10 +85,14 @@ public class ConformanceMethodBindingTest {
 	public void invokeServerCacheDisabled() throws NoSuchMethodException {
 		TestResourceProviderNoCache provider = init(new TestResourceProviderNoCache());
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(2)).getServerConformance(any(), any());
 	}
 
@@ -87,11 +100,15 @@ public class ConformanceMethodBindingTest {
 	public void invokeServerCacheDisabledInSuperclass() throws NoSuchMethodException {
 		TestResourceProviderNoCache2 provider = init(new TestResourceProviderNoCache2());
 
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
 
 		// We currently don't scan the annotation on the superclass...Perhaps we should
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), mySrd, new Object[] {
+			mock(HttpServletRequest.class), mock(RequestDetails.class)
+		});
 		verify(provider, times(1)).getServerConformance(any(), any());
 	}
 
@@ -100,10 +117,17 @@ public class ConformanceMethodBindingTest {
 		TestResourceProvider provider = init(new TestResourceProvider());
 
 		RequestDetails requestDetails = mySrd;
-		when(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)).thenReturn(Lists.newArrayList(Constants.CACHE_CONTROL_NO_CACHE));
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		when(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL))
+				.thenReturn(Lists.newArrayList(Constants.CACHE_CONTROL_NO_CACHE));
+		conformanceMethodBinding.invokeServer(
+				mock(IRestfulServer.class, RETURNS_DEEP_STUBS),
+				requestDetails,
+				new Object[] {mock(HttpServletRequest.class), mock(RequestDetails.class)});
 		verify(provider, times(1)).getServerConformance(any(), any());
-		conformanceMethodBinding.invokeServer(mock(IRestfulServer.class, RETURNS_DEEP_STUBS), requestDetails, new Object[]{mock(HttpServletRequest.class), mock(RequestDetails.class)});
+		conformanceMethodBinding.invokeServer(
+				mock(IRestfulServer.class, RETURNS_DEEP_STUBS),
+				requestDetails,
+				new Object[] {mock(HttpServletRequest.class), mock(RequestDetails.class)});
 		verify(provider, times(2)).getServerConformance(any(), any());
 	}
 
@@ -135,7 +159,6 @@ public class ConformanceMethodBindingTest {
 
 			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -146,7 +169,6 @@ public class ConformanceMethodBindingTest {
 		public IBaseConformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 			return mock(IBaseConformance.class, RETURNS_DEEP_STUBS);
 		}
-
 	}
 
 	private static void sleepAtLeast(long theMillis) {
@@ -161,5 +183,4 @@ public class ConformanceMethodBindingTest {
 			}
 		}
 	}
-
 }

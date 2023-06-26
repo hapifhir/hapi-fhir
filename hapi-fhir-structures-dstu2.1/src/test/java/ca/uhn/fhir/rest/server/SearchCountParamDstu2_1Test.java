@@ -59,23 +59,25 @@ public class SearchCountParamDstu2_1Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("search", ourLastMethod);
 			assertEquals(new Integer(2), ourLastParam);
-			
-			//@formatter:off
-			assertThat(responseContent, stringContainsInOrder(
-				"<link>", 
-				"<relation value=\"self\"/>", 
-				"<url value=\"http://localhost:" + ourPort + "/Patient?_count=2\"/>", 
-				"</link>", 
-				"<link>",
-				"<relation value=\"next\"/>", 
-				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>", 
-				"</link>"));
-			//@formatter:on
-			
+
+			// @formatter:off
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<link>",
+							"<relation value=\"self\"/>",
+							"<url value=\"http://localhost:" + ourPort + "/Patient?_count=2\"/>",
+							"</link>",
+							"<link>",
+							"<relation value=\"next\"/>",
+							"<url value=\"http://localhost:" + ourPort + "?_getpages=",
+							"&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+							"</link>"));
+			// @formatter:on
+
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	/**
@@ -83,7 +85,8 @@ public class SearchCountParamDstu2_1Test {
 	 */
 	@Test
 	public void testSearchWithNoCountParam() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNoCountParam&_count=2");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNoCountParam&_count=2");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -91,23 +94,26 @@ public class SearchCountParamDstu2_1Test {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("searchWithNoCountParam", ourLastMethod);
 			assertEquals(null, ourLastParam);
-			
-			//@formatter:off
-			assertThat(responseContent, stringContainsInOrder(
-				"<link>", 
-				"<relation value=\"self\"/>", 
-				"<url value=\"http://localhost:" + ourPort + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>", 
-				"</link>", 
-				"<link>",
-				"<relation value=\"next\"/>", 
-				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>", 
-				"</link>"));
-			//@formatter:on
-			
+
+			// @formatter:off
+			assertThat(
+					responseContent,
+					stringContainsInOrder(
+							"<link>",
+							"<relation value=\"self\"/>",
+							"<url value=\"http://localhost:" + ourPort
+									+ "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
+							"</link>",
+							"<link>",
+							"<relation value=\"next\"/>",
+							"<url value=\"http://localhost:" + ourPort + "?_getpages=",
+							"&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+							"</link>"));
+			// @formatter:on
+
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	@AfterAll
@@ -132,13 +138,13 @@ public class SearchCountParamDstu2_1Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -148,37 +154,38 @@ public class SearchCountParamDstu2_1Test {
 			return Patient.class;
 		}
 
-		//@formatter:off
+		// @formatter:off
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-				@OptionalParam(name=Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@Count() Integer theParam
-				) {
+				@OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier, @Count() Integer theParam) {
 			ourLastMethod = "search";
 			ourLastParam = theParam;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient()
+						.addName(new HumanName().addFamily("FAMILY"))
+						.setId("" + i));
 			}
 			return retVal;
 		}
-		//@formatter:on
+		// @formatter:on
 
-		//@formatter:off
+		// @formatter:off
 		@SuppressWarnings("rawtypes")
-		@Search(queryName="searchWithNoCountParam")
+		@Search(queryName = "searchWithNoCountParam")
 		public List searchWithNoCountParam() {
 			ourLastMethod = "searchWithNoCountParam";
 			ourLastParam = null;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 			for (int i = 1; i < 100; i++) {
-				retVal.add((Patient) new Patient().addName(new HumanName().addFamily("FAMILY")).setId("" + i));
+				retVal.add((Patient) new Patient()
+						.addName(new HumanName().addFamily("FAMILY"))
+						.setId("" + i));
 			}
 			return retVal;
 		}
-		//@formatter:on
+		// @formatter:on
 
 	}
-
 }

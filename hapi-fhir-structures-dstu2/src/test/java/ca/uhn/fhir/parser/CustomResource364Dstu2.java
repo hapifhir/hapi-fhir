@@ -1,24 +1,18 @@
 package ca.uhn.fhir.parser;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.junit.jupiter.api.Test;
-
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.List;
 
 /**
  * See #364
@@ -28,7 +22,11 @@ public class CustomResource364Dstu2 extends BaseResource implements IBaseOperati
 
 	private static final long serialVersionUID = 1L;
 
-	@Child(name = "baseValue", min = 1, max = Child.MAX_UNLIMITED, type= {})
+	@Child(
+			name = "baseValue",
+			min = 1,
+			max = Child.MAX_UNLIMITED,
+			type = {})
 	private IElement baseValues;
 
 	@Override
@@ -59,12 +57,17 @@ public class CustomResource364Dstu2 extends BaseResource implements IBaseOperati
 		this.baseValues = theValue;
 	}
 
-	@DatatypeDef(name="CustomDate")
+	@DatatypeDef(name = "CustomDate")
 	public static class CustomResource364CustomDate extends BaseIdentifiableElement implements ICompositeDatatype {
 
 		private static final long serialVersionUID = 1L;
-		
-		@Child(name = "date", order = 0, min = 1, max = 1, type = { DateTimeDt.class })
+
+		@Child(
+				name = "date",
+				order = 0,
+				min = 1,
+				max = 1,
+				type = {DateTimeDt.class})
 		private DateTimeDt date;
 
 		@Override
@@ -73,8 +76,7 @@ public class CustomResource364Dstu2 extends BaseResource implements IBaseOperati
 		}
 
 		public DateTimeDt getDate() {
-			if (date == null)
-				date = new DateTimeDt();
+			if (date == null) date = new DateTimeDt();
 			return date;
 		}
 
@@ -88,5 +90,4 @@ public class CustomResource364Dstu2 extends BaseResource implements IBaseOperati
 			return this;
 		}
 	}
-
 }

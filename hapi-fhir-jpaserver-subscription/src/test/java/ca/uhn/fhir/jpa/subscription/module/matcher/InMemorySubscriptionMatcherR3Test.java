@@ -44,14 +44,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
+
 	@Autowired
-    StorageSettings myStorageSettings;
+	StorageSettings myStorageSettings;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+		assertEquals(
+				SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
@@ -59,14 +62,16 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
+		assertEquals(
+				SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
 		assertNotMatched(resource, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
 	}
 
-	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
+	private void assertNotMatched(
+			IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
 		assertTrue(result.supported());
@@ -118,11 +123,9 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888");
 		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888,ProcedureRequest/999");
 		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123&_id=ProcedureRequest/888");
-
 	}
 
-
-		/*
+	/*
 	The following tests are copied from an e-mail from a site using HAPI FHIR
 	 */
 
@@ -259,7 +262,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@Test
 	public void testMedicationRequestStatuses() {
-		String criteria = "MedicationRequest?intent=plan&category=outpatient&status=suspended,entered-in-error,cancelled,stopped";
+		String criteria =
+				"MedicationRequest?intent=plan&category=outpatient&status=suspended,entered-in-error,cancelled,stopped";
 
 		// Note suspended is an invalid status and will never match
 		{
@@ -294,7 +298,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@Test
 	public void testBloodTest() {
-		String criteria = "Observation?code=FR_Org1Blood2nd,FR_Org1Blood3rd,FR_Org%201BldCult,FR_Org2Blood2nd,FR_Org2Blood3rd,FR_Org%202BldCult,FR_Org3Blood2nd,FR_Org3Blood3rd,FR_Org3BldCult,FR_Org4Blood2nd,FR_Org4Blood3rd,FR_Org4BldCult,FR_Org5Blood2nd,FR_Org5Blood3rd,FR_Org%205BldCult,FR_Org6Blood2nd,FR_Org6Blood3rd,FR_Org6BldCult,FR_Org7Blood2nd,FR_Org7Blood3rd,FR_Org7BldCult,FR_Org8Blood2nd,FR_Org8Blood3rd,FR_Org8BldCult,FR_Org9Blood2nd,FR_Org9Blood3rd,FR_Org9BldCult,FR_Bld2ndCulture,FR_Bld3rdCulture,FR_Blood%20Culture,FR_Com1Bld3rd,FR_Com1BldCult,FR_Com2Bld2nd,FR_Com2Bld3rd,FR_Com2BldCult,FR_CultureBld2nd,FR_CultureBld3rd,FR_CultureBldCul,FR_GmStainBldCul,FR_GramStain2Bld,FR_GramStain3Bld,FR_GramStNegBac&context.type=IHD";
+		String criteria =
+				"Observation?code=FR_Org1Blood2nd,FR_Org1Blood3rd,FR_Org%201BldCult,FR_Org2Blood2nd,FR_Org2Blood3rd,FR_Org%202BldCult,FR_Org3Blood2nd,FR_Org3Blood3rd,FR_Org3BldCult,FR_Org4Blood2nd,FR_Org4Blood3rd,FR_Org4BldCult,FR_Org5Blood2nd,FR_Org5Blood3rd,FR_Org%205BldCult,FR_Org6Blood2nd,FR_Org6Blood3rd,FR_Org6BldCult,FR_Org7Blood2nd,FR_Org7Blood3rd,FR_Org7BldCult,FR_Org8Blood2nd,FR_Org8Blood3rd,FR_Org8BldCult,FR_Org9Blood2nd,FR_Org9Blood3rd,FR_Org9BldCult,FR_Bld2ndCulture,FR_Bld3rdCulture,FR_Blood%20Culture,FR_Com1Bld3rd,FR_Com1BldCult,FR_Com2Bld2nd,FR_Com2Bld3rd,FR_Com2BldCult,FR_CultureBld2nd,FR_CultureBld3rd,FR_CultureBldCul,FR_GmStainBldCul,FR_GramStain2Bld,FR_GramStain3Bld,FR_GramStNegBac&context.type=IHD";
 
 		{
 			Observation obs = new Observation();
@@ -370,7 +375,9 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 		{
 			Provenance prov = new Provenance();
-			prov.setActivity(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("AU"));
+			prov.setActivity(new Coding()
+					.setSystem("http://hl7.org/fhir/v3/DocumentCompletion")
+					.setCode("AU"));
 			assertMatched(prov, criteria);
 		}
 		{
@@ -382,7 +389,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 			prov.setActivity(new Coding().setCode("XXX"));
 			assertNotMatched(prov, criteria);
 		}
-
 	}
 
 	@Test
@@ -418,7 +424,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 			bodySite.addExtension().setUrl("BodySite#accessType").setValue(new Coding().setCode("XXX"));
 			assertNotMatched(bodySite, criteria);
 		}
-
 	}
 
 	@Test
@@ -448,7 +453,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@Test
 	public void testQuestionnaireResponseLong() {
-		String criteria = "QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord,FMCSWDepressionSymptomsScreener,FMCAKIComprehensiveSW,FMCSWIntensiveScreener,FMCESRDComprehensiveSW,FMCNutritionProgressNote,FMCAKIComprehensiveRN";
+		String criteria =
+				"QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord,FMCSWDepressionSymptomsScreener,FMCAKIComprehensiveSW,FMCSWIntensiveScreener,FMCESRDComprehensiveSW,FMCNutritionProgressNote,FMCAKIComprehensiveRN";
 
 		{
 			QuestionnaireResponse qr = new QuestionnaireResponse();
@@ -478,7 +484,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@Test
 	public void testProcedureRequestCategory() {
-		String criteria = "ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19";
+		String criteria =
+				"ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19";
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("ProcedureRequest");
@@ -571,13 +578,13 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@Test
 	public void testCommunicationRequestWithRefAndDate() {
-		String criteria = "CommunicationRequest?requester=O1271,O1276&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
+		String criteria =
+				"CommunicationRequest?requester=O1271,O1276&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
 		CommunicationRequest cr = new CommunicationRequest();
 		cr.getRequester().getAgent().setReference("Organization/O1276");
 		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
 		assertMatched(cr, criteria);
 	}
-
 
 	@Test
 	public void testCommunicationRequestWithRef() {
@@ -643,14 +650,14 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		Location loc = new Location();
 		double latitude = 30.0;
 		double longitude = 40.0;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		double bigEnoughDistance = 100.0;
-		String badCriteria =
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + ":" + longitude +
-				"&" +
-				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km";
+		String badCriteria = "Location?" + Location.SP_NEAR
+				+ "=" + latitude + ":" + longitude + "&"
+				+ Location.SP_NEAR_DISTANCE
+				+ "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km";
 
 		assertUnsupported(loc, badCriteria);
 	}

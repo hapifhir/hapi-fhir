@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -26,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +47,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		File location = getLocation("migrator_h2_test_340_current");
 
 		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+		DriverTypeEnum.ConnectionProperties connectionProperties =
+				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 
 		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
@@ -58,20 +59,17 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		ourLog.info("Done Setup, Starting Migration...");
 		ourLog.info("**********************************************");
 
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "SA",
-			"-p", "SA"
+		String[] args = new String[] {
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE, "-d", "H2_EMBEDDED", "-u", url, "-n", "SA", "-p", "SA"
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
 		// Verify that HFJ_SEARCH_PARM exists along with index and foreign key dependencies.
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
-		Set<String> indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
+		Set<String> indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
 		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
-		Set<String> foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
+		Set<String> foreignKeys =
+				JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
 		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
@@ -122,7 +120,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		File location = getLocation("migrator_h2_test_340_dryrun");
 
 		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+		DriverTypeEnum.ConnectionProperties connectionProperties =
+				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
 		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
@@ -133,20 +132,16 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		ourLog.info("Done Setup, Starting Migration...");
 		ourLog.info("**********************************************");
 
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-r"
+		String[] args = new String[] {
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE, "-d", "H2_EMBEDDED", "-u", url, "-n", "", "-p", "", "-r"
 		};
 
 		// Verify that HFJ_SEARCH_PARM exists along with index and foreign key dependencies.
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
-		Set<String> indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
+		Set<String> indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
 		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
-		Set<String> foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
+		Set<String> foreignKeys =
+				JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
 		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
@@ -165,9 +160,9 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		// Verify that HFJ_SEARCH_PARM still exists along with index and foreign key dependencies.
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_SEARCH_PARM"));
-		indexNames =  JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
+		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_SEARCH_PARM");
 		assertTrue(indexNames.contains("IDX_SEARCHPARM_RESTYPE_SPNAME"));
-		foreignKeys =  JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
+		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_SEARCH_PARM", "HFJ_RES_PARAM_PRESENT");
 		assertTrue(foreignKeys.contains("FK_RESPARMPRES_SPID"));
 		// Verify that IDX_FORCEDID_TYPE_FORCEDID index still exists on HFJ_FORCED_ID table
 		indexNames = JdbcUtils.getIndexNames(connectionProperties, "HFJ_FORCED_ID");
@@ -189,18 +184,15 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		File location = getLocation("migrator_h2_test_empty_current");
 
 		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
+		DriverTypeEnum.ConnectionProperties connectionProperties =
+				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 
 		ourLog.info("**********************************************");
 		ourLog.info("Starting Migration...");
 		ourLog.info("**********************************************");
 
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "SA",
-			"-p", "SA"
+		String[] args = new String[] {
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE, "-d", "H2_EMBEDDED", "-u", url, "-n", "SA", "-p", "SA"
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
@@ -225,116 +217,117 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			JdbcTemplate jdbcTemplate = theConnectionProperties.newJdbcTemplate();
 
 			jdbcTemplate.execute(
-				"insert into HFJ_RESOURCE (RES_DELETED_AT, RES_VERSION, FORCED_ID_PID, HAS_TAGS, RES_PUBLISHED, RES_UPDATED, SP_HAS_LINKS, HASH_SHA256, SP_INDEX_STATUS, RES_LANGUAGE, SP_CMPSTR_UNIQ_PRESENT, SP_COORDS_PRESENT, SP_DATE_PRESENT, SP_NUMBER_PRESENT, SP_QUANTITY_PRESENT, SP_STRING_PRESENT, SP_TOKEN_PRESENT, SP_URI_PRESENT, RES_PROFILE, RES_TYPE, RES_VER, RES_ID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setNull(1, Types.TIMESTAMP);
-						thePs.setString(2, "R4");
-						thePs.setNull(3, Types.BIGINT);
-						thePs.setBoolean(4, false);
-						thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-						thePs.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-						thePs.setBoolean(7, false);
-						thePs.setNull(8, Types.VARCHAR);
-						thePs.setLong(9, 1L);
-						thePs.setNull(10, Types.VARCHAR);
-						thePs.setBoolean(11, false);
-						thePs.setBoolean(12, false);
-						thePs.setBoolean(13, false);
-						thePs.setBoolean(14, false);
-						thePs.setBoolean(15, false);
-						thePs.setBoolean(16, false);
-						thePs.setBoolean(17, false);
-						thePs.setBoolean(18, false);
-						thePs.setNull(19, Types.VARCHAR);
-						thePs.setString(20, "Patient");
-						thePs.setLong(21, 1L);
-						thePs.setLong(22, 1L);
-					}
-				}
-			);
+					"insert into HFJ_RESOURCE (RES_DELETED_AT, RES_VERSION, FORCED_ID_PID, HAS_TAGS, RES_PUBLISHED, RES_UPDATED, SP_HAS_LINKS, HASH_SHA256, SP_INDEX_STATUS, RES_LANGUAGE, SP_CMPSTR_UNIQ_PRESENT, SP_COORDS_PRESENT, SP_DATE_PRESENT, SP_NUMBER_PRESENT, SP_QUANTITY_PRESENT, SP_STRING_PRESENT, SP_TOKEN_PRESENT, SP_URI_PRESENT, RES_PROFILE, RES_TYPE, RES_VER, RES_ID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
+						@Override
+						protected void setValues(PreparedStatement thePs, LobCreator theLobCreator)
+								throws SQLException {
+							thePs.setNull(1, Types.TIMESTAMP);
+							thePs.setString(2, "R4");
+							thePs.setNull(3, Types.BIGINT);
+							thePs.setBoolean(4, false);
+							thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+							thePs.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+							thePs.setBoolean(7, false);
+							thePs.setNull(8, Types.VARCHAR);
+							thePs.setLong(9, 1L);
+							thePs.setNull(10, Types.VARCHAR);
+							thePs.setBoolean(11, false);
+							thePs.setBoolean(12, false);
+							thePs.setBoolean(13, false);
+							thePs.setBoolean(14, false);
+							thePs.setBoolean(15, false);
+							thePs.setBoolean(16, false);
+							thePs.setBoolean(17, false);
+							thePs.setBoolean(18, false);
+							thePs.setNull(19, Types.VARCHAR);
+							thePs.setString(20, "Patient");
+							thePs.setLong(21, 1L);
+							thePs.setLong(22, 1L);
+						}
+					});
 
 			jdbcTemplate.execute(
-				"insert into HFJ_RES_VER (RES_DELETED_AT, RES_VERSION, FORCED_ID_PID, HAS_TAGS, RES_PUBLISHED, RES_UPDATED, RES_ENCODING, RES_TEXT, RES_ID, RES_TYPE, RES_VER, PID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setNull(1, Types.TIMESTAMP);
-						thePs.setString(2, "R4");
-						thePs.setNull(3, Types.BIGINT);
-						thePs.setBoolean(4, false);
-						thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-						thePs.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-						thePs.setString(7, "JSON");
-						theLobCreator.setBlobAsBytes(thePs, 8, "{\"resourceType\":\"Patient\"}".getBytes(Charsets.US_ASCII));
-						thePs.setLong(9, 1L);
-						thePs.setString(10, "Patient");
-						thePs.setLong(11, 1L);
-						thePs.setLong(12, 1L);
-					}
-				}
-			);
+					"insert into HFJ_RES_VER (RES_DELETED_AT, RES_VERSION, FORCED_ID_PID, HAS_TAGS, RES_PUBLISHED, RES_UPDATED, RES_ENCODING, RES_TEXT, RES_ID, RES_TYPE, RES_VER, PID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
+						@Override
+						protected void setValues(PreparedStatement thePs, LobCreator theLobCreator)
+								throws SQLException {
+							thePs.setNull(1, Types.TIMESTAMP);
+							thePs.setString(2, "R4");
+							thePs.setNull(3, Types.BIGINT);
+							thePs.setBoolean(4, false);
+							thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+							thePs.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+							thePs.setString(7, "JSON");
+							theLobCreator.setBlobAsBytes(
+									thePs, 8, "{\"resourceType\":\"Patient\"}".getBytes(Charsets.US_ASCII));
+							thePs.setLong(9, 1L);
+							thePs.setString(10, "Patient");
+							thePs.setLong(11, 1L);
+							thePs.setLong(12, 1L);
+						}
+					});
 
 			jdbcTemplate.execute(
-				"insert into HFJ_SPIDX_STRING (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_VALUE_EXACT, SP_VALUE_NORMALIZED, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setBoolean(1, false);
-						thePs.setString(2, "given");
-						thePs.setLong(3, 1L); // res-id
-						thePs.setString(4, "Patient");
-						thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-						thePs.setString(6, "ROBERT");
-						thePs.setString(7, "Robert");
-						thePs.setLong(8, 1L);
-					}
-				}
-			);
+					"insert into HFJ_SPIDX_STRING (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_VALUE_EXACT, SP_VALUE_NORMALIZED, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
+					new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
+						@Override
+						protected void setValues(PreparedStatement thePs, LobCreator theLobCreator)
+								throws SQLException {
+							thePs.setBoolean(1, false);
+							thePs.setString(2, "given");
+							thePs.setLong(3, 1L); // res-id
+							thePs.setString(4, "Patient");
+							thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+							thePs.setString(6, "ROBERT");
+							thePs.setString(7, "Robert");
+							thePs.setLong(8, 1L);
+						}
+					});
 
 			jdbcTemplate.execute(
-				"insert into HFJ_SPIDX_TOKEN (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_SYSTEM, SP_VALUE, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setBoolean(1, false);
-						thePs.setString(2, "identifier");
-						thePs.setLong(3, 1L); // res-id
-						thePs.setString(4, "Patient");
-						thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-						thePs.setString(6, "http://foo");
-						thePs.setString(7, "12345678");
-						thePs.setLong(8, 1L);
-					}
-				}
-			);
+					"insert into HFJ_SPIDX_TOKEN (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_SYSTEM, SP_VALUE, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
+					new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
+						@Override
+						protected void setValues(PreparedStatement thePs, LobCreator theLobCreator)
+								throws SQLException {
+							thePs.setBoolean(1, false);
+							thePs.setString(2, "identifier");
+							thePs.setLong(3, 1L); // res-id
+							thePs.setString(4, "Patient");
+							thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+							thePs.setString(6, "http://foo");
+							thePs.setString(7, "12345678");
+							thePs.setLong(8, 1L);
+						}
+					});
 
 			jdbcTemplate.execute(
-				"insert into HFJ_SPIDX_DATE (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_VALUE_HIGH, SP_VALUE_LOW, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
-				new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
-					@Override
-					protected void setValues(PreparedStatement thePs, LobCreator theLobCreator) throws SQLException {
-						thePs.setBoolean(1, false);
-						thePs.setString(2, "birthdate");
-						thePs.setLong(3, 1L); // res-id
-						thePs.setString(4, "Patient");
-						thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-						thePs.setTimestamp(6, new Timestamp(1000000000L)); // value high
-						thePs.setTimestamp(7, new Timestamp(1000000000L)); // value low
-						thePs.setLong(8, 1L);
-					}
-				}
-			);
+					"insert into HFJ_SPIDX_DATE (SP_MISSING, SP_NAME, RES_ID, RES_TYPE, SP_UPDATED, SP_VALUE_HIGH, SP_VALUE_LOW, SP_ID) values (?, ?, ?, ?, ?, ?, ?, ?)",
+					new AbstractLobCreatingPreparedStatementCallback(new DefaultLobHandler()) {
+						@Override
+						protected void setValues(PreparedStatement thePs, LobCreator theLobCreator)
+								throws SQLException {
+							thePs.setBoolean(1, false);
+							thePs.setString(2, "birthdate");
+							thePs.setLong(3, 1L); // res-id
+							thePs.setString(4, "Patient");
+							thePs.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+							thePs.setTimestamp(6, new Timestamp(1000000000L)); // value high
+							thePs.setTimestamp(7, new Timestamp(1000000000L)); // value low
+							thePs.setLong(8, 1L);
+						}
+					});
 
 			return null;
 		});
-
 	}
 
-	private void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql) throws
-		IOException {
-		String script = IOUtils.toString(HapiFlywayMigrateDatabaseCommandTest.class.getResourceAsStream(theInitSql), Charsets.UTF_8);
+	private void executeSqlStatements(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theInitSql)
+			throws IOException {
+		String script = IOUtils.toString(
+				HapiFlywayMigrateDatabaseCommandTest.class.getResourceAsStream(theInitSql), Charsets.UTF_8);
 		List<String> scriptStatements = new ArrayList<>(Arrays.asList(script.split("\n")));
 		for (int i = 0; i < scriptStatements.size(); i++) {
 			String nextStatement = scriptStatements.get(i);
@@ -357,7 +350,5 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			}
 			return null;
 		});
-
 	}
-
 }

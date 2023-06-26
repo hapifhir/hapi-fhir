@@ -18,16 +18,19 @@ public class TokenOrListParamDstu3Test {
 	@Test
 	public void testParseExcaped() {
 		TokenOrListParam params = new TokenOrListParam();
-		params.setValuesAsQueryTokens(ourCtx, null, QualifiedParamList.singleton("system|code-include-but-not-end-with-comma\\,suffix"));
+		params.setValuesAsQueryTokens(
+				ourCtx, null, QualifiedParamList.singleton("system|code-include-but-not-end-with-comma\\,suffix"));
 
 		assertEquals(1, params.getListAsCodings().size());
-		assertEquals("system", params.getListAsCodings().get(0).getSystemElement().getValue());
-		assertEquals("code-include-but-not-end-with-comma,suffix", params.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals(
+				"system", params.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals(
+				"code-include-but-not-end-with-comma,suffix",
+				params.getListAsCodings().get(0).getCodeElement().getValue());
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

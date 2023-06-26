@@ -60,19 +60,22 @@ public interface IResourceLoader extends IDaoRegistryUser {
 	 * @return of type resource
 	 * @param <T>
 	 */
-	default <T extends IBaseResource> T loadResource(Class<T> theType, String theLocation, RequestDetails theRequestDetails) {
+	default <T extends IBaseResource> T loadResource(
+			Class<T> theType, String theLocation, RequestDetails theRequestDetails) {
 		var resource = readResource(theType, theLocation);
 		getDaoRegistry().getResourceDao(theType).update(resource, theRequestDetails);
 
 		return resource;
 	}
 
-	default public IBaseResource readResource(String theLocation) {
+	public default IBaseResource readResource(String theLocation) {
 		String resourceString = stringFromResource(theLocation);
-		return EncodingEnum.detectEncoding(resourceString).newParser(getFhirContext()).parseResource(resourceString);
+		return EncodingEnum.detectEncoding(resourceString)
+				.newParser(getFhirContext())
+				.parseResource(resourceString);
 	}
 
-	default public IBaseResource readAndLoadResource(String theLocation) {
+	public default IBaseResource readAndLoadResource(String theLocation) {
 		String resourceString = stringFromResource(theLocation);
 		if (theLocation.endsWith("json")) {
 			return loadResource(parseResource("json", resourceString));
@@ -81,7 +84,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 		}
 	}
 
-	default public IBaseResource loadResource(IBaseResource theResource) {
+	public default IBaseResource loadResource(IBaseResource theResource) {
 		if (getDaoRegistry() == null) {
 			return theResource;
 		}
@@ -90,7 +93,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 		return theResource;
 	}
 
-	default public IBaseResource parseResource(String theEncoding, String theResourceString) {
+	public default IBaseResource parseResource(String theEncoding, String theResourceString) {
 		IParser parser;
 		switch (theEncoding.toLowerCase()) {
 			case "json":
@@ -101,13 +104,13 @@ public interface IResourceLoader extends IDaoRegistryUser {
 				break;
 			default:
 				throw new IllegalArgumentException(
-					String.format("Expected encoding xml, or json.  %s is not a valid encoding", theEncoding));
+						String.format("Expected encoding xml, or json.  %s is not a valid encoding", theEncoding));
 		}
 
 		return parser.parseResource(theResourceString);
 	}
 
-	default public String stringFromResource(String theLocation) {
+	public default String stringFromResource(String theLocation) {
 		InputStream is = null;
 		try {
 			if (theLocation.startsWith(File.separator)) {
@@ -130,20 +133,17 @@ public interface IResourceLoader extends IDaoRegistryUser {
 
 	private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
 		return new Bundle.BundleEntryComponent()
-			.setResource((Resource) theResource)
-			.setRequest(createRequest(theResource));
+				.setResource((Resource) theResource)
+				.setRequest(createRequest(theResource));
 	}
 
 	private Bundle.BundleEntryRequestComponent createRequest(IBaseResource theResource) {
 		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
 		if (theResource.getIdElement().hasValue()) {
-			request
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(theResource.getIdElement().getValue());
+			request.setMethod(Bundle.HTTPVerb.PUT)
+					.setUrl(theResource.getIdElement().getValue());
 		} else {
-			request
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl(theResource.fhirType());
+			request.setMethod(Bundle.HTTPVerb.POST).setUrl(theResource.fhirType());
 		}
 
 		return request;

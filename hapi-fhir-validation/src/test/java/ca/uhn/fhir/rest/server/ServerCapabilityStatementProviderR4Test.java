@@ -83,8 +83,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,6 +92,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import static ca.uhn.fhir.test.utilities.server.MockServletUtil.createServletConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -117,7 +117,8 @@ public class ServerCapabilityStatementProviderR4Test {
 	public static final String PATIENT_SUB_SUB = "PatientSubSub";
 	public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
 	public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderR4Test.class);
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private FhirValidator myValidator;
 
@@ -144,14 +145,18 @@ public class ServerCapabilityStatementProviderR4Test {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
 		when(req.getServletPath()).thenReturn("/fhir");
-		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getRequestURL())
+				.thenReturn(
+						new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
 		when(req.getContextPath()).thenReturn("/FhirStorm");
 		return req;
 	}
 
-	private CapabilityStatementRestResourceComponent findRestResource(CapabilityStatement conformance, String wantResource) throws Exception {
+	private CapabilityStatementRestResourceComponent findRestResource(
+			CapabilityStatement conformance, String wantResource) throws Exception {
 		CapabilityStatementRestResourceComponent resource = null;
-		for (CapabilityStatementRestResourceComponent next : conformance.getRest().get(0).getResource()) {
+		for (CapabilityStatementRestResourceComponent next :
+				conformance.getRest().get(0).getResource()) {
 			if (next.getType().equals(wantResource)) {
 				resource = next;
 			}
@@ -172,20 +177,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement cs = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		List<String> formats = cs
-			.getFormat()
-			.stream()
-			.map(t -> t.getCode())
-			.collect(Collectors.toList());
-		assertThat(formats.toString(), formats, containsInAnyOrder(
-			"application/fhir+xml",
-			"xml",
-			"application/fhir+json",
-			"json",
-			"application/x-turtle",
-			"ttl"
-		));
+		CapabilityStatement cs =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		List<String> formats = cs.getFormat().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		assertThat(
+				formats.toString(),
+				formats,
+				containsInAnyOrder(
+						"application/fhir+xml", "xml", "application/fhir+json", "json", "application/x-turtle", "ttl"));
 	}
 
 	@Test
@@ -199,12 +198,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertEquals(2, conformance.getRest().get(0).getResource().size());
-		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
+		CapabilityStatementRestResourceComponent res =
+				conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
@@ -231,15 +232,22 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(1, patient.getOperation().size());
 		assertEquals("everything", patient.getOperation().get(0).getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-i-everything", patient.getOperation().get(0).getDefinition());
+		assertEquals(
+				"http://localhost/baseR4/OperationDefinition/Patient-i-everything",
+				patient.getOperation().get(0).getDefinition());
 
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
+		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(
+				new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
 		assertThat(opDef.getSystem(), is(false));
@@ -254,13 +262,13 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
+		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(
+				new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
@@ -281,11 +289,15 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
 		conf = myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode()
+						+ "\"/></interaction>"));
 	}
 
 	@Test
@@ -305,14 +317,16 @@ public class ServerCapabilityStatementProviderR4Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
 				found = true;
 			}
 		}
 
 		assertTrue(found);
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
@@ -331,10 +345,12 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
+		CapabilityStatementRestResourceComponent res =
+				conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 
 		assertNull(res.getConditionalCreateElement().getValue());
@@ -353,7 +369,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
 		IdType operationId = new IdType("OperationDefinition/EncounterPatient-i-someOp");
@@ -370,7 +387,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertEquals("date", opDef.getParameter().get(0).getType());
 		assertEquals("Start description", opDef.getParameter().get(0).getDocumentation());
 
-		List<Extension> exampleExtensions = opDef.getParameter().get(0).getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
+		List<Extension> exampleExtensions =
+				opDef.getParameter().get(0).getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
 		assertEquals(2, exampleExtensions.size());
 		assertEquals("2001", exampleExtensions.get(0).getValueAsPrimitive().getValueAsString());
 		assertEquals("2002", exampleExtensions.get(1).getValueAsPrimitive().getValueAsString());
@@ -390,23 +408,39 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(2, patient.getOperation().size());
 		assertThat(toOperationNames(patient.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(patient.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
+		assertThat(
+				toOperationDefinitions(patient.getOperation()),
+				containsInAnyOrder(
+						"http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp",
+						"http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
 
-		CapabilityStatementRestResourceComponent encounter = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Encounter")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent encounter = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Encounter"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(2, encounter.getOperation().size());
 		assertThat(toOperationNames(encounter.getOperation()), containsInAnyOrder("someOp", "validate"));
-		assertThat(toOperationDefinitions(encounter.getOperation()).toString(), toOperationDefinitions(encounter.getOperation()), containsInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
-
+		assertThat(
+				toOperationDefinitions(encounter.getOperation()).toString(),
+				toOperationDefinitions(encounter.getOperation()),
+				containsInAnyOrder(
+						"http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp",
+						"http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate"));
 
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(
+					new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
@@ -421,7 +455,8 @@ public class ServerCapabilityStatementProviderR4Test {
 			assertEquals("Resource", opDef.getParameter().get(1).getType());
 		}
 		{
-			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
+			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(
+					new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
@@ -446,13 +481,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(
+				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
-
 	}
 
 	@Test
@@ -466,7 +502,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
@@ -474,7 +511,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertEquals("DiagnosticReport", res.getType());
 
 		assertEquals("subject.identifier", res.getSearchParam().get(0).getName());
-//		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
+		//		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
 		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
@@ -495,7 +532,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
 		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
@@ -513,7 +551,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -549,13 +588,14 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(
+				conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
-
 	}
 
 	@Test
@@ -567,9 +607,11 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
-		CapabilityStatement serverConformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement serverConformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
-		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
+		List<String> formatCodes =
+				serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
 
 		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
 		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
@@ -597,16 +639,17 @@ public class ServerCapabilityStatementProviderR4Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
-
 	}
 
 	/**
@@ -629,22 +672,25 @@ public class ServerCapabilityStatementProviderR4Test {
 			if (resourceBinding.getResourceName().equals("Patient")) {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
-				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				SearchParameter param =
+						(SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
 		assertTrue(found);
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
 
 		CapabilityStatementRestResourceComponent resource = findRestResource(conformance, "Patient");
 
-		CapabilityStatementRestResourceSearchParamComponent param = resource.getSearchParam().get(0);
-//		assertEquals("bar", param.getChain().get(0).getValue());
-//		assertEquals("foo", param.getChain().get(1).getValue());
-//		assertEquals(2, param.getChain().size());
+		CapabilityStatementRestResourceSearchParamComponent param =
+				resource.getSearchParam().get(0);
+		//		assertEquals("bar", param.getChain().get(0).getValue());
+		//		assertEquals("foo", param.getChain().get(1).getValue());
+		//		assertEquals(2, param.getChain().size());
 	}
 
 	@Test
@@ -663,7 +709,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsNoType.setServerConformanceProvider(scNoType);
 		rsNoType.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
+		CapabilityStatement conformance = (CapabilityStatement)
+				scNoType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsNoType));
 		conformance.setId("");
 		String confNoType = validate(conformance);
 
@@ -680,7 +727,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		rsWithType.setServerConformanceProvider(scWithType);
 		rsWithType.init(createServletConfig());
 
-		CapabilityStatement conformanceWithType = (CapabilityStatement) scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
+		CapabilityStatement conformanceWithType = (CapabilityStatement)
+				scWithType.getServerConformance(createHttpServletRequest(), createRequestDetails(rsWithType));
 		conformanceWithType.setId("");
 		String confWithType = validate(conformanceWithType);
 
@@ -699,10 +747,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode()
+						+ "\"/></interaction>"));
 	}
 
 	@Test
@@ -716,10 +768,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+		assertThat(
+				conf,
+				containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode()
+						+ "\"/></interaction>"));
 	}
 
 	@Test
@@ -733,32 +789,35 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 
 			@Search
-			public List<IBaseResource> search(@RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_FAMILY) StringParam lastName,
-														 @RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_GIVEN) StringParam firstName,
-														 @RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_BIRTHDATE) DateParam dob,
-														 @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam range) {
+			public List<IBaseResource> search(
+					@RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_FAMILY) StringParam lastName,
+					@RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_GIVEN) StringParam firstName,
+					@RequiredParam(name = DiagnosticReport.SP_PATIENT + "." + Patient.SP_BIRTHDATE) DateParam dob,
+					@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam range) {
 				return null;
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new MyProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement opDef =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
+		CapabilityStatementRestResourceComponent resource =
+				opDef.getRest().get(0).getResource().get(0);
 		assertEquals("DiagnosticReport", resource.getType());
-		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
-		assertThat(searchParamNames, containsInAnyOrder("patient.birthdate", "patient.family", "patient.given", "date"));
+		List<String> searchParamNames =
+				resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
+		assertThat(
+				searchParamNames, containsInAnyOrder("patient.birthdate", "patient.family", "patient.given", "date"));
 	}
 
 	@Test
@@ -766,18 +825,25 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		class MyProvider {
 
-			@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+			@Description(
+					value =
+							"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 			@GraphQL(type = RequestTypeEnum.GET)
-			public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
+			public String processGraphQlGetRequest(
+					ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String queryUrl) {
 				throw new IllegalStateException();
 			}
 
-			@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+			@Description(
+					value =
+							"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
 			@GraphQL(type = RequestTypeEnum.POST)
-			public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String queryBody) {
+			public String processGraphQlPostRequest(
+					ServletRequestDetails theRequestDetails,
+					@IdParam IIdType theId,
+					@GraphQLQueryBody String queryBody) {
 				throw new IllegalStateException();
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -786,36 +852,57 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Patient.class));
 		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Observation.class));
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement opDef =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
 		// On Patient Resource
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		CapabilityStatementRestResourceOperationComponent graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent graphQlOperation = resource.getOperation().stream()
+				.filter(t -> t.getName().equals("graphql"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertEquals(
+				"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.",
+				graphQlOperation.getDocumentation());
 
 		// On Patient Resource
-		resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Observation")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		resource = opDef.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Observation"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		graphQlOperation = resource.getOperation().stream()
+				.filter(t -> t.getName().equals("graphql"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertEquals(
+				"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.",
+				graphQlOperation.getDocumentation());
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
-		graphQlOperation = rest.getOperation().stream().filter(t -> t.getName().equals("graphql")).findAny().orElseThrow(() -> new IllegalArgumentException());
+		graphQlOperation = rest.getOperation().stream()
+				.filter(t -> t.getName().equals("graphql"))
+				.findAny()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("graphql", graphQlOperation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertEquals(
+				"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.",
+				graphQlOperation.getDocumentation());
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
@@ -824,7 +911,9 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertEquals("Graphql", operationDefinition.getName());
 		assertEquals("graphql", operationDefinition.getCode());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", operationDefinition.getUrl());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", operationDefinition.getDescription());
+		assertEquals(
+				"This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.",
+				operationDefinition.getDescription());
 		assertTrue(operationDefinition.getSystem());
 		assertFalse(operationDefinition.getType());
 		assertTrue(operationDefinition.getInstance());
@@ -836,41 +925,68 @@ public class ServerCapabilityStatementProviderR4Test {
 		class MyProvider {
 
 			@Description(
-				value = "This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
-				shortDefinition = "Comparte two resources or two versions of a single resource")
+					value =
+							"This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
+					shortDefinition = "Comparte two resources or two versions of a single resource")
 			@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true, idempotent = true)
 			public IBaseParameters diff(
-				@IdParam IIdType theResourceId,
-
-				@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
-				@OperationParam(name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER, typeName = "string", min = 0, max = 1)
-					IPrimitiveType<?> theFromVersion,
-
-				@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
-				@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
-					IPrimitiveType<Boolean> theIncludeMeta,
-				RequestDetails theRequestDetails) {
+					@IdParam IIdType theResourceId,
+					@Description(
+									value = "The resource ID and version to diff from",
+									example = "Patient/example/version/1")
+							@OperationParam(
+									name = ProviderConstants.DIFF_FROM_VERSION_PARAMETER,
+									typeName = "string",
+									min = 0,
+									max = 1)
+							IPrimitiveType<?> theFromVersion,
+					@Description(
+									value = "Should differences in the Resource.meta element be included in the diff",
+									example = "false")
+							@OperationParam(
+									name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER,
+									typeName = "boolean",
+									min = 0,
+									max = 1)
+							IPrimitiveType<Boolean> theIncludeMeta,
+					RequestDetails theRequestDetails) {
 				throw new IllegalStateException();
 			}
 
-			@Description("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.")
+			@Description(
+					"This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.")
 			@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, idempotent = true)
 			public IBaseParameters diff(
-				@Description(value = "The resource ID and version to diff from", example = "Patient/example/version/1")
-				@OperationParam(name = ProviderConstants.DIFF_FROM_PARAMETER, typeName = "id", min = 1, max = 1)
-					IIdType theFromVersion,
-
-				@Description(value = "The resource ID and version to diff to", example = "Patient/example/version/2")
-				@OperationParam(name = ProviderConstants.DIFF_TO_PARAMETER, typeName = "id", min = 1, max = 1)
-					IIdType theToVersion,
-
-				@Description(value = "Should differences in the Resource.meta element be included in the diff", example = "false")
-				@OperationParam(name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER, typeName = "boolean", min = 0, max = 1)
-					IPrimitiveType<Boolean> theIncludeMeta,
-				RequestDetails theRequestDetails) {
+					@Description(
+									value = "The resource ID and version to diff from",
+									example = "Patient/example/version/1")
+							@OperationParam(
+									name = ProviderConstants.DIFF_FROM_PARAMETER,
+									typeName = "id",
+									min = 1,
+									max = 1)
+							IIdType theFromVersion,
+					@Description(
+									value = "The resource ID and version to diff to",
+									example = "Patient/example/version/2")
+							@OperationParam(
+									name = ProviderConstants.DIFF_TO_PARAMETER,
+									typeName = "id",
+									min = 1,
+									max = 1)
+							IIdType theToVersion,
+					@Description(
+									value = "Should differences in the Resource.meta element be included in the diff",
+									example = "false")
+							@OperationParam(
+									name = ProviderConstants.DIFF_INCLUDE_META_PARAMETER,
+									typeName = "boolean",
+									min = 0,
+									max = 1)
+							IPrimitiveType<Boolean> theIncludeMeta,
+					RequestDetails theRequestDetails) {
 				throw new IllegalStateException();
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -878,29 +994,42 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.registerProvider(new MyProvider());
 		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Patient.class));
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement opDef =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
 		// On Patient Resource
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		CapabilityStatementRestResourceOperationComponent operation = resource.getOperation().stream().filter(t -> t.getName().equals("diff")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operation = resource.getOperation().stream()
+				.filter(t -> t.getName().equals("diff"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		assertEquals("diff", operation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+		assertEquals(
+				"This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
+				operation.getDocumentation());
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
-		operation = rest.getOperation().stream().filter(t -> t.getName().equals("diff")).findAny().orElse(null);
+		operation = rest.getOperation().stream()
+				.filter(t -> t.getName().equals("diff"))
+				.findAny()
+				.orElse(null);
 		assertEquals("diff", operation.getName());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+		assertEquals(
+				"This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
+				operation.getDocumentation());
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-diff");
@@ -909,7 +1038,9 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertEquals("Diff", operationDefinition.getName());
 		assertEquals("diff", operationDefinition.getCode());
 		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operationDefinition.getUrl());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operationDefinition.getDescription());
+		assertEquals(
+				"This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
+				operationDefinition.getDescription());
 		assertTrue(operationDefinition.getSystem());
 		assertFalse(operationDefinition.getType());
 		assertTrue(operationDefinition.getInstance());
@@ -921,27 +1052,33 @@ public class ServerCapabilityStatementProviderR4Test {
 		class MyProvider implements IResourceProvider {
 
 			@Description("This is the expunge operation")
-			@Operation(name = "expunge", idempotent = false, returnParameters = {
-				@OperationParam(name = "count", typeName = "integer")
-			})
+			@Operation(
+					name = "expunge",
+					idempotent = false,
+					returnParameters = {@OperationParam(name = "count", typeName = "integer")})
 			public IBaseParameters expunge(
-				@IdParam IIdType theIdParam,
-				@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
-				@OperationParam(name = "deleted", typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
-				@OperationParam(name = "previous", typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
-				RequestDetails theRequest) {
+					@IdParam IIdType theIdParam,
+					@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
+					@OperationParam(name = "deleted", typeName = "boolean")
+							IPrimitiveType<Boolean> theExpungeDeletedResources,
+					@OperationParam(name = "previous", typeName = "boolean")
+							IPrimitiveType<Boolean> theExpungeOldVersions,
+					RequestDetails theRequest) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Description("This is the expunge operation")
-			@Operation(name = "expunge", idempotent = false, returnParameters = {
-				@OperationParam(name = "count", typeName = "integer")
-			})
+			@Operation(
+					name = "expunge",
+					idempotent = false,
+					returnParameters = {@OperationParam(name = "count", typeName = "integer")})
 			public IBaseParameters expunge(
-				@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
-				@OperationParam(name = "deleted", typeName = "boolean") IPrimitiveType<Boolean> theExpungeDeletedResources,
-				@OperationParam(name = "previous", typeName = "boolean") IPrimitiveType<Boolean> theExpungeOldVersions,
-				RequestDetails theRequest) {
+					@OperationParam(name = "limit", typeName = "integer") IPrimitiveType<Integer> theLimit,
+					@OperationParam(name = "deleted", typeName = "boolean")
+							IPrimitiveType<Boolean> theExpungeDeletedResources,
+					@OperationParam(name = "previous", typeName = "boolean")
+							IPrimitiveType<Boolean> theExpungeOldVersions,
+					RequestDetails theRequest) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -956,19 +1093,25 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.registerProvider(new MyProvider());
 		rs.registerProvider(new HashMapResourceProvider<>(myCtx, Patient.class));
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement opDef =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
 		// On Patient Resource
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		List<CapabilityStatementRestResourceOperationComponent> expungeResourceOperations = resource.getOperation().stream().filter(t -> t.getName().equals("expunge")).collect(Collectors.toList());
+		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		List<CapabilityStatementRestResourceOperationComponent> expungeResourceOperations =
+				resource.getOperation().stream()
+						.filter(t -> t.getName().equals("expunge"))
+						.collect(Collectors.toList());
 		assertEquals(1, expungeResourceOperations.size());
 		CapabilityStatementRestResourceOperationComponent operation = expungeResourceOperations.get(0);
 		assertEquals("expunge", operation.getName());
@@ -977,7 +1120,10 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
-		operation = rest.getOperation().stream().filter(t -> t.getName().equals("expunge")).findAny().orElse(null);
+		operation = rest.getOperation().stream()
+				.filter(t -> t.getName().equals("expunge"))
+				.findAny()
+				.orElse(null);
 		assertNull(operation);
 
 		// Fetch OperationDefinition
@@ -991,7 +1137,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertFalse(operationDefinition.getSystem());
 		assertTrue(operationDefinition.getType());
 		assertTrue(operationDefinition.getInstance());
-
 	}
 
 	@Test
@@ -1005,34 +1150,35 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 
 			@Search
-			public List<IBaseResource> search(@OptionalParam(name = DiagnosticReport.SP_DATE)
-															 DateRangeParam range,
-
-														 @Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
-														 @OptionalParam(name = "_lastUpdated")
-															 DateRangeParam theLastUpdated
-			) {
+			public List<IBaseResource> search(
+					@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam range,
+					@Description(
+									shortDefinition =
+											"Only return resources which were last updated as specified by the given range")
+							@OptionalParam(name = "_lastUpdated")
+							DateRangeParam theLastUpdated) {
 				return null;
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new MyProvider());
 
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {
-		};
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement opDef = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement opDef =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(opDef);
 
-		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
+		CapabilityStatementRestResourceComponent resource =
+				opDef.getRest().get(0).getResource().get(0);
 		assertEquals("DiagnosticReport", resource.getType());
-		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
+		List<String> searchParamNames =
+				resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
 		assertThat(searchParamNames, containsInAnyOrder("date", "_lastUpdated"));
 	}
 
@@ -1047,17 +1193,23 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		CapabilityStatementRestResourceOperationComponent operationComponent = patient.getOperation().get(0);
+		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operationComponent =
+				patient.getOperation().get(0);
 		assertThat(operationComponent.getName(), is(NamedQueryPlainProvider.QUERY_NAME));
 
 		String operationReference = operationComponent.getDefinition();
 		assertThat(operationReference, not(nullValue()));
 
-		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
+		OperationDefinition operationDefinition = (OperationDefinition)
+				sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
@@ -1092,20 +1244,32 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent restComponent = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
+		CapabilityStatementRestResourceComponent restComponent = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceOperationComponent operationComponent =
+				restComponent.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition();
 		assertThat(operationReference, not(nullValue()));
 
-		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
+		OperationDefinition operationDefinition = (OperationDefinition)
+				sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is("TestQuery"));
+		assertThat(
+				"The operation name should be the code if no description is set",
+				operationDefinition.getName(),
+				is("TestQuery"));
 		String patientResourceName = "Patient";
-		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
+		assertThat(
+				"A resource level search targets the resource of the provider it's defined in",
+				operationDefinition.getResource().get(0).getValue(),
+				is(patientResourceName));
 		assertThat(operationDefinition.getSystem(), is(false));
 		assertThat(operationDefinition.getType(), is(true));
 		assertThat(operationDefinition.getInstance(), is(false));
@@ -1120,7 +1284,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(param.getUse(), is(OperationParameterUse.IN));
 
 		List<CapabilityStatementRestResourceSearchParamComponent> patientResource = restComponent.getSearchParam();
-		assertThat("Named query parameters should not appear in the resource search params", patientResource, is(empty()));
+		assertThat(
+				"Named query parameters should not appear in the resource search params", patientResource, is(empty()));
 	}
 
 	@Test
@@ -1134,16 +1299,21 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		validate(conformance);
 
-		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
+		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream()
+				.filter(t -> t.getType().equals("Patient"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
 		List<CapabilityStatementRestResourceOperationComponent> operations = patient.getOperation();
 		assertThat(operations.size(), is(1));
 		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
 
-		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType(operations.get(0).getDefinition()), createRequestDetails(rs));
+		OperationDefinition opDef = (OperationDefinition)
+				sc.readOperationDefinition(new IdType(operations.get(0).getDefinition()), createRequestDetails(rs));
 		validate(opDef);
 		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
 		assertThat(opDef.getSystem(), is(false));
@@ -1161,13 +1331,16 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		List<CapabilityStatementRestResourceComponent> resources =
+				conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
-			.filter(resource -> "Patient".equals(resource.getType()))
-			.findFirst().get();
+				.filter(resource -> "Patient".equals(resource.getType()))
+				.findFirst()
+				.get();
 		assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
 	}
 
@@ -1182,10 +1355,13 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 
 			@Search
-			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:foo", "Provenance:bar"}) Set<Include> theRevIncludes) {
+			public List<Patient> search(
+					@IncludeParam(
+									reverse = true,
+									allow = {"Observation:foo", "Provenance:bar"})
+							Set<Include> theRevIncludes) {
 				return Collections.emptyList();
 			}
-
 		}
 
 		class ObservationResourceProvider implements IResourceProvider {
@@ -1199,7 +1375,6 @@ public class ServerCapabilityStatementProviderR4Test {
 			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
 				return Collections.emptyList();
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -1211,14 +1386,19 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		List<CapabilityStatementRestResourceComponent> resources =
+				conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
-			.filter(resource -> "Patient".equals(resource.getType()))
-			.findFirst().get();
-		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:foo", "Provenance:bar"));
+				.filter(resource -> "Patient".equals(resource.getType()))
+				.findFirst()
+				.get();
+		assertThat(
+				toStrings(patientResource.getSearchRevInclude()),
+				containsInAnyOrder("Observation:foo", "Provenance:bar"));
 	}
 
 	@Test
@@ -1235,7 +1415,6 @@ public class ServerCapabilityStatementProviderR4Test {
 			public List<Patient> search(@IncludeParam(reverse = true) Set<Include> theRevIncludes) {
 				return Collections.emptyList();
 			}
-
 		}
 
 		class ObservationResourceProvider implements IResourceProvider {
@@ -1246,10 +1425,9 @@ public class ServerCapabilityStatementProviderR4Test {
 			}
 
 			@Search
-			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam  theSubject) {
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
 				return Collections.emptyList();
 			}
-
 		}
 
 		RestfulServer rs = new RestfulServer(myCtx);
@@ -1261,13 +1439,16 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		List<CapabilityStatementRestResourceComponent> resources =
+				conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent patientResource = resources.stream()
-			.filter(resource -> "Patient".equals(resource.getType()))
-			.findFirst().get();
+				.filter(resource -> "Patient".equals(resource.getType()))
+				.findFirst()
+				.get();
 		assertThat(toStrings(patientResource.getSearchRevInclude()), containsInAnyOrder("Observation:subject"));
 	}
 
@@ -1281,15 +1462,18 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.setServerConformanceProvider(sc);
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
-		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		List<CapabilityStatementRestResourceComponent> resources =
+				conformance.getRestFirstRep().getResource();
 		CapabilityStatementRestResourceComponent groupResource = resources.stream()
-			.filter(resource -> "Group".equals(resource.getType()))
-			.findFirst().get();
+				.filter(resource -> "Group".equals(resource.getType()))
+				.findFirst()
+				.get();
 
-		assertThat(toOperationNames(groupResource.getOperation()),containsInAnyOrder("export", "export-poll-status"));
+		assertThat(toOperationNames(groupResource.getOperation()), containsInAnyOrder("export", "export-poll-status"));
 	}
 
 	@Test
@@ -1300,9 +1484,11 @@ public class ServerCapabilityStatementProviderR4Test {
 		rs.setServerConformanceProvider(sc);
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		CapabilityStatement conformance =
+				(CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		assertEquals(2, conformance.getRest().get(0).getResource().size());
-		List<CapabilityStatementRestResourceOperationComponent> res = conformance.getRest().get(0).getResource().get(1).getOperation();
+		List<CapabilityStatementRestResourceOperationComponent> res =
+				conformance.getRest().get(0).getResource().get(1).getOperation();
 		assertEquals(1, res.size());
 		CapabilityStatementRestResourceOperationComponent operationComponent = res.get(0);
 		assertEquals("everything", operationComponent.getName());
@@ -1343,55 +1529,69 @@ public class ServerCapabilityStatementProviderR4Test {
 		ourLog.info("Outcome: {}", outcome);
 
 		assertTrue(result.isSuccessful(), outcome);
-		List<OperationOutcome.OperationOutcomeIssueComponent> warningsAndErrors = operationOutcome
-			.getIssue()
-			.stream()
-			.filter(t -> t.getSeverity().ordinal() <= OperationOutcome.IssueSeverity.WARNING.ordinal()) // <= because this enum has a strange order
-			.collect(Collectors.toList());
+		List<OperationOutcome.OperationOutcomeIssueComponent> warningsAndErrors = operationOutcome.getIssue().stream()
+				.filter(t -> t.getSeverity().ordinal()
+						<= OperationOutcome.IssueSeverity.WARNING.ordinal()) // <= because this enum has a strange order
+				.collect(Collectors.toList());
 		assertThat(outcome, warningsAndErrors, is(empty()));
 
 		return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
 	}
 
 	public static class BulkDataExportProvider implements IResourceProvider {
-		@Operation(name = JpaConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
+		@Operation(
+				name = JpaConstants.OPERATION_EXPORT,
+				global = false /* set to true once we can handle this */,
+				manualResponse = true,
+				idempotent = true)
 		public void export(
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
-			ServletRequestDetails theRequestDetails
-		) {
-		}
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theOutputFormat,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theType,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
+						IPrimitiveType<Date> theSince,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theTypeFilter,
+				ServletRequestDetails theRequestDetails) {}
 
 		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
 		public void groupExport(
-			@IdParam IIdType theIdParam,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
-			ServletRequestDetails theRequestDetails
-		) {
-		}
+				@IdParam IIdType theIdParam,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theOutputFormat,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theType,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
+						IPrimitiveType<Date> theSince,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theTypeFilter,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean")
+						IPrimitiveType<Boolean> theMdm,
+				ServletRequestDetails theRequestDetails) {}
 
 		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 		public void patientExport(
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
-			ServletRequestDetails theRequestDetails
-		) {
-		}
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theOutputFormat,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theType,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant")
+						IPrimitiveType<Date> theSince,
+				@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string")
+						IPrimitiveType<String> theTypeFilter,
+				ServletRequestDetails theRequestDetails) {}
 
 		@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 		public void exportPollStatus(
-			@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
-			ServletRequestDetails theRequestDetails
-		) throws IOException {
-		}
+				@OperationParam(
+								name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID,
+								typeName = "string",
+								min = 0,
+								max = 1)
+						IPrimitiveType<String> theJobId,
+				ServletRequestDetails theRequestDetails)
+				throws IOException {}
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -1408,7 +1608,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 		@Delete
-		public MethodOutcome delete(@IdParam IdType theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
+		public MethodOutcome delete(
+				@IdParam IdType theId, @ConditionalUrlParam(supportsMultiple = true) String theConditionalUrl) {
 			return null;
 		}
 
@@ -1418,10 +1619,12 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 		@Update
-		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+		public MethodOutcome update(
+				@IdParam IdType theId,
+				@ResourceParam Patient thePatient,
+				@ConditionalUrlParam String theConditionalUrl) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -1435,26 +1638,30 @@ public class ServerCapabilityStatementProviderR4Test {
 		public List<IBaseResource> history(@IdParam IdType theId) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-											@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER)
+						TokenParam theIdentifier,
+				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME)
+						StringParam theName) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class MultiTypeEncounterProvider implements IResourceProvider {
 
 		@Operation(name = "someOp")
-		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId,
-													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+		public IBundleProvider everything(
+				HttpServletRequest theServletRequest,
+				@IdParam IdType theId,
+				@OperationParam(name = "someOpParam1") DateType theStart,
+				@OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
 
@@ -1464,10 +1671,10 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Encounter thePatient) {
+		public IBundleProvider validate(
+				HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Encounter thePatient) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -1475,14 +1682,14 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		@Operation(name = "someOp")
 		public IBundleProvider everything(
-			HttpServletRequest theServletRequest,
-
-			@IdParam IdType theId,
-
-			@Description(value = "Start description", example = {"2001", "2002"})
-			@OperationParam(name = "someOpParam1") DateType theStart,
-
-			@OperationParam(name = "someOpParam2") Patient theEnd) {
+				HttpServletRequest theServletRequest,
+				@IdParam IdType theId,
+				@Description(
+								value = "Start description",
+								example = {"2001", "2002"})
+						@OperationParam(name = "someOpParam1")
+						DateType theStart,
+				@OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
 
@@ -1492,7 +1699,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		}
 
 		@Validate
-		public IBundleProvider validate(HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Patient thePatient) {
+		public IBundleProvider validate(
+				HttpServletRequest theServletRequest, @IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
 	}
@@ -1519,15 +1727,17 @@ public class ServerCapabilityStatementProviderR4Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 
 		@Operation(name = "everything", idempotent = true)
-		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-													 @OperationParam(name = "end") DateType theEnd) {
+		public IBundleProvider everything(
+				HttpServletRequest theServletRequest,
+				@IdParam IdType theId,
+				@OperationParam(name = "start") DateType theStart,
+				@OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -1535,7 +1745,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -1543,18 +1752,27 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-																						 @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(
+				@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER)
+						TokenParam thePatientId,
+				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
+				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+				@IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes)
+				throws Exception {
 			return null;
 		}
-
 	}
 
 	public static class ProviderWithOperationReturningCanonicalUrl implements IResourceProvider {
-		@Operation(name = "everything", canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true)
-		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId,
-													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+		@Operation(
+				name = "everything",
+				canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything",
+				idempotent = true)
+		public IBundleProvider everything(
+				HttpServletRequest theServletRequest,
+				@IdParam IdType theId,
+				@OperationParam(name = "someOpParam1") DateType theStart,
+				@OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
 
@@ -1568,7 +1786,10 @@ public class ServerCapabilityStatementProviderR4Test {
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -1576,34 +1797,42 @@ public class ServerCapabilityStatementProviderR4Test {
 		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient1(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						TokenParam theIdentifier) {
 			return null;
 		}
 
 		@Search(type = Patient.class)
 		public Patient findPatient2(
-			@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = {Patient.class}) ReferenceAndListParam theLink) {
+				@Description(shortDefinition = "All patients linked to the given patient")
+						@OptionalParam(
+								name = "link",
+								targetTypes = {Patient.class})
+						ReferenceAndListParam theLink) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = {"foo",
-			"bar"}) ReferenceAndListParam theIdentifier) {
+		public Patient findPatient1(
+				@Description(shortDefinition = "The organization at which this person is a patient")
+						@RequiredParam(
+								name = Patient.SP_ORGANIZATION,
+								chainWhitelist = {"foo", "bar"})
+						ReferenceAndListParam theIdentifier) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -1614,12 +1843,13 @@ public class ServerCapabilityStatementProviderR4Test {
 			return Patient.class;
 		}
 
-
 		@Search()
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(
+				@Description(shortDefinition = "The organization at which this person is a patient")
+						@RequiredParam(name = Patient.SP_ORGANIZATION)
+						ReferenceAndListParam theIdentifier) {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -1630,12 +1860,13 @@ public class ServerCapabilityStatementProviderR4Test {
 			return Patient.class;
 		}
 
-
 		@Search(type = Patient.class)
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(
+				@Description(shortDefinition = "The organization at which this person is a patient")
+						@RequiredParam(name = Patient.SP_ORGANIZATION)
+						ReferenceAndListParam theIdentifier) {
 			return null;
 		}
-
 	}
 
 	public static class SystemHistoryProvider {
@@ -1644,7 +1875,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
-
 	}
 
 	public static class TypeHistoryProvider implements IResourceProvider {
@@ -1658,14 +1888,16 @@ public class ServerCapabilityStatementProviderR4Test {
 		public List<IBaseResource> history() {
 			return null;
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)")
+						@RequiredParam(name = Patient.SP_IDENTIFIER)
+						TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -1673,7 +1905,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		public Patient readPatient(@IdParam IdType theId) {
 			return null;
 		}
-
 	}
 
 	public static class TypeLevelOperationProvider implements IResourceProvider {
@@ -1689,7 +1920,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 	}
 
 	public static class NamedQueryPlainProvider {
@@ -1719,7 +1949,6 @@ public class ServerCapabilityStatementProviderR4Test {
 		public Bundle findAllGivenParameter(@OptionalParam(name = SP_PARAM) StringParam param) {
 			return null;
 		}
-
 	}
 
 	public static class ProfiledPatientProvider implements IResourceProvider {
@@ -1746,23 +1975,17 @@ public class ServerCapabilityStatementProviderR4Test {
 		public PatientTripleSub read(@IdParam IdType theId) {
 			return null;
 		}
-
 	}
 
 	@ResourceDef(id = PATIENT_SUB)
-	public static class PatientSub extends Patient {
-	}
+	public static class PatientSub extends Patient {}
 
 	@ResourceDef(id = PATIENT_SUB_SUB)
-	public static class PatientSubSub extends PatientSub {
-	}
+	public static class PatientSubSub extends PatientSub {}
 
 	@ResourceDef(id = PATIENT_SUB_SUB_2)
-	public static class PatientSubSub2 extends PatientSub {
-	}
+	public static class PatientSubSub2 extends PatientSub {}
 
 	@ResourceDef(id = PATIENT_TRIPLE_SUB)
-	public static class PatientTripleSub extends PatientSubSub {
-	}
-
+	public static class PatientTripleSub extends PatientSubSub {}
 }

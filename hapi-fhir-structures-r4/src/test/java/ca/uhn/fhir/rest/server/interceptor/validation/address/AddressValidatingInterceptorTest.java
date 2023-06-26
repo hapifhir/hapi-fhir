@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
@@ -14,15 +13,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Properties;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.ADDRESS_VALIDATION_DISABLED_HEADER;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_VALIDATOR_CLASS;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.BaseRestfulValidator.PROPERTY_SERVICE_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -33,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,9 +61,13 @@ class AddressValidatingInterceptorTest {
 		interceptor.validateAddress(address, ourCtx);
 
 		assertTrue(address.hasExtension());
-		assertEquals("true", address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString());
-		assertEquals("E",
-			address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL).getValueAsPrimitive().getValueAsString());
+		assertEquals(
+				"true", address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString());
+		assertEquals(
+				"E",
+				address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL)
+						.getValueAsPrimitive()
+						.getValueAsString());
 
 		assertEquals("100 Somewhere, Burloak", address.getText());
 		assertEquals(1, address.getLine().size());
@@ -134,7 +134,8 @@ class AddressValidatingInterceptorTest {
 
 	@Test
 	public void testDisablingValidationViaHeader() {
-		when(myRequestDetails.getHeaders(eq(ADDRESS_VALIDATION_DISABLED_HEADER))).thenReturn(Arrays.asList(new String[]{"True"}));
+		when(myRequestDetails.getHeaders(eq(ADDRESS_VALIDATION_DISABLED_HEADER)))
+				.thenReturn(Arrays.asList(new String[] {"True"}));
 
 		Person p = new Person();
 		AddressValidatingInterceptor spy = Mockito.spy(myInterceptor);
@@ -175,7 +176,8 @@ class AddressValidatingInterceptorTest {
 		assertNotNull(addressToValidate.getExtensionByUrl("MY_URL"));
 		assertFalse(address.hasExtension());
 		assertEquals(address.getCity(), addressToValidate.getCity());
-		assertTrue(address.getLine().get(0).equalsDeep(addressToValidate.getLine().get(0)));
+		assertTrue(
+				address.getLine().get(0).equalsDeep(addressToValidate.getLine().get(0)));
 	}
 
 	@Test
@@ -191,7 +193,9 @@ class AddressValidatingInterceptorTest {
 	private Extension assertValidationErrorExtension(Address theAddress) {
 		assertTrue(theAddress.hasExtension());
 		assertEquals(1, theAddress.getExtension().size());
-		assertEquals(IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, theAddress.getExtensionFirstRep().getUrl());
+		assertEquals(
+				IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL,
+				theAddress.getExtensionFirstRep().getUrl());
 		return theAddress.getExtensionFirstRep();
 	}
 
@@ -260,12 +264,12 @@ class AddressValidatingInterceptorTest {
 		assertNotNull(ext);
 		assertNull(ext.getValue());
 		assertTrue(ext.hasExtension());
-
 	}
 
 	public static class TestAddressValidator implements IAddressValidator {
 		@Override
-		public AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext) throws AddressValidationException {
+		public AddressValidationResult isValid(IBase theAddress, FhirContext theFhirContext)
+				throws AddressValidationException {
 			return null;
 		}
 	}

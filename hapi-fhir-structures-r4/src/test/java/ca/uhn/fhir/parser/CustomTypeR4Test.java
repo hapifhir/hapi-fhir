@@ -51,7 +51,11 @@ public class CustomTypeR4Test {
 
 	@ResourceDef
 	public static class PatientWithExtensionWithTwoTypes extends Patient {
-		@Child(name = "foo", type = { DateTimeType.class, Period.class }, min = 0, max = 1)
+		@Child(
+				name = "foo",
+				type = {DateTimeType.class, Period.class},
+				min = 0,
+				max = 1)
 		@Extension(url = "http://example.com/extension#foo", definedLocally = true, isModifier = false)
 		@Description(shortDefinition = "Some description")
 		private Type foo;
@@ -69,17 +73,21 @@ public class CustomTypeR4Test {
 	public void testExtensionWithTwoTypes() {
 		PatientWithExtensionWithTwoTypes pt = new PatientWithExtensionWithTwoTypes();
 		pt.setFoo(new DateTimeType("2011-01-01T00:00:00Z"));
-		
+
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
 		ourLog.info(encoded);
-		
+
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithTwoTypes.class, encoded);
-		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType)pt.getFoo()).getValueAsString());
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	@ResourceDef
 	public static class PatientWithExtensionWithOneTypes extends Patient {
-		@Child(name = "foo", type = { DateTimeType.class }, min = 0, max = 1)
+		@Child(
+				name = "foo",
+				type = {DateTimeType.class},
+				min = 0,
+				max = 1)
 		@Extension(url = "http://example.com/extension#foo", definedLocally = true, isModifier = false)
 		@Description(shortDefinition = "Some description")
 		private Type foo;
@@ -97,12 +105,12 @@ public class CustomTypeR4Test {
 	public void testExtensionWithOneTypes() {
 		PatientWithExtensionWithOneTypes pt = new PatientWithExtensionWithOneTypes();
 		pt.setFoo(new DateTimeType("2011-01-01T00:00:00Z"));
-		
+
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pt);
 		ourLog.info(encoded);
-		
+
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithOneTypes.class, encoded);
-		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType)pt.getFoo()).getValueAsString());
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	/**
@@ -121,16 +129,22 @@ public class CustomTypeR4Test {
 		String xml = parser.encodeResourceToString(resource);
 		ourLog.info(xml);
 
-		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
-				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-				"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
-				"</CustomResource>"));
-		//@formatter:on
+		// @formatter:on
+		assertThat(
+				xml,
+				stringContainsInOrder(
+						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+						"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
+						"</CustomResource>"));
+		// @formatter:on
 
 		CustomResource364R4 parsedResource = parser.parseResource(CustomResource364R4.class, xml);
-		assertEquals("2016-05-13", ((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString());
+		assertEquals(
+				"2016-05-13",
+				((CustomResource364CustomDate) parsedResource.getBaseValues())
+						.getDate()
+						.getValueAsString());
 	}
 
 	/**
@@ -148,13 +162,15 @@ public class CustomTypeR4Test {
 
 		String xml = parser.encodeResourceToString(resource);
 
-		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
-				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-				"<baseValueString value=\"2016-05-13\"/>",
-				"</CustomResource>"));
-		//@formatter:on
+		// @formatter:on
+		assertThat(
+				xml,
+				stringContainsInOrder(
+						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+						"<baseValueString value=\"2016-05-13\"/>",
+						"</CustomResource>"));
+		// @formatter:on
 
 		CustomResource364R4 parsedResource = parser.parseResource(CustomResource364R4.class, xml);
 		assertEquals("2016-05-13", ((StringType) parsedResource.getBaseValues()).getValueAsString());
@@ -177,7 +193,8 @@ public class CustomTypeR4Test {
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
 		assertEquals(1, res1.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
+		assertEquals(
+				"http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
 		assertEquals("185 cm", res1.getWeight().getValue());
@@ -192,7 +209,8 @@ public class CustomTypeR4Test {
 
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+		assertEquals(
+				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.r4.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
@@ -207,7 +225,8 @@ public class CustomTypeR4Test {
 		FhirContext ctx = FhirContext.forR4();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+		assertEquals(
+				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.r4.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(1, exts.size());
@@ -226,7 +245,6 @@ public class CustomTypeR4Test {
 		assertThat(p.getMeta().getTag(), empty());
 		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
 		assertThat(p.getMeta().getVersionId(), nullValue());
-
 	}
 
 	@Test
@@ -242,31 +260,33 @@ public class CustomTypeR4Test {
 		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(out);
 
-		//@formatter:off
-		assertThat(out, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://foo/profile1\"/>", 
-			"<profile value=\"http://foo/profile2\"/>", 
-			"<security>", 
-			"<system value=\"SEC_S1\"/>", 
-			"<code value=\"SEC_C1\"/>", 
-			"<display value=\"SED_D1\"/>", 
-			"</security>", 
-			"<security>", 
-			"<system value=\"SEC_S2\"/>", 
-			"<code value=\"SEC_C2\"/>", 
-			"<display value=\"SED_D2\"/>", 
-			"</security>", 
-			"<tag>", 
-			"<system value=\"TAG_S1\"/>", 
-			"<display value=\"TAG_D1\"/>", 
-			"</tag>", 
-			"<tag>", 
-			"<system value=\"TAG_S2\"/>", 
-			"<display value=\"TAG_D2\"/>", 
-			"</tag>", 
-			"</meta>"));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				out,
+				stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://foo/profile1\"/>",
+						"<profile value=\"http://foo/profile2\"/>",
+						"<security>",
+						"<system value=\"SEC_S1\"/>",
+						"<code value=\"SEC_C1\"/>",
+						"<display value=\"SED_D1\"/>",
+						"</security>",
+						"<security>",
+						"<system value=\"SEC_S2\"/>",
+						"<code value=\"SEC_C2\"/>",
+						"<display value=\"SED_D2\"/>",
+						"</security>",
+						"<tag>",
+						"<system value=\"TAG_S1\"/>",
+						"<display value=\"TAG_D1\"/>",
+						"</tag>",
+						"<tag>",
+						"<system value=\"TAG_S2\"/>",
+						"<display value=\"TAG_D2\"/>",
+						"</tag>",
+						"</meta>"));
+		// @formatter:on
 
 	}
 
@@ -293,20 +313,22 @@ public class CustomTypeR4Test {
 
 		ourLog.info(messageString);
 
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder("<meta>", "<profile value=\"http://example.com/foo\"/>", "</meta>"));
+		// @formatter:on
 
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				not(stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"",
+						"/>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"</meta>")));
+		// @formatter:on
 	}
 
 	@Test
@@ -335,21 +357,26 @@ public class CustomTypeR4Test {
 
 		ourLog.info(messageString);
 
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"<profile value=\"http://example.com/bar\"/>",
+						"</meta>"));
+		// @formatter:on
 
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				not(stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"",
+						"/>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"</meta>")));
+		// @formatter:on
 	}
 
 	/**
@@ -357,7 +384,7 @@ public class CustomTypeR4Test {
 	 */
 	@Test
 	public void testParseResourceWithContainedResourcesWithProfile() {
-		//@formatter:off
+		// @formatter:off
 		String input = "<MedicationRequest xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
 				+ "<meta> "
@@ -378,10 +405,11 @@ public class CustomTypeR4Test {
 				+ "<reference value=\"#1\"/> "
 				+ "</medication> "
 				+ "</MedicationRequest>";
-		//@formatter:on
+		// @formatter:on
 
 		FhirContext ctx = FhirContext.forR4();
-		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
+		ctx.setDefaultTypeForProfile(
+				"http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
 
 		MedicationRequest mo = ctx.newXmlParser().parseResource(MedicationRequest.class, input);
 		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
@@ -592,7 +620,16 @@ public class CustomTypeR4Test {
 
 		@Override
 		public boolean isEmpty() {
-			return super.isEmpty() && ElementUtil.isEmpty(myInsulinLevel, myGlucoseLevel, myHbA1c, myBloodPressure, myCholesterol, myWeight, myHeight, myCheckDates);
+			return super.isEmpty()
+					&& ElementUtil.isEmpty(
+							myInsulinLevel,
+							myGlucoseLevel,
+							myHbA1c,
+							myBloodPressure,
+							myCholesterol,
+							myWeight,
+							myHeight,
+							myCheckDates);
 		}
 
 		public void setBloodPressure(Quantity bloodPressure) {
@@ -643,13 +680,11 @@ public class CustomTypeR4Test {
 		public void setWeight(StringDt weight) {
 			myWeight = weight;
 		}
-
 	}
 
 	@ResourceDef()
 	public static class MyMedication extends Medication {
 
 		private static final long serialVersionUID = 1L;
-
 	}
 }

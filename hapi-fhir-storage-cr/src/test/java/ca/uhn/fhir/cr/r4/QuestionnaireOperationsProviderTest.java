@@ -2,7 +2,6 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -23,11 +22,20 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 		var requestDetails = setupRequestDetails();
 		var theSubject = "positive";
-		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = this.questionnaireOperationsProvider.populate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
-			null, null, null, null,
-			requestDetails);
+		var parameters = new Parameters()
+				.addParameter("Service Request Id", "SleepStudy")
+				.addParameter("Service Request Id", "SleepStudy2");
+		var result = this.questionnaireOperationsProvider.populate(
+				new IdType("Questionnaire", "ASLPA1"),
+				null,
+				null,
+				theSubject,
+				parameters,
+				null,
+				null,
+				null,
+				null,
+				requestDetails);
 
 		assertNotNull(result);
 		assertEquals("Patient/" + theSubject, result.getSubject().getReference());
@@ -40,11 +48,20 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 		var requestDetails = setupRequestDetails();
 		var theSubject = "positive";
-		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = this.questionnaireOperationsProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
-			null, null, null, null,
-			requestDetails);
+		var parameters = new Parameters()
+				.addParameter("Service Request Id", "SleepStudy")
+				.addParameter("Service Request Id", "SleepStudy2");
+		var result = this.questionnaireOperationsProvider.prepopulate(
+				new IdType("Questionnaire", "ASLPA1"),
+				null,
+				null,
+				theSubject,
+				parameters,
+				null,
+				null,
+				null,
+				null,
+				requestDetails);
 
 		assertNotNull(result);
 		assertTrue(result.getItem().get(0).getItem().get(0).hasInitial());
@@ -54,12 +71,15 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 	void testQuestionnairePackage() {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
-		var result = this.questionnaireOperationsProvider.packageQuestionnaire(null,
-			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
-			requestDetails);
+		var result = this.questionnaireOperationsProvider.packageQuestionnaire(
+				null, "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true", requestDetails);
 
 		assertNotNull(result);
 		assertEquals(11, result.getEntry().size());
-		assertTrue(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
+		assertTrue(result.getEntry()
+				.get(0)
+				.getResource()
+				.fhirType()
+				.equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
 	}
 }

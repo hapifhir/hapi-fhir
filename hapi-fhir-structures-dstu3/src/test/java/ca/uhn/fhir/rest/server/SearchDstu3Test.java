@@ -76,12 +76,25 @@ public class SearchDstu3Test {
 
 			assertEquals("search", ourLastMethod);
 
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals(
+					"foo",
+					ourIdentifiers
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getSystem());
+			assertEquals(
+					"bar",
+					ourIdentifiers
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValuesAsQueryTokens()
+							.get(0)
+							.getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
 	@Test
@@ -95,15 +108,14 @@ public class SearchDstu3Test {
 
 			OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
 			assertEquals(
-					Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
+					Msg.code(1935)
+							+ "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
 					oo.getIssueFirstRep().getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
-
 	}
 
-	
 	@Test
 	public void testPagingPreservesEncodingJson() throws Exception {
 		HttpGet httpGet;
@@ -133,7 +145,6 @@ public class SearchDstu3Test {
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_format=json"));
-
 	}
 
 	@Test
@@ -143,7 +154,8 @@ public class SearchDstu3Test {
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
+		httpGet = new HttpGet(
+				"http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
@@ -165,7 +177,6 @@ public class SearchDstu3Test {
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
-
 	}
 
 	@Test
@@ -197,7 +208,6 @@ public class SearchDstu3Test {
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_format=xml"));
-
 	}
 
 	@Test
@@ -229,7 +239,6 @@ public class SearchDstu3Test {
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, not(containsString("_format")));
-
 	}
 
 	@Test
@@ -240,42 +249,54 @@ public class SearchDstu3Test {
 
 		// Initial search
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar");
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		httpGet.addHeader(
+				Constants.HEADER_ACCEPT,
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, not(containsString("_format")));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		httpGet.addHeader(
+				Constants.HEADER_ACCEPT,
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, not(containsString("_format")));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		httpGet.addHeader(
+				Constants.HEADER_ACCEPT,
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, not(containsString("_format")));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		httpGet.addHeader(
+				Constants.HEADER_ACCEPT,
+				"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, not(containsString("_format")));
-
 	}
 
-	private Bundle executeAndReturnLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException, ClientProtocolException {
+	private Bundle executeAndReturnLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding)
+			throws IOException, ClientProtocolException {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		Bundle bundle;
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
+			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity()
+					.getContentType()
+					.getValue()
+					.replaceAll(";.*", "")
+					.trim());
 			assertEquals(theExpectEncoding, ct);
 			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 			assertEquals(10, bundle.getEntry().size());
@@ -287,7 +308,6 @@ public class SearchDstu3Test {
 		return bundle;
 	}
 
-	
 	@Test
 	public void testSearchWithPostAndInvalidParameters() throws Exception {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
@@ -300,8 +320,7 @@ public class SearchDstu3Test {
 		interceptor.setLogResponseSummary(false);
 		client.registerInterceptor(interceptor);
 		try {
-			client
-					.search()
+			client.search()
 					.forResource(Patient.class)
 					.where(new StringClientParam("foo").matches().value("bar"))
 					.prettyPrint()
@@ -311,11 +330,15 @@ public class SearchDstu3Test {
 					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]"));
+			assertThat(
+					e.getMessage(),
+					containsString(
+							"Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]"));
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(OperationOutcome.IssueType.NOTSUPPORTED, oo.getIssueFirstRep().getCode());
+			assertEquals(
+					OperationOutcome.IssueType.NOTSUPPORTED,
+					oo.getIssueFirstRep().getCode());
 		}
-
 	}
 
 	@AfterAll
@@ -340,13 +363,13 @@ public class SearchDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -358,12 +381,11 @@ public class SearchDstu3Test {
 
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List search(
-				@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+		public List search(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
-			
+
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.addName(new HumanName().setFamily("FAMILY"));
@@ -372,7 +394,5 @@ public class SearchDstu3Test {
 			}
 			return retVal;
 		}
-
 	}
-
 }

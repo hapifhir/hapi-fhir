@@ -6,6 +6,5 @@ public class CommonJpaStorageSettingsConfigurer {
 	public CommonJpaStorageSettingsConfigurer(JpaStorageSettings theStorageSettings) {
 		theStorageSettings.setIndexOnUpliftedRefchains(true);
 		theStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-
 	}
 }

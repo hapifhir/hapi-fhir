@@ -7,6 +7,7 @@ public class TestJobStep3InputType implements IModelJson {
 
 	@JsonProperty("data3")
 	private String myData3;
+
 	@JsonProperty("data4")
 	private String myData4;
 
@@ -27,5 +28,4 @@ public class TestJobStep3InputType implements IModelJson {
 		myData4 = theData2;
 		return this;
 	}
-
 }

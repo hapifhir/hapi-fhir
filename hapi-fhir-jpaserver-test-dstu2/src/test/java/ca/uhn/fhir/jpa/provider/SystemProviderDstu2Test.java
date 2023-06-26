@@ -98,14 +98,23 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
 			practitionerRp.setDao(myPractitionerDao);
 
-
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, binaryRp, locationRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
+			restServer.setResourceProviders(
+					patientRp,
+					questionnaireRp,
+					observationRp,
+					organizationRp,
+					binaryRp,
+					locationRp,
+					diagnosticReportRp,
+					diagnosticOrderRp,
+					practitionerRp);
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myStorageSettings);
+			JpaConformanceProviderDstu2 myConformanceProvider =
+					new JpaConformanceProviderDstu2(restServer, mySystemDao, myStorageSettings);
 			restServer.setServerConformanceProvider(myConformanceProvider);
 
 			ourServer = new Server(0);
@@ -125,7 +134,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			int myPort = JettyUtil.getPortForStartedServer(ourServer);
 			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager =
+					new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(connectionManager);
 			ourHttpClient = builder.build();
@@ -171,7 +181,6 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		assertThat(conf.getImplementation().getDescription(), not(emptyOrNullString()));
 	}
 
-
 	@Test
 	public void testEverythingReturnsCorrectBundleType() throws Exception {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -195,7 +204,9 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
+			assertEquals(
+					BundleTypeEnum.SEARCH_RESULTS,
+					responseBundle.getTypeElement().getValueAsEnum());
 
 		} finally {
 			http.close();
@@ -215,7 +226,6 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-
 	@Test
 	public void testGetOperationDefinition() {
 		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
@@ -229,7 +239,12 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext
+					.newJsonParser()
+					.parseResource(
+							Bundle.class,
+							IOUtils.toString(
+									getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
 			ourClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
@@ -249,32 +264,34 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			} catch (ResourceGoneException e) {
 				// good
 			}
-
 		}
-
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirContext, ourClient.search().forResource(theType).execute())
-			.forEach(t -> {
-				ourClient.delete().resourceById(t.getIdElement()).execute();
-			});
+		BundleUtil.toListOfResources(
+						myFhirContext, ourClient.search().forResource(theType).execute())
+				.forEach(t -> {
+					ourClient.delete().resourceById(t.getIdElement()).execute();
+				});
 	}
 
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
 
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 
-		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		InputStream bundleRes =
+				SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
@@ -315,7 +332,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/grahame-transaction.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 	}
 
@@ -323,7 +341,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		String response =
+				ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdDt id = new IdDt(bundleResp.getEntry().get(0).getResponse().getLocation());
@@ -343,7 +362,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(
+					Msg.code(533)
+							+ "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'",
+					oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode());
 		}
 	}
@@ -357,7 +379,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		// fail();
 		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the
+		// form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());
 		// }
 	}
@@ -423,6 +446,4 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
-
-
 }

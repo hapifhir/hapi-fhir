@@ -18,8 +18,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -44,11 +44,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -136,7 +134,8 @@ class BaseHapiFhirResourceDaoTest {
 	public void validateResourceIdCreation_asUser() {
 		Patient patient = new Patient();
 		RequestDetails sysRequest = new ServletRequestDetails();
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+		when(myStorageSettings.getResourceClientIdStrategy())
+				.thenReturn(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
@@ -150,7 +149,8 @@ class BaseHapiFhirResourceDaoTest {
 		Patient patient = new Patient();
 		patient.setId("2401");
 		RequestDetails sysRequest = new ServletRequestDetails();
-		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
+		when(myStorageSettings.getResourceClientIdStrategy())
+				.thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
@@ -189,19 +189,12 @@ class BaseHapiFhirResourceDaoTest {
 
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
-			any(RequestDetails.class),
-			Mockito.anyString(),
-			any(IIdType.class)
-		)).thenReturn(partitionId);
+						any(RequestDetails.class), Mockito.anyString(), any(IIdType.class)))
+				.thenReturn(partitionId);
 		when(myIdHelperService.resolveResourcePersistentIds(
-			any(RequestPartitionId.class),
-			Mockito.anyString(),
-			Mockito.anyString()
-		)).thenReturn(jpaPid);
-		when(myEntityManager.find(
-			any(Class.class),
-			Mockito.anyLong()
-		)).thenReturn(entity);
+						any(RequestPartitionId.class), Mockito.anyString(), Mockito.anyString()))
+				.thenReturn(jpaPid);
+		when(myEntityManager.find(any(Class.class), Mockito.anyLong())).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...
 		// if this changes, though, we will have to stub it.
@@ -217,7 +210,8 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Test
 	public void requestReindexForRelatedResources_withValidBase_includesUrlsInJobParameters() {
-		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
+		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange())
+				.thenReturn(true);
 
 		List<String> base = Lists.newArrayList("Patient", "Group");
 
@@ -244,7 +238,8 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Test
 	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
-		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
+		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange())
+				.thenReturn(true);
 
 		List<String> base = Lists.newArrayList("Resource");
 
@@ -263,12 +258,14 @@ class BaseHapiFhirResourceDaoTest {
 
 	@ParameterizedTest
 	@MethodSource("searchParameterMapProvider")
-	public void testMethodSearchForIds_withNullSPMapLoadSynchronousUpTo_defaultsToInternalSynchronousSearchSize(SearchParameterMap theSearchParameterMap, int expectedSearchSize) {
+	public void testMethodSearchForIds_withNullSPMapLoadSynchronousUpTo_defaultsToInternalSynchronousSearchSize(
+			SearchParameterMap theSearchParameterMap, int expectedSearchSize) {
 		// setup
 		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
 		mySvc.setTransactionService(myTransactionService);
 
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any()))
+				.thenReturn(mock(RequestPartitionId.class));
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(myISearchBuilder);
 		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
@@ -285,9 +282,8 @@ class BaseHapiFhirResourceDaoTest {
 
 	static Stream<Arguments> searchParameterMapProvider() {
 		return Stream.of(
-			Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
-			Arguments.of(new SearchParameterMap(), 5000)
-		);
+				Arguments.of(new SearchParameterMap().setLoadSynchronousUpTo(1000), 1000),
+				Arguments.of(new SearchParameterMap(), 5000));
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {

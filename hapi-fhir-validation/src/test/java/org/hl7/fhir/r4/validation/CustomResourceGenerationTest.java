@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -25,14 +25,16 @@ public class CustomResourceGenerationTest extends BaseTest {
 	@Test
 	public void testValidateCustomResource() throws IOException {
 
-		StructureDefinition customProfile = loadResource(myCtx, StructureDefinition.class, "/r4/custom-resource-profile.json");
+		StructureDefinition customProfile =
+				loadResource(myCtx, StructureDefinition.class, "/r4/custom-resource-profile.json");
 		String customResource = loadResource("/r4/custom-resource.json");
 
 		PrePopulatedValidationSupport prePopulatedValidationSupport = new PrePopulatedValidationSupport(myCtx);
 		prePopulatedValidationSupport.addStructureDefinition(customProfile);
 
 		DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(myCtx);
-		ValidationSupportChain validationSupport = new ValidationSupportChain(defaultProfileValidationSupport, prePopulatedValidationSupport);
+		ValidationSupportChain validationSupport =
+				new ValidationSupportChain(defaultProfileValidationSupport, prePopulatedValidationSupport);
 
 		FhirValidator validator = myCtx.newValidator();
 		validator.registerValidatorModule(new FhirInstanceValidator(validationSupport));
@@ -43,10 +45,12 @@ public class CustomResourceGenerationTest extends BaseTest {
 		ourLog.info(outcome);
 
 		assertEquals(3, result.getMessages().size());
-		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
-		assertEquals("The property name  must be a JSON Array, not a Primitive property (at CustomResource)", result.getMessages().get(1).getMessage());
+		assertEquals(
+				"Error parsing JSON: the primitive value must be a boolean",
+				result.getMessages().get(0).getMessage());
+		assertEquals(
+				"The property name  must be a JSON Array, not a Primitive property (at CustomResource)",
+				result.getMessages().get(1).getMessage());
 		assertEquals("Unrecognized property 'id1'", result.getMessages().get(2).getMessage());
-
 	}
-
 }

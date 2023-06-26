@@ -27,29 +27,38 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-	SubscriptionSubmitterConfig.class,
-	SearchParamConfig.class,
-	SubscriptionSubmitInterceptorLoaderTest.MyConfig.class
-})
+@ContextConfiguration(
+		classes = {
+			SubscriptionSubmitterConfig.class,
+			SearchParamConfig.class,
+			SubscriptionSubmitInterceptorLoaderTest.MyConfig.class
+		})
 public class SubscriptionSubmitInterceptorLoaderTest {
 
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
+
 	@MockBean
 	private IInterceptorService myInterceptorService;
+
 	@MockBean
 	private IValidationSupport myValidationSupport;
+
 	@MockBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@MockBean
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
+
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
+
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -81,8 +90,5 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 			return storageSettings;
 		}
-
 	}
-
-
 }

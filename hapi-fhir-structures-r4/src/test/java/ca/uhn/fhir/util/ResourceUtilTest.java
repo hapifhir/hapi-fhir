@@ -23,7 +23,9 @@ public class ResourceUtilTest {
 
 		ResourceUtil.removeNarrative(FhirContext.forR4(), bundle);
 
-		assertNull(((Patient) bundle.getEntry().get(0).getResource()).getText().getDiv().getValueAsString());
+		assertNull(((Patient) bundle.getEntry().get(0).getResource())
+				.getText()
+				.getDiv()
+				.getValueAsString());
 	}
-
 }

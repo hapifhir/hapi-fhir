@@ -24,7 +24,7 @@ class ObjectUtilTest {
 		assertTrue(ObjectUtil.equals(null, null));
 		assertTrue(ObjectUtil.equals(a, a));
 	}
-	
+
 	@Test
 	void testRequireNonNull() {
 		String message = "Must not be null in test";
@@ -36,19 +36,18 @@ class ObjectUtilTest {
 		}
 		assertNotNull(ObjectUtil.requireNonNull("some string", message));
 	}
-	
+
 	@Test
 	void testRequireNotEmpty() {
-		//All these are empty, null or whitespace strings.
+		// All these are empty, null or whitespace strings.
 		testRequireNotEmptyErrorScenario(null);
 		testRequireNotEmptyErrorScenario("");
 		testRequireNotEmptyErrorScenario(" ");
 		testRequireNotEmptyErrorScenario("  ");
-		//All these are non empty, some non whitespace char in the string.
+		// All these are non empty, some non whitespace char in the string.
 		ObjectUtil.requireNotEmpty("abc ", "");
 		ObjectUtil.requireNotEmpty(" abc ", "");
 		ObjectUtil.requireNotEmpty(" abc", "");
-		
 	}
 
 	private void testRequireNotEmptyErrorScenario(String string) {

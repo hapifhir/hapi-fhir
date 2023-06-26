@@ -24,21 +24,20 @@ public class WebTestFhirTesterConfig {
 	public TesterConfig testerConfig(ITestingUiClientFactory theClientFactory) {
 		TesterConfig retVal = new TesterConfig();
 		retVal.setClientFactory(theClientFactory);
-		retVal
-			.addServer()
-			.withId("internal")
-			.withFhirVersion(FhirVersionEnum.R4)
-			.withBaseUrl("http://localhost:8000")
-			.withName("Localhost Server")
-			.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
-			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
-			.withSearchResultRowOperation("$validate", id -> true)
-			.enableDebugTemplates();
+		retVal.addServer()
+				.withId("internal")
+				.withFhirVersion(FhirVersionEnum.R4)
+				.withBaseUrl("http://localhost:8000")
+				.withName("Localhost Server")
+				.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
+				.withSearchResultRowOperation(
+						"$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+				.withSearchResultRowOperation("$validate", id -> true)
+				.enableDebugTemplates();
 		return retVal;
 	}
 
 	public static void setBaseUrl(String theBaseUrl) {
 		ourBaseUrl = theBaseUrl;
 	}
-
 }

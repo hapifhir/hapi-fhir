@@ -44,177 +44,184 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class BinaryHl7OrgDstu2Test {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryHl7OrgDstu2Test.class);
-  private static CloseableHttpClient ourClient;
-  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-  private static Binary ourLast;
-  private static int ourPort;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryHl7OrgDstu2Test.class);
+	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static Binary ourLast;
+	private static int ourPort;
 
-  private static Server ourServer;
+	private static Server ourServer;
 
-  @BeforeEach
-  public void before() {
-    ourLast = null;
-  }
+	@BeforeEach
+	public void before() {
+		ourLast = null;
+	}
 
-  @Test
-  public void testReadWithExplicitTypeXml() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
-    IOUtils.closeQuietly(status.getEntity().getContent());
+	@Test
+	public void testReadWithExplicitTypeXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-    ourLog.info(responseContent);
+		ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
 
-    Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
-    assertEquals("foo", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
-  }
+		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+	}
 
-  @Test
-  public void testReadWithExplicitTypeJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
-    IOUtils.closeQuietly(status.getEntity().getContent());
+	@Test
+	public void testReadWithExplicitTypeJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-    ourLog.info(responseContent);
+		ourLog.info(responseContent);
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
 
-    Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
-    assertEquals("foo", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
-  }
+		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+	}
 
+	@Test
+	public void testCreate() throws Exception {
+		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
+		http.setEntity(new ByteArrayEntity(new byte[] {1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
-  @Test
-  public void testCreate() throws Exception {
-    HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
-    http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
+		HttpResponse status = ourClient.execute(http);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
-    HttpResponse status = ourClient.execute(http);
-    assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, ourLast.getContent());
+	}
 
-    assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
+	@Test
+	public void testRead() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, responseContent);
+	}
 
-  }
+	@Test
+	public void testSearchJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(
+				Constants.CT_FHIR_JSON + ";charset=utf-8",
+				status.getFirstHeader("content-type")
+						.getValue()
+						.replace(" ", "")
+						.replace("UTF", "utf"));
 
-  @Test
-  public void testRead() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
-    HttpResponse status = ourClient.execute(httpGet);
-    byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals("foo", status.getFirstHeader("content-type").getValue());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
+		ourLog.info(responseContent);
 
-  }
+		org.hl7.fhir.dstu2.model.Bundle bundle =
+				ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-  @Test
-  public void testSearchJson() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true&_format=json");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals("text/plain", bin.getContentType());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+	}
 
-    ourLog.info(responseContent);
+	@Test
+	public void testSearchXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(
+				Constants.CT_FHIR_XML + ";charset=utf-8",
+				status.getFirstHeader("content-type")
+						.getValue()
+						.replace(" ", "")
+						.replace("UTF", "utf"));
 
-		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
-    Binary bin = (Binary) bundle.getEntry().get(0).getResource();
+		ourLog.info(responseContent);
 
-    assertEquals("text/plain", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
-  }
+		org.hl7.fhir.dstu2.model.Bundle bundle =
+				ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-  @Test
-  public void testSearchXml() throws Exception {
-    HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals("text/plain", bin.getContentType());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, bin.getContent());
+	}
 
-    ourLog.info(responseContent);
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class ResourceProvider implements IResourceProvider {
 
-		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
-    Binary bin = (Binary) bundle.getEntry().get(0).getResource();
+		@Create
+		public MethodOutcome create(@ResourceParam Binary theBinary) {
+			ourLast = theBinary;
+			return new MethodOutcome(new IdType("1"));
+		}
 
-    assertEquals("text/plain", bin.getContentType());
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
-  }
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Binary.class;
+		}
 
-  /**
-   * Created by dsotnikov on 2/25/2014.
-   */
-  public static class ResourceProvider implements IResourceProvider {
+		@Read
+		public Binary read(@IdParam IdType theId) {
+			Binary retVal = new Binary();
+			retVal.setId("1");
+			retVal.setContent(new byte[] {1, 2, 3, 4});
+			retVal.setContentType(theId.getIdPart());
+			return retVal;
+		}
 
-    @Create
-    public MethodOutcome create(@ResourceParam Binary theBinary) {
-      ourLast = theBinary;
-      return new MethodOutcome(new IdType("1"));
-    }
+		@Search
+		public List<Binary> search() {
+			Binary retVal = new Binary();
+			retVal.setId("1");
+			retVal.setContent(new byte[] {1, 2, 3, 4});
+			retVal.setContentType("text/plain");
+			return Collections.singletonList(retVal);
+		}
+	}
 
-    @Override
-    public Class<? extends IBaseResource> getResourceType() {
-      return Binary.class;
-    }
+	@AfterAll
+	public static void afterClass() throws Exception {
+		JettyUtil.closeServer(ourServer);
+	}
 
-    @Read
-    public Binary read(@IdParam IdType theId) {
-      Binary retVal = new Binary();
-      retVal.setId("1");
-      retVal.setContent(new byte[]{1, 2, 3, 4});
-      retVal.setContentType(theId.getIdPart());
-      return retVal;
-    }
+	@BeforeAll
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
 
-    @Search
-    public List<Binary> search() {
-      Binary retVal = new Binary();
-      retVal.setId("1");
-      retVal.setContent(new byte[]{1, 2, 3, 4});
-      retVal.setContentType("text/plain");
-      return Collections.singletonList(retVal);
-    }
+		ResourceProvider patientProvider = new ResourceProvider();
 
-  }
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(patientProvider);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-  @AfterAll
-  public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
-  }
-
-  @BeforeAll
-  public static void beforeClass() throws Exception {
-    ourServer = new Server(0);
-
-    ResourceProvider patientProvider = new ResourceProvider();
-
-    ServletHandler proxyHandler = new ServletHandler();
-    RestfulServer servlet = new RestfulServer(ourCtx);
-    servlet.setResourceProviders(patientProvider);
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-    ServletHolder servletHolder = new ServletHolder(servlet);
-    proxyHandler.addServletWithMapping(servletHolder, "/*");
-    ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setConnectionManager(connectionManager);
-    ourClient = builder.build();
-
-  }
-
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+	}
 }

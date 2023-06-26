@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionHelper.class);
 	protected final MyTestInterceptor myInterceptor = new MyTestInterceptor();
 
 	@Autowired
 	IInterceptorService myIInterceptorService;
+
 	@Autowired
 	PartitionSettings myPartitionSettings;
 

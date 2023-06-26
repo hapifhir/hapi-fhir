@@ -18,8 +18,19 @@ public class JaxRsMethodBindingsMimeTypeTest {
 
 	@Test
 	public void testFindMethodsFor2ProvidersWithMethods() {
-		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
-		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4MimeType().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(
+				AbstractDummyPatientProvider.class,
+				new TestJaxRsDummyPatientProviderR4()
+						.getBindings()
+						.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "")
+						.getMethod()
+						.getDeclaringClass());
+		assertEquals(
+				AbstractDummyPatientProvider.class,
+				new TestJaxRsDummyPatientProviderR4MimeType()
+						.getBindings()
+						.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "")
+						.getMethod()
+						.getDeclaringClass());
 	}
-
 }

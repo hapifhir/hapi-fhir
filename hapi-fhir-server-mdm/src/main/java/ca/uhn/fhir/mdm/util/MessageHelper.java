@@ -44,8 +44,8 @@ public class MessageHelper {
 
 	public String getMessageForUnmanagedResource() {
 		return String.format(
-			"Only MDM managed resources can be merged. MDM managed resources must have the %s tag.",
-			MdmConstants.CODE_HAPI_MDM_MANAGED);
+				"Only MDM managed resources can be merged. MDM managed resources must have the %s tag.",
+				MdmConstants.CODE_HAPI_MDM_MANAGED);
 	}
 
 	public String getMessageForUnsupportedResource(String theName, IAnyResource theResource) {
@@ -53,8 +53,9 @@ public class MessageHelper {
 	}
 
 	public String getMessageForUnsupportedResource(String theName, String theResourceType) {
-		return String.format("Only %s resources can be merged. The %s points to a %s",
-			myMdmSettings.getSupportedMdmTypes(), theName, theResourceType);
+		return String.format(
+				"Only %s resources can be merged. The %s points to a %s",
+				myMdmSettings.getSupportedMdmTypes(), theName, theResourceType);
 	}
 
 	public String getMessageForUnsupportedMatchResult() {
@@ -63,27 +64,28 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedFirstArgumentTypeInUpdate(String goldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + goldenRecordType;
+				+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + goldenRecordType;
 	}
 
 	public String getMessageForUnsupportedSecondArgumentTypeInUpdate(String theGoldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
+				+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
 	}
 
 	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theSourceResourceType) {
-		return "Arguments to " + ProviderConstants.MDM_UPDATE_LINK + " must be of the same type. Were " +
-			theGoldenRecordType + " and " + theSourceResourceType;
+		return "Arguments to " + ProviderConstants.MDM_UPDATE_LINK + " must be of the same type. Were "
+				+ theGoldenRecordType + " and " + theSourceResourceType;
 	}
 
 	public String getMessageForUnsupportedSourceResource() {
 		return "The source resource is marked with the " + MdmConstants.CODE_NO_MDM_MANAGED
-			+ " tag which means it may not be MDM linked.";
+				+ " tag which means it may not be MDM linked.";
 	}
 
 	public String getMessageForNoLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
-		return getMessageForNoLink(theGoldenRecord.getIdElement().toVersionless().toString(),
-			theSourceResource.getIdElement().toVersionless().toString());
+		return getMessageForNoLink(
+				theGoldenRecord.getIdElement().toVersionless().toString(),
+				theSourceResource.getIdElement().toVersionless().toString());
 	}
 
 	public String getMessageForNoLink(String theGoldenRecord, String theSourceResource) {
@@ -91,8 +93,9 @@ public class MessageHelper {
 	}
 
 	public String getMessageForAlreadyAcceptedLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
-		return getMessageForAlreadyAcceptedLink(theGoldenRecord.getIdElement().toVersionless().toString(),
-			theSourceResource.getIdElement().toVersionless().toString());
+		return getMessageForAlreadyAcceptedLink(
+				theGoldenRecord.getIdElement().toVersionless().toString(),
+				theSourceResource.getIdElement().toVersionless().toString());
 	}
 
 	public String getMessageForAlreadyAcceptedLink(String theGoldenId, String theSourceId) {
@@ -100,16 +103,19 @@ public class MessageHelper {
 	}
 
 	public String getMessageForPresentLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
-		return getMessageForPresentLink(theGoldenRecord.getIdElement().toVersionless().toString(),
-			theSourceResource.getIdElement().toVersionless().toString());
+		return getMessageForPresentLink(
+				theGoldenRecord.getIdElement().toVersionless().toString(),
+				theSourceResource.getIdElement().toVersionless().toString());
 	}
 
 	public String getMessageForPresentLink(String theGoldenRecord, String theSourceResource) {
-		return "Link already exists between " + theGoldenRecord + " and " + theSourceResource + ". Use $mdm-update-link instead.";
+		return "Link already exists between " + theGoldenRecord + " and " + theSourceResource
+				+ ". Use $mdm-update-link instead.";
 	}
 
 	public String getMessageForMultipleGoldenRecords(IAnyResource theSourceResource) {
-		return getMessageForMultipleGoldenRecords(theSourceResource.getIdElement().toVersionless().toString());
+		return getMessageForMultipleGoldenRecords(
+				theSourceResource.getIdElement().toVersionless().toString());
 	}
 
 	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
@@ -117,15 +123,18 @@ public class MessageHelper {
 	}
 
 	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
-		return theGoldenResourceId + " used as parameter [" + theParamName + "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
+		return theGoldenResourceId + " used as parameter [" + theParamName
+				+ "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
 	}
 
 	public String getMessageForMismatchPartition(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
-		return getMessageForMismatchPartition(theGoldenRecord.getIdElement().toVersionless().toString(),
-			theSourceResource.getIdElement().toVersionless().toString());
+		return getMessageForMismatchPartition(
+				theGoldenRecord.getIdElement().toVersionless().toString(),
+				theSourceResource.getIdElement().toVersionless().toString());
 	}
 
 	public String getMessageForMismatchPartition(String theGoldenRecord, String theSourceResource) {
-		return theGoldenRecord + " and " + theSourceResource + " are stored in different partitions. This operation is only available for resources on the same partition.";
+		return theGoldenRecord + " and " + theSourceResource
+				+ " are stored in different partitions. This operation is only available for resources on the same partition.";
 	}
 }

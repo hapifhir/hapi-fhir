@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.mdm.provider.BaseLinkR4Test;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearStep;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -64,10 +64,13 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
+
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
+
 	@Autowired
 	private MdmSettings myMdmSettings;
+
 	private UserRequestRetryVersionConflictsInterceptor myUserRequestRetryVersionConflictsInterceptor;
 	private final RequestTenantPartitionInterceptor myPartitionInterceptor = new RequestTenantPartitionInterceptor();
 
@@ -113,17 +116,23 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		MdmPageRequest pageRequest = new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		MdmQuerySearchParameters params = new MdmQuerySearchParameters(pageRequest)
-			.setSourceId(myPatientId.getIdElement().getValue());
+				.setSourceId(myPatientId.getIdElement().getValue());
 
-		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(params,
-			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(
+				params,
+				new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
+				new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
 
 		assertEquals(resultPage.getContent().size(), 1);
 
-		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
+		assertEquals(
+				resultPage.getContent().get(0).getSourceId(),
+				patient.getIdElement().getResourceType() + "/"
+						+ patient.getIdElement().getIdPart());
 
-		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
+		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce())
+				.validateHasPartitionPermissions(
+						any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}
 
 	@Test
@@ -142,20 +151,29 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 
-		runInTransaction(()->{
-			ourLog.info("Links: {}", myMdmLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info(
+					"Links: {}",
+					myMdmLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		myCaptureQueriesListener.clear();
-		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
-			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
+		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(
+				null,
+				new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
+				new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)),
+				null);
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(1, resultPage.getContent().size());
-		assertEquals(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart(), resultPage.getContent().get(0).getSourceId());
+		assertEquals(
+				patient.getIdElement().getResourceType() + "/"
+						+ patient.getIdElement().getIdPart(),
+				resultPage.getContent().get(0).getSourceId());
 
-		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
+		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce())
+				.validateHasPartitionPermissions(
+						any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}
 
 	@Test
@@ -184,7 +202,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	@Test
 	public void testMdmClearWithWriteConflict() {
 		AtomicBoolean haveFired = new AtomicBoolean(false);
-		MdmClearStep.setClearCompletionCallbackForUnitTest(()->{
+		MdmClearStep.setClearCompletionCallbackForUnitTest(() -> {
 			if (haveFired.getAndSet(true) == false) {
 				throw new ResourceVersionConflictException("Conflict");
 			}
@@ -222,5 +240,4 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			return myRequestPartitionId.getPartitionIds().equals(theRequestPartitionId.getPartitionIds());
 		}
 	}
-
 }

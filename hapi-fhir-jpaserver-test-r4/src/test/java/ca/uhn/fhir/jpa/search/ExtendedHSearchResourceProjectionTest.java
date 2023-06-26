@@ -41,25 +41,17 @@ class ExtendedHSearchResourceProjectionTest {
 		assertThat(myResource.getIdElement().getIdPart(), equalTo("force-id"));
 	}
 
-
 	@Test
 	public void nullResourceStringThrows() {
 		ResourceNotFoundInIndexException ex = assertThrows(
-			ResourceNotFoundInIndexException.class,
-			() -> new ExtendedHSearchResourceProjection(22, null, null));
+				ResourceNotFoundInIndexException.class, () -> new ExtendedHSearchResourceProjection(22, null, null));
 		assertThat(ex.getMessage(), equalTo(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22"));
 	}
-
 
 	@Test
 	public void emptyResourceStringThrows() {
 		ResourceNotFoundInIndexException ex = assertThrows(
-			ResourceNotFoundInIndexException.class,
-			() -> new ExtendedHSearchResourceProjection(22, null, ""));
+				ResourceNotFoundInIndexException.class, () -> new ExtendedHSearchResourceProjection(22, null, ""));
 		assertThat(ex.getMessage(), equalTo(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22"));
 	}
-
-
-	
-
 }

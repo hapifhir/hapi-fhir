@@ -33,12 +33,17 @@ public class FhirPathFilterInterceptorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirPathFilterInterceptorTest.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
 	@RegisterExtension
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
+
 	@RegisterExtension
 	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourCtx);
+
 	@RegisterExtension
-	public HashMapResourceProviderExtension<Patient> myProviderExtension = new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
+	public HashMapResourceProviderExtension<Patient> myProviderExtension =
+			new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
+
 	private IGenericClient myClient;
 	private String myBaseUrl;
 	private CloseableHttpClient myHttpClient;
@@ -48,7 +53,10 @@ public class FhirPathFilterInterceptorTest {
 	public void before() {
 		myProviderExtension.clear();
 		myServerExtension.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
-		myServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(new FhirPathFilterInterceptor());
+		myServerExtension
+				.getRestfulServer()
+				.getInterceptorService()
+				.registerInterceptor(new FhirPathFilterInterceptor());
 
 		myClient = myServerExtension.getFhirClient();
 		myBaseUrl = "http://localhost:" + myServerExtension.getPort();
@@ -68,7 +76,6 @@ public class FhirPathFilterInterceptorTest {
 		}
 	}
 
-
 	@Test
 	public void testUnfilteredResponse_WithResponseHighlightingInterceptor() throws IOException {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
@@ -78,8 +85,14 @@ public class FhirPathFilterInterceptorTest {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>"));
+			assertThat(
+					responseText,
+					containsString(
+							"<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
+			assertThat(
+					responseText,
+					containsString(
+							"<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>"));
 		}
 	}
 
@@ -94,20 +107,22 @@ public class FhirPathFilterInterceptorTest {
 			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
 			assertThat(responseText, not(containsString("\"given\": [ \"Homer\", \"Jay\" ]")));
 		}
-
 	}
 
 	@Test
 	public void testFilteredResponse_ExpressionReturnsExtension() throws IOException {
 		createPatient();
 
-		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true");
+		HttpGet request = new HttpGet(
+				myPatientId
+						+ "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true");
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\""));
+			assertThat(
+					responseText,
+					containsString("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\""));
 		}
-
 	}
 
 	@Test
@@ -122,7 +137,6 @@ public class FhirPathFilterInterceptorTest {
 			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
 			assertThat(responseText, containsString("\"given\": [ \"Homer\", \"Jay\" ]"));
 		}
-
 	}
 
 	@Test
@@ -134,27 +148,29 @@ public class FhirPathFilterInterceptorTest {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: Error evaluating FHIRPath expression: left operand to * can only have 1 value, but has 8 values (@char 1)"));
+			assertThat(
+					responseText,
+					containsString(
+							Msg.code(327) + "Error parsing FHIRPath expression: " + Msg.code(255)
+									+ "org.hl7.fhir.exceptions.PathEngineException: Error evaluating FHIRPath expression: left operand to * can only have 1 value, but has 8 values (@char 1)"));
 		}
-
 	}
 
 	@Test
 	public void testFilteredResponseBundle() throws IOException {
 		createPatient();
 
-		HttpGet request = new HttpGet(myBaseUrl + "/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true");
+		HttpGet request =
+				new HttpGet(myBaseUrl + "/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true");
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString(
-				"      \"valueHumanName\": {\n" +
-					"        \"family\": \"Simpson\",\n" +
-					"        \"given\": [ \"Homer\", \"Jay\" ]\n" +
-					"      }"
-			));
+			assertThat(
+					responseText,
+					containsString("      \"valueHumanName\": {\n" + "        \"family\": \"Simpson\",\n"
+							+ "        \"given\": [ \"Homer\", \"Jay\" ]\n"
+							+ "      }"));
 		}
-
 	}
 
 	@Test
@@ -162,23 +178,30 @@ public class FhirPathFilterInterceptorTest {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		createPatient();
 
-		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON);
+		HttpGet request =
+				new HttpGet(myPatientId + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON);
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
-			assertThat(responseText, not(containsString("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>")));
+			assertThat(
+					responseText,
+					containsString(
+							"<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;"));
+			assertThat(
+					responseText,
+					not(
+							containsString(
+									"<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>")));
 		}
-
 	}
 
 	private void createPatient() {
 		Patient p = new Patient();
 		p.addExtension()
-			.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-race")
-			.addExtension()
-			.setUrl("ombCategory")
-			.setValue(new Coding("urn:oid:2.16.840.1.113883.6.238", "2106-3", "White"));
+				.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-race")
+				.addExtension()
+				.setUrl("ombCategory")
+				.setValue(new Coding("urn:oid:2.16.840.1.113883.6.238", "2106-3", "White"));
 		p.setActive(true);
 		p.addIdentifier().setSystem("http://identifiers/1").setValue("value-1");
 		p.addIdentifier().setSystem("http://identifiers/2").setValue("value-2");
@@ -186,5 +209,4 @@ public class FhirPathFilterInterceptorTest {
 		p.addName().setFamily("Simpson").addGiven("Grandpa");
 		myPatientId = myClient.create().resource(p).execute().getId().withServerBase(myBaseUrl, "Patient");
 	}
-
 }

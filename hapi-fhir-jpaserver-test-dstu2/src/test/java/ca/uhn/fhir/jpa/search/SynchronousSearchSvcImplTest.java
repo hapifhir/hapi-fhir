@@ -22,11 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,11 +45,15 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class)))
+				.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+		doAnswer(loadPids())
+				.when(mySearchBuilder)
+				.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
+		IBundleProvider result =
+				mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertFalse(result.isEmpty());
 
@@ -71,12 +73,23 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		List<JpaPid> pids = createPidSequence(30);
-		when(mySearchBuilder.createCountQuery(same(params), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
+		when(mySearchBuilder.createCountQuery(
+						same(params),
+						any(String.class),
+						nullable(RequestDetails.class),
+						nullable(RequestPartitionId.class)))
+				.thenReturn(20L);
+		when(mySearchBuilder.createQuery(
+						same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class)))
+				.thenReturn(
+						new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+		doAnswer(loadPids())
+				.when(mySearchBuilder)
+				.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
+		IBundleProvider result =
+				mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertEquals(10, resources.size());
@@ -92,18 +105,27 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		params.setLoadSynchronousUpTo(100);
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(
+						same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class)))
+				.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
 		List<JpaPid> finalPids = pids;
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(argThat(ids -> ids.containsAll(finalPids)), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
+		doAnswer(loadPids())
+				.when(mySearchBuilder)
+				.loadResourcesByPid(
+						argThat(ids -> ids.containsAll(finalPids)),
+						any(Collection.class),
+						any(List.class),
+						anyBoolean(),
+						nullable(RequestDetails.class));
 
-		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
+		IBundleProvider result =
+				mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertEquals(100, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
-
 }

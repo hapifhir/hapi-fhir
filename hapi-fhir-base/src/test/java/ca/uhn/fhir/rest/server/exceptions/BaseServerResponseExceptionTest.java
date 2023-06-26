@@ -8,8 +8,7 @@ public class BaseServerResponseExceptionTest {
 
 	@Test
 	public void testTrusted() {
-		assertTrue(new InternalErrorException("aaa").setErrorMessageTrusted(true).isErrorMessageTrusted());
+		assertTrue(
+				new InternalErrorException("aaa").setErrorMessageTrusted(true).isErrorMessageTrusted());
 	}
-
-
 }

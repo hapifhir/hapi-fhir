@@ -49,8 +49,7 @@ public class BulkExportJobParametersValidatorTest {
 		BulkExportJobParameters parameters = createSystemExportParameters();
 
 		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
 		// test
 		List<String> result = myValidator.validate(null, parameters);
@@ -60,21 +59,20 @@ public class BulkExportJobParametersValidatorTest {
 		assertTrue(result.isEmpty());
 	}
 
-
 	@Test
 	public void validate_exportId_illegal_characters() {
 		BulkExportJobParameters parameters = createSystemExportParameters();
 		parameters.setExportIdentifier("exportId&&&");
 		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(errors);
 		assertEquals(1, errors.size());
-		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
+		assertEquals(
+				errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
 	}
 
 	@Test
@@ -82,8 +80,7 @@ public class BulkExportJobParametersValidatorTest {
 		BulkExportJobParameters parameters = createSystemExportParameters();
 		parameters.setExportIdentifier("HELLO!/WORLD/");
 		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
 		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
 		List<String> errors = myValidator.validate(null, parameters);
@@ -92,6 +89,7 @@ public class BulkExportJobParametersValidatorTest {
 		assertNotNull(errors);
 		assertEquals(0, errors.size());
 	}
+
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
 		// setup
@@ -99,8 +97,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 
 		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
 		// test
 		List<String> result = myValidator.validate(null, parameters);
@@ -136,8 +133,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setExpandMdm(true);
 
 		// when
-		when(myDaoRegistry.isResourceTypeSupported(anyString()))
-			.thenReturn(true);
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
 
 		// test
 		List<String> result = myValidator.validate(null, parameters);

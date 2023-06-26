@@ -27,7 +27,8 @@ public class InstantiationTest {
 		prop.load(ctx.getVersion().getFhirVersionPropertiesFile());
 		for (Entry<Object, Object> next : prop.entrySet()) {
 			if (next.getKey().toString().startsWith("resource.")) {
-				Class<? extends IBaseResource> clazz = (Class<? extends IBaseResource>) Class.forName(next.getValue().toString());
+				Class<? extends IBaseResource> clazz = (Class<? extends IBaseResource>)
+						Class.forName(next.getValue().toString());
 				RuntimeResourceDefinition res = ctx.getResourceDefinition(clazz);
 
 				scanChildren(new HashSet<Class<?>>(), clazz, res);
@@ -35,7 +36,10 @@ public class InstantiationTest {
 		}
 	}
 
-	private void scanChildren(HashSet<Class<?>> theHashSet, Class<? extends IBase> theClazz, BaseRuntimeElementCompositeDefinition<?> theRes) {
+	private void scanChildren(
+			HashSet<Class<?>> theHashSet,
+			Class<? extends IBase> theClazz,
+			BaseRuntimeElementCompositeDefinition<?> theRes) {
 		for (BaseRuntimeChildDefinition next : theRes.getChildren()) {
 			if (next.getElementName().contains("_")) {
 				fail("Element name " + next.getElementName() + " in type " + theClazz + " contains illegal '_'");
@@ -44,14 +48,13 @@ public class InstantiationTest {
 			if (next instanceof RuntimeChildResourceBlockDefinition) {
 				RuntimeChildResourceBlockDefinition nextBlock = (RuntimeChildResourceBlockDefinition) next;
 				for (String nextName : nextBlock.getValidChildNames()) {
-					BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) nextBlock.getChildByName(nextName);
+					BaseRuntimeElementCompositeDefinition<?> elementDef =
+							(BaseRuntimeElementCompositeDefinition<?>) nextBlock.getChildByName(nextName);
 					if (theHashSet.add(elementDef.getImplementingClass())) {
 						scanChildren(theHashSet, elementDef.getImplementingClass(), elementDef);
 					}
 				}
 			}
-
 		}
 	}
-
 }

@@ -32,8 +32,10 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 	@Autowired
 	MdmCandidateSearchSvc myMdmCandidateSearchSvc;
+
 	@Autowired
 	MdmSettings myMdmSettings;
+
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
@@ -60,7 +62,8 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		createActivePatient();
 		Patient newJane = buildJanePatient();
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> result =
+				myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 		assertEquals(1, result.size());
 	}
 
@@ -74,7 +77,9 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		{
 			// First confirm we can search for this practitioner using a nickname search
-			SearchParameterMap map = myMatchUrlService.getResourceSearch("Practitioner?given:nickname=Bill&family=Shatner").getSearchParameterMap();
+			SearchParameterMap map = myMatchUrlService
+					.getResourceSearch("Practitioner?given:nickname=Bill&family=Shatner")
+					.getSearchParameterMap();
 			map.setLoadSynchronous(true);
 			IBundleProvider result = myPractitionerDao.search(map);
 			assertEquals(1, result.size());
@@ -87,7 +92,8 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			Practitioner nick = new Practitioner();
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
-			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
+			Collection<IAnyResource> result =
+					myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
 			assertEquals(1, result.size());
 		}
 
@@ -96,7 +102,8 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			Practitioner noMatch = new Practitioner();
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
-			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
+			Collection<IAnyResource> result =
+					myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
 			assertEquals(0, result.size());
 		}
 	}
@@ -111,7 +118,8 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		Patient newJane = buildJaneWithBirthday(today);
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> result =
+				myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 		assertEquals(1, result.size());
 	}
 
@@ -122,14 +130,17 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		Patient managedPatient = new Patient();
 		managedPatient.setActive(true);
-		managedPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
+		managedPatient.setGeneralPractitioner(
+				Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 		createPatient(managedPatient);
 
 		Patient incomingPatient = new Patient();
 		incomingPatient.setActive(true);
-		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
+		incomingPatient.setGeneralPractitioner(
+				Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
-		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> patient =
+				myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
 		assertThat(patient, hasSize(1));
 	}
 
@@ -140,16 +151,22 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		createActivePatient();
-		assertEquals(1, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
+		assertEquals(1, runInTransaction(() -> myMdmCandidateSearchSvc
+				.findCandidates("Patient", newJane, RequestPartitionId.allPartitions())
+				.size()));
 		createActivePatient();
-		assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
+		assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc
+				.findCandidates("Patient", newJane, RequestPartitionId.allPartitions())
+				.size()));
 
 		try {
 			createActivePatient();
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 			fail();
 		} catch (TooManyCandidatesException e) {
-			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());
+			assertEquals(
+					"HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.",
+					e.getMessage());
 		}
 	}
 

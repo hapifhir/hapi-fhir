@@ -74,21 +74,30 @@ public class LastNTestDataGenerator {
 	private static List<CodeJson> createCategoryCodeableConcepts() {
 		CodeJson categoryCodeableConcept1 = new CodeJson();
 		categoryCodeableConcept1.setCodeableConceptText(FIRSTCATEGORYTEXT);
-		categoryCodeableConcept1.addCoding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, FIRSTCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept1.addCoding(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE, FIRSTCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept1.addCoding(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE, FIRSTCATEGORYTHIRDCODINGDISPLAY);
+		categoryCodeableConcept1.addCoding(
+				CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, FIRSTCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept1.addCoding(
+				CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE, FIRSTCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept1.addCoding(
+				CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE, FIRSTCATEGORYTHIRDCODINGDISPLAY);
 
 		CodeJson categoryCodeableConcept2 = new CodeJson();
 		categoryCodeableConcept2.setCodeableConceptText(SECONDCATEGORYTEXT);
-		categoryCodeableConcept2.addCoding(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE, SECONDCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept2.addCoding(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE, SECONDCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept2.addCoding(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE, SECONDCATEGORYTHIRDCODINGDISPLAY);
+		categoryCodeableConcept2.addCoding(
+				CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE, SECONDCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept2.addCoding(
+				CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE, SECONDCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept2.addCoding(
+				CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE, SECONDCATEGORYTHIRDCODINGDISPLAY);
 
 		CodeJson categoryCodeableConcept3 = new CodeJson();
 		categoryCodeableConcept3.setCodeableConceptText(THIRDCATEGORYTEXT);
-		categoryCodeableConcept3.addCoding(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE, THIRDCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept3.addCoding(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE, THIRDCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept3.addCoding(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE, THIRDCATEGORYTHIRDCODINGDISPLAY);
+		categoryCodeableConcept3.addCoding(
+				CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE, THIRDCATEGORYFIRSTCODINGDISPLAY);
+		categoryCodeableConcept3.addCoding(
+				CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE, THIRDCATEGORYSECONDCODINGDISPLAY);
+		categoryCodeableConcept3.addCoding(
+				CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE, THIRDCATEGORYTHIRDCODINGDISPLAY);
 
 		return Arrays.asList(categoryCodeableConcept1, categoryCodeableConcept2, categoryCodeableConcept3);
 	}
@@ -121,8 +130,7 @@ public class LastNTestDataGenerator {
 
 		// For each patient - create 10 observations
 		return thePatientIds.stream()
-			.flatMap(patientId -> IntStream.range(0, 10)
-				.mapToObj(index -> {
+				.flatMap(patientId -> IntStream.range(0, 10).mapToObj(index -> {
 					ObservationJson observationJson = new ObservationJson();
 					String identifier = String.valueOf((index + patientId * 10L));
 					observationJson.setIdentifier(identifier);
@@ -138,7 +146,6 @@ public class LastNTestDataGenerator {
 					observationJson.setEffectiveDtm(effectiveDtm);
 					return observationJson;
 				}))
-			.collect(Collectors.toList());
+				.collect(Collectors.toList());
 	}
-
 }

@@ -3,21 +3,13 @@ package ca.uhn.hapi.converters.canonical;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
@@ -43,7 +35,8 @@ class VersionCanonicalizerTest {
 
 		SearchParameter inputR5 = new SearchParameter();
 		inputR5.setUrl("http://foo");
-		ca.uhn.fhir.model.dstu2.resource.SearchParameter outputDstu2 = (ca.uhn.fhir.model.dstu2.resource.SearchParameter) canonicalizer.searchParameterFromCanonical(inputR5);
+		ca.uhn.fhir.model.dstu2.resource.SearchParameter outputDstu2 =
+				(ca.uhn.fhir.model.dstu2.resource.SearchParameter) canonicalizer.searchParameterFromCanonical(inputR5);
 		assertEquals("http://foo", outputDstu2.getUrl());
 	}
 
@@ -61,11 +54,18 @@ class VersionCanonicalizerTest {
 		org.hl7.fhir.r5.model.SearchParameter actual = canonicalizer.searchParameterToCanonical(input);
 
 		// Verify
-		assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Patient", "Observation"));
-		assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), contains("Organization"));
-		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE), empty());
-		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE), empty());
-
+		assertThat(
+				actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()),
+				contains("Patient", "Observation"));
+		assertThat(
+				actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()),
+				contains("Organization"));
+		assertThat(
+				getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE),
+				empty());
+		assertThat(
+				getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE),
+				empty());
 	}
 
 	@Test
@@ -85,13 +85,14 @@ class VersionCanonicalizerTest {
 		// Verify
 		assertThat(actual.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
 		assertThat(actual.getTarget().stream().map(Enumeration::getCode).collect(Collectors.toList()), empty());
-		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE), contains("Base1", "Base2"));
-		assertThat(getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE), contains("Target1", "Target2"));
+		assertThat(
+				getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE),
+				contains("Base1", "Base2"));
+		assertThat(
+				getExtensionPrimitiveValues(actual, HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE),
+				contains("Target1", "Target2"));
 		// Original shouldn't be modified
 		assertThat(input.getBase().stream().map(CodeType::getCode).toList(), contains("Base1", "Base2"));
 		assertThat(input.getTarget().stream().map(CodeType::getCode).toList(), contains("Target1", "Target2"));
-
 	}
-
-
 }

@@ -35,11 +35,7 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 		myMdmSettings = mock(IMdmSettings.class);
 
-		myIMatcherFactory = new MdmMatcherFactory(
-			ourFhirContext,
-			myMdmSettings,
-			new NicknameSvc()
-		);
+		myIMatcherFactory = new MdmMatcherFactory(ourFhirContext, myMdmSettings, new NicknameSvc());
 	}
 
 	private @Nonnull IMdmFieldMatcher getFieldMatcher(MatchTypeEnum theMatchTypeEnum) {
@@ -112,38 +108,47 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 	public void testExactString() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myMdmMatcherJson));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new StringType("Jilly"), new StringType("Jilly"), myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myMdmMatcherJson));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new StringType("MCTAVISH"), new StringType("McTavish"), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new StringType("Durie"), new StringType("dury"), myMdmMatcherJson));
 	}
 
 	@Test
 	public void testExactBoolean() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myMdmMatcherJson));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new BooleanType(true), new BooleanType(true), myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myMdmMatcherJson));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new BooleanType(true), new BooleanType(false), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new BooleanType(false), new BooleanType(true), myMdmMatcherJson));
 	}
 
 	@Test
 	public void testExactDateString() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myMdmMatcherJson));
+		assertTrue(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myMdmMatcherJson));
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myMdmMatcherJson));
+		assertFalse(getFieldMatcher(MatchTypeEnum.STRING)
+				.matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myMdmMatcherJson));
 	}
-
 
 	@Test
 	public void testExactGender() {
-		Enumeration<Enumerations.AdministrativeGender> male = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
+		Enumeration<Enumerations.AdministrativeGender> male =
+				new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		male.setValue(Enumerations.AdministrativeGender.MALE);
 
-		Enumeration<Enumerations.AdministrativeGender> female = new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
+		Enumeration<Enumerations.AdministrativeGender> female =
+				new Enumeration<Enumerations.AdministrativeGender>(new Enumerations.AdministrativeGenderEnumFactory());
 		female.setValue(Enumerations.AdministrativeGender.FEMALE);
 
 		myMdmMatcherJson.setExact(true);
@@ -162,7 +167,6 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 		assertFalse(match(MatchTypeEnum.SOUNDEX, "Fred", "Frank"));
 		assertFalse(match(MatchTypeEnum.SOUNDEX, "Thomas", "Tom"));
 	}
-
 
 	@Test
 	public void testCaverphone1() {
@@ -194,7 +198,6 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 	}
 
 	private boolean match(MatchTypeEnum theMatcher, String theLeft, String theRight) {
-		return getFieldMatcher(theMatcher)
-			.matches(new StringType(theLeft), new StringType(theRight), myMdmMatcherJson);
+		return getFieldMatcher(theMatcher).matches(new StringType(theLeft), new StringType(theRight), myMdmMatcherJson);
 	}
 }

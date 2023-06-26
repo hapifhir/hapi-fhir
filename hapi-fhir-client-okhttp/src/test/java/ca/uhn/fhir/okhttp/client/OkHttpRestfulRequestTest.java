@@ -12,7 +12,8 @@ public class OkHttpRestfulRequestTest {
 		String theUrl = "https://example.com/fhir/meta";
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory();
 
-		OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.GET, null);
+		OkHttpRestfulRequest okHttpRestfulRequest =
+				new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.GET, null);
 		assertEquals("GET https://example.com/fhir/meta", okHttpRestfulRequest.toString());
 	}
 
@@ -21,7 +22,8 @@ public class OkHttpRestfulRequestTest {
 		String theUrl = "https://another.example.com/fhir/Task";
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory();
 
-		OkHttpRestfulRequest okHttpRestfulRequest = new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.POST, null);
+		OkHttpRestfulRequest okHttpRestfulRequest =
+				new OkHttpRestfulRequest(clientFactory.getNativeClient(), theUrl, RequestTypeEnum.POST, null);
 		assertEquals("POST https://another.example.com/fhir/Task", okHttpRestfulRequest.toString());
 	}
 }

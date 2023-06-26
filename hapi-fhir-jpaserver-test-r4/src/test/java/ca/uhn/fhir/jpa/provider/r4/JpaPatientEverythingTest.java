@@ -102,7 +102,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 	private Reference createPatient() {
 		Patient patient = new Patient();
-		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		String patientId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		Reference referenceToPatient = new Reference();
 		referenceToPatient.setReference(patientId);
 		return referenceToPatient;
@@ -115,7 +120,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Account account = new Account();
 		account.setSubject(List.of(referenceToPatient));
-		String accountId = myClient.create().resource(account).execute().getId().toUnqualifiedVersionless().getValue();
+		String accountId = myClient.create()
+				.resource(account)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -129,22 +139,32 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		AdverseEvent adverseEvent = new AdverseEvent();
 		adverseEvent.setSubject(referenceToPatient);
-		String adverseEventId = myClient.create().resource(adverseEvent).execute().getId().toUnqualifiedVersionless().getValue();
+		String adverseEventId = myClient.create()
+				.resource(adverseEvent)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(adverseEventId));
 	}
 
-
 	@Test
-	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsPatient() throws Exception {
+	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setPatient(referenceToPatient);
-		String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
+		String allergyIntoleranceId = myClient.create()
+				.resource(allergyIntolerance)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -152,13 +172,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsRecorder() throws Exception {
+	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsRecorder()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setRecorder(referenceToPatient);
-		String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
+		String allergyIntoleranceId = myClient.create()
+				.resource(allergyIntolerance)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -166,13 +192,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsAsserter() throws Exception {
+	public void patientEverything_shouldReturnAllergyIntolerance_whenAllergyIntoleranceRefersToPatientAsAsserter()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setAsserter(referenceToPatient);
-		String allergyIntoleranceId = myClient.create().resource(allergyIntolerance).execute().getId().toUnqualifiedVersionless().getValue();
+		String allergyIntoleranceId = myClient.create()
+				.resource(allergyIntolerance)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -185,10 +217,16 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Reference referenceToPatient = createPatient();
 
 		Appointment appointment = new Appointment();
-		Appointment.AppointmentParticipantComponent participantComponent = new Appointment.AppointmentParticipantComponent();
+		Appointment.AppointmentParticipantComponent participantComponent =
+				new Appointment.AppointmentParticipantComponent();
 		participantComponent.setActor(referenceToPatient);
 		appointment.setParticipant(List.of(participantComponent));
-		String appointmentId = myClient.create().resource(appointment).execute().getId().toUnqualifiedVersionless().getValue();
+		String appointmentId = myClient.create()
+				.resource(appointment)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -196,13 +234,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnAppointmentResponse_whenAppointmentResponseRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnAppointmentResponse_whenAppointmentResponseRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		AppointmentResponse appointmentResponse = new AppointmentResponse();
 		appointmentResponse.setActor(referenceToPatient);
-		String appointmentResponseId = myClient.create().resource(appointmentResponse).execute().getId().toUnqualifiedVersionless().getValue();
+		String appointmentResponseId = myClient.create()
+				.resource(appointmentResponse)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -218,7 +262,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		AuditEvent.AuditEventAgentComponent agentComponent = new AuditEvent.AuditEventAgentComponent();
 		agentComponent.setWho(referenceToPatient);
 		auditEvent.setAgent(List.of(agentComponent));
-		String auditEventId = myClient.create().resource(auditEvent).execute().getId().toUnqualifiedVersionless().getValue();
+		String auditEventId = myClient.create()
+				.resource(auditEvent)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -234,7 +283,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		AuditEvent.AuditEventSourceComponent sourceComponent = new AuditEvent.AuditEventSourceComponent();
 		sourceComponent.setObserver(referenceToPatient);
 		auditEvent.setSource(sourceComponent);
-		String auditEventId = myClient.create().resource(auditEvent).execute().getId().toUnqualifiedVersionless().getValue();
+		String auditEventId = myClient.create()
+				.resource(auditEvent)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -248,7 +302,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Basic basic = new Basic();
 		basic.setSubject(referenceToPatient);
-		String basicId = myClient.create().resource(basic).execute().getId().toUnqualifiedVersionless().getValue();
+		String basicId = myClient.create()
+				.resource(basic)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -262,7 +321,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Basic basic = new Basic();
 		basic.setAuthor(referenceToPatient);
-		String basicId = myClient.create().resource(basic).execute().getId().toUnqualifiedVersionless().getValue();
+		String basicId = myClient.create()
+				.resource(basic)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -276,7 +340,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		BodyStructure bodyStructure = new BodyStructure();
 		bodyStructure.setPatient(referenceToPatient);
-		String bodyStructureId = myClient.create().resource(bodyStructure).execute().getId().toUnqualifiedVersionless().getValue();
+		String bodyStructureId = myClient.create()
+				.resource(bodyStructure)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -290,7 +359,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		CarePlan carePlan = new CarePlan();
 		carePlan.setSubject(referenceToPatient);
-		String carePlanId = myClient.create().resource(carePlan).execute().getId().toUnqualifiedVersionless().getValue();
+		String carePlanId = myClient.create()
+				.resource(carePlan)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -304,7 +378,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		CareTeam careTeam = new CareTeam();
 		careTeam.setSubject(referenceToPatient);
-		String careTeamId = myClient.create().resource(careTeam).execute().getId().toUnqualifiedVersionless().getValue();
+		String careTeamId = myClient.create()
+				.resource(careTeam)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -312,7 +391,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCareTeam_whenCareTeamRefersToPatientAsParticipantMember() throws Exception {
+	public void patientEverything_shouldReturnCareTeam_whenCareTeamRefersToPatientAsParticipantMember()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
@@ -320,7 +400,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		CareTeam.CareTeamParticipantComponent participantComponent = new CareTeam.CareTeamParticipantComponent();
 		participantComponent.setMember(referenceToPatient);
 		careTeam.setParticipant(List.of(participantComponent));
-		String careTeamId = myClient.create().resource(careTeam).execute().getId().toUnqualifiedVersionless().getValue();
+		String careTeamId = myClient.create()
+				.resource(careTeam)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -334,7 +419,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ChargeItem chargeItem = new ChargeItem();
 		chargeItem.setSubject(referenceToPatient);
-		String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
+		String chargeItemId = myClient.create()
+				.resource(chargeItem)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -350,7 +440,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		ChargeItem.ChargeItemPerformerComponent performerComponent = new ChargeItem.ChargeItemPerformerComponent();
 		performerComponent.setActor(referenceToPatient);
 		chargeItem.setPerformer(List.of(performerComponent));
-		String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
+		String chargeItemId = myClient.create()
+				.resource(chargeItem)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -364,7 +459,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ChargeItem chargeItem = new ChargeItem();
 		chargeItem.setEnterer(referenceToPatient);
-		String chargeItemId = myClient.create().resource(chargeItem).execute().getId().toUnqualifiedVersionless().getValue();
+		String chargeItemId = myClient.create()
+				.resource(chargeItem)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -378,13 +478,17 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Claim claim = new Claim();
 		claim.setPatient(referenceToPatient);
-		String claimId = myClient.create().resource(claim).execute().getId().toUnqualifiedVersionless().getValue();
+		String claimId = myClient.create()
+				.resource(claim)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(claimId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnClaim_whenClaimRefersToPatientAsPayee() throws Exception {
@@ -395,13 +499,17 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Claim.PayeeComponent payeeComponent = new Claim.PayeeComponent();
 		payeeComponent.setParty(referenceToPatient);
 		claim.setPayee(payeeComponent);
-		String claimId = myClient.create().resource(claim).execute().getId().toUnqualifiedVersionless().getValue();
+		String claimId = myClient.create()
+				.resource(claim)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(claimId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnClaimResponse_whenClaimResponseRefersToPatient() throws Exception {
@@ -410,22 +518,32 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ClaimResponse claimResponse = new ClaimResponse();
 		claimResponse.setPatient(referenceToPatient);
-		String claimResponseId = myClient.create().resource(claimResponse).execute().getId().toUnqualifiedVersionless().getValue();
+		String claimResponseId = myClient.create()
+				.resource(claimResponse)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(claimResponseId));
 	}
 
-
 	@Test
-	public void patientEverything_shouldReturnClinicalImpression_whenClinicalImpressionRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnClinicalImpression_whenClinicalImpressionRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ClinicalImpression clinicalImpression = new ClinicalImpression();
 		clinicalImpression.setSubject(referenceToPatient);
-		String clinicalImpressionId = myClient.create().resource(clinicalImpression).execute().getId().toUnqualifiedVersionless().getValue();
+		String clinicalImpressionId = myClient.create()
+				.resource(clinicalImpression)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -433,13 +551,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsSubject() throws Exception {
+	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsSubject()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		Communication communication = new Communication();
 		communication.setSubject(referenceToPatient);
-		String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
+		String communicationId = myClient.create()
+				.resource(communication)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -447,13 +571,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsSender() throws Exception {
+	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsSender()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		Communication communication = new Communication();
 		communication.setSender(referenceToPatient);
-		String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
+		String communicationId = myClient.create()
+				.resource(communication)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -461,13 +591,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsRecipient() throws Exception {
+	public void patientEverything_shouldReturnCommunication_whenCommunicationRefersToPatientAsRecipient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		Communication communication = new Communication();
 		communication.setRecipient(List.of(referenceToPatient));
-		String communicationId = myClient.create().resource(communication).execute().getId().toUnqualifiedVersionless().getValue();
+		String communicationId = myClient.create()
+				.resource(communication)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -475,13 +611,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsSubject() throws Exception {
+	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsSubject()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CommunicationRequest CommunicationRequest = new CommunicationRequest();
 		CommunicationRequest.setSubject(referenceToPatient);
-		String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String CommunicationRequestId = myClient.create()
+				.resource(CommunicationRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -489,13 +631,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsSender() throws Exception {
+	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsSender()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CommunicationRequest CommunicationRequest = new CommunicationRequest();
 		CommunicationRequest.setSender(referenceToPatient);
-		String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String CommunicationRequestId = myClient.create()
+				.resource(CommunicationRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -503,13 +651,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsRecipient() throws Exception {
+	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsRecipient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CommunicationRequest CommunicationRequest = new CommunicationRequest();
 		CommunicationRequest.setRecipient(List.of(referenceToPatient));
-		String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String CommunicationRequestId = myClient.create()
+				.resource(CommunicationRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -517,19 +671,24 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsRequester() throws Exception {
+	public void patientEverything_shouldReturnCommunicationRequest_whenCommunicationRequestRefersToPatientAsRequester()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CommunicationRequest CommunicationRequest = new CommunicationRequest();
 		CommunicationRequest.setRequester(referenceToPatient);
-		String CommunicationRequestId = myClient.create().resource(CommunicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String CommunicationRequestId = myClient.create()
+				.resource(CommunicationRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(CommunicationRequestId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnComposition_whenCompositionRefersToPatient() throws Exception {
@@ -538,7 +697,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Composition composition = new Composition();
 		composition.setSubject(referenceToPatient);
-		String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		String compositionId = myClient.create()
+				.resource(composition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -552,7 +716,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Composition composition = new Composition();
 		composition.setAuthor(List.of(referenceToPatient));
-		String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		String compositionId = myClient.create()
+				.resource(composition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -568,7 +737,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Composition.CompositionAttesterComponent attesterComponent = new Composition.CompositionAttesterComponent();
 		attesterComponent.setParty(referenceToPatient);
 		composition.setAttester(List.of(attesterComponent));
-		String compositionId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		String compositionId = myClient.create()
+				.resource(composition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -582,7 +756,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Condition condition = new Condition();
 		condition.setSubject(referenceToPatient);
-		String conditionId = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless().getValue();
+		String conditionId = myClient.create()
+				.resource(condition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -596,7 +775,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Condition condition = new Condition();
 		condition.setAsserter(referenceToPatient);
-		String conditionId = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless().getValue();
+		String conditionId = myClient.create()
+				.resource(condition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -610,7 +794,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Consent consent = new Consent();
 		consent.setPatient(referenceToPatient);
-		String consentId = myClient.create().resource(consent).execute().getId().toUnqualifiedVersionless().getValue();
+		String consentId = myClient.create()
+				.resource(consent)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -628,7 +817,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		actorComponent.setReference(referenceToPatient);
 		provisionComponent.setActor(List.of(actorComponent));
 		consent.setProvision(provisionComponent);
-		String consentId = myClient.create().resource(consent).execute().getId().toUnqualifiedVersionless().getValue();
+		String consentId = myClient.create()
+				.resource(consent)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -642,13 +836,17 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Coverage coverage = new Coverage();
 		coverage.setPolicyHolder(referenceToPatient);
-		String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageId = myClient.create()
+				.resource(coverage)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(coverageId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnCoverage_whenCoverageRefersToPatientAsSubscriber() throws Exception {
@@ -657,13 +855,17 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Coverage coverage = new Coverage();
 		coverage.setSubscriber(referenceToPatient);
-		String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageId = myClient.create()
+				.resource(coverage)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(coverageId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnCoverage_whenCoverageRefersToPatientAsBeneficiary() throws Exception {
@@ -672,7 +874,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Coverage coverage = new Coverage();
 		coverage.setBeneficiary(referenceToPatient);
-		String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageId = myClient.create()
+				.resource(coverage)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -686,7 +893,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Coverage coverage = new Coverage();
 		coverage.setPayor(List.of(referenceToPatient));
-		String coverageId = myClient.create().resource(coverage).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageId = myClient.create()
+				.resource(coverage)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -694,13 +906,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCoverageEligibilityRequest_whenCoverageEligibilityRequestRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnCoverageEligibilityRequest_whenCoverageEligibilityRequestRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CoverageEligibilityRequest coverageEligibilityRequest = new CoverageEligibilityRequest();
 		coverageEligibilityRequest.setPatient(referenceToPatient);
-		String coverageEligibilityRequestId = myClient.create().resource(coverageEligibilityRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageEligibilityRequestId = myClient.create()
+				.resource(coverageEligibilityRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -708,13 +926,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnCoverageEligibilityResponse_whenCoverageEligibilityResponseRefersToPatient() throws Exception {
+	public void
+			patientEverything_shouldReturnCoverageEligibilityResponse_whenCoverageEligibilityResponseRefersToPatient()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		CoverageEligibilityResponse coverageEligibilityResponse = new CoverageEligibilityResponse();
 		coverageEligibilityResponse.setPatient(referenceToPatient);
-		String coverageEligibilityResponseId = myClient.create().resource(coverageEligibilityResponse).execute().getId().toUnqualifiedVersionless().getValue();
+		String coverageEligibilityResponseId = myClient.create()
+				.resource(coverageEligibilityResponse)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -728,7 +953,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		DetectedIssue detectedIssue = new DetectedIssue();
 		detectedIssue.setPatient(referenceToPatient);
-		String detectedIssueId = myClient.create().resource(detectedIssue).execute().getId().toUnqualifiedVersionless().getValue();
+		String detectedIssueId = myClient.create()
+				.resource(detectedIssue)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -742,7 +972,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Device device = new Device();
 		device.setPatient(referenceToPatient);
-		String deviceId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
+		String deviceId = myClient.create()
+				.resource(device)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -756,7 +991,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		DeviceRequest deviceRequest = new DeviceRequest();
 		deviceRequest.setSubject(referenceToPatient);
-		String deviceRequestId = myClient.create().resource(deviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String deviceRequestId = myClient.create()
+				.resource(deviceRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -764,13 +1004,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDeviceRequest_whenDeviceRequestRefersToPatientAsPerformer() throws Exception {
+	public void patientEverything_shouldReturnDeviceRequest_whenDeviceRequestRefersToPatientAsPerformer()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DeviceRequest deviceRequest = new DeviceRequest();
 		deviceRequest.setPerformer(referenceToPatient);
-		String deviceRequestId = myClient.create().resource(deviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String deviceRequestId = myClient.create()
+				.resource(deviceRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -778,13 +1024,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDeviceUseStatement_whenDeviceUseStatementRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnDeviceUseStatement_whenDeviceUseStatementRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DeviceUseStatement deviceUseStatement = new DeviceUseStatement();
 		deviceUseStatement.setSubject(referenceToPatient);
-		String deviceUseStatementId = myClient.create().resource(deviceUseStatement).execute().getId().toUnqualifiedVersionless().getValue();
+		String deviceUseStatementId = myClient.create()
+				.resource(deviceUseStatement)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -798,7 +1050,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setSubject(referenceToPatient);
-		String diagnosticReportId = myClient.create().resource(diagnosticReport).execute().getId().toUnqualifiedVersionless().getValue();
+		String diagnosticReportId = myClient.create()
+				.resource(diagnosticReport)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -812,7 +1069,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		DocumentManifest documentManifest = new DocumentManifest();
 		documentManifest.setSubject(referenceToPatient);
-		String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
+		String documentManifestId = myClient.create()
+				.resource(documentManifest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -820,13 +1082,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDocumentManifest_whenDocumentManifestRefersToPatientAsAuthor() throws Exception {
+	public void patientEverything_shouldReturnDocumentManifest_whenDocumentManifestRefersToPatientAsAuthor()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DocumentManifest documentManifest = new DocumentManifest();
 		documentManifest.setAuthor(List.of(referenceToPatient));
-		String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
+		String documentManifestId = myClient.create()
+				.resource(documentManifest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -834,13 +1102,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDocumentManifest_whenDocumentManifestRefersToPatientAsRecipient() throws Exception {
+	public void patientEverything_shouldReturnDocumentManifest_whenDocumentManifestRefersToPatientAsRecipient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DocumentManifest documentManifest = new DocumentManifest();
 		documentManifest.setRecipient(List.of(referenceToPatient));
-		String documentManifestId = myClient.create().resource(documentManifest).execute().getId().toUnqualifiedVersionless().getValue();
+		String documentManifestId = myClient.create()
+				.resource(documentManifest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -848,13 +1122,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDocumentReference_whenDocumentReferenceRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnDocumentReference_whenDocumentReferenceRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DocumentReference documentReference = new DocumentReference();
 		documentReference.setSubject(referenceToPatient);
-		String documentReferenceId = myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless().getValue();
+		String documentReferenceId = myClient.create()
+				.resource(documentReference)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -862,13 +1142,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnDocumentReference_whenDocumentReferenceRefersToPatientAsAuthor() throws Exception {
+	public void patientEverything_shouldReturnDocumentReference_whenDocumentReferenceRefersToPatientAsAuthor()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		DocumentReference documentReference = new DocumentReference();
 		documentReference.setAuthor(List.of(referenceToPatient));
-		String documentReferenceId = myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless().getValue();
+		String documentReferenceId = myClient.create()
+				.resource(documentReference)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -882,7 +1168,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Encounter encounter = new Encounter();
 		encounter.setSubject(referenceToPatient);
-		String encounterId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+		String encounterId = myClient.create()
+				.resource(encounter)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -890,13 +1181,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnEnrollmentRequest_whenEnrollmentRequestRefersToPatientAsCandidate() throws Exception {
+	public void patientEverything_shouldReturnEnrollmentRequest_whenEnrollmentRequestRefersToPatientAsCandidate()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		EnrollmentRequest enrollmentRequest = new EnrollmentRequest();
 		enrollmentRequest.setCandidate(referenceToPatient);
-		String enrollmentRequestId = myClient.create().resource(enrollmentRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String enrollmentRequestId = myClient.create()
+				.resource(enrollmentRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -910,7 +1207,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		EpisodeOfCare episodeOfCare = new EpisodeOfCare();
 		episodeOfCare.setPatient(referenceToPatient);
-		String episodeOfCareId = myClient.create().resource(episodeOfCare).execute().getId().toUnqualifiedVersionless().getValue();
+		String episodeOfCareId = myClient.create()
+				.resource(episodeOfCare)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -918,13 +1220,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnExplanationOfBenefit_whenExplanationOfBenefitRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnExplanationOfBenefit_whenExplanationOfBenefitRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
 		explanationOfBenefit.setPatient(referenceToPatient);
-		String explanationOfBenefitId = myClient.create().resource(explanationOfBenefit).execute().getId().toUnqualifiedVersionless().getValue();
+		String explanationOfBenefitId = myClient.create()
+				.resource(explanationOfBenefit)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -932,7 +1240,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnExplanationOfBenefit_whenExplanationOfBenefitRefersToPatientAsPayee() throws Exception {
+	public void patientEverything_shouldReturnExplanationOfBenefit_whenExplanationOfBenefitRefersToPatientAsPayee()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
@@ -940,7 +1249,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		ExplanationOfBenefit.PayeeComponent payeeComponent = new ExplanationOfBenefit.PayeeComponent();
 		payeeComponent.setParty(referenceToPatient);
 		explanationOfBenefit.setPayee(payeeComponent);
-		String explanationOfBenefitId = myClient.create().resource(explanationOfBenefit).execute().getId().toUnqualifiedVersionless().getValue();
+		String explanationOfBenefitId = myClient.create()
+				.resource(explanationOfBenefit)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -948,13 +1262,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnFamilyMemberHistory_whenFamilyMemberHistoryRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnFamilyMemberHistory_whenFamilyMemberHistoryRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		FamilyMemberHistory familyMemberHistory = new FamilyMemberHistory();
 		familyMemberHistory.setPatient(referenceToPatient);
-		String familyMemberHistoryId = myClient.create().resource(familyMemberHistory).execute().getId().toUnqualifiedVersionless().getValue();
+		String familyMemberHistoryId = myClient.create()
+				.resource(familyMemberHistory)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -968,7 +1288,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Flag flag = new Flag();
 		flag.setSubject(referenceToPatient);
-		String flagId = myClient.create().resource(flag).execute().getId().toUnqualifiedVersionless().getValue();
+		String flagId = myClient.create()
+				.resource(flag)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -982,7 +1307,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Goal goal = new Goal();
 		goal.setSubject(referenceToPatient);
-		String goalId = myClient.create().resource(goal).execute().getId().toUnqualifiedVersionless().getValue();
+		String goalId = myClient.create()
+				.resource(goal)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -998,7 +1328,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Group.GroupMemberComponent memberComponent = new Group.GroupMemberComponent();
 		memberComponent.setEntity(referenceToPatient);
 		group.setMember(List.of(memberComponent));
-		String groupId = myClient.create().resource(group).execute().getId().toUnqualifiedVersionless().getValue();
+		String groupId = myClient.create()
+				.resource(group)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1012,7 +1347,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ImagingStudy imagingStudy = new ImagingStudy();
 		imagingStudy.setSubject(referenceToPatient);
-		String imagingStudyId = myClient.create().resource(imagingStudy).execute().getId().toUnqualifiedVersionless().getValue();
+		String imagingStudyId = myClient.create()
+				.resource(imagingStudy)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1026,7 +1366,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Immunization immunization = new Immunization();
 		immunization.setPatient(referenceToPatient);
-		String immunizationId = myClient.create().resource(immunization).execute().getId().toUnqualifiedVersionless().getValue();
+		String immunizationId = myClient.create()
+				.resource(immunization)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1034,13 +1379,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnImmunizationEvaluation_whenImmunizationEvaluationRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnImmunizationEvaluation_whenImmunizationEvaluationRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ImmunizationEvaluation immunizationEvaluation = new ImmunizationEvaluation();
 		immunizationEvaluation.setPatient(referenceToPatient);
-		String immunizationEvaluationId = myClient.create().resource(immunizationEvaluation).execute().getId().toUnqualifiedVersionless().getValue();
+		String immunizationEvaluationId = myClient.create()
+				.resource(immunizationEvaluation)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1048,13 +1399,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnImmunizationRecommendation_whenImmunizationRecommendationRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnImmunizationRecommendation_whenImmunizationRecommendationRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ImmunizationRecommendation immunizationRecommendation = new ImmunizationRecommendation();
 		immunizationRecommendation.setPatient(referenceToPatient);
-		String immunizationRecommendationId = myClient.create().resource(immunizationRecommendation).execute().getId().toUnqualifiedVersionless().getValue();
+		String immunizationRecommendationId = myClient.create()
+				.resource(immunizationRecommendation)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1068,7 +1425,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Invoice invoice = new Invoice();
 		invoice.setSubject(referenceToPatient);
-		String invoiceId = myClient.create().resource(invoice).execute().getId().toUnqualifiedVersionless().getValue();
+		String invoiceId = myClient.create()
+				.resource(invoice)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1082,13 +1444,17 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Invoice invoice = new Invoice();
 		invoice.setRecipient(referenceToPatient);
-		String invoiceId = myClient.create().resource(invoice).execute().getId().toUnqualifiedVersionless().getValue();
+		String invoiceId = myClient.create()
+				.resource(invoice)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
 		assertThat(actual, hasItem(invoiceId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnList_whenListRefersToPatient() throws Exception {
@@ -1097,7 +1463,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ListResource listResource = new ListResource();
 		listResource.setSubject(referenceToPatient);
-		String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		String listResourceId = myClient.create()
+				.resource(listResource)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1111,7 +1482,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		ListResource listResource = new ListResource();
 		listResource.setSource(referenceToPatient);
-		String listResourceId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		String listResourceId = myClient.create()
+				.resource(listResource)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1125,7 +1501,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		MeasureReport measureReport = new MeasureReport();
 		measureReport.setSubject(referenceToPatient);
-		String measureReportId = myClient.create().resource(measureReport).execute().getId().toUnqualifiedVersionless().getValue();
+		String measureReportId = myClient.create()
+				.resource(measureReport)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1139,7 +1520,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Media media = new Media();
 		media.setSubject(referenceToPatient);
-		String mediaId = myClient.create().resource(media).execute().getId().toUnqualifiedVersionless().getValue();
+		String mediaId = myClient.create()
+				.resource(media)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1147,13 +1533,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationAdministration_whenMedicationAdministrationExistsThatRefersToPatient() throws Exception {
+	public void
+			patientEverything_shouldReturnMedicationAdministration_whenMedicationAdministrationExistsThatRefersToPatient()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationAdministration medicationAdministration = new MedicationAdministration();
 		medicationAdministration.setSubject(referenceToPatient);
-		String medicationAdministrationId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationAdministrationId = myClient.create()
+				.resource(medicationAdministration)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1161,13 +1554,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationDispense_whenMedicationDispenseExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnMedicationDispense_whenMedicationDispenseExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationDispense medicationDispense = new MedicationDispense();
 		medicationDispense.setSubject(referenceToPatient);
-		String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationDispenseId = myClient.create()
+				.resource(medicationDispense)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1175,15 +1574,23 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationDispense_whenMedicationDispenseExistsThatRefersToPatientAsPerformer() throws Exception {
+	public void
+			patientEverything_shouldReturnMedicationDispense_whenMedicationDispenseExistsThatRefersToPatientAsPerformer()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationDispense medicationDispense = new MedicationDispense();
-		MedicationDispense.MedicationDispensePerformerComponent performerComponent = new MedicationDispense.MedicationDispensePerformerComponent();
+		MedicationDispense.MedicationDispensePerformerComponent performerComponent =
+				new MedicationDispense.MedicationDispensePerformerComponent();
 		performerComponent.setActor(referenceToPatient);
 		medicationDispense.setPerformer(List.of(performerComponent));
-		String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationDispenseId = myClient.create()
+				.resource(medicationDispense)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1191,13 +1598,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationRequest medicationDispense = new MedicationRequest();
 		medicationDispense.setSubject(referenceToPatient);
-		String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationDispenseId = myClient.create()
+				.resource(medicationDispense)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1205,13 +1618,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatientAsRequester() throws Exception {
+	public void
+			patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatientAsRequester()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationRequest medicationDispense = new MedicationRequest();
 		medicationDispense.setRequester(referenceToPatient);
-		String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationDispenseId = myClient.create()
+				.resource(medicationDispense)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1219,13 +1639,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatientAsPerformer() throws Exception {
+	public void
+			patientEverything_shouldReturnMedicationRequest_whenMedicationRequestExistsThatRefersToPatientAsPerformer()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationRequest medicationDispense = new MedicationRequest();
 		medicationDispense.setPerformer(referenceToPatient);
-		String medicationDispenseId = myClient.create().resource(medicationDispense).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationDispenseId = myClient.create()
+				.resource(medicationDispense)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1233,13 +1660,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationStatement_whenMedicationStatementExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnMedicationStatement_whenMedicationStatementExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationStatement medicationStatement = new MedicationStatement();
 		medicationStatement.setSubject(referenceToPatient);
-		String medicationStatementId = myClient.create().resource(medicationStatement).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationStatementId = myClient.create()
+				.resource(medicationStatement)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1247,13 +1680,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedicationStatement_whenMedicationStatementExistsThatRefersToPatientAsSource() throws Exception {
+	public void
+			patientEverything_shouldReturnMedicationStatement_whenMedicationStatementExistsThatRefersToPatientAsSource()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MedicationStatement medicationStatement = new MedicationStatement();
 		medicationStatement.setInformationSource(referenceToPatient);
-		String medicationStatementId = myClient.create().resource(medicationStatement).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationStatementId = myClient.create()
+				.resource(medicationStatement)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1261,13 +1701,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMolecularSequence_whenMolecularSequenceExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnMolecularSequence_whenMolecularSequenceExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		MolecularSequence molecularSequence = new MolecularSequence();
 		molecularSequence.setPatient(referenceToPatient);
-		String molecularSequenceId = myClient.create().resource(molecularSequence).execute().getId().toUnqualifiedVersionless().getValue();
+		String molecularSequenceId = myClient.create()
+				.resource(molecularSequence)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1275,13 +1721,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnNutritionOrder_whenNutritionOrderExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnNutritionOrder_whenNutritionOrderExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		NutritionOrder nutritionOrder = new NutritionOrder();
 		nutritionOrder.setPatient(referenceToPatient);
-		String nutritionOrderId = myClient.create().resource(nutritionOrder).execute().getId().toUnqualifiedVersionless().getValue();
+		String nutritionOrderId = myClient.create()
+				.resource(nutritionOrder)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1295,7 +1747,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Observation observation = new Observation();
 		observation.setSubject(referenceToPatient);
-		String observationId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+		String observationId = myClient.create()
+				.resource(observation)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1303,16 +1760,27 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnOrganization_whenPatientRefersToItAsManagingOrganization() throws Exception {
+	public void patientEverything_shouldReturnOrganization_whenPatientRefersToItAsManagingOrganization()
+			throws Exception {
 
 		Organization organization = new Organization();
-		String organizationId = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
+		String organizationId = myClient.create()
+				.resource(organization)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		Reference referenceToOrganization = new Reference();
 		referenceToOrganization.setReference(organizationId);
 
 		Patient patient = new Patient();
 		patient.setManagingOrganization(referenceToOrganization);
-		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		String patientId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(patientId);
 		assertThat(actual, hasItem(patientId));
@@ -1320,16 +1788,27 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnOrganization_whenPatientRefersToItAsGeneralPractitioner() throws Exception {
+	public void patientEverything_shouldReturnOrganization_whenPatientRefersToItAsGeneralPractitioner()
+			throws Exception {
 
 		Organization organization = new Organization();
-		String organizationId = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
+		String organizationId = myClient.create()
+				.resource(organization)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		Reference referenceToOrganization = new Reference();
 		referenceToOrganization.setReference(organizationId);
 
 		Patient patient = new Patient();
 		patient.setGeneralPractitioner(List.of(referenceToOrganization));
-		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		String patientId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(patientId);
 		assertThat(actual, hasItem(patientId));
@@ -1337,7 +1816,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnOtherPatient_whenOtherPatientExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnOtherPatient_whenOtherPatientExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
@@ -1345,7 +1825,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Patient.PatientLinkComponent patientLinkComponent = new Patient.PatientLinkComponent();
 		patientLinkComponent.setOther(referenceToPatient);
 		otherPatient.setLink(List.of(patientLinkComponent));
-		String otherPatientId = myClient.create().resource(otherPatient).execute().getId().toUnqualifiedVersionless().getValue();
+		String otherPatientId = myClient.create()
+				.resource(otherPatient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1361,7 +1846,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Person.PersonLinkComponent personLinkComponent = new Person.PersonLinkComponent();
 		personLinkComponent.setTarget(referenceToPatient);
 		person.setLink(List.of(personLinkComponent));
-		String personId = myClient.create().resource(person).execute().getId().toUnqualifiedVersionless().getValue();
+		String personId = myClient.create()
+				.resource(person)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1369,16 +1859,27 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnPractitioner_whenPatientRefersToItAsGeneralPractitioner() throws Exception {
+	public void patientEverything_shouldReturnPractitioner_whenPatientRefersToItAsGeneralPractitioner()
+			throws Exception {
 
 		Practitioner practitioner = new Practitioner();
-		String practitionerId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
+		String practitionerId = myClient.create()
+				.resource(practitioner)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		Reference referenceToPractitioner = new Reference();
 		referenceToPractitioner.setReference(practitionerId);
 
 		Patient patient = new Patient();
 		patient.setGeneralPractitioner(List.of(referenceToPractitioner));
-		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		String patientId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(patientId);
 		assertThat(actual, hasItem(patientId));
@@ -1392,7 +1893,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Procedure procedure = new Procedure();
 		procedure.setSubject(referenceToPatient);
-		String procedureId = myClient.create().resource(procedure).execute().getId().toUnqualifiedVersionless().getValue();
+		String procedureId = myClient.create()
+				.resource(procedure)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1400,7 +1906,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnProvenance_whenProvenanceExistsThatRefersToPatientAsAgentWho() throws Exception {
+	public void patientEverything_shouldReturnProvenance_whenProvenanceExistsThatRefersToPatientAsAgentWho()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
@@ -1408,7 +1915,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Provenance.ProvenanceAgentComponent provenanceAgentComponent = new Provenance.ProvenanceAgentComponent();
 		provenanceAgentComponent.setWho(referenceToPatient);
 		provenance.setAgent(List.of(provenanceAgentComponent));
-		String procedureId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
+		String procedureId = myClient.create()
+				.resource(provenance)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1416,7 +1928,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnQuestionnaireResponse_whenProvenanceExistsThatRefersToPatientAsAgentWho() throws Exception {
+	public void patientEverything_shouldReturnQuestionnaireResponse_whenProvenanceExistsThatRefersToPatientAsAgentWho()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
@@ -1424,7 +1937,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		Provenance.ProvenanceAgentComponent provenanceAgentComponent = new Provenance.ProvenanceAgentComponent();
 		provenanceAgentComponent.setWho(referenceToPatient);
 		provenance.setAgent(List.of(provenanceAgentComponent));
-		String procedureId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
+		String procedureId = myClient.create()
+				.resource(provenance)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1432,13 +1950,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnRelatedPerson_whenRelatedPersonExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnRelatedPerson_whenRelatedPersonExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setPatient(referenceToPatient);
-		String relatedPersonId = myClient.create().resource(relatedPerson).execute().getId().toUnqualifiedVersionless().getValue();
+		String relatedPersonId = myClient.create()
+				.resource(relatedPerson)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1446,13 +1970,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnRequestGroup_whenRequestGroupExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnRequestGroup_whenRequestGroupExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		RequestGroup requestGroup = new RequestGroup();
 		requestGroup.setSubject(referenceToPatient);
-		String requestGroupId = myClient.create().resource(requestGroup).execute().getId().toUnqualifiedVersionless().getValue();
+		String requestGroupId = myClient.create()
+				.resource(requestGroup)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1460,13 +1990,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnResearchSubject_whenResearchSubjectExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnResearchSubject_whenResearchSubjectExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ResearchSubject researchSubject = new ResearchSubject();
 		researchSubject.setIndividual(referenceToPatient);
-		String researchSubjectId = myClient.create().resource(researchSubject).execute().getId().toUnqualifiedVersionless().getValue();
+		String researchSubjectId = myClient.create()
+				.resource(researchSubject)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1474,13 +2010,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnRiskAssessment_whenRiskAssessmentExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnRiskAssessment_whenRiskAssessmentExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		RiskAssessment riskAssessment = new RiskAssessment();
 		riskAssessment.setSubject(referenceToPatient);
-		String riskAssessmentId = myClient.create().resource(riskAssessment).execute().getId().toUnqualifiedVersionless().getValue();
+		String riskAssessmentId = myClient.create()
+				.resource(riskAssessment)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1494,7 +2036,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Schedule schedule = new Schedule();
 		schedule.setActor(List.of(referenceToPatient));
-		String scheduleId = myClient.create().resource(schedule).execute().getId().toUnqualifiedVersionless().getValue();
+		String scheduleId = myClient.create()
+				.resource(schedule)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1502,13 +2049,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setSubject(referenceToPatient);
-		String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String serviceRequestId = myClient.create()
+				.resource(serviceRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1516,13 +2069,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatientAsPerformer() throws Exception {
+	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatientAsPerformer()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setPerformer(List.of(referenceToPatient));
-		String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String serviceRequestId = myClient.create()
+				.resource(serviceRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1530,13 +2089,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatientAsRequester() throws Exception {
+	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatientAsRequester()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setRequester(referenceToPatient);
-		String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String serviceRequestId = myClient.create()
+				.resource(serviceRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1550,7 +2115,12 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Specimen specimen = new Specimen();
 		specimen.setSubject(referenceToPatient);
-		String specimenId = myClient.create().resource(specimen).execute().getId().toUnqualifiedVersionless().getValue();
+		String specimenId = myClient.create()
+				.resource(specimen)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1558,13 +2128,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnSupplyDelivery_whenSupplyDeliveryExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnSupplyDelivery_whenSupplyDeliveryExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		SupplyDelivery supplyDelivery = new SupplyDelivery();
 		supplyDelivery.setPatient(referenceToPatient);
-		String supplyDeliveryId = myClient.create().resource(supplyDelivery).execute().getId().toUnqualifiedVersionless().getValue();
+		String supplyDeliveryId = myClient.create()
+				.resource(supplyDelivery)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1572,13 +2148,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnSupplyRequest_whenSupplyRequestExistsThatRefersToPatientAsRequester() throws Exception {
+	public void patientEverything_shouldReturnSupplyRequest_whenSupplyRequestExistsThatRefersToPatientAsRequester()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		SupplyRequest supplyRequest = new SupplyRequest();
 		supplyRequest.setRequester(referenceToPatient);
-		String supplyRequestId = myClient.create().resource(supplyRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String supplyRequestId = myClient.create()
+				.resource(supplyRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1586,13 +2168,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnSupplyRequest_whenSupplyRequestExistsThatRefersToPatientAsDeliverTo() throws Exception {
+	public void patientEverything_shouldReturnSupplyRequest_whenSupplyRequestExistsThatRefersToPatientAsDeliverTo()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		SupplyRequest supplyRequest = new SupplyRequest();
 		supplyRequest.setDeliverTo(referenceToPatient);
-		String supplyRequestId = myClient.create().resource(supplyRequest).execute().getId().toUnqualifiedVersionless().getValue();
+		String supplyRequestId = myClient.create()
+				.resource(supplyRequest)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1600,13 +2188,19 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnVisionPrescription_whenVisionPrescriptionExistsThatRefersToPatient() throws Exception {
+	public void patientEverything_shouldReturnVisionPrescription_whenVisionPrescriptionExistsThatRefersToPatient()
+			throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		VisionPrescription visionPrescription = new VisionPrescription();
 		visionPrescription.setPatient(referenceToPatient);
-		String visionPrescriptionID = myClient.create().resource(visionPrescription).execute().getId().toUnqualifiedVersionless().getValue();
+		String visionPrescriptionID = myClient.create()
+				.resource(visionPrescription)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1614,19 +2208,31 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void patientEverything_shouldReturnMedication_whenMedicationAdministrationExistsThatRefersToMedicationAndPatient() throws Exception {
+	public void
+			patientEverything_shouldReturnMedication_whenMedicationAdministrationExistsThatRefersToMedicationAndPatient()
+					throws Exception {
 
 		Reference referenceToPatient = createPatient();
 
 		Medication medication = new Medication();
-		String medicationId = myClient.create().resource(medication).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationId = myClient.create()
+				.resource(medication)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		Reference referenceToMedication = new Reference();
 		referenceToMedication.setReference(medicationId);
 
 		MedicationAdministration medicationAdministration = new MedicationAdministration();
 		medicationAdministration.setSubject(referenceToPatient);
 		medicationAdministration.setMedication(referenceToMedication);
-		String medicationAdministrationId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
+		String medicationAdministrationId = myClient.create()
+				.resource(medicationAdministration)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
 		assertThat(actual, hasItem(referenceToPatient.getReference()));
@@ -1638,98 +2244,99 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	public void everything_typeFilterWithRecursivelyRelatedResources_shouldReturnSameAsNonTypeFilteredEverything() {
 		String testBundle;
 		{
-			testBundle = """
+			testBundle =
+					"""
 							{
-				       "resourceType": "Bundle",
-				       "type": "transaction",
-				       "entry": [
-				           {
-				               "fullUrl": "https://interop.providence.org:8000/Patient/385235",
-				               "resource": {
-				                   "resourceType": "Patient",
-				                   "id": "385235",
-				                   "active": true,
-				                   "name": [
-				                       {
-				                           "family": "TESTING",
-				                           "given": [
-				                               "TESTER",
-				                               "T"
-				                           ]
-				                       }
-				                   ],
-				                   "gender": "female"
-				               },
-				               "request": {
-				                   "method": "POST"
-				               }
-				           },
-				           {
-				               "fullUrl": "https://interop.providence.org:8000/Encounter/385236",
-				               "resource": {
-				                   "resourceType": "Encounter",
-				                   "id": "385236",
-				                   "subject": {
-				                       "reference": "Patient/385235"
-				                   }
-				               },
-				               "request": {
-				                   "method": "POST"
-				               }
-				           },
-				           {
-				               "fullUrl": "https://interop.providence.org:8000/Observation/385237",
-				               "resource": {
-				                   "resourceType": "Observation",
-				                   "id": "385237",
-				                   "subject": {
-				                       "reference": "Patient/385235"
-				                   },
-				                   "encounter": {
-				                       "reference": "Encounter/385236"
-				                   },
-				                   "performer": [
-				                       {
-				                           "reference": "Practitioner/79070"
-				                       },
-				                       {
-				                           "reference": "Practitioner/8454"
-				                       }
-				                   ],
-				                   "valueQuantity": {
-				                       "value": 100.9,
-				                       "unit": "%",
-				                       "system": "http://unitsofmeasure.org",
-				                       "code": "%"
-				                   }
-				               },
-				               "request": {
-				                   "method": "POST"
-				               }
-				           },
-				           {
-				               "fullUrl": "https://interop.providence.org:8000/Practitioner/8454",
-				               "resource": {
-				                   "resourceType": "Practitioner",
-				                   "id": "8454"
-				               },
-				               "request": {
-				                   "method": "POST"
-				               }
-				           },
-				           {
-				               "fullUrl": "https://interop.providence.org:8000/Practitioner/79070",
-				               "resource": {
-				                   "resourceType": "Practitioner",
-				                   "id": "79070",
-				                   "active": true
-				               },
-				               "request": {
-				                   "method": "POST"
-				               }
-				           }
-				       ]
-				   }
+					"resourceType": "Bundle",
+					"type": "transaction",
+					"entry": [
+						{
+							"fullUrl": "https://interop.providence.org:8000/Patient/385235",
+							"resource": {
+								"resourceType": "Patient",
+								"id": "385235",
+								"active": true,
+								"name": [
+									{
+										"family": "TESTING",
+										"given": [
+											"TESTER",
+											"T"
+										]
+									}
+								],
+								"gender": "female"
+							},
+							"request": {
+								"method": "POST"
+							}
+						},
+						{
+							"fullUrl": "https://interop.providence.org:8000/Encounter/385236",
+							"resource": {
+								"resourceType": "Encounter",
+								"id": "385236",
+								"subject": {
+									"reference": "Patient/385235"
+								}
+							},
+							"request": {
+								"method": "POST"
+							}
+						},
+						{
+							"fullUrl": "https://interop.providence.org:8000/Observation/385237",
+							"resource": {
+								"resourceType": "Observation",
+								"id": "385237",
+								"subject": {
+									"reference": "Patient/385235"
+								},
+								"encounter": {
+									"reference": "Encounter/385236"
+								},
+								"performer": [
+									{
+										"reference": "Practitioner/79070"
+									},
+									{
+										"reference": "Practitioner/8454"
+									}
+								],
+								"valueQuantity": {
+									"value": 100.9,
+									"unit": "%",
+									"system": "http://unitsofmeasure.org",
+									"code": "%"
+								}
+							},
+							"request": {
+								"method": "POST"
+							}
+						},
+						{
+							"fullUrl": "https://interop.providence.org:8000/Practitioner/8454",
+							"resource": {
+								"resourceType": "Practitioner",
+								"id": "8454"
+							},
+							"request": {
+								"method": "POST"
+							}
+						},
+						{
+							"fullUrl": "https://interop.providence.org:8000/Practitioner/79070",
+							"resource": {
+								"resourceType": "Practitioner",
+								"id": "79070",
+								"active": true
+							},
+							"request": {
+								"method": "POST"
+							}
+						}
+					]
+				}
 				""";
 		}
 
@@ -1745,9 +2352,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		assertEquals(4, resourceTypes.size());
 
 		// pre-seed the resources
-		Bundle responseBundle = myClient.transaction()
-			.withBundle(inputBundle)
-			.execute();
+		Bundle responseBundle = myClient.transaction().withBundle(inputBundle).execute();
 		assertNotNull(responseBundle);
 		assertEquals(resourceCount, responseBundle.getEntry().size());
 
@@ -1765,15 +2370,16 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		// test without types filter
 		{
 			Bundle response = myClient.operation()
-				.onInstance(String.format("Patient/%s", patientId.getIdPart()))
-				.named(JpaConstants.OPERATION_EVERYTHING)
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
+					.onInstance(String.format("Patient/%s", patientId.getIdPart()))
+					.named(JpaConstants.OPERATION_EVERYTHING)
+					.withNoParameters(Parameters.class)
+					.returnResourceType(Bundle.class)
+					.execute();
 			assertNotNull(response);
 			assertEquals(resourceCount, response.getEntry().size());
 			for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-				assertTrue(resourceTypes.contains(entry.getResource().getResourceType().name()));
+				assertTrue(resourceTypes.contains(
+						entry.getResource().getResourceType().name()));
 			}
 		}
 
@@ -1783,15 +2389,16 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 			Parameters parameters = new Parameters();
 			parameters.addParameter(Constants.PARAM_TYPE, String.join(",", resourceTypes));
 			Bundle response = myClient.operation()
-				.onInstance(String.format("Patient/%s", patientId.getIdPart()))
-				.named(JpaConstants.OPERATION_EVERYTHING)
-				.withParameters(parameters)
-				.returnResourceType(Bundle.class)
-				.execute();
+					.onInstance(String.format("Patient/%s", patientId.getIdPart()))
+					.named(JpaConstants.OPERATION_EVERYTHING)
+					.withParameters(parameters)
+					.returnResourceType(Bundle.class)
+					.execute();
 			assertNotNull(response);
 			assertEquals(resourceCount, response.getEntry().size());
 			for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-				assertTrue(resourceTypes.contains(entry.getResource().getResourceType().name()));
+				assertTrue(resourceTypes.contains(
+						entry.getResource().getResourceType().name()));
 			}
 		}
 	}
@@ -1801,8 +2408,15 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		HttpGet get = new HttpGet(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+			assertEquals(
+					EncodingEnum.JSON.getResourceContentTypeNonLegacy(),
+					resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE)
+							.getValue()
+							.replaceAll(";.*", ""));
+			bundle = EncodingEnum.JSON
+					.newParser(myFhirContext)
+					.parseResource(
+							Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -1811,11 +2425,13 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
 		Set<String> actual = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			actual.add(nextEntry
+					.getResource()
+					.getIdElement()
+					.toUnqualifiedVersionless()
+					.getValue());
 		}
 
 		return actual;
 	}
-
 }
-

@@ -54,7 +54,8 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
 		myMdmMatcherJson.setExact(true);
-		return myDateMatcher.matches(new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), myMdmMatcherJson);
+		return myDateMatcher.matches(
+				new DateType(theDate, theTheDay), new DateType(theSameMonth, theTheDay), myMdmMatcherJson);
 	}
 
 	@Test
@@ -66,10 +67,8 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 		sameSecondCal.add(Calendar.MILLISECOND, 123);
 		Date sameSecond = sameSecondCal.getTime();
 
-
 		Calendar sameDayCal = new GregorianCalendar(2020, 6, 15, 12, 34, 56);
 		Date sameDay = sameDayCal.getTime();
-
 
 		// Same precision
 
@@ -93,16 +92,17 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
 		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
 		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
-
-
 	}
 
-	private boolean dateTimeMatch(Date theDate, Date theSecondDate, TemporalPrecisionEnum thePrecision, TemporalPrecisionEnum theSecondPrecision) {
+	private boolean dateTimeMatch(
+			Date theDate,
+			Date theSecondDate,
+			TemporalPrecisionEnum thePrecision,
+			TemporalPrecisionEnum theSecondPrecision) {
 		myMdmMatcherJson.setExact(true);
 		return myDateMatcher.matches(
-			new DateTimeType(theDate, thePrecision),
-			new DateTimeType(theSecondDate, theSecondPrecision),
-			myMdmMatcherJson
-		);
+				new DateTimeType(theDate, thePrecision),
+				new DateTimeType(theSecondDate, theSecondPrecision),
+				myMdmMatcherJson);
 	}
 }

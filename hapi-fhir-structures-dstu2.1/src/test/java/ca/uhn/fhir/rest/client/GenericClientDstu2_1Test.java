@@ -100,26 +100,37 @@ public class GenericClientDstu2_1Test {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU2_1.getFhirVersionString() + "/DSTU2_1; apache)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR "
+				+ FhirVersionEnum.DSTU2_1.getFhirVersionString() + "/DSTU2_1; apache)";
 	}
 
 	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		byte[] body = IOUtils.toByteArray(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent());
+		byte[] body = IOUtils.toByteArray(
+				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0))
+						.getEntity()
+						.getContent());
 		return body;
 	}
 
 	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), StandardCharsets.UTF_8);
+		String body = IOUtils.toString(
+				((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0))
+						.getEntity()
+						.getContent(),
+				StandardCharsets.UTF_8);
 		return body;
 	}
 
 	private ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -137,8 +148,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -151,16 +164,21 @@ public class GenericClientDstu2_1Test {
 
 		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 
-		MethodOutcome outcome = client
-				.patch()
-				.withBody(patch)
-				.withId("Patient/123")
-				.execute();
+		MethodOutcome outcome =
+				client.patch().withBody(patch).withId("Patient/123").execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient/123",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_JSON_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -175,8 +193,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -189,16 +209,23 @@ public class GenericClientDstu2_1Test {
 
 		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 
-		MethodOutcome outcome = client
-				.patch()
+		MethodOutcome outcome = client.patch()
 				.withBody(patch)
 				.withId(new IdType("http://localhost/fhir/Patient/123/_history/234"))
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient/123",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_JSON_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -213,8 +240,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -227,16 +256,23 @@ public class GenericClientDstu2_1Test {
 
 		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 
-		MethodOutcome outcome = client
-				.patch()
+		MethodOutcome outcome = client.patch()
 				.withBody(patch)
 				.conditionalByUrl("Patient?foo=bar")
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?foo=bar", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?foo=bar",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_JSON_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -251,8 +287,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -265,17 +303,25 @@ public class GenericClientDstu2_1Test {
 
 		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 
-		MethodOutcome outcome = client
-				.patch()
+		MethodOutcome outcome = client.patch()
 				.withBody(patch)
-				.conditional("Patient").where(Patient.NAME.matches().value("TEST"))
+				.conditional("Patient")
+				.where(Patient.NAME.matches().value("TEST"))
 				.and(Patient.FAMILY.matches().value("TEST2"))
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name=TEST&family=TEST2",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_JSON_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -290,8 +336,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -304,17 +352,25 @@ public class GenericClientDstu2_1Test {
 
 		String patch = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 
-		MethodOutcome outcome = client
-				.patch()
+		MethodOutcome outcome = client.patch()
 				.withBody(patch)
-				.conditional(Patient.class).where(Patient.NAME.matches().value("TEST"))
+				.conditional(Patient.class)
+				.where(Patient.NAME.matches().value("TEST"))
 				.and(Patient.FAMILY.matches().value("TEST2"))
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name=TEST&family=TEST2",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_JSON_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -329,8 +385,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -341,18 +399,24 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		String patch = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
+		String patch =
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
 
-		MethodOutcome outcome = client
-				.patch()
-				.withBody(patch)
-				.withId("Patient/123")
-				.execute();
+		MethodOutcome outcome =
+				client.patch().withBody(patch).withId("Patient/123").execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient/123",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
 		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_XML_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				Constants.CT_XML_PATCH,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader("Content-Type")
+						.getValue()
+						.replaceAll(";.*", ""));
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -364,11 +428,7 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client
-					.patch()
-					.withBody("AA")
-					.withId("Patient/123")
-					.execute();
+			client.patch().withBody("AA").withId("Patient/123").execute();
 		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1386) + "Unable to determine encoding of patch", e.getMessage());
 		}
@@ -376,12 +436,15 @@ public class GenericClientDstu2_1Test {
 
 	@Test
 	public void testAcceptHeaderWithEncodingSpecified() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -393,25 +456,32 @@ public class GenericClientDstu2_1Test {
 		int idx = 0;
 
 		client.setEncoding(EncodingEnum.JSON);
-		client.search()
-				.forResource("Device")
-				.returnBundle(Bundle.class)
-				.execute();
+		client.search().forResource("Device").returnBundle(Bundle.class).execute();
 
-		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(
+				"http://example.com/fhir/Device?_format=json",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				Constants.CT_FHIR_JSON,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader(Constants.HEADER_ACCEPT)
+						.getValue());
 		idx++;
 
 		client.setEncoding(EncodingEnum.XML);
-		client.search()
-				.forResource("Device")
-				.returnBundle(Bundle.class)
-				.execute();
+		client.search().forResource("Device").returnBundle(Bundle.class).execute();
 
-		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals(
+				"http://example.com/fhir/Device?_format=xml",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				Constants.CT_FHIR_XML,
+				capt.getAllValues()
+						.get(idx)
+						.getFirstHeader(Constants.HEADER_ACCEPT)
+						.getValue());
 		idx++;
-
 	}
 
 	@Test
@@ -424,8 +494,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -445,16 +517,30 @@ public class GenericClientDstu2_1Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Binary",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(
+				"application/json+fhir;charset=utf-8",
+				capt.getAllValues()
+						.get(0)
+						.getHeaders("Content-Type")[0]
+						.getValue()
+						.toLowerCase()
+						.replace(" ", ""));
+		assertEquals(
+				Constants.CT_FHIR_JSON,
+				capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
-		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
+		Patient outputPt =
+				(Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>",
+				outputPt.getText().getDivAsString());
 	}
 
 	@Test
@@ -467,8 +553,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -479,18 +567,32 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Binary bin = new Binary();
-		bin.setContent(new byte[] { 0, 1, 2, 3, 4 });
+		bin.setContent(new byte[] {0, 1, 2, 3, 4});
 		client.create().resource(bin).execute();
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Binary",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
-
+		assertEquals(
+				"application/json+fhir;charset=utf-8",
+				capt.getAllValues()
+						.get(0)
+						.getHeaders("Content-Type")[0]
+						.getValue()
+						.toLowerCase()
+						.replace(" ", ""));
+		assertEquals(
+				Constants.CT_FHIR_JSON,
+				capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertArrayEquals(
+				new byte[] {0, 1, 2, 3, 4},
+				ourCtx.newJsonParser()
+						.parseResource(Binary.class, extractBodyAsString(capt))
+						.getContent());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -498,9 +600,12 @@ public class GenericClientDstu2_1Test {
 	public void testClientFailures() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, IOException.class);
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent())
+				.thenThrow(IllegalStateException.class, RuntimeException.class, IOException.class);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -531,8 +636,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = CustomTypeDstu2_1Test.createBundle(CustomTypeDstu2_1Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -543,13 +650,13 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.registerInterceptor(new CookieInterceptor("foo=bar"));
 
-		Bundle resp = client
-				.history()
+		Bundle resp = client.history()
 				.onType(Patient.class)
 				.andReturnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
+		assertEquals(
+				"foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
 	}
 
 	@Test
@@ -564,21 +671,27 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] {
+					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
+				};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(
+							new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 				} else {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(
+							new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 				}
 			}
 		});
@@ -588,20 +701,37 @@ public class GenericClientDstu2_1Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.create()
+				.resource(pt)
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute();
 
 		assertEquals(2, myAnswerCount);
 		assertNotNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
+				((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				Constants.CT_FHIR_JSON,
+				capt.getAllValues()
+						.get(0)
+						.getFirstHeader("content-type")
+						.getValue()
+						.replaceAll(";.*", ""));
 
-		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				"http://foo.com/base/Patient/222/_history/3",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 	}
 
 	@Test
@@ -613,14 +743,18 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] {
+					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
+				};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -634,16 +768,23 @@ public class GenericClientDstu2_1Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.create()
+				.resource(pt)
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute();
 
 		assertEquals(1, myAnswerCount);
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -651,8 +792,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = CustomTypeDstu2_1Test.createBundle(CustomTypeDstu2_1Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -662,15 +805,18 @@ public class GenericClientDstu2_1Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Bundle resp = client
-				.history()
+		Bundle resp = client.history()
 				.onType(CustomTypeDstu2_1Test.MyCustomPatient.class)
 				.andReturnBundle(Bundle.class)
 				.execute();
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getEntry().get(0).getResource().getClass());
+		assertEquals(
+				"http://example.com/fhir/Patient/_history",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -678,8 +824,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = CustomTypeDstu2_1Test.createBundle(CustomTypeDstu2_1Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -691,24 +839,26 @@ public class GenericClientDstu2_1Test {
 		Bundle bundle = new Bundle();
 		bundle.addLink().setRelation("next").setUrl("http://foo/next");
 
-		Bundle resp = client
-				.loadPage()
+		Bundle resp = client.loadPage()
 				.next(bundle)
 				.preferResponseType(MyCustomPatient.class)
 				.execute();
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getEntry().get(0).getResource().getClass());
 		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
 
-		resp = client
-				.loadPage()
+		resp = client.loadPage()
 				.next(bundle)
 				.preferResponseTypes(toTypeList(MyCustomPatient.class))
 				.execute();
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getEntry().get(0).getResource().getClass());
 		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
@@ -723,8 +873,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -734,8 +886,7 @@ public class GenericClientDstu2_1Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Parameters resp = client
-				.operation()
+		Parameters resp = client.operation()
 				.onServer()
 				.named("foo")
 				.withNoParameters(Parameters.class)
@@ -743,19 +894,26 @@ public class GenericClientDstu2_1Test {
 				.execute();
 
 		assertEquals(1, resp.getParameter().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/$foo", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getParameter().get(0).getResource().getClass());
+		assertEquals(
+				"http://example.com/fhir/$foo",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 
-		resp = client
-				.operation()
+		resp = client.operation()
 				.onType(MyCustomPatient.class)
 				.named("foo")
 				.withNoParameters(Parameters.class)
 				.execute();
 
 		assertEquals(1, resp.getParameter().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient/$foo", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getParameter().get(0).getResource().getClass());
+		assertEquals(
+				"http://example.com/fhir/Patient/$foo",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 	}
 
 	@Test
@@ -763,8 +921,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = CustomTypeDstu2_1Test.createBundle(CustomTypeDstu2_1Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -774,15 +934,18 @@ public class GenericClientDstu2_1Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Bundle resp = client
-				.search()
+		Bundle resp = client.search()
 				.forResource(CustomTypeDstu2_1Test.MyCustomPatient.class)
 				.returnBundle(Bundle.class)
 				.execute();
 
 		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeDstu2_1Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				CustomTypeDstu2_1Test.MyCustomPatient.class,
+				resp.getEntry().get(0).getResource().getClass());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -797,8 +960,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			private int myCount = 0;
 
@@ -818,20 +983,29 @@ public class GenericClientDstu2_1Test {
 		});
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformanceCapabilityStatement.com/fhir");
+		IGenericClient client =
+				ourCtx.newRestfulGenericClient("http://testForceConformanceCapabilityStatement.com/fhir");
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceCapabilityStatement.com/fhir/metadata",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceCapabilityStatement.com/fhir/Patient/1",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceCapabilityStatement.com/fhir/Patient/1",
+				capt.getAllValues().get(2).getURI().toASCIIString());
 
 		client.forceConformanceCheck();
 		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceCapabilityStatement.com/fhir/metadata",
+				capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -847,8 +1021,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 
 			@Override
@@ -871,17 +1047,25 @@ public class GenericClientDstu2_1Test {
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceConformance.com/fhir/metadata",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceConformance.com/fhir/Patient/1",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceConformance.com/fhir/Patient/1",
+				capt.getAllValues().get(2).getURI().toASCIIString());
 
 		myAnswerCount = 0;
 		client.forceConformanceCheck();
 		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformanceConformance.com/fhir/metadata",
+				capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -897,8 +1081,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 
 			@Override
@@ -921,25 +1107,35 @@ public class GenericClientDstu2_1Test {
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformance.com/fhir/metadata",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformance.com/fhir/Patient/1",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 
 		client.read().resource("Patient").withId("1").execute();
 		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformance.com/fhir/Patient/1",
+				capt.getAllValues().get(2).getURI().toASCIIString());
 
 		myAnswerCount = 0;
 		client.forceConformanceCheck();
 		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertEquals(
+				"http://testForceConformance.com/fhir/metadata",
+				capt.getAllValues().get(3).getURI().toASCIIString());
 	}
 
 	@Test
 	public void testHttp499() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 499, "Wacky Message"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 499, "Wacky Message"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public StringInputStream answer(InvocationOnMock theInvocation) {
@@ -953,18 +1149,21 @@ public class GenericClientDstu2_1Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (UnclassifiedServerFailureException e) {
-			assertEquals("ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException: HTTP 499 Wacky Message", e.toString());
+			assertEquals(
+					"ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException: HTTP 499 Wacky Message",
+					e.toString());
 			assertEquals("HELLO", e.getResponseBody());
 		}
-
 	}
 
 	@Test
 	public void testHttp501() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 501, "Not Implemented"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 501, "Not Implemented"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public StringInputStream answer(InvocationOnMock theInvocation) {
@@ -980,7 +1179,6 @@ public class GenericClientDstu2_1Test {
 		} catch (NotImplementedOperationException e) {
 			assertEquals("HTTP 501 Not Implemented", e.getMessage());
 		}
-
 	}
 
 	/**
@@ -993,8 +1191,7 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client
-				.search()
+		client.search()
 				.forResource(Patient.class)
 				.where(Patient.FAMILY.matches().value((String) null))
 				.and(Patient.BIRTHDATE.exactly().day((Date) null))
@@ -1003,29 +1200,32 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
-		client
-				.search()
+		client.search()
 				.forResource(Encounter.class)
 				.where(Encounter.LENGTH.exactly().number(null))
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Encounter", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Encounter",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
-		client
-				.search()
+		client.search()
 				.forResource(Observation.class)
 				.where(Observation.VALUE_QUANTITY.exactly().number(null).andUnits(null))
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Observation",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
-
 	}
 
 	@Test
@@ -1041,12 +1241,16 @@ public class GenericClientDstu2_1Test {
 		bundle.addEntry().setResource(patient);
 
 		final String encoded = p.encodeResourceToString(bundle);
-		assertEquals("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":[\"PATIENT1\"]}]}}]}", encoded);
+		assertEquals(
+				"{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":[\"PATIENT1\"]}]}}]}",
+				encoded);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1057,15 +1261,15 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client
-				.update()
+		client.update()
 				.resource(bundle)
 				.prefer(PreferReturnEnum.REPRESENTATION)
 				.encodedJson()
 				.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
-		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
 
 		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
 		assertEquals(encoded, requestString);
@@ -1090,8 +1294,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1102,15 +1308,15 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client
-				.update()
+		client.update()
 				.resource(bundle)
 				.prefer(PreferReturnEnum.REPRESENTATION)
 				.encodedXml()
 				.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
-		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
 
 		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
 		assertEquals(encoded, requestString);
@@ -1122,18 +1328,28 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent())
+				.thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
-			client.read().resource("Patient").withId("123").elementsSubset("name", "identifier").execute();
+			client.read()
+					.resource("Patient")
+					.withId("123")
+					.elementsSubset("name", "identifier")
+					.execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
 			assertEquals(
-				Msg.code(1359) + "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: " + Msg.code(1838) + "Invalid JSON content detected, missing required element: 'resourceType'",
+					Msg.code(1359)
+							+ "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: "
+							+ Msg.code(1838)
+							+ "Invalid JSON content detected, missing required element: 'resourceType'",
 					e.getMessage());
 		}
 	}
@@ -1147,8 +1363,10 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		// when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		// when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type",
+		// Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(null);
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
@@ -1178,7 +1396,8 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "text/plain"));
 		// when(myHttpResponse.getEntity().getContentType()).thenReturn(null);
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
@@ -1193,7 +1412,9 @@ public class GenericClientDstu2_1Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (NonFhirResponseException e) {
-			assertEquals("Response contains non FHIR Content-Type 'text/plain' : <Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient>", e.getMessage());
+			assertEquals(
+					"Response contains non FHIR Content-Type 'text/plain' : <Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient>",
+					e.getMessage());
 		}
 
 		// Patient resp = client.read().resource(Patient.class).withId("1").execute();
@@ -1202,12 +1423,15 @@ public class GenericClientDstu2_1Test {
 
 	@Test
 	public void testSearchByDate() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -1227,7 +1451,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=gt" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1236,7 +1462,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=gt" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1245,7 +1473,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=ge" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=ge" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1254,7 +1484,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=lt" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=lt" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1263,7 +1495,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=le" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=le" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1272,7 +1506,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=" + dateString, capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=" + dateString,
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1281,7 +1517,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt2011-01-02T22:33:01Z", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=gt2011-01-02T22:33:01Z",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1290,7 +1528,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=gt" + now.getValueAsString(), UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?birthdate=gt" + now.getValueAsString(),
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1299,8 +1539,11 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertThat(capt.getAllValues().get(idx).getURI().toString(), startsWith("http://example.com/fhir/Patient?birthdate=gt2"));
-		dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()).substring(44);
+		assertThat(
+				capt.getAllValues().get(idx).getURI().toString(),
+				startsWith("http://example.com/fhir/Patient?birthdate=gt2"));
+		dateString = UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())
+				.substring(44);
 		ourLog.info(dateString);
 		assertEquals(TemporalPrecisionEnum.SECOND, new DateTimeDt(dateString).getPrecision());
 		idx++;
@@ -1309,12 +1552,15 @@ public class GenericClientDstu2_1Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSearchByQuantity() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -1331,7 +1577,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=ap123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1340,7 +1588,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123||CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=ap123||CODE",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1349,7 +1599,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=ap123|SYSTEM|CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=ap123|SYSTEM|CODE",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1358,7 +1610,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1367,7 +1621,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=123||CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=123||CODE",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1376,7 +1632,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=123|SYSTEM|CODE", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=123|SYSTEM|CODE",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1385,7 +1643,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=gt123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1394,16 +1654,23 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=lt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=lt123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
 				.forResource("Observation")
-				.where(Observation.VALUE_QUANTITY.greaterThanOrEquals().number(123).andNoUnits())
+				.where(Observation.VALUE_QUANTITY
+						.greaterThanOrEquals()
+						.number(123)
+						.andNoUnits())
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=ge123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=ge123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1412,28 +1679,37 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=le123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=le123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
 				.forResource("Observation")
-				.where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.GREATERTHAN).number(123).andNoUnits())
+				.where(Observation.VALUE_QUANTITY
+						.withPrefix(ParamPrefixEnum.GREATERTHAN)
+						.number(123)
+						.andNoUnits())
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123||", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Observation?value-quantity=gt123||",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
-
 	}
 
 	@Test
 	public void testSearchByString() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -1450,7 +1726,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=AAA", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?name=AAA",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1459,7 +1737,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=AAA", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?name=AAA",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1468,7 +1748,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name=AAA,BBB",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1477,7 +1759,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name=AAA,BBB",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1486,7 +1770,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name%3Aexact=AAA", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?name%3Aexact=AAA",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1495,7 +1781,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name%3Aexact=AAA", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?name%3Aexact=AAA",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1504,7 +1792,9 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name:exact=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name:exact=AAA,BBB",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
 
 		client.search()
@@ -1513,19 +1803,23 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name:exact=AAA,BBB", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?name:exact=AAA,BBB",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
-
 	}
 
 	@Test
 	public void testSearchByUrl() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		final String msg =
+				"{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) {
@@ -1542,8 +1836,12 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("http://example.com/fhir/Device?url=http%3A%2F%2Ffoo.com", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Device?url=http://foo.com",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Device?url=http%3A%2F%2Ffoo.com",
+				capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 
 		client.search()
@@ -1552,9 +1850,10 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Device?url=http://foo.com",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
-
 	}
 
 	@Test
@@ -1572,10 +1871,13 @@ public class GenericClientDstu2_1Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-		assertEquals("http://example.com/fhir/Patient?identifier=SYS%7CVAL1%2CSYS%7CVAL2%2CSYS%7CVAL3A%5C%2CB", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals("http://example.com/fhir/Patient?identifier=SYS|VAL1,SYS|VAL2,SYS|VAL3A\\,B", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(
+				"http://example.com/fhir/Patient?identifier=SYS%7CVAL1%2CSYS%7CVAL2%2CSYS%7CVAL3A%5C%2CB",
+				capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(
+				"http://example.com/fhir/Patient?identifier=SYS|VAL1,SYS|VAL2,SYS|VAL3A\\,B",
+				UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
 		idx++;
-
 	}
 
 	/**
@@ -1591,8 +1893,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(b);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1603,32 +1907,39 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client
-				.search()
+		client.search()
 				.forResource(Patient.class)
-				.sort().ascending("address")
+				.sort()
+				.ascending("address")
 				.returnBundle(Bundle.class)
 				.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient?_sort=address",
+				capt.getAllValues().get(idx++).getURI().toASCIIString());
 
-		client
-				.search()
+		client.search()
 				.forResource(Patient.class)
-				.sort().descending("address")
+				.sort()
+				.descending("address")
 				.returnBundle(Bundle.class)
 				.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=-address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient?_sort=-address",
+				capt.getAllValues().get(idx++).getURI().toASCIIString());
 
-		client
-				.search()
+		client.search()
 				.forResource(Patient.class)
-				.sort().descending("address")
-				.sort().ascending("name")
-				.sort().descending(Patient.BIRTHDATE)
+				.sort()
+				.descending("address")
+				.sort()
+				.ascending("name")
+				.sort()
+				.descending(Patient.BIRTHDATE)
 				.returnBundle(Bundle.class)
 				.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate", capt.getAllValues().get(idx++).getURI().toASCIIString());
-
+		assertEquals(
+				"http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate",
+				capt.getAllValues().get(idx++).getURI().toASCIIString());
 	}
 
 	@Test
@@ -1640,7 +1951,10 @@ public class GenericClientDstu2_1Test {
 			client.transaction().withBundle("FOO");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1395) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(
+					Msg.code(1395)
+							+ "Unable to determing encoding of request (body does not appear to be valid XML or JSON)",
+					e.getMessage());
 		}
 
 		// Create
@@ -1648,7 +1962,10 @@ public class GenericClientDstu2_1Test {
 			client.create().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(
+					Msg.code(1368)
+							+ "Unable to determing encoding of request (body does not appear to be valid XML or JSON)",
+					e.getMessage());
 		}
 
 		// Update
@@ -1656,7 +1973,10 @@ public class GenericClientDstu2_1Test {
 			client.update().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(
+					Msg.code(1368)
+							+ "Unable to determing encoding of request (body does not appear to be valid XML or JSON)",
+					e.getMessage());
 		}
 
 		// Validate
@@ -1664,9 +1984,11 @@ public class GenericClientDstu2_1Test {
 			client.validate().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(
+					Msg.code(1368)
+							+ "Unable to determing encoding of request (body does not appear to be valid XML or JSON)",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -1679,8 +2001,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1698,11 +2022,22 @@ public class GenericClientDstu2_1Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Patient/111", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient/111",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals(
+				"application/json+fhir;charset=utf-8",
+				capt.getAllValues()
+						.get(0)
+						.getHeaders("Content-Type")[0]
+						.getValue()
+						.toLowerCase()
+						.replace(" ", ""));
+		assertEquals(
+				Constants.CT_FHIR_JSON,
+				capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
 		assertThat(body, containsString("\"id\":\"111\""));
 	}
@@ -1719,21 +2054,27 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] {
+					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
+				};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(
+							new StringReader(p.encodeResourceToString(resp0)), StandardCharsets.UTF_8);
 				} else {
-					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
+					return new ReaderInputStream(
+							new StringReader(p.encodeResourceToString(resp1)), StandardCharsets.UTF_8);
 				}
 			}
 		});
@@ -1744,18 +2085,29 @@ public class GenericClientDstu2_1Test {
 		pt.setId("Patient/222");
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.update()
+				.resource(pt)
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute();
 
 		assertEquals(2, myAnswerCount);
 		assertNotNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
+				((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient/222",
+				capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://foo.com/base/Patient/222/_history/3",
+				capt.getAllValues().get(1).getURI().toASCIIString());
 	}
 
 	@Test
@@ -1767,14 +2119,18 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
+				return new Header[] {
+					new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")
+				};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1789,16 +2145,23 @@ public class GenericClientDstu2_1Test {
 		pt.setId("Patient/222");
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.update()
+				.resource(pt)
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute();
 
 		assertEquals(1, myAnswerCount);
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>",
+				((Patient) outcome.getResource()).getText().getDivAsString());
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Patient/222",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -1811,8 +2174,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1824,18 +2189,23 @@ public class GenericClientDstu2_1Test {
 
 		Binary bin = new Binary();
 		bin.setContentType("application/foo");
-		bin.setContent(new byte[] { 0, 1, 2, 3, 4 });
+		bin.setContent(new byte[] {0, 1, 2, 3, 4});
 		client.create().resource(bin).execute();
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/Binary",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/foo", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, extractBodyAsByteArray(capt));
-
+		assertEquals(
+				"application/foo",
+				capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue());
+		assertEquals(
+				Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY,
+				capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, extractBodyAsByteArray(capt));
 	}
 
 	@Test
@@ -1848,8 +2218,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(conf);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1860,7 +2232,9 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		client.fetchConformance().ofType(Conformance.class).execute();
-		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://example.com/fhir/metadata",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 	}
 
@@ -1869,8 +2243,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = CustomTypeDstu2_1Test.createBundle(CustomTypeDstu2_1Test.createResource(false));
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1881,12 +2257,10 @@ public class GenericClientDstu2_1Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.registerInterceptor(new UserInfoInterceptor("user_id", "user_name", "app-name"));
 
-		Bundle resp = client
-				.history()
+		Bundle resp = client.history()
 				.onType(Patient.class)
 				.andReturnBundle(Bundle.class)
 				.execute();
-
 	}
 
 	@Test
@@ -1898,14 +2272,16 @@ public class GenericClientDstu2_1Test {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] {};
 			}
 		});
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1922,8 +2298,9 @@ public class GenericClientDstu2_1Test {
 		MethodOutcome outcome = client.validate().resource(pt).execute();
 
 		assertNotNull(outcome.getOperationOutcome());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
+				((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
 	}
 
 	@Test
@@ -1937,8 +2314,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(patient);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1947,8 +2326,13 @@ public class GenericClientDstu2_1Test {
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		MyPatientWithExtensions read = client.read().resource(MyPatientWithExtensions.class).withId(new IdType("1")).execute();
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
+		MyPatientWithExtensions read = client.read()
+				.resource(MyPatientWithExtensions.class)
+				.withId(new IdType("1"))
+				.execute();
+		assertEquals(
+				"<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>",
+				read.getText().getDivAsString());
 
 		// Ensure that we haven't overridden the default type for the name
 		assertFalse(MyPatientWithExtensions.class.isAssignableFrom(Patient.class));
@@ -1958,7 +2342,6 @@ public class GenericClientDstu2_1Test {
 		IParser parser = ourCtx.newXmlParser();
 		String encoded = parser.encodeResourceToString(pt);
 		pt = (Patient) parser.parseResource(encoded);
-
 	}
 
 	@Test
@@ -1975,8 +2358,10 @@ public class GenericClientDstu2_1Test {
 		final String respString = p.encodeResourceToString(b);
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) {
@@ -1985,10 +2370,15 @@ public class GenericClientDstu2_1Test {
 		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		Bundle bundle = client.search().forResource(MyPatientWithExtensions.class).returnBundle(Bundle.class).execute();
+		Bundle bundle = client.search()
+				.forResource(MyPatientWithExtensions.class)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(1, bundle.getEntry().size());
-		assertEquals(MyPatientWithExtensions.class, bundle.getEntry().get(0).getResource().getClass());
+		assertEquals(
+				MyPatientWithExtensions.class,
+				bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	private List<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> theClass) {
@@ -1999,7 +2389,9 @@ public class GenericClientDstu2_1Test {
 
 	private void validateUserAgent(ArgumentCaptor<HttpUriRequest> capt) {
 		assertEquals(1, capt.getAllValues().get(0).getHeaders("User-Agent").length);
-		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
+		assertEquals(
+				expectedUserAgent(),
+				capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
 	}
 
 	@AfterAll
@@ -2011,5 +2403,4 @@ public class GenericClientDstu2_1Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2_1();
 	}
-
 }

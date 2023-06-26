@@ -41,10 +41,8 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
 
@@ -56,13 +54,15 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
-		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
+		myStorageSettings.setIndexOnContainedResourcesRecursively(
+				new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
 	}
 
 	@Override
@@ -100,16 +100,16 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// Verify - We'll check that the right indexes got written, but the main test is that
 		// the create step didn't crash
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(0, myResourceLinkDao.count());
 		});
 	}
 
-
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing() throws Exception {
+	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing()
+			throws Exception {
 
 		// setup
 		IIdType oid1;
@@ -126,7 +126,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -160,7 +161,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -195,14 +197,19 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Observation obs = new Observation();
 			obs.getCode().setText("Body Weight");
-			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.getCode()
+					.addCoding()
+					.setCode("obs2")
+					.setSystem("Some System")
+					.setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
 			obs.setSubject(new Reference(p.getId()));
 			obs.setEncounter(new Reference(encounter.getId()));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -249,7 +256,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid2 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the records
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the
+			// records
 			myAuditEventDao.create(new AuditEvent(), mySrd);
 		}
 
@@ -296,7 +304,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid2 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the records
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the
+			// records
 			myAuditEventDao.create(new AuditEvent(), mySrd);
 		}
 
@@ -328,17 +337,24 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			Observation obs = new Observation();
 			obs.getContained().add(p);
 
-			obs.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
+			obs.getCode()
+					.addCoding()
+					.setCode("29463-7")
+					.setSystem("http://loinc.org")
+					.setDisplay("Body Weight");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setSubject(new Reference(p.getId()));
 			obs.setValue(new Quantity(null, 67.1, "http://unitsofmeasure.org", "kg", "kg"));
 			obs.getSubject().setReference("#pat");
 
-			ourLog.debug("Resource: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug(
+					"Resource: {}",
+					myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myCaptureQueriesListener.clear();
 			myObservationDao.create(new Observation(), mySrd);
 			myCaptureQueriesListener.logInsertQueries();
@@ -355,7 +371,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff() throws Exception {
+	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff()
+			throws Exception {
 		// setup
 		IIdType oid1;
 
@@ -372,7 +389,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -420,7 +438,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -462,7 +481,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -504,7 +524,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -533,7 +554,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Observation obs = new Observation();
 			obs.getCode().setText("Body Weight");
-			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.getCode()
+					.addCoding()
+					.setCode("obs2")
+					.setSystem("Some System")
+					.setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
 
@@ -542,7 +567,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -559,7 +585,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing() throws Exception {
+	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing()
+			throws Exception {
 
 		// setup
 		IIdType oid1;
@@ -582,7 +609,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			Organization dummyOrg = new Organization();
 			dummyOrg.setId(IdType.newRandomUuid());
 			dummyOrg.setName("Dummy");
@@ -636,7 +664,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			Organization dummyOrg = new Organization();
 			dummyOrg.setId(IdType.newRandomUuid());
 			dummyOrg.setName("Dummy");
@@ -691,7 +720,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -706,7 +736,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference()
+			throws Exception {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -727,14 +758,19 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Observation obs = new Observation();
 			obs.getCode().setText("Body Weight");
-			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.getCode()
+					.addCoding()
+					.setCode("obs2")
+					.setSystem("Some System")
+					.setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
 			obs.setSubject(new Reference(p.getId()));
 			obs.setEncounter(new Reference(encounter.getId()));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -777,7 +813,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -792,7 +829,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain_CommonReference() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain_CommonReference()
+			throws Exception {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -813,13 +851,18 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			Observation obs = new Observation();
 			obs.addContained(encounter);
 			obs.getCode().setText("Body Weight");
-			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.getCode()
+					.addCoding()
+					.setCode("obs2")
+					.setSystem("Some System")
+					.setDisplay("Body weight as measured by me");
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.setValue(new Quantity(81));
 			obs.setEncounter(new Reference("#enc"));
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -836,7 +879,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldNotResolveAThreeLinkChainWithAllContainedResourcesWhenRecursiveContainedIndexesAreDisabled() throws Exception {
+	public void testShouldNotResolveAThreeLinkChainWithAllContainedResourcesWhenRecursiveContainedIndexesAreDisabled()
+			throws Exception {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -861,7 +905,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -901,7 +946,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -954,7 +1000,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -969,7 +1016,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain()
+			throws Exception {
 		// This is the case that is most relevant to SMILE-2899
 
 		// setup
@@ -1010,7 +1058,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getSubject().setReference(d.getId());
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1062,7 +1111,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1080,7 +1130,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@Test
 	@Disabled
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning_NotDistinctSourcePaths() throws Exception {
+	public void
+			testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning_NotDistinctSourcePaths()
+					throws Exception {
 		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 
@@ -1120,7 +1172,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1182,7 +1235,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			myObservationDao.create(obs2, mySrd);
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1229,7 +1283,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1274,7 +1329,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1319,7 +1375,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1368,7 +1425,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			myCaptureQueriesListener.logInsertQueries();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1416,7 +1474,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1431,7 +1490,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereTheFirstReferenceAndTheLastReferenceAreContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereTheFirstReferenceAndTheLastReferenceAreContained()
+			throws Exception {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1461,7 +1521,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1506,7 +1567,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only
+			// record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
@@ -1538,7 +1600,10 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			searchAndReturnUnqualifiedVersionlessIdValues(url);
 			fail("Expected an exception to be thrown");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2007) + "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
+			assertEquals(
+					Msg.code(2007)
+							+ "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.",
+					e.getMessage());
 		}
 	}
 
@@ -1550,7 +1615,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.name=Smith", 0);
 		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 0);
 
-		// With indexing of contained resources turned on, we take the UNION of several subselects that handle the different patterns of containment
+		// With indexing of contained resources turned on, we take the UNION of several subselects that handle the
+		// different patterns of containment
 		//  Keeping in mind that the number of clauses is one greater than the number of UNION keywords,
 		//  this increases as the chain grows longer according to the Fibonacci sequence: (2, 3, 5, 8, 13)
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1587,7 +1653,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		return searchAndReturnUnqualifiedVersionlessIdValues(theUrl, myObservationDao);
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl, IFhirResourceDao<? extends DomainResource> theObservationDao) {
+	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(
+			String theUrl, IFhirResourceDao<? extends DomainResource> theObservationDao) {
 		List<String> ids = new ArrayList<>();
 
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
@@ -1596,5 +1663,4 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		IBundleProvider result = theObservationDao.search(map);
 		return result.getAllResourceIds();
 	}
-
 }

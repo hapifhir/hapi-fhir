@@ -1,15 +1,10 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.NumberParam;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.HumanName;
@@ -17,15 +12,16 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	private static final String MY_TEST_DATA =
@@ -35,8 +31,8 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void crudTest() {
 		var requestDetails = setupRequestDetails();
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
-		var result = repository
-				.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
+		var result = repository.create(
+				new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
 		assertEquals(true, result.getCreated());
 		var patient = (Patient) result.getResource();
 		assertEquals(1, patient.getName().size());
@@ -47,8 +43,10 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var updatedPatient = repository.read(Patient.class, patient.getIdElement());
 		assertEquals(2, updatedPatient.getName().get(0).getGiven().size());
 		repository.delete(Patient.class, patient.getIdElement());
-		var ex = assertThrows(Exception.class,
-				() -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
+		var ex = assertThrows(
+				Exception.class,
+				() -> repository.read(
+						Patient.class, new IdType(patient.getIdElement().getIdPart())));
 		assertTrue(ex.getMessage().contains("Resource was deleted"));
 	}
 
@@ -67,8 +65,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-				"Patient search results don't match available resources");
+		assertEquals(expectedPatientCount, counter, "Patient search results don't match available resources");
 	}
 
 	@Test
@@ -85,10 +82,14 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var nextUrl = next.getUrl();
 		var nextResult = repository.link(Bundle.class, nextUrl);
 		assertEquals(20, nextResult.getEntry().size());
-		assertEquals(false,
-				result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
-						i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
-								.collect(Collectors.toList()).contains(i)));
+		assertEquals(
+				false,
+				result.getEntry().stream()
+						.map(e -> e.getResource().getIdPart())
+						.anyMatch(i -> nextResult.getEntry().stream()
+								.map(e -> e.getResource().getIdPart())
+								.collect(Collectors.toList())
+								.contains(i)));
 	}
 
 	@Test
@@ -105,8 +106,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 			counter++;
 		}
 		// verify all patient resources captured
-		assertEquals(expectedPatientCount, counter,
-				"Patient search results don't match available resources");
+		assertEquals(expectedPatientCount, counter, "Patient search results don't match available resources");
 	}
 
 	@Test
@@ -123,8 +123,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 			counter++;
 		}
 		// verify all encounter resources captured
-		assertEquals(expectedEncounterCount, counter,
-				"Encounter search results don't match available resources");
+		assertEquals(expectedEncounterCount, counter, "Encounter search results don't match available resources");
 	}
 
 	@Test
@@ -141,8 +140,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 			counter++;
 		}
 		// verify all immunization resources captured
-		assertEquals(expectedEncounterCount, counter,
-				"Immunization search results don't match available resources");
+		assertEquals(expectedEncounterCount, counter, "Immunization search results don't match available resources");
 	}
 
 	Map<String, List<IQueryParameterType>> withEmptySearchParams() {

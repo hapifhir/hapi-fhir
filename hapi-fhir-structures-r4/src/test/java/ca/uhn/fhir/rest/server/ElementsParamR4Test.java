@@ -70,60 +70,55 @@ public class ElementsParamR4Test {
 	@Test
 	public void testElementsOnChoiceWithGenericName() throws IOException {
 		createObservationWithQuantity();
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Observation?_elements=value,status",
-			bundle -> {
-				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
-				assertEquals("mg", obs.getValueQuantity().getCode());
-			});
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Observation?_elements=value,status", bundle -> {
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+			assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+			assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
+			assertEquals("mg", obs.getValueQuantity().getCode());
+		});
 	}
 
 	@Test
 	public void testElementsOnChoiceWithSpecificName() throws IOException {
 		createObservationWithQuantity();
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Observation?_elements=valueQuantity,status",
-			bundle -> {
-				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
-				assertEquals("mg", obs.getValueQuantity().getCode());
-			});
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Observation?_elements=valueQuantity,status", bundle -> {
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+			assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+			assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
+			assertEquals("mg", obs.getValueQuantity().getCode());
+		});
 	}
 
 	@Test
 	@Disabled
 	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
 		createObservationWithQuantity();
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Observation?_elements=valueString,status",
-			bundle -> {
-				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals(null, obs.getValueQuantity());
-			});
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Observation?_elements=valueString,status", bundle -> {
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+			assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+			assertEquals(null, obs.getValueQuantity());
+		});
 	}
 
 	@Test
 	public void testExcludeResources() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
-			bundle -> {
-				assertEquals(null, bundle.getEntry().get(0).getResource());
-				assertEquals(null, bundle.getEntry().get(1).getResource());
+				"http://localhost:" + ourPort
+						+ "/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
+				bundle -> {
+					assertEquals(null, bundle.getEntry().get(0).getResource());
+					assertEquals(null, bundle.getEntry().get(1).getResource());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals(true, obs.getMeta().isEmpty());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals(1, obs.getCode().getCoding().size());
-				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals(true, obs.getMeta().isEmpty());
+					assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+					assertEquals(1, obs.getCode().getCoding().size());
+					assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+				});
 	}
 
 	@Test
@@ -133,13 +128,13 @@ public class ElementsParamR4Test {
 		HttpGet httpGet;
 
 		encodingEnum = EncodingEnum.JSON;
-		httpGet = new HttpGet(("http://localhost:" + ourPort + "/Procedure?_include=*&_elements=DiagnosticReport:foo") + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
+		httpGet = new HttpGet(("http://localhost:" + ourPort + "/Procedure?_include=*&_elements=DiagnosticReport:foo")
+				+ "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
-
 	}
 
 	private void createObservationWithQuantity() {
@@ -147,73 +142,59 @@ public class ElementsParamR4Test {
 		ourNextObservation.setId("Observation/123/_history/456");
 		ourNextObservation.setStatus(Observation.ObservationStatus.FINAL);
 		ourNextObservation.setSubject(new Reference("Patient/AAA"));
-		ourNextObservation.setValue(new Quantity()
-			.setValue(222)
-			.setCode("mg")
-			.setSystem("http://unitsofmeasure.org"));
+		ourNextObservation.setValue(new Quantity().setValue(222).setCode("mg").setSystem("http://unitsofmeasure.org"));
 	}
 
 	@Test
 	public void testReadSummaryData() throws Exception {
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Patient/1?_elements=name,maritalStatus",
-			Patient.class,
-			patient -> {
-				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<Bundle")));
-				assertThat(responseContent, (containsString("<Patient")));
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, (containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
-			}
-		);
+				"http://localhost:" + ourPort + "/Patient/1?_elements=name,maritalStatus", Patient.class, patient -> {
+					String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
+					assertThat(responseContent, not(containsString("<Bundle")));
+					assertThat(responseContent, (containsString("<Patient")));
+					assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+					assertThat(responseContent, (containsString("family")));
+					assertThat(responseContent, (containsString("maritalStatus")));
+					assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+				});
 	}
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Patient/1?_elements=name",
-			Patient.class,
-			patient -> {
-				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
-				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("name"));
-			}
-		);
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Patient/1?_elements=name", Patient.class, patient -> {
+			String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
+			assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+			assertThat(responseContent, (containsString("family")));
+			assertThat(responseContent, not(containsString("maritalStatus")));
+			assertThat(ourLastElements, containsInAnyOrder("name"));
+		});
 	}
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Patient?_elements=name,maritalStatus",
-			bundle -> {
-				assertEquals("1", bundle.getTotalElement().getValueAsString());
-				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("<Patient"));
-				assertThat(responseContent, not(containsString("THE DIV")));
-				assertThat(responseContent, containsString("family"));
-				assertThat(responseContent, containsString("maritalStatus"));
-				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
-			}
-		);
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Patient?_elements=name,maritalStatus", bundle -> {
+			assertEquals("1", bundle.getTotalElement().getValueAsString());
+			String responseContent = ourCtx.newXmlParser()
+					.encodeResourceToString(bundle.getEntry().get(0).getResource());
+			assertThat(responseContent, containsString("<Patient"));
+			assertThat(responseContent, not(containsString("THE DIV")));
+			assertThat(responseContent, containsString("family"));
+			assertThat(responseContent, containsString("maritalStatus"));
+			assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
+		});
 	}
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Patient?_elements=text&_pretty=true",
-			bundle -> {
-				assertEquals("1", bundle.getTotalElement().getValueAsString());
-				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
-				assertThat(responseContent, containsString("THE DIV"));
-				assertThat(responseContent, not(containsString("family")));
-				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("text"));
-			}
-		);
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Patient?_elements=text&_pretty=true", bundle -> {
+			assertEquals("1", bundle.getTotalElement().getValueAsString());
+			String responseContent = ourCtx.newXmlParser()
+					.encodeResourceToString(bundle.getEntry().get(0).getResource());
+			assertThat(responseContent, containsString("THE DIV"));
+			assertThat(responseContent, not(containsString("family")));
+			assertThat(responseContent, not(containsString("maritalStatus")));
+			assertThat(ourLastElements, containsInAnyOrder("text"));
+		});
 	}
 
 	/**
@@ -224,112 +205,125 @@ public class ElementsParamR4Test {
 	public void testStandardElementsFilter() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=reasonCode,status",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals(0, procedure.getUsedCode().size());
+				"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=reasonCode,status", bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(
+							"SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(0, procedure.getUsedCode().size());
 
-				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
-				assertEquals(0, dr.getMeta().getTag().size());
-				assertEquals("Observation/OBSA", dr.getResult().get(0).getReference());
+					DiagnosticReport dr =
+							(DiagnosticReport) bundle.getEntry().get(1).getResource();
+					assertEquals(0, dr.getMeta().getTag().size());
+					assertEquals("Observation/OBSA", dr.getResult().get(0).getReference());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals(0, obs.getMeta().getTag().size());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals("1234-5", obs.getCode().getCoding().get(0).getCode());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals(0, obs.getMeta().getTag().size());
+					assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+					assertEquals("1234-5", obs.getCode().getCoding().get(0).getCode());
+				});
 	}
 
 	@Test
 	public void testMultiResourceElementsFilter() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals(0, procedure.getUsedCode().size());
+				"http://localhost:" + ourPort
+						+ "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
+				bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(
+							"SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(0, procedure.getUsedCode().size());
 
-				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
-				assertEquals(0, dr.getMeta().getTag().size());
+					DiagnosticReport dr =
+							(DiagnosticReport) bundle.getEntry().get(1).getResource();
+					assertEquals(0, dr.getMeta().getTag().size());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals(0, obs.getCode().getCoding().size());
-				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+					assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+					assertEquals(0, obs.getCode().getCoding().size());
+					assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+				});
 	}
 
 	@Test
 	public void testMultiResourceElementsOnExtension() throws IOException {
 		ourNextProcedure = new Procedure();
 		ourNextProcedure.setId("Procedure/PROC");
-		ourNextProcedure.addExtension()
-			.setUrl("http://quantity")
-			.setValue(Quantity.fromUcum("1.1", "mg"));
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals(0, procedure.getReasonCode().size());
-				assertEquals("http://quantity", procedure.getExtension().get(0).getUrl());
-				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
-			});
+		ourNextProcedure.addExtension().setUrl("http://quantity").setValue(Quantity.fromUcum("1.1", "mg"));
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension", bundle -> {
+			Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+			assertEquals(0, procedure.getReasonCode().size());
+			assertEquals("http://quantity", procedure.getExtension().get(0).getUrl());
+			assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+		});
+
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value", bundle -> {
+			Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+			assertEquals(0, procedure.getReasonCode().size());
+			assertEquals(
+					"1.1",
+					((Quantity) procedure.getExtension().get(0).getValue())
+							.getValueElement()
+							.getValueAsString());
+			assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+		});
 
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals(0, procedure.getReasonCode().size());
-				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
-				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
-			});
+				"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value", bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(
+							"SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+					assertEquals(0, procedure.getReasonCode().size());
+					assertEquals(
+							"1.1",
+							((Quantity) procedure.getExtension().get(0).getValue())
+									.getValueElement()
+									.getValueAsString());
+					assertEquals(
+							null, ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+				});
 
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals(0, procedure.getReasonCode().size());
-				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
-				assertEquals(null, ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
-			});
-
-		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reason",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals(0, procedure.getExtension().size());
-			});
+		verifyXmlAndJson("http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reason", bundle -> {
+			Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+			assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+			assertEquals(0, procedure.getExtension().size());
+		});
 	}
 
 	@Test
 	public void testMultiResourceElementsFilterWithMetadataExcluded() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals(true, procedure.getMeta().isEmpty());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals(0, procedure.getUsedCode().size());
+				"http://localhost:" + ourPort
+						+ "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+				bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(true, procedure.getMeta().isEmpty());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(0, procedure.getUsedCode().size());
 
-				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
-				assertEquals(true, dr.getMeta().isEmpty());
+					DiagnosticReport dr =
+							(DiagnosticReport) bundle.getEntry().get(1).getResource();
+					assertEquals(true, dr.getMeta().isEmpty());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals(true, obs.getMeta().isEmpty());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals(0, obs.getCode().getCoding().size());
-				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals(true, obs.getMeta().isEmpty());
+					assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+					assertEquals(0, obs.getCode().getCoding().size());
+					assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+				});
 	}
 
 	/**
@@ -340,24 +334,28 @@ public class ElementsParamR4Test {
 	public void testMultiResourceElementsFilterDoesntAffectFocalResource() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Observation.subject",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals(true, procedure.getMeta().isEmpty());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals("USED_CODE", procedure.getUsedCode().get(0).getCoding().get(0).getCode());
+				"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Observation.subject", bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(true, procedure.getMeta().isEmpty());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(
+							"USED_CODE",
+							procedure.getUsedCode().get(0).getCoding().get(0).getCode());
 
-				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
-				assertEquals(true, dr.getMeta().isEmpty());
-				assertEquals(1, dr.getResult().size());
+					DiagnosticReport dr =
+							(DiagnosticReport) bundle.getEntry().get(1).getResource();
+					assertEquals(true, dr.getMeta().isEmpty());
+					assertEquals(1, dr.getResult().size());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
-				assertEquals(null, obs.getStatus());
-				assertEquals(0, obs.getCode().getCoding().size());
-				assertEquals(false, obs.hasValue());
-				assertEquals("Patient/123", obs.getSubject().getReference());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+					assertEquals(null, obs.getStatus());
+					assertEquals(0, obs.getCode().getCoding().size());
+					assertEquals(false, obs.hasValue());
+					assertEquals("Patient/123", obs.getSubject().getReference());
+				});
 	}
 
 	@Test
@@ -365,44 +363,59 @@ public class ElementsParamR4Test {
 		ourServlet.setElementsSupport(ElementsSupportEnum.STANDARD);
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals(true, procedure.getMeta().isEmpty());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals(1, procedure.getUsedCode().size());
+				"http://localhost:" + ourPort
+						+ "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+				bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(true, procedure.getMeta().isEmpty());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(1, procedure.getUsedCode().size());
 
-				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
-				assertEquals(true, dr.getMeta().isEmpty());
-				assertEquals(1, dr.getResult().size());
+					DiagnosticReport dr =
+							(DiagnosticReport) bundle.getEntry().get(1).getResource();
+					assertEquals(true, dr.getMeta().isEmpty());
+					assertEquals(1, dr.getResult().size());
 
-				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
-				assertEquals(true, obs.getMeta().isEmpty());
-				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertEquals(1, obs.getCode().getCoding().size());
-				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
-			});
+					Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+					assertEquals(true, obs.getMeta().isEmpty());
+					assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+					assertEquals(1, obs.getCode().getCoding().size());
+					assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+				});
 	}
 
 	@Test
 	public void testElementsFilterWithComplexPath() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reasonCode.coding.code",
-			bundle -> {
-				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
-				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
-				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
-				assertEquals(null, procedure.getReasonCode().get(0).getCoding().get(0).getSystem());
-				assertEquals(null, procedure.getReasonCode().get(0).getCoding().get(0).getDisplay());
-				assertEquals(0, procedure.getUsedCode().size());
-			});
+				"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reasonCode.coding.code", bundle -> {
+					Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+					assertEquals(
+							"SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+					assertEquals(
+							"REASON_CODE",
+							procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+					assertEquals(
+							null,
+							procedure.getReasonCode().get(0).getCoding().get(0).getSystem());
+					assertEquals(
+							null,
+							procedure.getReasonCode().get(0).getCoding().get(0).getDisplay());
+					assertEquals(0, procedure.getUsedCode().size());
+				});
 	}
 
 	private void createProcedureWithLongChain() {
 		ourNextProcedure = new Procedure();
 		ourNextProcedure.setId("Procedure/PROC");
-		ourNextProcedure.addReasonCode().addCoding().setCode("REASON_CODE").setSystem("REASON_SYSTEM").setDisplay("REASON_DISPLAY");
+		ourNextProcedure
+				.addReasonCode()
+				.addCoding()
+				.setCode("REASON_CODE")
+				.setSystem("REASON_SYSTEM")
+				.setDisplay("REASON_DISPLAY");
 		ourNextProcedure.addUsedCode().addCoding().setCode("USED_CODE");
 
 		DiagnosticReport dr = new DiagnosticReport();
@@ -422,7 +435,8 @@ public class ElementsParamR4Test {
 		verifyXmlAndJson(theUri, Bundle.class, theVerifier);
 	}
 
-	private <T extends IBaseResource> void verifyXmlAndJson(String theUri, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+	private <T extends IBaseResource> void verifyXmlAndJson(String theUri, Class<T> theType, Consumer<T> theVerifier)
+			throws IOException {
 		EncodingEnum encodingEnum;
 		HttpGet httpGet;
 
@@ -447,7 +461,6 @@ public class ElementsParamR4Test {
 
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
-
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Observation.class;
@@ -457,7 +470,6 @@ public class ElementsParamR4Test {
 		public Observation search(@IncludeParam(allow = {"*"}) Collection<Include> theIncludes) {
 			return ourNextObservation;
 		}
-
 	}
 
 	public static class DummyProcedureResourceProvider implements IResourceProvider {
@@ -471,7 +483,6 @@ public class ElementsParamR4Test {
 		public Procedure search(@IncludeParam(allow = {"*"}) Collection<Include> theIncludes) {
 			return ourNextProcedure;
 		}
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -502,7 +513,6 @@ public class ElementsParamR4Test {
 			patient.getMaritalStatus().addCoding().setCode("D");
 			return patient;
 		}
-
 	}
 
 	@AfterAll
@@ -526,13 +536,12 @@ public class ElementsParamR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-
 }

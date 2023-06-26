@@ -18,20 +18,18 @@ public class BundleTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@Test
-	public void testGetLink() {		
+	public void testGetLink() {
 		Bundle b = new Bundle();
 		Link link = b.getLink(IBaseBundle.LINK_NEXT);
-		
+
 		assertNull(link);
-		
+
 		Link link2 = b.getLinkOrCreate(IBaseBundle.LINK_NEXT);
 		link = b.getLink(IBaseBundle.LINK_NEXT);
-		
+
 		assertNotNull(link);
 		assertNotNull(link2);
 		assertSame(link, link2);
 	}
-	
 }

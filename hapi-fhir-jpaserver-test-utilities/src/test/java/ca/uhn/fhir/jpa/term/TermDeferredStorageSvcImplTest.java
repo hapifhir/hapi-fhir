@@ -34,10 +34,13 @@ public class TermDeferredStorageSvcImplTest {
 
 	@Mock
 	private PlatformTransactionManager myTxManager;
+
 	@Mock
 	private TermConceptDaoSvc myTermConceptDaoSvc;
+
 	@Mock
 	private ITermConceptDao myConceptDao;
+
 	@Mock
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 
@@ -54,7 +57,6 @@ public class TermDeferredStorageSvcImplTest {
 		svc.saveDeferred();
 	}
 
-
 	@Test
 	public void testStorageNotEmptyWhileJobsExecuting() {
 		String jobId = "jobId";
@@ -67,13 +69,11 @@ public class TermDeferredStorageSvcImplTest {
 
 		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
 
-		when(myJobCoordinator.getInstance(eq(jobId)))
-			.thenReturn(instance);
+		when(myJobCoordinator.getInstance(eq(jobId))).thenReturn(instance);
 		assertFalse(mySvc.isStorageQueueEmpty(true));
 		instance.setStatus(StatusEnum.COMPLETED);
 		assertTrue(mySvc.isStorageQueueEmpty(true));
 	}
-
 
 	@Test
 	public void testSaveDeferred_Concept() {
@@ -95,7 +95,6 @@ public class TermDeferredStorageSvcImplTest {
 		svc.saveDeferred();
 		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
 		verifyNoMoreInteractions(myTermConceptDaoSvc);
-
 	}
 
 	@Test
@@ -119,7 +118,6 @@ public class TermDeferredStorageSvcImplTest {
 
 		verify(myTermConceptDaoSvc, times(0)).saveConcept(same(concept));
 		verifyNoMoreInteractions(myTermConceptDaoSvc);
-
 	}
 
 	@Test
@@ -146,7 +144,6 @@ public class TermDeferredStorageSvcImplTest {
 
 		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
 		verifyNoMoreInteractions(myTermConceptDaoSvc);
-
 	}
 
 	@Test
@@ -165,5 +162,4 @@ public class TermDeferredStorageSvcImplTest {
 
 		verifyNoMoreInteractions(myTermConceptDaoSvc);
 	}
-
 }

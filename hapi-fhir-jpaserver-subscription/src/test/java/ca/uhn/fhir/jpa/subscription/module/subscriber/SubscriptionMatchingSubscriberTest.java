@@ -57,7 +57,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@AfterEach
 	public void afterEach() {
-		myStorageSettings.setCrossPartitionSubscriptionEnabled(new JpaStorageSettings().isCrossPartitionSubscriptionEnabled());
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(
+				new JpaStorageSettings().isCrossPartitionSubscriptionEnabled());
 	}
 
 	@Test
@@ -116,7 +117,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		observation.setId("OBS");
 		observation.setStatus(Observation.ObservationStatus.CORRECTED);
 
-		Subscription subscription = makeActiveSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
+		Subscription subscription =
+				makeActiveSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
 		sendSubscription(subscription, null, false);
 
 		assertEquals(1, mySubscriptionRegistry.size());
@@ -155,7 +157,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		assertEquals(0, ourContentTypes.size());
 	}
-
 
 	@Test
 	public void testCriteriaStarOnly() throws InterruptedException {
@@ -348,7 +349,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		subscription
+				.addExtension()
+				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+				.setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
 		sendSubscription(subscription, subscriptionPartitionId, true);
 
@@ -371,7 +375,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		subscription
+				.addExtension()
+				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+				.setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
 		sendSubscription(subscription, subscriptionPartitionId, true);
 
@@ -383,7 +390,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	}
 
 	@Test
-	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch() throws InterruptedException {
+	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch()
+			throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
@@ -395,7 +403,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		subscription
+				.addExtension()
+				.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+				.setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
 		sendSubscription(subscription, subscriptionPartitionId, true);
 
@@ -411,56 +422,68 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(), eq(true))).thenReturn(modifiedSubscription);
+		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(), eq(true)))
+				.thenReturn(modifiedSubscription);
 	}
 
 	@Nested
 	public class TestDeleteMessages {
 		@Mock
 		ResourceModifiedMessage message;
+
 		@Mock
 		IInterceptorBroadcaster myInterceptorBroadcaster;
+
 		@Mock
 		SubscriptionRegistry mySubscriptionRegistry;
+
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		ActiveSubscription myActiveSubscription;
+
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		ActiveSubscription myNonDeleteSubscription;
+
 		@Mock
 		CanonicalSubscription myCanonicalSubscription;
+
 		@Mock
 		CanonicalSubscription myNonDeleteCanonicalSubscription;
+
 		@Mock
 		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
+
 		@Mock
 		SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+
 		@InjectMocks
 		SubscriptionMatchingSubscriber subscriber;
-
 
 		@Test
 		public void testAreNotIgnored() {
 
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+							eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class)))
+					.thenReturn(true);
 			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
-			verify(myInterceptorBroadcaster).callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
-			verify(myInterceptorBroadcaster).callHooks(
-				eq(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
+			verify(myInterceptorBroadcaster)
+					.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
+			verify(myInterceptorBroadcaster)
+					.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
 		}
 
 		@Test
 		public void matchActiveSubscriptionsChecksSendDeleteMessagesExtensionFlag() {
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+							eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class)))
+					.thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
-			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions())
+					.thenReturn(Collections.singletonList(myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
@@ -475,10 +498,12 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		public void testMultipleSubscriptionsDoNotEarlyReturn() {
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+							eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class)))
+					.thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
 			when(myNonDeleteCanonicalSubscription.getSendDeleteMessages()).thenReturn(false);
-			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(List.of(myNonDeleteSubscription, myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions())
+					.thenReturn(List.of(myNonDeleteSubscription, myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");
@@ -497,9 +522,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		public void matchActiveSubscriptionsAndDeliverSetsPartitionId() {
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+							eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class)))
+					.thenReturn(true);
 			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
-			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions())
+					.thenReturn(Collections.singletonList(myActiveSubscription));
 			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
 			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
 			when(myActiveSubscription.getId()).thenReturn("Patient/123");

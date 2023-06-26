@@ -29,20 +29,17 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.servlet.http.HttpServlet;
 
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
 	private FhirContext myFhirContext;
@@ -116,7 +113,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		myPagingProvider = null;
 		myServlet = null;
 	}
-
 
 	private void createContextIfNeeded() {
 		if (myFhirVersion != null) {
@@ -211,7 +207,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		return myServlet.getInterceptorService();
 	}
 
-	public RestfulServerExtension registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
+	public RestfulServerExtension registerAnonymousInterceptor(
+			Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
 		return withServer(t -> t.getInterceptorService().registerAnonymousInterceptor(thePointcut, theInterceptor));
 	}
 

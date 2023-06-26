@@ -41,19 +41,24 @@ public class BlockingContentR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BlockingContentR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
-	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx)
-		.withIdleTimeout(5000);
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx).withIdleTimeout(5000);
+
 	@RegisterExtension
-	public ResourceProviderExtension myPatientProviderRule = new ResourceProviderExtension(ourServerRule, new SystemProvider());
+	public ResourceProviderExtension myPatientProviderRule =
+			new ResourceProviderExtension(ourServerRule, new SystemProvider());
+
 	private volatile BaseServerResponseException myServerException;
 	private IAnonymousInterceptor myErrorCaptureInterceptor;
 
 	@BeforeEach
 	public void beforeEach() {
-		myErrorCaptureInterceptor = (thePointcut, theArgs) -> myServerException = theArgs.get(BaseServerResponseException.class);
+		myErrorCaptureInterceptor =
+				(thePointcut, theArgs) -> myServerException = theArgs.get(BaseServerResponseException.class);
 		ourServerRule.registerAnonymousInterceptor(Pointcut.SERVER_HANDLE_EXCEPTION, myErrorCaptureInterceptor);
 	}
+
 	@AfterEach
 	public void afterEach() {
 		ourServerRule.unregisterInterceptor(myErrorCaptureInterceptor);
@@ -70,10 +75,16 @@ public class BlockingContentR4Test {
 
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
-		input.addEntry().setResource(patient).setFullUrl("Patient/").getRequest().setMethod(Bundle.HTTPVerb.POST);
+		input.addEntry()
+				.setResource(patient)
+				.setFullUrl("Patient/")
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST);
 
-		RequestConfig config = RequestConfig.custom().setExpectContinueEnabled(true).build();
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		RequestConfig config =
+				RequestConfig.custom().setExpectContinueEnabled(true).build();
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		builder.setDefaultRequestConfig(config);
@@ -83,7 +94,7 @@ public class BlockingContentR4Test {
 
 			byte[] bytes = resourceAsString.getBytes(Charsets.UTF_8);
 			InputStream inputStream = new ByteArrayInputStream(bytes);
-			HttpEntity entity = new InputStreamEntity(inputStream, ContentType.parse("application/fhir+json")){
+			HttpEntity entity = new InputStreamEntity(inputStream, ContentType.parse("application/fhir+json")) {
 				@Override
 				public long getContentLength() {
 					return bytes.length + 100;
@@ -95,14 +106,12 @@ public class BlockingContentR4Test {
 			try (CloseableHttpResponse resp = client.execute(post)) {
 				ourLog.info(Arrays.asList(resp.getAllHeaders()).toString().replace(", ", "\n"));
 				ourLog.info(resp.toString());
-				await().until(()->myServerException, notNullValue());
+				await().until(() -> myServerException, notNullValue());
 			}
 
 			assertThat(myServerException.toString(), containsString("Idle timeout expired"));
-
 		}
 	}
-
 
 	public static class SystemProvider {
 
@@ -110,7 +119,5 @@ public class BlockingContentR4Test {
 		public Bundle transaction(@TransactionParam Bundle theInput) {
 			return theInput;
 		}
-
 	}
-
 }

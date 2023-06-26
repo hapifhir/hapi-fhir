@@ -66,7 +66,6 @@ public class ReadMethodBindingTest {
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getOperation()).thenReturn("_history");
 		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
-
 	}
 
 	@Test
@@ -109,7 +108,6 @@ public class ReadMethodBindingTest {
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
 		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
-
 	}
 
 	@Test
@@ -191,9 +189,6 @@ public class ReadMethodBindingTest {
 		}
 
 		@Override
-		public void setUserData(String theName, Object theValue) {
-
-		}
+		public void setUserData(String theName, Object theValue) {}
 	}
-
 }

@@ -61,7 +61,5 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1769) + "Resource 'Patient' is not a CodeSystem", e.getMessage());
 		}
-
 	}
-
 }

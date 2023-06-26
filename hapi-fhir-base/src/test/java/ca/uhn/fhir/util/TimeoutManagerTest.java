@@ -31,8 +31,10 @@ class TimeoutManagerTest {
 	public static final String TEST_SERVICE_NAME = "TEST TIMEOUT";
 	final Duration myWarningTimeout = Duration.ofDays(1);
 	final Duration myErrorTimeout = Duration.ofDays(10);
+
 	@Mock
 	private Appender<ILoggingEvent> myAppender;
+
 	@Captor
 	ArgumentCaptor<ILoggingEvent> myLoggingEvent;
 
@@ -45,14 +47,16 @@ class TimeoutManagerTest {
 
 	@BeforeEach
 	void before() {
-		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TimeoutManager.class);
+		ch.qos.logback.classic.Logger logger =
+				(ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TimeoutManager.class);
 
 		logger.addAppender(myAppender);
 	}
 
 	@AfterEach
 	void after() {
-		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TimeoutManager.class);
+		ch.qos.logback.classic.Logger logger =
+				(ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TimeoutManager.class);
 
 		logger.detachAppender(myAppender);
 		verifyNoMoreInteractions(myAppender);
@@ -98,7 +102,6 @@ class TimeoutManagerTest {
 		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event2.getFormattedMessage());
 	}
 
-
 	@Test
 	public void checkTimeout_errorThreadholdHitInUnitTest_throwsException() {
 		// setup
@@ -118,5 +121,4 @@ class TimeoutManagerTest {
 		assertEquals(Level.WARN, event.getLevel());
 		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event.getFormattedMessage());
 	}
-
 }

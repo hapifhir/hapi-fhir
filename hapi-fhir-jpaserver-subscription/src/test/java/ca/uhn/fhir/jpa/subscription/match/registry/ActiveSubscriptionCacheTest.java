@@ -31,12 +31,14 @@ public class ActiveSubscriptionCacheTest {
 		assertFalse(activeSub1.isFlagForDeletion());
 		List<String> saveIds = new ArrayList<>();
 
-		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		List<String> idsToDelete =
+				activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertTrue(activeSub1.isFlagForDeletion());
 		assertNotNull(activeSubscriptionCache.get(ID1));
 		assertEquals(0, idsToDelete.size());
 
-		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		idsToDelete =
+				activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertThat(idsToDelete, containsInAnyOrder(ID1));
 	}
 
@@ -55,13 +57,15 @@ public class ActiveSubscriptionCacheTest {
 
 		assertFalse(activeSub1.isFlagForDeletion());
 
-		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		List<String> idsToDelete =
+				activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertTrue(activeSub1.isFlagForDeletion());
 		assertNotNull(activeSubscriptionCache.get(ID1));
 		assertEquals(0, idsToDelete.size());
 
 		saveIds.add(ID1);
-		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		idsToDelete =
+				activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertFalse(activeSub1.isFlagForDeletion());
 		assertEquals(0, idsToDelete.size());
 	}
@@ -78,7 +82,8 @@ public class ActiveSubscriptionCacheTest {
 		activeSub1.setFlagForDeletion(true);
 		List<String> saveIds = new ArrayList<>();
 
-		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		List<String> idsToDelete =
+				activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
 		assertThat(idsToDelete, containsInAnyOrder(ID1));
 		assertNotNull(activeSubscriptionCache.get(ID2));
@@ -118,17 +123,23 @@ public class ActiveSubscriptionCacheTest {
 		ActiveSubscription activeSub2 = buildTopicSubscription(ID2, TEST_TOPIC_URL);
 		activeSubscriptionCache.put(ID2, activeSub2);
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL), hasSize(1));
-		ActiveSubscription match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL).get(0);
+		ActiveSubscription match = activeSubscriptionCache
+				.getTopicSubscriptionsForTopic(TEST_TOPIC_URL)
+				.get(0);
 		assertEquals(ID2, match.getId());
 
 		ActiveSubscription activeSub3 = buildTopicSubscription(ID3, TEST_TOPIC_URL_OTHER);
 		activeSubscriptionCache.put(ID3, activeSub3);
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL), hasSize(1));
-		match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL).get(0);
+		match = activeSubscriptionCache
+				.getTopicSubscriptionsForTopic(TEST_TOPIC_URL)
+				.get(0);
 		assertEquals(ID2, match.getId());
 
 		assertThat(activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL_OTHER), hasSize(1));
-		match = activeSubscriptionCache.getTopicSubscriptionsForTopic(TEST_TOPIC_URL_OTHER).get(0);
+		match = activeSubscriptionCache
+				.getTopicSubscriptionsForTopic(TEST_TOPIC_URL_OTHER)
+				.get(0);
 		assertEquals(ID3, match.getId());
 	}
 
@@ -139,5 +150,4 @@ public class ActiveSubscriptionCacheTest {
 		activeSub2.getSubscription().getTopicSubscription().setTopic(theTopicUrl);
 		return activeSub2;
 	}
-
 }

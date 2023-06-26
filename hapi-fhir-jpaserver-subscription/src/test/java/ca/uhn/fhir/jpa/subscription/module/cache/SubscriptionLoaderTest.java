@@ -12,14 +12,15 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 	public void testMultipleThreadsDontBlock() throws InterruptedException {
 		SubscriptionLoader svc = new SubscriptionLoader();
 		CountDownLatch latch = new CountDownLatch(1);
-		new Thread(()->{
-			try {
-				svc.acquireSemaphoreForUnitTest();
-				latch.countDown();
-			} catch (InterruptedException theE) {
-				// ignore
-			}
-		}).start();
+		new Thread(() -> {
+					try {
+						svc.acquireSemaphoreForUnitTest();
+						latch.countDown();
+					} catch (InterruptedException theE) {
+						// ignore
+					}
+				})
+				.start();
 
 		latch.await(10, TimeUnit.SECONDS);
 		svc.syncDatabaseToCache();

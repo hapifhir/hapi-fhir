@@ -59,6 +59,7 @@ public class ReindexProviderTest {
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Mock
 	private UrlPartitioner myUrlPartitioner;
 
@@ -72,9 +73,9 @@ public class ReindexProviderTest {
 	public void beforeEach() {
 		myServerExtension.registerProvider(mySvc);
 
-		when(myJobCoordinator.startInstance(isNotNull(), any()))
-			.thenReturn(createJobStartResponse());
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any()))
+				.thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {
@@ -107,12 +108,12 @@ public class ReindexProviderTest {
 		// Execute
 
 		Parameters response = myServerExtension
-			.getFhirClient()
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_REINDEX)
-			.withParameters(input)
-			.execute();
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute();
 
 		// Verify
 
@@ -143,12 +144,12 @@ public class ReindexProviderTest {
 		// Execute
 
 		Parameters response = myServerExtension
-			.getFhirClient()
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_REINDEX)
-			.withParameters(input)
-			.execute();
+				.getFhirClient()
+				.operation()
+				.onServer()
+				.named(ProviderConstants.OPERATION_REINDEX)
+				.withParameters(input)
+				.execute();
 
 		// Verify
 
@@ -163,6 +164,5 @@ public class ReindexProviderTest {
 		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
 		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
-
 	}
 }

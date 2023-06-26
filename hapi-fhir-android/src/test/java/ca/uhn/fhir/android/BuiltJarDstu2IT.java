@@ -60,7 +60,7 @@ public class BuiltJarDstu2IT {
 			ctx.newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
-			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled",e.getMessage());
+			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}
 
@@ -81,13 +81,12 @@ public class BuiltJarDstu2IT {
 
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();
-
 	}
 
 	/**
 	 * A simple client test - We try to connect to a server that doesn't exist, but
 	 * if we at least get the right exception it means we made it up to the HTTP/network stack
-	 * 
+	 *
 	 * Disabled for now - TODO: add the old version of the apache client (the one that
 	 * android uses) and see if this passes
 	 */
@@ -135,7 +134,7 @@ public class BuiltJarDstu2IT {
 
 			try {
 				Set<String> names = new HashSet<String>();
-				for (Enumeration<? extends ZipEntry> iter = zip.entries(); iter.hasMoreElements();) {
+				for (Enumeration<? extends ZipEntry> iter = zip.entries(); iter.hasMoreElements(); ) {
 					ZipEntry next = iter.nextElement();
 					String nextName = next.getName();
 					if (!names.add(nextName)) {
@@ -162,7 +161,10 @@ public class BuiltJarDstu2IT {
 
 				ourLog.info("File {} contains {} entries", file, names.size());
 				ourLog.info("Total classes {} - Total methods {}", totalClasses, totalMethods);
-				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(Math.max(0, topMethods.size() - 10), topMethods.size()));
+				ourLog.info(
+						"Top classes {}",
+						new ArrayList<ClassMethodCount>(topMethods)
+								.subList(Math.max(0, topMethods.size() - 10), topMethods.size()));
 
 			} finally {
 				zip.close();
@@ -205,7 +207,5 @@ public class BuiltJarDstu2IT {
 		public void setMethodCount(int theMethodCount) {
 			myMethodCount = theMethodCount;
 		}
-
 	}
-
 }

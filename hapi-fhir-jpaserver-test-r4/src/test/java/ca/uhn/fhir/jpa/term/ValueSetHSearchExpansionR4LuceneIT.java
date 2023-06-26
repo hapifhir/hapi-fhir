@@ -13,6 +13,4 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-public class ValueSetHSearchExpansionR4LuceneIT extends BaseValueSetHSearchExpansionR4Test {
-
-}
+public class ValueSetHSearchExpansionR4LuceneIT extends BaseValueSetHSearchExpansionR4Test {}

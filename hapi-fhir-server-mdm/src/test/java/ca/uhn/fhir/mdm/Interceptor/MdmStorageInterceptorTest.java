@@ -30,18 +30,19 @@ public class MdmStorageInterceptorTest {
 
 	@InjectMocks
 	private MdmStorageInterceptor myMdmStorageInterceptor;
+
 	@Mock
 	private IMdmSettings myMdmSettings;
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		ourLog.addAppender(myListAppender);
 	}
 
 	@AfterEach
-	public void afterEach(){
+	public void afterEach() {
 		myListAppender.stop();
 	}
 
@@ -50,15 +51,12 @@ public class MdmStorageInterceptorTest {
 		Patient updatedResource = new Patient();
 		RequestDetails requestDetails = new ServletRequestDetails();
 
-		myMdmStorageInterceptor.blockManualGoldenResourceManipulationOnUpdate(null, updatedResource, requestDetails, null);
+		myMdmStorageInterceptor.blockManualGoldenResourceManipulationOnUpdate(
+				null, updatedResource, requestDetails, null);
 
-		List<ILoggingEvent> warningLogs = myListAppender
-			.list
-			.stream()
-			.filter(event -> Level.WARN.equals(event.getLevel()))
-			.toList();
+		List<ILoggingEvent> warningLogs = myListAppender.list.stream()
+				.filter(event -> Level.WARN.equals(event.getLevel()))
+				.toList();
 		assertEquals(0, warningLogs.size());
-
 	}
-
 }

@@ -77,10 +77,8 @@ public class Batch2JobRunnerImplTest {
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(captor.capture());
-		assertTrue(captor.getValue().getMessage()
-			.contains("Invalid JobDefinitionId " + jobId));
-		verify(myJobCoordinator, never())
-			.startInstance(any(JobInstanceStartRequest.class));
+		assertTrue(captor.getValue().getMessage().contains("Invalid JobDefinitionId " + jobId));
+		verify(myJobCoordinator, never()).startInstance(any(JobInstanceStartRequest.class));
 	}
 
 	@Test
@@ -89,18 +87,16 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startNewJob(new SystemRequestDetails(), new Batch2BaseJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
+		myJobRunner.startNewJob(
+				new SystemRequestDetails(), new Batch2BaseJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(captor.capture());
 		String msg = captor.getValue().getMessage();
 		String expectedMsg = "Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT;
-		assertTrue(msg
-			.contains(expectedMsg),
-			msg + " != " + expectedMsg);
-		verify(myJobCoordinator, never())
-			.startInstance(any(JobInstanceStartRequest.class));
+		assertTrue(msg.contains(expectedMsg), msg + " != " + expectedMsg);
+		verify(myJobCoordinator, never()).startInstance(any(JobInstanceStartRequest.class));
 	}
 
 	@Test
@@ -112,7 +108,7 @@ public class Batch2JobRunnerImplTest {
 		// when
 		String jobInstanceId = "test_job_instance";
 		Date end = new Date();
-		Date start = new Date(end.getTime()-100);
+		Date start = new Date(end.getTime() - 100);
 		JobInstance mockJobInstance = createMockJobInstance(parameters, jobInstanceId, start, end);
 		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
 
@@ -121,8 +117,7 @@ public class Batch2JobRunnerImplTest {
 
 		// verify
 		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
-		verify(myJobCoordinator)
-			.startInstance(isNotNull(), captor.capture());
+		verify(myJobCoordinator).startInstance(isNotNull(), captor.capture());
 		JobInstanceStartRequest val = captor.getValue();
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());
@@ -134,7 +129,8 @@ public class Batch2JobRunnerImplTest {
 		verifyBatch2JobInfo(jobInfo, jobInstanceId, start, end, null);
 	}
 
-	private JobInstance createMockJobInstance(BulkExportParameters theParameters, String theJobInstanceId, Date start, Date end) {
+	private JobInstance createMockJobInstance(
+			BulkExportParameters theParameters, String theJobInstanceId, Date start, Date end) {
 		JobInstance mockJobInstance = new JobInstance();
 		mockJobInstance.setInstanceId(theJobInstanceId);
 		mockJobInstance.setStatus(StatusEnum.COMPLETED);
@@ -147,8 +143,9 @@ public class Batch2JobRunnerImplTest {
 		return mockJobInstance;
 	}
 
-	private void verifyBatch2JobInfo(Batch2JobInfo jobInfo, String theJobId, Date start, Date end, RequestPartitionId partitionId) {
-		assertEquals(jobInfo.getJobId(), theJobId );
+	private void verifyBatch2JobInfo(
+			Batch2JobInfo jobInfo, String theJobId, Date start, Date end, RequestPartitionId partitionId) {
+		assertEquals(jobInfo.getJobId(), theJobId);
 		assertFalse(jobInfo.isCancelled());
 		assertEquals(jobInfo.getStartTime(), start);
 		assertEquals(jobInfo.getEndTime(), end);
@@ -172,7 +169,7 @@ public class Batch2JobRunnerImplTest {
 		// when
 		String jobInstanceId = "test_job_instance";
 		Date end = new Date();
-		Date start = new Date(end.getTime()-100);
+		Date start = new Date(end.getTime() - 100);
 		JobInstance mockJobInstance = createMockJobInstance(parameters, jobInstanceId, start, end);
 		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
 
@@ -181,8 +178,7 @@ public class Batch2JobRunnerImplTest {
 
 		// verify
 		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
-		verify(myJobCoordinator)
-			.startInstance(isNotNull(), captor.capture());
+		verify(myJobCoordinator).startInstance(isNotNull(), captor.capture());
 		JobInstanceStartRequest val = captor.getValue();
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());
@@ -192,7 +188,5 @@ public class Batch2JobRunnerImplTest {
 
 		Batch2JobInfo jobInfo = myJobRunner.getJobInfo(jobInstanceId);
 		verifyBatch2JobInfo(jobInfo, jobInstanceId, start, end, partitionId);
-
 	}
-
 }

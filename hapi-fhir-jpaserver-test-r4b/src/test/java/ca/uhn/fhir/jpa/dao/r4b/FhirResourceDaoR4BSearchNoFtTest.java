@@ -72,29 +72,24 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 		runInTransaction(() -> {
 			logAllTokenIndexes();
 
-			List<String> params = myResourceIndexedSearchParamTokenDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getParamName().contains("."))
-				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
-				.toList();
-			assertThat(params.toString(), params, containsInAnyOrder(
-				"composition.patient.identifier http://foo|bar"
-			));
+			List<String> params = myResourceIndexedSearchParamTokenDao.findAll().stream()
+					.filter(t -> t.getParamName().contains("."))
+					.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+					.toList();
+			assertThat(params.toString(), params, containsInAnyOrder("composition.patient.identifier http://foo|bar"));
 		});
 
 		// Test 2
 		IBundleProvider outcome;
 
-		SearchParameterMap map = SearchParameterMap
-			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		SearchParameterMap map = SearchParameterMap.newSynchronous(
+				"composition.patient.identifier", new TokenParam("http://foo", "bar"));
 		outcome = myBundleDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 
-		map = SearchParameterMap
-			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		map = SearchParameterMap.newSynchronous(
+				"composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
 		outcome = myBundleDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 	}
-
 }

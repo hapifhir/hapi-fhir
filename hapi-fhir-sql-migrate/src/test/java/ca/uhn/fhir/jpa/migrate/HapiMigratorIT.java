@@ -16,13 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -44,9 +44,9 @@ class HapiMigratorIT {
 		migrator.createMigrationTableIfRequired();
 		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
 		assertTrue(count > 0);
-		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
+		HapiMigrationDao migrationDao =
+				new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
 		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
-
 	}
 
 	@AfterEach
@@ -88,14 +88,16 @@ class HapiMigratorIT {
 		LatchMigrationTask latchMigrationTask3 = new LatchMigrationTask("third repeat", "1");
 		HapiMigrator migrator2 = buildMigrator(latchMigrationTask2, latchMigrationTask3);
 
-		// We only expect the first migration to run because the second one will block on the lock and by the time the lock
+		// We only expect the first migration to run because the second one will block on the lock and by the time the
+		// lock
 		// is released, the first one will have already run so there will be nothing to do
 
 		latchMigrationTask1.setExpectedCount(1);
 		Future<MigrationResult> future1 = executor.submit(() -> migrator1.migrate());
 		latchMigrationTask1.awaitExpected();
 
-		// We wait until the first migration is in the middle of executing the migration task before we start the second one
+		// We wait until the first migration is in the middle of executing the migration task before we start the second
+		// one
 
 		// Release the first migration task so it can complete and unblock to allow the second one to start
 
@@ -145,9 +147,7 @@ class HapiMigratorIT {
 			assertEquals(0, countLockRecords());
 			assertThat(result.succeededTasks, hasSize(0));
 		}
-
 	}
-
 
 	@Test
 	void test_oldLockFails_block() {
@@ -160,7 +160,10 @@ class HapiMigratorIT {
 			migrator.migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description, e.getMessage());
+			assertEquals(
+					"HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = "
+							+ description,
+					e.getMessage());
 		}
 	}
 
@@ -177,9 +180,11 @@ class HapiMigratorIT {
 		assertThat(result.succeededTasks, hasSize(1));
 	}
 
-
 	private int countLockRecords() {
-		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationLock.LOCK_PID, Integer.class);
+		return myJdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = "
+						+ HapiMigrationLock.LOCK_PID,
+				Integer.class);
 	}
 
 	@Nonnull
@@ -196,7 +201,6 @@ class HapiMigratorIT {
 		return new HapiMigrator(MIGRATION_TABLENAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
 	}
 
-
 	private class LatchMigrationTask extends BaseTask implements IPointcutLatch {
 		private final PointcutLatch myLatch;
 		private final PointcutLatch myWaitLatch;
@@ -209,9 +213,7 @@ class HapiMigratorIT {
 		}
 
 		@Override
-		public void validate() {
-
-		}
+		public void validate() {}
 
 		@Override
 		protected void doExecute() {
@@ -219,7 +221,8 @@ class HapiMigratorIT {
 				myLatch.call(this);
 				List<HookParams> hookParams = myWaitLatch.awaitExpected();
 				ourLog.info("Latch released with parameter {}", PointcutLatch.getLatchInvocationParameter(hookParams));
-				// We sleep a bit to ensure the other thread has a chance to try to get the lock.  We don't have a hook there, so sleep instead
+				// We sleep a bit to ensure the other thread has a chance to try to get the lock.  We don't have a hook
+				// there, so sleep instead
 				// Maybe we can await on a log message?
 				Thread.sleep(200);
 				ourLog.info("Completing execution of {}", PointcutLatch.getLatchInvocationParameter(hookParams));
@@ -229,14 +232,10 @@ class HapiMigratorIT {
 		}
 
 		@Override
-		protected void generateHashCode(HashCodeBuilder theBuilder) {
-
-		}
+		protected void generateHashCode(HashCodeBuilder theBuilder) {}
 
 		@Override
-		protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-
-		}
+		protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {}
 
 		@Override
 		public void clear() {

@@ -67,9 +67,7 @@ public class ServerFeaturesDstu2Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<Conformance"));
-
 	}
-
 
 	/**
 	 * See #313
@@ -131,7 +129,7 @@ public class ServerFeaturesDstu2Test {
 		assertEquals(null, status.getEntity());
 
 		ourLog.info(status.toString());
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
 	}
@@ -158,9 +156,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("PRP2"));
-
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -184,13 +180,13 @@ public class ServerFeaturesDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -207,7 +203,6 @@ public class ServerFeaturesDstu2Test {
 			p1.addIdentifier().setValue("PRP1");
 			return p1;
 		}
-
 	}
 
 	public static class DummyPatientResourceProvider2 implements IResourceProvider {
@@ -224,7 +219,5 @@ public class ServerFeaturesDstu2Test {
 			p1.addIdentifier().setValue("PRP2");
 			return p1;
 		}
-
 	}
-
 }

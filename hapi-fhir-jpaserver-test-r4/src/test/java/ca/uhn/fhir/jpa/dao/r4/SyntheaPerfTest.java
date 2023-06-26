@@ -56,10 +56,13 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	public static final int CONCURRENCY = 4;
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
@@ -83,19 +86,22 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 		assertTrue(myStorageSettings.isMassIngestionMode());
 
-		List<Path> files = Files
-			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
-			.filter(t -> t.toString().endsWith(".json"))
-			.collect(Collectors.toList());
+		List<Path> files = Files.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
+				.filter(t -> t.toString().endsWith(".json"))
+				.collect(Collectors.toList());
 
-		List<Path> meta = files.stream().filter(t -> t.toString().contains("hospital") || t.toString().contains("practitioner")).collect(Collectors.toList());
+		List<Path> meta = files.stream()
+				.filter(t -> t.toString().contains("hospital") || t.toString().contains("practitioner"))
+				.collect(Collectors.toList());
 		new Uploader(meta);
 
-		List<Path> nonMeta = files.stream().filter(t -> !t.toString().contains("hospital") && !t.toString().contains("practitioner")).collect(Collectors.toList());
+		List<Path> nonMeta = files.stream()
+				.filter(t -> !t.toString().contains("hospital") && !t.toString().contains("practitioner"))
+				.collect(Collectors.toList());
 
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+		//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+		//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+		//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
 		new Uploader(Collections.singletonList(nonMeta.remove(0)));
 
 		new Uploader(nonMeta);
@@ -154,12 +160,13 @@ public class SyntheaPerfTest extends BaseJpaTest {
 				next.get();
 			}
 
-			ourLog.info("Finished uploading {} files with {} resources in {} - {} files/sec - {} res/sec",
-				myFilesCounter.get(),
-				myResourcesCounter.get(),
-				mySw,
-				mySw.formatThroughput(myFilesCounter.get(), TimeUnit.SECONDS),
-				mySw.formatThroughput(myResourcesCounter.get(), TimeUnit.SECONDS));
+			ourLog.info(
+					"Finished uploading {} files with {} resources in {} - {} files/sec - {} res/sec",
+					myFilesCounter.get(),
+					myResourcesCounter.get(),
+					mySw,
+					mySw.formatThroughput(myFilesCounter.get(), TimeUnit.SECONDS),
+					mySw.formatThroughput(myResourcesCounter.get(), TimeUnit.SECONDS));
 		}
 
 		private class MyTask implements Runnable {
@@ -179,24 +186,25 @@ public class SyntheaPerfTest extends BaseJpaTest {
 					throw new InternalErrorException(e);
 				}
 
-//				int resCount = 0;
-//				int totalBytes = 0;
-//				int maxBytes = 0;
-//				int countOver5kb = 0;
-//				for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
-//					int size = myCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(nextEntry.getResource()).length();
-//					resCount++;
-//					totalBytes += size;
-//					if (size > maxBytes) {
-//						maxBytes = size;
-//					}
-//					if (size > 10000) {
-//						countOver5kb++;
-//					}
-//				}
-//				int avg = (int) ((double)totalBytes / (double) resCount);
-//				ourLog.info("Resources {} Average {} Max {} CountOver {}", resCount, FileUtil.formatFileSize(avg), FileUtil.formatFileSize(maxBytes), countOver5kb);
-
+				//				int resCount = 0;
+				//				int totalBytes = 0;
+				//				int maxBytes = 0;
+				//				int countOver5kb = 0;
+				//				for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
+				//					int size =
+				// myCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(nextEntry.getResource()).length();
+				//					resCount++;
+				//					totalBytes += size;
+				//					if (size > maxBytes) {
+				//						maxBytes = size;
+				//					}
+				//					if (size > 10000) {
+				//						countOver5kb++;
+				//					}
+				//				}
+				//				int avg = (int) ((double)totalBytes / (double) resCount);
+				//				ourLog.info("Resources {} Average {} Max {} CountOver {}", resCount, FileUtil.formatFileSize(avg),
+				// FileUtil.formatFileSize(maxBytes), countOver5kb);
 
 				mySystemDao.transaction(new SystemRequestDetails(myInterceptorRegistry), bundle);
 
@@ -204,18 +212,15 @@ public class SyntheaPerfTest extends BaseJpaTest {
 				myResourcesCounter.addAndGet(bundle.getEntry().size());
 
 				if (fileCount % 10 == 0) {
-					ourLog.info("Have uploaded {} files with {} resources in {} - {} files/sec - {} res/sec",
-						myFilesCounter.get(),
-						myResourcesCounter.get(),
-						mySw,
-						mySw.formatThroughput(myFilesCounter.get(), TimeUnit.SECONDS),
-						mySw.formatThroughput(myResourcesCounter.get(), TimeUnit.SECONDS));
+					ourLog.info(
+							"Have uploaded {} files with {} resources in {} - {} files/sec - {} res/sec",
+							myFilesCounter.get(),
+							myResourcesCounter.get(),
+							mySw,
+							mySw.formatThroughput(myFilesCounter.get(), TimeUnit.SECONDS),
+							mySw.formatThroughput(myResourcesCounter.get(), TimeUnit.SECONDS));
 				}
 			}
 		}
-
-
 	}
-
-
 }

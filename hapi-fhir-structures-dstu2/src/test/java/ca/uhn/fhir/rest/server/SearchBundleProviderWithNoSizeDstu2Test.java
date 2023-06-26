@@ -27,7 +27,8 @@ public class SearchBundleProviderWithNoSizeDstu2Test {
 	private static TokenAndListParam ourIdentifiers;
 	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu2Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeDstu2Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -37,7 +38,6 @@ public class SearchBundleProviderWithNoSizeDstu2Test {
 		ourLastMethod = null;
 		ourIdentifiers = null;
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -60,13 +60,13 @@ public class SearchBundleProviderWithNoSizeDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -81,7 +81,5 @@ public class SearchBundleProviderWithNoSizeDstu2Test {
 			ourLastMethod = "searchAll";
 			return ourLastBundleProvider;
 		}
-
 	}
-
 }

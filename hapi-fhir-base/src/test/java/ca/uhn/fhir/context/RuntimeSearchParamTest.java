@@ -4,7 +4,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RuntimeSearchParamTest {
 
@@ -31,10 +30,8 @@ public class RuntimeSearchParamTest {
 		"true, Patient, (( DomainResource. identifier))",
 		"true, Patient, (( DomainResource . identifier))",
 		"true, Patient, ((  DomainResource.identifier))",
-
 		"true, Patient, identifier",
 		"true, Patient, (identifier)",
-
 		"false, Patient, Observation.identifier",
 		"false, Patient, PatientFoo.identifier",
 		"false, Patient, Patient",
@@ -47,5 +44,4 @@ public class RuntimeSearchParamTest {
 	public void getPathMatchesResourceType(boolean theShouldMatch, String theResourceType, String thePath) {
 		assertEquals(theShouldMatch, RuntimeSearchParam.pathMatchesResourceType(theResourceType, thePath));
 	}
-
 }

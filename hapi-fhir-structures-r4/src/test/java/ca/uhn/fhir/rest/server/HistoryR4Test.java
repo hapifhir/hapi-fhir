@@ -96,9 +96,12 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
-
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/ih1/_history/1",
+					bundle.getEntry().get(0).getResource().getId());
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/ih1/_history/2",
+					bundle.getEntry().get(1).getResource().getId());
 		}
 	}
 
@@ -115,9 +118,12 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
-
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/h1/_history/1",
+					bundle.getEntry().get(0).getResource().getId());
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/h1/_history/2",
+					bundle.getEntry().get(1).getResource().getId());
 		}
 	}
 
@@ -158,9 +164,12 @@ public class HistoryR4Test {
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals(2, bundle.getEntry().size());
-			assertEquals("http://localhost:" + ourPort + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
-			assertEquals("http://localhost:" + ourPort + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
-
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/th1/_history/1",
+					bundle.getEntry().get(0).getResource().getId());
+			assertEquals(
+					"http://localhost:" + ourPort + "/Patient/th1/_history/2",
+					bundle.getEntry().get(1).getResource().getId());
 		}
 	}
 
@@ -204,23 +213,24 @@ public class HistoryR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPlainProvider {
 
 		@History
-		public List<Patient> history(@Since InstantType theSince,
-											  @Since IPrimitiveType<Date> theSince2,
-											  @Since IPrimitiveType<String> theSince3,
-											  @Since IPrimitiveType theSince4,
-											  @At DateRangeParam theAt) {
+		public List<Patient> history(
+				@Since InstantType theSince,
+				@Since IPrimitiveType<Date> theSince2,
+				@Since IPrimitiveType<String> theSince3,
+				@Since IPrimitiveType theSince4,
+				@At DateRangeParam theAt) {
 			ourLastAt = theAt;
 			ourLastSince = theSince;
 			ourLastSince2 = theSince2;
@@ -241,7 +251,6 @@ public class HistoryR4Test {
 
 			return retVal;
 		}
-
 	}
 
 	public static class DummyResourceProvider implements IResourceProvider {
@@ -292,7 +301,5 @@ public class HistoryR4Test {
 			retVal.setId(theId);
 			return retVal;
 		}
-
 	}
-
 }

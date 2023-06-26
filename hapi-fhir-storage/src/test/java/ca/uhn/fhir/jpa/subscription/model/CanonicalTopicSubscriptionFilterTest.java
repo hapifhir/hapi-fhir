@@ -19,10 +19,22 @@ class CanonicalTopicSubscriptionFilterTest {
 		String queryUrl = "/Patient?family=smith&given=stevie,elisha&family=carpenter";
 		List<CanonicalTopicSubscriptionFilter> filters = CanonicalTopicSubscriptionFilter.fromQueryUrl(queryUrl);
 		assertThat(filters, hasSize(3));
-		assertTrue(filters.stream().map(CanonicalTopicSubscriptionFilter::getComparator).allMatch(Enumerations.SearchComparator.EQ::equals));
-		assertTrue(filters.stream().map(CanonicalTopicSubscriptionFilter::getModifier).allMatch(Objects::isNull));
-		assertTrue(filters.stream().map(CanonicalTopicSubscriptionFilter::getResourceType).allMatch("Patient"::equals));
-		assertThat(filters.stream().map(CanonicalTopicSubscriptionFilter::getFilterParameter).collect(Collectors.toSet()), Matchers.containsInAnyOrder("family", "given"));
-		assertThat(filters.stream().map(CanonicalTopicSubscriptionFilter::getValue).collect(Collectors.toSet()), Matchers.containsInAnyOrder("smith", "stevie,elisha", "carpenter"));
+		assertTrue(filters.stream()
+				.map(CanonicalTopicSubscriptionFilter::getComparator)
+				.allMatch(Enumerations.SearchComparator.EQ::equals));
+		assertTrue(filters.stream()
+				.map(CanonicalTopicSubscriptionFilter::getModifier)
+				.allMatch(Objects::isNull));
+		assertTrue(filters.stream()
+				.map(CanonicalTopicSubscriptionFilter::getResourceType)
+				.allMatch("Patient"::equals));
+		assertThat(
+				filters.stream()
+						.map(CanonicalTopicSubscriptionFilter::getFilterParameter)
+						.collect(Collectors.toSet()),
+				Matchers.containsInAnyOrder("family", "given"));
+		assertThat(
+				filters.stream().map(CanonicalTopicSubscriptionFilter::getValue).collect(Collectors.toSet()),
+				Matchers.containsInAnyOrder("smith", "stevie,elisha", "carpenter"));
 	}
 }

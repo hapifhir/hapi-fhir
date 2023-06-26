@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -100,9 +99,8 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 	private MdmRulesJson buildOldStyleEidRules() {
 		MdmRulesJson mdmRulesJson = super.buildActiveBirthdateIdRules();
 		mdmRulesJson.setEnterpriseEIDSystems(Collections.emptyMap());
-		//This sets the new-style eid resource type to `*`
+		// This sets the new-style eid resource type to `*`
 		mdmRulesJson.setEnterpriseEIDSystem(PATIENT_EID_FOR_TEST);
 		return mdmRulesJson;
 	}
-
 }

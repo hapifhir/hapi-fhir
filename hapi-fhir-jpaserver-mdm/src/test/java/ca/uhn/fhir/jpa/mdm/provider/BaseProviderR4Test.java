@@ -21,25 +21,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
+
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
+
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+
 	@Autowired
 	protected MdmSettings myMdmSettings;
+
 	@Autowired
 	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
+
 	@Autowired
 	private MdmControllerHelper myMdmHelper;
+
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
+
 	@Autowired
 	MessageHelper myMessageHelper;
 
@@ -56,7 +63,8 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
+		myMdmProvider =
+				new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
@@ -74,7 +82,8 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	}
 
 	protected void clearMdmLinks(String theResourceName) {
-		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
+		Parameters result =
+				(Parameters) myMdmProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
 		myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 	}
 

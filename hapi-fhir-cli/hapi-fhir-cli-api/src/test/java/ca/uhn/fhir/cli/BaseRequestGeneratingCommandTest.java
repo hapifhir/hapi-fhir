@@ -26,8 +26,7 @@ class BaseRequestGeneratingCommandTest {
 
 	private final BaseRequestGeneratingCommand tested = new BaseRequestGeneratingCommandChild();
 
-	private final List<BaseRequestGeneratingCommandOptions> allOptions =
-		Arrays.asList(values());
+	private final List<BaseRequestGeneratingCommandOptions> allOptions = Arrays.asList(values());
 
 	@Test
 	void getOptions() {
@@ -43,8 +42,9 @@ class BaseRequestGeneratingCommandTest {
 	}
 
 	@ParameterizedTest(name = "Excluding {0}")
-	@EnumSource(value = BaseRequestGeneratingCommandOptions.class,
-		names = {"VERSION", "BASE_URL", "BASIC_AUTH", "VERBOSE_LOGGING", "HEADER_PASSTHROUGH", "TLS_AUTH"})
+	@EnumSource(
+			value = BaseRequestGeneratingCommandOptions.class,
+			names = {"VERSION", "BASE_URL", "BASIC_AUTH", "VERBOSE_LOGGING", "HEADER_PASSTHROUGH", "TLS_AUTH"})
 	void getSomeOptionsExcludingOne(BaseRequestGeneratingCommandOptions excludedOption) {
 		Collection<BaseRequestGeneratingCommandOptions> excludeOptions = Collections.singleton(excludedOption);
 
@@ -60,16 +60,15 @@ class BaseRequestGeneratingCommandTest {
 		}
 
 		Arrays.stream(values())
-			.filter(excludeOptValue -> ! excludeOptValue.equals(excludedOption))
-			.forEach(excludeOptValue -> {
-				assertTrue(options.hasShortOption(getOptionForExcludedOption(excludeOptValue)));
-				// BASIC_AUTH option carries additional BEARER_TOKEN option
-				if (excludedOption != BASIC_AUTH) {
-					assertTrue(options.hasLongOption(BaseCommand.BEARER_TOKEN_PARAM_LONGOPT));
-				}
-			});
+				.filter(excludeOptValue -> !excludeOptValue.equals(excludedOption))
+				.forEach(excludeOptValue -> {
+					assertTrue(options.hasShortOption(getOptionForExcludedOption(excludeOptValue)));
+					// BASIC_AUTH option carries additional BEARER_TOKEN option
+					if (excludedOption != BASIC_AUTH) {
+						assertTrue(options.hasLongOption(BaseCommand.BEARER_TOKEN_PARAM_LONGOPT));
+					}
+				});
 	}
-
 
 	private String getOptionForExcludedOption(BaseRequestGeneratingCommandOptions excludeOption) {
 		switch (excludeOption) {
@@ -106,16 +105,19 @@ class BaseRequestGeneratingCommandTest {
 		assertTrue(options.hasShortOption(BaseCommand.TLS_AUTH_PARAM_NAME));
 	}
 
-
 	private static class BaseRequestGeneratingCommandChild extends BaseRequestGeneratingCommand {
 
 		@Override
-		public String getCommandDescription() { return null; }
+		public String getCommandDescription() {
+			return null;
+		}
 
 		@Override
-		public String getCommandName() { return null; }
+		public String getCommandName() {
+			return null;
+		}
 
 		@Override
-		public void run(CommandLine theCommandLine) { }
+		public void run(CommandLine theCommandLine) {}
 	}
 }

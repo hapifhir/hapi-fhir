@@ -22,5 +22,4 @@ public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
 	public void setFoo(Enumeration<AddressUse> theFoo) {
 		myFoo = theFoo;
 	}
-
 }

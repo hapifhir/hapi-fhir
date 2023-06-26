@@ -34,19 +34,32 @@ import static org.mockito.Mockito.when;
 class HSearchSortHelperImplTest {
 
 	@InjectMocks
-	@Spy private HSearchSortHelperImpl tested;
+	@Spy
+	private HSearchSortHelperImpl tested;
 
-	@Mock private ISearchParamRegistry mockSearchParamRegistry;
-	@Mock private ResourceSearchParams mockResourceSearchParams;
-	@Mock private RuntimeSearchParam mockRuntimeSearchParam;
+	@Mock
+	private ISearchParamRegistry mockSearchParamRegistry;
 
-	@Mock private SearchSortFactory mockSearchSortFactory;
-	@Mock private CompositeSortComponentsStep mockCompositeSortComponentsStep;
-	@Mock private FieldSortOptionsStep mockFieldSortOptionsStep;
-	@Mock private SortFinalStep mockSortFinalStep;
-	@Mock private FieldSortMissingValueBehaviorStep mockFieldSortMissingValueBehaviorStep;
+	@Mock
+	private ResourceSearchParams mockResourceSearchParams;
 
+	@Mock
+	private RuntimeSearchParam mockRuntimeSearchParam;
 
+	@Mock
+	private SearchSortFactory mockSearchSortFactory;
+
+	@Mock
+	private CompositeSortComponentsStep mockCompositeSortComponentsStep;
+
+	@Mock
+	private FieldSortOptionsStep mockFieldSortOptionsStep;
+
+	@Mock
+	private SortFinalStep mockSortFinalStep;
+
+	@Mock
+	private FieldSortMissingValueBehaviorStep mockFieldSortMissingValueBehaviorStep;
 
 	/**
 	 * Validates gets from map theParamType and replaces '*' in name by theParamName
@@ -58,7 +71,9 @@ class HSearchSortHelperImplTest {
 
 		List<String> sortPropertyList = tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
 
-		assertThat(sortPropertyList, Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
+		assertThat(
+				sortPropertyList,
+				Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
 	}
 
 	/**
@@ -86,7 +101,9 @@ class HSearchSortHelperImplTest {
 		sortSpec.setParamName("_tag");
 		sortSpec.setOrder(SortOrderEnum.DESC);
 		doReturn(Optional.of(RestSearchParameterTypeEnum.TOKEN)).when(tested).getParamType("Observation", "_tag");
-		doReturn(List.of("aaa._tag.bbb.ccc", "ddd._tag.eee.fff")).when(tested).getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "_tag");
+		doReturn(List.of("aaa._tag.bbb.ccc", "ddd._tag.eee.fff"))
+				.when(tested)
+				.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "_tag");
 		when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
 		when(mockSearchSortFactory.field("aaa._tag.bbb.ccc")).thenReturn(mockFieldSortOptionsStep);
 		when(mockSearchSortFactory.field("ddd._tag.eee.fff")).thenReturn(mockFieldSortOptionsStep);
@@ -114,8 +131,12 @@ class HSearchSortHelperImplTest {
 		sortSpec.setChain(sortSpec2);
 
 		when(mockSearchSortFactory.composite()).thenReturn(mockCompositeSortComponentsStep);
-		doReturn(Optional.of(mockSortFinalStep)).when(tested).getSortClause(mockSearchSortFactory, sortSpec, "Observation");
-		doReturn(Optional.of(mockSortFinalStep)).when(tested).getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
+		doReturn(Optional.of(mockSortFinalStep))
+				.when(tested)
+				.getSortClause(mockSearchSortFactory, sortSpec, "Observation");
+		doReturn(Optional.of(mockSortFinalStep))
+				.when(tested)
+				.getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
 
 		SortFinalStep sortFinalStep = tested.getSortClauses(mockSearchSortFactory, sortSpec, "Observation");
 
@@ -123,7 +144,5 @@ class HSearchSortHelperImplTest {
 		verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec, "Observation");
 		verify(tested, times(1)).getSortClause(mockSearchSortFactory, sortSpec2, "Observation");
 		verify(mockCompositeSortComponentsStep, times(2)).add(mockSortFinalStep);
-
 	}
-
 }

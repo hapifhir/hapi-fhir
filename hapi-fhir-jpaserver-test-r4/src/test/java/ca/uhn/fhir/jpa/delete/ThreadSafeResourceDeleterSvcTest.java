@@ -24,13 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,6 +42,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 	private final MyCascadeDeleteInterceptor myCascadeDeleteInterceptor = new MyCascadeDeleteInterceptor();
 
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
+
 	@Autowired
 	IInterceptorBroadcaster myIdInterceptorBroadcaster;
 
@@ -54,10 +54,10 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 	private final TransactionDetails myTransactionDetails = new TransactionDetails();
 
-
 	@BeforeEach
 	void beforeEach() {
-		myThreadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService);
+		myThreadSafeResourceDeleterSvc =
+				new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService);
 	}
 
 	@AfterEach
@@ -85,7 +85,10 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
 
 		assertEquals(2, countPatients());
-		myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
+		myHapiTransactionService.execute(
+				mySrd,
+				myTransactionDetails,
+				status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
@@ -108,8 +111,10 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		ourLog.info("Start background delete");
-		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+		final Future<Integer> future = executorService.submit(() -> myHapiTransactionService.execute(
+				mySrd,
+				myTransactionDetails,
+				status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
@@ -144,12 +149,13 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
-		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+		final Future<Integer> future = executorService.submit(() -> myHapiTransactionService.execute(
+				mySrd,
+				myTransactionDetails,
+				status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// Patient 1 We are paused after reading the version but before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
-
 
 		// Unpause and delete the first patient
 		myCascadeDeleteInterceptor.setExpectedCount(1);
@@ -221,7 +227,9 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		}
 
 		@Hook(Pointcut.STORAGE_CASCADE_DELETE)
-		public void cascadeDelete(RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource) throws InterruptedException {
+		public void cascadeDelete(
+				RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource)
+				throws InterruptedException {
 			myCalledLatch.call(theResource);
 			ourLog.info("Waiting to proceed with delete");
 			List<HookParams> hookParams = myWaitLatch.awaitExpected();

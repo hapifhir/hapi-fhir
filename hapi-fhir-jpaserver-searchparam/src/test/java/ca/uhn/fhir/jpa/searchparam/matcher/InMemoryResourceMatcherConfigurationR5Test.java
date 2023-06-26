@@ -5,8 +5,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -47,37 +47,61 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
 	@MockBean
 	private SearchParamExtractorService mySearchParamExtractorService;
+
 	@MockBean
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
 	private Observation myObservation;
 	private ResourceIndexedSearchParams mySearchParams;
 
 	@BeforeEach
 	public void before() {
-		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(
+				null,
+				null,
+				null,
+				null,
+				"Observation.code",
+				RestSearchParameterTypeEnum.TOKEN,
+				null,
+				null,
+				RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+				null,
+				null,
+				null);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
 
 		myObservation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode(OBSERVATION_CODE)
-			.setSystem(OBSERVATION_CODE_SYSTEM).setDisplay(OBSERVATION_CODE_DISPLAY);
+		codeableConcept
+				.addCoding()
+				.setCode(OBSERVATION_CODE)
+				.setSystem(OBSERVATION_CODE_SYSTEM)
+				.setDisplay(OBSERVATION_CODE_DISPLAY);
 		myObservation.setCode(codeableConcept);
 		mySearchParams = extractSearchParams(myObservation);
 	}
 
 	@Test
-	@Order(1)	// We have to do this one first, because the InMemoryResourceMatcher is stateful regarding whether it has been initialized yet
+	@Order(1) // We have to do this one first, because the InMemoryResourceMatcher is stateful regarding whether it has
+	// been initialized yet
 	public void testValidationSupportInitializedOnlyOnce() {
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
 		when(applicationContext.getBean(IValidationSupport.class)).thenThrow(new ConfigurationException());
 		myInMemoryResourceMatcher.myApplicationContext = applicationContext;
 
 		for (int i = 0; i < 10; i++) {
-			myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+			myInMemoryResourceMatcher.match(
+					"code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI,
+					myObservation,
+					mySearchParams,
+					newRequest());
 		}
 
 		verify(applicationContext, times(1)).getBean(IValidationSupport.class);
@@ -86,10 +110,14 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@Test
 	@Order(2)
 	/*
-		Tests the case where the :in qualifier can not be supported because no bean implementing IValidationSupport was registered
-	 */
+	Tests the case where the :in qualifier can not be supported because no bean implementing IValidationSupport was registered
+	*/
 	public void testUnsupportedIn() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI,
+				myObservation,
+				mySearchParams,
+				newRequest());
 		assertFalse(result.supported());
 		assertEquals("Parameter: <code:in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
 	}
@@ -97,9 +125,14 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@Test
 	@Order(3)
 	public void testUnsupportedNotIn() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI,
+				myObservation,
+				mySearchParams,
+				newRequest());
 		assertFalse(result.supported());
-		assertEquals("Parameter: <code:not-in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+		assertEquals(
+				"Parameter: <code:not-in> Reason: Qualified parameter not supported", result.getUnsupportedReason());
 	}
 
 	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
@@ -110,7 +143,8 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 
 	private ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
 		Coding coding = theObservation.getCode().getCodingFirstRep();
-		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
+		return new ResourceIndexedSearchParamToken(
+				new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
 	}
 
 	@Configuration
@@ -131,9 +165,8 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		}
 
 		@Bean
-        StorageSettings storageSettings() {
+		StorageSettings storageSettings() {
 			return new StorageSettings();
 		}
 	}
-
 }

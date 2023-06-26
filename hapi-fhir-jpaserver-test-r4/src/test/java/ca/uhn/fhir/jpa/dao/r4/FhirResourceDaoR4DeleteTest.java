@@ -49,18 +49,21 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Table should be marked as deleted
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(id.getIdPartAsLong()).get();
+			ResourceTable resourceTable =
+					myResourceTableDao.findById(id.getIdPartAsLong()).get();
 			assertNotNull(resourceTable.getDeleted());
 		});
 
 		// Current version should be marked as deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1);
+			ResourceHistoryTable resourceTable =
+					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1);
 			assertNull(resourceTable.getDeleted());
 			assertNotNull(resourceTable.getPersistentId());
 		});
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable =
+					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -79,8 +82,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
-
-
 	}
 
 	@Test
@@ -114,25 +115,27 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		Bundle createTransaction = new Bundle();
 		createTransaction.setType(Bundle.BundleType.TRANSACTION);
 		createTransaction
-			.addEntry()
-			.setResource(org1)
-			.setFullUrl(org1.getId())
-			.getRequest()
-			.setMethod(Bundle.HTTPVerb.POST)
-			.setUrl("Organization");
+				.addEntry()
+				.setResource(org1)
+				.setFullUrl(org1.getId())
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Organization");
 		createTransaction
-			.addEntry()
-			.setResource(org2)
-			.setFullUrl(org2.getId())
-			.getRequest()
-			.setMethod(Bundle.HTTPVerb.POST)
-			.setUrl("Organization");
+				.addEntry()
+				.setResource(org2)
+				.setFullUrl(org2.getId())
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Organization");
 
 		Bundle createResponse = mySystemDao.transaction(mySrd, createTransaction);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createResponse));
 
-		IdType orgId1 = new IdType(createResponse.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
-		IdType orgId2 = new IdType(createResponse.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		IdType orgId1 =
+				new IdType(createResponse.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		IdType orgId2 =
+				new IdType(createResponse.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
 
 		// Nope, can't delete 'em!
 		try {
@@ -151,14 +154,16 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Now in a transaction
 		Bundle deleteTransaction = new Bundle();
 		deleteTransaction.setType(Bundle.BundleType.TRANSACTION);
-		deleteTransaction.addEntry()
-			.getRequest()
-			.setMethod(Bundle.HTTPVerb.DELETE)
-			.setUrl(orgId1.getValue());
-		deleteTransaction.addEntry()
-			.getRequest()
-			.setMethod(Bundle.HTTPVerb.DELETE)
-			.setUrl(orgId2.getValue());
+		deleteTransaction
+				.addEntry()
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.DELETE)
+				.setUrl(orgId1.getValue());
+		deleteTransaction
+				.addEntry()
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.DELETE)
+				.setUrl(orgId2.getValue());
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(deleteTransaction));
 		mySystemDao.transaction(mySrd, deleteTransaction);
 
@@ -175,8 +180,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
-
-
 	}
 
 	@Test
@@ -190,14 +193,16 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Table should be marked as deleted
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(id.getIdPartAsLong()).get();
+			ResourceTable resourceTable =
+					myResourceTableDao.findById(id.getIdPartAsLong()).get();
 			assertNotNull(resourceTable.getDeleted());
 		});
 
 		// Mark the current history version as not-deleted even though the actual resource
 		// table entry is marked deleted
 		runInTransaction(() -> {
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable =
+					myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
 			resourceTable.setDeleted(null);
 			myResourceHistoryTableDao.save(resourceTable);
 		});
@@ -217,7 +222,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
-
 	}
 
 	@Test
@@ -226,7 +230,9 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		String matchUrl = "identifier=20210427133226.4440+800";
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
-		IIdType firstObservationId = myObservationDao.create(obs, matchUrl, new SystemRequestDetails()).getId();
+		IIdType firstObservationId = myObservationDao
+				.create(obs, matchUrl, new SystemRequestDetails())
+				.getId();
 		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
 
 		// when

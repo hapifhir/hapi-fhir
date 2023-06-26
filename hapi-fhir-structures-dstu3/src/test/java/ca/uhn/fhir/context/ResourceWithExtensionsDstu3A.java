@@ -1,7 +1,7 @@
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.List;
@@ -149,9 +149,11 @@ public class ResourceWithExtensionsDstu3A extends DomainResource {
 		@Child(name = "bar11", type = DateType.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 		@Extension(url = "http://bar/#b1/1", definedLocally = true, isModifier = false)
 		private List<DateType> myBar11;
+
 		@Child(name = "bar12", type = DateType.class, order = 1, min = 0, max = Child.MAX_UNLIMITED)
 		@Extension(url = "http://bar/#b1/2", definedLocally = true, isModifier = false)
 		private List<Bar2> myBar12;
+
 		private IdType myId;
 
 		public Bar1() {
@@ -183,8 +185,6 @@ public class ResourceWithExtensionsDstu3A extends DomainResource {
 		public void setBar12(List<Bar2> theBar12) {
 			myBar12 = theBar12;
 		}
-
-
 	}
 
 	@Block(name = "Bar2")
@@ -208,7 +208,6 @@ public class ResourceWithExtensionsDstu3A extends DomainResource {
 			return false; // not implemented
 		}
 
-
 		public List<DateType> getBar121() {
 			return myBar121;
 		}
@@ -224,9 +223,5 @@ public class ResourceWithExtensionsDstu3A extends DomainResource {
 		public void setBar122(List<DateType> theBar122) {
 			myBar122 = theBar122;
 		}
-
-
 	}
-
-
 }

@@ -62,12 +62,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	Callable<String> myResource;
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 		myThreadGaterPointcutLatchInterceptor = new ThreadGaterPointcutLatch("gaterLatch");
 		myUserRequestRetryVersionConflictsInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 
 		// this pointcut is AFTER the match url has resolved, but before commit.
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatchInterceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatchInterceptor);
 		myInterceptorRegistry.registerInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 		myResourceConcurrentSubmitterSvc = new ResourceConcurrentSubmitterSvc();
 		myResource = buildResourceAndCreateCallable();
@@ -90,7 +91,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMultipleThreads_attemptingToCreatingTheSameResource_willCreateOnlyOneResource() throws InterruptedException, ExecutionException {
+	public void testMultipleThreads_attemptingToCreatingTheSameResource_willCreateOnlyOneResource()
+			throws InterruptedException, ExecutionException {
 		// given
 		final int numberOfThreadsAttemptingToCreateDuplicates = 2;
 		int expectedResourceCount = myResourceTableDao.findAll().size() + 1;
@@ -99,7 +101,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 		// when
 		// create a situation where multiple threads will try to create the same resource;
-		for (int i = 0; i < numberOfThreadsAttemptingToCreateDuplicates; i++){
+		for (int i = 0; i < numberOfThreadsAttemptingToCreateDuplicates; i++) {
 			myResourceConcurrentSubmitterSvc.submitResource(myResource);
 		}
 
@@ -109,28 +111,31 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// we get here only if latch.countdown has reach 0, ie, all executor threads have reached the pointcut
 		// so notify them all to allow execution to proceed.
 		myThreadGaterPointcutLatchInterceptor.doNotifyAll();
-		
+
 		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForThreadsCompletionAndReturnErrors();
 
 		// then
 		assertThat(errorList, hasSize(0));
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
 		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
-
 	}
 
 	@Test
-	public void testRemoveStaleEntries_withNonStaleAndStaleEntries_willOnlyDeleteStaleEntries(){
+	public void testRemoveStaleEntries_withNonStaleAndStaleEntries_willOnlyDeleteStaleEntries() {
 		// given
 		long tenMinutes = 10 * DateUtils.MILLIS_PER_HOUR;
 
 		Date tooOldBy10Minutes = cutOffTimeMinus(tenMinutes);
-		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", 1l).setCreatedTime(tooOldBy10Minutes);
-		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", 2l).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", 1l)
+				.setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", 2l)
+				.setCreatedTime(tooOldBy10Minutes);
 
 		Date tooNewBy10Minutes = cutOffTimePlus(tenMinutes);
-		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", 3l).setCreatedTime(tooNewBy10Minutes);
-		ResourceSearchUrlEntity tooNew2 =ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", 4l).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", 3l)
+				.setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlEntity tooNew2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", 4l)
+				.setCreatedTime(tooNewBy10Minutes);
 
 		myResourceSearchUrlDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
 
@@ -143,14 +148,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testRemoveStaleEntries_withNoEntries_willNotGenerateExceptions(){
+	public void testRemoveStaleEntries_withNoEntries_willNotGenerateExceptions() {
 
 		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
-
 	}
 
 	@Test
-	public void testMethodDeleteByResId_withEntries_willDeleteTheEntryIfExists(){
+	public void testMethodDeleteByResId_withEntries_willDeleteTheEntryIfExists() {
 
 		// given
 		long nonExistentResourceId = 99l;
@@ -166,12 +170,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// then
 		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
 		assertThat(resourcesPids, containsInAnyOrder(2l));
-
 	}
 
-	private List<Long> getStoredResourceSearchUrlEntitiesPids(){
+	private List<Long> getStoredResourceSearchUrlEntitiesPids() {
 		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
-		return remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
+		return remainingSearchUrlEntities.stream()
+				.map(ResourceSearchUrlEntity::getResourcePid)
+				.collect(Collectors.toList());
 	}
 
 	private Date cutOffTimePlus(long theAdjustment) {
@@ -186,7 +191,6 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	private Callable<String> buildResourceAndCreateCallable() {
 		return () -> {
-
 			Identifier identifier = new Identifier().setValue("20210427133226.444+0800");
 			Observation obs = new Observation().addIdentifier(identifier);
 
@@ -196,14 +200,14 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 			try {
 				ourLog.info("Creating resource");
-				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", requestDetails);
+				DaoMethodOutcome outcome =
+						myObservationDao.create(obs, "identifier=20210427133226.444+0800", requestDetails);
 			} catch (Throwable t) {
 				ourLog.info("create threw an exception {}", t.getMessage());
 				fail();
 			}
 			return null;
 		};
-		
 	}
 
 	/**
@@ -219,31 +223,31 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		}
 
 		@Override
-		public void invoke(IPointcut thePointcut, HookParams theArgs)  {
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
 			doInvoke(thePointcut, theArgs);
 		}
 
-		private synchronized void doInvoke(IPointcut thePointcut, HookParams theArgs){
+		private synchronized void doInvoke(IPointcut thePointcut, HookParams theArgs) {
 			super.invoke(thePointcut, theArgs);
 			try {
 				String threadName = Thread.currentThread().getName();
 				ourLog.info(String.format("I'm thread %s and i'll going to sleep", threadName));
-				wait(10*1000);
+				wait(10 * 1000);
 				ourLog.info(String.format("I'm thread %s and i'm waking up", threadName));
 			} catch (InterruptedException theE) {
 				throw new RuntimeException(theE);
 			}
 		}
 
-		public synchronized void doNotifyAll(){
+		public synchronized void doNotifyAll() {
 			notifyAll();
 		}
-
 	}
 
-	public static class ResourceConcurrentSubmitterSvc{
+	public static class ResourceConcurrentSubmitterSvc {
 		ExecutorService myPool;
 		List<Future<String>> myFutures = new ArrayList<>();
+
 		public List<String> waitForThreadsCompletionAndReturnErrors() throws ExecutionException, InterruptedException {
 
 			List<String> errorList = new ArrayList<>();
@@ -257,8 +261,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			return errorList;
 		}
 
-		private ExecutorService getExecutorServicePool(){
-			if(Objects.isNull(myPool)){
+		private ExecutorService getExecutorServicePool() {
+			if (Objects.isNull(myPool)) {
 				int maxThreadsUsed = TestR4Config.ourMaxThreads - 1;
 				myPool = Executors.newFixedThreadPool(Math.min(maxThreadsUsed, 5));
 			}
@@ -266,7 +270,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			return myPool;
 		}
 
-		public void shutDown(){
+		public void shutDown() {
 			getExecutorServicePool().shutdown();
 		}
 
@@ -275,5 +279,4 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			myFutures.add(future);
 		}
 	}
-
 }

@@ -68,35 +68,46 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {TestR4WithDelayConfig.class})
 public class CascadingDeleteInterceptorMultiThreadTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorMultiThreadTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(CascadingDeleteInterceptorMultiThreadTest.class);
 
 	@Autowired
 	private CascadingDeleteInterceptor myDeleteInterceptor;
+
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	protected ResourceProviderFactory myResourceProviders;
+
 	@Autowired
 	protected ApplicationContext myAppCtx;
+
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
+
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
+
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@Autowired
 	protected SearchParamRegistryImpl mySearchParamRegistry;
+
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+
 	@Autowired
 	DelayListener myDelayListener;
+
 	@Autowired
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
-
 
 	private static Server ourServer;
 	private static RestfulServer ourRestServer;
@@ -130,7 +141,10 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 			GenericWebApplicationContext ourWebApplicationContext = new GenericWebApplicationContext();
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
+			proxyHandler
+					.getServletContext()
+					.setAttribute(
+							WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
 
 			server.setHandler(proxyHandler);
 			JettyUtil.startServer(server);
@@ -152,7 +166,13 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@AfterEach
 	public void afterTest() throws IOException {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(
+				myStorageSettings,
+				mySystemDao,
+				myResourceReindexingSvc,
+				mySearchCoordinatorSvc,
+				mySearchParamRegistry,
+				myBulkDataScheduleHelper);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
@@ -161,7 +181,13 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		myHttpClient2.close();
 	}
 
-	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	protected static void purgeDatabase(
+			JpaStorageSettings theStorageSettings,
+			IFhirSystemDao<?, ?> theSystemDao,
+			IResourceReindexingSvc theResourceReindexingSvc,
+			ISearchCoordinatorSvc theSearchCoordinatorSvc,
+			ISearchParamRegistry theSearchParamRegistry,
+			IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
@@ -194,7 +220,6 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		theSearchParamRegistry.forceRefresh();
 	}
 
-
 	@AfterAll
 	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -205,12 +230,22 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		Practitioner prac = new Practitioner();
 		prac.setActive(true);
 		prac.setId("test-prac");
-		myPractitionerId = myClient.update().resource(prac).withId("Practitioner/test-prac").execute().getId().toUnqualifiedVersionless();
+		myPractitionerId = myClient.update()
+				.resource(prac)
+				.withId("Practitioner/test-prac")
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		Organization org = new Organization();
 		org.setActive(true);
 		org.setId("test-org");
-		myOrganizationId = myClient.update().resource(org).withId("Organization/test-org").execute().getId().toUnqualifiedVersionless();
+		myOrganizationId = myClient.update()
+				.resource(org)
+				.withId("Organization/test-org")
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.addParticipant().setIndividual(new Reference(myPractitionerId));
@@ -235,7 +270,6 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		enc.setServiceProvider(new Reference(myOrganizationId));
 		enc.setId("test-enc-4");
 		myClient.update().resource(enc).withId("Encounter/test-enc-4").execute();
-
 	}
 
 	@Test
@@ -275,14 +309,13 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 				results.add(next.get());
 			}
 			for (Boolean next : results) {
-				assert(next);
+				assert (next);
 			}
 		} catch (ExecutionException | InterruptedException theE) {
 			theE.printStackTrace();
 		} finally {
 			executor.shutdown();
 		}
-
 	}
 
 	@Test
@@ -319,14 +352,13 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 				results.add(next.get());
 			}
 			for (Boolean next : results) {
-				assert(next);
+				assert (next);
 			}
 		} catch (ExecutionException | InterruptedException theE) {
 			theE.printStackTrace();
 		} finally {
 			executor.shutdown();
 		}
-
 	}
 
 	@Test
@@ -363,7 +395,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 			results.add(future1.get());
 			results.add(future2.get());
 			for (Boolean next : results) {
-				assert(next);
+				assert (next);
 			}
 		} catch (ExecutionException | InterruptedException theE) {
 			theE.printStackTrace();
@@ -387,12 +419,12 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		} catch (IOException theE) {
 			theE.printStackTrace();
 		}
-		assert(deleteOrganizationSucceeded && deletePractitionerSucceeded);
-
+		assert (deleteOrganizationSucceeded && deletePractitionerSucceeded);
 	}
 
 	private CloseableHttpClient getHttpClient() {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(10);
 		connectionManager.setDefaultMaxPerRoute(10);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -400,21 +432,23 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		builder.setMaxConnPerRoute(99);
 
 		return builder.build();
-
 	}
 
 	private boolean deletePractitioner(CloseableHttpClient theCloseableHttpClient) throws IOException {
 		ourLog.info("Starting deletePractitioner");
-		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPractitionerId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPractitionerId.getValue() + "?"
+				+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
 			if (response.getStatusLine().getStatusCode() != 200) {
-				ourLog.error("Unexpected status on practitioner delete = " + response.getStatusLine().getStatusCode());
+				ourLog.error("Unexpected status on practitioner delete = "
+						+ response.getStatusLine().getStatusCode());
 				return false;
 			}
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
+			if (!deleteResponse.contains("Cascaded delete to ")
+					&& !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
 				ourLog.error("Unexpected response on practitioner delete = " + deleteResponse);
 				return false;
 			}
@@ -424,14 +458,20 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 		try {
 			ourLog.info("Reading {}", myPractitionerId);
-			myClient.read().resource(Practitioner.class).withId(myPractitionerId).execute();
+			myClient.read()
+					.resource(Practitioner.class)
+					.withId(myPractitionerId)
+					.execute();
 			fail();
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Practitioner resource gone as expected");
 		}
 		try {
 			ourLog.info("Searching for encounters after deleting Practitioner");
-			myClient.read().resource(Encounter.class).withId("Encounter/test-enc-3").execute();
+			myClient.read()
+					.resource(Encounter.class)
+					.withId("Encounter/test-enc-3")
+					.execute();
 			fail();
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Encounter resource gone as expected after Practitioner deleted");
@@ -441,17 +481,20 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	private boolean deleteOrganization(CloseableHttpClient theCloseableHttpClient) throws IOException {
 		ourLog.info("Starting deleteOrganization");
-		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myOrganizationId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myOrganizationId.getValue() + "?"
+				+ Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		ourLog.info("HttpDelete : {}", delete);
 		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
 			if (response.getStatusLine().getStatusCode() != 200) {
-				ourLog.error("Unexpected status on organization delete = " + response.getStatusLine().getStatusCode());
+				ourLog.error("Unexpected status on organization delete = "
+						+ response.getStatusLine().getStatusCode());
 				return false;
 			}
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
+			if (!deleteResponse.contains("Cascaded delete to ")
+					&& !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
 				ourLog.error("Unexpected response organization delete = " + deleteResponse);
 				return false;
 			}
@@ -461,19 +504,24 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 		try {
 			ourLog.info("Reading {}", myOrganizationId);
-			myClient.read().resource(Organization.class).withId(myOrganizationId).execute();
+			myClient.read()
+					.resource(Organization.class)
+					.withId(myOrganizationId)
+					.execute();
 			fail();
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Organization resource gone as expected");
 		}
 		try {
 			ourLog.info("Searching for encounters after deleting Organization");
-			myClient.read().resource(Encounter.class).withId("Encounter/test-enc-3").execute();
+			myClient.read()
+					.resource(Encounter.class)
+					.withId("Encounter/test-enc-3")
+					.execute();
 			fail();
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Encounter resource gone as expected after Organization deleted");
 		}
 		return true;
 	}
-
 }

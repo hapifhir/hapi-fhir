@@ -19,6 +19,7 @@ public class SimplePreResourceShowDetailsTest {
 
 	@Mock
 	private IBaseResource myResource1;
+
 	@Mock
 	private IBaseResource myResource2;
 
@@ -51,7 +52,6 @@ public class SimplePreResourceShowDetailsTest {
 		assertSame(myResource2, details.iterator().next());
 	}
 
-
 	@Test
 	public void testGetResources() {
 		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(List.of(myResource1, myResource2));
@@ -61,5 +61,4 @@ public class SimplePreResourceShowDetailsTest {
 
 		assertThat(details.getAllResources(), contains(myResource2));
 	}
-
 }

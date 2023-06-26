@@ -78,6 +78,7 @@ public class SubscriptionLoaderTest {
 
 	@Mock
 	private IFhirResourceDao mySubscriptionDao;
+
 	@InjectMocks
 	private SubscriptionLoader mySubscriptionLoader;
 
@@ -91,11 +92,8 @@ public class SubscriptionLoaderTest {
 		ourLogger.addAppender(myAppender);
 
 		when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-			anyString(),
-			any(SearchParameterMap.class),
-			any(SubscriptionLoader.class),
-			anyLong()
-		)).thenReturn(mySubscriptionCache);
+						anyString(), any(SearchParameterMap.class), any(SubscriptionLoader.class), anyLong()))
+				.thenReturn(mySubscriptionCache);
 
 		when(myDaoRegistry.getResourceDaoOrNull("Subscription")).thenReturn(mySubscriptionDao);
 
@@ -125,39 +123,31 @@ public class SubscriptionLoaderTest {
 		ourLogger.setLevel(Level.ERROR);
 
 		// when
-		when(myDaoRegistry.getResourceDao("Subscription"))
-				.thenReturn(mySubscriptionDao);
-		when(myDaoRegistry.isResourceTypeSupported("Subscription"))
-				.thenReturn(true);
+		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
+		when(myDaoRegistry.isResourceTypeSupported("Subscription")).thenReturn(true);
 		when(mySubscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
-			.thenReturn(getSubscriptionList(
-				Collections.singletonList(subscription)
-			));
+				.thenReturn(getSubscriptionList(Collections.singletonList(subscription)));
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);
 
 		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
-			.thenReturn(true);
+				.thenReturn(true);
 
-		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
-		
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any()))
+				.thenReturn(SubscriptionConstants.REQUESTED_STATUS);
+
 		// test
 		mySubscriptionLoader.syncDatabaseToCache();
 
 		// verify
-		verify(mySubscriptionDao)
-			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
+		verify(mySubscriptionDao).search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
 		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(eventCaptor.capture());
-		String actual = "Subscription "
-			+ subscription.getIdElement().getIdPart()
-			+ " could not be activated.";
+		String actual = "Subscription " + subscription.getIdElement().getIdPart() + " could not be activated.";
 		String msg = eventCaptor.getValue().getMessage();
-		Assertions.assertTrue(msg
-			.contains(actual),
-			String.format("Expected %s, actual %s", msg, actual));
+		Assertions.assertTrue(msg.contains(actual), String.format("Expected %s, actual %s", msg, actual));
 		Assertions.assertTrue(msg.contains(subscription.getError()));
 	}
 }

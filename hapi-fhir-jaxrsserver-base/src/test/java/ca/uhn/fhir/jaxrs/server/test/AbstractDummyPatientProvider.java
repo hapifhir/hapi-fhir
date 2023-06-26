@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Patient;
 import java.util.List;
 
 /**
- * A dummy patient provider exposing no methods 
+ * A dummy patient provider exposing no methods
  */
 public abstract class AbstractDummyPatientProvider extends AbstractJaxRsResourceProvider<Patient> {
 
@@ -20,7 +20,6 @@ public abstract class AbstractDummyPatientProvider extends AbstractJaxRsResource
 
 	@Override
 	public abstract String getBaseForServer();
-
 
 	@Search
 	public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name) {

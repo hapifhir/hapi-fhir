@@ -32,16 +32,22 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCacheTest.class);
+
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
+
 	@Autowired
 	private INpmPackageDao myPackageDao;
+
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
+
 	@Autowired
 	private IInterceptorService myInterceptorService;
+
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
@@ -79,7 +85,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor =
+				new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
@@ -104,7 +111,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 
 			logAllResources();
 
-			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
+			PackageDeleteOutcomeJson deleteOutcomeJson =
+					myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 			assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
 		} finally {
@@ -118,12 +126,15 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor =
+				new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
-			try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
-				myPackageCacheManager.addPackageToCache("hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
+			try (InputStream stream =
+					ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
+				myPackageCacheManager.addPackageToCache(
+						"hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
 			}
 
 			NpmPackage pkg;
@@ -141,7 +152,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 				assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
 			}
 
-			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
+			PackageDeleteOutcomeJson deleteOutcomeJson =
+					myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 			assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
 		} finally {
@@ -153,7 +165,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Test
 	public void testSavePackageWithLongDescription() throws IOException {
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
-			myPackageCacheManager.addPackageToCache("hl7.fhir.us.davinci-cdex", "0.2.0", stream, "hl7.fhir.us.davinci-cdex");
+			myPackageCacheManager.addPackageToCache(
+					"hl7.fhir.us.davinci-cdex", "0.2.0", stream, "hl7.fhir.us.davinci-cdex");
 		}
 
 		NpmPackage pkg;
@@ -161,9 +174,19 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.us.davinci-cdex", null);
 		assertEquals("0.2.0", pkg.version());
 
-		runInTransaction(()-> {
-			assertEquals("This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...", myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").get().getDescription());
-			assertEquals("This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...", myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0").get().getDescription());
+		runInTransaction(() -> {
+			assertEquals(
+					"This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...",
+					myPackageDao
+							.findByPackageId("hl7.fhir.us.davinci-cdex")
+							.get()
+							.getDescription());
+			assertEquals(
+					"This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...",
+					myPackageVersionDao
+							.findByPackageIdAndVersion("hl7.fhir.us.davinci-cdex", "0.2.0")
+							.get()
+							.getDescription());
 		});
 	}
 
@@ -173,16 +196,20 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		String packageNameUppercase = packageNameAllLowercase.toUpperCase(Locale.ROOT);
 		InputStream stream = JpaPackageCacheTest.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
 
-		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
-		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that
+		// no error is thrown
+		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(
+				packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 	}
 
 	@Test
 	public void testNonMatchingPackageIdsCauseError() throws IOException {
 		String incorrectPackageName = "hl7.fhir.us.davinci-nonsense";
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz")) {
-			assertThrows(InvalidRequestException.class, () -> myPackageCacheManager.addPackageToCache(incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
+			assertThrows(
+					InvalidRequestException.class,
+					() -> myPackageCacheManager.addPackageToCache(
+							incorrectPackageName, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));
 		}
 	}
-
 }

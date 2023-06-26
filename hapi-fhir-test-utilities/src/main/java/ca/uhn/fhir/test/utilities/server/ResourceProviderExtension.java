@@ -52,5 +52,4 @@ public class ResourceProviderExtension<T> implements BeforeEachCallback, AfterEa
 	public T getProvider() {
 		return myProvider;
 	}
-
 }

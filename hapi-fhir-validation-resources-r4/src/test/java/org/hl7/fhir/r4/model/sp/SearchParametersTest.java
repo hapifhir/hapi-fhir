@@ -14,5 +14,4 @@ public class SearchParametersTest {
 		String resource = ClasspathUtil.loadResource("org/hl7/fhir/r4/model/sp/search-parameters.json");
 		assertThat(resource, not(containsString("\"draft\"")));
 	}
-
 }

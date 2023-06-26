@@ -20,12 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CapabilityStatementCustomizationR4Test {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
+
 	@Order(0)
 	@RegisterExtension
 	protected RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
+
 	@Order(1)
 	@RegisterExtension
-	protected HashMapResourceProviderExtension<Patient> myProviderPatientExtension = new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
+	protected HashMapResourceProviderExtension<Patient> myProviderPatientExtension =
+			new HashMapResourceProviderExtension<>(myServerExtension, Patient.class);
 
 	@AfterEach
 	public void afterEach() {
@@ -45,21 +48,21 @@ public class CapabilityStatementCustomizationR4Test {
 				CapabilityStatement cs = (CapabilityStatement) theCapabilityStatement;
 
 				// Customize the CapabilityStatement as desired
-				cs
-					.getSoftware()
-					.setName("Acme FHIR Server")
-					.setVersion("1.0")
-					.setReleaseDateElement(new DateTimeType("2021-02-06"));
-
+				cs.getSoftware()
+						.setName("Acme FHIR Server")
+						.setVersion("1.0")
+						.setReleaseDateElement(new DateTimeType("2021-02-06"));
 			}
-
 		}
 
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
-		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement received = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
 		assertEquals("Acme FHIR Server", received.getSoftware().getName());
-
 	}
 
 	@Test
@@ -74,22 +77,22 @@ public class CapabilityStatementCustomizationR4Test {
 				CapabilityStatement cs = new CapabilityStatement();
 
 				// Customize the CapabilityStatement as desired
-				cs
-					.getSoftware()
-					.setName("Acme FHIR Server")
-					.setVersion("1.0")
-					.setReleaseDateElement(new DateTimeType("2021-02-06"));
+				cs.getSoftware()
+						.setName("Acme FHIR Server")
+						.setVersion("1.0")
+						.setReleaseDateElement(new DateTimeType("2021-02-06"));
 
 				return cs;
 			}
-
 		}
 
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
-		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement received = myServerExtension
+				.getFhirClient()
+				.capabilities()
+				.ofType(CapabilityStatement.class)
+				.execute();
 		assertEquals("Acme FHIR Server", received.getSoftware().getName());
-
 	}
-
 }

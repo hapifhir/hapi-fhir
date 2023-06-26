@@ -56,7 +56,6 @@ public class FhirPathEngineR4Test {
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
 		assertEquals(1, value.size());
 
-
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
 		assertEquals(1, value.size());
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
@@ -68,17 +67,19 @@ public class FhirPathEngineR4Test {
 
 		Observation o1 = new Observation();
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code1").setValue(200));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code1").setValue(200));
 		o1.addComponent()
-			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
-			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
+				.setCode(new CodeableConcept()
+						.addCoding(new Coding().setSystem("http://foo").setCode("code2")))
+				.setValue(
+						new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
 		List<Base> outcome = ourCtx.newFhirPath().evaluate(o1, path, Base.class);
 		assertEquals(2, outcome.size());
-
 	}
-
 
 	@Test
 	public void testAs() {
@@ -104,7 +105,7 @@ public class FhirPathEngineR4Test {
 		assertEquals(1, value.size());
 		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
-	
+
 	@Test
 	public void testExistsWithNoValue() throws FHIRException {
 		Patient patient = new Patient();
@@ -130,7 +131,6 @@ public class FhirPathEngineR4Test {
 		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15T10:00:00", true);
 	}
 
-
 	private void testEquivalent(Patient thePatient, String theExpression, boolean theExpected) throws FHIRException {
 		List<Base> eval = ourCtx.newFhirPath().evaluate(thePatient, theExpression, Base.class);
 		assertEquals(theExpected, ((BooleanType) eval.get(0)).getValue());
@@ -151,19 +151,22 @@ public class FhirPathEngineR4Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily("TEST");
-		String result = ourCtx.newFhirPath().evaluate(p, exp, IPrimitiveType.class).get(0).getValueAsString();
+		String result = ourCtx.newFhirPath()
+				.evaluate(p, exp, IPrimitiveType.class)
+				.get(0)
+				.getValueAsString();
 		assertEquals("TEST.", result);
 	}
 
 	@Test
 	public void testStringCompare() throws FHIRException {
-		String exp = "element.first().path.startsWith(%resource.type().name) and element.tail().all(path.startsWith(%resource.type().name & '.'))";
+		String exp =
+				"element.first().path.startsWith(%resource.type().name) and element.tail().all(path.startsWith(%resource.type().name & '.'))";
 
 		StructureDefinition sd = new StructureDefinition();
 		StructureDefinition.StructureDefinitionDifferentialComponent diff = sd.getDifferential();
 
 		diff.addElement().setPath("Patient.name");
-
 
 		Patient p = new Patient();
 		p.addName().setFamily("TEST");
@@ -176,16 +179,17 @@ public class FhirPathEngineR4Test {
 	public void testQuestionnaireResponseExpression() {
 
 		QuestionnaireResponse qr = new QuestionnaireResponse();
-		QuestionnaireResponse.QuestionnaireResponseItemComponent parent = qr.addItem().setLinkId("PARENT");
-		QuestionnaireResponse.QuestionnaireResponseItemComponent child = parent.addItem().setLinkId("CHILD");
+		QuestionnaireResponse.QuestionnaireResponseItemComponent parent =
+				qr.addItem().setLinkId("PARENT");
+		QuestionnaireResponse.QuestionnaireResponseItemComponent child =
+				parent.addItem().setLinkId("CHILD");
 		child.addAnswer().setValue(new DateTimeType("2019-01-01"));
 
-		String path = "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(FHIR.dateTime)";
+		String path =
+				"QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(FHIR.dateTime)";
 		List<Base> answer = ourCtx.newFhirPath().evaluate(qr, path, Base.class);
 		assertEquals("2019-01-01", ((DateTimeType) answer.get(0)).getValueAsString());
-
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
@@ -196,5 +200,4 @@ public class FhirPathEngineR4Test {
 	public static void beforeClass() {
 		ourEngine = new FHIRPathEngine(new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport()));
 	}
-
 }

@@ -23,12 +23,12 @@ public class JpaSearchParamCacheTest {
 	private TestableJpaSearchParamCache myJpaSearchParamCache;
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 		myJpaSearchParamCache = new TestableJpaSearchParamCache();
 	}
 
 	@Test
-	public void testGetAllActiveComboParams(){
+	public void testGetAllActiveComboParams() {
 		RuntimeSearchParam unique1 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam unique2 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam nonUnique1 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
@@ -41,31 +41,33 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetUniqueActiveComboParams(){
+	public void testGetUniqueActiveComboParams() {
 		RuntimeSearchParam unique1 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam unique2 = createSearchParam(ComboSearchParamType.UNIQUE);
 		RuntimeSearchParam nonUnique = createSearchParam(ComboSearchParamType.NON_UNIQUE);
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique));
 
-		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
+		List<RuntimeSearchParam> result =
+				myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
 		assertEquals(2, result.size());
 		assertTrue(result.containsAll(List.of(unique1, unique2)));
 	}
 
 	@Test
-	public void testGetNonUniqueActiveComboParams(){
+	public void testGetNonUniqueActiveComboParams() {
 		RuntimeSearchParam nonUnique1 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
 		RuntimeSearchParam nonUnique2 = createSearchParam(ComboSearchParamType.NON_UNIQUE);
 		RuntimeSearchParam unique = createSearchParam(ComboSearchParamType.UNIQUE);
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(nonUnique1, nonUnique2, unique));
 
-		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
+		List<RuntimeSearchParam> result =
+				myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
 		assertEquals(2, result.size());
 		assertTrue(result.containsAll(List.of(nonUnique1, nonUnique2)));
 	}
 
 	@Test
-	public void testGetActiveComboParamByIdPresent(){
+	public void testGetActiveComboParamByIdPresent() {
 		IIdType id1 = new IdType(1);
 		RuntimeSearchParam sp1 = createSearchParam(id1, ComboSearchParamType.NON_UNIQUE);
 
@@ -80,7 +82,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	@Test
-	public void testGetActiveComboParamByIdAbsent(){
+	public void testGetActiveComboParamByIdAbsent() {
 		IIdType id1 = new IdType(1);
 		RuntimeSearchParam sp1 = createSearchParam(id1, ComboSearchParamType.NON_UNIQUE);
 
@@ -92,11 +94,11 @@ public class JpaSearchParamCacheTest {
 		assertTrue(found.isEmpty());
 	}
 
-	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType){
+	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType) {
 		return createSearchParam(null, theType);
 	}
 
-	private RuntimeSearchParam createSearchParam(IIdType theId, ComboSearchParamType theType){
+	private RuntimeSearchParam createSearchParam(IIdType theId, ComboSearchParamType theType) {
 		RuntimeSearchParam sp = mock(RuntimeSearchParam.class);
 		when(sp.getId()).thenReturn(theId);
 		when(sp.getComboSearchParamType()).thenReturn(theType);
@@ -110,7 +112,7 @@ public class JpaSearchParamCacheTest {
 	}
 
 	private class TestableJpaSearchParamCache extends JpaSearchParamCache {
-		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams){
+		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams) {
 			myActiveComboSearchParams = theActiveComboSearchParams;
 		}
 	}

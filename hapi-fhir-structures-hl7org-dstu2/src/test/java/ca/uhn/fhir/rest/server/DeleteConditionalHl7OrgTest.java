@@ -36,9 +36,7 @@ public class DeleteConditionalHl7OrgTest {
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Server ourServer;
 	private static IdType ourLastIdParam;
-	
-	
-	
+
 	@BeforeEach
 	public void before() {
 		ourLastConditionalUrl = null;
@@ -55,12 +53,11 @@ public class DeleteConditionalHl7OrgTest {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
-		
+
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
 	}
 
-	
 	@Test
 	public void testUpdateWithoutConditionalUrl() throws Exception {
 		Patient patient = new Patient();
@@ -71,7 +68,7 @@ public class DeleteConditionalHl7OrgTest {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(204, status.getStatusLine().getStatusCode());
-		
+
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
 	}
@@ -80,8 +77,7 @@ public class DeleteConditionalHl7OrgTest {
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 	}
-		
-	
+
 	@BeforeAll
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -95,15 +91,15 @@ public class DeleteConditionalHl7OrgTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-	
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -111,14 +107,11 @@ public class DeleteConditionalHl7OrgTest {
 			return Patient.class;
 		}
 
-		
 		@Delete()
 		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdType theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
 			return new MethodOutcome(new IdType("Patient/001/_history/002"));
 		}
-
 	}
-
 }

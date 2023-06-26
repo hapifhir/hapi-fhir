@@ -49,7 +49,6 @@ public class BaseResourceReferenceDtTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@BeforeEach
 	public void before() {
 		ourCtx = FhirContext.forDstu2();
@@ -66,9 +65,13 @@ public class BaseResourceReferenceDtTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] {
+			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
+		});
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -85,9 +88,13 @@ public class BaseResourceReferenceDtTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT") });
+		when(myHttpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] {
+			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
+		});
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
@@ -107,9 +114,12 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://domain2.example.com/base/Patient/123",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
-		assertEquals("http://domain2.example.com/base/Patient/123", response.getId().getValue());
+		assertEquals(
+				"http://domain2.example.com/base/Patient/123", response.getId().getValue());
 	}
 
 	@Test
@@ -127,21 +137,30 @@ public class BaseResourceReferenceDtTest {
 			new ResourceReferenceDt("123").loadResource(client);
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123", e.getMessage());
+			assertEquals(
+					Msg.code(1906)
+							+ "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123",
+					e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("Patient/123").loadResource(client);
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123", e.getMessage());
+			assertEquals(
+					Msg.code(1906)
+							+ "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123",
+					e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1684) + "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(
+					Msg.code(1684)
+							+ "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")",
+					e.getMessage());
 		}
 
 		try {
@@ -149,9 +168,11 @@ public class BaseResourceReferenceDtTest {
 			fail();
 		} catch (DataFormatException e) {
 			e.printStackTrace();
-			assertEquals(Msg.code(1684) + "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(
+					Msg.code(1684)
+							+ "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")",
+					e.getMessage());
 		}
-	
 	}
 
 	@Test
@@ -169,7 +190,7 @@ public class BaseResourceReferenceDtTest {
 		assertEquals(0, capt.getAllValues().size());
 		assertSame(pat, response);
 	}
-	
+
 	@Test
 	public void testLoadResourceFromAnnotationClientXml() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = fixtureXml();
@@ -181,7 +202,9 @@ public class BaseResourceReferenceDtTest {
 		Patient response = (Patient) ref.loadResource(client);
 
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
-		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://domain2.example.com/base/Patient/123",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -194,7 +217,9 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://domain2.example.com/base/Patient/123",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
@@ -208,11 +233,11 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(
+				"http://domain2.example.com/base/Patient/123",
+				capt.getAllValues().get(0).getURI().toASCIIString());
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
-	public interface IClientType extends IRestfulClient {
-
-	}
+	public interface IClientType extends IRestfulClient {}
 }

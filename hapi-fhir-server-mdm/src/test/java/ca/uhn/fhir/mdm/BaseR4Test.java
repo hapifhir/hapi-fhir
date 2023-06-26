@@ -32,11 +32,7 @@ public abstract class BaseR4Test {
 	@BeforeEach
 	public void before() {
 		myMdmSettings = mock(IMdmSettings.class);
-		myIMatcherFactory = new MdmMatcherFactory(
-			ourFhirContext,
-			myMdmSettings,
-			new NicknameSvc()
-		);
+		myIMatcherFactory = new MdmMatcherFactory(ourFhirContext, myMdmSettings, new NicknameSvc());
 	}
 
 	protected Patient buildJohn() {
@@ -54,17 +50,24 @@ public abstract class BaseR4Test {
 	}
 
 	protected MdmResourceMatcherSvc buildMatcher(MdmRulesJson theMdmRulesJson) {
-		return new MdmResourceMatcherSvc(ourFhirContext,
-			myIMatcherFactory,
-			new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson)
-		);
+		return new MdmResourceMatcherSvc(
+				ourFhirContext,
+				myIMatcherFactory,
+				new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever))
+						.setMdmRules(theMdmRulesJson));
 	}
 
 	protected void assertMatch(MdmMatchResultEnum theExpectedMatchEnum, MdmMatchOutcome theMatchResult) {
 		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 
-	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
+	protected void assertMatchResult(
+			MdmMatchResultEnum theExpectedMatchEnum,
+			long theExpectedVector,
+			double theExpectedScore,
+			boolean theExpectedNewGoldenResource,
+			boolean theExpectedEidMatch,
+			MdmMatchOutcome theMatchResult) {
 		assertEquals(theExpectedScore, theMatchResult.getScore(), 0.001);
 		assertEquals(theExpectedVector, theMatchResult.getVector());
 		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());

@@ -1,11 +1,11 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,7 +28,8 @@ public class SnapshotGeneratorR4Test {
 
 	@Test
 	public void testGenerateSnapshot() throws IOException {
-		StructureDefinition differential = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+		StructureDefinition differential =
+				loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
@@ -37,16 +38,16 @@ public class SnapshotGeneratorR4Test {
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(
+				new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
 		assertEquals(54, snapshot.getSnapshot().getElement().size());
 	}
 
-
-
-	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
+	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName)
+			throws IOException {
 		InputStream stream = SnapshotGeneratorR4Test.class.getResourceAsStream(resourceName);
 		if (stream == null) {
 			fail("Unable to load resource: " + resourceName);
@@ -55,5 +56,4 @@ public class SnapshotGeneratorR4Test {
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}
-
 }

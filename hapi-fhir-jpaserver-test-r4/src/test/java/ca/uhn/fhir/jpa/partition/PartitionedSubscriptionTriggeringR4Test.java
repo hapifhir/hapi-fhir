@@ -30,16 +30,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import javax.servlet.ServletException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
+public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
 	@Autowired
@@ -57,11 +57,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	protected int myPartitionId;
 	protected int myPartitionId2;
 
-
 	@BeforeEach
 	public void beforeEach() throws ServletException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
+		myPartitionSettings.setIncludePartitionInSearchHashes(
+				new PartitionSettings().isIncludePartitionInSearchHashes());
 
 		myStorageSettings.setUniqueIndexesEnabled(true);
 
@@ -88,7 +88,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public void afterUnregisterRestHookListener() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(
+				new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
@@ -99,7 +100,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
+		mySrdInterceptorService.unregisterInterceptorsIf(
+				t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 
 		super.afterUnregisterRestHookListener();
 	}
@@ -112,7 +114,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		Assertions.assertEquals(
+				mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -126,7 +129,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
 		BaseSubscriptionsR4Test.ourObservationProvider.waitForUpdateCount(1);
 
-		Assertions.assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
+		Assertions.assertEquals(
+				Constants.CT_FHIR_JSON_NEW,
+				BaseSubscriptionsR4Test.ourRestfulServer
+						.getRequestContentTypes()
+						.get(0));
 	}
 
 	@Test
@@ -137,7 +144,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Patient?active=true";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		Assertions.assertEquals(
+				mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -145,7 +153,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+		myDaoRegistry
+				.getResourceDao("Patient")
+				.create(
+						patient,
+						new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
 
 		// Should see 0 subscription notification
 		waitForQueueToDrain();
@@ -156,7 +168,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
 			fail();
 		} catch (ConditionTimeoutException e) {
-			Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+			Assertions.assertEquals(
+					0,
+					BaseSubscriptionsR4Test.ourRestfulServer
+							.getRequestContentTypes()
+							.size());
 		}
 	}
 
@@ -167,14 +183,17 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Create the resource first
-		DaoMethodOutcome observationOutcome = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd);
+		DaoMethodOutcome observationOutcome =
+				myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd);
 
 		Observation observation = (Observation) observationOutcome.getResource();
 
 		// Create the subscription now
-		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
+		DaoMethodOutcome subscriptionOutcome =
+				myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
 
-		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+		Assertions.assertEquals(
+				mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 
@@ -183,8 +202,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		ArrayList<IPrimitiveType<String>> resourceIdList = new ArrayList<>();
 		resourceIdList.add(observation.getIdElement());
 
-
-		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement());
+		Parameters resultParameters = (Parameters)
+				mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement());
 
 		waitForQueueToDrain();
 		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());

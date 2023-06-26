@@ -33,8 +33,7 @@ import java.net.URL;
 
 public class HtmlUtil {
 
-	private HtmlUtil() {
-	}
+	private HtmlUtil() {}
 
 	public static HtmlPage parseAsHtml(String theHtml) throws IOException {
 		return parseAsHtml(theHtml, new URL("http://foo"));

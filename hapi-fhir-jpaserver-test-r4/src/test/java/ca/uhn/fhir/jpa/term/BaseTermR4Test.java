@@ -17,8 +17,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import javax.annotation.Nonnull;
 
 public abstract class BaseTermR4Test extends BaseJpaR4Test {
 
@@ -50,7 +50,8 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
 		return runInTransaction(() -> {
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+			ResourceTable table =
+					myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 
 			TermCodeSystemVersion cs = new TermCodeSystemVersion();
 			cs.setResource(table);
@@ -78,10 +79,10 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			childAAB.addPropertyString("propA", "valueAAB");
 			childAAB.addPropertyString("propB", "foo");
 			childAAB.addDesignation()
-				.setUseSystem("D1S")
-				.setUseCode("D1C")
-				.setUseDisplay("D1D")
-				.setValue("D1V");
+					.setUseSystem("D1S")
+					.setUseCode("D1C")
+					.setUseDisplay("D1D")
+					.setValue("D1V");
 			childAA.addChild(childAAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 
 			TermConcept childAB = new TermConcept(cs, "childAB");
@@ -90,7 +91,8 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			TermConcept parentB = new TermConcept(cs, "ParentB");
 			cs.getConcepts().add(parentB);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(
+					JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 			return id;
 		});
@@ -118,7 +120,8 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 	}
 
 	void loadAndPersistCodeSystemWithDesignations(HttpVerb theVerb) throws IOException {
-		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
+		CodeSystem codeSystem =
+				loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
 		codeSystem.setId("CodeSystem/cs");
 		persistCodeSystem(codeSystem, theVerb);
 	}
@@ -130,7 +133,10 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalCsId = myCodeSystemDao
+								.create(theCodeSystem, mySrd)
+								.getId()
+								.toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -138,14 +144,20 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao.update(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalCsId = myCodeSystemDao
+								.update(theCodeSystem, mySrd)
+								.getId()
+								.toUnqualifiedVersionless();
 					}
 				});
 				break;
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalCsIdOnResourceTable = (Long) myCodeSystemDao.readEntity(myExtensionalCsId, null).getPersistentId().getId();
+		myExtensionalCsIdOnResourceTable = (Long) myCodeSystemDao
+				.readEntity(myExtensionalCsId, null)
+				.getPersistentId()
+				.getId();
 	}
 
 	void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
@@ -167,7 +179,8 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalVsId =
+								myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
@@ -175,14 +188,17 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+						myExtensionalVsId =
+								myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
 				break;
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao
+				.readEntity(myExtensionalVsId, null)
+				.getPersistentId()
+				.getId();
 	}
-
 }

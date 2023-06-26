@@ -24,8 +24,10 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 	@Mock
 	IJobPersistence myJobPersistence;
+
 	@Mock
 	JobDefinitionRegistry myJobDefinitionRegistry;
+
 	JobQuerySvc mySvc;
 
 	@BeforeEach
@@ -49,10 +51,11 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		JobInstance outcome = mySvc.fetchInstance(INSTANCE_ID);
 		ourLog.info("Job instance: {}", outcome);
 		ourLog.info("Parameters: {}", outcome.getParameters());
-		assertEquals(PARAM_1_VALUE, outcome.getParameters(TestJobParameters.class).getParam1());
-		assertEquals(PARAM_2_VALUE, outcome.getParameters(TestJobParameters.class).getParam2());
+		assertEquals(
+				PARAM_1_VALUE, outcome.getParameters(TestJobParameters.class).getParam1());
+		assertEquals(
+				PARAM_2_VALUE, outcome.getParameters(TestJobParameters.class).getParam2());
 		assertNull(outcome.getParameters(TestJobParameters.class).getPassword());
-
 	}
 
 	@Test
@@ -71,7 +74,5 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		// Verify
 
 		assertEquals(1, outcome.size());
-
 	}
-
 }

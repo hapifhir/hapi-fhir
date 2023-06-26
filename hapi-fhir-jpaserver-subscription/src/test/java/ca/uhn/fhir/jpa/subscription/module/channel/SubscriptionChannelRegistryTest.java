@@ -25,15 +25,18 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class SubscriptionChannelRegistryTest {
 	private static final String TEST_CHANNEL_NAME = "TEST_CHANNEL";
+
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@MockBean
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+
 	@MockBean
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+
 	@MockBean
-    StorageSettings myStorageSettings;
+	StorageSettings myStorageSettings;
 
 	@Test
 	public void testAddAddRemoveRemove() {
@@ -44,7 +47,8 @@ public class SubscriptionChannelRegistryTest {
 		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
-		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
+		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any()))
+				.thenReturn(mock(IChannelProducer.class));
 
 		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);

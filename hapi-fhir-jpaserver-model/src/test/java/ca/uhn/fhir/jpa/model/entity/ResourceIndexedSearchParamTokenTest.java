@@ -10,7 +10,8 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token =
+				new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 		token.calculateHashes();
 
@@ -22,7 +23,8 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctionsWithOverlapNames() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token =
+				new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 		token.calculateHashes();
 
@@ -34,12 +36,10 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testEquals() {
-		ResourceIndexedSearchParamToken val1 = new ResourceIndexedSearchParamToken()
-			.setValue("AAA");
+		ResourceIndexedSearchParamToken val1 = new ResourceIndexedSearchParamToken().setValue("AAA");
 		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
-		ResourceIndexedSearchParamToken val2 = new ResourceIndexedSearchParamToken()
-			.setValue("AAA");
+		ResourceIndexedSearchParamToken val2 = new ResourceIndexedSearchParamToken().setValue("AAA");
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
 		assertEquals(val1, val1);
@@ -47,5 +47,4 @@ public class ResourceIndexedSearchParamTokenTest {
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
 	}
-
 }

@@ -17,14 +17,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,71 +46,55 @@ public class ClientHeadersR4Test {
 		ourMethod = null;
 	}
 
-
 	@Test
 	public void testReadXml() {
-		myClient
-			.read()
-			.resource("Patient")
-			.withId(123L)
-			.encodedXml()
-			.execute();
+		myClient.read().resource("Patient").withId(123L).encodedXml().execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(
+				"application/fhir+xml;q=1.0, application/xml+fhir;q=0.9",
+				ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
 		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
 	@Test
 	public void testReadXmlNoParam() {
 		myClient.setFormatParamStyle(RequestFormatParamStyleEnum.NONE);
-		myClient
-			.read()
-			.resource("Patient")
-			.withId(123L)
-			.encodedXml()
-			.execute();
+		myClient.read().resource("Patient").withId(123L).encodedXml().execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(
+				"application/fhir+xml;q=1.0, application/xml+fhir;q=0.9",
+				ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
 		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
 	public void testReadJson() {
-		myClient
-			.read()
-			.resource("Patient")
-			.withId(123L)
-			.encodedJson()
-			.execute();
+		myClient.read().resource("Patient").withId(123L).encodedJson().execute();
 
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(
+				"application/fhir+json;q=1.0, application/json+fhir;q=0.9",
+				ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
 		assertEquals("json", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
 	@Test
 	public void testReadJsonNoParam() {
 		myClient.setFormatParamStyle(RequestFormatParamStyleEnum.NONE);
-		myClient
-			.read()
-			.resource("Patient")
-			.withId(123L)
-			.encodedJson()
-			.execute();
+		myClient.read().resource("Patient").withId(123L).encodedJson().execute();
 
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(
+				"application/fhir+json;q=1.0, application/json+fhir;q=0.9",
+				ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
 		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
 	public void testReadXmlDisable() {
-		myClient
-			.read()
-			.resource("Patient")
-			.withId(123L)
-			.encodedXml()
-			.execute();
+		myClient.read().resource("Patient").withId(123L).encodedXml().execute();
 
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(
+				"application/fhir+xml;q=1.0, application/xml+fhir;q=0.9",
+				ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
 		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
 	}
 
@@ -124,7 +108,9 @@ public class ClientHeadersR4Test {
 
 		assertNotNull(resp);
 		assertEquals(1, ourHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
+		assertEquals(
+				"application/fhir+json; charset=UTF-8",
+				ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
 	}
 
 	@BeforeEach
@@ -160,14 +146,12 @@ public class ClientHeadersR4Test {
 				resp.getWriter().append("{\"resourceType\":\"Patient\"}");
 				resp.getWriter().close();
 			}
-
 		}
-
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-        JettyUtil.closeServer(ourServer);
+		JettyUtil.closeServer(ourServer);
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -188,9 +172,7 @@ public class ClientHeadersR4Test {
 
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        int myPort = JettyUtil.getPortForStartedServer(ourServer);
-        ourServerBase = "http://localhost:" + myPort + "/fhir/context";
-
+		int myPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 	}
-
 }

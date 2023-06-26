@@ -20,7 +20,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType(true)); // MDM rules defined do not care about the deceased attribute.
 
-		//SUT
+		// SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
 		assertThat(shouldBeProcessed, is(equalTo(false)));
@@ -31,7 +31,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("Hey I'm an ID! rules defined in mdm-rules.json care about me!");
 
-		//SUT
+		// SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
 		assertThat(shouldBeProcessed, is(equalTo(true)));

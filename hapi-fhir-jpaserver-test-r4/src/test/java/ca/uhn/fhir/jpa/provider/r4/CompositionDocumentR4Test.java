@@ -54,6 +54,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	private String encId;
 	private String listId;
 	private String compId;
+
 	@Captor
 	private ArgumentCaptor<HookParams> myHookParamsCaptor;
 
@@ -67,7 +68,8 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
@@ -80,18 +82,33 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create()
+				.resource(org)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Encounter enc = new Encounter();
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		enc.getSubject().setReference(patId);
 		enc.getServiceProvider().setReference(orgId);
-		encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
+		encId = myClient.create()
+				.resource(enc)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		ListResource listResource = new ListResource();
 
@@ -101,13 +118,23 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(Observation.ObservationStatus.FINAL);
-			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create()
+					.resource(obs)
+					.execute()
+					.getId()
+					.toUnqualifiedVersionless()
+					.getValue();
 			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
 			myObs.add(obs);
 			myObsIds.add(obsId);
 		}
 
-		listId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		listId = myClient.create()
+				.resource(listResource)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Composition composition = new Composition();
 		composition.setSubject(new Reference(patId));
@@ -119,7 +146,12 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		for (String obsId : myObsIds) {
 			composition.addSection().addEntry(new Reference(obsId));
 		}
-		compId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		compId = myClient.create()
+				.resource(composition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 	}
 
 	@Test
@@ -127,18 +159,24 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
-		//Ensure each entry has a URL.
+		// Ensure each entry has a URL.
 
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
-		bundle.getEntry().stream()
-				.forEach(entry -> {
-					assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
-				});
+		bundle.getEntry().stream().forEach(entry -> {
+			assertThat(
+					entry.getFullUrl(),
+					is(equalTo(
+							entry.getResource().getIdElement().toVersionless().toString())));
+		});
 		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			actual.add(nextEntry
+					.getResource()
+					.getIdElement()
+					.toUnqualifiedVersionless()
+					.getValue());
 		}
 
 		ourLog.info("Found IDs: {}", actual);
@@ -154,29 +192,45 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		myServer.getRestfulServer()
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 		try {
 
 			ourLog.info("Composition ID: {}", compId);
 			List<String> returnedClasses = new ArrayList<>();
-			doAnswer(t->{
-				HookParams param = t.getArgument(1, HookParams.class);
-				IPreResourceAccessDetails nextPreResourceAccessDetails = param.get(IPreResourceAccessDetails.class);
-				for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
-					String className = nextPreResourceAccessDetails.getResource(i).getClass().getSimpleName();
-					ourLog.info("* Preaccess called on {}", nextPreResourceAccessDetails.getResource(i).getIdElement().getValue());
-					returnedClasses.add(className);
-				}
-				return null;
-			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
+			doAnswer(t -> {
+						HookParams param = t.getArgument(1, HookParams.class);
+						IPreResourceAccessDetails nextPreResourceAccessDetails =
+								param.get(IPreResourceAccessDetails.class);
+						for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
+							String className = nextPreResourceAccessDetails
+									.getResource(i)
+									.getClass()
+									.getSimpleName();
+							ourLog.info(
+									"* Preaccess called on {}",
+									nextPreResourceAccessDetails
+											.getResource(i)
+											.getIdElement()
+											.getValue());
+							returnedClasses.add(className);
+						}
+						return null;
+					})
+					.when(interceptor)
+					.invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
 
 			String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
-				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
+				ourLog.info(
+						"Bundle contained: {}",
+						next.getResource().getIdElement().getValue());
 			}
 
-			Mockito.verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
+			Mockito.verify(interceptor, times(2))
+					.invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
 
 			ourLog.info("Returned classes: {}", returnedClasses);
 
@@ -186,7 +240,6 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		} finally {
 
 			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(interceptor);
-
 		}
 	}
 
@@ -200,5 +253,4 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		}
 		return bundle;
 	}
-
 }

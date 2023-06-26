@@ -30,7 +30,6 @@ public class RangeTestHelper {
 
 	public static final double THOUSANDTH = .001d;
 
-
 	public static void checkInRange(double base, double value) {
 		checkInRange(base, THOUSANDTH, value);
 	}
@@ -76,6 +75,4 @@ public class RangeTestHelper {
 		double value = Double.parseDouble(theValue);
 		checkWithinBounds(lowerBound, upperBound, value);
 	}
-
-
 }

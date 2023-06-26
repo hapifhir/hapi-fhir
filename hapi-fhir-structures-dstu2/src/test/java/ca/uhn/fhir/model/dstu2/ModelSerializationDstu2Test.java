@@ -32,7 +32,6 @@ public class ModelSerializationDstu2Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	/**
 	 * Verify that MaritalStatusCodeEnum (and, by extension, BoundCodeableConcepts in general) are serializable. Author: Nick Peterson (nrpeterson@gmail.com)
 	 */
@@ -63,10 +62,15 @@ public class ModelSerializationDstu2Test {
 		out.getGenderElement().setValue("female");
 		assertEquals(AdministrativeGenderEnum.FEMALE, out.getGenderElement().getValueAsEnum());
 
-		assertEquals(IdentifierTypeCodesEnum.DL, out.getIdentifier().get(0).getType().getValueAsEnum().iterator().next());
+		assertEquals(
+				IdentifierTypeCodesEnum.DL,
+				out.getIdentifier().get(0).getType().getValueAsEnum().iterator().next());
 		out.getIdentifier().get(0).getType().setValueAsEnum(IdentifierTypeCodesEnum.MR);
-		assertEquals("MR", out.getIdentifier().get(0).getType().getCoding().get(0).getCode());
-		assertEquals("http://hl7.org/fhir/v2/0203", out.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
+		assertEquals(
+				"MR", out.getIdentifier().get(0).getType().getCoding().get(0).getCode());
+		assertEquals(
+				"http://hl7.org/fhir/v2/0203",
+				out.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,7 +89,8 @@ public class ModelSerializationDstu2Test {
 
 	@Test
 	public void testSerialization() throws Exception {
-		String input = IOUtils.toString(ModelSerializationDstu2Test.class.getResourceAsStream("/diagnosticreport-examples-lab-text(72ac8493-52ac-41bd-8d5d-7258c289b5ea).xml"));
+		String input = IOUtils.toString(ModelSerializationDstu2Test.class.getResourceAsStream(
+				"/diagnosticreport-examples-lab-text(72ac8493-52ac-41bd-8d5d-7258c289b5ea).xml"));
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 		testIsSerializable(parsed);
@@ -96,11 +101,21 @@ public class ModelSerializationDstu2Test {
 	 */
 	@Test
 	public void testSerialization2() {
-		Patient patient = new Patient().addName(new HumanNameDt().addGiven("George").addFamily("Washington")).addName(new HumanNameDt().addGiven("George2").addFamily("Washington2"))
-				.addAddress(new AddressDt().addLine("line 1").addLine("line 2").setCity("city").setState("UT"))
-				.addAddress(new AddressDt().addLine("line 1b").addLine("line 2b").setCity("cityb").setState("UT")).setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
+		Patient patient = new Patient()
+				.addName(new HumanNameDt().addGiven("George").addFamily("Washington"))
+				.addName(new HumanNameDt().addGiven("George2").addFamily("Washington2"))
+				.addAddress(new AddressDt()
+						.addLine("line 1")
+						.addLine("line 2")
+						.setCity("city")
+						.setState("UT"))
+				.addAddress(new AddressDt()
+						.addLine("line 1b")
+						.addLine("line 2b")
+						.setCity("cityb")
+						.setState("UT"))
+				.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
 		testIsSerializable(patient);
 	}
-
 }

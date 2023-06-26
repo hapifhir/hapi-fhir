@@ -15,9 +15,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,9 +66,8 @@ public class EmailSenderImplTest {
 
 	private IMailSvc withMailService() {
 		final MailConfig mailConfig = new MailConfig()
-			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-			.setSmtpPort(ourGreenMail.getSmtp().getPort());
+				.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
+				.setSmtpPort(ourGreenMail.getSmtp().getPort());
 		return new MailSvc(mailConfig);
 	}
-
 }

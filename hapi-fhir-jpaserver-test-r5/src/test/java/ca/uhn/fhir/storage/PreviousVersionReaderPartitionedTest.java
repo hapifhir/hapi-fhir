@@ -23,15 +23,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
 	SystemRequestDetails mySrd;
+
 	@Autowired
 	DaoRegistry myDaoRegistry;
+
 	SimplePartitionTestHelper mySimplePartitionTestHelper;
 
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 
-		mySimplePartitionTestHelper = new SimplePartitionTestHelper(myPartitionSettings, myPartitionConfigSvc, myInterceptorRegistry);
+		mySimplePartitionTestHelper =
+				new SimplePartitionTestHelper(myPartitionSettings, myPartitionConfigSvc, myInterceptorRegistry);
 		mySimplePartitionTestHelper.beforeEach(null);
 
 		mySvc = new PreviousVersionReader<>(myPatientDao);
@@ -51,7 +54,12 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient patient = createMale();
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		myPatientDao.update(patient, mySrd);
-		assertEquals(Enumerations.AdministrativeGender.FEMALE, myPatientDao.read(patient.getIdElement(), mySrd).getGenderElement().getValue());
+		assertEquals(
+				Enumerations.AdministrativeGender.FEMALE,
+				myPatientDao
+						.read(patient.getIdElement(), mySrd)
+						.getGenderElement()
+						.getValue());
 
 		// execute
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
@@ -59,7 +67,9 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		// verify
 		assertTrue(oPreviousPatient.isPresent());
 		Patient previousPatient = oPreviousPatient.get();
-		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+		assertEquals(
+				Enumerations.AdministrativeGender.MALE,
+				previousPatient.getGenderElement().getValue());
 	}
 
 	private Patient createMale() {
@@ -95,7 +105,9 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		// verify
 		assertTrue(oPreviousPatient.isPresent());
 		Patient previousPatient = oPreviousPatient.get();
-		assertEquals(Enumerations.AdministrativeGender.MALE, previousPatient.getGenderElement().getValue());
+		assertEquals(
+				Enumerations.AdministrativeGender.MALE,
+				previousPatient.getGenderElement().getValue());
 	}
 
 	@Test
@@ -140,8 +152,9 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		assertEquals(3L, latestUndeletedVersion.getIdElement().getVersionIdPartAsLong());
 
 		assertFalse(latestUndeletedVersion.isDeleted());
-		assertEquals(Enumerations.AdministrativeGender.FEMALE, latestUndeletedVersion.getGenderElement().getValue());
+		assertEquals(
+				Enumerations.AdministrativeGender.FEMALE,
+				latestUndeletedVersion.getGenderElement().getValue());
 		return latestUndeletedVersion;
 	}
-
 }

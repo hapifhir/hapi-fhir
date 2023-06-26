@@ -45,15 +45,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test extends BaseResourceProviderDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test.class);
 	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
@@ -86,7 +89,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
-	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint)
+			throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
@@ -147,7 +151,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update()
+				.resource(subscriptionTemp)
+				.withId(subscriptionTemp.getIdElement())
+				.execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -157,7 +164,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete()
+				.resourceById(new IdDt("Subscription/" + subscription2.getId()))
+				.execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -172,7 +181,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3)
+				.withId(observation3.getIdElement())
+				.execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
@@ -186,7 +198,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3a)
+				.withId(observation3a.getIdElement())
+				.execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -210,9 +225,12 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
 
-
 		runInTransaction(() -> {
-			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info(
+					"All token indexes:\n * {}",
+					myResourceIndexedSearchParamTokenDao.findAll().stream()
+							.map(t -> t.toString())
+							.collect(Collectors.joining("\n * ")));
 		});
 
 		myCaptureQueriesListener.clear();
@@ -232,7 +250,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update()
+				.resource(subscriptionTemp)
+				.withId(subscriptionTemp.getIdElement())
+				.execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -242,7 +263,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete()
+				.resourceById(new IdDt("Subscription/" + subscription2.getId()))
+				.execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -257,7 +280,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3)
+				.withId(observation3.getIdElement())
+				.execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
@@ -271,7 +297,10 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update()
+				.resource(observation3a)
+				.withId(observation3a.getIdElement())
+				.execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -303,7 +332,6 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 			ourUpdatedObservations.add(theObservation);
 			return new MethodOutcome(new IdDt("Observation/1"), false);
 		}
-
 	}
 
 	@BeforeAll
@@ -332,5 +360,4 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}
-
 }

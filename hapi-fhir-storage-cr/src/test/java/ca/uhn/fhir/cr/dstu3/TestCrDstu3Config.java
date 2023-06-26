@@ -17,7 +17,8 @@ import java.util.function.Function;
 @Import(TestCrConfig.class)
 public class TestCrDstu3Config {
 	@Bean
-	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext theApplicationContext) {
+	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(
+			ApplicationContext theApplicationContext) {
 		return r -> {
 			var ms = theApplicationContext.getBean(MeasureService.class);
 			ms.setRequestDetails(r);

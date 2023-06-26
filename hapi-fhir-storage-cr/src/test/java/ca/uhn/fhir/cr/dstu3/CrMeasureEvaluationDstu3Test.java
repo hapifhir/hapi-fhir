@@ -1,11 +1,7 @@
 package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.BaseCrDstu3Test;
-import ca.uhn.fhir.cr.IResourceLoader;
-import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;
@@ -38,6 +34,7 @@ public class CrMeasureEvaluationDstu3Test extends BaseCrDstu3Test {
 
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
+
 	private final SystemRequestDetails mySrd = new SystemRequestDetails();
 
 	protected void testMeasureBundle(String theLocation) throws IOException {
@@ -61,18 +58,23 @@ public class CrMeasureEvaluationDstu3Test extends BaseCrDstu3Test {
 	protected void testMeasureReport(MeasureReport expected) {
 		String measureId = this.getMeasureId(expected);
 		String patientId = this.getPatientId(expected);
-		String periodStart = "2019-01-01";//this.getPeriodStart(expected);
-		String periodEnd = "2019-12-31";//this.getPeriodEnd(expected);
+		String periodStart = "2019-01-01"; // this.getPeriodStart(expected);
+		String periodEnd = "2019-12-31"; // this.getPeriodEnd(expected);
 
 		ourLog.info("Measure: {}, Patient: {}, Start: {}, End: {}", measureId, patientId, periodStart, periodEnd);
 
 		MeasureReport actual = this.myMeasureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", measureId),
-			periodStart,
-			periodEnd,
-			"patient",
-			patientId,
-			null, null, null, null, null, mySrd);
+				new IdType("Measure", measureId),
+				periodStart,
+				periodEnd,
+				"patient",
+				patientId,
+				null,
+				null,
+				null,
+				null,
+				null,
+				mySrd);
 
 		compareMeasureReport(expected, actual);
 	}
@@ -81,18 +83,24 @@ public class CrMeasureEvaluationDstu3Test extends BaseCrDstu3Test {
 		assertNotNull("expected MeasureReport can not be null", expected);
 		assertNotNull("actual MeasureReport can not be null", actual);
 
-		String errorLocator = String.format("Measure: %s, Subject: %s", expected.getMeasure().getReference(),
-				expected.getPatient().getReference());
+		String errorLocator = String.format(
+				"Measure: %s, Subject: %s",
+				expected.getMeasure().getReference(), expected.getPatient().getReference());
 
 		assertEquals(expected.hasGroup(), actual.hasGroup(), errorLocator);
 		assertEquals(expected.getGroup().size(), actual.getGroup().size(), errorLocator);
 
 		for (MeasureReportGroupComponent mrgcExpected : expected.getGroup()) {
 			Optional<MeasureReportGroupComponent> mrgcActualOptional = actual.getGroup().stream()
-					.filter(x -> x.getId() != null && x.getId().equals(mrgcExpected.getIdentifier().getValue())).findFirst();
+					.filter(x -> x.getId() != null
+							&& x.getId().equals(mrgcExpected.getIdentifier().getValue()))
+					.findFirst();
 
-			errorLocator = String.format("Measure: %s, Subject: %s, Group: %s", expected.getMeasure().getReference(),
-					expected.getPatient().getReference(), mrgcExpected.getIdentifier().getValue());
+			errorLocator = String.format(
+					"Measure: %s, Subject: %s, Group: %s",
+					expected.getMeasure().getReference(),
+					expected.getPatient().getReference(),
+					mrgcExpected.getIdentifier().getValue());
 			assertTrue(errorLocator, mrgcActualOptional.isPresent());
 
 			MeasureReportGroupComponent mrgcActual = mrgcActualOptional.get();

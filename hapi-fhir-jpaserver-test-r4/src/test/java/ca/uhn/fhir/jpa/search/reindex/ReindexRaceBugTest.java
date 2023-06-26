@@ -15,7 +15,6 @@ import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
@@ -37,16 +36,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ContextConfiguration(classes = {
-	DaoTestDataBuilder.Config.class
-})
+@ContextConfiguration(classes = {DaoTestDataBuilder.Config.class})
 class ReindexRaceBugTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexRaceBugTest.class);
+
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
 
 	enum Steps {
-		STARTING, RUN_REINDEX, RUN_DELETE, COMMIT_REINDEX, FINISHED
+		STARTING,
+		RUN_REINDEX,
+		RUN_DELETE,
+		COMMIT_REINDEX,
+		FINISHED
 	}
 
 	/**
@@ -74,16 +76,20 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		assertEquals(1, getSPIDXDateCount(observationPid), "date index row for date");
 
 		ourLog.info("Then a SP is created after that matches data in the Observation");
-		SearchParameter sp = myFhirContext.newJsonParser().parseResource(SearchParameter.class, """
+		SearchParameter sp = myFhirContext
+				.newJsonParser()
+				.parseResource(
+						SearchParameter.class,
+						"""
 			{
-			  "resourceType": "SearchParameter",
-			  "id": "observation-date2",
-			  "status": "active",
-			  "code": "date2",
-			  "name": "date2",
-			  "base": [ "Observation" ],
-			  "type": "date",
-			  "expression": "Observation.effective"
+			"resourceType": "SearchParameter",
+			"id": "observation-date2",
+			"status": "active",
+			"code": "date2",
+			"name": "date2",
+			"base": [ "Observation" ],
+			"type": "date",
+			"expression": "Observation.effective"
 			}
 			""");
 		this.myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
@@ -93,7 +99,6 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 			return result;
 		});
 
-
 		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
 
 		ReindexParameters reindexParameters = new ReindexParameters();
@@ -102,7 +107,9 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		reindexParameters.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE);
 
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
-		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().namingPattern("Reindex-thread-%d").build());
+		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder()
+				.namingPattern("Reindex-thread-%d")
+				.build());
 		Future<Integer> backgroundResult = backgroundReindexThread.submit(() -> {
 			try {
 				callInFreshTx((tx, rd) -> {
@@ -112,7 +119,11 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 						phaser.assertInPhase(Steps.RUN_REINDEX);
 						ourLog.info("Run $reindex");
-						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), reindexParameters, rd, new TransactionDetails());
+						myObservationDao.reindex(
+								JpaPid.fromIdAndResourceType(observationPid, "Observation"),
+								reindexParameters,
+								rd,
+								new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
 						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
@@ -154,20 +165,29 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		ourLog.info("Await $reindex commit");
 		phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 
-		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should still have 0 index rows, after $reindex completes");
+		assertEquals(
+				0,
+				getSPIDXDateCount(observationPid),
+				"A deleted resource should still have 0 index rows, after $reindex completes");
 
 		// Verify the exception from $reindex
-		// In a running server, we expect UserRequestRetryVersionConflictsInterceptor to cause a retry inside the ReindexStep
+		// In a running server, we expect UserRequestRetryVersionConflictsInterceptor to cause a retry inside the
+		// ReindexStep
 		// But here in the test, we have not configured any retry logic.
-		ExecutionException e = assertThrows(ExecutionException.class, backgroundResult::get, "Optimistic locking detects the DELETE and rolls back");
-		assertThat("Hapi maps conflict exception type", e.getCause(), Matchers.instanceOf(ResourceVersionConflictException.class));
+		ExecutionException e = assertThrows(
+				ExecutionException.class,
+				backgroundResult::get,
+				"Optimistic locking detects the DELETE and rolls back");
+		assertThat(
+				"Hapi maps conflict exception type",
+				e.getCause(),
+				Matchers.instanceOf(ResourceVersionConflictException.class));
 	}
 
 	void assertResourceDeleted(IIdType observationId) {
 		try {
 			// confirm deleted
-			callInFreshTx((tx, rd)->
-				myObservationDao.read(observationId, rd, false));
+			callInFreshTx((tx, rd) -> myObservationDao.read(observationId, rd, false));
 			fail("Read deleted resource");
 		} catch (ResourceGoneException e) {
 			// expected
@@ -176,16 +196,16 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 	<T> T callInFreshTx(BiFunction<TransactionStatus, RequestDetails, T> theCallback) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		return myHapiTransactionService.withRequest(requestDetails)
-			.withTransactionDetails(new TransactionDetails())
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(tx-> theCallback.apply(tx, requestDetails));
+		return myHapiTransactionService
+				.withRequest(requestDetails)
+				.withTransactionDetails(new TransactionDetails())
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(tx -> theCallback.apply(tx, requestDetails));
 	}
-
 
 	int getSPIDXDateCount(long observationPid) {
-		return callInFreshTx((rd, tx) ->
-			myResourceIndexedSearchParamDateDao.findAllForResourceId(observationPid).size());
+		return callInFreshTx((rd, tx) -> myResourceIndexedSearchParamDateDao
+				.findAllForResourceId(observationPid)
+				.size());
 	}
-
 }

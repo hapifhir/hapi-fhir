@@ -30,27 +30,32 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-	SubscriptionProcessorConfig.class,
-	SearchParamConfig.class,
-	DaoSubscriptionMatcherTest.MyConfig.class
-})
+@ContextConfiguration(
+		classes = {SubscriptionProcessorConfig.class, SearchParamConfig.class, DaoSubscriptionMatcherTest.MyConfig.class
+		})
 public class DaoSubscriptionMatcherTest {
 
 	@Autowired(required = false)
 	private PlatformTransactionManager myTxManager;
+
 	@MockBean
 	private JpaStorageSettings myStorageSettings;
+
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
+
 	@MockBean
 	private IInterceptorService myInterceptorService;
+
 	@MockBean
 	private DaoRegistry myDaoRegistry;
+
 	@MockBean
 	private IValidationSupport myValidationSupport;
+
 	@MockBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@MockBean
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
@@ -87,9 +92,8 @@ public class DaoSubscriptionMatcherTest {
 		}
 
 		@Bean
-		public IEmailSender emailSender(){
+		public IEmailSender emailSender() {
 			return mock(IEmailSender.class);
 		}
 	}
-
 }

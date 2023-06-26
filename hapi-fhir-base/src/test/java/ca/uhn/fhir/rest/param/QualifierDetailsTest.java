@@ -14,8 +14,5 @@ public class QualifierDetailsTest {
 		details.setColonQualifier(":Patient");
 		assertFalse(details.passes(null, Sets.newHashSet(":Patient")));
 		assertTrue(details.passes(null, Sets.newHashSet(":Observation")));
-
 	}
-
-
 }

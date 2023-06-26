@@ -17,8 +17,12 @@ import java.util.List;
 @ResourceDef(name = "Bug720ResourceType", profile = "http://example.com/StructureDefinition/dontuse#Bug720ResourceType")
 public class Bug720ResourceType extends DomainResource {
 
-
-	@Child(name = "templates", order = 4, min = 1, max = Child.MAX_UNLIMITED, type = {Bug720Datatype.class})
+	@Child(
+			name = "templates",
+			order = 4,
+			min = 1,
+			max = Child.MAX_UNLIMITED,
+			type = {Bug720Datatype.class})
 	@Description(shortDefinition = "import information for 1-n consent templates")
 	private List<Type> templates = new ArrayList<Type>();
 

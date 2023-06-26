@@ -1,17 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
  * This is an example of a custom resource that also uses a custom
  * datatype.
- * 
+ *
  * See #364
  */
 @ResourceDef(name = "CustomResource", profile = "http://hl7.org/fhir/profiles/custom-resource", id = "custom-resource")
@@ -19,13 +18,16 @@ public class CustomResource364Dstu3 extends DomainResource {
 
 	private static final long serialVersionUID = 1L;
 
-	@Child(name = "baseValue", min = 1, max = Child.MAX_UNLIMITED, type= {})
+	@Child(
+			name = "baseValue",
+			min = 1,
+			max = Child.MAX_UNLIMITED,
+			type = {})
 	private Type baseValues;
 
 	public Type getBaseValues() {
 		return baseValues;
 	}
-
 
 	@Override
 	public FhirVersionEnum getStructureFhirVersionEnum() {
@@ -41,18 +43,21 @@ public class CustomResource364Dstu3 extends DomainResource {
 		this.baseValues = theValue;
 	}
 
-	@DatatypeDef(name="CustomDate")
+	@DatatypeDef(name = "CustomDate")
 	public static class CustomResource364CustomDate extends Type implements ICompositeType {
 
 		private static final long serialVersionUID = 1L;
-		
-		@Child(name = "date", order = 0, min = 1, max = 1, type = { DateTimeDt.class })
+
+		@Child(
+				name = "date",
+				order = 0,
+				min = 1,
+				max = 1,
+				type = {DateTimeDt.class})
 		private DateTimeType date;
 
-
 		public DateTimeType getDate() {
-			if (date == null)
-				date = new DateTimeType();
+			if (date == null) date = new DateTimeType();
 			return date;
 		}
 
@@ -83,10 +88,8 @@ public class CustomResource364Dstu3 extends DomainResource {
 		return retVal;
 	}
 
-
 	@Override
 	public ResourceType getResourceType() {
 		return null;
 	}
-
 }

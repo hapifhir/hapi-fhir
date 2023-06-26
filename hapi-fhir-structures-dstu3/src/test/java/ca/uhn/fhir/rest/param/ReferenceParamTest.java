@@ -43,7 +43,6 @@ public class ReferenceParamTest {
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Location/123", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
 
 	@Test
@@ -55,7 +54,6 @@ public class ReferenceParamTest {
 		assertEquals("e", rp.getIdPart());
 		assertEquals("http://a.b/c/d/e", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
 
 	@Test
@@ -68,7 +66,6 @@ public class ReferenceParamTest {
 		assertEquals("FOO", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
 		assertEquals("name", rp.getChain());
-
 	}
 
 	@Test
@@ -81,7 +78,6 @@ public class ReferenceParamTest {
 		assertEquals("Patient/1233", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
 		assertEquals("name", rp.getChain());
-
 	}
 
 	@Test
@@ -94,7 +90,6 @@ public class ReferenceParamTest {
 		assertEquals("http://something.strange/a/b/c", rp.getValue());
 		assertEquals(".name", rp.getQueryParameterQualifier());
 		assertEquals("name", rp.getChain());
-
 	}
 
 	@Test
@@ -106,7 +101,6 @@ public class ReferenceParamTest {
 		assertEquals("123", rp.getIdPart());
 		assertEquals("123", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
 
 	/**
@@ -122,7 +116,6 @@ public class ReferenceParamTest {
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Patient/123", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
 
 	@Test
@@ -134,7 +127,6 @@ public class ReferenceParamTest {
 		assertEquals("123", rp.getIdPart());
 		assertEquals("Patient/123", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
 
 	// TODO: verify this behavior is correct. Same case as testWithResourceTypeAsQualifier_RelativeUrl()
@@ -147,9 +139,7 @@ public class ReferenceParamTest {
 		assertEquals("http://a.b/c/d/e", rp.getIdPart());
 		assertEquals("http://a.b/c/d/e", rp.getValue());
 		assertEquals(null, rp.getQueryParameterQualifier());
-
 	}
-
 
 	@Test
 	public void testWithResourceTypeAsQualifierAndChain() {
@@ -161,7 +151,6 @@ public class ReferenceParamTest {
 		assertEquals("FOO", rp.getValue());
 		assertEquals(":Location.name", rp.getQueryParameterQualifier());
 		assertEquals("name", rp.getChain());
-
 	}
 
 	@Test
@@ -174,7 +163,6 @@ public class ReferenceParamTest {
 		assertEquals("http://hey.there/a/b|123", rp.getValue());
 		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
 		assertEquals("identifier", rp.getChain());
-
 	}
 
 	@Test
@@ -187,7 +175,6 @@ public class ReferenceParamTest {
 		assertEquals("http://hey.there/a/b|", rp.getIdPart());
 		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
 		assertEquals("identifier", rp.getChain());
-
 	}
 
 	@Test
@@ -200,7 +187,6 @@ public class ReferenceParamTest {
 		assertEquals("|abc", rp.getValue());
 		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
 		assertEquals("identifier", rp.getChain());
-
 	}
 
 	@Test
@@ -302,5 +288,4 @@ public class ReferenceParamTest {
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

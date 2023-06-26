@@ -36,8 +36,10 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		DatePredicateBuilder datePredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(null);
 		datePredicateBuilder.setStorageSettingsForUnitTest(storageSettings);
 
-		Condition datePredicate = datePredicateBuilder.createPredicateDateWithoutIdentityPredicate(new DateParam("2022"), SearchFilterParser.CompareOperation.eq);
-		Condition comboPredicate = datePredicateBuilder.combineWithHashIdentityPredicate("Observation", "date", datePredicate);
+		Condition datePredicate = datePredicateBuilder.createPredicateDateWithoutIdentityPredicate(
+				new DateParam("2022"), SearchFilterParser.CompareOperation.eq);
+		Condition comboPredicate =
+				datePredicateBuilder.combineWithHashIdentityPredicate("Observation", "date", datePredicate);
 
 		searchQueryBuilder.addPredicate(comboPredicate);
 
@@ -45,7 +47,9 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) limit ?", sql);
+		assertEquals(
+				"SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) limit ?",
+				sql);
 
 		assertEquals(4, StringUtils.countMatches(sql, "?"));
 		assertEquals(4, generatedSql.getBindVariables().size());

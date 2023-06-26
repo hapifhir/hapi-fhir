@@ -58,7 +58,6 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSchedulingDisabled(false);
 	}
 
-
 	@Test
 	public void testCreateInvalidNoStatus() {
 		Subscription subs = new Subscription();
@@ -97,7 +96,10 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertEquals(
+					"HTTP 422 Unprocessable Entity: " + Msg.code(811)
+							+ "Subscription.status must be 'off' or 'requested' on a newly created subscription",
+					e.getMessage());
 		}
 
 		subs.setId("ABC");
@@ -105,11 +107,12 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertEquals(
+					"HTTP 422 Unprocessable Entity: " + Msg.code(811)
+							+ "Subscription.status must be 'off' or 'requested' on a newly created subscription",
+					e.getMessage());
 		}
 	}
-
-
 
 	@Test
 	public void testUpdateFails() {
@@ -128,7 +131,10 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertEquals(
+					"HTTP 422 Unprocessable Entity: " + Msg.code(809)
+							+ "Subscription.status can not be changed from 'requested' to 'active'",
+					e.getMessage());
 		}
 
 		try {
@@ -141,7 +147,6 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		subs.setStatus(SubscriptionStatus.OFF);
 	}
-
 
 	@Test
 	public void testUpdateToInvalidStatus() {
@@ -159,7 +164,10 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertEquals(
+					"HTTP 422 Unprocessable Entity: " + Msg.code(809)
+							+ "Subscription.status can not be changed from 'requested' to 'active'",
+					e.getMessage());
 		}
 
 		try {
@@ -174,13 +182,11 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(subs).execute();
 	}
 
-
 	public class BaseSocket {
 		protected String myError;
 		protected boolean myGotBound;
 		protected int myPingCount;
 		protected String mySubsId;
-
 	}
 
 	/**
@@ -192,6 +198,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 		private String myCriteria;
 		private EncodingEnum myEncoding;
 		private List<IBaseResource> myReceived = new ArrayList<IBaseResource>();
+
 		@SuppressWarnings("unused")
 		private Session session;
 

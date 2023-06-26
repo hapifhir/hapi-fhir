@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,16 +43,36 @@ public class ThymeleafNarrativeGeneratorTest {
 		Observation obs1 = new Observation();
 		obs1.getCode().getCodingFirstRep().setDisplay("Hemoglobin [Mass/volume] in Blood");
 		obs1.setValue(new Quantity(null, 176, "http://unitsofmeasure.org", "g/L", "g/L"));
-		obs1.getReferenceRangeFirstRep().getLow().setValue(135).setSystem("http://unitsofmeasure.org").setCode("g/L").setUnit("g/L");
-		obs1.getReferenceRangeFirstRep().getHigh().setValue(180).setSystem("http://unitsofmeasure.org").setCode("g/L").setUnit("g/L");
+		obs1.getReferenceRangeFirstRep()
+				.getLow()
+				.setValue(135)
+				.setSystem("http://unitsofmeasure.org")
+				.setCode("g/L")
+				.setUnit("g/L");
+		obs1.getReferenceRangeFirstRep()
+				.getHigh()
+				.setValue(180)
+				.setSystem("http://unitsofmeasure.org")
+				.setCode("g/L")
+				.setUnit("g/L");
 		obs1.getReferenceRangeFirstRep().getTextElement().setValue("135 - 180");
 		dr1.addResult().setResource(obs1);
 
 		Observation obs2 = new Observation();
 		obs2.getCode().getCodingFirstRep().setDisplay("Erythrocytes [#/volume] in Blood by Automated count");
 		obs2.setValue(new Quantity(null, 5.9, "http://unitsofmeasure.org", "x10*12/L", "x10*12/L"));
-		obs2.getReferenceRangeFirstRep().getLow().setValue(4.2).setSystem("http://unitsofmeasure.org").setCode("x10*12/L").setUnit("x10*12/L");
-		obs2.getReferenceRangeFirstRep().getHigh().setValue(6.0).setSystem("http://unitsofmeasure.org").setCode("x10*12/L").setUnit("x10*12/L");
+		obs2.getReferenceRangeFirstRep()
+				.getLow()
+				.setValue(4.2)
+				.setSystem("http://unitsofmeasure.org")
+				.setCode("x10*12/L")
+				.setUnit("x10*12/L");
+		obs2.getReferenceRangeFirstRep()
+				.getHigh()
+				.setValue(6.0)
+				.setSystem("http://unitsofmeasure.org")
+				.setCode("x10*12/L")
+				.setUnit("x10*12/L");
 		obs2.getReferenceRangeFirstRep().getTextElement().setValue("4.2 - 6.0");
 		dr1.addResult().setResource(obs2);
 
@@ -73,7 +93,8 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative2/narratives.properties");
+		CustomThymeleafNarrativeGenerator gen =
+				new CustomThymeleafNarrativeGenerator("classpath:narrative2/narratives.properties");
 
 		gen.populateResourceNarrative(ourCtx, composition);
 
@@ -91,14 +112,15 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testTemplateCount() throws IOException {
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
+		NarrativeTemplateManifest manifest =
+				NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
 		assertEquals(4, manifest.getNamedTemplateCount());
 	}
 
-
 	@Test
 	public void testFragment() {
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(
+				"classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
 		ourLog.info("Output:\n{}", output);
@@ -113,7 +135,8 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new CodeableConcept().setText("Some Text"));
 
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(
+				"classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
@@ -132,7 +155,8 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new Reference("Medication/M"));
 
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(
+				"classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		gen.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
 			@Override
@@ -149,6 +173,4 @@ public class ThymeleafNarrativeGeneratorTest {
 
 		assertEquals("<div> Other Med</div>", output);
 	}
-
-
 }

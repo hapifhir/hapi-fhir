@@ -5,9 +5,9 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.util.Enumeration;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,5 +39,4 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
 		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}
-
 }

@@ -22,5 +22,4 @@ public class ResourceDeliveryMessageTest {
 		assertEquals("baz", msg.getAttribute("foo2").get());
 		assertEquals(false, msg.getAttribute("foo3").isPresent());
 	}
-
 }

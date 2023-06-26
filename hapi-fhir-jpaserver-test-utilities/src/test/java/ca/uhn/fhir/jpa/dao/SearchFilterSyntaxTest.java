@@ -14,7 +14,10 @@ public class SearchFilterSyntaxTest {
 		ourLog.info("Source: {}", theExpression);
 		ourLog.info("Parsed: {}", filter.toString());
 		assertNotNull(filter, "Parsing failed - returned null");
-		assertEquals(theExpression, filter.toString(), String.format("Expression mismatch: found %s, expecting %s", filter.toString(), theExpression));
+		assertEquals(
+				theExpression,
+				filter.toString(),
+				String.format("Expression mismatch: found %s, expecting %s", filter.toString(), theExpression));
 	}
 
 	@Test
@@ -66,5 +69,4 @@ public class SearchFilterSyntaxTest {
 	public void testPrecedence() throws SearchFilterParser.FilterSyntaxException {
 		testParse("this eq that and this1 eq that1");
 	}
-
 }

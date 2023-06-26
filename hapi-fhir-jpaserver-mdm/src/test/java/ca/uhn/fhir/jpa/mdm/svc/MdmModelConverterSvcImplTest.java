@@ -5,9 +5,9 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hibernate.envers.RevisionType;
@@ -16,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmModelConverterSvcImplTest.class);
@@ -36,41 +36,75 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(
+				MdmMatchResultEnum.MATCH,
+				MdmLinkSourceEnum.MANUAL,
+				version,
+				createTime,
+				updateTime,
+				isLinkCreatedResource);
 		myMdmLinkDao.save(mdmLink);
 
 		final MdmLinkJson actualMdmLinkJson = myMdmModelConverterSvc.toJson(mdmLink);
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), actualMdmLinkJson);
+		assertEquals(
+				getExepctedMdmLinkJson(
+						mdmLink.getGoldenResourcePersistenceId().getId(),
+						mdmLink.getSourcePersistenceId().getId(),
+						MdmMatchResultEnum.MATCH,
+						MdmLinkSourceEnum.MANUAL,
+						version,
+						createTime,
+						updateTime,
+						isLinkCreatedResource),
+				actualMdmLinkJson);
 	}
 
 	@Test
 	public void testBasicMdmLinkRevisionConversion() {
 		final Date createTime = new Date();
 		final Date updateTime = new Date();
-		final Date revisionTimestamp = Date.from(LocalDateTime
-			.of(2023, Month.MARCH, 16, 15, 23, 0)
+		final Date revisionTimestamp = Date.from(LocalDateTime.of(2023, Month.MARCH, 16, 15, 23, 0)
 				.atZone(ZoneId.systemDefault())
-			.toInstant());
+				.toInstant());
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
 
-		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createGoldenPatientAndLinkToSourcePatient(
+				MdmMatchResultEnum.MATCH,
+				MdmLinkSourceEnum.MANUAL,
+				version,
+				createTime,
+				updateTime,
+				isLinkCreatedResource);
 
-		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, revisionTimestamp));
+		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(
+				mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, revisionTimestamp));
 
 		final MdmLinkWithRevisionJson actualMdmLinkWithRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
-		final MdmLinkWithRevisionJson expectedMdmLinkWithRevisionJson =
-			new MdmLinkWithRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
+		final MdmLinkWithRevisionJson expectedMdmLinkWithRevisionJson = new MdmLinkWithRevisionJson(
+				getExepctedMdmLinkJson(
+						mdmLink.getGoldenResourcePersistenceId().getId(),
+						mdmLink.getSourcePersistenceId().getId(),
+						MdmMatchResultEnum.MATCH,
+						MdmLinkSourceEnum.MANUAL,
+						version,
+						createTime,
+						updateTime,
+						isLinkCreatedResource),
+				revisionNumber,
+				revisionTimestamp);
 
 		assertMdmLinkRevisionsEqual(expectedMdmLinkWithRevisionJson, actualMdmLinkWithRevisionJson);
 	}
 
-	private void assertMdmLinkRevisionsEqual(MdmLinkWithRevisionJson theExpectedMdmLinkWithRevisionJson, MdmLinkWithRevisionJson theActualMdmLinkWithRevisionJson) {
+	private void assertMdmLinkRevisionsEqual(
+			MdmLinkWithRevisionJson theExpectedMdmLinkWithRevisionJson,
+			MdmLinkWithRevisionJson theActualMdmLinkWithRevisionJson) {
 		final MdmLinkJson expectedMdmLink = theExpectedMdmLinkWithRevisionJson.getMdmLink();
 		final MdmLinkJson actualMdmLink = theActualMdmLinkWithRevisionJson.getMdmLink();
 		assertEquals(expectedMdmLink.getGoldenResourceId(), actualMdmLink.getGoldenResourceId());
@@ -78,11 +112,23 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
 		assertEquals(expectedMdmLink.getLinkSource(), actualMdmLink.getLinkSource());
 
-		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionNumber(), theActualMdmLinkWithRevisionJson.getRevisionNumber());
-		assertEquals(theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp(), theActualMdmLinkWithRevisionJson.getRevisionTimestamp());
+		assertEquals(
+				theExpectedMdmLinkWithRevisionJson.getRevisionNumber(),
+				theActualMdmLinkWithRevisionJson.getRevisionNumber());
+		assertEquals(
+				theExpectedMdmLinkWithRevisionJson.getRevisionTimestamp(),
+				theActualMdmLinkWithRevisionJson.getRevisionTimestamp());
 	}
 
-	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+	private MdmLinkJson getExepctedMdmLinkJson(
+			Long theGoldenPatientId,
+			Long theSourceId,
+			MdmMatchResultEnum theMdmMatchResultEnum,
+			MdmLinkSourceEnum theMdmLinkSourceEnum,
+			String version,
+			Date theCreateTime,
+			Date theUpdateTime,
+			boolean theLinkCreatedNewResource) {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
 		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);

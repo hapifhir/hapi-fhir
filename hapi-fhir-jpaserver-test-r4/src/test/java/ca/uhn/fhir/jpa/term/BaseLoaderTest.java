@@ -22,12 +22,16 @@ abstract class BaseLoaderTest extends BaseTest {
 
 	@Mock
 	protected RequestDetails mySrd;
+
 	@Captor
 	protected ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor;
+
 	@Captor
 	protected ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
+
 	@Captor
 	protected ArgumentCaptor<List<ValueSet>> myValueSetsCaptor;
+
 	@Captor
 	protected ArgumentCaptor<CodeSystem> mySystemCaptor;
 
@@ -54,6 +58,4 @@ abstract class BaseLoaderTest extends BaseTest {
 		}
 		return valueSets;
 	}
-
-
 }

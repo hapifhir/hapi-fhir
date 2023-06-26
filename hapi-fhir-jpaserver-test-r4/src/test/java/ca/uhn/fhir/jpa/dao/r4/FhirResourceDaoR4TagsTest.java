@@ -18,9 +18,9 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -41,7 +41,6 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 	}
 
-
 	/**
 	 * Make sure tags are preserved
 	 */
@@ -60,7 +59,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
-		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(meta).toString(),
+				toTags(meta),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 		assertEquals("3", meta.getVersionId());
 
 		// Revive and verify
@@ -73,7 +75,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		patient = (Patient) myPatientDao.update(patient, mySrd).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 		myCaptureQueriesListener.logAllQueries();
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
@@ -81,8 +86,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	/**
@@ -102,7 +109,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
-		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(meta).toString(),
+				toTags(meta),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Revive and verify
 
@@ -116,14 +126,19 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logAllQueries();
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Read it back
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	/**
@@ -139,9 +154,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		input = new BundleBuilder(myFhirContext)
-			.addTransactionDeleteEntry(new IdType("Patient/A"))
-			.andThen()
-			.getBundleTyped();
+				.addTransactionDeleteEntry(new IdType("Patient/A"))
+				.andThen()
+				.getBundleTyped();
 		output = mySystemDao.transaction(mySrd, input);
 		IIdType outcomeId = new IdType(output.getEntry().get(0).getResponse().getLocation());
 		assertEquals("3", outcomeId.getVersionIdPart());
@@ -151,7 +166,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
-		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(meta).toString(),
+				toTags(meta),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 		assertEquals("3", meta.getVersionId());
 
 		// Revive and verify
@@ -164,15 +182,18 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 
 		input = new BundleBuilder(myFhirContext)
-			.addTransactionUpdateEntry(patient)
-			.andThen()
-			.getBundleTyped();
+				.addTransactionUpdateEntry(patient)
+				.andThen()
+				.getBundleTyped();
 		output = mySystemDao.transaction(mySrd, input);
 		patient = (Patient) output.getEntry().get(0).getResource();
 		assert patient != null;
 
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 		myCaptureQueriesListener.logAllQueries();
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
@@ -180,8 +201,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	/**
@@ -197,9 +220,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		input = new BundleBuilder(myFhirContext)
-			.addTransactionDeleteEntry(new IdType("Patient/A"))
-			.andThen()
-			.getBundleTyped();
+				.addTransactionDeleteEntry(new IdType("Patient/A"))
+				.andThen()
+				.getBundleTyped();
 		output = mySystemDao.transaction(mySrd, input);
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
@@ -207,7 +230,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
-		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(meta).toString(),
+				toTags(meta),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Revive and verify
 
@@ -218,23 +244,28 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		myCaptureQueriesListener.clear();
 		input = new BundleBuilder(myFhirContext)
-			.addTransactionUpdateEntry(patient)
-			.andThen()
-			.getBundleTyped();
+				.addTransactionUpdateEntry(patient)
+				.andThen()
+				.getBundleTyped();
 		output = mySystemDao.transaction(mySrd, input);
 		patient = (Patient) output.getEntry().get(0).getResource();
 		assert patient != null;
 		myCaptureQueriesListener.logAllQueries();
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Read it back
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	@Test
@@ -246,8 +277,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		Patient patient;
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	@Test
@@ -259,8 +292,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		Patient patient;
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	@Test
@@ -273,8 +308,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	@Test
@@ -283,12 +320,17 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Patient patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
-
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
 
 	@Test
@@ -305,9 +347,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		// Version 2
 		patient = (Patient) history.getResources(0, 999).get(0);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
-
 
 	@Test
 	public void testStoreAndRetrieveNonVersionedTags_History() {
@@ -318,14 +362,19 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		// Version 1
 		Patient patient = (Patient) history.getResources(0, 999).get(1);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Version 2
 		patient = (Patient) history.getResources(0, 999).get(0);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
-
 
 	@Test
 	public void testStoreAndRetrieveVersionedTags_Search() {
@@ -335,9 +384,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Patient patient = (Patient) search.getResources(0, 999).get(0);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
-
 
 	@Test
 	public void testStoreAndRetrieveNonVersionedTags_Search() {
@@ -347,9 +398,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		Patient patient = (Patient) search.getResources(0, 999).get(0);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
-		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertThat(
+				toTags(patient).toString(),
+				toTags(patient),
+				containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 	}
-
 
 	@Test
 	public void testInlineTags_StoreAndRetrieve() {
@@ -374,7 +427,8 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 
 		// Store a second version
 		patient = new Patient();
@@ -395,24 +449,28 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 
 		// Second version should have the new set of tags
 		// TODO: We could copy these forward like we do for non-inline mode. Perhaps in the future.
 		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag2|vtag2|dtag2"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), containsInAnyOrder("http://sec2|vsec2|dsec2"));
-
+		assertThat(
+				toSecurityLabels(patient).toString(),
+				toSecurityLabels(patient),
+				containsInAnyOrder("http://sec2|vsec2|dsec2"));
 	}
-
 
 	@Test
 	public void testInlineTags_Search_Tag() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createResourceTagSearchParameter();
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -421,7 +479,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_tag").exactly().systemAndCode("http://tag1", "vtag1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_tag").exactly().systemAndCode("http://tag1", "vtag1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
@@ -445,7 +507,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
 		assertEquals(1, meta.getTag().size());
 
-		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle patientBundle = myClient.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
 		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
 		assertEquals(1, patient.getMeta().getTag().size());
 	}
@@ -467,7 +532,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
 		assertEquals(1, meta.getTag().size());
 
-		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle patientBundle = myClient.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
 		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
 		assertEquals(1, patient.getMeta().getTag().size());
 	}
@@ -477,7 +545,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -486,7 +556,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_profile").exactly().code("http://profile1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_profile").exactly().code("http://profile1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 		validatePatientSearchResultsForInlineTags(outcome);
 	}
@@ -497,7 +571,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		FhirContext fhirContext = myFhirContext;
 		SearchParameter searchParameter = createSecuritySearchParameter(fhirContext);
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -506,7 +582,11 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_security").exactly().systemAndCode("http://sec1", "vsec1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_security").exactly().systemAndCode("http://sec1", "vsec1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
@@ -532,11 +612,13 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient = (Patient) outcome.getEntry().get(0).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 		patient = (Patient) outcome.getEntry().get(1).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 	}
 
 	private void createPatientsForInlineSearchTests() {
@@ -618,12 +700,16 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Nonnull
 	static List<String> toTags(Meta meta) {
-		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+		return meta.getTag().stream()
+				.map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay())
+				.collect(Collectors.toList());
 	}
 
 	@Nonnull
 	static List<String> toSecurityLabels(Meta meta) {
-		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+		return meta.getSecurity().stream()
+				.map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay())
+				.collect(Collectors.toList());
 	}
 
 	@Nonnull
@@ -635,7 +721,8 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	public static SearchParameter createSearchParamForInlineResourceProfile() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-profile");
-		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+		for (String next :
+				FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -650,7 +737,8 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	public static SearchParameter createResourceTagSearchParameter() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-tag");
-		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+		for (String next :
+				FhirContext.forR4Cached().getResourceTypes().stream().sorted().collect(Collectors.toList())) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -660,5 +748,4 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		searchParameter.setExpression("meta.tag");
 		return searchParameter;
 	}
-
 }

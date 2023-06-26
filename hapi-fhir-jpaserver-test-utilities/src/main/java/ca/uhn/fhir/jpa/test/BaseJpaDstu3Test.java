@@ -129,8 +129,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
 import java.util.Map;
+import javax.persistence.EntityManager;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
@@ -138,222 +138,304 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
+
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
+
 	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
+
 	@Autowired
 	@Qualifier("myCoverageDaoDstu3")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
+
 	@Autowired
 	protected IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
+
 	@Autowired
 	protected ApplicationContext myAppCtx;
+
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu3")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
+
 	@Autowired
 	@Qualifier("myAuditEventDaoDstu3")
 	protected IFhirResourceDao<AuditEvent> myAuditEventDao;
+
 	@Autowired
 	@Qualifier("myBundleDaoDstu3")
 	protected IFhirResourceDao<Bundle> myBundleDao;
+
 	@Autowired
 	@Qualifier("myCarePlanDaoDstu3")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
+
 	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
+
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoDstu3")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
+
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+
 	@Autowired
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
+
 	@Autowired
 	@Qualifier("myDeviceDaoDstu3")
 	protected IFhirResourceDao<Device> myDeviceDao;
+
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu3")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+
 	@Autowired
 	@Qualifier("myBinaryDaoDstu3")
 	protected IFhirResourceDao<Binary> myBinaryDao;
+
 	@Autowired
 	@Qualifier("myEncounterDaoDstu3")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
+
 	@Autowired
 	protected EntityManager myEntityManager;
+
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	@Qualifier("myGroupDaoDstu3")
 	protected IFhirResourceDao<Group> myGroupDao;
+
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
+
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoDstu3")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
+
 	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
+
 	@Autowired
 	@Qualifier("myPractitionerRoleDaoDstu3")
 	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
+
 	@Autowired
 	@Qualifier("myMediaDaoDstu3")
 	protected IFhirResourceDao<Media> myMediaDao;
+
 	@Autowired
 	@Qualifier("myMedicationAdministrationDaoDstu3")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
+
 	@Autowired
 	@Qualifier("myMedicationDaoDstu3")
 	protected IFhirResourceDao<Medication> myMedicationDao;
+
 	@Autowired
 	@Qualifier("myMedicationRequestDaoDstu3")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
+
 	@Autowired
 	@Qualifier("myMedicationStatementDaoDstu3")
 	protected IFhirResourceDao<MedicationStatement> myMedicationStatementDao;
+
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
+
 	@Autowired
 	@Qualifier("myObservationDaoDstu3")
 	protected IFhirResourceDao<Observation> myObservationDao;
+
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoDstu3")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
+
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+
 	@Autowired
 	@Qualifier("myConsentDaoDstu3")
 	protected IFhirResourceDao<Consent> myConsentDao;
+
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
+
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+
 	@Autowired
 	@Qualifier("myCompositionDaoDstu3")
 	protected IFhirResourceDao<Composition> myCompositionDao;
+
 	@Autowired
 	@Qualifier("myCommunicationDaoDstu3")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
+
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu3")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+
 	@Autowired
 	@Qualifier("myProcedureRequestDaoDstu3")
 	protected IFhirResourceDao<ProcedureRequest> myProcedureRequestDao;
+
 	@Autowired
 	@Qualifier("myQuestionnaireDaoDstu3")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoDstu3")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
+
 	@Autowired
 	@Qualifier("myResourceProvidersDstu3")
 	protected ResourceProviderFactory myResourceProviders;
+
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
+
 	@Autowired
 	@Qualifier("mySearchParameterDaoDstu3")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
+
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu3")
 	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
+
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+
 	@Autowired
 	@Qualifier("mySubstanceDaoDstu3")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
+
 	@Autowired
 	@Qualifier("mySystemDaoDstu3")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
+
 	@Autowired
 	@Qualifier("mySystemProviderDstu3")
 	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
+
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
+
 	@Autowired
 	@Qualifier("myTaskDaoDstu3")
 	protected IFhirResourceDao<Task> myTaskDao;
+
 	@Autowired
 	@Qualifier("myBodySiteDaoDstu3")
 	protected IFhirResourceDao<BodySite> myBodySiteDao;
+
 	@Autowired
 	@Qualifier("myProcedureDaoDstu3")
 	protected IFhirResourceDao<Procedure> myProcedureDao;
+
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
+
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
+
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+
 	@Autowired
 	protected ITermReadSvc myTermSvc;
+
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
+
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+
 	@Autowired
 	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
+
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
+
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
+
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainDstu3;
+
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@RegisterExtension
-	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
+			new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
-		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setExpireSearchResultsAfterMillis(
+				new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
 	}
 
@@ -384,7 +466,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(
+				myStorageSettings,
+				mySystemDao,
+				myResourceReindexingSvc,
+				mySearchCoordinatorSvc,
+				mySearchParamRegistry,
+				myBulkDataScheduleHelper);
 	}
 
 	@BeforeEach
@@ -444,7 +532,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	 */
 	public static ConceptMap createConceptMap() {
 		try {
-			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(BaseJpaR4Test.createConceptMap(), new BaseAdvisor_30_40(false));
+			return (ConceptMap) VersionConvertorFactory_30_40.convertResource(
+					BaseJpaR4Test.createConceptMap(), new BaseAdvisor_30_40(false));
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}

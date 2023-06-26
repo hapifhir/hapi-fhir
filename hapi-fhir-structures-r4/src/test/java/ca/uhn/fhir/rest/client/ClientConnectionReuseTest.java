@@ -27,12 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ClientConnectionReuseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ClientConnectionReuseTest.class);
+
 	@RegisterExtension
 	@Order(0)
 	private static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached());
+
 	@RegisterExtension
 	@Order(1)
-	private static HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
+	private static HashMapResourceProviderExtension<Patient> ourPatientProvider =
+			new HashMapResourceProviderExtension<>(ourServer, Patient.class);
 
 	@ParameterizedTest()
 	@MethodSource("clients")
@@ -45,11 +48,11 @@ public class ClientConnectionReuseTest {
 		int reps = 100;
 		for (int i = 0; i < reps; i++) {
 			ourServer
-				.getFhirClient()
-				.read()
-				.resource(Patient.class)
-				.withId("Patient/P")
-				.execute();
+					.getFhirClient()
+					.read()
+					.resource(Patient.class)
+					.withId("Patient/P")
+					.execute();
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
@@ -63,11 +66,11 @@ public class ClientConnectionReuseTest {
 		int reps = 100;
 		for (int i = 0; i < reps; i++) {
 			ourServer
-				.getFhirClient()
-				.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.execute();
+					.getFhirClient()
+					.search()
+					.forResource(Patient.class)
+					.returnBundle(Bundle.class)
+					.execute();
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
@@ -81,16 +84,15 @@ public class ClientConnectionReuseTest {
 		int reps = 100;
 		for (int i = 0; i < reps; i++) {
 			ourServer
-				.getFhirClient()
-				.create()
-				.resource(new Patient().setActive(true))
-				.execute();
+					.getFhirClient()
+					.create()
+					.resource(new Patient().setActive(true))
+					.execute();
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
 		assertEquals(1, ourServer.getConnectionsOpenedCount());
 	}
-
 
 	public static List<IGenericClient> clients() {
 		FhirContext ctx = FhirContext.forR4Cached();
@@ -99,11 +101,11 @@ public class ClientConnectionReuseTest {
 
 		IGenericClient gzipClient = ctx.newRestfulGenericClient(ourServer.getBaseUrl());
 		gzipClient.registerInterceptor(new GZipContentInterceptor());
-		AdditionalRequestHeadersInterceptor additionalRequestHeadersInterceptor = new AdditionalRequestHeadersInterceptor();
+		AdditionalRequestHeadersInterceptor additionalRequestHeadersInterceptor =
+				new AdditionalRequestHeadersInterceptor();
 		additionalRequestHeadersInterceptor.addHeaderValue(Constants.HEADER_ACCEPT_ENCODING, Constants.ENCODING_GZIP);
 		gzipClient.registerInterceptor(additionalRequestHeadersInterceptor);
 
 		return Lists.newArrayList(client, gzipClient);
 	}
-
 }

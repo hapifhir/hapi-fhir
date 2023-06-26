@@ -16,7 +16,6 @@ public class ValidateCommandTest {
 	private ValidateCommand myValidateCommand = new ValidateCommand();
 	private ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
 
-
 	@BeforeEach
 	public void beforeEach() {
 		ourLog.setLevel(Level.ALL);
@@ -30,7 +29,6 @@ public class ValidateCommandTest {
 		myListAppender.stop();
 	}
 
-
 	@BeforeEach
 	public void before() {
 		HapiSystemProperties.enableTestMode();
@@ -38,37 +36,33 @@ public class ValidateCommandTest {
 
 	@Test
 	public void testValidateLocalProfileDstu3() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		String resourcePath = ValidateCommandTest.class
+				.getResource("/patient-uslab-example1.xml")
+				.getFile();
 
-		App.main(new String[]{
-			"validate",
-			"-v", "dstu3",
-			"-p",
-			"-n", resourcePath});
+		App.main(new String[] {"validate", "-v", "dstu3", "-p", "-n", resourcePath});
 	}
 
 	@Test
 	public void testValidateLocalProfileR4() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		String resourcePath = ValidateCommandTest.class
+				.getResource("/patient-uslab-example1.xml")
+				.getFile();
 		ourLog.info(resourcePath);
 
-		App.main(new String[]{
-			"validate",
-			"-v", "R4",
-			"-p",
-			"-n", resourcePath});
+		App.main(new String[] {"validate", "-v", "R4", "-p", "-n", resourcePath});
 	}
 
 	@Test
 	public void validate_withLocalProfileR4_shouldPass_whenResourceCompliesWithProfile() {
-		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
-		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
+		String patientJson =
+				ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
+		String patientProfile = ValidateCommandTest.class
+				.getResource("/validate/PatientIn-Profile.json")
+				.getFile();
 
-		App.main(new String[]{
-			"validate",
-			"--fhir-version", "r4",
-			"--profile",
-			"--file", patientJson,
-			"-l", patientProfile});
+		App.main(new String[] {
+			"validate", "--fhir-version", "r4", "--profile", "--file", patientJson, "-l", patientProfile
+		});
 	}
 }

@@ -22,6 +22,7 @@ class MdmGoldenResourceFindingSvcTest extends BaseMdmR4Test {
 
 	@Autowired
 	MdmGoldenResourceFindingSvc myMdmGoldenResourceFindingSvc = new MdmGoldenResourceFindingSvc();
+
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 

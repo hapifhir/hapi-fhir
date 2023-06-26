@@ -19,14 +19,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProviderDstu3Test{
+public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProviderDstu3Test {
 	@Autowired
 	MatchUrlService myMatchUrlService;
 
 	@Test
 	public void testReplicateBugWithNotDuringChain() {
 		Encounter enc = new Encounter();
-		enc.setType(Collections.singletonList(new CodeableConcept().addCoding(new Coding("system", "value", "display"))));
+		enc.setType(
+				Collections.singletonList(new CodeableConcept().addCoding(new Coding("system", "value", "display"))));
 		IIdType encId = myEncounterDao.create(enc).getId();
 
 		Observation obs = new Observation();
@@ -34,7 +35,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 		myObservationDao.create(obs).getId();
 
 		{
-			//Works when not chained:
+			// Works when not chained:
 			String encounterSearchString = "Encounter?type:not=system|value";
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(encounterSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
@@ -42,7 +43,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			assertThat(search.size(), is(equalTo(0)));
 		}
 		{
-			//Works without the NOT qualifier.
+			// Works without the NOT qualifier.
 			String resultSearchString = "Observation?context.type=system|value";
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(resultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
@@ -51,7 +52,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 		}
 
 		{
-			//Works in a chain
+			// Works in a chain
 			String noResultSearchString = "Observation?context.type:not=system|value";
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
@@ -59,7 +60,7 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			assertThat(search.size(), is(equalTo(0)));
 		}
 		{
-			//Works in a chain with only value
+			// Works in a chain with only value
 			String noResultSearchString = "Observation?context.type:not=value";
 			ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(noResultSearchString);
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();

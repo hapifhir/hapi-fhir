@@ -31,12 +31,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -116,7 +116,6 @@ public class TestR4WithDelayConfig extends TestR4Config {
 					myHaveDumpedThreads = true;
 				}
 			}
-
 		};
 
 		retVal.setDriver(new org.h2.Driver());
@@ -127,17 +126,16 @@ public class TestR4WithDelayConfig extends TestR4Config {
 		retVal.setMaxTotal(ourMaxThreads);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
-			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.beforeQuery(getMandatoryTransactionListener())
-			.afterQuery(captureQueriesListener())
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.afterQuery(delayListener())
-			.countQuery(singleQueryCountHolder())
-			.afterMethod(captureQueriesListener())
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
+				.beforeQuery(new BlockLargeNumbersOfParamsListener())
+				.beforeQuery(getMandatoryTransactionListener())
+				.afterQuery(captureQueriesListener())
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.afterQuery(delayListener())
+				.countQuery(singleQueryCountHolder())
+				.afterMethod(captureQueriesListener())
+				.build();
 
 		return dataSource;
 	}
@@ -146,5 +144,4 @@ public class TestR4WithDelayConfig extends TestR4Config {
 	DelayListener delayListener() {
 		return new DelayListener();
 	}
-
 }

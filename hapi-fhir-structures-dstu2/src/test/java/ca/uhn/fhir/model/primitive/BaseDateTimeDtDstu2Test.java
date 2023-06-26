@@ -66,7 +66,6 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(44, type.getMinute().intValue());
 		assertEquals(25, type.getSecond().intValue());
 		assertEquals(12, type.getMillis().intValue());
-
 	}
 
 	@Test
@@ -89,9 +88,7 @@ public class BaseDateTimeDtDstu2Test {
 		millis = 1466022208000L;
 		expected = "2016-06-15T20:23:28.000Z";
 		validate(millis, expected);
-
 	}
-
 
 	private void validate(long millis, String expected) {
 		InstantDt dt;
@@ -100,14 +97,14 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(expected, dt.getValueAsString());
 
 		assertEquals(millis % 1000, dt.getMillis().longValue());
-		assertEquals((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
+		assertEquals(
+				(millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
 
 		dt = new InstantDt();
 		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
 		dt.setValue(new Date(millis));
 		assertEquals(expected.replace("Z", "+00:00"), dt.getValueAsString());
 	}
-
 
 	@Test
 	public void testSetPartialsYearFromExisting() {
@@ -199,7 +196,8 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			dt.setNanos(BaseDateTimeDt.NANOS_PER_SECOND);
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1884) + "Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
+			assertEquals(
+					Msg.code(1884) + "Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
 		}
 	}
 
@@ -229,7 +227,8 @@ public class BaseDateTimeDtDstu2Test {
 	@BeforeEach
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
+		myDateInstantZoneParser =
+				FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
 
 	@Test
@@ -269,7 +268,6 @@ public class BaseDateTimeDtDstu2Test {
 		verifyFails("A974-12-25");
 		verifyFails("1974-A2-25");
 		verifyFails("1974-12-A5");
-
 
 		// Date shouldn't have a time zone
 		verifyFails("1974-12-25Z");
@@ -311,7 +309,8 @@ public class BaseDateTimeDtDstu2Test {
 		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
 
 		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
-		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
+		String outcomeStr =
+				ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeStr);
 
 		assertThat(outcomeStr, containsString("date-primitive"));
@@ -369,7 +368,9 @@ public class BaseDateTimeDtDstu2Test {
 
 	@Test
 	public void testEncodeOffset() {
-		String offset = InstantDt.withCurrentTime().setTimeZone(TimeZone.getTimeZone("America/Toronto")).getValueAsString();
+		String offset = InstantDt.withCurrentTime()
+				.setTimeZone(TimeZone.getTimeZone("America/Toronto"))
+				.getValueAsString();
 		assertThat(offset, either(endsWith("-05:00")).or(endsWith("-04:00")));
 	}
 
@@ -465,7 +466,6 @@ public class BaseDateTimeDtDstu2Test {
 		} catch (DataFormatException e) {
 			// good
 		}
-
 	}
 
 	@Test
@@ -512,7 +512,8 @@ public class BaseDateTimeDtDstu2Test {
 			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
+			assertEquals(
+					Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
 		}
 	}
 
@@ -528,7 +529,9 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt dt = new InstantDt();
 		dt.setValueAsString("2013-02-03T11:22:33.234");
 
-		assertEquals("2013-02-03 11:22:33.234", myDateInstantParser.format(dt.getValue()).substring(0, 23));
+		assertEquals(
+				"2013-02-03 11:22:33.234",
+				myDateInstantParser.format(dt.getValue()).substring(0, 23));
 		assertEquals("2013-02-03T11:22:33.234", dt.getValueAsString());
 		assertEquals(false, dt.isTimeZoneZulu());
 		assertNull(dt.getTimeZone());
@@ -588,7 +591,10 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString("2013-02-03T11:22");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
+			assertEquals(
+					e.getMessage(),
+					Msg.code(1885)
+							+ "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
 		}
 	}
 
@@ -599,7 +605,10 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString("2013-02-03T11:22Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
+			assertEquals(
+					e.getMessage(),
+					Msg.code(1885)
+							+ "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
 		}
 	}
 
@@ -608,7 +617,8 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33");
 
-		assertEquals("2013-02-03 11:22:33", myDateInstantParser.format(dt.getValue()).substring(0, 19));
+		assertEquals(
+				"2013-02-03 11:22:33", myDateInstantParser.format(dt.getValue()).substring(0, 19));
 		assertEquals("2013-02-03T11:22:33", dt.getValueAsString());
 		assertEquals(false, dt.isTimeZoneZulu());
 		assertNull(dt.getTimeZone());
@@ -844,5 +854,4 @@ public class BaseDateTimeDtDstu2Test {
 
 		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
 	}
-
 }

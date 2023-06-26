@@ -21,10 +21,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,18 +67,19 @@ public class LoadIdsStepTest {
 		String instanceId = "instance-id";
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
-		StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
+		StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> details =
+				new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
 
 		// First Execution
 
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(0L, 20000L, DATE_2));
+				.thenReturn(createIdChunk(0L, 20000L, DATE_2));
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
+				.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(40000L, 40040L, DATE_4));
+				.thenReturn(createIdChunk(40000L, 40040L, DATE_4));
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_4), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(new EmptyResourcePidList());
+				.thenReturn(new EmptyResourcePidList());
 
 		mySvc.run(details, mySink);
 
@@ -88,9 +89,9 @@ public class LoadIdsStepTest {
 			String actual = myChunkIdsCaptor.getAllValues().get(i).toString();
 			assertEquals(expected, actual);
 		}
-		assertEquals(createIdChunk(40000, 40040).toString(),
-			myChunkIdsCaptor.getAllValues().get(80).toString());
-
+		assertEquals(
+				createIdChunk(40000, 40040).toString(),
+				myChunkIdsCaptor.getAllValues().get(80).toString());
 	}
 
 	@Nonnull
@@ -112,5 +113,4 @@ public class LoadIdsStepTest {
 		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate, null);
 		return chunk;
 	}
-
 }

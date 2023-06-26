@@ -16,7 +16,6 @@ public class TransactionServerTest {
 	@RegisterExtension
 	public RestfulServerExtension myServerRule = new RestfulServerExtension(FhirVersionEnum.R4);
 
-
 	@Test
 	public void testTransactionParamIsInterface() {
 
@@ -26,7 +25,6 @@ public class TransactionServerTest {
 			public IBaseBundle transaction(@TransactionParam IBaseBundle theInput) {
 				return theInput;
 			}
-
 		}
 
 		myServerRule.getRestfulServer().registerProvider(new MyProvider());
@@ -34,10 +32,9 @@ public class TransactionServerTest {
 		Bundle input = new Bundle();
 		input.setId("ABC");
 		input.setType(Bundle.BundleType.TRANSACTION);
-		Bundle output = myServerRule.getFhirClient().transaction().withBundle(input).execute();
+		Bundle output =
+				myServerRule.getFhirClient().transaction().withBundle(input).execute();
 
 		assertEquals("ABC", output.getIdElement().getIdPart());
-
 	}
-
 }

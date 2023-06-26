@@ -36,5 +36,4 @@ class MethodOutcomeTest {
 		assertTrue(firstHeader.isPresent());
 		assertEquals("value1", firstHeader.get());
 	}
-
 }

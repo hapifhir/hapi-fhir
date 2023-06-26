@@ -58,14 +58,16 @@ import static org.mockito.Mockito.when;
 public class ReductionStepExecutorServiceImplTest {
 
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+
 	@Mock
 	private IJobPersistence myJobPersistence;
+
 	@Mock
 	private IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStepWorker;
 	//	@Mock
-//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myPreviousStep;
-//	@Mock
-//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myCurrentStep;
+	//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myPreviousStep;
+	//	@Mock
+	//	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myCurrentStep;
 	private ReductionStepExecutorServiceImpl mySvc;
 	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
@@ -73,7 +75,6 @@ public class ReductionStepExecutorServiceImplTest {
 	public void before() {
 		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry);
 	}
-
 
 	@Test
 	public void doExecution_reductionWithChunkFailed_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
@@ -87,17 +88,20 @@ public class ReductionStepExecutorServiceImplTest {
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-
 		// when
-		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
+		when(workCursor.getCurrentStep())
+				.thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>)
+						createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
-		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(
+						INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED)))
+				.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
+				.thenReturn(chunks.stream());
 		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class)))
-			.thenReturn(ChunkOutcome.SUCCESS())
-			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAILED));
+				.thenReturn(ChunkOutcome.SUCCESS())
+				.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAILED));
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
@@ -107,12 +111,8 @@ public class ReductionStepExecutorServiceImplTest {
 		ArgumentCaptor<List> submittedListIds = ArgumentCaptor.forClass(List.class);
 		ArgumentCaptor<WorkChunkStatusEnum> statusCaptor = ArgumentCaptor.forClass(WorkChunkStatusEnum.class);
 		verify(myJobPersistence, times(chunkIds.size()))
-			.markWorkChunksWithStatusAndWipeData(
-				eq(INSTANCE_ID),
-				submittedListIds.capture(),
-				statusCaptor.capture(),
-				any()
-			);
+				.markWorkChunksWithStatusAndWipeData(
+						eq(INSTANCE_ID), submittedListIds.capture(), statusCaptor.capture(), any());
 		assertEquals(2, submittedListIds.getAllValues().size());
 		List<String> list1 = submittedListIds.getAllValues().get(0);
 		List<String> list2 = submittedListIds.getAllValues().get(1);
@@ -127,7 +127,6 @@ public class ReductionStepExecutorServiceImplTest {
 		assertEquals(WorkChunkStatusEnum.FAILED, statuses.get(1));
 	}
 
-
 	@Test
 	public void doExecution_reductionStepWithValidInput_executesAsExpected() {
 		// setup
@@ -140,26 +139,27 @@ public class ReductionStepExecutorServiceImplTest {
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-
 		// when
-		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
+		when(workCursor.getCurrentStep())
+				.thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>)
+						createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
-		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED))).thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(
+						INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(IN_PROGRESS, ERRORED)))
+				.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
-		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class)))
-			.thenReturn(ChunkOutcome.SUCCESS());
+				.thenReturn(chunks.stream());
+		when(myReductionStepWorker.consume(any(ChunkExecutionDetails.class))).thenReturn(ChunkOutcome.SUCCESS());
 		when(myReductionStepWorker.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
-			.thenReturn(RunOutcome.SUCCESS);
+				.thenReturn(RunOutcome.SUCCESS);
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
 
 		// verify
 		ArgumentCaptor<ChunkExecutionDetails> chunkCaptor = ArgumentCaptor.forClass(ChunkExecutionDetails.class);
-		verify(myReductionStepWorker, times(chunks.size()))
-			.consume(chunkCaptor.capture());
+		verify(myReductionStepWorker, times(chunks.size())).consume(chunkCaptor.capture());
 		List<ChunkExecutionDetails> chunksSubmitted = chunkCaptor.getAllValues();
 		assertEquals(chunks.size(), chunksSubmitted.size());
 		for (ChunkExecutionDetails submitted : chunksSubmitted) {
@@ -168,16 +168,15 @@ public class ReductionStepExecutorServiceImplTest {
 
 		assertTrue(result.isSuccessful());
 		ArgumentCaptor<List<String>> chunkIdCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
-			chunkIdCaptor.capture(), eq(WorkChunkStatusEnum.COMPLETED), eq(null));
+		verify(myJobPersistence)
+				.markWorkChunksWithStatusAndWipeData(
+						eq(INSTANCE_ID), chunkIdCaptor.capture(), eq(WorkChunkStatusEnum.COMPLETED), eq(null));
 		List<String> capturedIds = chunkIdCaptor.getValue();
 		assertEquals(chunkIds.size(), capturedIds.size());
 		for (String chunkId : chunkIds) {
 			assertTrue(capturedIds.contains(chunkId));
 		}
-
 	}
-
 
 	@Test
 	public void doExecution_reductionStepWithErrors_returnsFalseAndMarksPreviousChunksFailed() {
@@ -192,12 +191,19 @@ public class ReductionStepExecutorServiceImplTest {
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
 		// when
-		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
+		when(workCursor.getCurrentStep())
+				.thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>)
+						createJobDefinition().getSteps().get(1));
 		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(jobInstance));
-		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID))).thenReturn(chunks.stream());
-		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED))).thenReturn(true);
-		doThrow(new RuntimeException("This is an error")).when(myReductionStepWorker).consume(any(ChunkExecutionDetails.class));
+		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
+				.thenReturn(chunks.stream());
+		when(myJobPersistence.markInstanceAsStatusWhenStatusIn(
+						INSTANCE_ID, StatusEnum.FINALIZE, EnumSet.of(StatusEnum.IN_PROGRESS, StatusEnum.ERRORED)))
+				.thenReturn(true);
+		doThrow(new RuntimeException("This is an error"))
+				.when(myReductionStepWorker)
+				.consume(any(ChunkExecutionDetails.class));
 
 		// test
 		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
@@ -207,7 +213,7 @@ public class ReductionStepExecutorServiceImplTest {
 		ArgumentCaptor<String> chunkIdCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
 		verify(myJobPersistence, times(chunkIds.size()))
-			.onWorkChunkFailed(chunkIdCaptor.capture(), errorCaptor.capture());
+				.onWorkChunkFailed(chunkIdCaptor.capture(), errorCaptor.capture());
 		List<String> chunkIdsCaptured = chunkIdCaptor.getAllValues();
 		List<String> errorsCaptured = errorCaptor.getAllValues();
 		for (int i = 0; i < chunkIds.size(); i++) {
@@ -218,33 +224,25 @@ public class ReductionStepExecutorServiceImplTest {
 			assertTrue(error.contains("Reduction step failed to execute chunk reduction for chunk"));
 		}
 		verify(myJobPersistence, never())
-			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());
-		verify(myReductionStepWorker, never())
-			.run(any(), any());
+				.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());
+		verify(myReductionStepWorker, never()).run(any(), any());
 	}
 
 	@SuppressWarnings("unchecked")
 	private JobDefinition<TestJobParameters> createJobDefinition() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_DEFINITION_ID)
-			.setJobDescription("Reduction job description")
-			.setJobDefinitionVersion(1)
-			.gatedExecution()
-			.setParametersType(TestJobParameters.class)
-			.addFirstStep(
-				"step 1",
-				"description 1",
-				VoidModel.class,
-				mock(IJobStepWorker.class) // we don't care about this step - we just need it
-			)
-			.addFinalReducerStep(
-				REDUCTION_STEP_ID,
-				"description 2",
-				StepOutputData.class,
-				myReductionStepWorker
-			)
-			.build();
+				.setJobDefinitionId(JOB_DEFINITION_ID)
+				.setJobDescription("Reduction job description")
+				.setJobDefinitionVersion(1)
+				.gatedExecution()
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep(
+						"step 1",
+						"description 1",
+						VoidModel.class,
+						mock(IJobStepWorker.class) // we don't care about this step - we just need it
+						)
+				.addFinalReducerStep(REDUCTION_STEP_ID, "description 2", StepOutputData.class, myReductionStepWorker)
+				.build();
 	}
-
-
 }

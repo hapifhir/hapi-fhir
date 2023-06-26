@@ -29,16 +29,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nullable;
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +39,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -74,18 +74,20 @@ public class BaseHapiFhirDaoTest {
 		}
 
 		@Override
-		protected TagDefinition getTagOrNull(TransactionDetails theDetails,
-														 TagTypeEnum theEnum,
-														 String theScheme,
-														 String theTerm,
-														 String theLabel,
-														 String theVersion,
-														 Boolean theUserSelected ) {
+		protected TagDefinition getTagOrNull(
+				TransactionDetails theDetails,
+				TagTypeEnum theEnum,
+				String theScheme,
+				String theTerm,
+				String theLabel,
+				String theVersion,
+				Boolean theUserSelected) {
 			// we need to init synchronization due to what
 			// the underlying class is doing
 			try {
 				TransactionSynchronizationManager.initSynchronization();
-				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel, theVersion, theUserSelected);
+				return super.getTagOrNull(
+						theDetails, theEnum, theScheme, theTerm, theLabel, theVersion, theUserSelected);
 			} finally {
 				TransactionSynchronizationManager.clearSynchronization();
 			}
@@ -129,8 +131,7 @@ public class BaseHapiFhirDaoTest {
 
 		CriteriaBuilder builder = mock(CriteriaBuilder.class);
 		// lenient due to multiple equal calls with different inputs
-		lenient().when(builder.equal(any(), any()))
-			.thenReturn(pred);
+		lenient().when(builder.equal(any(), any())).thenReturn(pred);
 
 		return builder;
 	}
@@ -144,8 +145,7 @@ public class BaseHapiFhirDaoTest {
 
 		Root<TagDefinition> from = mock(Root.class);
 		// lenient due to multiple get calls with different inputs
-		lenient().when(from.get(anyString()))
-			.thenReturn(path);
+		lenient().when(from.get(anyString())).thenReturn(path);
 		return from;
 	}
 
@@ -179,7 +179,7 @@ public class BaseHapiFhirDaoTest {
 		String term = "code123";
 		String label = "hollow world";
 		String version = "v1.0";
-		Boolean userSelected  = true;
+		Boolean userSelected = true;
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType, scheme, term, label);
@@ -193,76 +193,70 @@ public class BaseHapiFhirDaoTest {
 		Root<TagDefinition> from = getMockedFrom();
 
 		// when
-		when(myEntityManager.getCriteriaBuilder())
-			.thenReturn(builder);
-		when(builder.createQuery(any(Class.class)))
-				.thenReturn(cq);
-		when(cq.from(any(Class.class)))
-				.thenReturn(from);
-		when(myEntityManager.createQuery(any(CriteriaQuery.class)))
-			.thenReturn(query);
+		when(myEntityManager.getCriteriaBuilder()).thenReturn(builder);
+		when(builder.createQuery(any(Class.class))).thenReturn(cq);
+		when(cq.from(any(Class.class))).thenReturn(from);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(query);
 		AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 		AtomicInteger getSingleResultInt = new AtomicInteger();
-		when(query.getSingleResult())
-			.thenAnswer(new Answer<TagDefinition>() {
-				private final AtomicInteger count = new AtomicInteger();
-
-				@Override
-				public TagDefinition answer(InvocationOnMock invocationOnMock) throws Throwable {
-					getSingleResultInt.incrementAndGet();
-					if (fakeRaceCondition) {
-						// fake
-						// ensure the first 2 accesses throw to
-						// help fake a race condition (2, or possibly the same,
-						// thread failing to access the resource)
-						if (count.get() < 2) {
-							count.incrementAndGet();
-							throw new NoResultException();
-						}
-					}
-					else {
-						// real
-						if (!atomicBoolean.get()) {
-							throw new NoResultException();
-						}
-					}
-					return tagDefinition;
-				}
-			});
-		AtomicInteger persistInt = new AtomicInteger();
-		doAnswer(new Answer() {
+		when(query.getSingleResult()).thenAnswer(new Answer<TagDefinition>() {
 			private final AtomicInteger count = new AtomicInteger();
 
 			@Override
-			public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-				persistInt.incrementAndGet();
+			public TagDefinition answer(InvocationOnMock invocationOnMock) throws Throwable {
+				getSingleResultInt.incrementAndGet();
 				if (fakeRaceCondition) {
 					// fake
-					if (count.get() < 1) {
+					// ensure the first 2 accesses throw to
+					// help fake a race condition (2, or possibly the same,
+					// thread failing to access the resource)
+					if (count.get() < 2) {
 						count.incrementAndGet();
-						return null;
+						throw new NoResultException();
 					}
-					else {
-						throw new EntityExistsException(raceConditionError);
-					}
-				}
-				else {
+				} else {
 					// real
-					if (!atomicBoolean.getAndSet(true)) {
-						// first thread gets null...
-						return null;
-					} else {
-						// all other threads get entity exists exception
-						throw new EntityExistsException(raceConditionError);
+					if (!atomicBoolean.get()) {
+						throw new NoResultException();
 					}
 				}
+				return tagDefinition;
 			}
-		}).when(myEntityManager).persist(any(Object.class));
+		});
+		AtomicInteger persistInt = new AtomicInteger();
+		doAnswer(new Answer() {
+					private final AtomicInteger count = new AtomicInteger();
+
+					@Override
+					public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+						persistInt.incrementAndGet();
+						if (fakeRaceCondition) {
+							// fake
+							if (count.get() < 1) {
+								count.incrementAndGet();
+								return null;
+							} else {
+								throw new EntityExistsException(raceConditionError);
+							}
+						} else {
+							// real
+							if (!atomicBoolean.getAndSet(true)) {
+								// first thread gets null...
+								return null;
+							} else {
+								// all other threads get entity exists exception
+								throw new EntityExistsException(raceConditionError);
+							}
+						}
+					}
+				})
+				.when(myEntityManager)
+				.persist(any(Object.class));
 
 		ourLogger.setLevel(Level.WARN);
 
 		// test
-//		ExecutorService service = Executors.newFixedThreadPool(threads);
+		//		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ConcurrentHashMap<Integer, TagDefinition> outcomes = new ConcurrentHashMap<>();
 		ConcurrentHashMap<Integer, Throwable> errors = new ConcurrentHashMap<>();
 
@@ -274,7 +268,8 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label, version, userSelected);
+				TagDefinition retTag = myTestDao.getTagOrNull(
+						new TransactionDetails(), tagType, scheme, term, label, version, userSelected);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -291,23 +286,23 @@ public class BaseHapiFhirDaoTest {
 		}
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(latch, (long) threads, TimeUnit.SECONDS);
 
-//		try {
-//			ArrayList<Future> futures = new ArrayList<>();
-//			for (int i = 0; i < threads; i++) {
-//				futures.add(service.submit(task));
-//			}
-//			for (Future f : futures) {
-//				f.get();
-//			}
-//		} finally {
-//			service.shutdown();
-//		}
-//		// should not take a second per thread.
-//		// but will take some time, due to the delays above.
-//		// a second per thread seems like a good threshold.
-//		Assertions.assertTrue(
-//			service.awaitTermination(threads, TimeUnit.SECONDS)
-//		);
+		//		try {
+		//			ArrayList<Future> futures = new ArrayList<>();
+		//			for (int i = 0; i < threads; i++) {
+		//				futures.add(service.submit(task));
+		//			}
+		//			for (Future f : futures) {
+		//				f.get();
+		//			}
+		//		} finally {
+		//			service.shutdown();
+		//		}
+		//		// should not take a second per thread.
+		//		// but will take some time, due to the delays above.
+		//		// a second per thread seems like a good threshold.
+		//		Assertions.assertTrue(
+		//			service.awaitTermination(threads, TimeUnit.SECONDS)
+		//		);
 
 		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), "Not enough gets " + getSingleResultInt.get());
 		Assertions.assertEquals(threads, persistInt.get(), "Not enough persists " + persistInt.get());
@@ -315,16 +310,15 @@ public class BaseHapiFhirDaoTest {
 		// verify
 		Assertions.assertEquals(1, outcomes.size());
 		Assertions.assertEquals(threads, counter.get());
-		Assertions.assertEquals(0, errors.size(),
-			errors.values().stream().map(Throwable::getMessage)
-				.collect(Collectors.joining(", ")));
+		Assertions.assertEquals(
+				0,
+				errors.size(),
+				errors.values().stream().map(Throwable::getMessage).collect(Collectors.joining(", ")));
 
 		// verify we logged some race conditions
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myAppender, Mockito.atLeastOnce())
-			.doAppend(captor.capture());
-		assertTrue(captor.getAllValues().get(0).getMessage()
-			.contains(raceConditionError));
+		verify(myAppender, Mockito.atLeastOnce()).doAppend(captor.capture());
+		assertTrue(captor.getAllValues().get(0).getMessage().contains(raceConditionError));
 	}
 
 	@Test
@@ -349,18 +343,12 @@ public class BaseHapiFhirDaoTest {
 		Root<TagDefinition> from = getMockedFrom();
 
 		// when
-		when(myEntityManager.getCriteriaBuilder())
-			.thenReturn(builder);
-		when(builder.createQuery(any(Class.class)))
-			.thenReturn(cq);
-		when(cq.from(any(Class.class)))
-			.thenReturn(from);
-		when(myEntityManager.createQuery(any(CriteriaQuery.class)))
-			.thenReturn(query);
-		when(query.getSingleResult())
-			.thenThrow(new NoResultException(readError));
-		doThrow(new RuntimeException(exMsg))
-			.when(myEntityManager).persist(any(Object.class));
+		when(myEntityManager.getCriteriaBuilder()).thenReturn(builder);
+		when(builder.createQuery(any(Class.class))).thenReturn(cq);
+		when(cq.from(any(Class.class))).thenReturn(from);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(query);
+		when(query.getSingleResult()).thenThrow(new NoResultException(readError));
+		doThrow(new RuntimeException(exMsg)).when(myEntityManager).persist(any(Object.class));
 
 		// test
 		try {
@@ -371,20 +359,18 @@ public class BaseHapiFhirDaoTest {
 			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-			verify(myAppender, Mockito.times(10))
-				.doAppend(appenderCaptor.capture());
+			verify(myAppender, Mockito.times(10)).doAppend(appenderCaptor.capture());
 			List<ILoggingEvent> events = appenderCaptor.getAllValues();
 			assertEquals(10, events.size());
 			for (int i = 0; i < 10; i++) {
 				String actualMsg = events.get(i).getMessage();
 				assertEquals(
-					"Tag read/write failed: "
-						+ exMsg
-						+ ". "
-						+ "This is not a failure on its own, "
-						+ "but could be useful information in the result of an actual failure.",
-					actualMsg
-				);
+						"Tag read/write failed: "
+								+ exMsg
+								+ ". "
+								+ "This is not a failure on its own, "
+								+ "but could be useful information in the result of an actual failure.",
+						actualMsg);
 			}
 		}
 	}

@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.function.Predicate;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,9 +34,12 @@ public class XverExtensionsValidationTest {
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(
+				0,
+				validationResult.getMessages().stream()
+						.filter(errorMessagePredicate())
+						.count());
 	}
-
 
 	@Test
 	public void validation_XverExtensions_ReturnsNoErrors() throws IOException {
@@ -46,7 +49,11 @@ public class XverExtensionsValidationTest {
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(
+				0,
+				validationResult.getMessages().stream()
+						.filter(errorMessagePredicate())
+						.count());
 	}
 
 	@Test
@@ -58,8 +65,15 @@ public class XverExtensionsValidationTest {
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(1, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
-		SingleValidationMessage errorMessage = validationResult.getMessages().stream().filter(errorMessagePredicate()).findFirst().get();
+		assertEquals(
+				1,
+				validationResult.getMessages().stream()
+						.filter(errorMessagePredicate())
+						.count());
+		SingleValidationMessage errorMessage = validationResult.getMessages().stream()
+				.filter(errorMessagePredicate())
+				.findFirst()
+				.get();
 		assertEquals("Extension_EXT_Type", errorMessage.getMessageId());
 	}
 
@@ -82,7 +96,8 @@ public class XverExtensionsValidationTest {
 	@Nonnull
 	private static MedicationRequest getMedicationRequest() {
 		MedicationRequest med_req;
-		med_req = ourCtx.newJsonParser().parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
+		med_req = ourCtx.newJsonParser()
+				.parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
 		return med_req;
 	}
 
@@ -91,9 +106,6 @@ public class XverExtensionsValidationTest {
 		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(ourCtx);
 		npmPackageSupport.loadPackageFromClasspath("classpath:package/hl7.fhir.xver-extensions-0.0.11.tgz");
 
-		return new ValidationSupportChain(
-			new DefaultProfileValidationSupport(ourCtx),
-			npmPackageSupport
-		);
+		return new ValidationSupportChain(new DefaultProfileValidationSupport(ourCtx), npmPackageSupport);
 	}
 }

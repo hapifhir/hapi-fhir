@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -50,6 +48,7 @@ import static org.mockito.Mockito.when;
 public class PagingTest {
 
 	private FhirContext ourContext = FhirContext.forR4();
+
 	@RegisterExtension
 	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourContext);
 
@@ -60,12 +59,12 @@ public class PagingTest {
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 	}
-
 
 	/**
 	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/2509
@@ -82,8 +81,10 @@ public class PagingTest {
 		when(pagingProvider.canStoreSearchResults()).thenReturn(true);
 		when(pagingProvider.getDefaultPageSize()).thenReturn(10);
 		when(pagingProvider.getMaximumPageSize()).thenReturn(50);
-		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
-		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
+		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class)))
+				.thenReturn("ABCD");
+		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString()))
+				.thenReturn(ourBundleProvider);
 
 		String nextLink;
 		String base = "http://localhost:" + myServerExtension.getPort();
@@ -228,8 +229,10 @@ public class PagingTest {
 		when(pagingProvider.canStoreSearchResults()).thenReturn(true);
 		when(pagingProvider.getDefaultPageSize()).thenReturn(10);
 		when(pagingProvider.getMaximumPageSize()).thenReturn(50);
-		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
-		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
+		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class)))
+				.thenReturn("ABCD");
+		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString()))
+				.thenReturn(ourBundleProvider);
 
 		String nextLink;
 		String base = "http://localhost:" + myServerExtension.getPort();
@@ -250,15 +253,15 @@ public class PagingTest {
 			assertEquals(0, bundle.getEntry().size());
 		}
 	}
+
 	private void checkParam(String theUriString, String theCheckedParam, String theExpectedValue) {
 		Optional<String> paramValue = URLEncodedUtils.parse(URI.create(theUriString), CHARSET_UTF8).stream()
-			.filter(nameValuePair -> nameValuePair.getName().equals(theCheckedParam))
-			.map(NameValuePair::getValue)
-			.findAny();
+				.filter(nameValuePair -> nameValuePair.getName().equals(theCheckedParam))
+				.map(NameValuePair::getValue)
+				.findAny();
 		assertTrue(paramValue.isPresent(), "No parameter '" + theCheckedParam + "' present in response");
 		assertEquals(theExpectedValue, paramValue.get());
 	}
-
 
 	private void initBundleProvider(int theResourceQty) {
 		List<IBaseResource> retVal = new ArrayList<>();
@@ -270,7 +273,6 @@ public class PagingTest {
 		}
 		ourBundleProvider = new SimpleBundleProvider(retVal);
 	}
-
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -286,8 +288,5 @@ public class PagingTest {
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 	}
-
-
 }

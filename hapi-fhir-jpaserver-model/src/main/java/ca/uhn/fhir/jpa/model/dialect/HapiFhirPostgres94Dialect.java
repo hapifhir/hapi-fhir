@@ -30,7 +30,6 @@ public class HapiFhirPostgres94Dialect extends PostgreSQL94Dialect {
 
 	public HapiFhirPostgres94Dialect() {
 		super();
-		registerColumnType( Types.CLOB, "oid" );
+		registerColumnType(Types.CLOB, "oid");
 	}
-
 }

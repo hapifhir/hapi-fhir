@@ -32,7 +32,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 public class CapturingInterceptorTest {
 
 	@Test
@@ -92,7 +91,7 @@ public class CapturingInterceptorTest {
 		assertThat("Some content", equalTo(IOUtils.toString(actualResponse.createReader())));
 		verify(expectedResponse).bufferEntity();
 
-		//A second call should not throw an exception (InpuStreamEntity is not repeatable)
+		// A second call should not throw an exception (InpuStreamEntity is not repeatable)
 		IOUtils.toString(actualResponse.createReader());
 	}
 
@@ -124,7 +123,6 @@ public class CapturingInterceptorTest {
 
 		assertEquals(Msg.code(1404) + "Unable to buffer the entity for capturing", exception.getMessage());
 		assertEquals(expectedCause, exception.getCause());
-
 	}
 
 	@Test
@@ -142,8 +140,7 @@ public class CapturingInterceptorTest {
 		assertThat("Some content", equalTo(IOUtils.toString(actualResponse.createReader())));
 		verify(expectedResponse, times(0)).bufferEntity();
 
-		//A second call should not throw an exception (StringEntity is repeatable)
+		// A second call should not throw an exception (StringEntity is repeatable)
 		IOUtils.toString(actualResponse.createReader());
 	}
-
 }

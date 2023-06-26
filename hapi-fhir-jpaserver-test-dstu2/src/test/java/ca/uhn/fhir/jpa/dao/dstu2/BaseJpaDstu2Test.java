@@ -72,9 +72,9 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,140 +85,188 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	protected ISearchParamRegistryController mySearchParamRegistryController;
+
 	@Autowired
 	protected ApplicationContext myAppCtx;
+
 	@Autowired
 	protected IResourceReindexingSvc myResourceReindexingSvc;
+
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu2")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
+
 	@Autowired
 	@Qualifier("mySearchParameterDaoDstu2")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+
 	@Autowired
 	@Qualifier("myCommunicationDaoDstu2")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
+
 	@Autowired
 	@Qualifier("myBundleDaoDstu2")
 	protected IFhirResourceDao<Bundle> myBundleDao;
+
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
+
 	@Autowired
 	@Qualifier("myDiagnosticOrderDaoDstu2")
 	protected IFhirResourceDao<DiagnosticOrder> myDiagnosticOrderDao;
+
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu2")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+
 	@Autowired
 	@Qualifier("myBinaryDaoDstu2")
 	protected IFhirResourceDao<Binary> myBinaryDao;
+
 	@Autowired
 	@Qualifier("myEncounterDaoDstu2")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
 	//	@PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
+
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu2")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
+
 	@Autowired
 	@Qualifier("myLocationDaoDstu2")
 	protected IFhirResourceDao<Location> myLocationDao;
+
 	@Autowired
 	@Qualifier("myMediaDaoDstu2")
 	protected IFhirResourceDao<Media> myMediaDao;
+
 	@Autowired
 	@Qualifier("myMedicationAdministrationDaoDstu2")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
+
 	@Autowired
 	@Qualifier("myMedicationDaoDstu2")
 	protected IFhirResourceDao<Medication> myMedicationDao;
+
 	@Autowired
 	@Qualifier("myMedicationOrderDaoDstu2")
 	protected IFhirResourceDao<MedicationOrder> myMedicationOrderDao;
+
 	@Autowired
 	@Qualifier("myObservationDaoDstu2")
 	protected IFhirResourceDao<Observation> myObservationDao;
+
 	@Autowired
 	@Qualifier("myOrganizationDaoDstu2")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
+
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
+
 	@Autowired
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+
 	@Autowired
 	@Qualifier("myConformanceDaoDstu2")
 	protected IFhirResourceDao<Conformance> myConformanceDao;
+
 	@Autowired
 	@Qualifier("myGroupDaoDstu2")
 	protected IFhirResourceDao<Group> myGroupDao;
+
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu2")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+
 	@Autowired
 	@Qualifier("myQuestionnaireDaoDstu2")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoDstu2")
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
+
 	@Autowired
 	@Qualifier("myResourceProvidersDstu2")
 	protected ResourceProviderFactory myResourceProviders;
+
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
+
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu2")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
+
 	@Autowired
 	@Qualifier("mySubstanceDaoDstu2")
 	protected IFhirResourceDao<Substance> mySubstanceDao;
+
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
+
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+
 	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+
 	@Autowired
 	@Qualifier("mySystemProviderDstu2")
 	protected JpaSystemProvider mySystemProvider;
+
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
 	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
+
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkExportJobSchedulingHelper;
+
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
 
-
 	@RegisterExtension
-	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension =
+			new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
 
 	@BeforeEach
 	public void beforeFlushFT() {
@@ -231,7 +279,13 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
+		purgeDatabase(
+				myStorageSettings,
+				mySystemDao,
+				myResourceReindexingSvc,
+				mySearchCoordinatorSvc,
+				mySearchParamRegistry,
+				myBulkExportJobSchedulingHelper);
 	}
 
 	@BeforeEach

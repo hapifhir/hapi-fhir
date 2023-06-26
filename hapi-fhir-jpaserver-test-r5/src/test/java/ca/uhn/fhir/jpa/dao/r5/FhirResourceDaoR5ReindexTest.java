@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5ReindexTest.class);
-
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5ReindexTest.class);
 
 	@Test
 	public void testReindexDeletedSearchParameter() {
@@ -35,24 +35,39 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 		mySearchParameterDao.delete(id, mySrd);
 
 		runInTransaction(() -> {
-			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE set sp_uri_present = true").executeUpdate());
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			assertEquals(
+					1,
+					myEntityManager
+							.createNativeQuery("UPDATE HFJ_RESOURCE set sp_uri_present = true")
+							.executeUpdate());
+			ResourceTable table =
+					myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
 			assertTrue(table.isParamsUriPopulated());
-			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
+			ResourceIndexedSearchParamUri uri =
+					new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
 			uri.setResource(table);
 			uri.calculateHashes();
 			myResourceIndexedSearchParamUriDao.save(uri);
 		});
 
 		Parameters outcome = (Parameters) myInstanceReindexService.reindex(mySrd, id);
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue(), containsString("Reindex completed in"));
-		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
+		ourLog.info(
+				"Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(
+				outcome.getParameter("Narrative").getValueStringType().getValue(),
+				containsString("Reindex completed in"));
+		assertEquals(
+				"REMOVE",
+				outcome.getParameter("UriIndexes")
+						.getPartFirstRep()
+						.getPartFirstRep()
+						.getValueCodeType()
+						.getValue());
 
 		runInTransaction(() -> {
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
+			ResourceTable table =
+					myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
 			assertFalse(table.isParamsUriPopulated());
 		});
 	}
-
 }

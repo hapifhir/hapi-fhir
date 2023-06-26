@@ -26,21 +26,23 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query="
+				+ UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX +"{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAM\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertEquals(
+					TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" + "  \"name\":[{\n"
+							+ "    \"family\":\"FAM\",\n"
+							+ "    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n"
+							+ "  },{\n"
+							+ "    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n"
+							+ "  }]\n"
+							+ "}"
+							+ GraphQLProviderTestUtil.DATA_SUFFIX),
+					TestUtil.stripWhitespace(resp));
 		}
-
 	}
 
 	@Test
@@ -53,41 +55,33 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX +"{\n" +
-				"  \"PatientList\":[{\n" +
-				"    \"name\":[{\n" +
-				"      \"family\":\"FAM\",\n" +
-				"      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"    },{\n" +
-				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"    }]\n" +
-				"  },{\n" +
-				"    \"name\":[{\n" +
-				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
-				"    }]\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertEquals(
+					TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" + "  \"PatientList\":[{\n"
+							+ "    \"name\":[{\n"
+							+ "      \"family\":\"FAM\",\n"
+							+ "      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n"
+							+ "    },{\n"
+							+ "      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n"
+							+ "    }]\n"
+							+ "  },{\n"
+							+ "    \"name\":[{\n"
+							+ "      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n"
+							+ "    }]\n"
+							+ "  }]\n"
+							+ "}"
+							+ GraphQLProviderTestUtil.DATA_SUFFIX),
+					TestUtil.stripWhitespace(resp));
 		}
-
 	}
 
 	private void initTestPatients() {
 		Patient p = new Patient();
-		p.addName()
-			.setFamily("FAM")
-			.addGiven("GIVEN1")
-			.addGiven("GIVEN2");
-		p.addName()
-			.addGiven("GivenOnly1")
-			.addGiven("GivenOnly2");
+		p.addName().setFamily("FAM").addGiven("GIVEN1").addGiven("GIVEN2");
+		p.addName().addGiven("GivenOnly1").addGiven("GivenOnly2");
 		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.addName()
-			.addGiven("GivenOnlyB1")
-			.addGiven("GivenOnlyB2");
+		p.addName().addGiven("GivenOnlyB1").addGiven("GivenOnlyB2");
 		myClient.create().resource(p).execute();
 	}
-
-
 }

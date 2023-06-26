@@ -25,10 +25,13 @@ class RequestPartitionHelperSvcTest {
 
 	@Mock
 	PartitionSettings myPartitionSettings;
+
 	@Mock
 	IPartitionLookupSvc myPartitionLookupSvc;
+
 	@Mock
 	FhirContext myFhirContext;
+
 	@Mock
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -45,7 +48,8 @@ class RequestPartitionHelperSvcTest {
 		when(myPartitionLookupSvc.getPartitionById(PARTITION_ID)).thenReturn(ourPartitionEntity);
 
 		// execute
-		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, "Patient", new IdType("Patient/123"));
+		RequestPartitionId result =
+				mySvc.determineReadPartitionForRequestForRead(srd, "Patient", new IdType("Patient/123"));
 
 		// verify
 		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
@@ -70,5 +74,4 @@ class RequestPartitionHelperSvcTest {
 		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
 		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
 	}
-
 }

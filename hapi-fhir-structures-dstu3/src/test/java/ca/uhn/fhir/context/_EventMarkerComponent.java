@@ -11,24 +11,35 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 
 @Block
-public class _EventMarkerComponent extends BackboneElement implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
+public class _EventMarkerComponent extends BackboneElement
+		implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
 
 	/**
 	 * eventType (extension)
 	 */
-	@Child(name = FIELD_EVENTTYPE, min = 1, max = 1, type = {Coding.class})
+	@Child(
+			name = FIELD_EVENTTYPE,
+			min = 1,
+			max = 1,
+			type = {Coding.class})
 	@Description(shortDefinition = "", formalDefinition = "The type of event marker on an episode of care.")
 	@Extension(url = EXTURL_EVENTTYPE, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.Coding ourEventType;
+
 	public static final String EXTURL_EVENTTYPE = "http://myfhir.dk/x/MyEpisodeOfCare-event-marker/eventType";
 	public static final String FIELD_EVENTTYPE = "eventType";
 	/**
 	 * eventTimestamp (extension)
 	 */
-	@Child(name = FIELD_EVENTTIMESTAMP, min = 1, max = 1, type = {DateTimeType.class})
+	@Child(
+			name = FIELD_EVENTTIMESTAMP,
+			min = 1,
+			max = 1,
+			type = {DateTimeType.class})
 	@Description(shortDefinition = "", formalDefinition = "Time in which the event marker was created.")
 	@Extension(url = EXTURL_EVENTTIMESTAMP, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.DateTimeType ourEventTimestamp;
+
 	public static final String EXTURL_EVENTTIMESTAMP = "http://myfhir.dk/x/MyEpisodeOfCare-event-marker/eventTimestamp";
 	public static final String FIELD_EVENTTIMESTAMP = "eventTimestamp";
 
@@ -58,7 +69,8 @@ public class _EventMarkerComponent extends BackboneElement implements org.hl7.fh
 			return false;
 		}
 		_EventMarkerComponent that = (_EventMarkerComponent) other;
-		return compareDeep(ourEventType, that.ourEventType, true) && compareDeep(ourEventTimestamp, that.ourEventTimestamp, true);
+		return compareDeep(ourEventType, that.ourEventType, true)
+				&& compareDeep(ourEventTimestamp, that.ourEventTimestamp, true);
 	}
 
 	@Override
@@ -77,8 +89,7 @@ public class _EventMarkerComponent extends BackboneElement implements org.hl7.fh
 	}
 
 	public org.hl7.fhir.dstu3.model.Coding _getEventType() {
-		if (ourEventType == null)
-			ourEventType = new org.hl7.fhir.dstu3.model.Coding();
+		if (ourEventType == null) ourEventType = new org.hl7.fhir.dstu3.model.Coding();
 		return ourEventType;
 	}
 
@@ -88,8 +99,7 @@ public class _EventMarkerComponent extends BackboneElement implements org.hl7.fh
 	}
 
 	public org.hl7.fhir.dstu3.model.DateTimeType _getEventTimestamp() {
-		if (ourEventTimestamp == null)
-			ourEventTimestamp = new org.hl7.fhir.dstu3.model.DateTimeType();
+		if (ourEventTimestamp == null) ourEventTimestamp = new org.hl7.fhir.dstu3.model.DateTimeType();
 		return ourEventTimestamp;
 	}
 
@@ -97,5 +107,4 @@ public class _EventMarkerComponent extends BackboneElement implements org.hl7.fh
 		ourEventTimestamp = theValue;
 		return this;
 	}
-
 }

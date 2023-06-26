@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -26,12 +25,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,7 +44,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 public class BinaryAccessProviderTest {
 	public static final byte[] SOME_BYTES = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
@@ -56,19 +54,24 @@ public class BinaryAccessProviderTest {
 
 	@Spy
 	protected ServletRequestDetails myRequestDetails;
+
 	@Spy
 	protected HttpServletRequest theServletRequest;
+
 	@Spy
 	protected HttpServletResponse theServletResponse;
+
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
 	@Spy
 	private IFhirResourceDao myResourceDao;
+
 	@Spy
 	protected IBinaryStorageSvc myBinaryStorageSvc;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
 
 	@BeforeEach
 	public void before() {
@@ -108,7 +111,12 @@ public class BinaryAccessProviderTest {
 		myBinaryAccessProvider.setTargetAttachmentIdForUnitTest(true);
 
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (IOException e) {
 		}
 		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
@@ -128,9 +136,16 @@ public class BinaryAccessProviderTest {
 		myBinaryAccessProvider.setTargetAttachmentIdForUnitTest(true);
 
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
-			assertEquals(Msg.code(1331) + "Can not find the requested binary content. It may have been deleted.", e.getMessage());
+			assertEquals(
+					Msg.code(1331) + "Can not find the requested binary content. It may have been deleted.",
+					e.getMessage());
 		}
 		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
 	}
@@ -146,7 +161,12 @@ public class BinaryAccessProviderTest {
 		when(theServletResponse.getOutputStream()).thenReturn(sos);
 
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (IOException e) {
 		}
 		verify(theServletResponse, times(1)).setStatus(200);
@@ -167,9 +187,19 @@ public class BinaryAccessProviderTest {
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
 
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
-			assertEquals(String.format(Msg.code(1332) + "The resource with ID %s has no data at path: DocumentReference.content.attachment", docRef.getId()), e.getMessage());
+			assertEquals(
+					String.format(
+							Msg.code(1332)
+									+ "The resource with ID %s has no data at path: DocumentReference.content.attachment",
+							docRef.getId()),
+					e.getMessage());
 		}
 	}
 
@@ -180,7 +210,12 @@ public class BinaryAccessProviderTest {
 		content.getAttachment().setContentType("application/octet-stream");
 		docRef.getIdElement().setParts(null, "DocumentReference", "123", null);
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1340) + "Unknown/unsupported resource type: DocumentReference", e.getMessage());
 		}
@@ -190,7 +225,12 @@ public class BinaryAccessProviderTest {
 	public void testBinaryAccessRead_EmptyResourceType() {
 		DocumentReference docRef = createDocRef();
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1337) + "No resource type specified", e.getMessage());
 		}
@@ -201,7 +241,8 @@ public class BinaryAccessProviderTest {
 		DocumentReference docRef = createDocRef();
 		docRef.getIdElement().setParts(null, "DocumentReference", "123", null);
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1339) + "No path specified", e.getMessage());
 		}
@@ -212,7 +253,8 @@ public class BinaryAccessProviderTest {
 		DocumentReference docRef = createDocRef();
 		docRef.getIdElement().setParts(null, "DocumentReference", null, null);
 		try {
-			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessRead(
+					docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1338) + "No ID specified", e.getMessage());
 		}
@@ -232,7 +274,12 @@ public class BinaryAccessProviderTest {
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
-			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 			assertNotNull(outcome);
 			assertEquals(docRef.getId(), outcome.getIdElement().getValue());
 		} catch (IOException e) {
@@ -254,13 +301,26 @@ public class BinaryAccessProviderTest {
 		when(myResourceDao.update(docRef, myRequestDetails)).thenReturn(daoOutcome);
 		when(theServletRequest.getContentType()).thenReturn("Integer");
 		when(theServletRequest.getContentLength()).thenReturn(15);
-		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
+		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer"))
+				.thenReturn(true);
 		myRequestDetails.setServletRequest(theServletRequest);
-		doReturn(sd).when(myBinaryStorageSvc).storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(RequestDetails.class));
+		doReturn(sd)
+				.when(myBinaryStorageSvc)
+				.storeBlob(
+						eq(docRef.getIdElement()),
+						isNull(),
+						eq("Integer"),
+						any(InputStream.class),
+						any(RequestDetails.class));
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
-			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 			assertNotNull(outcome);
 			assertEquals(docRef.getId(), outcome.getIdElement().getValue());
 		} catch (IOException e) {
@@ -278,7 +338,12 @@ public class BinaryAccessProviderTest {
 		when(theServletRequest.getContentType()).thenReturn("");
 
 		try {
-			myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1333) + "No content-target supplied", e.getMessage());
 		}
@@ -291,7 +356,12 @@ public class BinaryAccessProviderTest {
 		content.getAttachment().setContentType("application/octet-stream");
 		docRef.getIdElement().setParts(null, "DocumentReference", "123", null);
 		try {
-			myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1340) + "Unknown/unsupported resource type: DocumentReference", e.getMessage());
 		}
@@ -301,7 +371,12 @@ public class BinaryAccessProviderTest {
 	public void testBinaryAccessWrite_EmptyResourceType() {
 		DocumentReference docRef = createDocRef();
 		try {
-			myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(),
+					new StringType("DocumentReference.content.attachment"),
+					myRequestDetails,
+					theServletRequest,
+					theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1337) + "No resource type specified", e.getMessage());
 		}
@@ -312,7 +387,8 @@ public class BinaryAccessProviderTest {
 		DocumentReference docRef = createDocRef();
 		docRef.getIdElement().setParts(null, "DocumentReference", "123", null);
 		try {
-			myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1339) + "No path specified", e.getMessage());
 		}
@@ -323,7 +399,8 @@ public class BinaryAccessProviderTest {
 		DocumentReference docRef = createDocRef();
 		docRef.getIdElement().setParts(null, "DocumentReference", null, null);
 		try {
-			myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
+			myBinaryAccessProvider.binaryAccessWrite(
+					docRef.getIdElement(), new StringType(""), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (InvalidRequestException | IOException e) {
 			assertEquals(Msg.code(1338) + "No ID specified", e.getMessage());
 		}

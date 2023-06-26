@@ -63,8 +63,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
+
 	private MyTestInterceptor myTestInterceptor = new MyTestInterceptor();
 
 	@AfterEach
@@ -99,7 +101,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextModifyResourceId = true;
 
 		// Create a subscription
-		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+		CountDownLatch registerLatch =
+				registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
 		registerLatch.await(10, TimeUnit.SECONDS);
 
@@ -108,11 +111,14 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		sendObservation();
 		deliveryLatch.await(10, TimeUnit.SECONDS);
 
-
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
-		assertEquals("Observation/A/_history/1", ourObservationProvider.getStoredResources().get(0).getId());
+		assertEquals(
+				Constants.CT_FHIR_JSON_NEW,
+				ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(
+				"Observation/A/_history/1",
+				ourObservationProvider.getStoredResources().get(0).getId());
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
 	}
@@ -122,7 +128,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextAddHeader = true;
 
 		// Create a subscription
-		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+		CountDownLatch registerLatch =
+				registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
 		registerLatch.await(10, TimeUnit.SECONDS);
 
@@ -133,7 +140,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals(
+				Constants.CT_FHIR_JSON_NEW,
+				ourRestfulServer.getRequestContentTypes().get(0));
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
 		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: Bar"));
@@ -146,7 +155,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		try {
 
 			// Create a subscription
-			CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+			CountDownLatch registerLatch =
+					registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 			createSubscription("Observation?status=final", "application/fhir+json");
 			registerLatch.await(10, TimeUnit.SECONDS);
 
@@ -173,7 +183,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextBeforeRestHookDeliveryReturn = false;
 
 		// Create a subscription
-		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+		CountDownLatch registerLatch =
+				registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
 		registerLatch.await(10, TimeUnit.SECONDS);
 
@@ -188,9 +199,13 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextBeforeRestHookDeliveryReturn = false;
 
 		// Create a subscription
-		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+		CountDownLatch registerLatch =
+				registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		Subscription subscription = newSubscription("Observation?status=final", "application/fhir+json");
-		subscription.getChannel().setEndpoint("http://localhost:" + ourListenerPort + "/this/url/does/not/exist"); // this better not succeed!
+		subscription
+				.getChannel()
+				.setEndpoint(
+						"http://localhost:" + ourListenerPort + "/this/url/does/not/exist"); // this better not succeed!
 
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
@@ -225,16 +240,20 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		List<String> messages = new ArrayList<>();
 		Logger loggerMock = mock(Logger.class);
 		doAnswer(t -> {
-			Object msg = t.getArguments()[0];
-			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
-			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
-			messages.add(formattedMessage);
-			return null;
-		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
+					Object msg = t.getArguments()[0];
+					Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
+					String formattedMessage =
+							MessageFormatter.arrayFormat((String) msg, args).getMessage();
+					messages.add(formattedMessage);
+					return null;
+				})
+				.when(loggerMock)
+				.debug(any(), ArgumentMatchers.<Object[]>any());
 
 		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
-		SubscriptionDebugLogInterceptor interceptor2 = new SubscriptionDebugLogInterceptor(t -> loggerMock, Level.DEBUG);
+		SubscriptionDebugLogInterceptor interceptor2 =
+				new SubscriptionDebugLogInterceptor(t -> loggerMock, Level.DEBUG);
 		myInterceptorRegistry.registerInterceptor(interceptor2);
 		try {
 
@@ -254,15 +273,26 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			waitForQueueToDrain();
 			ourObservationProvider.waitForCreateCount(0);
 			ourObservationProvider.waitForUpdateCount(1);
-			assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+			assertEquals(
+					Constants.CT_FHIR_JSON_NEW,
+					ourRestfulServer.getRequestContentTypes().get(0));
 
-			assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+			assertEquals(
+					"1",
+					ourObservationProvider
+							.getStoredResources()
+							.get(0)
+							.getIdElement()
+							.getVersionIdPart());
 
 			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 			assertNotNull(subscriptionTemp);
 
 			subscriptionTemp.setCriteria(criteria1);
-			myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+			myClient.update()
+					.resource(subscriptionTemp)
+					.withId(subscriptionTemp.getIdElement())
+					.execute();
 			waitForQueueToDrain();
 
 			sendObservation(code, "SNOMED-CT");
@@ -274,7 +304,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
-			assertThat(messages.get(messages.size() - 1), matchesPattern("Finished delivery of resource Observation.*"));
+			assertThat(
+					messages.get(messages.size() - 1), matchesPattern("Finished delivery of resource Observation.*"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -314,12 +345,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Configuration
 	static class MyTestCtxConfig {
 
-
 		@Bean
 		public MyTestInterceptor interceptor() {
 			return new MyTestInterceptor();
 		}
-
 	}
 
 	/**
@@ -336,7 +365,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 
 		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+		public boolean beforeRestHookDelivery(
+				ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			if (ourNextModifyResourceId) {
 				theDeliveryMessage.getPayload(ourCtx).setId(new IdType("Observation/A"));
 			}
@@ -349,11 +379,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 
 		@Hook(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY)
-		public void afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+		public void afterRestHookDelivery(
+				ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			ourHitAfterRestHookDelivery = true;
 		}
-
 	}
-
-
 }

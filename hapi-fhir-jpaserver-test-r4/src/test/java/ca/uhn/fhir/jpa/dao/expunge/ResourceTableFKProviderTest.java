@@ -6,10 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -17,21 +13,25 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.sql.DataSource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-
 
 class ResourceTableFKProviderTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceTableFKProviderTest.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
 	@Autowired
 	ResourceTableFKProvider myResourceTableFKProvider;
+
 	@Autowired
 	private DataSource myDataSource;
-
 
 	@Test
 	public void testWeHaveAllForeignKeys() throws SQLException {
@@ -57,9 +57,7 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 					ourLog.info("Found FK to HFJ_RESOURCE: {}", foreignKey);
 					expected.add(foreignKey);
 				}
-
 			}
-
 		}
 
 		// Add the extra FKs that are not available in the CROSS_REFERENCES table

@@ -78,9 +78,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		// This could be stricter, but we don't want this to be brittle.
 		@Override
 		public int hashCode() {
-			return new HashCodeBuilder(17, 37)
-				.append(size())
-				.toHashCode();
+			return new HashCodeBuilder(17, 37).append(size()).toHashCode();
 		}
 	}
 }

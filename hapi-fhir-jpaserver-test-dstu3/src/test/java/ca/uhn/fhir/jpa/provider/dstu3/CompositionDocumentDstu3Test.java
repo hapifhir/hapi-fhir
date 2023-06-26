@@ -38,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompositionDocumentDstu3Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(CompositionDocumentDstu3Test.class);
 	private String orgId;
 	private String patId;
 	private List<String> myObsIds;
@@ -56,7 +57,8 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	public void after() throws Exception {
 		super.after();
 
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 	}
 
 	@Override
@@ -69,18 +71,33 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create()
+				.resource(org)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create()
+				.resource(patient)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Encounter enc = new Encounter();
 		enc.setStatus(EncounterStatus.ARRIVED);
 		enc.getSubject().setReference(patId);
 		enc.getServiceProvider().setReference(orgId);
-		encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
+		encId = myClient.create()
+				.resource(enc)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		ListResource listResource = new ListResource();
 
@@ -90,13 +107,23 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create()
+					.resource(obs)
+					.execute()
+					.getId()
+					.toUnqualifiedVersionless()
+					.getValue();
 			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
 			myObs.add(obs);
 			myObsIds.add(obsId);
 		}
 
-		listId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		listId = myClient.create()
+				.resource(listResource)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 
 		Composition composition = new Composition();
 		composition.setSubject(new Reference(patId));
@@ -108,7 +135,12 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		for (String obsId : myObsIds) {
 			composition.addSection().addEntry(new Reference(obsId));
 		}
-		compId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		compId = myClient.create()
+				.resource(composition)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 	}
 
 	@Test
@@ -116,19 +148,26 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
-		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(
+				"Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		bundle.getEntry().stream()
-			.forEach(entry -> {
-				assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
-			});
+		bundle.getEntry().stream().forEach(entry -> {
+			assertThat(
+					entry.getFullUrl(),
+					is(equalTo(
+							entry.getResource().getIdElement().toVersionless().toString())));
+		});
 
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
 		assertNull(bundle.getLinkOrCreate("next").getUrl());
 
 		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+			actual.add(nextEntry
+					.getResource()
+					.getIdElement()
+					.toUnqualifiedVersionless()
+					.getValue());
 		}
 
 		ourLog.info("Found IDs: {}", actual);
@@ -146,8 +185,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
-		} 
+		}
 		return bundle;
 	}
-
 }

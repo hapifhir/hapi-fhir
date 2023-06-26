@@ -10,24 +10,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidatorInstantiatorDstu2Test {
 
-
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-   @Test
-   public void testValidator() {
-      
-      FhirValidator val = ourCtx.newValidator();
-      val.validateWithResult(new Patient());
-      
-      // We have a full classpath, so take advantage
-      assertTrue(val.isValidateAgainstStandardSchema());
-      assertTrue(val.isValidateAgainstStandardSchematron());
-      
-   }
-   
+
+	@Test
+	public void testValidator() {
+
+		FhirValidator val = ourCtx.newValidator();
+		val.validateWithResult(new Patient());
+
+		// We have a full classpath, so take advantage
+		assertTrue(val.isValidateAgainstStandardSchema());
+		assertTrue(val.isValidateAgainstStandardSchematron());
+	}
 }

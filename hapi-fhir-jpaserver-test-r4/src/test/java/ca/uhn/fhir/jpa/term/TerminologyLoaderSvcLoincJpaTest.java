@@ -46,14 +46,19 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(38, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
-			TermCodeSystemVersion myTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
+			TermCodeSystemVersion myTermCodeSystemVersion_versioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_versioned.getPid());
-			assertNotEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_versioned.getResource().getId());
+			assertNotEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_versioned.getResource().getId());
 
-			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_nonversioned.getPid());
-			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_nonversioned.getResource().getId());
-
+			assertEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_nonversioned.getResource().getId());
 		});
 
 		// Update LOINC marked as version 2.67
@@ -77,16 +82,20 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(38, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
-			TermCodeSystemVersion myTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
+			TermCodeSystemVersion myTermCodeSystemVersion_versioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_versioned.getPid());
-			assertNotEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_versioned.getResource().getId());
+			assertNotEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_versioned.getResource().getId());
 
-			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_nonversioned.getPid());
-			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_nonversioned.getResource().getId());
-
+			assertEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_nonversioned.getResource().getId());
 		});
-
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
@@ -106,19 +115,28 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(57, myResourceTableDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
-			TermCodeSystemVersion mySecondTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.68");
-			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), mySecondTermCodeSystemVersion_versioned.getPid());
-			assertNotEquals(myTermCodeSystem.getResource().getId(), mySecondTermCodeSystemVersion_versioned.getResource().getId());
+			TermCodeSystemVersion mySecondTermCodeSystemVersion_versioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.68");
+			assertNotEquals(
+					myTermCodeSystem.getCurrentVersion().getPid(), mySecondTermCodeSystemVersion_versioned.getPid());
+			assertNotEquals(
+					myTermCodeSystem.getResource().getId(),
+					mySecondTermCodeSystemVersion_versioned.getResource().getId());
 
-			TermCodeSystemVersion myTermCodeSystemVersion_versioned = myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
+			TermCodeSystemVersion myTermCodeSystemVersion_versioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_versioned.getPid());
-			assertNotEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_versioned.getResource().getId());
+			assertNotEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_versioned.getResource().getId());
 
-			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned = myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned =
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_nonversioned.getPid());
-			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_nonversioned.getResource().getId());
+			assertEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_nonversioned.getResource().getId());
 		});
-
 	}
 
 	@Test
@@ -152,24 +170,27 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion myTermCodeSystemVersion_versioned =
-				myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_versioned.getPid());
-			assertNotEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_versioned.getResource().getId());
+			assertNotEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_versioned.getResource().getId());
 
 			TermCodeSystemVersion myTermCodeSystemVersion_nonversioned =
-				myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 			assertEquals(myTermCodeSystem.getCurrentVersion().getPid(), myTermCodeSystemVersion_nonversioned.getPid());
-			assertEquals(myTermCodeSystem.getResource().getId(), myTermCodeSystemVersion_nonversioned.getResource().getId());
+			assertEquals(
+					myTermCodeSystem.getResource().getId(),
+					myTermCodeSystemVersion_nonversioned.getResource().getId());
 
 			// current should be null loaded after 2.67
 			currentCodeSystemVersion_before_loading_v2_68[0] =
-				myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 		});
 
 		// Load LOINC marked as version 2.68 and not making it current (so 2.67 should remain current)
 		myFiles = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(
-			myFiles, "v268_curr_false_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_curr_false_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -183,22 +204,22 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion currentCodeSystemVersion_after_loading_v2_68 =
-				myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
+					myTermCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
 
 			// current should be same as before loading 2.68
-			assertEquals(currentCodeSystemVersion_before_loading_v2_68[0].getPid(), currentCodeSystemVersion_after_loading_v2_68.getPid());
+			assertEquals(
+					currentCodeSystemVersion_before_loading_v2_68[0].getPid(),
+					currentCodeSystemVersion_after_loading_v2_68.getPid());
 
 			TermCodeSystemVersion termCodeSystemVersion_267 =
-				myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.67");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), termCodeSystemVersion_267.getPid());
 
 			TermCodeSystemVersion termCodeSystemVersion_268 =
-				myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.68");
+					myTermCodeSystemVersionDao.findByCodeSystemPidAndVersion(myTermCodeSystem.getPid(), "2.68");
 			assertNotEquals(myTermCodeSystem.getCurrentVersion().getPid(), termCodeSystemVersion_268.getPid());
 		});
-
 	}
-
 
 	/**
 	 * Loinc distro includes loinc.xml as of 2.70
@@ -220,6 +241,4 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0, 1).get(0);
 		assertEquals("LOINC Code System (Testing Copy)", codeSystem.getTitle());
 	}
-
-
 }

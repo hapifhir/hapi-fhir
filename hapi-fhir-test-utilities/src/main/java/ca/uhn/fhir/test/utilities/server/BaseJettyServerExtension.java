@@ -47,6 +47,13 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.PreDestroy;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -57,18 +64,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>> implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
+public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>>
+		implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
 	private final List<List<String>> myRequestHeaders = new ArrayList<>();
 	private final List<String> myRequestContentTypes = new ArrayList<>();
@@ -150,9 +151,10 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		ServerConnector connector = new ServerConnector(myServer);
 		connector.setIdleTimeout(myIdleTimeoutMillis);
 		connector.setPort(myPort);
-		myServer.setConnectors(new Connector[]{connector});
+		myServer.setConnectors(new Connector[] {connector});
 
-		HttpConnectionFactory connectionFactory = (HttpConnectionFactory) connector.getConnectionFactories().iterator().next();
+		HttpConnectionFactory connectionFactory = (HttpConnectionFactory)
+				connector.getConnectionFactories().iterator().next();
 		connectionFactory.addBean(new Listener() {
 			@Override
 			public void onOpened(Connection connection) {
@@ -201,7 +203,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		myHttpClient = builder.build();
@@ -216,7 +219,6 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	}
 
 	protected abstract HttpServlet provideServlet();
-
 
 	public String getWebsocketContextPath() {
 		return myEnableSpringWebsocketContextPath;
@@ -282,7 +284,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	 * <code>@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)</code>
 	 */
 	@SuppressWarnings("unchecked")
-	public T withSpringWebsocketSupport(String theContextPath, Class<? extends WebSocketConfigurer> theContextConfigClass) {
+	public T withSpringWebsocketSupport(
+			String theContextPath, Class<? extends WebSocketConfigurer> theContextConfigClass) {
 		assert !isRunning();
 		assert theContextConfigClass != null;
 		myEnableSpringWebsocketSupport = theContextConfigClass;
@@ -297,7 +300,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		}
 
 		@Override
-		public void doFilter(ServletRequest theRequest, ServletResponse theResponse, FilterChain theChain) throws IOException, ServletException {
+		public void doFilter(ServletRequest theRequest, ServletResponse theResponse, FilterChain theChain)
+				throws IOException, ServletException {
 			HttpServletRequest request = (HttpServletRequest) theRequest;
 
 			String header = request.getHeader(Constants.HEADER_CONTENT_TYPE);

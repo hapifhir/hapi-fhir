@@ -32,17 +32,16 @@ public class Parser {
 	public static void main(String[] args) throws DataFormatException, IOException {
 
 		{
-			//START SNIPPET: parsing
+			// START SNIPPET: parsing
 			// Create a FHIR context
 			FhirContext ctx = FhirContext.forR4();
 
 			// The following example is a simple serialized Patient resource to parse
-			String input = "{" +
-				"\"resourceType\" : \"Patient\"," +
-				"  \"name\" : [{" +
-				"    \"family\": \"Simpson\"" +
-				"  }]" +
-				"}";
+			String input = "{" + "\"resourceType\" : \"Patient\","
+					+ "  \"name\" : [{"
+					+ "    \"family\": \"Simpson\""
+					+ "  }]"
+					+ "}";
 
 			// Instantiate a new parser
 			IParser parser = ctx.newJsonParser();
@@ -50,10 +49,10 @@ public class Parser {
 			// Parse it
 			Patient parsed = parser.parseResource(Patient.class, input);
 			System.out.println(parsed.getName().get(0).getFamily());
-			//END SNIPPET: parsing
+			// END SNIPPET: parsing
 		}
 		{
-			//START SNIPPET: encoding
+			// START SNIPPET: encoding
 			// Create a FHIR context
 			FhirContext ctx = FhirContext.forR4();
 
@@ -71,7 +70,7 @@ public class Parser {
 			// Using XML instead
 			serialized = ctx.newXmlParser().encodeResourceToString(patient);
 			System.out.println(serialized);
-			//END SNIPPET: encoding
+			// END SNIPPET: encoding
 		}
 		{
 			// Create a FHIR context
@@ -79,7 +78,7 @@ public class Parser {
 			Patient patient = new Patient();
 			patient.addName().setFamily("Simpson").addGiven("James");
 
-			//START SNIPPET: encodingPretty
+			// START SNIPPET: encodingPretty
 			// Create a parser
 			IParser parser = ctx.newJsonParser();
 
@@ -92,7 +91,7 @@ public class Parser {
 
 			// You can also chain these statements together
 			ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-			//END SNIPPET: encodingPretty
+			// END SNIPPET: encodingPretty
 		}
 		{
 			// Create a FHIR context
@@ -100,7 +99,7 @@ public class Parser {
 			Patient patient = new Patient();
 			patient.addName().setFamily("Simpson").addGiven("James");
 
-			//START SNIPPET: encodingConfig
+			// START SNIPPET: encodingConfig
 			// Create a parser
 			IParser parser = ctx.newJsonParser();
 
@@ -116,34 +115,37 @@ public class Parser {
 			// Serialize it
 			String serialized = parser.encodeResourceToString(patient);
 			System.out.println(serialized);
-			//END SNIPPET: encodingConfig
+			// END SNIPPET: encodingConfig
 		}
 		{
-			//START SNIPPET: disableStripVersions
+			// START SNIPPET: disableStripVersions
 			FhirContext ctx = FhirContext.forR4();
 			IParser parser = ctx.newJsonParser();
 
 			// Disable the automatic stripping of versions from references on the parser
 			parser.setStripVersionsFromReferences(false);
-			//END SNIPPET: disableStripVersions
+			// END SNIPPET: disableStripVersions
 
-			//START SNIPPET: disableStripVersionsCtx
+			// START SNIPPET: disableStripVersionsCtx
 			ctx.getParserOptions().setStripVersionsFromReferences(false);
-			//END SNIPPET: disableStripVersionsCtx
+			// END SNIPPET: disableStripVersionsCtx
 		}
 
 		{
-			//START SNIPPET: disableStripVersionsField
+			// START SNIPPET: disableStripVersionsField
 			FhirContext ctx = FhirContext.forR4();
 			IParser parser = ctx.newJsonParser();
 
 			// Preserve versions only on these two fields (for the given parser)
-			parser.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
+			parser.setDontStripVersionsFromReferencesAtPaths(
+					"AuditEvent.entity.reference", "Patient.managingOrganization");
 
 			// You can also apply this setting to the context so that it will
 			// flow to all parsers
-			ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference", "Patient.managingOrganization");
-			//END SNIPPET: disableStripVersionsField
+			ctx.getParserOptions()
+					.setDontStripVersionsFromReferencesAtPaths(
+							"AuditEvent.entity.reference", "Patient.managingOrganization");
+			// END SNIPPET: disableStripVersionsField
 
 		}
 	}

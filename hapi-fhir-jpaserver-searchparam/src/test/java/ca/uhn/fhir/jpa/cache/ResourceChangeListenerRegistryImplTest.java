@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -46,14 +45,19 @@ class ResourceChangeListenerRegistryImplTest {
 
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
+
 	@Autowired
 	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
+
 	@MockBean
 	private ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
+
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
 
@@ -67,8 +71,10 @@ class ResourceChangeListenerRegistryImplTest {
 		ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 
 		@Bean
-		public IResourceChangeListenerRegistry resourceChangeListenerRegistry(InMemoryResourceMatcher theInMemoryResourceMatcher) {
-			return new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+		public IResourceChangeListenerRegistry resourceChangeListenerRegistry(
+				InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(
+					ourFhirContext, myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean
@@ -80,18 +86,23 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(
+				PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 		entries.add(cache);
-		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any()))
+				.thenReturn(InMemoryMatchResult.successfulMatch());
 	}
 
 	@Test
 	public void addingListenerForNonResourceFails() {
 		try {
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+					"Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+			assertEquals(
+					Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")",
+					e.getMessage());
 		}
 	}
 
@@ -99,44 +110,57 @@ class ResourceChangeListenerRegistryImplTest {
 	public void addingNonInMemorySearchParamFails() {
 		try {
 			mockInMemorySupported(InMemoryMatchResult.unsupportedFromReason("TEST REASON"));
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+					PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
+			assertEquals(
+					Msg.code(482)
+							+ "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.",
+					e.getMessage());
 		}
 	}
 
 	private void mockInMemorySupported(InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(ourMap, ourFhirContext.getResourceDefinition(PATIENT_RESOURCE_NAME))).thenReturn(theTheInMemoryMatchResult);
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(
+						ourMap, ourFhirContext.getResourceDefinition(PATIENT_RESOURCE_NAME)))
+				.thenReturn(theTheInMemoryMatchResult);
 	}
 
 	@AfterEach
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
-			ResourceChangeListenerCache.setNowForUnitTests(null);
+		ResourceChangeListenerCache.setNowForUnitTests(null);
 	}
 
 	@Test
 	public void registerUnregister() {
 		IResourceChangeListener listener1 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(OBSERVATION_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+				PATIENT_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+				OBSERVATION_RESOURCE_NAME, ourMap, listener1, TEST_REFRESH_INTERVAL_MS);
 
 		when(mySearchParamMatcher.match(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
 		assertEquals(2, myResourceChangeListenerRegistry.size());
 
 		IResourceChangeListener listener2 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener2, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+				PATIENT_RESOURCE_NAME, ourMap, listener2, TEST_REFRESH_INTERVAL_MS);
 		assertEquals(3, myResourceChangeListenerRegistry.size());
 
 		List<ResourceChangeListenerCache> entries = Lists.newArrayList(myResourceChangeListenerRegistry.iterator());
 		assertThat(entries, hasSize(3));
 
-		List<IResourceChangeListener> listeners = entries.stream().map(ResourceChangeListenerCache::getResourceChangeListener).collect(Collectors.toList());
+		List<IResourceChangeListener> listeners = entries.stream()
+				.map(ResourceChangeListenerCache::getResourceChangeListener)
+				.collect(Collectors.toList());
 		assertThat(listeners, contains(listener1, listener1, listener2));
 
-		List<String> resourceNames = entries.stream().map(IResourceChangeListenerCache::getResourceName).collect(Collectors.toList());
+		List<String> resourceNames = entries.stream()
+				.map(IResourceChangeListenerCache::getResourceName)
+				.collect(Collectors.toList());
 		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
 
 		IResourceChangeListenerCache firstcache = entries.iterator().next();
@@ -145,7 +169,8 @@ class ResourceChangeListenerRegistryImplTest {
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener1);
 		assertEquals(1, myResourceChangeListenerRegistry.size());
-		ResourceChangeListenerCache cache = myResourceChangeListenerRegistry.iterator().next();
+		ResourceChangeListenerCache cache =
+				myResourceChangeListenerRegistry.iterator().next();
 		assertEquals(PATIENT_RESOURCE_NAME, cache.getResourceName());
 		assertEquals(listener2, cache.getResourceChangeListener());
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener2);

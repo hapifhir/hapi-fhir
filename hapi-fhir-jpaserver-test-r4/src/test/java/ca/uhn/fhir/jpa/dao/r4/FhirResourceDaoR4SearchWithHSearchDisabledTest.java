@@ -57,43 +57,63 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
 @DirtiesContext
 public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithHSearchDisabledTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithHSearchDisabledTest.class);
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
+
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
+
 	@Autowired
 	private FhirContext myFhirCtx;
+
 	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
+
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
+
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+
 	@Autowired
 	private ITermReadSvc myTermSvc;
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(
+				myStorageSettings,
+				mySystemDao,
+				myResourceReindexingSvc,
+				mySearchCoordinatorSvc,
+				mySearchParamRegistry,
+				myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -120,7 +140,10 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
+			assertEquals(
+					Msg.code(1192)
+							+ "Fulltext search is not enabled on this service, can not process parameter: _content",
+					e.getMessage());
 		}
 	}
 
@@ -135,7 +158,6 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Organization.SP_NAME, new StringParam(methodName));
 		myOrganizationDao.search(map);
-
 	}
 
 	@Test
@@ -152,7 +174,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
+			assertEquals(
+					Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text",
+					e.getMessage());
 		}
 	}
 
@@ -168,9 +192,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://fooVS");
 		vs.getCompose()
-			.addInclude()
-			.setSystem("http://fooCS")
-			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
+				.addInclude()
+				.setSystem("http://fooCS")
+				.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
 
 		// Explicit expand
 		ValueSet outcome = myValueSetDao.expand(vs, null);
@@ -185,7 +209,6 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 	}
 
-
 	@Test
 	@Disabled
 	public void testExpandValueSetWithFilter() {
@@ -199,12 +222,12 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://fooVS");
 		vs.getCompose()
-			.addInclude()
-			.setSystem("http://fooCS")
-			.addFilter()
-			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setProperty("code")
-			.setValue("CODEA");
+				.addInclude()
+				.setSystem("http://fooCS")
+				.addFilter()
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setProperty("code")
+				.setValue("CODEA");
 
 		try {
 			myValueSetDao.expand(vs, null);
@@ -231,24 +254,31 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		vs.setUrl("http://vs");
 		// Add some codes in separate compose sections, and some more codes in a single compose section.
 		// Order should be preserved for all of them.
-		vs.getCompose().addInclude().setSystem("http://cs")
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code5")));
-		vs.getCompose().addInclude().setSystem("http://cs")
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code4")));
-		vs.getCompose().addInclude().setSystem("http://cs")
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code3")))
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")))
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
+		vs.getCompose()
+				.addInclude()
+				.setSystem("http://cs")
+				.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code5")));
+		vs.getCompose()
+				.addInclude()
+				.setSystem("http://cs")
+				.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code4")));
+		vs.getCompose()
+				.addInclude()
+				.setSystem("http://cs")
+				.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code3")))
+				.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")))
+				.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
 		myValueSetDao.update(vs);
 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
-		assertThat(myValueSetTestUtil.toCodes(outcome).toString(), myValueSetTestUtil.toCodes(outcome), contains(
-			"code5", "code4", "code3", "code2", "code1"
-		));
-
-
+		assertEquals(
+				"ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.",
+				outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(
+				myValueSetTestUtil.toCodes(outcome).toString(),
+				myValueSetTestUtil.toCodes(outcome),
+				contains("code5", "code4", "code3", "code2", "code1"));
 	}
 
 	@Test
@@ -263,15 +293,15 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://fooVS");
 		vs.getCompose()
-			.addInclude()
-			.setSystem("http://fooCS")
-			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
+				.addInclude()
+				.setSystem("http://fooCS")
+				.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
 		myValueSetDao.create(vs);
-
 
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEA");
-		String obs1id = myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
+		String obs1id =
+				myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
 
 		obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEB");
@@ -283,8 +313,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		IBundleProvider results = myObservationDao.search(map);
 		List<IBaseResource> resultsList = results.getResources(0, 10);
 		assertEquals(1, resultsList.size());
-		assertEquals(obs1id, resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue());
-
+		assertEquals(
+				obs1id,
+				resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	/**
@@ -298,11 +329,11 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
 		myValueSetDao.create(vs);
 
-		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
+		ValueSet expansion =
+				myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(6, expansion.getExpansion().getContains().size());
-
 	}
 
 	@Test
@@ -311,7 +342,8 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		myCodeSystemDao.create(cs);
 
 		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
-		ValueSet.ConceptSetComponent excludeComponent = new ValueSet.ConceptSetComponent().setSystem("http://ccim.on.ca/fhir/iar/CodeSystem/iar-citizenship-status");
+		ValueSet.ConceptSetComponent excludeComponent = new ValueSet.ConceptSetComponent()
+				.setSystem("http://ccim.on.ca/fhir/iar/CodeSystem/iar-citizenship-status");
 		excludeComponent.addConcept().setCode("REF");
 		vs.getCompose().addExclude(excludeComponent);
 		myValueSetDao.create(vs);
@@ -322,17 +354,16 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet vs2 = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
 		myValueSetDao.create(vs2);
 
-		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
+		ValueSet expansion =
+				myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(5, expansion.getExpansion().getContains().size());
 
-		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
+		ValueSet expansion2 = myValueSetDao.expandByIdentifier(
+				"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
 
 		assertEquals(22, expansion2.getExpansion().getContains().size());
-
 	}
-
-
 }

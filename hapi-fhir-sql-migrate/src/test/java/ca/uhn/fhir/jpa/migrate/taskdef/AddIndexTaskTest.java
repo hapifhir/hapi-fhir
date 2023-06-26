@@ -27,7 +27,8 @@ public class AddIndexTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testUniqueConstraintAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testUniqueConstraintAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
+			throws SQLException {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -46,7 +47,6 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), hasItem("IDX_ANINDEX"));
-
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -70,12 +70,15 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(
+				JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"),
+				containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testNonUniqueIndexAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testNonUniqueIndexAlreadyExists(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
+			throws SQLException {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -94,7 +97,9 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(
+				JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"),
+				containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -114,14 +119,15 @@ public class AddIndexTaskTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
+		assertThat(
+				JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"),
+				containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
 	@Nested
 	public class SqlFeatures {
 		private AddIndexTask myTask;
 		private String mySql;
-
 
 		@Nested
 		public class IncludeColumns {
@@ -148,7 +154,6 @@ public class AddIndexTaskTest extends BaseTest {
 				mySql = myTask.generateSql();
 				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 			}
-
 		}
 
 		@Nested
@@ -181,7 +186,8 @@ public class AddIndexTaskTest extends BaseTest {
 				myTask.setDriverType(theDriver);
 				myTask.setOnline(true);
 				DriverTypeEnum.ConnectionProperties props;
-				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(true);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any()))
+						.thenReturn(true);
 				mySql = myTask.generateSql();
 				switch (theDriver) {
 					case POSTGRES_9_4:
@@ -189,7 +195,9 @@ public class AddIndexTaskTest extends BaseTest {
 						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 					case ORACLE_12C:
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
+						assertEquals(
+								"create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION",
+								mySql);
 						break;
 					case MSSQL_2012:
 						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
@@ -202,12 +210,13 @@ public class AddIndexTaskTest extends BaseTest {
 			}
 
 			@ParameterizedTest(name = "{index}: {0}")
-			@ValueSource(booleans = { true, false } )
+			@ValueSource(booleans = {true, false})
 			public void offForUnsupportedVersionsOfSqlServer(boolean theSupportedFlag) {
 				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
 				myTask.setOnline(true);
 				myTask.setMetadataSource(mockMetadataSource);
-				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any()))
+						.thenReturn(theSupportedFlag);
 
 				mySql = myTask.generateSql();
 				if (theSupportedFlag) {
@@ -218,16 +227,18 @@ public class AddIndexTaskTest extends BaseTest {
 			}
 
 			@ParameterizedTest(name = "{index}: {0}")
-			@ValueSource(booleans = { true, false } )
+			@ValueSource(booleans = {true, false})
 			public void offForUnsupportedVersionsOfOracleServer(boolean theSupportedFlag) {
 				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
 				myTask.setOnline(true);
 				myTask.setMetadataSource(mockMetadataSource);
-				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any()))
+						.thenReturn(theSupportedFlag);
 
 				mySql = myTask.generateSql();
 				if (theSupportedFlag) {
-					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
+					assertEquals(
+							"create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 				} else {
 					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 				}

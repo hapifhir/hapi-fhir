@@ -41,9 +41,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import javax.servlet.Servlet;
 import java.security.KeyStore;
 import java.util.List;
+import javax.servlet.Servlet;
 
 public abstract class BaseRestServerHelper {
 
@@ -76,7 +76,7 @@ public abstract class BaseRestServerHelper {
 
 	protected void startServer(Servlet theServlet) throws Exception {
 		myListenerServer = new Server(0);
-		
+
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(120000);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -94,9 +94,10 @@ public abstract class BaseRestServerHelper {
 		httpsConfig.setSecureScheme("https");
 		httpsConfig.setSecurePort(0);
 
-		ServerConnector sslConnector = new ServerConnector(myListenerServer,
-			new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-			new HttpConnectionFactory(httpsConfig));
+		ServerConnector sslConnector = new ServerConnector(
+				myListenerServer,
+				new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+				new HttpConnectionFactory(httpsConfig));
 		sslConnector.setPort(0);
 
 		myListenerServer.addConnector(sslConnector);
@@ -115,11 +116,11 @@ public abstract class BaseRestServerHelper {
 	}
 
 	private void assignHttpAndHttpsPorts() {
-		myListenerPort = ((ServerConnector)myListenerServer.getConnectors()[0]).getLocalPort();
-		myHttpsListenerPort = ((ServerConnector)myListenerServer.getConnectors()[1]).getLocalPort();
+		myListenerPort = ((ServerConnector) myListenerServer.getConnectors()[0]).getLocalPort();
+		myHttpsListenerPort = ((ServerConnector) myListenerServer.getConnectors()[1]).getLocalPort();
 	}
 
-	private SslContextFactory.Server getSslContextFactory() throws Exception{
+	private SslContextFactory.Server getSslContextFactory() throws Exception {
 		try {
 			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
@@ -129,13 +130,13 @@ public abstract class BaseRestServerHelper {
 			sslContextFactory.setKeyStorePassword(PASSWORD);
 
 			KeyStore trustStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
-			trustStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_TRUSTSTORE_PATH), PASSWORD.toCharArray());
+			trustStore.load(
+					BaseRestServerHelper.class.getResourceAsStream(SERVER_TRUSTSTORE_PATH), PASSWORD.toCharArray());
 			sslContextFactory.setTrustStore(trustStore);
 
 			return sslContextFactory;
-		}
-		catch(Exception e){
-			throw new RuntimeException(Msg.code(2123)+"Failed to obtain SslContextFactory", e);
+		} catch (Exception e) {
+			throw new RuntimeException(Msg.code(2123) + "Failed to obtain SslContextFactory", e);
 		}
 	}
 
@@ -193,7 +194,7 @@ public abstract class BaseRestServerHelper {
 
 	public abstract IIdType createObservation(IBaseResource theBaseResource);
 
-	public void setServerAddressStrategy(boolean theUseHttps){
+	public void setServerAddressStrategy(boolean theUseHttps) {
 		String path = theUseHttps ? mySecureBase : myBase;
 		HardcodedServerAddressStrategy strategy = new HardcodedServerAddressStrategy(path);
 		setServerAddressStrategy(strategy);

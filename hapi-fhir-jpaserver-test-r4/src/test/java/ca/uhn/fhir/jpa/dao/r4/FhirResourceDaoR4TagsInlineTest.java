@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TagsInlineTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TagsInlineTest.class);
 
 	@Override
 	@AfterEach
@@ -33,7 +34,6 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		super.after();
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 	}
-
 
 	@Test
 	public void testInlineTags_StoreAndRetrieve() {
@@ -58,7 +58,8 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 
 		// Store a second version
 		patient = new Patient();
@@ -79,24 +80,28 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		patient = myPatientDao.read(new IdType("Patient/A/_history/1"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 
 		// Second version should have the new set of tags
 		// TODO: We could copy these forward like we do for non-inline mode. Perhaps in the future.
 		patient = myPatientDao.read(new IdType("Patient/A/_history/2"), mySrd);
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile2"));
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag2|vtag2|dtag2"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), containsInAnyOrder("http://sec2|vsec2|dsec2"));
-
+		assertThat(
+				toSecurityLabels(patient).toString(),
+				toSecurityLabels(patient),
+				containsInAnyOrder("http://sec2|vsec2|dsec2"));
 	}
-
 
 	@Test
 	public void testInlineTags_Search_Tag() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineTag();
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -108,7 +113,11 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_tag").exactly().systemAndCode("http://tag1", "vtag1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_tag").exactly().systemAndCode("http://tag1", "vtag1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
@@ -119,7 +128,9 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineProfile();
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -128,7 +139,11 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_profile").exactly().code("http://profile1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_profile").exactly().code("http://profile1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 		validatePatientSearchResultsForInlineTags(outcome);
 	}
@@ -138,7 +153,9 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineSecurity();
-		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug(
+				"SearchParam:\n{}",
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -147,7 +164,11 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		logAllTokenIndexes();
 
 		// Perform a search
-		Bundle outcome = myClient.search().forResource("Patient").where(new TokenClientParam("_security").exactly().systemAndCode("http://sec1", "vsec1")).returnBundle(Bundle.class).execute();
+		Bundle outcome = myClient.search()
+				.forResource("Patient")
+				.where(new TokenClientParam("_security").exactly().systemAndCode("http://sec1", "vsec1"))
+				.returnBundle(Bundle.class)
+				.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
@@ -158,11 +179,13 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		patient = (Patient) outcome.getEntry().get(0).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 		patient = (Patient) outcome.getEntry().get(1).getResource();
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), contains("http://profile1"));
 		assertThat(toTags(patient).toString(), toTags(patient), contains("http://tag1|vtag1|dtag1"));
-		assertThat(toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
+		assertThat(
+				toSecurityLabels(patient).toString(), toSecurityLabels(patient), contains("http://sec1|vsec1|dsec1"));
 	}
 
 	private void createPatientsForInlineSearchTests() {
@@ -195,7 +218,8 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 	public static SearchParameter createSearchParameterForInlineTag() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-tag");
-		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
+		for (String next :
+				FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -210,7 +234,8 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 	public static SearchParameter createSearchParameterForInlineSecurity() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
+		for (String next :
+				FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -225,7 +250,8 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 	public static SearchParameter createSearchParameterForInlineProfile() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-profile");
-		for (String next : FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
+		for (String next :
+				FhirContext.forR4Cached().getResourceTypes().stream().sorted().toList()) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -235,5 +261,4 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 		searchParameter.setExpression("meta.profile");
 		return searchParameter;
 	}
-
 }

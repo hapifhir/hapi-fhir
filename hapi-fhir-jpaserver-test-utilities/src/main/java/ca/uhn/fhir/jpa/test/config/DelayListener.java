@@ -32,7 +32,7 @@ public class DelayListener implements ProxyDataSourceBuilder.SingleQueryExecutio
 	private static final Logger ourLog = LoggerFactory.getLogger(DelayListener.class);
 
 	private boolean enabled = false;
-	private AtomicInteger deleteCount= new AtomicInteger(0);
+	private AtomicInteger deleteCount = new AtomicInteger(0);
 
 	public void enable() {
 		enabled = true;
@@ -55,5 +55,4 @@ public class DelayListener implements ProxyDataSourceBuilder.SingleQueryExecutio
 			}
 		}
 	}
-
 }

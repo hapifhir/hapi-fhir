@@ -19,8 +19,10 @@ import static org.mockito.Mockito.when;
 public class SearchParamExtractorServiceTest {
 
 	private SearchParamExtractorService mySvc;
+
 	@Mock
 	private IInterceptorBroadcaster myRequestInterceptorBroadcaster;
+
 	@Mock
 	private IInterceptorBroadcaster myJpaInterceptorBroadcaster;
 
@@ -45,5 +47,4 @@ public class SearchParamExtractorServiceTest {
 		verify(myJpaInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
 		verify(myRequestInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
 	}
-
 }

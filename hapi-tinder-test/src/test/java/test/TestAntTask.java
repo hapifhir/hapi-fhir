@@ -1,12 +1,10 @@
 package test;
 
-import java.util.List;
-
+import ca.uhn.test.ant.multi.*;
+import ca.uhn.test.ant.single.TestConfigDstu2;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.test.ant.single.TestConfigDstu2;
-import ca.uhn.test.ant.multi.*;
-import test.ResourceTest;
+import java.util.List;
 
 public class TestAntTask {
 
@@ -19,5 +17,4 @@ public class TestAntTask {
 			String name = generic.getResourceName();
 		}
 	}
-	
 }

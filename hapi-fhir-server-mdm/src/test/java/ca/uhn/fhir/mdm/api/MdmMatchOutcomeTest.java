@@ -21,5 +21,4 @@ class MdmMatchOutcomeTest {
 		outcome.setMdmRuleCount(3);
 		assertEquals(2.0 / 3.0, outcome.getNormalizedScore(), DELTA);
 	}
-
 }

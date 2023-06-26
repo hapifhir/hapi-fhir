@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import com.google.common.base.Strings;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -17,8 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class MetadataSourceTest {
 	MetadataSource myMetadataSource = new MetadataSource();
+
 	@Mock
 	DriverTypeEnum.ConnectionProperties myConnectionProperties;
+
 	@Mock
 	JdbcTemplate myJdbcTemplate;
 
@@ -43,9 +43,9 @@ class MetadataSourceTest {
 		// stub out our Sql Server edition lookup
 		Mockito.when(myConnectionProperties.getDriverType()).thenReturn(theType);
 		Mockito.when(myConnectionProperties.newJdbcTemplate()).thenReturn(myJdbcTemplate);
-		Mockito.when(myJdbcTemplate.queryForObject(Mockito.any(), Mockito.eq(String.class))).thenReturn(Strings.nullToEmpty(theEdition));
+		Mockito.when(myJdbcTemplate.queryForObject(Mockito.any(), Mockito.eq(String.class)))
+				.thenReturn(Strings.nullToEmpty(theEdition));
 
 		assertEquals(theSupportedFlag, myMetadataSource.isOnlineIndexSupported(myConnectionProperties));
 	}
-
 }

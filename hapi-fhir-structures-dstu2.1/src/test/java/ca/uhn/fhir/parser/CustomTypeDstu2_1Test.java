@@ -48,7 +48,6 @@ public class CustomTypeDstu2_1Test {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	/**
 	 * See #364
 	 */
@@ -65,17 +64,22 @@ public class CustomTypeDstu2_1Test {
 		String xml = parser.encodeResourceToString(resource);
 		ourLog.info(xml);
 
-		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
-			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
-			"</CustomResource>"
-		));
-		//@formatter:on
-		
+		// @formatter:on
+		assertThat(
+				xml,
+				stringContainsInOrder(
+						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+						"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
+						"</CustomResource>"));
+		// @formatter:on
+
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
-		assertEquals("2016-05-13", ((CustomResource364CustomDate)parsedResource.getBaseValues()).getDate().getValueAsString());
+		assertEquals(
+				"2016-05-13",
+				((CustomResource364CustomDate) parsedResource.getBaseValues())
+						.getDate()
+						.getValueAsString());
 	}
 
 	/**
@@ -85,7 +89,7 @@ public class CustomTypeDstu2_1Test {
 	public void testCustomTypeWithPrimitiveType() {
 		FhirContext context = FhirContext.forDstu2_1();
 		context.registerCustomTypes(new ArrayList<Class<? extends IBase>>());
-		
+
 		IParser parser = context.newXmlParser();
 
 		CustomResource364Dstu21 resource = new CustomResource364Dstu21();
@@ -93,75 +97,77 @@ public class CustomTypeDstu2_1Test {
 
 		String xml = parser.encodeResourceToString(resource);
 
-		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
-			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
-			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
-			"<baseValueString value=\"2016-05-13\"/>",
-			"</CustomResource>"
-		));
-		//@formatter:on
-		
+		// @formatter:on
+		assertThat(
+				xml,
+				stringContainsInOrder(
+						"<CustomResource xmlns=\"http://hl7.org/fhir\">",
+						"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
+						"<baseValueString value=\"2016-05-13\"/>",
+						"</CustomResource>"));
+		// @formatter:on
+
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
-		assertEquals("2016-05-13", ((StringType)parsedResource.getBaseValues()).getValueAsString());
+		assertEquals("2016-05-13", ((StringType) parsedResource.getBaseValues()).getValueAsString());
 	}
 
-	
 	@Test
 	public void parseBundleWithResourceDirective() {
 		String input = createBundle(createResource(false), createResource(true));
-		
+
 		FhirContext ctx = FhirContext.forDstu2_1();
 		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
-		
+
 		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, input);
-		
+
 		Patient res0 = (Patient) bundle.getEntry().get(0).getResource();
 		assertEquals(0, res0.getMeta().getProfile().size());
 		List<Extension> exts = res0.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(1, exts.size());
-		assertEquals("185 cm", ((StringType)exts.get(0).getValue()).getValue());
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
 		assertEquals(1, res1.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
+		assertEquals(
+				"http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
 		assertEquals("185 cm", res1.getWeight().getValue());
 	}
-	
+
 	@Test
 	public void parseResourceWithDirective() {
 		String input = createResource(true);
-		
+
 		FhirContext ctx = FhirContext.forDstu2_1();
 		ctx.setDefaultTypeForProfile("http://example.com/foo", MyCustomPatient.class);
-		
+
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
-		
+		assertEquals(
+				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+
 		List<Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(0, exts.size());
-		
+
 		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
 
-	
 	@Test
 	public void parseResourceWithNoDirective() {
 		String input = createResource(true);
-		
+
 		FhirContext ctx = FhirContext.forDstu2_1();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
 		assertEquals(1, parsed.getMeta().getProfile().size());
-		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
-		
+		assertEquals(
+				"http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
+
 		List<Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertEquals(1, exts.size());
-		assertEquals("185 cm", ((StringType)exts.get(0).getValue()).getValue());
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 	}
-	
+
 	@Test
 	public void testAccessEmptyMetaLists() {
 		Patient p = new Patient();
@@ -174,7 +180,6 @@ public class CustomTypeDstu2_1Test {
 		assertThat(p.getMeta().getTag(), empty());
 		assertThat(p.getMeta().getTag("foo", "bar"), nullValue());
 		assertThat(p.getMeta().getVersionId(), nullValue());
-		
 	}
 
 	@Test
@@ -186,38 +191,40 @@ public class CustomTypeDstu2_1Test {
 		p.getMeta().addSecurity().setSystem("SEC_S2").setCode("SEC_C2").setDisplay("SED_D2");
 		p.getMeta().addTag().setSystem("TAG_S1").setCode("TAG_C1").setDisplay("TAG_D1");
 		p.getMeta().addTag().setSystem("TAG_S2").setCode("TAG_C2").setDisplay("TAG_D2");
-		
+
 		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(out);
-		
-		//@formatter:off
-		assertThat(out, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://foo/profile1\"/>", 
-			"<profile value=\"http://foo/profile2\"/>", 
-			"<security>", 
-			"<system value=\"SEC_S1\"/>", 
-			"<code value=\"SEC_C1\"/>", 
-			"<display value=\"SED_D1\"/>", 
-			"</security>", 
-			"<security>", 
-			"<system value=\"SEC_S2\"/>", 
-			"<code value=\"SEC_C2\"/>", 
-			"<display value=\"SED_D2\"/>", 
-			"</security>", 
-			"<tag>", 
-			"<system value=\"TAG_S1\"/>", 
-			"<display value=\"TAG_D1\"/>", 
-			"</tag>", 
-			"<tag>", 
-			"<system value=\"TAG_S2\"/>", 
-			"<display value=\"TAG_D2\"/>", 
-			"</tag>", 
-			"</meta>"));
-		//@formatter:on
-		
+
+		// @formatter:off
+		assertThat(
+				out,
+				stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://foo/profile1\"/>",
+						"<profile value=\"http://foo/profile2\"/>",
+						"<security>",
+						"<system value=\"SEC_S1\"/>",
+						"<code value=\"SEC_C1\"/>",
+						"<display value=\"SED_D1\"/>",
+						"</security>",
+						"<security>",
+						"<system value=\"SEC_S2\"/>",
+						"<code value=\"SEC_C2\"/>",
+						"<display value=\"SED_D2\"/>",
+						"</security>",
+						"<tag>",
+						"<system value=\"TAG_S1\"/>",
+						"<display value=\"TAG_D1\"/>",
+						"</tag>",
+						"<tag>",
+						"<system value=\"TAG_S2\"/>",
+						"<display value=\"TAG_D2\"/>",
+						"</tag>",
+						"</meta>"));
+		// @formatter:on
+
 	}
-	
+
 	@Test
 	public void testEncodeWithCustomType() {
 
@@ -240,21 +247,23 @@ public class CustomTypeDstu2_1Test {
 		String messageString = p.encodeResourceToString(patient);
 
 		ourLog.info(messageString);
-		
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
-		//@formatter:on
 
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder("<meta>", "<profile value=\"http://example.com/foo\"/>", "</meta>"));
+		// @formatter:on
+
+		// @formatter:off
+		assertThat(
+				messageString,
+				not(stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"",
+						"/>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"</meta>")));
+		// @formatter:on
 	}
 
 	@Test
@@ -264,7 +273,7 @@ public class CustomTypeDstu2_1Test {
 
 		patient.getMeta().addProfile("http://example.com/foo");
 		patient.getMeta().addProfile("http://example.com/bar");
-		
+
 		patient.addIdentifier().setSystem("urn:system").setValue("1234");
 		patient.addName().addFamily("Rossi").addGiven("Mario");
 		patient.setInsulinLevel(new Quantity());
@@ -282,22 +291,27 @@ public class CustomTypeDstu2_1Test {
 		String messageString = p.encodeResourceToString(patient);
 
 		ourLog.info(messageString);
-		
-		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
-		//@formatter:on
 
-		//@formatter:off
-		assertThat(messageString, not(stringContainsInOrder(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>")));
-		//@formatter:on
+		// @formatter:off
+		assertThat(
+				messageString,
+				stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"<profile value=\"http://example.com/bar\"/>",
+						"</meta>"));
+		// @formatter:on
+
+		// @formatter:off
+		assertThat(
+				messageString,
+				not(stringContainsInOrder(
+						"<meta>",
+						"<profile value=\"http://example.com/foo\"",
+						"/>",
+						"<profile value=\"http://example.com/foo\"/>",
+						"</meta>")));
+		// @formatter:on
 	}
 
 	/**
@@ -305,7 +319,7 @@ public class CustomTypeDstu2_1Test {
 	 */
 	@Test
 	public void testParseResourceWithContainedResourcesWithProfile() {
-		//@formatter:off
+		// @formatter:off
 		String input = "<MedicationOrder xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"44cfa24c-52e1-a8ff-8428-4e7ce1165460-local\"/> "
 				+ "<meta> "
@@ -326,11 +340,12 @@ public class CustomTypeDstu2_1Test {
 				+ "<reference value=\"#1\"/> "
 				+ "</medication> "
 				+ "</MedicationOrder>";
-		//@formatter:on
-		
+		// @formatter:on
+
 		FhirContext ctx = FhirContext.forDstu2_1();
-		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
-		
+		ctx.setDefaultTypeForProfile(
+				"http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
+
 		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
 		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
 	}
@@ -410,8 +425,7 @@ public class CustomTypeDstu2_1Test {
 		b.append("      <given value=\"Mario\"/>\n");
 		b.append("   </name>\n");
 		b.append("</Patient>");
-		String input =
-			b.toString();
+		String input = b.toString();
 		return input;
 	}
 
@@ -421,45 +435,69 @@ public class CustomTypeDstu2_1Test {
 		private static final long serialVersionUID = 1L;
 
 		@Child(name = "bloodPressure") // once every 3 month. The average target is 130/80 mmHg or less
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/BloodPressure", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/BloodPressure",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The value of the patient's blood pressure")
 		private Quantity myBloodPressure;
 
 		// Dates of periodic tests
 		@Child(name = "CheckDates", max = Child.MAX_UNLIMITED)
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/diabetes2", definedLocally = false, isModifier = true)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/diabetes2",
+				definedLocally = false,
+				isModifier = true)
 		@Description(shortDefinition = "Dates of periodic tests")
 		private List<DateTimeDt> myCheckDates;
 
 		@Child(name = "cholesterol") // once a year. The target is triglycerides =< 2 mmol/l e cholesterol =< 4 mmol/l
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/Cholesterol", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/Cholesterol",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The value of the patient's cholesterol")
 		private Quantity myCholesterol;
 
 		@Child(name = "glucoseLevel") // fingerprick test
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/Glucose", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/Glucose",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The value of the patient's blood glucose")
 		private Quantity myGlucoseLevel;
 
 		// Periodic Tests
 		@Child(name = "hbA1c") // once every 6 month. The average target is 53 mmol/mol (or 7%) or less.
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/HbA1c", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/HbA1c",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The value of the patient's glucose")
 		private Quantity myHbA1c;
 
 		@Child(name = "Height")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/Height", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/Height",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The patient's height in cm")
 		private StringDt myHeight;
 
 		@Child(name = "insulinLevel") // Normal range is [43,208] pmol/l
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/Insuline", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/Insuline",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The value of the patient's insulin")
 		private Quantity myInsulinLevel;
 
 		// Other parameters
 		@Child(name = "weight")
-		@ca.uhn.fhir.model.api.annotation.Extension(url = "http://example.com/Weight", definedLocally = false, isModifier = false)
+		@ca.uhn.fhir.model.api.annotation.Extension(
+				url = "http://example.com/Weight",
+				definedLocally = false,
+				isModifier = false)
 		@Description(shortDefinition = "The patient's weight in Kg")
 		private StringDt myWeight;
 
@@ -541,7 +579,16 @@ public class CustomTypeDstu2_1Test {
 
 		@Override
 		public boolean isEmpty() {
-			return super.isEmpty() && ElementUtil.isEmpty(myInsulinLevel, myGlucoseLevel, myHbA1c, myBloodPressure, myCholesterol, myWeight, myHeight, myCheckDates);
+			return super.isEmpty()
+					&& ElementUtil.isEmpty(
+							myInsulinLevel,
+							myGlucoseLevel,
+							myHbA1c,
+							myBloodPressure,
+							myCholesterol,
+							myWeight,
+							myHeight,
+							myCheckDates);
 		}
 
 		public void setBloodPressure(Quantity bloodPressure) {
@@ -592,15 +639,11 @@ public class CustomTypeDstu2_1Test {
 		public void setWeight(StringDt weight) {
 			myWeight = weight;
 		}
-
 	}
-	
-	
+
 	@ResourceDef()
-	public static class MyMedication extends Medication
-	{
+	public static class MyMedication extends Medication {
 
 		private static final long serialVersionUID = 1L;
-		
 	}
 }

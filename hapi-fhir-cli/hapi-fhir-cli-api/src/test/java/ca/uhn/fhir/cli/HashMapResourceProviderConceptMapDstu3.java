@@ -64,23 +64,20 @@ public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvi
 
 		FhirVersionEnum fhirVersion = theFhirContext.getVersion().getVersion();
 		if (fhirVersion != FhirVersionEnum.DSTU3) {
-			throw new IllegalStateException("Requires FHIR version DSTU3. Unsupported FHIR version provided: " + fhirVersion);
+			throw new IllegalStateException(
+					"Requires FHIR version DSTU3. Unsupported FHIR version provided: " + fhirVersion);
 		}
-
-
 	}
 
 	@Search
-	public List<ConceptMap> searchByUrl(
-		@RequiredParam(name=ConceptMap.SP_URL) String theConceptMapUrl) {
+	public List<ConceptMap> searchByUrl(@RequiredParam(name = ConceptMap.SP_URL) String theConceptMapUrl) {
 
 		List<ConceptMap> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, ConceptMap> next : myIdToVersionToResourceMap.values()) {
 			if (!next.isEmpty()) {
 				ConceptMap conceptMap = next.lastEntry().getValue();
-				if (theConceptMapUrl.equals(conceptMap.getUrl()))
-				retVal.add(conceptMap);
+				if (theConceptMapUrl.equals(conceptMap.getUrl())) retVal.add(conceptMap);
 				break;
 			}
 		}
@@ -91,9 +88,9 @@ public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvi
 	@Override
 	@Update
 	public MethodOutcome update(
-		@ResourceParam ConceptMap theConceptMap,
-		@ConditionalUrlParam String theConditional,
-		RequestDetails theRequestDetails) {
+			@ResourceParam ConceptMap theConceptMap,
+			@ConditionalUrlParam String theConditional,
+			RequestDetails theRequestDetails) {
 
 		MethodOutcome methodOutcome = new MethodOutcome();
 

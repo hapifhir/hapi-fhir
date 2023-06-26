@@ -36,6 +36,20 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -55,20 +69,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -104,10 +104,10 @@ public class JpaModelScannerAndVerifier {
 	private static final Multimap<String, String> ourIndexNameToColumn = HashMultimap.create();
 
 	private static Set<String> ourReservedWords;
+
 	public JpaModelScannerAndVerifier() {
 		super();
 	}
-
 
 	/**
 	 * This is really only useful for unit tests, do not call otherwise
@@ -119,13 +119,15 @@ public class JpaModelScannerAndVerifier {
 			String contents = IOUtils.toString(is, Constants.CHARSET_UTF8);
 			String[] words = contents.split("\\n");
 			ourReservedWords = Arrays.stream(words)
-				.filter(StringUtils::isNotBlank)
-				.map(Ascii::toUpperCase)
-				.collect(Collectors.toSet());
+					.filter(StringUtils::isNotBlank)
+					.map(Ascii::toUpperCase)
+					.collect(Collectors.toSet());
 		}
 
 		for (String packageName : thePackageNames) {
-			ImmutableSet<ClassPath.ClassInfo> classes = ClassPath.from(JpaModelScannerAndVerifier.class.getClassLoader()).getTopLevelClassesRecursive(packageName);
+			ImmutableSet<ClassPath.ClassInfo> classes = ClassPath.from(
+							JpaModelScannerAndVerifier.class.getClassLoader())
+					.getTopLevelClassesRecursive(packageName);
 			Set<String> names = new HashSet<>();
 
 			if (classes.size() <= 1) {
@@ -141,7 +143,6 @@ public class JpaModelScannerAndVerifier {
 				}
 
 				scanClass(names, clazz);
-
 			}
 		}
 	}
@@ -161,15 +162,16 @@ public class JpaModelScannerAndVerifier {
 			for (UniqueConstraint nextIndex : table.uniqueConstraints()) {
 				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, nextIndex.name());
 				if (indexLength > maxIndexLength) {
-					throw new IllegalStateException(Msg.code(1624) + "Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
+					throw new IllegalStateException(
+							Msg.code(1624) + "Index '" + nextIndex.name() + "' is too long. Length is " + indexLength
+									+ " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
 				}
 			}
-
 		}
-
 	}
 
-	private void scanClassOrSuperclass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass, Map<String, Integer> columnNameToLength) {
+	private void scanClassOrSuperclass(
+			Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass, Map<String, Integer> columnNameToLength) {
 		ourLog.info("Scanning: {}", theClazz.getSimpleName());
 
 		Subselect subselect = theClazz.getAnnotation(Subselect.class);
@@ -195,7 +197,8 @@ public class JpaModelScannerAndVerifier {
 
 					GeneratedValue generatedValue = nextField.getAnnotation(GeneratedValue.class);
 					if (generatedValue != null) {
-						Validate.notBlank(generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
+						Validate.notBlank(
+								generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
 						assertNotADuplicateName(generatedValue.generator(), theNames);
 						assertEquals(generatedValue.strategy(), GenerationType.AUTO);
 
@@ -204,7 +207,9 @@ public class JpaModelScannerAndVerifier {
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
+							assertEquals(
+									"ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator",
+									genericGenerator.strategy());
 							assertEquals(generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
@@ -213,7 +218,6 @@ public class JpaModelScannerAndVerifier {
 						}
 					}
 				}
-
 			}
 
 			boolean isTransient = nextField.getAnnotation(Transient.class) != null;
@@ -226,17 +230,24 @@ public class JpaModelScannerAndVerifier {
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
-				boolean isField = nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField.class) != null;
-				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField.class) != null;
-				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField.class) != null;
+				boolean isField = nextField.getAnnotation(
+								org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField.class)
+						!= null;
+				isField |= nextField.getAnnotation(
+								org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField.class)
+						!= null;
+				isField |= nextField.getAnnotation(
+								org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField.class)
+						!= null;
 				Validate.isTrue(
-					hasEmbedded ||
-						hasColumn ||
-						hasJoinColumn ||
-						isOtherSideOfOneToManyMapping ||
-						isOtherSideOfOneToOneMapping ||
-						hasEmbeddedId ||
-						isField, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
+						hasEmbedded
+								|| hasColumn
+								|| hasJoinColumn
+								|| isOtherSideOfOneToManyMapping
+								|| isOtherSideOfOneToOneMapping
+								|| hasEmbeddedId
+								|| isField,
+						"Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
 
 				int columnLength = 16;
 				String columnName = null;
@@ -256,10 +267,7 @@ public class JpaModelScannerAndVerifier {
 
 					columnNameToLength.put(columnName, columnLength);
 				}
-
 			}
-
-
 		}
 
 		for (Class<?> innerClass : theClazz.getDeclaredClasses()) {
@@ -267,7 +275,6 @@ public class JpaModelScannerAndVerifier {
 			if (embeddable != null) {
 				scanClassOrSuperclass(theNames, innerClass, false, columnNameToLength);
 			}
-
 		}
 
 		if (theClazz.getSuperclass().equals(Object.class)) {
@@ -277,7 +284,8 @@ public class JpaModelScannerAndVerifier {
 		scanClassOrSuperclass(theNames, theClazz.getSuperclass(), true, columnNameToLength);
 	}
 
-	private void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
+	private void scan(
+			AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass, boolean theIsView) {
 		Table table = theAnnotatedElement.getAnnotation(Table.class);
 		if (table != null) {
 
@@ -290,12 +298,15 @@ public class JpaModelScannerAndVerifier {
 			assertNotADuplicateName(table.name(), theNames);
 			for (UniqueConstraint nextConstraint : table.uniqueConstraints()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
-				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
+				Validate.isTrue(
+						nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
 			}
 			for (Index nextConstraint : table.indexes()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
-				Validate.isTrue(nextConstraint.name().startsWith("IDX_") || nextConstraint.name().startsWith("FK_"),
-					nextConstraint.name() + " must start with IDX_ or FK_ (last one when indexing a FK column)");
+				Validate.isTrue(
+						nextConstraint.name().startsWith("IDX_")
+								|| nextConstraint.name().startsWith("FK_"),
+						nextConstraint.name() + " must start with IDX_ or FK_ (last one when indexing a FK column)");
 
 				// add the index names to the collection of allowable duplicate fk names
 				String[] cols = nextConstraint.columnList().split(",");
@@ -313,23 +324,30 @@ public class JpaModelScannerAndVerifier {
 			assertNotADuplicateName(columnName, null);
 			ForeignKey fk = joinColumn.foreignKey();
 			if (theIsSuperClass) {
-				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
+				Validate.isTrue(
+						isBlank(fk.name()),
+						"Foreign key on " + theAnnotatedElement + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
 
 				// Validate FK naming.
 				// temporarily allow two hibernate legacy sp fk names until we fix them
-				List<String> legacySPHibernateFKNames = Arrays.asList(
-					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
-				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
-					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
+				List<String> legacySPHibernateFKNames =
+						Arrays.asList("FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+				Validate.isTrue(
+						fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
+						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
 
 				if (ourIndexNameToColumn.containsKey(fk.name())) {
 					// this foreign key has the same name as an existing index
 					// let's make sure it's on the same column
 					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
-					assertTrue(columns.contains(columnName), String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName));
+					assertTrue(
+							columns.contains(columnName),
+							String.format(
+									"Foreign key %s duplicates index name, but column %s is not part of the index!",
+									fk.name(), columnName));
 				} else {
 					// verify it's not a duplicate
 					assertNotADuplicateName(fk.name(), theNames);
@@ -343,7 +361,10 @@ public class JpaModelScannerAndVerifier {
 			validateColumnName(columnName, theAnnotatedElement);
 
 			assertNotADuplicateName(columnName, null);
-			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement);
+			Validate.isTrue(
+					column.unique() == false,
+					"Should not use unique attribute on column (use named @UniqueConstraint instead) on "
+							+ theAnnotatedElement);
 
 			boolean hasLob = theAnnotatedElement.getAnnotation(Lob.class) != null;
 			Field field = (Field) theAnnotatedElement;
@@ -358,7 +379,8 @@ public class JpaModelScannerAndVerifier {
 			if (field.getType().equals(String.class)) {
 				if (!hasLob) {
 					if (!theIsView && column.length() == 255) {
-						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
+						throw new IllegalStateException(
+								Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
 					}
 					if (column.length() > MAX_COL_LENGTH) {
 						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
@@ -379,29 +401,33 @@ public class JpaModelScannerAndVerifier {
 					}
 				}
 			}
-
 		}
-
 	}
 
 	private void validateColumnName(String theColumnName, AnnotatedElement theElement) {
 		if (!theColumnName.equals(theColumnName.toUpperCase())) {
-			throw new IllegalArgumentException(Msg.code(1630) + "Column name must be all upper case: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(1630) + "Column name must be all upper case: " + theColumnName
+					+ " found on " + theElement);
 		}
 		if (ourReservedWords.contains(theColumnName)) {
-			throw new IllegalArgumentException(Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(
+					Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
 		}
 		if (theColumnName.startsWith("_")) {
-			throw new IllegalArgumentException(Msg.code(2272) + "Column name "+ theColumnName +" starts with an '_' (underscore). This is not permitted for oracle field names. Found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(2272) + "Column name " + theColumnName
+					+ " starts with an '_' (underscore). This is not permitted for oracle field names. Found on "
+					+ theElement);
 		}
 	}
 
-	private static int calculateIndexLength(String[] theColumnNames, Map<String, Integer> theColumnNameToLength, String theIndexName) {
+	private static int calculateIndexLength(
+			String[] theColumnNames, Map<String, Integer> theColumnNameToLength, String theIndexName) {
 		int retVal = 0;
 		for (String nextName : theColumnNames) {
 			Integer nextLength = theColumnNameToLength.get(nextName);
 			if (nextLength == null) {
-				throw new IllegalStateException(Msg.code(1625) + "Index '" + theIndexName + "' references unknown column: " + nextName);
+				throw new IllegalStateException(
+						Msg.code(1625) + "Index '" + theIndexName + "' references unknown column: " + nextName);
 			}
 			retVal += nextLength;
 		}
@@ -416,10 +442,11 @@ public class JpaModelScannerAndVerifier {
 		if (isBlank(theName)) {
 			return;
 		}
-		Validate.isTrue(theName.length() <= MAX_LENGTH, "Identifier \"" + theName + "\" is " + theName.length() + " chars long");
+		Validate.isTrue(
+				theName.length() <= MAX_LENGTH,
+				"Identifier \"" + theName + "\" is " + theName.length() + " chars long");
 		if (theNames != null) {
 			Validate.isTrue(theNames.add(theName), "Duplicate name: " + theName);
 		}
 	}
-
 }

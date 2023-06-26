@@ -93,6 +93,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsEvenOnlyBackwards;
 	private ConsentInterceptor myConsentInterceptor;
+
 	@Autowired
 	@Qualifier(JpaConfig.GRAPHQL_PROVIDER_NAME)
 	private Object myGraphQlProvider;
@@ -124,22 +125,25 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (int i = 0; i <10 ;i++) {
+		for (int i = 0; i < 10; i++) {
 			Observation o = new Observation();
 			o.setId("obs-" + i);
 			builder.addTransactionUpdateEntry(o);
 		}
-		for (int i = 0; i <10 ;i++) {
+		for (int i = 0; i < 10; i++) {
 			Observation o = new Observation();
-			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
+			o.setIdentifier(
+					Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
 			builder.addTransactionCreateEntry(o);
 		}
 
-		Bundle execute = (Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
+		Bundle execute =
+				(Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
 		assertThat(execute.getEntry().size(), is(equalTo(20)));
 
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
+
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
 		create50Observations();
@@ -149,24 +153,20 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		Bundle result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues, hasSize(15));
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
 
 		// Fetch the next page
-		result = myClient
-			.loadPage()
-			.next(result)
-			.execute();
+		result = myClient.loadPage().next(result).execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues, hasSize(10));
@@ -190,14 +190,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and only allow even
 		consentService.setTarget(new ConsentSvcCantSeeOddNumbered());
-		Bundle result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		Bundle result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
@@ -206,14 +205,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and only allow odd
 		consentService.setTarget(new ConsentSvcCantSeeEvenNumbered());
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsOddOnly.subList(0, 15), returnedIdValues);
@@ -222,14 +220,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and allow all with a PROCEED
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
@@ -238,14 +235,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Perform a search and allow all with an AUTHORIZED (no further checking)
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
@@ -255,14 +251,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		// Perform a second search and allow all with an AUTHORIZED (no further checking)
 		// which means we should finally get one from the cache
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
-		result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
@@ -281,14 +276,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
+		Bundle result = myClient.search()
+				.forResource("Observation")
+				.sort()
+				.ascending(Observation.SP_IDENTIFIER)
+				.returnBundle(Bundle.class)
+				.count(15)
+				.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		assertEquals(15, resources.size());
 		assertEquals(16, consentService.getSeeCount());
@@ -297,10 +291,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// Fetch the next page
-		result = myClient
-			.loadPage()
-			.next(result)
-			.execute();
+		result = myClient.loadPage().next(result).execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		assertEquals(15, resources.size());
 		assertEquals(32, consentService.getSeeCount());
@@ -311,17 +302,24 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	@Test
 	public void testConsentWorksWithVersionedApiConverterInterceptor() {
-		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
-		});
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new VersionedApiConverterInterceptor());
 
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
-		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("1")))
+				.execute();
+		Bundle response = myClient.search()
+				.forResource(Patient.class)
+				.count(1)
+				.accept("application/fhir+json; fhirVersion=3.0")
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
-
 	}
 
 	@Test
@@ -333,12 +331,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
-		Bundle result = myClient
-			.history()
-			.onServer()
-			.returnBundle(Bundle.class)
-			.count(10)
-			.execute();
+		Bundle result = myClient.history()
+				.onServer()
+				.returnBundle(Bundle.class)
+				.count(10)
+				.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
@@ -355,22 +352,33 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(0))).execute();
-		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(1))).execute();
+		myClient.read()
+				.resource("Observation")
+				.withId(new IdType(myObservationIdsEvenOnly.get(0)))
+				.execute();
+		myClient.read()
+				.resource("Observation")
+				.withId(new IdType(myObservationIdsEvenOnly.get(1)))
+				.execute();
 
 		try {
-			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(0))).execute();
+			myClient.read()
+					.resource("Observation")
+					.withId(new IdType(myObservationIdsOddOnly.get(0)))
+					.execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
-			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(1))).execute();
+			myClient.read()
+					.resource("Observation")
+					.withId(new IdType(myObservationIdsOddOnly.get(1)))
+					.execute();
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-
 	}
 
 	@Test
@@ -387,7 +395,9 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		// Reject output
 		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
 		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.addHeader(
+				Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
@@ -401,7 +411,9 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		post.addHeader(
+				Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
@@ -412,7 +424,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase(), matchesPattern(".*json.*"));
 		}
-
 	}
 
 	@Test
@@ -421,7 +432,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType id = myClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create()
+				.resource(patient)
+				.prefer(PreferReturnEnum.REPRESENTATION)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
@@ -434,10 +450,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL1");
 		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.addHeader(
+				Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String idVal =
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(idVal, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -452,10 +471,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL2");
 		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.addHeader(
+				Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
+			String idVal =
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(idVal, matchesPattern("^.*/Patient/[0-9]+/_history/[0-9]+$"));
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertNotNull(status.getEntity());
@@ -463,7 +485,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase(), matchesPattern(".*json.*"));
 		}
-
 	}
 
 	@Test
@@ -489,7 +510,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 			assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
 		}
-
 	}
 
 	@Test
@@ -515,7 +535,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]"));
 			assertThat(responseString, containsString("\"name\":\"ORG_NAME\""));
 		}
-
 	}
 
 	@Test
@@ -545,9 +564,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known"));
+			assertThat(
+					oo.getIssueFirstRep().getDiagnostics(),
+					matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995)
+							+ "Resource Patient/[0-9]+ is not known"));
 		}
-
 	}
 
 	@Test
@@ -560,13 +581,14 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
-			IBaseResource resource = t.getArgument(1, IBaseResource.class);
-			if (resource instanceof Organization) {
-				return ConsentOutcome.REJECT;
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = t.getArgument(1, IBaseResource.class);
+					if (resource instanceof Organization) {
+						return ConsentOutcome.REJECT;
+					}
+					return ConsentOutcome.PROCEED;
+				});
 		when(svc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		consentService.setTarget(svc);
@@ -584,9 +606,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known"));
+			assertThat(
+					oo.getIssueFirstRep().getDiagnostics(),
+					matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995)
+							+ "Resource Organization/[0-9]+ is not known"));
 		}
-
 	}
 
 	@Test
@@ -594,15 +618,31 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcCantSeeFemales());
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("1")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("2")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.FEMALE)
+						.addName(new HumanName().setFamily("3")))
+				.execute();
 
 		runInTransaction(() -> {
 			assertEquals(3, myResourceTableDao.count());
 		});
 
-		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
+		Bundle response = myClient.search()
+				.forResource(Patient.class)
+				.count(1)
+				.returnBundle(Bundle.class)
+				.execute();
 		String searchId = response.getIdElement().getIdPart();
 
 		// 2 results returned, but no total since it's stripped
@@ -612,7 +652,9 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		StopWatch sw = new StopWatch();
 		while (true) {
 			SearchStatusEnum status = runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+				Search search = mySearchEntityDao
+						.findByUuidAndFetchIncludes(searchId)
+						.orElseThrow(() -> new IllegalStateException());
 				return search.getStatus();
 			});
 			if (status == SearchStatusEnum.FINISHED) {
@@ -629,19 +671,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertNull(response.getTotalElement().getValue());
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+			Search search = mySearchEntityDao
+					.findByUuidAndFetchIncludes(searchId)
+					.orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
 		});
 
-		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
+		// The paging should have ended now - but the last redacted female result is an empty existing page which should
+		// never have been there.
 		String next = BundleUtil.getLinkUrlOfType(myFhirContext, response, "next");
 		if (next != null) {
 			response = myClient.loadPage().next(response).execute();
 			fail(myFhirContext.newJsonParser().encodeResourceToString(response));
 		}
-
 	}
 
 	/**
@@ -649,15 +693,30 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	 */
 	@Test
 	public void testDefaultInterceptorAllowsAll() {
-		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
-		});
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("1")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("2")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.FEMALE)
+						.addName(new HumanName().setFamily("3")))
+				.execute();
 
-		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
+		Bundle response = myClient.search()
+				.forResource(Patient.class)
+				.count(1)
+				.returnBundle(Bundle.class)
+				.execute();
 		String searchId = response.getIdElement().getIdPart();
 
 		assertEquals(1, response.getEntry().size());
@@ -668,17 +727,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
 
-		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
+		// The paging should have ended now - but the last redacted female result is an empty existing page which should
+		// never have been there.
 		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next"));
 
-		await()
-			.until(
-				() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()),
-				equalTo(SearchStatusEnum.FINISHED)
-			);
+		await().until(
+						() -> runInTransaction(() -> mySearchEntityDao
+								.findByUuidAndFetchIncludes(searchId)
+								.orElseThrow(() -> new IllegalStateException())
+								.getStatus()),
+						equalTo(SearchStatusEnum.FINISHED));
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+			Search search = mySearchEntityDao
+					.findByUuidAndFetchIncludes(searchId)
+					.orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(0, search.getNumBlocked());
 			assertEquals(3, search.getTotalCount());
@@ -690,16 +753,33 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	 */
 	@Test
 	public void testDefaultInterceptorAllowsFailure() {
-		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
-		});
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
-		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("1")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.MALE)
+						.addName(new HumanName().setFamily("2")))
+				.execute();
+		myClient.create()
+				.resource(new Patient()
+						.setGender(Enumerations.AdministrativeGender.FEMALE)
+						.addName(new HumanName().setFamily("3")))
+				.execute();
 
 		try {
-			myClient.search().forResource(Patient.class).where(new StringClientParam("INVALID_PARAM").matchesExactly().value("value")).returnBundle(Bundle.class).execute();
+			myClient.search()
+					.forResource(Patient.class)
+					.where(new StringClientParam("INVALID_PARAM")
+							.matchesExactly()
+							.value("value"))
+					.returnBundle(Bundle.class)
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("INVALID_PARAM"));
@@ -717,18 +797,20 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(svc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
-			IBaseResource resource = t.getArgument(1, IBaseResource.class);
-			if (resource instanceof Organization) {
-				Organization org = new Organization();
-				org.addIdentifier().setSystem("ORG_SYSTEM").setValue("ORG_VALUE");
-				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, org);
-			}
-			return ConsentOutcome.PROCEED;
-		});
+		when(svc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				.thenAnswer(t -> {
+					IBaseResource resource = t.getArgument(1, IBaseResource.class);
+					if (resource instanceof Organization) {
+						Organization org = new Organization();
+						org.addIdentifier().setSystem("ORG_SYSTEM").setValue("ORG_VALUE");
+						return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, org);
+					}
+					return ConsentOutcome.PROCEED;
+				});
 
 		consentService.setTarget(svc);
-		String query = "{ name { family, given }, managingOrganization { reference, resource {name, identifier { system } } } }";
+		String query =
+				"{ name { family, given }, managingOrganization { reference, resource {name, identifier { system } } } }";
 		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
@@ -742,7 +824,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 			assertThat(responseString, containsString("\"system\":\"ORG_SYSTEM\""));
 		}
-
 	}
 
 	private void createPatientAndOrg() {
@@ -778,9 +859,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
 		}
 
-		myObservationIdsEvenOnly =
-			myObservationIds
-				.stream()
+		myObservationIdsEvenOnly = myObservationIds.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
 
@@ -799,12 +878,16 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		private int mySeeCount = 0;
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
@@ -813,9 +896,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			mySeeCount++;
-			String resourceId = theResource.getIdElement().toUnqualifiedVersionless().getValue();
+			String resourceId =
+					theResource.getIdElement().toUnqualifiedVersionless().getValue();
 			ourLog.info("** SEE: {}", resourceId);
 			if (theResource instanceof Observation) {
 				((Observation) theResource).getSubject().setReference("");
@@ -826,32 +913,38 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
-	private static class ReadingBackResourcesConsentSvc implements  IConsentService {
+	private static class ReadingBackResourcesConsentSvc implements IConsentService {
 		private final DaoRegistry myDaoRegistry;
 
-		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry)   {
+		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry) {
 			myDaoRegistry = theDaoRegistry;
 		}
-		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 
+		@Override
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			String fhirType = theResource.fhirType();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
 			String currentTransactionName = TransactionSynchronizationManager.getCurrentTransactionName();
@@ -860,29 +953,41 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
 	}
+
 	private static class ConsentSvcCantSeeOddNumbered implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			Long resIdLong = theResource.getIdElement().getIdPartAsLong();
 			if (resIdLong % 2 == 1) {
 				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
@@ -891,49 +996,59 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
 	private static class ConsentSvcCantSeeFemales implements IConsentService {
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.CREATE) {
 				Patient patient = (Patient) theResource;
 				if (patient.getGender() == Enumerations.AdministrativeGender.FEMALE) {
 					return ConsentOutcome.REJECT;
 				}
 				return ConsentOutcome.PROCEED;
-
 			}
 			return ConsentOutcome.AUTHORIZED;
 		}
-
 	}
 
 	private static class ConsentSvcCantSeeEvenNumbered implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			Long resIdLong = theResource.getIdElement().getIdPartAsLong();
 			if (resIdLong % 2 == 0) {
 				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
@@ -942,21 +1057,26 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
 	private static class ConsentSvcNop implements IConsentService {
@@ -968,78 +1088,102 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(myOperationStatus);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
 
 	private static class ConsentSvcRejectCanSeeAnything implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.REJECT;
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
-
 
 	private static class ConsentSvcRejectWillSeeEvenNumbered implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public ConsentOutcome startOperation(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome canSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(
+				RequestDetails theRequestDetails,
+				IBaseResource theResource,
+				IConsentContextServices theContextServices) {
 			if (theResource.getIdElement().isIdPartValidLong()) {
 				Long resIdLong = theResource.getIdElement().getIdPartAsLong();
 				if (resIdLong % 2 == 0) {
@@ -1050,17 +1194,17 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		public void completeOperationSuccess(
+				RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		public void completeOperationFailure(
+				RequestDetails theRequestDetails,
+				BaseServerResponseException theException,
+				IConsentContextServices theContextServices) {
 			// nothing
 		}
-
-
 	}
-
-
 }

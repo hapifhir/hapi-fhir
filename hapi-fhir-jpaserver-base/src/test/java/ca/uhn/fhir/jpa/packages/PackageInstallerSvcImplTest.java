@@ -32,12 +32,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,24 +55,34 @@ public class PackageInstallerSvcImplTest {
 
 	@Mock
 	private INpmPackageVersionDao myPackageVersionDao;
+
 	@Mock
 	private IHapiPackageCacheManager myPackageCacheManager;
+
 	@Mock
 	private ISearchParamRegistryController mySearchParamRegistryController;
+
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
 	@Mock
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+
 	@Mock
 	private IValidationSupport myIValidationSupport;
+
 	@Spy
 	private FhirContext myCtx = FhirContext.forR4Cached();
+
 	@Spy
 	private IHapiTransactionService myTxService = new NonTransactionalHapiTransactionService();
+
 	@Spy
 	private PackageResourceParsingSvc myPackageResourceParsingSvc = new PackageResourceParsingSvc(myCtx);
+
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
+
 	@InjectMocks
 	private PackageInstallerSvcImpl mySvc;
 
@@ -107,7 +116,6 @@ public class PackageInstallerSvcImplTest {
 		assertFalse(mySvc.validForUpload(sp));
 	}
 
-
 	@Test
 	public void testValidForUpload_GoodSearchParameter() {
 		SearchParameter sp = new SearchParameter();
@@ -121,9 +129,9 @@ public class PackageInstallerSvcImplTest {
 	@Test
 	public void testValidForUpload_RequestedSubscription() {
 		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
+				new Subscription.SubscriptionChannelComponent()
+						.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+						.setEndpoint("https://tinyurl.com/2p95e27r");
 		Subscription subscription = new Subscription();
 		subscription.setCriteria("Patient?name=smith");
 		subscription.setChannel(subscriptionChannelComponent);
@@ -134,9 +142,9 @@ public class PackageInstallerSvcImplTest {
 	@Test
 	public void testValidForUpload_ErrorSubscription() {
 		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
+				new Subscription.SubscriptionChannelComponent()
+						.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+						.setEndpoint("https://tinyurl.com/2p95e27r");
 		Subscription subscription = new Subscription();
 		subscription.setCriteria("Patient?name=smith");
 		subscription.setChannel(subscriptionChannelComponent);
@@ -147,9 +155,9 @@ public class PackageInstallerSvcImplTest {
 	@Test
 	public void testValidForUpload_ActiveSubscription() {
 		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
-			new Subscription.SubscriptionChannelComponent()
-				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
-				.setEndpoint("https://tinyurl.com/2p95e27r");
+				new Subscription.SubscriptionChannelComponent()
+						.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+						.setEndpoint("https://tinyurl.com/2p95e27r");
 		Subscription subscription = new Subscription();
 		subscription.setCriteria("Patient?name=smith");
 		subscription.setChannel(subscriptionChannelComponent);
@@ -212,7 +220,7 @@ public class PackageInstallerSvcImplTest {
 		when(myPackageCacheManager.installPackage(any())).thenReturn(pkg);
 		when(myDaoRegistry.getResourceDao(CodeSystem.class)).thenReturn(myCodeSystemDao);
 		when(myCodeSystemDao.search(any(), any())).thenReturn(new SimpleBundleProvider(existingCs));
-		when(myCodeSystemDao.update(any(),any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
+		when(myCodeSystemDao.update(any(), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 
 		PackageInstallationSpec spec = new PackageInstallationSpec();
 		spec.setName(PACKAGE_ID_1);
@@ -243,6 +251,7 @@ public class PackageInstallerSvcImplTest {
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
+
 	@Captor
 	private ArgumentCaptor<CodeSystem> myCodeSystemCaptor;
 
@@ -261,6 +270,4 @@ public class PackageInstallerSvcImplTest {
 
 		return pkg;
 	}
-
-
 }

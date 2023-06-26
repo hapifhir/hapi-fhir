@@ -39,10 +39,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.ServletException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,7 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class OperationGenericServer2R4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 	private static IdType ourLastId;
@@ -65,11 +66,10 @@ public class OperationGenericServer2R4Test {
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
-		ourLastParam3=null;
+		ourLastParam3 = null;
 		ourLastId = null;
 		ourLastResourceParam = null;
 	}
-
 
 	@Test
 	public void testDeclarativeTypedParameters() throws Exception {
@@ -84,11 +84,10 @@ public class OperationGenericServer2R4Test {
 
 			@Operation(name = "$OP_INSTANCE")
 			public Parameters opInstance(
-				@ResourceParam() IBaseResource theResourceParam,
-				@IdParam IdType theId,
-				@OperationParam(name = "PARAM1", typeName = "code") IPrimitiveType<String> theParam1,
-				@OperationParam(name = "PARAM2", typeName = "Coding") ICompositeType theParam2
-			) {
+					@ResourceParam() IBaseResource theResourceParam,
+					@IdParam IdType theId,
+					@OperationParam(name = "PARAM1", typeName = "code") IPrimitiveType<String> theParam1,
+					@OperationParam(name = "PARAM2", typeName = "Coding") ICompositeType theParam2) {
 
 				ourLastId = theId;
 				ourLastParam1 = theParam1;
@@ -99,7 +98,6 @@ public class OperationGenericServer2R4Test {
 				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 				return retVal;
 			}
-
 		}
 
 		PatientProvider provider = new PatientProvider();
@@ -126,7 +124,6 @@ public class OperationGenericServer2R4Test {
 			assertEquals("val", param2.getCode());
 			assertEquals("dis", param2.getDisplay());
 		}
-
 	}
 
 	@Test
@@ -142,10 +139,10 @@ public class OperationGenericServer2R4Test {
 
 			@Operation(name = "$OP_INSTANCE")
 			public Parameters opInstance(
-				@ResourceParam() IBaseResource theResourceParam,
-				@IdParam IdType theId,
-				@OperationParam(name = "PARAM1", typeName = "code", max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theParam1
-			) {
+					@ResourceParam() IBaseResource theResourceParam,
+					@IdParam IdType theId,
+					@OperationParam(name = "PARAM1", typeName = "code", max = OperationParam.MAX_UNLIMITED)
+							List<IPrimitiveType<String>> theParam1) {
 
 				ourLastId = theId;
 				ourLastParam1 = theParam1;
@@ -155,7 +152,6 @@ public class OperationGenericServer2R4Test {
 				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 				return retVal;
 			}
-
 		}
 
 		PatientProvider provider = new PatientProvider();
@@ -180,7 +176,6 @@ public class OperationGenericServer2R4Test {
 			assertEquals("PARAM1val", param1.get(0).getValue());
 			assertEquals("PARAM1val2", param1.get(1).getValue());
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -197,12 +192,17 @@ public class OperationGenericServer2R4Test {
 
 			@Operation(name = "$OP_INSTANCE")
 			public Parameters opInstance(
-				@ResourceParam() IBaseResource theResourceParam,
-				@IdParam IdType theId,
-				@OperationParam(name = "PARAM1", min = 1, typeName = "uri") IPrimitiveType<String> theParam1,
-				@OperationParam(name = "PARAM2", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theParam2,
-				@OperationParam(name = "PARAM3", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theParam3
-			) {
+					@ResourceParam() IBaseResource theResourceParam,
+					@IdParam IdType theId,
+					@OperationParam(name = "PARAM1", min = 1, typeName = "uri") IPrimitiveType<String> theParam1,
+					@OperationParam(name = "PARAM2", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+							List<IPrimitiveType<String>> theParam2,
+					@OperationParam(
+									name = "PARAM3",
+									min = 0,
+									max = OperationParam.MAX_UNLIMITED,
+									typeName = "attachment")
+							List<ICompositeType> theParam3) {
 
 				ourLastId = theId;
 				ourLastParam1 = theParam1;
@@ -214,7 +214,6 @@ public class OperationGenericServer2R4Test {
 				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 				return retVal;
 			}
-
 		}
 
 		PatientProvider provider = new PatientProvider();
@@ -239,7 +238,6 @@ public class OperationGenericServer2R4Test {
 			List<StringType> param2 = (List<StringType>) ourLastParam2;
 			assertEquals("PARAM2val", param2.get(0).getValue());
 		}
-
 	}
 
 	@Test
@@ -254,12 +252,9 @@ public class OperationGenericServer2R4Test {
 			}
 
 			@Operation(name = "$OP_INSTANCE")
-			public Parameters opInstance(
-				@OperationParam(name = "PARAM2", typeName = "code") ICompositeType theParam2
-			) {
+			public Parameters opInstance(@OperationParam(name = "PARAM2", typeName = "code") ICompositeType theParam2) {
 				return new Parameters();
 			}
-
 		}
 
 		try {
@@ -268,10 +263,13 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ServletException e) {
 			ConfigurationException ce = (ConfigurationException) e.getCause();
-			assertThat(ce.getMessage(), containsString("Failure scanning class PatientProvider: " + Msg.code(405) + "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
+			assertThat(
+					ce.getMessage(),
+					containsString(
+							"Failure scanning class PatientProvider: " + Msg.code(405)
+									+ "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
 		}
 	}
-
 
 	@Test
 	public void testTypeOperationWithTypeDeclaredByName() throws Exception {
@@ -280,10 +278,7 @@ public class OperationGenericServer2R4Test {
 		class PlainProvider {
 
 			@Operation(name = "$OP_INSTANCE", typeName = "Patient", idempotent = true)
-			public Parameters opInstance(
-				@ResourceParam() IBaseResource theResourceParam,
-				@IdParam IdType theId
-			) {
+			public Parameters opInstance(@ResourceParam() IBaseResource theResourceParam, @IdParam IdType theId) {
 
 				ourLastId = theId;
 
@@ -291,7 +286,6 @@ public class OperationGenericServer2R4Test {
 				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 				return retVal;
 			}
-
 		}
 
 		PlainProvider provider = new PlainProvider();
@@ -306,7 +300,6 @@ public class OperationGenericServer2R4Test {
 
 			assertEquals("123", ourLastId.getIdPart());
 		}
-
 	}
 
 	@Test
@@ -319,7 +312,6 @@ public class OperationGenericServer2R4Test {
 			public Parameters opInstance() {
 				return null;
 			}
-
 		}
 
 		PlainProvider provider = new PlainProvider();
@@ -328,10 +320,14 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ServletException e) {
 			Throwable cause = e.getRootCause();
-			assertEquals(Msg.code(288) + "Failure scanning class PlainProvider: " + Msg.code(423) +  "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - " + Msg.code(1684) + "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")", cause.getMessage());
+			assertEquals(
+					Msg.code(288) + "Failure scanning class PlainProvider: " + Msg.code(423)
+							+ "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - "
+							+ Msg.code(1684)
+							+ "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")",
+					cause.getMessage());
 		}
 	}
-
 
 	private void startServer(Object theProvider) throws Exception {
 		myServer = new Server(0);
@@ -351,7 +347,6 @@ public class OperationGenericServer2R4Test {
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 	}
 
-
 	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
@@ -366,11 +361,10 @@ public class OperationGenericServer2R4Test {
 	public static void beforeClass() {
 		ourCtx = FhirContext.forR4();
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-
 }

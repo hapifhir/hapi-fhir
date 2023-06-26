@@ -31,8 +31,10 @@ public class SubscriptionChannelFactoryTest {
 
 	@Mock
 	private ChannelInterceptor myInterceptor;
+
 	@Mock
 	private IChannelNamer myChannelNamer;
+
 	@Captor
 	private ArgumentCaptor<Exception> myExceptionCaptor;
 
@@ -54,7 +56,7 @@ public class SubscriptionChannelFactoryTest {
 
 		Message<?> input = new GenericMessage<>("TEST");
 
-		when(myInterceptor.preSend(any(),any())).thenAnswer(t->t.getArgument(0, Message.class));
+		when(myInterceptor.preSend(any(), any())).thenAnswer(t -> t.getArgument(0, Message.class));
 
 		try {
 			channel.send(input);
@@ -67,7 +69,6 @@ public class SubscriptionChannelFactoryTest {
 
 		assertTrue(myExceptionCaptor.getValue() instanceof NullPointerException);
 	}
-
 
 	private class NpeThrowingHandler implements MessageHandler {
 		@Override

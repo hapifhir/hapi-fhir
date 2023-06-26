@@ -1,8 +1,8 @@
 package ca.uhn.fhir.validation;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResultSeverityEnumTest {
 
@@ -12,7 +12,5 @@ public class ResultSeverityEnumTest {
 		assertEquals(1, ResultSeverityEnum.WARNING.ordinal());
 		assertEquals(2, ResultSeverityEnum.ERROR.ordinal());
 		assertEquals(3, ResultSeverityEnum.FATAL.ordinal());
-		
 	}
-	
 }

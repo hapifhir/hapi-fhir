@@ -11,9 +11,7 @@ public class MdmTestLinkExpression {
 	private final String myMdmMatchResult;
 	private final String myRightSideResourceIdentifier;
 
-	public MdmTestLinkExpression(
-		String theInputState
-	) {
+	public MdmTestLinkExpression(String theInputState) {
 		myLinkExpression = theInputState;
 		String[] params = parseState(theInputState);
 
@@ -27,9 +25,7 @@ public class MdmTestLinkExpression {
 		String[] state = theStateString.split(",");
 		if (state.length != 4) {
 			// we're using this exclusively in test area
-			fail(
-				String.format("%s must contain 4 arguments; found %d", theStateString, state.length)
-			);
+			fail(String.format("%s must contain 4 arguments; found %d", theStateString, state.length));
 		}
 
 		return state;

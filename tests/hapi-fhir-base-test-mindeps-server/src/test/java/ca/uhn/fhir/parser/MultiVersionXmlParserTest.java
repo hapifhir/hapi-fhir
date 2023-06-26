@@ -31,14 +31,22 @@ public class MultiVersionXmlParserTest {
 		String str;
 		str = ourCtxDstu2.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<unit value=\"g/L\"",
-			"</valueQuantity></extension>"));
+		assertThat(
+				str,
+				Matchers.stringContainsInOrder(
+						"<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"",
+						"<comparator value=\"&lt;\"",
+						"<unit value=\"g/L\"",
+						"</valueQuantity></extension>"));
 
 		try {
 			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
+			assertEquals(
+					Msg.code(1829)
+							+ "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2",
+					e.getMessage());
 		}
 	}
 
@@ -60,21 +68,24 @@ public class MultiVersionXmlParserTest {
 			ourCtxDstu3.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertEquals(
+					Msg.code(1731)
+							+ "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"",
+					e.getMessage());
 		}
 		try {
 			ourCtxDstu3.newXmlParser().parseResource(Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertEquals(
+					Msg.code(1731)
+							+ "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"",
+					e.getMessage());
 		}
-
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
-
 }

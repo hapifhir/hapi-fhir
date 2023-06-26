@@ -36,10 +36,10 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-
 public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderHasParamR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderHasParamR4Test.class);
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
@@ -49,12 +49,13 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		
+
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
@@ -74,10 +75,9 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
-
 	@Test
 	public void testHasParameter() throws Exception {
-		
+
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -106,26 +106,26 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
 			obs.setDevice(new Reference(devId));
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		
-		String uri = myServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:identifier="
+				+ UrlUtil.escapeUrlParam("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
 
 	@Test
 	public void testMultipleHasParametersOfSameType() throws Exception {
-		
+
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			
 		}
 		{
 			Patient patient = new Patient();
@@ -154,32 +154,36 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			Encounter encounter = new Encounter();
 			encounter.addIdentifier().setValue("theEncounter");
 			encounter.getClass_().setCode("IMP").setSystem("urn:system");
-			encounter.getPeriod().setStartElement(new DateTimeType("2020-01-01")).setEndElement(new DateTimeType("2020-09-30"));
+			encounter
+					.getPeriod()
+					.setStartElement(new DateTimeType("2020-01-01"))
+					.setEndElement(new DateTimeType("2020-09-30"));
 			encounter.setSubject(new Reference(pid0));
-						
+
 			myEncounterDao.create(encounter, mySrd);
-			
-			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+
+			ourLog.debug("Encounter: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
-		
-		String uri = myServerBase + "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP") + "&_has:Encounter:subject:date=gt1950";
-		
+
+		String uri = myServerBase + "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP")
+				+ "&_has:Encounter:subject:date=gt1950";
+
 		ourLog.info("uri = " + uri);
-		
+
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
-	
+
 	@Test
 	public void testMultipleHasParametersOfDifferentType() throws Exception {
-		
+
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			
 		}
 		{
 			Patient patient = new Patient();
@@ -194,8 +198,9 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -212,21 +217,26 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			Encounter encounter = new Encounter();
 			encounter.addIdentifier().setValue("theEncounter");
 			encounter.getClass_().setCode("IMP").setSystem("urn:system");
-			encounter.getPeriod().setStartElement(new DateTimeType("2020-01-01")).setEndElement(new DateTimeType("2020-09-30"));
+			encounter
+					.getPeriod()
+					.setStartElement(new DateTimeType("2020-01-01"))
+					.setEndElement(new DateTimeType("2020-09-30"));
 			encounter.setSubject(new Reference(pid0));
-						
+
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
-		
-		String uri = myServerBase + "/Patient?_has:Observation:patient:code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
-		
+
+		String uri = myServerBase + "/Patient?_has:Observation:patient:code=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
+
 		ourLog.info("uri = " + uri);
-		
+
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
-	
+
 	@Test
 	public void testHasCompositeParameterCodeValueQuantity() throws Exception {
 		IIdType pid0;
@@ -248,14 +258,15 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			Quantity q = new Quantity();
 			q.setValue(200);
 			obs.setValue(q);
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -268,7 +279,8 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
@@ -295,15 +307,16 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-						
+
 			Period period = new Period();
 			period.setStartElement(new DateTimeType("2020-01-01"));
 			period.setEndElement(new DateTimeType("2020-09-30"));
 			obs.setValue(period);
-						
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -316,7 +329,8 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-date=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt2019");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-date=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$gt2019");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
@@ -343,23 +357,24 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-						
+
 			Period period = new Period();
 			period.setStartElement(new DateTimeType("2020-01-01"));
 			period.setEndElement(new DateTimeType("2020-09-30"));
 			obs.setValue(period);
-						
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept compCC = comp.getCode();
 			compCC.addCoding().setCode("2345-8").setSystem("http://loinc.org");
-			
+
 			Quantity q = new Quantity();
 			q.setValue(200);
 			comp.setValue(q);
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -372,7 +387,8 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$200");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:combo-code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-8$200");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
@@ -400,26 +416,28 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			obs.setValue(new StringType("100"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("BAR");
 			obs.getSubject().setReferenceElement(pid1);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			obs.setValue(new StringType("200"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -432,13 +450,14 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-string=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$100,http://loinc.org|2345-7$200");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-string=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$100,http://loinc.org|2345-7$200");
 		ourLog.info("uri = " + uri);
-		
+
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
 	}
-	
+
 	@Test
 	public void testHasCompositeParameterWithNoResult() throws Exception {
 		IIdType pid0;
@@ -460,14 +479,15 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			Quantity q = new Quantity();
 			q.setValue(200);
 			obs.setValue(q);
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -480,12 +500,13 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(0, ids.size());
 	}
-	
+
 	@Test
 	public void testMultipleHasParameterWithCompositeOfSameType() throws Exception {
 		IIdType pid0;
@@ -507,14 +528,15 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			Quantity q = new Quantity();
 			q.setValue(200);
 			obs.setValue(q);
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -527,23 +549,24 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
-		
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:identifier="
+				+ UrlUtil.escapeUrlParam("urn:system|FOO");
+
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
 	}
-	
+
 	@Test
 	public void testMultipleHasParameterWithCompositeOfDifferentType() throws Exception {
-		
+
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			
 		}
 		{
 			Patient patient = new Patient();
@@ -557,14 +580,15 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-			
+
 			Quantity q = new Quantity();
 			q.setValue(200);
 			obs.setValue(q);
-			
+
 			myObservationDao.create(obs, mySrd);
-			
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			ourLog.debug("Observation: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -581,42 +605,51 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			Encounter encounter = new Encounter();
 			encounter.addIdentifier().setValue("theEncounter");
 			encounter.getClass_().setCode("IMP").setSystem("urn:system");
-			encounter.getPeriod().setStartElement(new DateTimeType("2020-01-01")).setEndElement(new DateTimeType("2020-09-30"));
+			encounter
+					.getPeriod()
+					.setStartElement(new DateTimeType("2020-01-01"))
+					.setEndElement(new DateTimeType("2020-09-30"));
 			encounter.setSubject(new Reference(pid0));
-						
+
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n"
+					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
-		
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
-		
+
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950"
+				+ "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
+
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-				
+
 		assertThat(ids, contains(pid0.getValue()));
 	}
 
 	@Test
 	public void testMultipleHasParameter_NOT_IN() throws Exception {
 
-		for (int i=0; i<10; i++) {
+		for (int i = 0; i < 10; i++) {
 			createPatientWithObs(10);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:date=gt1950" + "&_has:Observation:subject:status=final&_count=4";
+		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://"
+				+ UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:date=gt1950"
+				+ "&_has:Observation:subject:status=final&_count=4";
 
 		ourLog.info("uri = " + uri);
 		myCaptureQueriesListener.clear();
 
 		searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList();
+		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream()
+				.map(t -> t.getSql(true, false))
+				.toList();
 
 		List<String> notInListQueries = new ArrayList<>();
 		for (String query : queries) {
 			ourLog.info("Query: {}", query);
-			if (query.contains("RES_ID NOT IN"))
-				notInListQueries.add(query);
+			if (query.contains("RES_ID NOT IN")) notInListQueries.add(query);
 		}
 
 		assertNotEquals(0, notInListQueries.size());
@@ -636,24 +669,24 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void createPatientWithObs(int obsNum) {
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester").addGiven("Joe");
 		IIdType pid = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		Observation o1 = new Observation();
 		o1.setStatus(ObservationStatus.FINAL);
 		o1.getSubject().setReferenceElement(pid);
 		o1.setEffective(new DateTimeType("2001-02-01"));
 		CodeableConcept cc = o1.getCode();
 		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-		o1.setValue(new Quantity().setValue(200));	
+		o1.setValue(new Quantity().setValue(200));
 		cc = new CodeableConcept();
 		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 		o1.addCategory(cc);
-		
-		for (int i=0; i<obsNum; i++) {
+
+		for (int i = 0; i < obsNum; i++) {
 			myObservationDao.create(o1).getId().toUnqualifiedVersionless();
 		}
 	}

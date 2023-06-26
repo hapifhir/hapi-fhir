@@ -39,28 +39,35 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-	TestR4Config.class,
-	TestHSearchAddInConfig.NoFT.class,
-	DaoTestDataBuilder.Config.class,
-	TestDaoSearch.Config.class
-})
+@ContextConfiguration(
+		classes = {
+			TestR4Config.class,
+			TestHSearchAddInConfig.NoFT.class,
+			DaoTestDataBuilder.Config.class,
+			TestDaoSearch.Config.class
+		})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
 	@Autowired
 	PlatformTransactionManager myTxManager;
+
 	@Autowired
 	FhirContext myFhirCtx;
+
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
+
 	@Autowired
 	MatchUrlService myMatchUrlService;
+
 	@RegisterExtension
 	@Autowired
 	DaoTestDataBuilder myDataBuilder;
+
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
@@ -73,7 +80,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
-
 
 	@Nested
 	public class StringSearch {
@@ -90,14 +96,14 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			"exact  search matches exact        , Flintstones,  :exact=Flintstones ,  True",
 			"exact  search no match wrong case  , Flintstones,  :exact=flintstones ,  False",
 			"exact  search no match prefix      , Flintstones,  :exact=Flint       ,  False",
-//			"contains search match prefix      ,  Flintstones,  :contains=flint       ,  True",
-//			"contains search match prefix      ,  Flintstones,  :contains=Flint       ,  True",
+			//			"contains search match prefix      ,  Flintstones,  :contains=flint       ,  True",
+			//			"contains search match prefix      ,  Flintstones,  :contains=Flint       ,  True",
 		})
 		void stringSearches(String theDescription, String theString, String theQuery, boolean theExpectMatchFlag) {
-		    // given
+			// given
 			IIdType id = myDataBuilder.createPatient(myDataBuilder.withFamily(theString));
 
-		    // when
+			// when
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?name" + theQuery);
 
 			// then
@@ -112,48 +118,59 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		void searchTwoFields() {
 			// given
 			IIdType id = myDataBuilder.createPatient(
-				myDataBuilder.withGiven("Fred"),
-				myDataBuilder.withFamily("Flintstone"));
+					myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Flintstone"));
 
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?family=flint&given:exact=Fred");
 
 			// then
-			assertThat(foundIds, hasItem(id.getIdPart()));		    // then
+			assertThat(foundIds, hasItem(id.getIdPart())); // then
 		}
 
 		@Test
 		void sort() {
 			// given
-			String idWilma = myDataBuilder.createPatient(myDataBuilder.withGiven("Wilma"), myDataBuilder.withFamily("Flintstone")).getIdPart();
-			String idFred = myDataBuilder.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Flintstone")).getIdPart();
-			String idBarney = myDataBuilder.createPatient(myDataBuilder.withGiven("Barney"), myDataBuilder.withFamily("Rubble")).getIdPart();
-			String idCoolFred = myDataBuilder.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Jones")).getIdPart();
-			String idPolka = myDataBuilder.createPatient(myDataBuilder.withGiven("Polkaroo"), myDataBuilder.withFamily("Polkaroo")).getIdPart();
+			String idWilma = myDataBuilder
+					.createPatient(myDataBuilder.withGiven("Wilma"), myDataBuilder.withFamily("Flintstone"))
+					.getIdPart();
+			String idFred = myDataBuilder
+					.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Flintstone"))
+					.getIdPart();
+			String idBarney = myDataBuilder
+					.createPatient(myDataBuilder.withGiven("Barney"), myDataBuilder.withFamily("Rubble"))
+					.getIdPart();
+			String idCoolFred = myDataBuilder
+					.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Jones"))
+					.getIdPart();
+			String idPolka = myDataBuilder
+					.createPatient(myDataBuilder.withGiven("Polkaroo"), myDataBuilder.withFamily("Polkaroo"))
+					.getIdPart();
 
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?_sort=family,given");
 
 			// then
-			assertThat(foundIds, contains(idFred, idWilma, idCoolFred, idPolka, idBarney));		    // then
+			assertThat(foundIds, contains(idFred, idWilma, idCoolFred, idPolka, idBarney)); // then
 		}
-
 
 		@Test
 		void sortWithAge() {
 			// given
 			DaoTestDataBuilder b = myDataBuilder;
-			String idWilma = b.createPatient(
-				b.withGiven("Wilma"), b.withFamily("Flintstone"), b.withBirthdate("1945")).getIdPart();
-			String idFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Flintstone"), b.withBirthdate("1940")).getIdPart();
-			String idBarney = b.createPatient(b.withGiven("Barney"), b.withFamily("Rubble"), b.withBirthdate("1941")).getIdPart();
-			String idCoolFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Jones"), b.withBirthdate("1965")).getIdPart();
-			String idPolka = b.createPatient(b.withGiven("Polkaroo"), b.withFamily("Polkaroo"), b.withBirthdate("1980")).getIdPart();
+			String idWilma = b.createPatient(b.withGiven("Wilma"), b.withFamily("Flintstone"), b.withBirthdate("1945"))
+					.getIdPart();
+			String idFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Flintstone"), b.withBirthdate("1940"))
+					.getIdPart();
+			String idBarney = b.createPatient(b.withGiven("Barney"), b.withFamily("Rubble"), b.withBirthdate("1941"))
+					.getIdPart();
+			String idCoolFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Jones"), b.withBirthdate("1965"))
+					.getIdPart();
+			String idPolka = b.createPatient(b.withGiven("Polkaroo"), b.withFamily("Polkaroo"), b.withBirthdate("1980"))
+					.getIdPart();
 
 			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?birthdate=lt1960&_sort=family,given");
 
 			// then
-			assertThat(foundIds, contains(idFred, idWilma, idBarney));		    // then
+			assertThat(foundIds, contains(idFred, idWilma, idBarney)); // then
 		}
-
 	}
 
 	@Nested
@@ -180,7 +197,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("by code, any system", "/Observation?code=value");
 				assertNotFind("by same system, different code", "/Observation?code=http://example.com|other");
 				assertNotFind("by same code, different system", "/Observation?code=http://example2.com|value");
-				assertNotFind("by different code, different system", "/Observation?code=http://example2.com|otherValue");
+				assertNotFind(
+						"by different code, different system", "/Observation?code=http://example2.com|otherValue");
 			}
 
 			@Test
@@ -216,7 +234,9 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 					assertFind("by same system, different code", "/Observation?code:not=http://example.com|other");
 					assertFind("by same code, different system", "/Observation?code:not=http://example2.com|value");
-					assertFind("by different code, different system", "/Observation?code:not=http://example2.com|otherValue");
+					assertFind(
+							"by different code, different system",
+							"/Observation?code:not=http://example2.com|otherValue");
 					assertNotFind("by system and code", "/Observation?code:not=http://example.com|value");
 					assertNotFind("by system, any code", "/Observation?code:not=http://example.com|");
 					assertNotFind("by code, any system", "/Observation?code:not=value");
@@ -229,7 +249,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					assertFind("by system and code", "/Observation?code:not=http://example.com|value");
 					assertFind("by system, any code", "/Observation?code:not=http://example.com|");
 					assertFind("by code, any system", "/Observation?code:not=value");
-
 				}
 			}
 
@@ -237,7 +256,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			public class TextModifier {
 				@Test
 				public void systemAndCode() {
-					withObservation(myDataBuilder.withObservationCode("http://example.com", "value", "the display text"));
+					withObservation(
+							myDataBuilder.withObservationCode("http://example.com", "value", "the display text"));
 					assertFind("by code display", "/Observation?code:text=the%20display%20text");
 				}
 			}
@@ -246,13 +266,19 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			public class Sorting {
 				@Test
 				public void sortBySystemThenValue() {
-					String idAlphaM = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Mvalue")).getIdPart();
-					String idAlphaA = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Avalue")).getIdPart();
-					String idAlphaZ = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Zvalue")).getIdPart();
+					String idAlphaM = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Mvalue"))
+							.getIdPart();
+					String idAlphaA = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Avalue"))
+							.getIdPart();
+					String idAlphaZ = withObservation(myDataBuilder.withObservationCode("http://alpha.org", "Zvalue"))
+							.getIdPart();
 
-					String idExD = withObservation(myDataBuilder.withObservationCode("http://example.org", "DValue")).getIdPart();
-					String idExA = withObservation(myDataBuilder.withObservationCode("http://example.org", "AValue")).getIdPart();
-					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue")).getIdPart();
+					String idExD = withObservation(myDataBuilder.withObservationCode("http://example.org", "DValue"))
+							.getIdPart();
+					String idExA = withObservation(myDataBuilder.withObservationCode("http://example.org", "AValue"))
+							.getIdPart();
+					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue"))
+							.getIdPart();
 
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code");
 					assertThat(allIds, hasItems(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
@@ -269,7 +295,9 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		IIdType myResourceId;
 
 		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
-			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withResourcePrimitiveAttribute("prediction.probabilityDecimal", theValue));
+			myResourceId = myDataBuilder.createResource(
+					"RiskAssessment",
+					myDataBuilder.withResourcePrimitiveAttribute("prediction.probabilityDecimal", theValue));
 			return myResourceId;
 		}
 
@@ -315,7 +343,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("when gt", "/RiskAssessment?probability=gt0.5");
 				assertNotFind("when eq", "/RiskAssessment?probability=gt0.6");
 				assertNotFind("when lt", "/RiskAssessment?probability=gt0.7");
-
 			}
 
 			@Test
@@ -334,7 +361,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertNotFind("when gt", "/RiskAssessment?probability=lt0.5");
 				assertNotFind("when eq", "/RiskAssessment?probability=lt0.6");
 				assertFind("when lt", "/RiskAssessment?probability=lt0.7");
-
 			}
 
 			@Test
@@ -345,7 +371,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("when eq", "/RiskAssessment?probability=le0.6");
 				assertFind("when lt", "/RiskAssessment?probability=le0.7");
 			}
-
 
 			private void assertFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
@@ -369,9 +394,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				List<String> allIds = myTestDaoSearch.searchForIds("/RiskAssessment?_sort=probability");
 				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
 			}
-
 		}
-
 	}
 
 	@Nested
@@ -379,16 +402,16 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		IIdType myResourceId;
 
 		private IIdType withObservationWithValueQuantity(double theValue) {
-//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
-//				myDataBuilder.withPrimitiveAttribute("value", theValue),
-//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
-//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
-			myResourceId = myDataBuilder.createObservation(myDataBuilder.withElementAt("valueQuantity",
-				myDataBuilder.withPrimitiveAttribute("value", theValue),
-				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
-				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
-				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-			));
+			//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
+			//				myDataBuilder.withPrimitiveAttribute("value", theValue),
+			//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+			//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withElementAt(
+					"valueQuantity",
+					myDataBuilder.withPrimitiveAttribute("value", theValue),
+					myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+					myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
+					myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")));
 			return myResourceId;
 		}
 
@@ -438,7 +461,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("when gt", "/Observation?value-quantity=gt0.5");
 				assertNotFind("when eq", "/Observation?value-quantity=gt0.6");
 				assertNotFind("when lt", "/Observation?value-quantity=gt0.7");
-
 			}
 
 			@Test
@@ -457,7 +479,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertNotFind("when gt", "/Observation?value-quantity=lt0.5");
 				assertNotFind("when eq", "/Observation?value-quantity=lt0.6");
 				assertFind("when lt", "/Observation?value-quantity=lt0.7");
-
 			}
 
 			@Test
@@ -468,7 +489,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("when eq", "/Observation?value-quantity=le0.6");
 				assertFind("when lt", "/Observation?value-quantity=le0.7");
 			}
-
 
 			private void assertFind(String theMessage, String theUrl) {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
@@ -493,7 +513,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
 			}
 		}
-
 	}
 
 	// todo mb re-enable this.  Some of these fail!

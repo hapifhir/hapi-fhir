@@ -1,9 +1,6 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
-import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
-import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +26,4 @@ public class EmptyFieldMatcherTest extends BaseMatcherR4Test {
 		assertFalse(fieldMatch.matches(left, null, null));
 		assertFalse(fieldMatch.matches(left, right, null));
 	}
-
-
 }

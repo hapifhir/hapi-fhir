@@ -45,18 +45,18 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
-		CodeSystem.ConceptDefinitionComponent parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A");
+		CodeSystem.ConceptDefinitionComponent parentA =
+				parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A");
 		parentA.addConcept().setCode("ChildAA").setDisplay("Child AA");
 		parentChildCs.addConcept().setCode("ParentB").setDisplay("Parent B");
 
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
-		parentChildCsId = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
-
+		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 	}
 
 	@Test
 	public void testValidateCodeWithUrlAndVersion_v1() {
-		
+
 		String url = "http://url";
 		createCodeSystem(url, "v1", "1", "Code v1 display");
 		createCodeSystem(url, "v2", "1", "Code v2 display");
@@ -67,76 +67,88 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 		inParams.addParameter().setName("display").setValue(new StringType("Code v1 display"));
 
-		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute();
 
-		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
-		
+		ourLog.debug("Response Parameters\n"
+				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals(
+				"Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
-			.andParameter("system", new UriType("http://acme.org"))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+				.andParameter("system", new UriType("http://acme.org"))
+				.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(
+				("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals(
+				("Systolic blood pressure--expiration"),
+				((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
 	public void testSubsumesOnCodes_Subsumes() {
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
-			.andParameter("codeB", new CodeType("ChildAA"))
-			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_SUBSUMES)
+				.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+				.andParameter("codeB", new CodeType("ChildAA"))
+				.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
+				.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(
+				ConceptSubsumptionOutcome.SUBSUMES.toCode(),
+				((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
 	@Test
 	public void testSubsumesOnCodings_Subsumes() {
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_SUBSUMES)
+				.withParameter(
+						Parameters.class,
+						"codingA",
+						new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+				.andParameter(
+						"codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
+				.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
 		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(
+				ConceptSubsumptionOutcome.SUBSUMES.toCode(),
+				((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
-
-
 	private void createCodeSystem(String url, String version, String code, String display) {
-		
+
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(url).setVersion(version);
 
@@ -149,28 +161,34 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		ConceptDefinitionComponent concept2 = codeSystem.addConcept();
 		concept2.setCode("2000").setDisplay("Code Dispaly 2000");
 
-		ourLog.debug("CodeSystem: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
-		
+		ourLog.debug("CodeSystem: \n"
+				+ myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
 		myCodeSystemDao.create(codeSystem, mySrd);
 	}
 
 	@Test
 	public void testLookupOperationByCoding() throws IOException {
 
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
-			.execute();
+		Parameters respParam = myClient.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(
+						Parameters.class,
+						"coding",
+						new Coding().setSystem("http://acme.org").setCode("8450-9"))
+				.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(
+				("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals(
+				("Systolic blood pressure--expiration"),
+				((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
@@ -181,73 +199,82 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
 
-		Parameters respParam = myClient.operation().onInstance(myCsId).named("validate-code").withParameters(inParams).execute();
+		Parameters respParam = myClient.operation()
+				.onInstance(myCsId)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals(
+				"Systolic blood pressure.inspiration - expiration",
+				((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
 		// First test with no version specified (should return the one and only version defined).
 		{
-			Parameters respParam = myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
-				.execute();
+			Parameters respParam = myClient.operation()
+					.onType(CodeSystem.class)
+					.named("lookup")
+					.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+					.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+					.execute();
 
 			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 			ourLog.info(resp);
 
-			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
+			Parameters.ParametersParameterComponent param0 =
+					respParam.getParameter().get(0);
 			assertEquals("name", param0.getName());
 			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
-			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
+			Parameters.ParametersParameterComponent param1 =
+					respParam.getParameter().get(1);
 			assertEquals("version", param1.getName());
 			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
-			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
+			Parameters.ParametersParameterComponent param2 =
+					respParam.getParameter().get(2);
 			assertEquals("display", param2.getName());
 			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
-			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
+			Parameters.ParametersParameterComponent param3 =
+					respParam.getParameter().get(3);
 			assertEquals("abstract", param3.getName());
 			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
 		}
 
 		// Repeat with version specified.
 		{
-			Parameters respParam = myClient
-				.operation()
-				.onType(CodeSystem.class)
-				.named("lookup")
-				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
-				.andParameter("version", new StringType("2.9.0"))
-				.execute();
+			Parameters respParam = myClient.operation()
+					.onType(CodeSystem.class)
+					.named("lookup")
+					.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+					.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+					.andParameter("version", new StringType("2.9.0"))
+					.execute();
 
 			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 			ourLog.info(resp);
 
-			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
+			Parameters.ParametersParameterComponent param0 =
+					respParam.getParameter().get(0);
 			assertEquals("name", param0.getName());
 			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
-			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
+			Parameters.ParametersParameterComponent param1 =
+					respParam.getParameter().get(1);
 			assertEquals("version", param1.getName());
 			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
-			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
+			Parameters.ParametersParameterComponent param2 =
+					respParam.getParameter().get(2);
 			assertEquals("display", param2.getName());
 			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
-			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
+			Parameters.ParametersParameterComponent param3 =
+					respParam.getParameter().get(3);
 			assertEquals("abstract", param3.getName());
 			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
 		}
 	}
-
-
-
 }

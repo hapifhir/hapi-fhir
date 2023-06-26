@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.searchparam.config.NicknameServiceConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -49,7 +48,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
-import javax.sql.DataSource;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -59,6 +57,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -98,8 +97,10 @@ public class TestR4Config {
 	}
 
 	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
+
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
+
 	private boolean myHaveDumpedThreads;
 
 	@Bean
@@ -166,27 +167,24 @@ public class TestR4Config {
 					myHaveDumpedThreads = true;
 				}
 			}
-
 		};
 
 		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
-		DataSource dataSource = ProxyDataSourceBuilder
-			.create(retVal)
-//			.logQueryBySlf4j(level)
-			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
-			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.beforeQuery(getMandatoryTransactionListener())
-			.afterQuery(captureQueriesListener())
-			.afterQuery(new CurrentThreadCaptureQueriesListener())
-			.countQuery(singleQueryCountHolder())
-			.afterMethod(captureQueriesListener())
-			.build();
+		DataSource dataSource = ProxyDataSourceBuilder.create(retVal)
+				//			.logQueryBySlf4j(level)
+				.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
+				.beforeQuery(new BlockLargeNumbersOfParamsListener())
+				.beforeQuery(getMandatoryTransactionListener())
+				.afterQuery(captureQueriesListener())
+				.afterQuery(new CurrentThreadCaptureQueriesListener())
+				.countQuery(singleQueryCountHolder())
+				.afterMethod(captureQueriesListener())
+				.build();
 
 		return dataSource;
 	}
-
 
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
@@ -196,7 +194,6 @@ public class TestR4Config {
 		theDataSource.setPassword("");
 		theDataSource.setMaxTotal(ourMaxThreads);
 	}
-
 
 	@Bean
 	public SingleQueryCountHolder singleQueryCountHolder() {
@@ -208,10 +205,11 @@ public class TestR4Config {
 		return new MandatoryTransactionListener();
 	}
 
-
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+			ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(
+				theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -280,5 +278,4 @@ public class TestR4Config {
 	public static int getMaxThreads() {
 		return ourMaxThreads;
 	}
-
 }

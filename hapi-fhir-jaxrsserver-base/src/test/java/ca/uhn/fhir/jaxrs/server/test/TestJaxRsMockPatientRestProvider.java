@@ -1,22 +1,5 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.interceptor.Interceptors;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.mockito.Mockito;
-
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.model.api.IResource;
@@ -24,18 +7,28 @@ import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.mockito.Mockito;
+
+import java.util.List;
+import javax.ejb.Stateless;
+import javax.interceptor.Interceptors;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
 
 /**
  * A test server delegating each call to a mock
  */
 @Path(TestJaxRsMockPatientRestProvider.PATH)
 @Stateless
-@Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+@Produces({MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML})
 @Interceptors(JaxRsExceptionInterceptor.class)
 public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvider<Patient> {
 
@@ -45,13 +38,12 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 
 	public static final FifoMemoryPagingProvider PAGING_PROVIDER;
 
-	static
-	{
+	static {
 		PAGING_PROVIDER = new FifoMemoryPagingProvider(10);
 		PAGING_PROVIDER.setDefaultPageSize(10);
 		PAGING_PROVIDER.setMaximumPageSize(100);
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -60,12 +52,18 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 	}
 
 	@Search
-	public List<Patient> search(@RequiredParam(name = Patient.SP_NAME) final StringParam name, @RequiredParam(name=Patient.SP_ADDRESS) StringAndListParam theAddressParts) {
+	public List<Patient> search(
+			@RequiredParam(name = Patient.SP_NAME) final StringParam name,
+			@RequiredParam(name = Patient.SP_ADDRESS) StringAndListParam theAddressParts) {
 		return mock.search(name, theAddressParts);
 	}
 
 	@Update
-	public MethodOutcome update(@IdParam final IdDt theId, @ResourceParam final Patient patient,@ConditionalUrlParam final String theConditional) throws Exception {
+	public MethodOutcome update(
+			@IdParam final IdDt theId,
+			@ResourceParam final Patient patient,
+			@ConditionalUrlParam final String theConditional)
+			throws Exception {
 		return mock.update(theId, patient, theConditional);
 	}
 
@@ -100,31 +98,41 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 		return mock.delete(theId, theConditional);
 	}
 
-    @Search(compartmentName = "Condition")
-    public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
-        return mock.searchCompartment(thePatientId);
-    }   
-	
+	@Search(compartmentName = "Condition")
+	public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
+		return mock.searchCompartment(thePatientId);
+	}
+
 	@GET
 	@Path("/{id}/$someCustomOperation")
 	public Response someCustomOperationUsingGet(@PathParam("id") String id, String resource) throws Exception {
-		return customOperation(resource, RequestTypeEnum.GET, id, "$someCustomOperation",
+		return customOperation(
+				resource,
+				RequestTypeEnum.GET,
+				id,
+				"$someCustomOperation",
 				RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
 	}
 
 	@POST
 	@Path("/{id}/$someCustomOperation")
 	public Response someCustomOperationUsingPost(@PathParam("id") String id, String resource) throws Exception {
-		return customOperation(resource, RequestTypeEnum.POST, id, "$someCustomOperation",
+		return customOperation(
+				resource,
+				RequestTypeEnum.POST,
+				id,
+				"$someCustomOperation",
 				RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE);
 	}
 
-	@Operation(name = "someCustomOperation", idempotent = true, returnParameters = {
-			@OperationParam(name = "return", type = StringDt.class) })
+	@Operation(
+			name = "someCustomOperation",
+			idempotent = true,
+			returnParameters = {@OperationParam(name = "return", type = StringDt.class)})
 	public Parameters someCustomOperation(@IdParam IdDt myId, @OperationParam(name = "dummy") StringDt dummyInput) {
 		return mock.someCustomOperation(myId, dummyInput);
 	}
-  
+
 	@Validate()
 	public MethodOutcome validate(@ResourceParam final Patient resource) {
 		final MethodOutcome mO = new MethodOutcome();
@@ -141,5 +149,4 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 	public IPagingProvider getPagingProvider() {
 		return PAGING_PROVIDER;
 	}
-
 }

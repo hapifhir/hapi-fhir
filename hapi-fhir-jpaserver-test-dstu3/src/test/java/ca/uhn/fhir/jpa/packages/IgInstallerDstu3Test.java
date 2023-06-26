@@ -15,8 +15,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +30,8 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,15 +40,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(IgInstallerDstu3Test.class);
+
 	@Autowired
 	private PackageInstallerSvcImpl igInstaller;
+
 	@Autowired
 	@Qualifier(PackageUtils.LOADER_WITH_CACHE)
 	private IHapiPackageCacheManager myPackageCacheManager;
+
 	private Server myServer;
 	private FakeNpmServlet myFakeNpmServlet;
+
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
+
 	private int myPort;
 
 	@Override
@@ -88,7 +91,11 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		// That patient profile in this NPM package has an invalid base
 		try {
-			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
+			igInstaller.install(new PackageInstallationSpec()
+					.setName("erroneous-ig")
+					.setVersion("1.0.2")
+					.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+					.setPackageContents(bytes));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
 			assertThat(e.getMessage(), containsString("Could not load NPM package erroneous-ig#1.0.2"));
@@ -110,20 +117,26 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		myStorageSettings.setAllowExternalReferences(true);
 		PackageInstallationSpec spec = new PackageInstallationSpec()
-			.setName("nictiz.fhir.nl.stu3.questionnaires")
-			.setVersion("1.0.2")
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
-			.setFetchDependencies(true)
-			.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
+				.setName("nictiz.fhir.nl.stu3.questionnaires")
+				.setVersion("1.0.2")
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY)
+				.setFetchDependencies(true)
+				.addDependencyExclude("hl7\\.fhir\\.[a-zA-Z0-9]+\\.core");
 		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
 		ourLog.info("Install messages:\n * {}", outcome.getMessage().stream().collect(Collectors.joining("\n * ")));
-		assertThat(outcome.getMessage(), hasItem("Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
+		assertThat(
+				outcome.getMessage(),
+				hasItem(
+						"Indexing StructureDefinition Resource[package/vl-QuestionnaireProvisioningTask.json] with URL: http://nictiz.nl/fhir/StructureDefinition/vl-QuestionnaireProvisioningTask|1.0.1"));
 
 		runInTransaction(() -> {
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.zib2017", "1.3.10").isPresent());
+			assertTrue(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2")
+					.isPresent());
+			assertTrue(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.zib2017", "1.3.10")
+					.isPresent());
 		});
-
 	}
 
 	@Test
@@ -137,13 +150,20 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.x", bytes);
 
 		myStorageSettings.setAllowExternalReferences(true);
-		igInstaller.install(new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(false));
+		igInstaller.install(new PackageInstallationSpec()
+				.setName("nictiz.fhir.nl.stu3.questionnaires")
+				.setVersion("1.0.2")
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setFetchDependencies(false));
 
 		runInTransaction(() -> {
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
-			assertFalse(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.zib2017", "1.3.10").isPresent());
+			assertTrue(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2")
+					.isPresent());
+			assertFalse(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.zib2017", "1.3.10")
+					.isPresent());
 		});
-
 	}
 
 	@Test
@@ -154,15 +174,15 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		myFakeNpmServlet.getResponses().put("/foo.tgz", bytes);
 
 		igInstaller.install(new PackageInstallationSpec()
-			.setName("nictiz.fhir.nl.stu3.questionnaires")
-			.setVersion("1.0.2")
-			.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
-		);
+				.setName("nictiz.fhir.nl.stu3.questionnaires")
+				.setVersion("1.0.2")
+				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz"));
 
 		runInTransaction(() -> {
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
+			assertTrue(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2")
+					.isPresent());
 		});
-
 	}
 
 	@Test
@@ -170,49 +190,50 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		byte[] bytes;
 
 		igInstaller.install(new PackageInstallationSpec()
-			.setName("nictiz.fhir.nl.stu3.questionnaires")
-			.setVersion("1.0.2")
-			.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz")
-		);
+				.setName("nictiz.fhir.nl.stu3.questionnaires")
+				.setVersion("1.0.2")
+				.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz"));
 
 		runInTransaction(() -> {
-			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
+			assertTrue(myPackageVersionDao
+					.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2")
+					.isPresent());
 		});
 	}
 
 	private void ensureNoCreatesOrUpdates(Callable theCallable) throws Exception {
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, t) -> {
-			IBaseResource iBaseResource = t.get(IBaseResource.class);
-			if (iBaseResource instanceof IBaseBinary) {
-				return;
-			}
-			throw new RuntimeException("Not allowed!");
-		});
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t) -> {
-			IBaseResource iBaseResource = t.get(IBaseResource.class);
-			if (iBaseResource instanceof IBaseBinary) {
-				return;
-			}
-			throw new RuntimeException("Not allowed!");
-		});
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, t) -> {
+					IBaseResource iBaseResource = t.get(IBaseResource.class);
+					if (iBaseResource instanceof IBaseBinary) {
+						return;
+					}
+					throw new RuntimeException("Not allowed!");
+				});
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t) -> {
+					IBaseResource iBaseResource = t.get(IBaseResource.class);
+					if (iBaseResource instanceof IBaseBinary) {
+						return;
+					}
+					throw new RuntimeException("Not allowed!");
+				});
 
 		try {
 			theCallable.call();
 		} finally {
 			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 		}
-
-
 	}
+
 	@Test
 	public void testMultipleUploads() throws Exception {
 		myStorageSettings.setAllowExternalReferences(true);
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec()
-			.setName("nictiz.fhir.nl.stu3.questionnaires")
-			.setVersion("1.0.2")
-			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
-			.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
-
+				.setName("nictiz.fhir.nl.stu3.questionnaires")
+				.setVersion("1.0.2")
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
 
 		igInstaller.install(installationSpec);
 
@@ -226,7 +247,6 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		installationSpec.setReloadExisting(false);
 		ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
-
 	}
 
 	@Test
@@ -238,30 +258,30 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			igInstaller.install(new PackageInstallationSpec()
-				.setName("blah")
-				.setVersion("1.0.2")
-				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
-			);
+					.setName("blah")
+					.setVersion("1.0.2")
+					.setPackageUrl("http://localhost:" + myPort + "/foo.tgz"));
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
+			assertEquals(
+					Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
 	public void testInstallPackageByUrl_FailingUrl() {
 		try {
 			igInstaller.install(new PackageInstallationSpec()
-				.setName("blah")
-				.setVersion("1.0.2")
-				.setPackageUrl("http://localhost:" + myPort + "/foo.tgz")
-			);
+					.setName("blah")
+					.setVersion("1.0.2")
+					.setPackageUrl("http://localhost:" + myPort + "/foo.tgz"));
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz", e.getMessage());
+			assertEquals(
+					Msg.code(1303) + "Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -269,6 +289,9 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		byte[] bytes = loadResourceAsByteArray("/packages/basisprofil.de.tar.gz");
 		myFakeNpmServlet.getResponses().put("/basisprofil.de/0.2.40", bytes);
 
-		igInstaller.install(new PackageInstallationSpec().setName("basisprofil.de").setVersion("0.2.40").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
+		igInstaller.install(new PackageInstallationSpec()
+				.setName("basisprofil.de")
+				.setVersion("0.2.40")
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY));
 	}
 }

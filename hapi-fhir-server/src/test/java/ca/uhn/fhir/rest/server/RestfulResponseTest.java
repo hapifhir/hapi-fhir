@@ -17,9 +17,9 @@ public class RestfulResponseTest {
 	@Test
 	public void addMultipleHeaderValues() {
 		@SuppressWarnings("unchecked")
-		final BaseRestfulResponse<?> restfulResponse =
-			mock(BaseRestfulResponse.class, withSettings()
-				.useConstructor((RequestDetails) null).defaultAnswer(CALLS_REAL_METHODS));
+		final BaseRestfulResponse<?> restfulResponse = mock(
+				BaseRestfulResponse.class,
+				withSettings().useConstructor((RequestDetails) null).defaultAnswer(CALLS_REAL_METHODS));
 
 		restfulResponse.addHeader("Authorization", "Basic");
 		restfulResponse.addHeader("Authorization", "Bearer");

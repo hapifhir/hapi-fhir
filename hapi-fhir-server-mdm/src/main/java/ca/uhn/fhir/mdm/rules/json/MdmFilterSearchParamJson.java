@@ -31,10 +31,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MdmFilterSearchParamJson implements IModelJson {
 	@JsonProperty(value = "resourceType", required = true)
 	String myResourceType;
+
 	@JsonProperty(value = "searchParam", required = true)
 	String mySearchParam;
+
 	@JsonProperty(value = "qualifier", required = true)
 	TokenParamModifier myTokenParamModifier;
+
 	@JsonProperty(value = "fixedValue", required = true)
 	String myFixedValue;
 
@@ -56,7 +59,6 @@ public class MdmFilterSearchParamJson implements IModelJson {
 		return this;
 	}
 
-
 	public TokenParamModifier getTokenParamModifier() {
 		return myTokenParamModifier;
 	}
@@ -75,7 +77,7 @@ public class MdmFilterSearchParamJson implements IModelJson {
 		return this;
 	}
 
-    public String getTokenParamModifierAsString() {
+	public String getTokenParamModifierAsString() {
 		return myTokenParamModifier == null ? "" : myTokenParamModifier.getValue();
-    }
+	}
 }

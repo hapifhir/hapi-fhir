@@ -29,11 +29,11 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /**
  * Test helper to collect logback lines.
@@ -135,24 +135,23 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		}
 	}
 
-
-	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText){
-		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
+	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText) {
+		return filterLoggingEventsWithPredicate(
+				loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText){
-		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
+	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText) {
+		return filterLoggingEventsWithPredicate(
+				loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
 	}
 
-	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate){
-		return getLogEvents()
-			.stream()
-			.filter(theLoggingEventPredicate)
-			.collect(Collectors.toList());
+	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate) {
+		return getLogEvents().stream().filter(theLoggingEventPredicate).collect(Collectors.toList());
 	}
 
 	//  Hamcrest matcher support
-	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(
+			@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
 		return new LogbackEventMatcher(theLevel, thePartialMessage);
 	}
 
@@ -164,11 +163,8 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		return new LogbackEventMatcher(null, thePartialMessage);
 	}
 
-	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
-																								 @Nonnull String thePartialMessage,
-																								 @Nonnull String theThrown)
-	{
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(
+			@Nonnull Level theLevel, @Nonnull String thePartialMessage, @Nonnull String theThrown) {
 		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
 	}
-
 }

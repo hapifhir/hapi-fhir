@@ -38,37 +38,38 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
-			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + bigEnoughDistance;
+			String url = "/Location?" + Location.SP_NEAR
+					+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN + "|"
+					+ bigEnoughDistance;
 
-			Bundle actual = myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			Bundle actual = myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 
 			assertEquals(1, actual.getEntry().size());
-			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(
+					locId.getIdPart(),
+					actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
-			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + tooSmallDistance;
+			String url = "/Location?" + Location.SP_NEAR
+					+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN + "|"
+					+ tooSmallDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			Bundle actual = myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
 			assertEquals(0, actual.getEntry().size());
@@ -80,7 +81,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
@@ -88,17 +90,17 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		pr.addLocation().setReference(locId.getValue());
 		IIdType prId = myClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
 
-		String url = "PractitionerRole?location." +
-			Location.SP_NEAR + "=" + latitude + "|" + longitude;
+		String url = "PractitionerRole?location." + Location.SP_NEAR + "=" + latitude + "|" + longitude;
 
-		Bundle actual = myClient
-			.search()
-			.byUrl(myServerBase + "/" + url)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle actual = myClient.search()
+				.byUrl(myServerBase + "/" + url)
+				.returnBundle(Bundle.class)
+				.execute();
 
 		assertEquals(1, actual.getEntry().size());
-		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertEquals(
+				prId.getIdPart(),
+				actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test
@@ -106,7 +108,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		myCaptureQueriesListener.clear();
 		IIdType locId = myLocationDao.create(loc, mySrd).getId().toUnqualifiedVersionless();
@@ -117,34 +120,34 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		IIdType prId = myPractitionerRoleDao.create(pr, mySrd).getId().toUnqualifiedVersionless();
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
-			String url = "PractitionerRole?location." +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + bigEnoughDistance;
+			String url = "PractitionerRole?location." + Location.SP_NEAR
+					+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN + "|"
+					+ bigEnoughDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			Bundle actual = myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
 			assertEquals(1, actual.getEntry().size());
-			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(
+					prId.getIdPart(),
+					actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
-			String url = "PractitionerRole?location." +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + tooSmallDistance;
+			String url = "PractitionerRole?location." + Location.SP_NEAR
+					+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN + "|"
+					+ tooSmallDistance;
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			Bundle actual = myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
 			assertEquals(0, actual.getEntry().size());
@@ -155,28 +158,22 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	public void testNearSearchDistanceNotInKm() {
 		createFourCityLocations();
 
-		String url = "Location?" +
-			Location.SP_NEAR +
-			"=" +
-			CoordCalculatorTestUtil.LATITUDE_CHIN +
-			"|" +
-			CoordCalculatorTestUtil.LONGITUDE_CHIN +
-			"|" +
-			"300000" +
-			"|" +
-			"m";
+		String url = "Location?" + Location.SP_NEAR
+				+ "="
+				+ CoordCalculatorTestUtil.LATITUDE_CHIN
+				+ "|"
+				+ CoordCalculatorTestUtil.LONGITUDE_CHIN
+				+ "|"
+				+ "300000"
+				+ "|"
+				+ "m";
 
-		Bundle actual = myClient
-			.search()
-			.byUrl(myServerBase + "/" + url)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle actual = myClient.search()
+				.byUrl(myServerBase + "/" + url)
+				.returnBundle(Bundle.class)
+				.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids.toString(), ids, contains("Location/toronto", "Location/belleville", "Location/kingston"));
 	}
 
 	@ParameterizedTest
@@ -184,44 +181,33 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	public void testSortNear(boolean theAscending) {
 		createFourCityLocations();
 
-		String url = "Location?" +
-			Location.SP_NEAR +
-			"=" +
-			CoordCalculatorTestUtil.LATITUDE_CHIN +
-			"|" +
-			CoordCalculatorTestUtil.LONGITUDE_CHIN +
-			"|" +
-			"300" +
-			"|" +
-			"km" +
-			"&_sort=" +
-			(theAscending ? "" : "-") +
-			Location.SP_NEAR;
+		String url = "Location?" + Location.SP_NEAR
+				+ "="
+				+ CoordCalculatorTestUtil.LATITUDE_CHIN
+				+ "|"
+				+ CoordCalculatorTestUtil.LONGITUDE_CHIN
+				+ "|"
+				+ "300"
+				+ "|"
+				+ "km"
+				+ "&_sort="
+				+ (theAscending ? "" : "-")
+				+ Location.SP_NEAR;
 
 		logAllCoordsIndexes();
 
 		myCaptureQueriesListener.clear();
-		Bundle actual = myClient
-			.search()
-			.byUrl(myServerBase + "/" + url)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle actual = myClient.search()
+				.byUrl(myServerBase + "/" + url)
+				.returnBundle(Bundle.class)
+				.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
 		if (theAscending) {
-			assertThat(ids.toString(), ids, contains(
-				"Location/toronto",
-				"Location/belleville",
-				"Location/kingston"
-			));
+			assertThat(ids.toString(), ids, contains("Location/toronto", "Location/belleville", "Location/kingston"));
 		} else {
-			assertThat(ids.toString(), ids, contains(
-				"Location/kingston",
-				"Location/belleville",
-				"Location/toronto"
-			));
+			assertThat(ids.toString(), ids, contains("Location/kingston", "Location/belleville", "Location/toronto"));
 		}
-
 	}
 
 	/**
@@ -243,73 +229,78 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 		createFourCityLocations();
 
-		String url = "Location?" +
-			"near2=" +
-			CoordCalculatorTestUtil.LATITUDE_CHIN + "|" +
-			CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-			"300" + "|" + "km" +
-			"&near=" +
-			CoordCalculatorTestUtil.LATITUDE_CHIN + "|" +
-			CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-			"300" + "|" + "km" +
-			"&_sort=near2,near";
+		String url = "Location?" + "near2="
+				+ CoordCalculatorTestUtil.LATITUDE_CHIN
+				+ "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN
+				+ "|" + "300"
+				+ "|" + "km" + "&near="
+				+ CoordCalculatorTestUtil.LATITUDE_CHIN
+				+ "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN
+				+ "|" + "300"
+				+ "|" + "km" + "&_sort=near2,near";
 
 		logAllCoordsIndexes();
 
 		myCaptureQueriesListener.clear();
-		Bundle actual = myClient
-			.search()
-			.byUrl(myServerBase + "/" + url)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle actual = myClient.search()
+				.byUrl(myServerBase + "/" + url)
+				.returnBundle(Bundle.class)
+				.execute();
 		List<String> ids = toUnqualifiedVersionlessIdValues(actual);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(ids.toString(), ids, contains(
-			"Location/toronto",
-			"Location/belleville",
-			"Location/kingston"
-		));
+		assertThat(ids.toString(), ids, contains("Location/toronto", "Location/belleville", "Location/kingston"));
 	}
 
 	@Test
 	public void testSortNearWithNoNearParameter() {
 		String url = "Location?_sort=near";
 		try {
-			myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter"));
+			assertThat(
+					e.getMessage(),
+					containsString(
+							"Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter"));
 		}
-
 	}
 
 	private void createFourCityLocations() {
-		createLocation("Location/toronto", CoordCalculatorTestUtil.LATITUDE_TORONTO, CoordCalculatorTestUtil.LONGITUDE_TORONTO);
-		createLocation("Location/belleville", CoordCalculatorTestUtil.LATITUDE_BELLEVILLE, CoordCalculatorTestUtil.LONGITUDE_BELLEVILLE);
-		createLocation("Location/kingston", CoordCalculatorTestUtil.LATITUDE_KINGSTON, CoordCalculatorTestUtil.LONGITUDE_KINGSTON);
-		createLocation("Location/ottawa", CoordCalculatorTestUtil.LATITUDE_OTTAWA, CoordCalculatorTestUtil.LONGITUDE_OTTAWA);
+		createLocation(
+				"Location/toronto",
+				CoordCalculatorTestUtil.LATITUDE_TORONTO,
+				CoordCalculatorTestUtil.LONGITUDE_TORONTO);
+		createLocation(
+				"Location/belleville",
+				CoordCalculatorTestUtil.LATITUDE_BELLEVILLE,
+				CoordCalculatorTestUtil.LONGITUDE_BELLEVILLE);
+		createLocation(
+				"Location/kingston",
+				CoordCalculatorTestUtil.LATITUDE_KINGSTON,
+				CoordCalculatorTestUtil.LONGITUDE_KINGSTON);
+		createLocation(
+				"Location/ottawa", CoordCalculatorTestUtil.LATITUDE_OTTAWA, CoordCalculatorTestUtil.LONGITUDE_OTTAWA);
 	}
 
 	@Test
 	public void testInvalid_SortWithNoParameter() {
 
-		String url = "Location?" +
-			"_sort=" +
-			Location.SP_NEAR;
+		String url = "Location?" + "_sort=" + Location.SP_NEAR;
 
 		try {
-			myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified"));
+			assertThat(
+					e.getMessage(),
+					containsString(
+							"Can not sort on coordinate parameter \"near\" unless this parameter is also specified"));
 		}
 	}
 
@@ -320,25 +311,28 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		"43.65513, -79.4170007, foo, km,  Invalid lat/lon parameter value: foo",
 		"43.65513, -79.4170007, 300, foo, The unit 'foo' is unknown"
 	})
-	public void testInvalid_InvalidLatitude(String theLatitude, String theLongitude, String theDistance, String theDistanceUnits, String theExpectedErrorMessageContains) {
+	public void testInvalid_InvalidLatitude(
+			String theLatitude,
+			String theLongitude,
+			String theDistance,
+			String theDistanceUnits,
+			String theExpectedErrorMessageContains) {
 
-		String url = "Location?" +
-			Location.SP_NEAR +
-			"=" +
-			theLatitude +
-			"|" +
-			theLongitude +
-			"|" +
-			theDistance +
-			"|" +
-			theDistanceUnits;
+		String url = "Location?" + Location.SP_NEAR
+				+ "="
+				+ theLatitude
+				+ "|"
+				+ theLongitude
+				+ "|"
+				+ theDistance
+				+ "|"
+				+ theDistanceUnits;
 
 		try {
-			myClient
-				.search()
-				.byUrl(myServerBase + "/" + url)
-				.returnBundle(Bundle.class)
-				.execute();
+			myClient.search()
+					.byUrl(myServerBase + "/" + url)
+					.returnBundle(Bundle.class)
+					.execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString(theExpectedErrorMessageContains));
@@ -348,11 +342,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	private void createLocation(String id, double latitude, double longitude) {
 		Location loc = new Location();
 		loc.setId(id);
-		loc.getPosition()
-			.setLatitude(latitude)
-			.setLongitude(longitude);
+		loc.getPosition().setLatitude(latitude).setLongitude(longitude);
 		myLocationDao.update(loc, mySrd);
 	}
-
-
 }

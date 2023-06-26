@@ -13,7 +13,6 @@ public class TagTypeEnumTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
-
 	@Test
 	public void testOrder() {
 		// Ordinals are used in DB columns so the order
@@ -22,5 +21,4 @@ public class TagTypeEnumTest {
 		assertEquals(1, TagTypeEnum.PROFILE.ordinal());
 		assertEquals(2, TagTypeEnum.SECURITY_LABEL.ordinal());
 	}
-	
 }

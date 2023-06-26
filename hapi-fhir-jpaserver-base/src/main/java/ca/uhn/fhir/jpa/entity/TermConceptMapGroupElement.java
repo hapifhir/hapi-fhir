@@ -25,20 +25,22 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_MAP_GRP_ELEMENT", indexes = {
-	@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE"),
-	@Index(name = "FK_TCMGELEMENT_GROUP", columnList = "CONCEPT_MAP_GROUP_PID")
-})
+@Table(
+		name = "TRM_CONCEPT_MAP_GRP_ELEMENT",
+		indexes = {
+			@Index(name = "IDX_CNCPT_MAP_GRP_CD", columnList = "SOURCE_CODE"),
+			@Index(name = "FK_TCMGELEMENT_GROUP", columnList = "CONCEPT_MAP_GROUP_PID")
+		})
 public class TermConceptMapGroupElement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -49,7 +51,11 @@ public class TermConceptMapGroupElement implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
+	@JoinColumn(
+			name = "CONCEPT_MAP_GROUP_PID",
+			nullable = false,
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
@@ -79,8 +85,10 @@ public class TermConceptMapGroupElement implements Serializable {
 
 	public TermConceptMapGroupElement setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCode,
+				TermConcept.MAX_CODE_LENGTH,
+				"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -152,33 +160,39 @@ public class TermConceptMapGroupElement implements Serializable {
 		TermConceptMapGroupElement that = (TermConceptMapGroupElement) o;
 
 		return new EqualsBuilder()
-			.append(getCode(), that.getCode())
-			.append(getSystem(), that.getSystem())
-			.append(getSystemVersion(), that.getSystemVersion())
-			.isEquals();
+				.append(getCode(), that.getCode())
+				.append(getSystem(), that.getSystem())
+				.append(getSystemVersion(), that.getSystemVersion())
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(getCode())
-			.append(getSystem())
-			.append(getSystemVersion())
-			.toHashCode();
+				.append(getCode())
+				.append(getSystem())
+				.append(getSystemVersion())
+				.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myConceptMapGroup != null ? ("myConceptMapGroup - id=" + myConceptMapGroup.getId()) : ("myConceptMapGroup=(null)"))
-			.append("myCode", myCode)
-			.append("myDisplay", myDisplay)
-			.append(myConceptMapGroupElementTargets != null ? ("myConceptMapGroupElementTargets - size=" + myConceptMapGroupElementTargets.size()) : ("myConceptMapGroupElementTargets=(null)"))
-			.append("myConceptMapUrl", this.getConceptMapUrl())
-			.append("mySystem", this.getSystem())
-			.append("mySystemVersion", this.getSystemVersion())
-			.append("myValueSet", this.getValueSet())
-			.toString();
+				.append("myId", myId)
+				.append(
+						myConceptMapGroup != null
+								? ("myConceptMapGroup - id=" + myConceptMapGroup.getId())
+								: ("myConceptMapGroup=(null)"))
+				.append("myCode", myCode)
+				.append("myDisplay", myDisplay)
+				.append(
+						myConceptMapGroupElementTargets != null
+								? ("myConceptMapGroupElementTargets - size=" + myConceptMapGroupElementTargets.size())
+								: ("myConceptMapGroupElementTargets=(null)"))
+				.append("myConceptMapUrl", this.getConceptMapUrl())
+				.append("mySystem", this.getSystem())
+				.append("mySystemVersion", this.getSystemVersion())
+				.append("myValueSet", this.getValueSet())
+				.toString();
 	}
 }

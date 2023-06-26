@@ -21,25 +21,29 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionMatcherInterceptorTest {
 
 	@Mock
 	StorageSettings myStorageSettings;
+
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@InjectMocks
 	SubscriptionMatcherInterceptor myUnitUnderTest;
+
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
+	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(
+			boolean theIsQualifySubMatchingChannelName) {
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(myStorageSettings.isQualifySubscriptionMatchingChannelName())
+				.thenReturn(theIsQualifySubMatchingChannelName);
 		when(myStorageSettings.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
 
 		// when
@@ -48,13 +52,10 @@ public class SubscriptionMatcherInterceptorTest {
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
 		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(expectedResult));
-
 	}
 
-	private ChannelProducerSettings getCapturedChannelProducerSettings(){
+	private ChannelProducerSettings getCapturedChannelProducerSettings() {
 		verify(mySubscriptionChannelFactory).newMatchingSendingChannel(anyString(), myArgumentCaptor.capture());
 		return myArgumentCaptor.getValue();
 	}
-
-
 }

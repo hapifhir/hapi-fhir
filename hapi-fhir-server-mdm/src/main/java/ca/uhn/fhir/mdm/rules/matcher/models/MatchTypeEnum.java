@@ -25,7 +25,6 @@ package ca.uhn.fhir.mdm.rules.matcher.models;
  * https://commons.apache.org/proper/commons-codec/userguide.html
  */
 public enum MatchTypeEnum {
-
 	CAVERPHONE1,
 	CAVERPHONE2,
 	COLOGNE,
@@ -49,5 +48,4 @@ public enum MatchTypeEnum {
 	EMPTY_FIELD,
 	EXTENSION_ANY_ORDER,
 	NUMERIC;
-
 }

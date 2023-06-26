@@ -23,7 +23,7 @@ public class ReindexJobParametersValidatorTest {
 	private ReindexJobParametersValidator myValidator;
 
 	@ParameterizedTest
-	@ValueSource(strings = { "\n", " ", "\t" })
+	@ValueSource(strings = {"\n", " ", "\t"})
 	public void validate_urlWithSpace_fails(String theWhiteSpaceChar) {
 		List<String> errors = runTestWithUrl("Patient," + theWhiteSpaceChar + "Practitioner");
 

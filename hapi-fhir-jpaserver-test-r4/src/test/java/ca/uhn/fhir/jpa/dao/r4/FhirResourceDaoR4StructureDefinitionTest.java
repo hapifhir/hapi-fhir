@@ -17,15 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4StructureDefinitionTest.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4StructureDefinitionTest.class);
 
 	@AfterEach
-	public final void after() {
-	}
+	public final void after() {}
 
 	@Test
 	public void testGenerateSnapshot() throws IOException {
-		StructureDefinition differential = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+		StructureDefinition differential =
+				loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
 		assertEquals(0, differential.getSnapshot().getElement().size());
 
 		// Create a validation chain that includes default validation support and a
@@ -35,7 +36,8 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
-		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
+		StructureDefinition snapshot = (StructureDefinition) chain.generateSnapshot(
+				new ValidationSupportContext(chain), differential, "http://foo", null, "THE BEST PROFILE");
 
 		String url = "http://foo";
 		String webUrl = null;
@@ -46,17 +48,18 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		assertEquals(54, output.getSnapshot().getElement().size());
 	}
 
-
 	/**
 	 * Make sure that if one SD extends another SD, and the parent SD hasn't been snapshotted itself, the child can
 	 * be snapshotted.
 	 */
 	@Test
 	public void testGenerateSnapshotChained() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient.json");
+		StructureDefinition sd =
+				loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient.json");
 		myStructureDefinitionDao.update(sd);
 
-		StructureDefinition sd2 = loadResourceFromClasspath(StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient-no-phi.json");
+		StructureDefinition sd2 = loadResourceFromClasspath(
+				StructureDefinition.class, "/r4/StructureDefinition-kfdrc-patient-no-phi.json");
 		myStructureDefinitionDao.update(sd2);
 
 		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
@@ -64,7 +67,4 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
 		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
 	}
-
-
-
 }

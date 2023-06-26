@@ -13,5 +13,4 @@ class EmailStandardizerTest {
 		assertEquals("емайл@мaйлсервер.ком", std.standardize("\t емайл@мAйлсервер.ком"));
 		assertEquals("show.me.the@moneycom", std.standardize("show . m e . t he@Moneycom"));
 	}
-
 }

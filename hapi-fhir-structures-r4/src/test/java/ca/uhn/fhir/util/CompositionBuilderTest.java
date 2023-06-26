@@ -83,7 +83,6 @@ public class CompositionBuilderTest {
 		assertEquals(Composition.DocumentConfidentiality.L, composition.getConfidentiality());
 	}
 
-
 	@Test
 	public void testAddSection() {
 		CompositionBuilder builder = new CompositionBuilder(myCtx);
@@ -93,7 +92,5 @@ public class CompositionBuilderTest {
 		Composition composition = builder.getComposition();
 		Composition.SectionComponent section = composition.getSection().get(0);
 		assertEquals("title", section.getTitle());
-
 	}
-
 }

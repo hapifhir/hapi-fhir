@@ -43,27 +43,44 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 		Observation obsInCompartment = new Observation();
 		obsInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
-		IIdType obsInCompartmentId = myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsInCompartmentId =
+				myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
-		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsNotInCompartmentId = myClient.create()
+				.resource(obsNotInCompartment)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		myRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
-					.deny().delete().allResources().withAnyId().andThen()
-					.allowAll()
-					.build();
+						.allow()
+						.delete()
+						.resourcesOfType(Observation.class)
+						.inCompartment("Patient", id)
+						.andThen()
+						.deny()
+						.delete()
+						.allResources()
+						.withAnyId()
+						.andThen()
+						.allowAll()
+						.build();
 			}
 		});
 
-		myClient.delete().resourceById(obsInCompartmentId.toUnqualifiedVersionless()).execute();
+		myClient.delete()
+				.resourceById(obsInCompartmentId.toUnqualifiedVersionless())
+				.execute();
 
 		try {
-			myClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
+			myClient.delete()
+					.resourceById(obsNotInCompartmentId.toUnqualifiedVersionless())
+					.execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -81,20 +98,33 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 		Observation obsInCompartment = new Observation();
 		obsInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
 		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
-		IIdType obsInCompartmentId = myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsInCompartmentId =
+				myClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
 
 		Observation obsNotInCompartment = new Observation();
 		obsNotInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
-		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+		IIdType obsNotInCompartmentId = myClient.create()
+				.resource(obsNotInCompartment)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		myRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.denyAll()
-					.build();
+						.allow()
+						.delete()
+						.resourcesOfType(Observation.class)
+						.inCompartment("Patient", id)
+						.andThen()
+						.allow()
+						.transaction()
+						.withAnyOperation()
+						.andApplyNormalRules()
+						.andThen()
+						.denyAll()
+						.build();
 			}
 		});
 
@@ -102,19 +132,23 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
+		bundle.addEntry()
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.DELETE)
+				.setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
 		myClient.transaction().withBundle(bundle).execute();
 
 		try {
 			bundle = new Bundle();
 			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
+			bundle.addEntry()
+					.getRequest()
+					.setMethod(Bundle.HTTPVerb.DELETE)
+					.setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
 			myClient.transaction().withBundle(bundle).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
 	}
-
-
 }

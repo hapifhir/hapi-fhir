@@ -34,9 +34,13 @@ public class ExceptionPropertiesTest {
 		test(new FhirClientInappropriateForServerException(new Exception()));
 		test(new FhirClientInappropriateForServerException("", new Exception()));
 
-		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
+		assertEquals(
+				"Resource Patient/123 is gone/deleted",
+				new ResourceGoneException(new IdDt("Patient/123")).getMessage());
 		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
-		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage());
+		assertEquals(
+				"Resource of type Practitioner with ID Patient/123 is gone/deleted",
+				new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage());
 	}
 
 	private void test(Exception theE) {
@@ -52,7 +56,8 @@ public class ExceptionPropertiesTest {
 	public void testExceptionsAreGood() throws Exception {
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AssignableTypeFilter(BaseServerResponseException.class));
-		Set<BeanDefinition> classes = scanner.findCandidateComponents(BaseServerResponseException.class.getPackage().getName());
+		Set<BeanDefinition> classes = scanner.findCandidateComponents(
+				BaseServerResponseException.class.getPackage().getName());
 		assertTrue(classes.size() > 5, classes.toString());
 
 		for (BeanDefinition classInfo : classes) {
@@ -75,7 +80,8 @@ public class ExceptionPropertiesTest {
 				continue;
 			}
 
-			assertTrue(BaseServerResponseException.isExceptionTypeRegistered(next), "Type " + next + " is not registered");
+			assertTrue(
+					BaseServerResponseException.isExceptionTypeRegistered(next), "Type " + next + " is not registered");
 
 			if (next == AuthenticationException.class) {
 				continue;
@@ -87,13 +93,10 @@ public class ExceptionPropertiesTest {
 				fail(classInfo.getBeanClassName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}
 		}
-
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

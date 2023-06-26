@@ -11,24 +11,38 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.StringType;
 
 @Block
-public class _PreviousComponent extends BackboneElement implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
+public class _PreviousComponent extends BackboneElement
+		implements org.hl7.fhir.instance.model.api.IBaseBackboneElement {
 
 	/**
 	 * previousReference (extension)
 	 */
-	@Child(name = FIELD_PREVIOUSREFERENCE, min = 1, max = 1, type = {StringType.class})
-	@Description(shortDefinition = "", formalDefinition = "Reference to the previous episode of care which may be external.")
+	@Child(
+			name = FIELD_PREVIOUSREFERENCE,
+			min = 1,
+			max = 1,
+			type = {StringType.class})
+	@Description(
+			shortDefinition = "",
+			formalDefinition = "Reference to the previous episode of care which may be external.")
 	@Extension(url = EXTURL_PREVIOUSREFERENCE, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.StringType ourPreviousReference;
-	public static final String EXTURL_PREVIOUSREFERENCE = "http://myfhir.dk/x/MyEpisodeOfCare-previous/previousReference";
+
+	public static final String EXTURL_PREVIOUSREFERENCE =
+			"http://myfhir.dk/x/MyEpisodeOfCare-previous/previousReference";
 	public static final String FIELD_PREVIOUSREFERENCE = "previousReference";
 	/**
 	 * referenceType (extension)
 	 */
-	@Child(name = FIELD_REFERENCETYPE, min = 1, max = 1, type = {Coding.class})
+	@Child(
+			name = FIELD_REFERENCETYPE,
+			min = 1,
+			max = 1,
+			type = {Coding.class})
 	@Description(shortDefinition = "", formalDefinition = "The type of reference to a previous episode of care.")
 	@Extension(url = EXTURL_REFERENCETYPE, definedLocally = false, isModifier = false)
 	protected org.hl7.fhir.dstu3.model.Coding ourReferenceType;
+
 	public static final String EXTURL_REFERENCETYPE = "http://myfhir.dk/x/MyEpisodeOfCare-previous/referenceType";
 	public static final String FIELD_REFERENCETYPE = "referenceType";
 
@@ -58,7 +72,8 @@ public class _PreviousComponent extends BackboneElement implements org.hl7.fhir.
 			return false;
 		}
 		_PreviousComponent that = (_PreviousComponent) other;
-		return compareDeep(ourPreviousReference, that.ourPreviousReference, true) && compareDeep(ourReferenceType, that.ourReferenceType, true);
+		return compareDeep(ourPreviousReference, that.ourPreviousReference, true)
+				&& compareDeep(ourReferenceType, that.ourReferenceType, true);
 	}
 
 	@Override
@@ -77,8 +92,7 @@ public class _PreviousComponent extends BackboneElement implements org.hl7.fhir.
 	}
 
 	public org.hl7.fhir.dstu3.model.StringType _getPreviousReference() {
-		if (ourPreviousReference == null)
-			ourPreviousReference = new org.hl7.fhir.dstu3.model.StringType();
+		if (ourPreviousReference == null) ourPreviousReference = new org.hl7.fhir.dstu3.model.StringType();
 		return ourPreviousReference;
 	}
 
@@ -88,8 +102,7 @@ public class _PreviousComponent extends BackboneElement implements org.hl7.fhir.
 	}
 
 	public org.hl7.fhir.dstu3.model.Coding _getReferenceType() {
-		if (ourReferenceType == null)
-			ourReferenceType = new org.hl7.fhir.dstu3.model.Coding();
+		if (ourReferenceType == null) ourReferenceType = new org.hl7.fhir.dstu3.model.Coding();
 		return ourReferenceType;
 	}
 
@@ -97,5 +110,4 @@ public class _PreviousComponent extends BackboneElement implements org.hl7.fhir.
 		ourReferenceType = theValue;
 		return this;
 	}
-
 }

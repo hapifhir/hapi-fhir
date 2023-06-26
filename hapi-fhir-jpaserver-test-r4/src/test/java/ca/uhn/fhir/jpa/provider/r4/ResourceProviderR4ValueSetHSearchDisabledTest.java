@@ -28,8 +28,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -39,35 +39,40 @@ import static org.hamcrest.Matchers.containsString;
 @SuppressWarnings({"Duplicates"})
 public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetHSearchDisabledTest.class);
-
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetHSearchDisabledTest.class);
 
 	@Autowired
 	private FhirContext myFhirCtx;
+
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
+
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	private ResourceProviderFactory myResourceProviders;
+
 	@Autowired
 	private ApplicationContext myAppCtx;
 
-
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
+
 	@SuppressWarnings("JUnitMalformedDeclaration")
 	@RegisterExtension
 	private RestfulServerExtension myServer = new RestfulServerExtension(FhirContext.forR4Cached())
-		.withServer(t -> t.registerProviders(myResourceProviders.createProviders()))
-		.withServer(t -> t.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class)))
-		.withServer(t -> t.setDefaultResponseEncoding(EncodingEnum.XML))
-		.withServer(t -> t.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class)));
+			.withServer(t -> t.registerProviders(myResourceProviders.createProviders()))
+			.withServer(t -> t.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class)))
+			.withServer(t -> t.setDefaultResponseEncoding(EncodingEnum.XML))
+			.withServer(t -> t.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class)));
 
 	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
 		loadAndPersistCodeSystem();
@@ -84,7 +89,8 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+				myExtensionalCsId =
+						myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId, null);
@@ -100,7 +106,8 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+				myExtensionalVsId =
+						myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
 		myValueSetDao.readEntity(myExtensionalVsId, null);
@@ -120,13 +127,12 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = myServer
-			.getFhirClient()
-			.operation()
-			.onInstance(myExtensionalVsId)
-			.named("expand")
-			.withNoParameters(Parameters.class)
-			.execute();
+		Parameters respParam = myServer.getFhirClient()
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -144,8 +150,5 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, containsString("</contains>"));
 		assertThat(resp, containsString("</expansion>"));
-
 	}
-
-
 }

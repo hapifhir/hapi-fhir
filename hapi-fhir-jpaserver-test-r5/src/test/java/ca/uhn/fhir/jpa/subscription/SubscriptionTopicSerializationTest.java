@@ -14,25 +14,26 @@ public class SubscriptionTopicSerializationTest {
 	@Test
 	void testSubscriptionDerialization() {
 		@Language("json")
-		String input = """
+		String input =
+				"""
 			{
-			  "resourceType": "Subscription",
-			  "id": "2",
-			  "status": "active",
-			  "topic": "http://example.com/topic/test",
-			  "reason": "Monitor new neonatal function (note, age will be determined by the monitor)",
-			  "filterBy": [ {
-			    "resourceType": "Encounter",
-			    "filterParameter": "participation-type",
-			    "comparator": "eq",
-			    "value": "PRPF"
-			  } ],
-			  "channelType": {
-			    "system": "http://terminology.hl7.org/CodeSystem/subscription-channel-type",
-			    "code": "rest-hook"
-			  },
-			  "endpoint": "http://localhost:57333/fhir/context",
-			  "contentType": "application/fhir+json"
+			"resourceType": "Subscription",
+			"id": "2",
+			"status": "active",
+			"topic": "http://example.com/topic/test",
+			"reason": "Monitor new neonatal function (note, age will be determined by the monitor)",
+			"filterBy": [ {
+				"resourceType": "Encounter",
+				"filterParameter": "participation-type",
+				"comparator": "eq",
+				"value": "PRPF"
+			} ],
+			"channelType": {
+				"system": "http://terminology.hl7.org/CodeSystem/subscription-channel-type",
+				"code": "rest-hook"
+			},
+			"endpoint": "http://localhost:57333/fhir/context",
+			"contentType": "application/fhir+json"
 			}
 			""";
 
@@ -48,37 +49,38 @@ public class SubscriptionTopicSerializationTest {
 	@Test
 	void testSubscriptionDerializationInBundle() {
 		@Language("json")
-		String input = """
+		String input =
+				"""
 {
-  "resourceType": "Bundle",
-  "id": "bundle-transaction",
-  "type": "transaction",
-  "entry": [ {
-    "fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
-    "resource": {
-      "resourceType": "Subscription",
-      "id": "2",
-      "status": "active",
-      "topic": "http://example.com/topic/test",
-      "reason": "Monitor new neonatal function (note, age will be determined by the monitor)",
-      "filterBy": [ {
-        "resourceType": "Encounter",
-        "filterParameter": "participation-type",
-        "comparator": "eq",
-        "value": "PRPF"
-      } ],
-      "channelType": {
-        "system": "http://terminology.hl7.org/CodeSystem/subscription-channel-type",
-        "code": "rest-hook"
-      },
-      "endpoint": "http://localhost:57333/fhir/context",
-      "contentType": "application/fhir+json"
-    },
-    "request": {
-      "method": "POST",
-      "url": "Subscription"
-    }
-  } ]
+"resourceType": "Bundle",
+"id": "bundle-transaction",
+"type": "transaction",
+"entry": [ {
+	"fullUrl": "urn:uuid:61ebe359-bfdc-4613-8bf2-c5e300945f0a",
+	"resource": {
+	"resourceType": "Subscription",
+	"id": "2",
+	"status": "active",
+	"topic": "http://example.com/topic/test",
+	"reason": "Monitor new neonatal function (note, age will be determined by the monitor)",
+	"filterBy": [ {
+		"resourceType": "Encounter",
+		"filterParameter": "participation-type",
+		"comparator": "eq",
+		"value": "PRPF"
+	} ],
+	"channelType": {
+		"system": "http://terminology.hl7.org/CodeSystem/subscription-channel-type",
+		"code": "rest-hook"
+	},
+	"endpoint": "http://localhost:57333/fhir/context",
+	"contentType": "application/fhir+json"
+	},
+	"request": {
+	"method": "POST",
+	"url": "Subscription"
+	}
+} ]
 }
 			""";
 

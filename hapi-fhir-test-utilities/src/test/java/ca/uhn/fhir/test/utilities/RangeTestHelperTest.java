@@ -7,29 +7,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RangeTestHelperTest {
 
-
 	@Nested
 	public class DefaultRange {
 
 		@Test
 		void checkInRange() {
-				RangeTestHelper.checkInRange(.83d, .829999999d);
+			RangeTestHelper.checkInRange(.83d, .829999999d);
 		}
 
 		@Test
 		void checkLower() {
-			AssertionError thrown = assertThrows(
-				AssertionError.class,
-				() -> RangeTestHelper.checkInRange(.91, .83)
-			);
+			AssertionError thrown = assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(.91, .83));
 		}
 
 		@Test
 		void checkHigher() {
-			AssertionError thrown = assertThrows(
-				AssertionError.class,
-				() -> RangeTestHelper.checkInRange(.26, .25)
-			);
+			AssertionError thrown = assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(.26, .25));
 		}
 
 		@Nested
@@ -43,17 +36,13 @@ class RangeTestHelperTest {
 			@Test
 			void checkLower() {
 				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkWithinBounds(.91001, .91002, .9013)
-				);
+						AssertionError.class, () -> RangeTestHelper.checkWithinBounds(.91001, .91002, .9013));
 			}
 
 			@Test
 			void checkHigher() {
-				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkWithinBounds(.87, .88, .9)
-				);
+				AssertionError thrown =
+						assertThrows(AssertionError.class, () -> RangeTestHelper.checkWithinBounds(.87, .88, .9));
 			}
 
 			@Nested
@@ -66,17 +55,13 @@ class RangeTestHelperTest {
 				@Test
 				void checkLower() {
 					AssertionError thrown = assertThrows(
-						AssertionError.class,
-						() -> RangeTestHelper.checkWithinBounds(".91001", ".91002", ".9013")
-					);
+							AssertionError.class, () -> RangeTestHelper.checkWithinBounds(".91001", ".91002", ".9013"));
 				}
 
 				@Test
 				void checkHigher() {
 					AssertionError thrown = assertThrows(
-						AssertionError.class,
-						() -> RangeTestHelper.checkWithinBounds(".87", ".88", ".9")
-					);
+							AssertionError.class, () -> RangeTestHelper.checkWithinBounds(".87", ".88", ".9"));
 				}
 			}
 		}
@@ -91,21 +76,16 @@ class RangeTestHelperTest {
 
 			@Test
 			void checkLower() {
-				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkInRange(".91", ".83")
-				);
+				AssertionError thrown =
+						assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(".91", ".83"));
 			}
 
 			@Test
 			void checkHigher() {
-				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkInRange(".26", "0.25")
-				);
+				AssertionError thrown =
+						assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(".26", "0.25"));
 			}
 		}
-
 	}
 
 	@Nested
@@ -120,18 +100,14 @@ class RangeTestHelperTest {
 
 		@Test
 		void checkLower() {
-			AssertionError thrown = assertThrows(
-				AssertionError.class,
-				() -> RangeTestHelper.checkInRange(.84, .01, .82)
-			);
+			AssertionError thrown =
+					assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(.84, .01, .82));
 		}
 
 		@Test
 		void checkHigher() {
-			AssertionError thrown = assertThrows(
-				AssertionError.class,
-				() -> RangeTestHelper.checkInRange(.2511,.0001, .2513)
-			);
+			AssertionError thrown =
+					assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(.2511, .0001, .2513));
 		}
 
 		@Nested
@@ -145,18 +121,14 @@ class RangeTestHelperTest {
 
 			@Test
 			void checkLower() {
-				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkInRange(".91", .02, ".83")
-				);
+				AssertionError thrown =
+						assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(".91", .02, ".83"));
 			}
 
 			@Test
 			void checkHigher() {
-				AssertionError thrown = assertThrows(
-					AssertionError.class,
-					() -> RangeTestHelper.checkInRange(".26", .03, "0.3")
-				);
+				AssertionError thrown =
+						assertThrows(AssertionError.class, () -> RangeTestHelper.checkInRange(".26", .03, "0.3"));
 			}
 		}
 	}

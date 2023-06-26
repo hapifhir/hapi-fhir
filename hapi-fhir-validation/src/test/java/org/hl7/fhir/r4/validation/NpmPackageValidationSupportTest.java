@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -30,25 +30,24 @@ public class NpmPackageValidationSupportTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	private Map<String, byte[]> EXPECTED_BINARIES_MAP = Map.of(
-		"dummyBinary1.txt", "myDummyContent1".getBytes(),
-		"dummyBinary2.txt", "myDummyContent2".getBytes()
-	);
+			"dummyBinary1.txt", "myDummyContent1".getBytes(),
+			"dummyBinary2.txt", "myDummyContent2".getBytes());
 
 	@Test
 	public void testValidateWithPackage() throws IOException {
 
 		// Create an NPM Package Support module and load one package in from
 		// the classpath
-		NpmPackageValidationSupport npmPackageSupport = getNpmPackageValidationSupport("classpath:package/UK.Core.r4-1.1.0.tgz");
+		NpmPackageValidationSupport npmPackageSupport =
+				getNpmPackageValidationSupport("classpath:package/UK.Core.r4-1.1.0.tgz");
 
 		// Create a support chain including the NPM Package Support
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
-			npmPackageSupport,
-			new DefaultProfileValidationSupport(myFhirContext),
-			new CommonCodeSystemsTerminologyService(myFhirContext),
-			new InMemoryTerminologyServerValidationSupport(myFhirContext),
-			new SnapshotGeneratingValidationSupport(myFhirContext)
-		);
+				npmPackageSupport,
+				new DefaultProfileValidationSupport(myFhirContext),
+				new CommonCodeSystemsTerminologyService(myFhirContext),
+				new InMemoryTerminologyServerValidationSupport(myFhirContext),
+				new SnapshotGeneratingValidationSupport(myFhirContext));
 		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
 
 		// Create a validator
@@ -65,10 +64,12 @@ public class NpmPackageValidationSupportTest {
 		// Perform the validation
 		ValidationResult outcome = validator.validateWithResult(patient);
 
-		String outcomeSerialized = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
+		String outcomeSerialized =
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
 		ourLog.info(outcomeSerialized);
-		assertThat(outcomeSerialized, containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
-
+		assertThat(
+				outcomeSerialized,
+				containsString("Patient.identifier:nhsNumber.value: minimum required = 1, but only found 0"));
 	}
 
 	@Nonnull
@@ -80,7 +81,8 @@ public class NpmPackageValidationSupportTest {
 
 	@Test
 	public void loadPackageFromClasspath_normally_loadsExpectedBinaries() throws IOException {
-		NpmPackageValidationSupport npmPackageSupport = getNpmPackageValidationSupport("classpath:package/dummy-package-with-binaries.tgz");
+		NpmPackageValidationSupport npmPackageSupport =
+				getNpmPackageValidationSupport("classpath:package/dummy-package-with-binaries.tgz");
 
 		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			byte[] expectedBytes = entry.getValue();

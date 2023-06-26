@@ -37,40 +37,52 @@ public class ContextScanningDstu3Test {
 	@Test
 	public void testContextDoesntScanUnneccesaryTypes() {
 		FhirContext ctx = FhirContext.forDstu3();
-		
+
 		TreeSet<String> resDefs = scannedResourceNames(ctx);
 		TreeSet<String> elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
-		
+
 		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + ourPort);
 		client.read().resource(Patient.class).withId("1").execute();
-		
+
 		resDefs = scannedResourceNames(ctx);
 		elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
 
 		client.read().resource(Observation.class).withId("1").execute();
 		resDefs = scannedResourceNames(ctx);
 		elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
 		assertThat(resDefs, containsInRelativeOrder("Observation"));
 	}
 
 	public static void main(String[] args) {
-		
+
 		// 1.6 - no defer - Took 6700 ms - 6.7ms / pass
 		// 1.6 - no defer - Took 6127 ms - 6.127ms / pass
-		
+
 		// 1.6 - defer - Took 2523 ms - 2.523ms / pass
 		// 1.6 - defer - Took 2328 ms - 2.328ms / pass
-		
+
 		int passes = 1000;
-		
+
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < passes; i++) {
 			FhirContext ctx = FhirContext.forDstu3();
@@ -78,36 +90,45 @@ public class ContextScanningDstu3Test {
 			ctx.getResourceDefinition("Observation");
 		}
 		long end = System.currentTimeMillis();
-		
-		long delay = end-start;
-		float per = (float)delay / (float)passes;
-		
+
+		long delay = end - start;
+		float per = (float) delay / (float) passes;
+
 		ourLog.info("Took {} ms - {}ms / pass", delay, per);
 	}
-	
+
 	@Test
 	public void testDeferredScanning() {
 		FhirContext ctx = FhirContext.forDstu3();
 		ctx.getRestfulClientFactory().setSocketTimeout(600000);
-		
+
 		ctx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-		
+
 		TreeSet<String> resDefs = scannedResourceNames(ctx);
 		TreeSet<String> elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
-		
-		BaseRuntimeElementCompositeDefinition<?> compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
+
+		BaseRuntimeElementCompositeDefinition<?> compositeDef =
+				(BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertFalse(compositeDef.isSealed());
-		
+
 		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + ourPort);
 		client.read().resource(Patient.class).withId("1").execute();
-		
+
 		resDefs = scannedResourceNames(ctx);
 		elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertFalse(compositeDef.isSealed());
@@ -115,9 +136,13 @@ public class ContextScanningDstu3Test {
 		client.read().resource(Observation.class).withId("1").execute();
 		resDefs = scannedResourceNames(ctx);
 		elementDefs = scannedElementNames(ctx);
-		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
-		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs, containsInRelativeOrder("Observation"));		
+		ourLog.info(
+				"Have {} resource definitions: {}",
+				ctx.getAllResourceDefinitions().size(),
+				resDefs);
+		ourLog.info(
+				"Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
+		assertThat(resDefs, containsInRelativeOrder("Observation"));
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertTrue(compositeDef.isSealed());
 	}
@@ -129,7 +154,7 @@ public class ContextScanningDstu3Test {
 		}
 		return defs;
 	}
-	
+
 	private TreeSet<String> scannedElementNames(FhirContext ctx) {
 		TreeSet<String> defs = new TreeSet<String>();
 		for (BaseRuntimeElementDefinition<?> next : ctx.getElementDefinitions()) {
@@ -138,7 +163,6 @@ public class ContextScanningDstu3Test {
 		return defs;
 	}
 
-	
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
@@ -156,8 +180,7 @@ public class ContextScanningDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 	}
 
 	public static class PatientProvider implements IResourceProvider {
@@ -171,9 +194,8 @@ public class ContextScanningDstu3Test {
 		public Patient read(@IdParam IdType theId) {
 			return (Patient) new Patient().setId(theId);
 		}
-
 	}
-	
+
 	public static class ObservationProvider implements IResourceProvider {
 
 		@Override
@@ -188,9 +210,7 @@ public class ContextScanningDstu3Test {
 			retVal.addIdentifier().setSystem("ISYS").setValue("IVAL");
 			retVal.setStatus(ObservationStatus.FINAL);
 			retVal.setValue(new StringType("VAL"));
-			return retVal; 
+			return retVal;
 		}
-
 	}
-
 }

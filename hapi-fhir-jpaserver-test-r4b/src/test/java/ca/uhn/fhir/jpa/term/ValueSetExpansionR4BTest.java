@@ -27,14 +27,18 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 	public void testExpandTaskCodeValueSet_withCorrectedCodeSystemVersion_willExpandCorrectly() throws IOException {
 		// load validation file
 		Bundle r4bValueSets = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/r4b/model/valueset/valuesets.xml");
-		ValueSet taskCodeVs = (ValueSet) findResourceByFullUrlInBundle(r4bValueSets, "http://hl7.org/fhir/ValueSet/task-code");
-		CodeSystem taskCodeCs = (CodeSystem) findResourceByFullUrlInBundle(r4bValueSets, "http://hl7.org/fhir/CodeSystem/task-code");
+		ValueSet taskCodeVs =
+				(ValueSet) findResourceByFullUrlInBundle(r4bValueSets, "http://hl7.org/fhir/ValueSet/task-code");
+		CodeSystem taskCodeCs =
+				(CodeSystem) findResourceByFullUrlInBundle(r4bValueSets, "http://hl7.org/fhir/CodeSystem/task-code");
 
 		// check valueSet and codeSystem versions
 		String expectedCodeSystemVersion = "4.3.0";
 		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
 		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
-		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
+		assertEquals(
+				expectedCodeSystemVersion,
+				taskCodeVs.getCompose().getInclude().get(0).getVersion());
 
 		myCodeSystemDao.create(taskCodeCs);
 		IIdType id = myValueSetDao.create(taskCodeVs).getId();
@@ -44,17 +48,18 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 		// check expansion size and include CodeSystem version
 		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
 		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
-		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
+		assertEquals(
+				expectedCodeSystemVersion,
+				expandedValueSet.getCompose().getInclude().get(0).getVersion());
 	}
 
 	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
 		Optional<Bundle.BundleEntryComponent> bundleEntry = thebundle.getEntry().stream()
-			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
-			.findFirst();
+				.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
+				.findFirst();
 		if (bundleEntry.isEmpty()) {
 			fail("Can't find resource: " + theFullUrl);
 		}
 		return bundleEntry.get().getResource();
 	}
-
 }

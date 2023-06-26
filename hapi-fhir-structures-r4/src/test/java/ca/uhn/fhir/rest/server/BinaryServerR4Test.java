@@ -65,7 +65,7 @@ public class BinaryServerR4Test {
 
 		ourNextBinary = new Binary();
 		ourNextBinary.setId("Binary/A/_history/222");
-		ourNextBinary.setContent(new byte[]{0, 1, 2, 3, 4});
+		ourNextBinary.setContent(new byte[] {0, 1, 2, 3, 4});
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
@@ -75,25 +75,29 @@ public class BinaryServerR4Test {
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/foo", status.getEntity().getContentType().getValue());
-			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
-			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(
+					"Patient/1",
+					status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals(
+					"W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
+			assertEquals(
+					"http://localhost:" + ourPort + "/Binary/A/_history/222",
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, content);
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, content);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
 	}
-
 
 	@Test
 	public void testGetWithAccept() throws Exception {
 
 		ourNextBinary = new Binary();
 		ourNextBinary.setId("Binary/A/_history/222");
-		ourNextBinary.setContent(new byte[]{0, 1, 2, 3, 4});
+		ourNextBinary.setContent(new byte[] {0, 1, 2, 3, 4});
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
@@ -103,14 +107,23 @@ public class BinaryServerR4Test {
 		CloseableHttpResponse status = ourClient.execute(get);
 		try {
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
-			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
-			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(
+					"application/json+fhir;charset=utf-8",
+					status.getEntity().getContentType().getValue());
+			assertEquals(
+					"Patient/1",
+					status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals(
+					"W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
+			assertEquals(
+					"http://localhost:" + ourPort + "/Binary/A/_history/222",
+					status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}", content);
+			assertEquals(
+					"{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}",
+					content);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -119,7 +132,7 @@ public class BinaryServerR4Test {
 	@Test
 	public void testPostBinaryWithSecurityContext() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
 		CloseableHttpResponse status = ourClient.execute(post);
@@ -127,8 +140,8 @@ public class BinaryServerR4Test {
 			assertNull(ourLastId);
 			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertEquals("Encounter/2", ourLastBinary.getSecurityContext().getReference());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinary.getContent());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinaryBytes);
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinaryBytes);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -137,14 +150,14 @@ public class BinaryServerR4Test {
 	@Test
 	public void testPostRawBytesBinaryContentType() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastId);
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinary.getContent());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinaryBytes);
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinaryBytes);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -158,7 +171,7 @@ public class BinaryServerR4Test {
 
 		Binary b = new Binary();
 		b.setContentType("application/foo");
-		b.setContent(new byte[]{0, 1, 2, 3, 4});
+		b.setContent(new byte[] {0, 1, 2, 3, 4});
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
@@ -167,7 +180,7 @@ public class BinaryServerR4Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -201,11 +214,11 @@ public class BinaryServerR4Test {
 	@Test
 	public void testPostRawBytesNoContentType() throws Exception {
 		HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastBinary.getContentType());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -214,7 +227,7 @@ public class BinaryServerR4Test {
 	@Test
 	public void testPutBinaryWithSecurityContext() throws Exception {
 		HttpPut post = new HttpPut("http://localhost:" + ourPort + "/Binary/A");
-		post.setEntity(new ByteArrayEntity(new byte[]{0, 1, 2, 3, 4}));
+		post.setEntity(new ByteArrayEntity(new byte[] {0, 1, 2, 3, 4}));
 		post.addHeader("Content-Type", "application/foo");
 		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
 		CloseableHttpResponse status = ourClient.execute(post);
@@ -223,8 +236,8 @@ public class BinaryServerR4Test {
 			assertEquals("Binary/A", ourLastBinary.getId());
 			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertEquals("Encounter/2", ourLastBinary.getSecurityContext().getReference());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinary.getContent());
-			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourLastBinaryBytes);
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinary.getContent());
+			assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourLastBinaryBytes);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -249,9 +262,10 @@ public class BinaryServerR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
@@ -259,7 +273,10 @@ public class BinaryServerR4Test {
 
 	public static class BinaryProvider implements IResourceProvider {
 		@Create()
-		public MethodOutcome createBinary(@ResourceParam Binary theBinary, @ResourceParam String theBinaryString, @ResourceParam byte[] theBinaryBytes) {
+		public MethodOutcome createBinary(
+				@ResourceParam Binary theBinary,
+				@ResourceParam String theBinaryString,
+				@ResourceParam byte[] theBinaryBytes) {
 			ourLastBinary = theBinary;
 			ourLastBinaryString = theBinaryString;
 			ourLastBinaryBytes = theBinaryBytes;
@@ -277,14 +294,16 @@ public class BinaryServerR4Test {
 		}
 
 		@Update()
-		public MethodOutcome updateBinary(@IdParam IdType theId, @ResourceParam Binary theBinary, @ResourceParam String theBinaryString, @ResourceParam byte[] theBinaryBytes) {
+		public MethodOutcome updateBinary(
+				@IdParam IdType theId,
+				@ResourceParam Binary theBinary,
+				@ResourceParam String theBinaryString,
+				@ResourceParam byte[] theBinaryBytes) {
 			ourLastId = theId;
 			ourLastBinary = theBinary;
 			ourLastBinaryString = theBinaryString;
 			ourLastBinaryBytes = theBinaryBytes;
 			return new MethodOutcome(new IdType("Binary/001/_history/002"));
 		}
-
 	}
-
 }

@@ -33,13 +33,17 @@ public class InstanceReindexProviderTest {
 
 	@Mock
 	private IInstanceReindexService myDryRunService;
+
 	@RegisterExtension
 	@Order(0)
 	private RestfulServerExtension myServer = new RestfulServerExtension(FhirVersionEnum.R4)
-		.withServer(server -> server.registerProvider(new InstanceReindexProvider(myDryRunService)));
+			.withServer(server -> server.registerProvider(new InstanceReindexProvider(myDryRunService)));
+
 	@RegisterExtension
 	@Order(1)
-	private HashMapResourceProviderExtension<Patient> myPatientProvider = new HashMapResourceProviderExtension<>(myServer, Patient.class);
+	private HashMapResourceProviderExtension<Patient> myPatientProvider =
+			new HashMapResourceProviderExtension<>(myServer, Patient.class);
+
 	@Captor
 	private ArgumentCaptor<Set<String>> myCodeCaptor;
 
@@ -49,14 +53,13 @@ public class InstanceReindexProviderTest {
 		parameters.addParameter("foo", "bar");
 		when(myDryRunService.reindexDryRun(any(), any(), any())).thenReturn(parameters);
 
-		Parameters outcome = myServer
-			.getFhirClient()
-			.operation()
-			.onInstance(new IdType("Patient/123"))
-			.named(OPERATION_REINDEX_DRYRUN)
-			.withNoParameters(Parameters.class)
-			.useHttpGet()
-			.execute();
+		Parameters outcome = myServer.getFhirClient()
+				.operation()
+				.onInstance(new IdType("Patient/123"))
+				.named(OPERATION_REINDEX_DRYRUN)
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.execute();
 		assertEquals("foo", outcome.getParameter().get(0).getName());
 	}
 
@@ -66,19 +69,17 @@ public class InstanceReindexProviderTest {
 		parameters.addParameter("foo", "bar");
 		when(myDryRunService.reindexDryRun(any(), any(), any())).thenReturn(parameters);
 
-		Parameters outcome = myServer
-			.getFhirClient()
-			.operation()
-			.onInstance(new IdType("Patient/123"))
-			.named(OPERATION_REINDEX_DRYRUN)
-			.withParameter(Parameters.class, "code", new CodeType("blah"))
-			.useHttpGet()
-			.execute();
+		Parameters outcome = myServer.getFhirClient()
+				.operation()
+				.onInstance(new IdType("Patient/123"))
+				.named(OPERATION_REINDEX_DRYRUN)
+				.withParameter(Parameters.class, "code", new CodeType("blah"))
+				.useHttpGet()
+				.execute();
 		assertEquals("foo", outcome.getParameter().get(0).getName());
 
 		verify(myDryRunService, times(1)).reindexDryRun(any(), any(), myCodeCaptor.capture());
 
 		assertThat(myCodeCaptor.getValue(), contains("blah"));
 	}
-
 }

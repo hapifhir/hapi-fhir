@@ -27,7 +27,7 @@ class ValidationResultTest {
 	@Test
 	void testMoreThanDefaultDisplayQty() {
 		List<SingleValidationMessage> validationMessages =
-			getTestValidationErrors(ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT * 2);
+				getTestValidationErrors(ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT * 2);
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
 		assertTrue(toStringValue.contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT));
@@ -50,12 +50,11 @@ class ValidationResultTest {
 			SingleValidationMessage validationMsg = new SingleValidationMessage();
 			validationMsg.setLocationCol(i);
 			validationMsg.setLocationLine(1);
-			validationMsg.setLocationString("Error #" + (i+1));
-			validationMsg.setMessage("Error message #" + (i+1));
+			validationMsg.setLocationString("Error #" + (i + 1));
+			validationMsg.setMessage("Error message #" + (i + 1));
 			validationMsg.setSeverity(ResultSeverityEnum.ERROR);
 			msgList.add(validationMsg);
 		}
 		return msgList;
 	}
-
 }

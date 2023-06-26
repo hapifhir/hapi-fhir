@@ -44,11 +44,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
-import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -75,15 +75,19 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Mock
 	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Mock
 	private IChannelFactory myChannelFactory;
+
 	@Mock
 	private IChannelProducer myChannelProducer;
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IRestfulClientFactory myRestfulClientFactory;
+
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IGenericClient myGenericClient;
 
@@ -166,7 +170,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail();
 		} catch (MessagingException e) {
-			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123; nested exception is ca.uhn.fhir.rest.server.exceptions.InternalErrorException: FOO", e.getMessage());
+			assertEquals(
+					Msg.code(2)
+							+ "Failure handling subscription payload for subscription: Subscription/123; nested exception is ca.uhn.fhir.rest.server.exceptions.InternalErrorException: FOO",
+					e.getMessage());
 		}
 
 		verify(myGenericClient, times(1)).update();
@@ -174,9 +181,12 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	@Test
 	public void testRestHookDeliveryFails_InterceptorDealsWithIt() {
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED), any())).thenReturn(false);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any()))
+				.thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any()))
+				.thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED), any()))
+				.thenReturn(false);
 
 		Patient patient = generatePatient();
 
@@ -198,14 +208,21 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Test
 	public void testMessageSubscriber_PermitsInterceptorsToModifyOutgoingEnvelope() throws URISyntaxException {
 
-		//Given: We setup mocks, and have this mock interceptor inject those headers.
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
-			HookParams argument = t.getArgument(1, HookParams.class);
-			ResourceModifiedJsonMessage resourceModifiedJsonMessage = argument.get(ResourceModifiedJsonMessage.class);
-			resourceModifiedJsonMessage.getHapiHeaders().getCustomHeaders().put("foo", List.of("bar", "bar2"));
-			return true;
-		});
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		// Given: We setup mocks, and have this mock interceptor inject those headers.
+		when(myInterceptorBroadcaster.callHooks(
+						eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class)))
+				.thenAnswer(t -> {
+					HookParams argument = t.getArgument(1, HookParams.class);
+					ResourceModifiedJsonMessage resourceModifiedJsonMessage =
+							argument.get(ResourceModifiedJsonMessage.class);
+					resourceModifiedJsonMessage
+							.getHapiHeaders()
+							.getCustomHeaders()
+							.put("foo", List.of("bar", "bar2"));
+					return true;
+				});
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any()))
+				.thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
 
 		CanonicalSubscription subscription = generateSubscription();
@@ -216,24 +233,28 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
-		//When: We submit the message for delivery
+		// When: We submit the message for delivery
 		myMessageSubscriber.handleMessage(payload);
 
-		//Then: The receiving channel should also receive the custom headers.
+		// Then: The receiving channel should also receive the custom headers.
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
 		assertThat(messages, hasSize(1));
 		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
-		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
+		Collection<String> foo = (Collection<String>)
+				receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
 
 		assertThat(foo, containsInAnyOrder("bar", "bar2"));
 	}
 
 	@Test
 	public void testMessageSubscriptionWithPayloadSearchMode() throws URISyntaxException {
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myInterceptorBroadcaster.callHooks(
+						eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class)))
+				.thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any()))
+				.thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
@@ -241,7 +262,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		Patient p1 = generatePatient();
 		Patient p2 = generatePatient();
 
-		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1,p2));
+		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1, p2));
 		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
 
 		CanonicalSubscription subscription = generateSubscription();
@@ -264,15 +285,20 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
 		assertThat(receivedBundle.getEntry(), hasSize(2));
-		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
-		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
-
+		assertEquals(
+				p1.getIdElement().getValue(),
+				receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals(
+				p2.getIdElement().getValue(),
+				receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
 	}
 
 	@Test
 	public void testRestHookDeliveryAbortedByInterceptor() {
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(false);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any()))
+				.thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any()))
+				.thenReturn(false);
 
 		Patient patient = generatePatient();
 
@@ -289,9 +315,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
-	public void testInterceptorBroadcasterAbortsDelivery() {
-
-	}
+	public void testInterceptorBroadcasterAbortsDelivery() {}
 
 	@Test
 	public void testSerializeDeliveryMessageWithRequestPartition() throws JsonProcessingException {
@@ -308,7 +332,6 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		String jsonString = jsonMessage.asJson();
 
 		ourLog.info(jsonString);
-
 
 		// Assert that the partitionID is being serialized in JSON
 		assertThat(jsonString, containsString("\"partitionDate\":[2020,1,1]"));
@@ -341,8 +364,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Test
 	public void testDeliveryMessageWithPartition() throws URISyntaxException {
 		RequestPartitionId thePartitionId = RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1));
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any())).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any()))
+				.thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any()))
+				.thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
 
 		CanonicalSubscription subscription = generateSubscription();
@@ -364,14 +389,17 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	@Test
 	public void testSerializeLegacyDeliveryMessage() throws JsonProcessingException {
-		String legacyDeliveryMessageJson = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
+		String legacyDeliveryMessageJson =
+				"{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
 
 		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
 
 		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
 
 		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
-		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertEquals(
+				jsonMessage.getPayload().getRequestPartitionId().toJson(),
+				RequestPartitionId.defaultPartition().toJson());
 	}
 
 	@Test
@@ -415,5 +443,4 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		subscription.setPayloadString("application/fhir+json");
 		return subscription;
 	}
-
 }

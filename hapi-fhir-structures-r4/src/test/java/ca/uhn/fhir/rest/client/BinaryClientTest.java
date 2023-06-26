@@ -60,9 +60,10 @@ public class BinaryClientTest {
 	public void testRead() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "foo/bar"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {1, 2, 3, 4}));
 
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		Binary resp = client.read(new IdType("http://foo/Patient/123"));
@@ -72,19 +73,21 @@ public class BinaryClientTest {
 		assertEquals("http://foo/Binary/123", get.getURI().toString());
 
 		assertEquals("foo/bar", resp.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, resp.getContent());
+		assertArrayEquals(new byte[] {1, 2, 3, 4}, resp.getContent());
 	}
 
 	@Test
 	public void testCreate() throws Exception {
 		Binary res = new Binary();
-		res.setContent(new byte[] { 1, 2, 3, 4 });
+		res.setContent(new byte[] {1, 2, 3, 4});
 		res.setContentType("text/plain");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
+		when(httpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {}));
 
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
@@ -94,9 +97,10 @@ public class BinaryClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertEquals("http://foo/Binary", post.getURI().toString());
 
-		assertEquals("text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, IOUtils.toByteArray(post.getEntity().getContent()));
-
+		assertEquals(
+				"text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
+		assertArrayEquals(
+				new byte[] {1, 2, 3, 4}, IOUtils.toByteArray(post.getEntity().getContent()));
 	}
 
 	@Test
@@ -106,8 +110,10 @@ public class BinaryClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(httpResponse);
-		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
-		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
+		when(httpResponse.getStatusLine())
+				.thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(httpResponse.getEntity().getContentType())
+				.thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ByteArrayInputStream(new byte[] {}));
 
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
@@ -117,9 +123,11 @@ public class BinaryClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertEquals("http://foo/Binary", post.getURI().toString());
 
-		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue(), containsString(Constants.CT_FHIR_JSON_NEW));
-		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
-
+		assertThat(
+				capt.getValue().getFirstHeader("Content-Type").getValue(), containsString(Constants.CT_FHIR_JSON_NEW));
+		assertEquals(
+				"{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}",
+				IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
 	}
 
 	private interface IClient extends IBasicClient {
@@ -129,13 +137,10 @@ public class BinaryClientTest {
 
 		@Create(type = Binary.class)
 		MethodOutcome create(@ResourceParam Binary theBinary);
-
 	}
-
 
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-
 }

@@ -30,8 +30,6 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -60,7 +58,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -78,6 +75,15 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityGraph;
@@ -94,15 +100,6 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -125,12 +122,16 @@ public class GiantTransactionPerfTest {
 	private HapiTransactionService myHapiTransactionService;
 	private DaoRegistry myDaoRegistry;
 	private JpaResourceDao<ExplanationOfBenefit> myEobDao;
+
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private ApplicationContext myAppCtx;
+
 	@Mock
 	private IInstanceValidatorModule myInstanceValidatorSvc;
+
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
@@ -138,15 +139,19 @@ public class GiantTransactionPerfTest {
 	private SearchParamRegistryImpl mySearchParamRegistry;
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
 	@Mock
 	private ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+
 	private ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 	private MockResourceVersionSvc myResourceVersionSvc;
 	private MockResourceHistoryTableDao myResourceHistoryTableDao;
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
+
 	@Mock
 	private IIdHelperService myIdHelperService;
+
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
@@ -207,22 +212,26 @@ public class GiantTransactionPerfTest {
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
-		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {
-			String resourceName = t.getArgument(0, String.class);
-			SearchParameterMap searchParameterMap = t.getArgument(1, SearchParameterMap.class);
-			IResourceChangeListener changeListener = t.getArgument(2, IResourceChangeListener.class);
-			long refreshInterval = t.getArgument(3, Long.class);
-			ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(resourceName, changeListener, searchParameterMap, refreshInterval);
-			retVal.setResourceChangeListenerCacheRefresher(myResourceChangeListenerCacheRefresher);
-			return retVal;
-		});
+		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong()))
+				.thenAnswer(t -> {
+					String resourceName = t.getArgument(0, String.class);
+					SearchParameterMap searchParameterMap = t.getArgument(1, SearchParameterMap.class);
+					IResourceChangeListener changeListener = t.getArgument(2, IResourceChangeListener.class);
+					long refreshInterval = t.getArgument(3, Long.class);
+					ResourceChangeListenerCache retVal = new ResourceChangeListenerCache(
+							resourceName, changeListener, searchParameterMap, refreshInterval);
+					retVal.setResourceChangeListenerCacheRefresher(myResourceChangeListenerCacheRefresher);
+					return retVal;
+				});
 
-		myResourceChangeListenerRegistry = new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, myInMemoryResourceMatcher);
+		myResourceChangeListenerRegistry = new ResourceChangeListenerRegistryImpl(
+				ourFhirContext, myResourceChangeListenerCacheFactory, myInMemoryResourceMatcher);
 		myResourceChangeListenerCacheRefresher.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 
 		mySearchParamRegistry = new SearchParamRegistryImpl();
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
-		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
+		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(
+				new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
 		mySearchParamRegistry.setStorageSettings(myStorageSettings);
 		mySearchParamRegistry.registerListener();
@@ -284,10 +293,20 @@ public class GiantTransactionPerfTest {
 
 		mySystemDao.transaction(requestDetails, input);
 
-		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		ourLog.info("Merges:\n * "
+				+ myEntityManager.myMergeCount.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
-		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
+		assertThat(
+				myEntityManager.myPersistCount.stream()
+						.map(t -> t.getClass().getSimpleName())
+						.collect(Collectors.toList()),
+				Matchers.contains("ResourceTable"));
+		assertThat(
+				myEntityManager.myMergeCount.stream()
+						.map(t -> t.getClass().getSimpleName())
+						.collect(Collectors.toList()),
+				Matchers.containsInAnyOrder(
+						"ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
 		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
@@ -298,7 +317,6 @@ public class GiantTransactionPerfTest {
 	public void testTransactionStressTest() {
 		myStorageSettings.setEnforceReferenceTargetTypes(false);
 		myStorageSettings.setAllowInlineMatchUrlReferences(false);
-
 
 		Bundle input = ClasspathUtil.loadResource(ourFhirContext, Bundle.class, "/r4/large-transaction.json");
 
@@ -322,8 +340,17 @@ public class GiantTransactionPerfTest {
 			myEntityManager.clearCounts();
 		}
 
-		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
-		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
+		assertThat(
+				myEntityManager.myPersistCount.stream()
+						.map(t -> t.getClass().getSimpleName())
+						.collect(Collectors.toList()),
+				Matchers.contains("ResourceTable"));
+		assertThat(
+				myEntityManager.myMergeCount.stream()
+						.map(t -> t.getClass().getSimpleName())
+						.collect(Collectors.toList()),
+				Matchers.containsInAnyOrder(
+						"ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
 		assertEquals(1, myEntityManager.myFlushCount);
 		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
 		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
@@ -334,13 +361,17 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public ResourceVersionMap getVersionMap(RequestPartitionId theRequestPartitionId, String theResourceName, SearchParameterMap theSearchParamMap) {
+		public ResourceVersionMap getVersionMap(
+				RequestPartitionId theRequestPartitionId,
+				String theResourceName,
+				SearchParameterMap theSearchParamMap) {
 			myGetVersionMap++;
 			return ResourceVersionMap.fromResources(Lists.newArrayList());
 		}
 
 		@Override
-		public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(RequestPartitionId thePartition, List<IIdType> theIds) {
+		public ResourcePersistentIdMap getLatestVersionIdsForResourceIds(
+				RequestPartitionId thePartition, List<IIdType> theIds) {
 			return null;
 		}
 	}
@@ -364,7 +395,8 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(
+				Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -543,7 +575,8 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> Page<S> findAll(@Nonnull Example<S> example, @Nonnull Pageable pageable) {
+		public <S extends ResourceHistoryTable> Page<S> findAll(
+				@Nonnull Example<S> example, @Nonnull Pageable pageable) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -559,7 +592,8 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable, R> R findBy(@Nonnull Example<S> example, @Nonnull Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+		public <S extends ResourceHistoryTable, R> R findBy(
+				@Nonnull Example<S> example, @Nonnull Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -605,7 +639,8 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode, Map<String, Object> properties) {
+		public <T> T find(
+				Class<T> entityClass, Object primaryKey, LockModeType lockMode, Map<String, Object> properties) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -838,13 +873,13 @@ public class GiantTransactionPerfTest {
 		}
 	}
 
-	private static class MockServletRequest extends MockHttpServletRequest {
-	}
+	private static class MockServletRequest extends MockHttpServletRequest {}
 
 	private static class MockRequestPartitionHelperSvc implements ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc {
 		@Nonnull
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(
+				@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 
@@ -855,7 +890,10 @@ public class GiantTransactionPerfTest {
 
 		@Nonnull
 		@Override
-		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
+		public RequestPartitionId determineCreatePartitionForRequest(
+				@Nullable RequestDetails theRequest,
+				@Nonnull IBaseResource theResource,
+				@Nonnull String theResourceType) {
 			return RequestPartitionId.defaultPartition();
 		}
 
@@ -870,12 +908,9 @@ public class GiantTransactionPerfTest {
 		public boolean isResourcePartitionable(String theResourceType) {
 			return true;
 		}
-
-
 	}
 
 	private static class MockTransactionManager implements PlatformTransactionManager {
-
 
 		@Nonnull
 		@Override

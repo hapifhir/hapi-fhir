@@ -1,12 +1,11 @@
 package ca.uhn.fhir.testmindeps;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirContextTest {
 
@@ -17,5 +16,4 @@ public class FhirContextTest {
 		RuntimeResourceDefinition def = ctx.getResourceDefinition("Patient");
 		assertEquals(Patient.class, def.getImplementingClass());
 	}
-
 }

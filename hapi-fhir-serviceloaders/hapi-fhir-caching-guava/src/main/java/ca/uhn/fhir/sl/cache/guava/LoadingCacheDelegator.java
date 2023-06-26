@@ -20,17 +20,19 @@ package ca.uhn.fhir.sl.cache.guava;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.sl.cache.LoadingCache;
+import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import ca.uhn.fhir.i18n.Msg;
-import com.google.common.cache.CacheLoader;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import ca.uhn.fhir.sl.cache.LoadingCache;
+public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K, V> {
 
-public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K,V> {
-
-	public LoadingCacheDelegator(com.google.common.cache.LoadingCache<K, V> impl) { super(impl); }
+	public LoadingCacheDelegator(com.google.common.cache.LoadingCache<K, V> impl) {
+		super(impl);
+	}
 
 	public com.google.common.cache.LoadingCache<K, V> getCache() {
 		return (com.google.common.cache.LoadingCache<K, V>) cache;
@@ -43,7 +45,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		} catch (UncheckedExecutionException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				// Unwrap exception to match Caffeine
-				throw (RuntimeException)e.getCause();
+				throw (RuntimeException) e.getCause();
 			}
 			throw e;
 		} catch (ExecutionException e) {
@@ -62,7 +64,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		} catch (UncheckedExecutionException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				// Unwrap exception to match Caffeine
-				throw (RuntimeException)e.getCause();
+				throw (RuntimeException) e.getCause();
 			}
 			throw e;
 		} catch (ExecutionException e) {
@@ -75,5 +77,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 	}
 
 	@Override
-	public void refresh(K key) { getCache().refresh(key); }
+	public void refresh(K key) {
+		getCache().refresh(key);
+	}
 }

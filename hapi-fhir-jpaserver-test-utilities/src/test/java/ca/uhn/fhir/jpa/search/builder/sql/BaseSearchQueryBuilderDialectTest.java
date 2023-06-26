@@ -26,22 +26,31 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchQueryBuilderDialectTest.class);
 	protected final FhirContext myFhirContext = FhirContext.forR4Cached();
+
 	@Mock
 	protected SqlObjectFactory mySqlObjectFactory;
+
 	@Mock
 	protected HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 	@BeforeEach
 	public void beforeInitMocks() {
-		when(myHibernatePropertiesProvider.getDialect())
-			.thenReturn(createDialect());
+		when(myHibernatePropertiesProvider.getDialect()).thenReturn(createDialect());
 	}
 
 	@Nonnull
 	protected abstract Dialect createDialect();
 
 	protected SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false);
+		return new SearchQueryBuilder(
+				myFhirContext,
+				new StorageSettings(),
+				new PartitionSettings(),
+				RequestPartitionId.allPartitions(),
+				"Patient",
+				mySqlObjectFactory,
+				myHibernatePropertiesProvider,
+				false);
 	}
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
@@ -50,18 +59,20 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
 
 		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder sortPredicateBuilder =
+				searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("MolecularSequence", "variant-start");
+		Condition hashIdentityPredicate =
+				sortPredicateBuilder.createHashIdentityPredicate("MolecularSequence", "variant-start");
 		searchQueryBuilder.addPredicate(hashIdentityPredicate);
 		if (theNullOrder == null) {
 			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending);
 		} else {
-			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder, false);
+			searchQueryBuilder.addSortNumeric(
+					sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder, false);
 		}
 
 		return searchQueryBuilder.generate(0, 500);
-
 	}
 
 	public void logSql(GeneratedSql theGeneratedSql) {

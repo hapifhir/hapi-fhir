@@ -33,10 +33,13 @@ class JobInstanceStatusUpdaterTest {
 
 	@Mock
 	private JobDefinition<TestParameters> myJobDefinition;
+
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
+
 	@InjectMocks
 	JobInstanceStatusUpdater mySvc;
+
 	private JobInstance myInstance;
 	private TestParameters myTestParameters;
 	private AtomicReference<JobCompletionDetails> myDetails;
@@ -52,7 +55,8 @@ class JobInstanceStatusUpdaterTest {
 		myInstance.setErrorMessage(TEST_ERROR_MESSAGE);
 		myInstance.setErrorCount(TEST_ERROR_COUNT);
 
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any())).thenReturn((JobDefinition) myJobDefinition);
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any()))
+				.thenReturn((JobDefinition) myJobDefinition);
 	}
 
 	@Test
@@ -141,7 +145,6 @@ class JobInstanceStatusUpdaterTest {
 		when(myJobDefinition.getErrorHandler()).thenReturn(errorHandler);
 		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
 	}
-
 
 	static class TestParameters implements IModelJson {
 		@JsonProperty

@@ -38,20 +38,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
-	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor =
+			new SubscriptionDebugLogInterceptor();
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
+
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+
 	@Autowired
 	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 
@@ -108,19 +115,21 @@ public class SubscriptionTestUtil {
 	public void unregisterSubscriptionLoggingInterceptor() {
 		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
+
 	public int getExecutorQueueSizeForUnitTests() {
 		return getExecutorQueueSize();
 	}
 
 	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
+		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
+				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
+		SubscriptionDeliveringEmailSubscriber subscriber =
+				(SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
 		subscriber.setEmailSender(theEmailSender);
 	}
 
 	public int getActiveSubscriptionCount() {
 		return mySubscriptionRegistry.size();
 	}
-
 }

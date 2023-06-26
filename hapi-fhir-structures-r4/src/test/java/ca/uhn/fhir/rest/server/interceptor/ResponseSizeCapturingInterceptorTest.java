@@ -33,13 +33,19 @@ import static org.mockito.Mockito.verify;
 public class ResponseSizeCapturingInterceptorTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
+
 	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
+
 	private ResponseSizeCapturingInterceptor myInterceptor;
+
 	@RegisterExtension
-	public HashMapResourceProviderExtension<Patient> myPatientProviderRule = new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
+	public HashMapResourceProviderExtension<Patient> myPatientProviderRule =
+			new HashMapResourceProviderExtension<>(ourServerRule, Patient.class);
+
 	@Mock
 	private Consumer<ResponseSizeCapturingInterceptor.Result> myConsumer;
+
 	@Captor
 	private ArgumentCaptor<ResponseSizeCapturingInterceptor.Result> myResultCaptor;
 
@@ -58,11 +64,20 @@ public class ResponseSizeCapturingInterceptorTest {
 	public void testReadResource() throws InterruptedException {
 		PointcutLatch createLatch = new PointcutLatch(Pointcut.SERVER_PROCESSING_COMPLETED);
 		createLatch.setExpectedCount(1);
-		ourServerRule.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_PROCESSING_COMPLETED, createLatch);
+		ourServerRule
+				.getRestfulServer()
+				.getInterceptorService()
+				.registerAnonymousInterceptor(Pointcut.SERVER_PROCESSING_COMPLETED, createLatch);
 
 		Patient resource = new Patient();
 		resource.setActive(true);
-		IIdType id = ourServerRule.getFhirClient().create().resource(resource).execute().getId().toUnqualifiedVersionless();
+		IIdType id = ourServerRule
+				.getFhirClient()
+				.create()
+				.resource(resource)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
 
 		createLatch.awaitExpected();
 		ourServerRule.getRestfulServer().getInterceptorService().unregisterInterceptor(createLatch);
@@ -70,22 +85,29 @@ public class ResponseSizeCapturingInterceptorTest {
 		myInterceptor.registerConsumer(myConsumer);
 
 		List<String> stacks = Collections.synchronizedList(new ArrayList<>());
-		doAnswer(t->{
-			ResponseSizeCapturingInterceptor.Result result =t.getArgument(0, ResponseSizeCapturingInterceptor.Result.class);
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				stacks.add("INVOCATION\n" + result.getRequestDetails().getCompleteUrl() + "\n" + ExceptionUtils.getStackTrace(e));
-			}
-			return null;
-		}).when(myConsumer).accept(any());
+		doAnswer(t -> {
+					ResponseSizeCapturingInterceptor.Result result =
+							t.getArgument(0, ResponseSizeCapturingInterceptor.Result.class);
+					try {
+						throw new Exception();
+					} catch (Exception e) {
+						stacks.add("INVOCATION\n" + result.getRequestDetails().getCompleteUrl() + "\n"
+								+ ExceptionUtils.getStackTrace(e));
+					}
+					return null;
+				})
+				.when(myConsumer)
+				.accept(any());
 
-		resource = ourServerRule.getFhirClient().read().resource(Patient.class).withId(id).execute();
+		resource = ourServerRule
+				.getFhirClient()
+				.read()
+				.resource(Patient.class)
+				.withId(id)
+				.execute();
 		assertEquals(true, resource.getActive());
 
 		verify(myConsumer, timeout(10000).times(1)).accept(myResultCaptor.capture());
 		assertEquals(100, myResultCaptor.getValue().getWrittenChars());
 	}
-
-
 }

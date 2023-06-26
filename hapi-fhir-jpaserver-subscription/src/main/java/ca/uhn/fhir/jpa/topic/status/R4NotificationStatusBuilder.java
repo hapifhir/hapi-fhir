@@ -43,18 +43,23 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		myFhirContext = theFhirContext;
 	}
 
-	public Parameters buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+	public Parameters buildNotificationStatus(
+			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		Long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		// See http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Parameters-r4-notification-status.json.html
-		// and http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/StructureDefinition-backport-subscription-status-r4.html
+		// and
+		// http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/StructureDefinition-backport-subscription-status-r4.html
 		Parameters parameters = new Parameters();
 		parameters.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_STATUS);
 		parameters.setId(UUID.randomUUID().toString());
-		parameters.addParameter("subscription", new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
+		parameters.addParameter(
+				"subscription",
+				new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		parameters.addParameter("topic", new CanonicalType(theTopicUrl));
 		parameters.addParameter("status", new CodeType(Subscription.SubscriptionStatus.ACTIVE.toCode()));
-		parameters.addParameter("type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
+		parameters.addParameter(
+				"type", new CodeType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION.toCode()));
 		// WIP STR5 events-since-subscription-start should be read from the database
 		parameters.addParameter("events-since-subscription-start", eventNumber.toString());
 		Parameters.ParametersParameterComponent notificationEvent = parameters.addParameter();
@@ -63,7 +68,10 @@ public class R4NotificationStatusBuilder implements INotificationStatusBuilder<P
 		notificationEvent.addPart().setName("timestamp").setValue(new DateType(new Date()));
 		if (theResources.size() > 0) {
 			IBaseResource firstResource = theResources.get(0);
-			notificationEvent.addPart().setName("focus").setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
+			notificationEvent
+					.addPart()
+					.setName("focus")
+					.setValue(new Reference(firstResource.getIdElement().toUnqualifiedVersionless()));
 		}
 
 		return parameters;

@@ -43,7 +43,6 @@ class BaseLoincHandlerTest {
 	private Map<String, Integer> headerMap;
 	private CSVRecord recordWithHeader;
 
-
 	/**
 	 * Need to setup a real parser because we can't mock final classes (without PowerMockito)
 	 */
@@ -61,7 +60,6 @@ class BaseLoincHandlerTest {
 		}
 	}
 
-
 	@Nested
 	public class WithVersion {
 
@@ -73,8 +71,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(
-				null, Lists.newArrayList(), null, null, null,
-				Lists.newArrayList(), new Properties(), null);
+					null, Lists.newArrayList(), null, null, null, Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -98,8 +95,8 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("PartName", "test-PartName");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(Maps.newHashMap(), null,
-				Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
+			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(
+					Maps.newHashMap(), null, Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -112,7 +109,6 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude).setVersion(Mockito.notNull());
 		}
-
 
 		@Test
 		void LoincGroupTermsFileHandlerTest() throws Exception {
@@ -122,7 +118,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincGroupTermsFileHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -135,7 +131,6 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude).setVersion(Mockito.notNull());
 		}
-
 
 		@Test
 		void LoincImagingDocumentCodeHandlerTest() throws Exception {
@@ -145,7 +140,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincImagingDocumentCodeHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -158,7 +153,6 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude).setVersion(Mockito.notNull());
 		}
-
 
 		@Test
 		void LoincUniversalOrderSetHandlerTest() throws Exception {
@@ -169,7 +163,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincUniversalOrderSetHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -181,7 +175,8 @@ class BaseLoincHandlerTest {
 			spiedLoincHandler.accept(recordWithHeader);
 
 			Mockito.verify(myInclude).setVersion(Mockito.notNull());
-		}	}
+		}
+	}
 
 	@Nested
 	public class WithoutVersion {
@@ -193,8 +188,15 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("Long Common Name", "test-Long-Common-Names");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(Maps.newHashMap(), Lists.newArrayList(),
-				null, null, null, Lists.newArrayList(), new Properties(), null);
+			BaseLoincHandler loincHandler = new BaseLoincTop2000LabResultsHandler(
+					Maps.newHashMap(),
+					Lists.newArrayList(),
+					null,
+					null,
+					null,
+					Lists.newArrayList(),
+					new Properties(),
+					null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -217,8 +219,8 @@ class BaseLoincHandlerTest {
 			recordDataMap.put("PartName", "test-PartName");
 			setupCSVParser(recordDataMap);
 
-			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(Maps.newHashMap(), null,
-				Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
+			BaseLoincHandler loincHandler = new LoincDocumentOntologyHandler(
+					Maps.newHashMap(), null, Lists.newArrayList(), Lists.newArrayList(), new Properties(), null);
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -239,7 +241,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincGroupTermsFileHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -251,7 +253,6 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude, never()).setVersion(any());
 		}
-
 
 		@Test
 		void LoincImagingDocumentCodeHandlerTest() throws Exception {
@@ -261,7 +262,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincImagingDocumentCodeHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -273,7 +274,6 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude, never()).setVersion(any());
 		}
-
 
 		@Test
 		void LoincUniversalOrderSetHandlerTest() throws Exception {
@@ -284,7 +284,7 @@ class BaseLoincHandlerTest {
 			setupCSVParser(recordDataMap);
 
 			BaseLoincHandler loincHandler = new LoincUniversalOrderSetHandler(
-				Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
+					Maps.newHashMap(), Lists.newArrayList(), Lists.newArrayList(), new Properties());
 			BaseLoincHandler spiedLoincHandler = spy(loincHandler);
 
 			when(spiedLoincHandler.getValueSet(any(), any(), any(), any())).thenReturn(myValueSet);
@@ -296,10 +296,5 @@ class BaseLoincHandlerTest {
 
 			Mockito.verify(myInclude, never()).setVersion(any());
 		}
-
 	}
-
-
-
-
 }

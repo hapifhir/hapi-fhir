@@ -9,75 +9,70 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JsonLikeStructureTest {
-//	private static FhirContext ourCtx;
-//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonLikeStructureTest.class);
+	//	private static FhirContext ourCtx;
+	//	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonLikeStructureTest.class);
 
-	private static final String TEST_STRUCTURELOADING_DATA = 
-		"{" +
-		"    \"resourceType\":\"Organization\"," +
-		"    \"id\":\"11111\"," +
-		"    \"meta\":{" +
-		"        \"lastUpdated\":\"3900-09-20T10:10:10.000-07:00\"" +
-		"    }," +
-		"    \"identifier\":[" +
-		"        {" +
-		"            \"value\":\"15250\"" +
-		"        }" +
-		"    ]," +
-		"    \"type\":{" +
-		"        \"coding\":[" +
-		"            {" +
-		"                \"system\":\"http://test\"," +
-		"                \"code\":\"ins\"," +
-		"                \"display\":\"General Ledger System\"," +
-		"                \"userSelected\":false" +
-		"            }" +
-		"        ]" +
-		"    }," +
-		"    \"name\":\"Acme Investments\"" +
-		"}";
+	private static final String TEST_STRUCTURELOADING_DATA = "{" + "    \"resourceType\":\"Organization\","
+			+ "    \"id\":\"11111\","
+			+ "    \"meta\":{"
+			+ "        \"lastUpdated\":\"3900-09-20T10:10:10.000-07:00\""
+			+ "    },"
+			+ "    \"identifier\":["
+			+ "        {"
+			+ "            \"value\":\"15250\""
+			+ "        }"
+			+ "    ],"
+			+ "    \"type\":{"
+			+ "        \"coding\":["
+			+ "            {"
+			+ "                \"system\":\"http://test\","
+			+ "                \"code\":\"ins\","
+			+ "                \"display\":\"General Ledger System\","
+			+ "                \"userSelected\":false"
+			+ "            }"
+			+ "        ]"
+			+ "    },"
+			+ "    \"name\":\"Acme Investments\""
+			+ "}";
 
 	@Test
 	public void testStructureLoading() {
 		StringReader reader = new StringReader(TEST_STRUCTURELOADING_DATA);
 		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(reader);
-		
+
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
-		
+
 		assertNotNull(rootObject);
 		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, rootObject.getJsonType());
 	}
 
-	private static final String TEST_JSONTYPES_DATA = 
-			"{" +
-			"    \"scalar-string\":\"A scalar string\"," +
-			"    \"scalar-number\":11111," +
-			"    \"scalar-boolean\":true," +
-			"    \"null-value\":null," +
-			"    \"object-value\":{" +
-			"        \"lastUpdated\":\"3900-09-20T10:10:10.000-07:00\"," +
-			"        \"deleted\":\"3909-09-20T10:10:10.000-07:00\"" +
-			"    }," +
-			"    \"array-value\":[" +
-			"        12345," +
-			"        {" +
-			"            \"value\":\"15250\"" +
-			"        }" +
-			"    ]" +
-			"}";
-
+	private static final String TEST_JSONTYPES_DATA = "{" + "    \"scalar-string\":\"A scalar string\","
+			+ "    \"scalar-number\":11111,"
+			+ "    \"scalar-boolean\":true,"
+			+ "    \"null-value\":null,"
+			+ "    \"object-value\":{"
+			+ "        \"lastUpdated\":\"3900-09-20T10:10:10.000-07:00\","
+			+ "        \"deleted\":\"3909-09-20T10:10:10.000-07:00\""
+			+ "    },"
+			+ "    \"array-value\":["
+			+ "        12345,"
+			+ "        {"
+			+ "            \"value\":\"15250\""
+			+ "        }"
+			+ "    ]"
+			+ "}";
 
 	@Test
 	public void testJsonAndDataTypes() {
 		StringReader reader = new StringReader(TEST_JSONTYPES_DATA);
 		JsonLikeStructure jsonStructure = new JacksonStructure();
 		jsonStructure.load(reader);
-		
+
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
-		
+
 		assertNotNull(rootObject);
-		
+
 		BaseJsonLikeValue value = rootObject.get("object-value");
 		assertNotNull(value);
 		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, value.getJsonType());
@@ -93,7 +88,7 @@ public class JsonLikeStructureTest {
 		assertEquals(false, obj.isArray());
 		assertEquals(false, obj.isScalar());
 		assertEquals(false, obj.isNull());
-		
+
 		value = rootObject.get("array-value");
 		assertNotNull(value);
 		assertEquals(BaseJsonLikeValue.ValueType.ARRAY, value.getJsonType());
@@ -140,5 +135,4 @@ public class JsonLikeStructureTest {
 		assertEquals(BaseJsonLikeValue.ScalarType.BOOLEAN, value.getDataType());
 		assertEquals(value.getAsString(), "true");
 	}
-
 }

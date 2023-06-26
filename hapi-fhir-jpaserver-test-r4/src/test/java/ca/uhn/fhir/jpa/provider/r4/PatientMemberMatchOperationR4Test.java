@@ -49,7 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("Duplicates")
 public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientMemberMatchOperationR4Test.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(PatientMemberMatchOperationR4Test.class);
 
 	private static final String ourQuery = "/Patient/$member-match?_format=json";
 	private static final String EXISTING_COVERAGE_ID = "cov-id-123";
@@ -57,8 +58,10 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	private static final String EXISTING_COVERAGE_IDENT_VALUE = "U1234567890";
 	private static final String EXISTING_COVERAGE_PATIENT_IDENT_SYSTEM = "http://oldhealthplan.example.com";
 	private static final String EXISTING_COVERAGE_PATIENT_IDENT_VALUE = "DHU-55678";
-	private static final String CONSENT_POLICY_SENSITIVE_DATA_URI = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive";
-	private static final String CONSENT_POLICY_REGULAR_DATA_URI = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular";
+	private static final String CONSENT_POLICY_SENSITIVE_DATA_URI =
+			"http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive";
+	private static final String CONSENT_POLICY_REGULAR_DATA_URI =
+			"http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular";
 
 	private Identifier ourExistingCoverageIdentifier;
 	private Patient myPatient;
@@ -81,8 +84,10 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
-		myStorageSettings.setEverythingIncludesFetchPageSize(new JpaStorageSettings().getEverythingIncludesFetchPageSize());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(
+				new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEverythingIncludesFetchPageSize(
+				new JpaStorageSettings().getEverythingIncludesFetchPageSize());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myServer.getRestfulServer().unregisterProvider(theMemberMatchR4ResourceProvider);
@@ -93,61 +98,70 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	public void before() throws Exception {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-		myPatient = (Patient) new Patient().setName(Lists.newArrayList(new HumanName()
-				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
-			.setBirthDateElement(new DateType("2020-01-01"))
-			.setId("Patient/A123");
+		myPatient = (Patient) new Patient()
+				.setName(Lists.newArrayList(
+						new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+				.setBirthDateElement(new DateType("2020-01-01"))
+				.setId("Patient/A123");
 
 		// Old Coverage (must match field)
-		oldCoverage = (Coverage) new Coverage()
-			.setId(EXISTING_COVERAGE_ID);
+		oldCoverage = (Coverage) new Coverage().setId(EXISTING_COVERAGE_ID);
 
 		// New Coverage (must return unchanged)
 		newCoverage = (Coverage) new Coverage()
-			.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")))
-			.setId("AA87654");
+				.setIdentifier(Lists.newArrayList(new Identifier()
+						.setSystem("http://newealthplan.example.com")
+						.setValue("234567")))
+				.setId("AA87654");
 
 		myConsent = new Consent()
-			.setStatus(Consent.ConsentState.ACTIVE)
-			.setScope(new CodeableConcept().addCoding(new Coding("http://terminology.hl7.org/CodeSystem/consentscope", "patient-privacy", null)))
-			.addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI))
-			.setPatient(new Reference("Patient/A123"))
-			.addPerformer(new Reference("Patient/A123"));
+				.setStatus(Consent.ConsentState.ACTIVE)
+				.setScope(new CodeableConcept()
+						.addCoding(new Coding(
+								"http://terminology.hl7.org/CodeSystem/consentscope", "patient-privacy", null)))
+				.addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI))
+				.setPatient(new Reference("Patient/A123"))
+				.addPerformer(new Reference("Patient/A123"));
 		myServer.getRestfulServer().registerProvider(theMemberMatchR4ResourceProvider);
 		myMemberMatcherR4Helper.setRegularFilterSupported(false);
 	}
 
 	private void createCoverageWithBeneficiary(
-		boolean theAssociateBeneficiaryPatient, boolean includeBeneficiaryIdentifier) {
+			boolean theAssociateBeneficiaryPatient, boolean includeBeneficiaryIdentifier) {
 
 		Patient member = new Patient();
 		if (theAssociateBeneficiaryPatient) {
 			// Patient
-			member.setName(Lists.newArrayList(new HumanName()
-				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
-				.setBirthDateElement(new DateType("2020-01-01"))
-				.setId("Patient/A123");
+			member.setName(Lists.newArrayList(
+							new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+					.setBirthDateElement(new DateType("2020-01-01"))
+					.setId("Patient/A123");
 			if (includeBeneficiaryIdentifier) {
 				member.setIdentifier(Collections.singletonList(new Identifier()
-					.setSystem(EXISTING_COVERAGE_PATIENT_IDENT_SYSTEM).setValue(EXISTING_COVERAGE_PATIENT_IDENT_VALUE)));
+						.setSystem(EXISTING_COVERAGE_PATIENT_IDENT_SYSTEM)
+						.setValue(EXISTING_COVERAGE_PATIENT_IDENT_VALUE)));
 			}
 			member.setActive(true);
 			myClient.update().resource(member).execute();
 		}
 
 		// Coverage
-		ourExistingCoverageIdentifier = new Identifier()
-			.setSystem(EXISTING_COVERAGE_IDENT_SYSTEM).setValue(EXISTING_COVERAGE_IDENT_VALUE);
+		ourExistingCoverageIdentifier =
+				new Identifier().setSystem(EXISTING_COVERAGE_IDENT_SYSTEM).setValue(EXISTING_COVERAGE_IDENT_VALUE);
 		Coverage ourExistingCoverage = (Coverage) new Coverage()
-			.setStatus(Coverage.CoverageStatus.ACTIVE)
-			.setIdentifier(Collections.singletonList(ourExistingCoverageIdentifier));
+				.setStatus(Coverage.CoverageStatus.ACTIVE)
+				.setIdentifier(Collections.singletonList(ourExistingCoverageIdentifier));
 
 		if (theAssociateBeneficiaryPatient) {
-			ourExistingCoverage.setBeneficiary(new Reference(member))
-				.setId(EXISTING_COVERAGE_ID);
+			ourExistingCoverage.setBeneficiary(new Reference(member)).setId(EXISTING_COVERAGE_ID);
 		}
 
-		myClient.create().resource(ourExistingCoverage).execute().getId().toUnqualifiedVersionless().getValue();
+		myClient.create()
+				.resource(ourExistingCoverage)
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless()
+				.getValue();
 	}
 
 	@Test
@@ -155,21 +169,22 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		createCoverageWithBeneficiary(true, true);
 
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		Parameters parametersResponse = performOperation(myServerBase + ourQuery,
-			EncodingEnum.JSON, inputParameters);
+		Parameters parametersResponse = performOperation(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
 		validateNewCoverage(parametersResponse, newCoverage);
 	}
-
 
 	@Test
 	public void testCoverageNoBeneficiaryReturns422() throws Exception {
 		createCoverageWithBeneficiary(false, false);
 
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Could not find beneficiary for coverage.");
+		performOperationExpecting422(
+				myServerBase + ourQuery,
+				EncodingEnum.JSON,
+				inputParameters,
+				"Could not find beneficiary for coverage.");
 	}
 
 	@Test
@@ -177,18 +192,25 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		createCoverageWithBeneficiary(true, false);
 
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Coverage beneficiary does not have an identifier.");
+		performOperationExpecting422(
+				myServerBase + ourQuery,
+				EncodingEnum.JSON,
+				inputParameters,
+				"Coverage beneficiary does not have an identifier.");
 	}
 
 	@Test
 	public void testCoverageNoMatchingPatientFamilyNameReturns422() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 
-		myPatient.setName(Lists.newArrayList(new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Smith")));
+		myPatient.setName(Lists.newArrayList(
+				new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Smith")));
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Could not find matching patient for coverage.");
+		performOperationExpecting422(
+				myServerBase + ourQuery,
+				EncodingEnum.JSON,
+				inputParameters,
+				"Could not find matching patient for coverage.");
 	}
 
 	@Test
@@ -197,8 +219,11 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 		myPatient.setBirthDateElement(new DateType("2000-01-01"));
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Could not find matching patient for coverage.");
+		performOperationExpecting422(
+				myServerBase + ourQuery,
+				EncodingEnum.JSON,
+				inputParameters,
+				"Could not find matching patient for coverage.");
 	}
 
 	@Test
@@ -206,16 +231,18 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		createCoverageWithBeneficiary(true, true);
 		myConsent.getPolicy().get(0).setUri(CONSENT_POLICY_REGULAR_DATA_URI);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Consent policy does not match the data release segmentation capabilities.");
+		performOperationExpecting422(
+				myServerBase + ourQuery,
+				EncodingEnum.JSON,
+				inputParameters,
+				"Consent policy does not match the data release segmentation capabilities.");
 	}
 
 	@Test
 	public void testSensitiveContentProfileAccessWithRegularNotAllowed() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		Parameters parametersResponse = performOperation(myServerBase + ourQuery,
-			EncodingEnum.JSON, inputParameters);
+		Parameters parametersResponse = performOperation(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
 		validateNewCoverage(parametersResponse, newCoverage);
@@ -227,8 +254,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		myConsent.getPolicy().get(0).setUri(CONSENT_POLICY_REGULAR_DATA_URI);
 		myMemberMatcherR4Helper.setRegularFilterSupported(true);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		Parameters parametersResponse = performOperation(myServerBase + ourQuery,
-			EncodingEnum.JSON, inputParameters);
+		Parameters parametersResponse = performOperation(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
 		validateNewCoverage(parametersResponse, newCoverage);
@@ -240,8 +266,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		myConsent.getPolicy().get(0).setUri(CONSENT_POLICY_REGULAR_DATA_URI);
 		myMemberMatcherR4Helper.setRegularFilterSupported(true);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		Parameters parametersResponse = performOperation(myServerBase + ourQuery,
-			EncodingEnum.JSON, inputParameters);
+		Parameters parametersResponse = performOperation(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
 		validateNewCoverage(parametersResponse, newCoverage);
@@ -263,13 +288,18 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	 * Validates that second resource from the response is same as the received coverage
 	 */
 	private void validateNewCoverage(Parameters theResponse, Coverage theOriginalCoverage) {
-		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_NEW_COVERAGE);
+		List<IBase> patientList =
+				ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_NEW_COVERAGE);
 		assertEquals(1, patientList.size());
 		Coverage respCoverage = (Coverage) theResponse.getParameter().get(1).getResource();
 
 		assertEquals("Coverage/" + theOriginalCoverage.getId(), respCoverage.getId());
-		assertEquals(theOriginalCoverage.getIdentifierFirstRep().getSystem(), respCoverage.getIdentifierFirstRep().getSystem());
-		assertEquals(theOriginalCoverage.getIdentifierFirstRep().getValue(), respCoverage.getIdentifierFirstRep().getValue());
+		assertEquals(
+				theOriginalCoverage.getIdentifierFirstRep().getSystem(),
+				respCoverage.getIdentifierFirstRep().getSystem());
+		assertEquals(
+				theOriginalCoverage.getIdentifierFirstRep().getValue(),
+				respCoverage.getIdentifierFirstRep().getValue());
 	}
 
 	private void validateConsentPatientAndPerformerRef(Patient thePatient, Consent theConsent) {
@@ -279,24 +309,25 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	}
 
 	private void validateMemberPatient(Parameters response) {
-//		parameter MemberPatient must have a new identifier with:
-//		{
-//			"use": "usual",
-//			"type": {
-//			"coding": [
-//				{
-//					"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-//					"code": "UMB",
-//					"display": "Member Number",
-//					"userSelected": false
-//				}
-//       	],
-//				"text": "Member Number"
-//			},
-//			"system": COVERAGE_PATIENT_IDENT_SYSTEM,
-//			"value": COVERAGE_PATIENT_IDENT_VALUE
-//		}
-		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), response, PARAM_MEMBER_PATIENT);
+		//		parameter MemberPatient must have a new identifier with:
+		//		{
+		//			"use": "usual",
+		//			"type": {
+		//			"coding": [
+		//				{
+		//					"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+		//					"code": "UMB",
+		//					"display": "Member Number",
+		//					"userSelected": false
+		//				}
+		//       	],
+		//				"text": "Member Number"
+		//			},
+		//			"system": COVERAGE_PATIENT_IDENT_SYSTEM,
+		//			"value": COVERAGE_PATIENT_IDENT_VALUE
+		//		}
+		List<IBase> patientList =
+				ParametersUtil.getNamedParameters(this.getFhirContext(), response, PARAM_MEMBER_PATIENT);
 		assertEquals(1, patientList.size());
 		Patient resultPatient = (Patient) response.getParameter().get(0).getResource();
 
@@ -312,22 +343,22 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testNoCoverageMatchFound() throws Exception {
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Could not find coverage for member");
+		performOperationExpecting422(
+				myServerBase + ourQuery, EncodingEnum.JSON, inputParameters, "Could not find coverage for member");
 	}
 
 	@Test
 	public void testConsentUpdatePatientAndPerformer() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
-		Parameters parametersResponse = performOperation(myServerBase + ourQuery,
-			EncodingEnum.JSON, inputParameters);
+		Parameters parametersResponse = performOperation(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		Consent respConsent = validateResponseConsent(parametersResponse, myConsent);
 		validateConsentPatientAndPerformerRef(myPatient, respConsent);
 	}
 
-	private Parameters buildInputParameters(Patient thePatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
+	private Parameters buildInputParameters(
+			Patient thePatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		Parameters p = new Parameters();
 		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_MEMBER_PATIENT, thePatient);
 		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_OLD_COVERAGE, theOldCoverage);
@@ -336,8 +367,8 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		return p;
 	}
 
-	private Parameters performOperation(String theUrl,
-													EncodingEnum theEncoding, Parameters theInputParameters) throws Exception {
+	private Parameters performOperation(String theUrl, EncodingEnum theEncoding, Parameters theInputParameters)
+			throws Exception {
 
 		HttpPost post = new HttpPost(theUrl);
 		post.addHeader(Constants.HEADER_ACCEPT_ENCODING, theEncoding.toString());
@@ -348,13 +379,13 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 			ourLog.info("Response: {}", responseString);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			return theEncoding.newParser(myFhirContext).parseResource(Parameters.class,
-				responseString);
+			return theEncoding.newParser(myFhirContext).parseResource(Parameters.class, responseString);
 		}
 	}
 
-	private void performOperationExpecting422(String theUrl, EncodingEnum theEncoding,
-															Parameters theInputParameters, String theExpectedErrorMsg) throws Exception {
+	private void performOperationExpecting422(
+			String theUrl, EncodingEnum theEncoding, Parameters theInputParameters, String theExpectedErrorMsg)
+			throws Exception {
 
 		HttpPost post = new HttpPost(theUrl);
 		post.addHeader(Constants.HEADER_ACCEPT_ENCODING, theEncoding.toString());
@@ -393,9 +424,15 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		assertEquals(1, consentList.size());
 		Consent respConsent = (Consent) theResponse.getParameter().get(2).getResource();
 
-		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getSystem(), respConsent.getScope().getCodingFirstRep().getSystem());
-		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getCode(), respConsent.getScope().getCodingFirstRep().getCode());
-		assertEquals(myMemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM, respConsent.getIdentifier().get(0).getSystem());
+		assertEquals(
+				theOriginalConsent.getScope().getCodingFirstRep().getSystem(),
+				respConsent.getScope().getCodingFirstRep().getSystem());
+		assertEquals(
+				theOriginalConsent.getScope().getCodingFirstRep().getCode(),
+				respConsent.getScope().getCodingFirstRep().getCode());
+		assertEquals(
+				myMemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM,
+				respConsent.getIdentifier().get(0).getSystem());
 		assertNotNull(respConsent.getIdentifier().get(0).getValue());
 		return respConsent;
 	}
@@ -416,8 +453,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 			ourNewCoverage = new Coverage();
 			ourNewCoverage.setId("AA87654");
-			ourNewCoverage.setIdentifier(Lists.newArrayList(
-				new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
+			ourNewCoverage.setIdentifier(Lists.newArrayList(new Identifier()
+					.setSystem("http://newealthplan.example.com")
+					.setValue("234567")));
 
 			ourConsent = new Consent();
 			ourConsent.setStatus(Consent.ConsentState.ACTIVE);
@@ -425,70 +463,97 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 		@Test
 		public void testInvalidPatient() throws Exception {
-			Parameters inputParameters = buildInputParameters(new Patient(), ourOldCoverage, ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_MEMBER_PATIENT + "\\\" is required.");
+			Parameters inputParameters =
+					buildInputParameters(new Patient(), ourOldCoverage, ourNewCoverage, ourConsent);
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_MEMBER_PATIENT + "\\\" is required.");
 		}
 
 		@Test
 		public void testInvalidOldCoverage() throws Exception {
 			Parameters inputParameters = buildInputParameters(ourPatient, new Coverage(), ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_OLD_COVERAGE + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_OLD_COVERAGE + "\\\" is required.");
 		}
 
 		@Test
 		public void testInvalidNewCoverage() throws Exception {
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, new Coverage(), ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_NEW_COVERAGE + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_NEW_COVERAGE + "\\\" is required.");
 		}
 
 		@Test
 		public void testInvalidConsent() throws Exception {
-			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, new Consent());
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_CONSENT + "\\\" is required.");
+			Parameters inputParameters =
+					buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, new Consent());
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_CONSENT + "\\\" is required.");
 		}
 
 		@Test
 		public void testMissingPatientFamilyName() throws Exception {
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_MEMBER_PATIENT_NAME + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_MEMBER_PATIENT_NAME + "\\\" is required.");
 		}
 
 		@Test
 		public void testMissingPatientBirthdate() throws Exception {
-			ourPatient.setName(Lists.newArrayList(new HumanName()
-				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")));
+			ourPatient.setName(Lists.newArrayList(
+					new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")));
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_MEMBER_PATIENT_BIRTHDATE + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_MEMBER_PATIENT_BIRTHDATE + "\\\" is required.");
 		}
 
 		@Test
 		public void testMissingConsentPatientReference() throws Exception {
-			ourPatient.setName(Lists.newArrayList(new HumanName()
-					.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
-				.setBirthDateElement(new DateType("2020-01-01"));
+			ourPatient
+					.setName(Lists.newArrayList(
+							new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+					.setBirthDateElement(new DateType("2020-01-01"));
 
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_CONSENT_PATIENT_REFERENCE + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_CONSENT_PATIENT_REFERENCE + "\\\" is required.");
 		}
 
 		@Test
 		public void testMissingConsentPerformerReference() throws Exception {
-			ourPatient.setName(Lists.newArrayList(new HumanName()
-					.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
-				.setBirthDateElement(new DateType("2020-01-01"));
+			ourPatient
+					.setName(Lists.newArrayList(
+							new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+					.setBirthDateElement(new DateType("2020-01-01"));
 
 			ourConsent.setPatient(new Reference("Patient/1"));
 			Parameters inputParameters = buildInputParameters(ourPatient, ourOldCoverage, ourNewCoverage, ourConsent);
-			performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-				"Parameter \\\"" + PARAM_CONSENT_PERFORMER_REFERENCE + "\\\" is required.");
+			performOperationExpecting422(
+					myServerBase + ourQuery,
+					EncodingEnum.JSON,
+					inputParameters,
+					"Parameter \\\"" + PARAM_CONSENT_PERFORMER_REFERENCE + "\\\" is required.");
 		}
 	}
-
 }

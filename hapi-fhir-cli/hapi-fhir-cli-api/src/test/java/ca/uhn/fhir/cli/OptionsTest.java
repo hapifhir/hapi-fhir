@@ -15,5 +15,4 @@ public class OptionsTest {
 			next.getOptions();
 		}
 	}
-
 }

@@ -13,8 +13,13 @@ class NameStandardizerTest {
 
 	@Test
 	public void testCleanNoiseCharacters() {
-		assertEquals("Public", myLastNameStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020"));
-		assertEquals("This - Text Has /ã Lot # Of Special Characters", myLastNameStandardizer.standardize("\t\r\nThis - ┴\t┬\t├\t─\t┼ text ! has \\\\ /Ã lot # of % special % characters\n"));
+		assertEquals(
+				"Public",
+				myLastNameStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020"));
+		assertEquals(
+				"This - Text Has /ã Lot # Of Special Characters",
+				myLastNameStandardizer.standardize(
+						"\t\r\nThis - ┴\t┬\t├\t─\t┼ text ! has \\\\ /Ã lot # of % special % characters\n"));
 		assertEquals("Nbsp", myLastNameStandardizer.standardize("nbsp \u00A0"));
 	}
 
@@ -43,7 +48,9 @@ class NameStandardizerTest {
 		assertEquals("Charles de Gaulle", myLastNameStandardizer.standardize("charles de gaulle\n"));
 		assertEquals("Charles-Gaspard de la Rive", myLastNameStandardizer.standardize("charles-gaspard de la rive"));
 		assertEquals("Niccolò Machiavelli", myLastNameStandardizer.standardize("niccolò machiavelli"));
-		assertEquals("O'Reilly M'Grego D'Angelo MacDonald McFry", myLastNameStandardizer.standardize("o'reilly m'grego d'angelo macdonald mcfry"));
+		assertEquals(
+				"O'Reilly M'Grego D'Angelo MacDonald McFry",
+				myLastNameStandardizer.standardize("o'reilly m'grego d'angelo macdonald mcfry"));
 		assertEquals("Cornelius Vanderbilt", myLastNameStandardizer.standardize("cornelius vanderbilt"));
 		assertEquals("Cornelius Vanderbilt Jr.", myLastNameStandardizer.standardize("cornelius vanderbilt jr."));
 		assertEquals("William Shakespeare", myLastNameStandardizer.standardize("william shakespeare"));
@@ -54,7 +61,9 @@ class NameStandardizerTest {
 		assertEquals("Sarah Ann Mary Pollock", myLastNameStandardizer.standardize("SARAH ANN MARY POLLOCK\n"));
 		assertEquals("Tarit Kumar Kanungo", myLastNameStandardizer.standardize("TARIT KUMAR  KANUNGO\n"));
 		assertEquals("Tram Anh Thi Nguyen", myLastNameStandardizer.standardize("TRAM ANH THI  NGUYEN\n"));
-		assertEquals("William L. Trenwith / Paul J. Trenwith", myLastNameStandardizer.standardize("WILLIAM L. TRENWITH / PAUL J. TRENWITH\n"));
+		assertEquals(
+				"William L. Trenwith / Paul J. Trenwith",
+				myLastNameStandardizer.standardize("WILLIAM L. TRENWITH / PAUL J. TRENWITH\n"));
 	}
 
 	@Test

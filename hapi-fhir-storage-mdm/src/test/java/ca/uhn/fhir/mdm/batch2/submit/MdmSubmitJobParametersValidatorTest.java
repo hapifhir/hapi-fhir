@@ -21,16 +21,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 class MdmSubmitJobParametersValidatorTest {
 
 	@InjectMocks
 	MdmSubmitJobParametersValidator myValidator;
+
 	@Mock
 	private FhirContext myFhirContext;
+
 	@Mock
 	private IMdmSettings myMdmSettings;
+
 	@Mock
 	private MatchUrlService myMatchUrlService;
 
@@ -48,18 +50,20 @@ class MdmSubmitJobParametersValidatorTest {
 		parameters.addUrl("Practitioner?name=foo");
 		List<String> errors = myValidator.validate(null, parameters);
 		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
+		assertThat(
+				errors.get(0),
+				is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
 	}
 
 	@Test
 	public void testMissingSearchParameter() {
 		when(myMdmSettings.isSupportedMdmType(anyString())).thenReturn(true);
-		when(myMatchUrlService.translateMatchUrl(anyString(), any())).thenThrow(new InvalidRequestException("Can't find death-date!"));
+		when(myMatchUrlService.translateMatchUrl(anyString(), any()))
+				.thenThrow(new InvalidRequestException("Can't find death-date!"));
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?death-date=foo");
 		List<String> errors = myValidator.validate(null, parameters);
 		assertThat(errors, hasSize(1));
 		assertThat(errors.get(0), is(equalTo("Invalid request detected: Can't find death-date!")));
 	}
-
 }

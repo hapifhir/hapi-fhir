@@ -34,14 +34,15 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + ":" + longitude,
-			myFhirContext.getResourceDefinition("Location"));
+				"Location?" + Location.SP_NEAR + "=" + latitude + ":" + longitude,
+				myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
@@ -52,41 +53,46 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_CHIN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-			"Location?" +
-				Location.SP_NEAR + "=" + latitude + ":" + longitude +
-				"&" +
-				Location.SP_NEAR_DISTANCE + "=0||",
-			myFhirContext.getResourceDefinition("Location"));
+				"Location?" + Location.SP_NEAR
+						+ "=" + latitude + ":" + longitude + "&"
+						+ Location.SP_NEAR_DISTANCE
+						+ "=0||",
+				myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
 	}
 
-
 	@Test
-	public void testNearSearchChained() {
-	}
+	public void testNearSearchChained() {}
+
 	@Test
 	public void testNearSearchApproximate() {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
-		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		Location.LocationPositionComponent position =
+				new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		String locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
+		String locId =
+				myLocationDao.create(loc).getId().toUnqualifiedVersionless().getValue();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + ":" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + ":" + CoordCalculatorTestUtil.LONGITUDE_CHIN
+							+ "&"
+							+ Location.SP_NEAR_DISTANCE
+							+ "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km",
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -95,15 +101,16 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
 
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
-				"Location?" +
-					Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + ":" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
+					"Location?" + Location.SP_NEAR
+							+ "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + ":" + CoordCalculatorTestUtil.LONGITUDE_CHIN
+							+ "&"
+							+ Location.SP_NEAR_DISTANCE
+							+ "=" + tooSmallDistance + "|http://unitsofmeasure.org|km",
+					myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
 		}
-
 	}
 
 	@Test
@@ -122,7 +129,10 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
+			assertEquals(
+					Msg.code(1228) + "Invalid position format '" + theCoords
+							+ "'.  Required format is 'latitude:longitude'",
+					e.getCause().getMessage());
 		}
 	}
 
@@ -135,8 +145,9 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
+			assertEquals(
+					Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.",
+					e.getCause().getMessage());
 		}
 	}
-
 }

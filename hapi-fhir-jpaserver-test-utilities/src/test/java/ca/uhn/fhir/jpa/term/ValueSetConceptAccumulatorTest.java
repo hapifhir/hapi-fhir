@@ -26,17 +26,21 @@ public class ValueSetConceptAccumulatorTest {
 
 	private ValueSetConceptAccumulator myAccumulator;
 	private TermValueSet myValueSet;
+
 	@Mock
 	private ITermValueSetDao myValueSetDao;
+
 	@Mock
 	private ITermValueSetConceptDesignationDao myValueSetDesignationDao;
+
 	@Mock
 	private ITermValueSetConceptDao myValueSetConceptDao;
 
 	@BeforeEach
 	public void before() {
 		myValueSet = new TermValueSet();
-		myAccumulator = new ValueSetConceptAccumulator(myValueSet, myValueSetDao, myValueSetConceptDao, myValueSetDesignationDao);
+		myAccumulator = new ValueSetConceptAccumulator(
+				myValueSet, myValueSetDao, myValueSetConceptDao, myValueSetDesignationDao);
 	}
 
 	@Test
@@ -61,17 +65,16 @@ public class ValueSetConceptAccumulatorTest {
 
 	@Test
 	public void testExcludeConceptWithDesignations() {
-		for (int i = 0; i <1000; i++) {
+		for (int i = 0; i < 1000; i++) {
 
 			TermValueSetConcept value = new TermValueSetConcept();
 			value.setCode("code");
 			value.getDesignations().add(new TermValueSetConceptDesignation().setValue("foo"));
 
-			when(myValueSetConceptDao.findByTermValueSetIdSystemAndCode(any(), eq("sys"), eq("code"+i))).thenReturn(Optional.of(value));
+			when(myValueSetConceptDao.findByTermValueSetIdSystemAndCode(any(), eq("sys"), eq("code" + i)))
+					.thenReturn(Optional.of(value));
 
-			myAccumulator.excludeConcept("sys", "code"+i);
+			myAccumulator.excludeConcept("sys", "code" + i);
 		}
-
 	}
-
 }

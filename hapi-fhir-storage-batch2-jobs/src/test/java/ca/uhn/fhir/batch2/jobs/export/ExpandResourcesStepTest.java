@@ -1,6 +1,5 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -91,28 +90,21 @@ public class ExpandResourcesStepTest {
 		return parameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, ResourceIdList> createInput(ResourceIdList theData,
-                                                                                      BulkExportJobParameters theParameters,
-                                                                                      JobInstance theInstance) {
-		return new StepExecutionDetails<>(
-			theParameters,
-			theData,
-			theInstance,
-			"1"
-		);
+	private StepExecutionDetails<BulkExportJobParameters, ResourceIdList> createInput(
+			ResourceIdList theData, BulkExportJobParameters theParameters, JobInstance theInstance) {
+		return new StepExecutionDetails<>(theParameters, theData, theInstance, "1");
 	}
 
 	private IFhirResourceDao<?> mockOutDaoRegistry() {
 		IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
-		when(myDaoRegistry.getResourceDao(anyString()))
-			.thenReturn(mockDao);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(mockDao);
 		return mockDao;
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void jobComplete_withBasicParameters_succeeds(boolean thePartitioned) {
-		//setup
+		// setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
 		IJobDataSink<ExpandedResourcesList> sink = mock(IJobDataSink.class);
@@ -134,14 +126,12 @@ public class ExpandResourcesStepTest {
 		}
 		idList.setIds(batchResourceIds);
 
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
-			idList,
-			createParameters(thePartitioned),
-			instance
-		);
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input =
+				createInput(idList, createParameters(thePartitioned), instance);
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString()))
+				.thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t -> {
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
 			for (var next : inputSet) {
@@ -156,13 +146,12 @@ public class ExpandResourcesStepTest {
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
-
 		// data sink
 		ArgumentCaptor<ExpandedResourcesList> expandedCaptor = ArgumentCaptor.forClass(ExpandedResourcesList.class);
-		verify(sink)
-			.accept(expandedCaptor.capture());
+		verify(sink).accept(expandedCaptor.capture());
 		ExpandedResourcesList expandedResources = expandedCaptor.getValue();
-		assertEquals(resources.size(), expandedResources.getStringifiedResources().size());
+		assertEquals(
+				resources.size(), expandedResources.getStringifiedResources().size());
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
 		String stringifiedElement = expandedResources.getStringifiedResources().get(0);
@@ -173,7 +162,8 @@ public class ExpandResourcesStepTest {
 		// Patient Search
 		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(patientDao).search(any(), patientSearchCaptor.capture());
-		assertEquals(input.getParameters().getPartitionId(), patientSearchCaptor.getValue().getRequestPartitionId());
-
+		assertEquals(
+				input.getParameters().getPartitionId(),
+				patientSearchCaptor.getValue().getRequestPartitionId());
 	}
 }

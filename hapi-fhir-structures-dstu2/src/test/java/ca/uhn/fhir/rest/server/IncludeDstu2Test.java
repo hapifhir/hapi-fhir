@@ -66,7 +66,6 @@ public class IncludeDstu2Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
-
 	@Test
 	public void testIIncludedResourcesNonContained() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=normalInclude&_pretty=true");
@@ -81,22 +80,39 @@ public class IncludeDstu2Test {
 
 		assertEquals(3, bundle.getEntry().size());
 
-		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
-		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
+		assertEquals(
+				new IdDt("Patient/p1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(0)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Patient/p2"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(1)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Organization/o1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(2)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				SearchEntryModeEnum.INCLUDE,
+				bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
 		assertEquals(0, p2.getContained().getContainedResources().size());
-
 	}
 
 	@Test
 	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -107,19 +123,42 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(4, bundle.getEntry().size());
-		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o2"), BundleUtil.toListOfResources(ourCtx, bundle).get(3).getIdElement().toUnqualifiedVersionless());
-		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
-		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(3).getSearch().getModeElement().getValueAsEnum());
+		assertEquals(
+				new IdDt("Patient/p1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(0)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Patient/p2"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(1)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Organization/o1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(2)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Organization/o2"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(3)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				SearchEntryModeEnum.INCLUDE,
+				bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
+		assertEquals(
+				SearchEntryModeEnum.INCLUDE,
+				bundle.getEntry().get(3).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
 		assertEquals(0, p2.getContained().getContainedResources().size());
-
 	}
 
 	@Test
@@ -135,22 +174,39 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(3, bundle.getEntry().size());
-		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
-		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
+		assertEquals(
+				new IdDt("Patient/p1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(0)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Patient/p2"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(1)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Organization/o1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(2)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				SearchEntryModeEnum.INCLUDE,
+				bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
 		assertEquals(0, p2.getContained().getContainedResources().size());
-
 	}
 
 	@Test
 	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -161,23 +217,40 @@ public class IncludeDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(3, bundle.getEntry().size());
-		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Patient/p2"), BundleUtil.toListOfResources(ourCtx, bundle).get(1).getIdElement().toUnqualifiedVersionless());
-		assertEquals(new IdDt("Organization/o1"), BundleUtil.toListOfResources(ourCtx, bundle).get(2).getIdElement().toUnqualifiedVersionless());
-		assertEquals(SearchEntryModeEnum.INCLUDE, bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
+		assertEquals(
+				new IdDt("Patient/p1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(0)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Patient/p2"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(1)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				new IdDt("Organization/o1"),
+				BundleUtil.toListOfResources(ourCtx, bundle)
+						.get(2)
+						.getIdElement()
+						.toUnqualifiedVersionless());
+		assertEquals(
+				SearchEntryModeEnum.INCLUDE,
+				bundle.getEntry().get(2).getSearch().getModeElement().getValueAsEnum());
 
 		Patient p1 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
 
 		Patient p2 = (Patient) BundleUtil.toListOfResources(ourCtx, bundle).get(1);
 		assertEquals(0, p2.getContained().getContainedResources().size());
-
 	}
 
 	@Test
 	@Disabled
 	public void testMixedContainedAndNonContained() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
+		HttpGet httpGet =
+				new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -200,7 +273,8 @@ public class IncludeDstu2Test {
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+				.get(0);
 		assertEquals(0, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
 	}
@@ -219,7 +293,8 @@ public class IncludeDstu2Test {
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+				.get(0);
 		assertEquals(1, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
@@ -239,7 +314,8 @@ public class IncludeDstu2Test {
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+				.get(0);
 		assertEquals(1, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
@@ -247,7 +323,8 @@ public class IncludeDstu2Test {
 
 	@Test
 	public void testTwoInclude() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=bar&_pretty=true");
+		HttpGet httpGet = new HttpGet(
+				"http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=bar&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -258,7 +335,8 @@ public class IncludeDstu2Test {
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
 
-		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
+		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class)
+				.get(0);
 		assertEquals(2, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
 
@@ -266,7 +344,6 @@ public class IncludeDstu2Test {
 		values.add(p.getName().get(0).getFamilyFirstRep().getValue());
 		values.add(p.getName().get(1).getFamilyFirstRep().getValue());
 		assertThat(values, containsInAnyOrder("foo", "bar"));
-
 	}
 
 	/**
@@ -314,7 +391,6 @@ public class IncludeDstu2Test {
 
 			return Collections.singletonList(rep);
 		}
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -381,7 +457,9 @@ public class IncludeDstu2Test {
 		}
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = {"foo", "bar"}) Set<Include> theIncludes) {
+		public List<Patient> findPatient(
+				@RequiredParam(name = Patient.SP_NAME) StringDt theName,
+				@IncludeParam(allow = {"foo", "bar"}) Set<Include> theIncludes) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
@@ -422,7 +500,6 @@ public class IncludeDstu2Test {
 
 			return Arrays.asList(p1, p2);
 		}
-
 	}
 
 	@ResourceDef(name = "Patient")
@@ -446,7 +523,6 @@ public class IncludeDstu2Test {
 		public boolean isEmpty() {
 			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
 		}
-
 	}
 
 	@AfterAll
@@ -474,11 +550,10 @@ public class IncludeDstu2Test {
 		JettyUtil.startServer(ourServer);
 		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
-
 }

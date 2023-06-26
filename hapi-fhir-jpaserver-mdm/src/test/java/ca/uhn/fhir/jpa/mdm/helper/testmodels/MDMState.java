@@ -147,6 +147,4 @@ public class MDMState<T, P extends IResourcePersistentId> {
 		myOutputState = theOutputState;
 		return this;
 	}
-
-
 }

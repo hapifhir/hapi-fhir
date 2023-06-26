@@ -16,8 +16,8 @@ class RuleTargetTest {
 	void setSearchParams() {
 		RuleTarget target = new RuleTarget();
 		RequestDetails requestDetails = new ServletRequestDetails();
-		requestDetails.addParameter("subject:mdm", new String[]{"Patient/123"});
-		requestDetails.addParameter("performer", new String[]{"Practioner/456"});
+		requestDetails.addParameter("subject:mdm", new String[] {"Patient/123"});
+		requestDetails.addParameter("performer", new String[] {"Practioner/456"});
 		target.setSearchParams(requestDetails);
 
 		Map<String, String[]> storedParams = target.getSearchParams();

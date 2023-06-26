@@ -23,8 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithInterceptorR4Test.class);
 
-
-
 	@Test
 	public void testRawSql_Search() {
 		myStorageSettings.setAdvancedHSearchIndexing(false);
@@ -45,7 +43,11 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_RAW_SQL, interceptor);
 
 			Patient patient = new Patient();
-			String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+			String patientId = myPatientDao
+					.create(patient)
+					.getId()
+					.toUnqualifiedVersionless()
+					.getValue();
 
 			Condition conditionS = new Condition();
 			conditionS.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("123");
@@ -75,7 +77,4 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
-
-
-
 }

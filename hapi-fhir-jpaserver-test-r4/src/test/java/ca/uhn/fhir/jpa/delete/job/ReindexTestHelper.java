@@ -27,14 +27,15 @@ import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public class ReindexTestHelper {
-	public static final String ALLELE_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName";
+	public static final String ALLELE_EXTENSION_URL =
+			"http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName";
 	public static final String EYECOLOUR_EXTENSION_URL = "http://hl7.org/fhir/StructureDefinition/patient-eyeColour";
 	public static final String ALLELE_SP_CODE = "alleleName";
-	public static final String EYECOLOUR_SP_CODE= "eyecolour";
+	public static final String EYECOLOUR_SP_CODE = "eyecolour";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTestHelper.class);
 	private static final String TEST_ALLELE_VALUE = "HERC";
 	private static final String TEST_EYECOLOUR_VALUE = "blue";
@@ -46,9 +47,8 @@ public class ReindexTestHelper {
 	private final IFhirResourceDao<Observation> myObservationDao;
 	private final IFhirResourceDao<Patient> myPatientDao;
 
-
-
-	public ReindexTestHelper(FhirContext theFhirContext, DaoRegistry theDaoRegistry, ISearchParamRegistry theSearchParamRegistry) {
+	public ReindexTestHelper(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, ISearchParamRegistry theSearchParamRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
 		mySearchParamRegistry = theSearchParamRegistry;
@@ -60,6 +60,7 @@ public class ReindexTestHelper {
 	public void createAlleleSearchParameter() {
 		createAlleleSearchParameter(ALLELE_SP_CODE);
 	}
+
 	public void createEyeColourSearchParameter() {
 		createEyeColourSearchParameter(EYECOLOUR_SP_CODE);
 	}
@@ -67,7 +68,6 @@ public class ReindexTestHelper {
 	public DaoMethodOutcome createEyeColourPatient(boolean theActive) {
 		Patient patient = buildPatientWithEyeColourExtension(theActive);
 		return myPatientDao.create(patient);
-
 	}
 
 	private Patient buildPatientWithEyeColourExtension(boolean theActive) {
@@ -100,7 +100,7 @@ public class ReindexTestHelper {
 		eyeColourSp.setCode(theCode);
 		eyeColourSp.setType(Enumerations.SearchParamType.TOKEN);
 		eyeColourSp.setTitle("Eye Colour");
-		eyeColourSp.setExpression("Patient.extension('" + EYECOLOUR_EXTENSION_URL+ "')");
+		eyeColourSp.setExpression("Patient.extension('" + EYECOLOUR_EXTENSION_URL + "')");
 		eyeColourSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(eyeColourSp);
 		mySearchParamRegistry.forceRefresh();
@@ -111,13 +111,17 @@ public class ReindexTestHelper {
 		createCodeSearchParameter();
 		SearchParameter uniqueCodeSp = new SearchParameter();
 		uniqueCodeSp.setId("SearchParameter/unique-code");
-		uniqueCodeSp.addExtension(new Extension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(true)));
+		uniqueCodeSp.addExtension(new Extension()
+				.setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique")
+				.setValue(new BooleanType(true)));
 		uniqueCodeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		uniqueCodeSp.setCode("observation-code");
 		uniqueCodeSp.addBase("Observation");
 		uniqueCodeSp.setType(Enumerations.SearchParamType.COMPOSITE);
 		uniqueCodeSp.setExpression("Observation");
-		uniqueCodeSp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/clinical-code").setExpression("Observation"));
+		uniqueCodeSp.addComponent(new SearchParameter.SearchParameterComponentComponent()
+				.setDefinition("SearchParameter/clinical-code")
+				.setExpression("Observation"));
 
 		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(uniqueCodeSp);
 		mySearchParamRegistry.forceRefresh();
@@ -159,7 +163,8 @@ public class ReindexTestHelper {
 	public Observation buildObservationWithCode() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight"));
+		codeableConcept.addCoding(
+				new Coding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight"));
 		observation.setCode(codeableConcept);
 		return observation;
 	}
@@ -199,11 +204,12 @@ public class ReindexTestHelper {
 	}
 
 	public List<String> getAlleleObservationIds(IGenericClient theClient) {
-		IBaseBundle result = theClient.search()
-			.forResource("Observation")
-			.where(new StringClientParam(ALLELE_SP_CODE).matches().value(TEST_ALLELE_VALUE))
-			.cacheControl(new CacheControlDirective().setNoCache(true))
-			.execute();
+		IBaseBundle result = theClient
+				.search()
+				.forResource("Observation")
+				.where(new StringClientParam(ALLELE_SP_CODE).matches().value(TEST_ALLELE_VALUE))
+				.cacheControl(new CacheControlDirective().setNoCache(true))
+				.execute();
 		return BundleUtil.toListOfResourceIds(myFhirContext, result);
 	}
 }

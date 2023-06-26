@@ -49,7 +49,13 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		new TestFindPatientProvider();
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(
+				TestFindPatientProvider.class,
+				new TestFindPatientProvider()
+						.getBindings()
+						.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "")
+						.getMethod()
+						.getDeclaringClass());
 	}
 
 	@Test
@@ -66,8 +72,20 @@ public class JaxRsMethodBindingsDstu3Test {
 				return null;
 			}
 		}
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
-		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass());
+		assertEquals(
+				TestFindPatientProvider.class,
+				new TestFindPatientProvider()
+						.getBindings()
+						.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "")
+						.getMethod()
+						.getDeclaringClass());
+		assertEquals(
+				TestUpdatePatientProvider.class,
+				new TestUpdatePatientProvider()
+						.getBindings()
+						.getBinding(RestOperationTypeEnum.UPDATE, "")
+						.getMethod()
+						.getDeclaringClass());
 	}
 
 	@Test
@@ -105,26 +123,46 @@ public class JaxRsMethodBindingsDstu3Test {
 				return null;
 			}
 
-			@Operation(name = "firstMethod", idempotent = true, returnParameters = {@OperationParam(name = "return", type = StringType.class)})
+			@Operation(
+					name = "firstMethod",
+					idempotent = true,
+					returnParameters = {@OperationParam(name = "return", type = StringType.class)})
 			public Parameters firstMethod(@OperationParam(name = "dummy") StringType dummyInput) {
 				return null;
 			}
 
-			@Operation(name = "secondMethod", returnParameters = {@OperationParam(name = "return", type = StringType.class)})
+			@Operation(
+					name = "secondMethod",
+					returnParameters = {@OperationParam(name = "return", type = StringType.class)})
 			public Parameters secondMethod(@OperationParam(name = "dummy") StringType dummyInput) {
 				return null;
 			}
 		}
 		JaxRsMethodBindings bindings = new TestFindPatientProvider().getBindings();
-		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName());
-		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName());
-		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName());
-		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
+		assertEquals(
+				"search",
+				bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "")
+						.getMethod()
+						.getName());
+		assertEquals(
+				"update",
+				bindings.getBinding(RestOperationTypeEnum.UPDATE, "")
+						.getMethod()
+						.getName());
+		assertEquals(
+				"firstMethod",
+				bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod")
+						.getMethod()
+						.getName());
+		assertEquals(
+				"secondMethod",
+				bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod")
+						.getMethod()
+						.getName());
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
 			fail();
 		} catch (NotImplementedOperationException e) {
 		}
 	}
-
 }

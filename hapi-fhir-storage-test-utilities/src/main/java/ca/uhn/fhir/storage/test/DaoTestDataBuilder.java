@@ -93,7 +93,7 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 	public void cleanup() {
 		ourLog.info("cleanup {}", myIds);
 
-		myIds.keySet().forEach(nextType->{
+		myIds.keySet().forEach(nextType -> {
 			// todo do this in a bundle for perf.
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
 			myIds.get(nextType).forEach(dao::delete);
@@ -108,8 +108,11 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 
 	@Configuration
 	public static class Config {
-		@Autowired FhirContext myFhirContext;
-		@Autowired DaoRegistry myDaoRegistry;
+		@Autowired
+		FhirContext myFhirContext;
+
+		@Autowired
+		DaoRegistry myDaoRegistry;
 
 		@Bean
 		DaoTestDataBuilder testDataBuilder() {

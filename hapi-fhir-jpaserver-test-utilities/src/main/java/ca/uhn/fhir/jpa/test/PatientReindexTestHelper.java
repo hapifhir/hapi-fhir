@@ -27,10 +27,10 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,26 +53,29 @@ public class PatientReindexTestHelper {
 	private final IFhirResourceDao<Patient> myPatientDao;
 	private final boolean myIncrementVersionOnReindex;
 
-	public static Stream<Arguments> numResourcesParams(){
+	public static Stream<Arguments> numResourcesParams() {
 		return Stream.of(
-			Arguments.of(0),
-			Arguments.of(1),
-			Arguments.of(499),
-			Arguments.of(500),
-			Arguments.of(750),
-			Arguments.of(1000),
-			Arguments.of(1001)
-		);
+				Arguments.of(0),
+				Arguments.of(1),
+				Arguments.of(499),
+				Arguments.of(500),
+				Arguments.of(750),
+				Arguments.of(1000),
+				Arguments.of(1001));
 	}
 
-	public PatientReindexTestHelper(IJobCoordinator theJobCoordinator, Batch2JobHelper theBatch2JobHelper, IFhirResourceDao<Patient> thePatientDao, boolean theIncrementVersionOnReindex) {
+	public PatientReindexTestHelper(
+			IJobCoordinator theJobCoordinator,
+			Batch2JobHelper theBatch2JobHelper,
+			IFhirResourceDao<Patient> thePatientDao,
+			boolean theIncrementVersionOnReindex) {
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myPatientDao = thePatientDao;
 		myIncrementVersionOnReindex = theIncrementVersionOnReindex;
 	}
 
-	public void testReindex(int theNumResources){
+	public void testReindex(int theNumResources) {
 		createPatients(theNumResources);
 
 		validatePersistedPatients(theNumResources, VERSION_1);
@@ -80,7 +83,8 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(
+				reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 
@@ -88,7 +92,7 @@ public class PatientReindexTestHelper {
 		validatePersistedPatients(theNumResources, expectedVersion);
 	}
 
-	public void testSequentialReindexOperation(int theNumResources){
+	public void testSequentialReindexOperation(int theNumResources) {
 		createPatients(theNumResources);
 
 		validatePersistedPatients(theNumResources, VERSION_1);
@@ -96,7 +100,8 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(
+				reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 		int expectedVersion = myIncrementVersionOnReindex ? VERSION_2 : VERSION_1;
@@ -105,14 +110,15 @@ public class PatientReindexTestHelper {
 		// Reindex 2
 		JobInstanceStartRequest reindexRequest2 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(
+				reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance2, theNumResources);
 		expectedVersion = myIncrementVersionOnReindex ? VERSION_3 : VERSION_1;
 		validatePersistedPatients(theNumResources, expectedVersion);
 	}
 
-	public void testParallelReindexOperation(int theNumResources){
+	public void testParallelReindexOperation(int theNumResources) {
 		createPatients(theNumResources);
 
 		validatePersistedPatients(theNumResources, VERSION_1);
@@ -126,8 +132,10 @@ public class PatientReindexTestHelper {
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
 
 		// Wait for jobs to finish
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(
+				reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(
+				reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 
@@ -137,13 +145,12 @@ public class PatientReindexTestHelper {
 		validatePersistedPatients(theNumResources, expectedVersion);
 	}
 
-
 	private void createPatients(int theNumPatients) {
 		RequestDetails requestDetails = new SystemRequestDetails();
-		for(int i = 0; i < theNumPatients; i++){
+		for (int i = 0; i < theNumPatients; i++) {
 			Patient patient = new Patient();
-			patient.getNameFirstRep().setFamily("Family-"+i).addGiven("Given-"+i);
-			patient.getIdentifierFirstRep().setValue("Id-"+i);
+			patient.getNameFirstRep().setFamily("Family-" + i).addGiven("Given-" + i);
+			patient.getIdentifierFirstRep().setValue("Id-" + i);
 			myPatientDao.create(patient, requestDetails);
 			TestUtil.sleepOneClick();
 		}
@@ -151,15 +158,18 @@ public class PatientReindexTestHelper {
 
 	private void validatePersistedPatients(int theExpectedNumPatients, long theExpectedVersion) {
 		RequestDetails requestDetails = new SystemRequestDetails();
-		List<IBaseResource> resources = myPatientDao.search(SearchParameterMap.newSynchronous(), requestDetails).getAllResources();
+		List<IBaseResource> resources = myPatientDao
+				.search(SearchParameterMap.newSynchronous(), requestDetails)
+				.getAllResources();
 		assertEquals(theExpectedNumPatients, resources.size());
-		for(IBaseResource resource : resources){
+		for (IBaseResource resource : resources) {
 			assertEquals(Patient.class, resource.getClass());
 			Patient patient = (Patient) resource;
 			Long actualVersion = patient.getIdElement().getVersionIdPartAsLong();
-			if(theExpectedVersion != actualVersion){
-				String failureMessage = String.format("Failure for Resource [%s] with index [%s]. Expected version: %s, Actual version: %s",
-					patient.getId(), resources.indexOf(resource), theExpectedVersion, actualVersion);
+			if (theExpectedVersion != actualVersion) {
+				String failureMessage = String.format(
+						"Failure for Resource [%s] with index [%s]. Expected version: %s, Actual version: %s",
+						patient.getId(), resources.indexOf(resource), theExpectedVersion, actualVersion);
 				fail(failureMessage);
 			}
 		}

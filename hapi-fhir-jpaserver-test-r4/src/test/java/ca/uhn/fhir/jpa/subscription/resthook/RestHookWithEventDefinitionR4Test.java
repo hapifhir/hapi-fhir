@@ -76,7 +76,9 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		myClient.delete()
+				.resourceConditionalByUrl("Observation?code:missing=false")
+				.execute();
 		ourLog.info("Done deleting all subscriptions");
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
@@ -98,16 +100,17 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		EventDefinition eventDef = new EventDefinition();
-		eventDef
-			.setPurpose("Monitor all admissions to Emergency")
-			.addTrigger(new TriggerDefinition()
-				.setType(TriggerDefinition.TriggerType.DATAADDED)
-				.setCondition(new Expression()
-					.setDescription("Encounter Location = emergency (active/completed encounters, current or previous)")
-					.setLanguage(Expression.ExpressionLanguage.TEXT_FHIRPATH.toCode())
-					.setExpression("(this | %previous).location.where(location = 'Location/emergency' and status in {'active', 'completed'}).exists()")
-				)
-			);
+		eventDef.setPurpose("Monitor all admissions to Emergency")
+				.addTrigger(
+						new TriggerDefinition()
+								.setType(TriggerDefinition.TriggerType.DATAADDED)
+								.setCondition(
+										new Expression()
+												.setDescription(
+														"Encounter Location = emergency (active/completed encounters, current or previous)")
+												.setLanguage(Expression.ExpressionLanguage.TEXT_FHIRPATH.toCode())
+												.setExpression(
+														"(this | %previous).location.where(location = 'Location/emergency' and status in {'active', 'completed'}).exists()")));
 
 		/*
 		 * Create subscription
@@ -123,7 +126,6 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 
 		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
-
 	}
 
 	@BeforeEach
@@ -138,6 +140,4 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		ourContentTypes.clear();
 		ourHeaders.clear();
 	}
-
-
 }

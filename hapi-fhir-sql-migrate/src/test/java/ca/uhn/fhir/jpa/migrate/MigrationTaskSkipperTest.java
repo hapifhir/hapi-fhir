@@ -5,12 +5,12 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -58,7 +58,8 @@ public class MigrationTaskSkipperTest {
 
 	@Test
 	public void skipWeirdSpacing() {
-		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "   " + VERSION_PREFIX + 2 + "     ,     " + VERSION_PREFIX + 3 + "   ");
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(
+				myTasks, "   " + VERSION_PREFIX + 2 + "     ,     " + VERSION_PREFIX + 3 + "   ");
 		assertSkipped(myTasks, 2, 3);
 	}
 
@@ -76,13 +77,15 @@ public class MigrationTaskSkipperTest {
 
 	@Test
 	public void quoted() {
-		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "\"" + VERSION_PREFIX + 2 + "," + VERSION_PREFIX + 3 + "\"");
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(
+				myTasks, "\"" + VERSION_PREFIX + 2 + "," + VERSION_PREFIX + 3 + "\"");
 		assertSkipped(myTasks, 2, 3);
 	}
 
 	@Test
 	public void allQuoted() {
-		MigrationTaskSkipper.setDoNothingOnSkippedTasks(myTasks, "\"" + VERSION_PREFIX + 2 + "\",\"" + VERSION_PREFIX + 3 + "\"");
+		MigrationTaskSkipper.setDoNothingOnSkippedTasks(
+				myTasks, "\"" + VERSION_PREFIX + 2 + "\",\"" + VERSION_PREFIX + 3 + "\"");
 		assertSkipped(myTasks, 2, 3);
 	}
 
@@ -104,7 +107,10 @@ public class MigrationTaskSkipperTest {
 
 	private void assertSkipped(List<BaseTask> theTasks, Integer... theVersions) {
 		Set<String> expectedVersions = integersToVersions(theVersions).collect(Collectors.toSet());
-		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getMigrationVersion).collect(Collectors.toSet());
+		Set<String> taskVersions = theTasks.stream()
+				.filter(BaseTask::isDoNothing)
+				.map(BaseTask::getMigrationVersion)
+				.collect(Collectors.toSet());
 		assertThat(taskVersions, equalTo(expectedVersions));
 	}
 

@@ -27,12 +27,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
@@ -53,6 +53,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
+
 	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
 
@@ -60,7 +61,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	@AfterEach
 	public void after() {
 		super.after();
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(
+				new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
 	}
 
@@ -68,12 +70,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void testCreateConceptMapWithMissingSourceSystem() {
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
-		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup()
-			.setTarget(CS_URL_2);
-		group.addElement()
-			.setCode("12345")
-			.addTarget()
-			.setCode("34567");
+		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup().setTarget(CS_URL_2);
+		group.addElement().setCode("12345").addTarget().setCode("34567");
 
 		try {
 			runInTransaction(() -> {
@@ -81,11 +79,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			});
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source", e.getMessage());
+			assertEquals(
+					Msg.code(838)
+							+ "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source",
+					e.getMessage());
 		}
-
 	}
-
 
 	@Test
 	public void testCreateConceptMapWithMissingTargetSystems() {
@@ -93,12 +92,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		// Missing source
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
-		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup()
-			.setSource(CS_URL);
-		group.addElement()
-			.setCode("12345")
-			.addTarget()
-			.setCode("34567");
+		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup().setSource(CS_URL);
+		group.addElement().setCode("12345").addTarget().setCode("34567");
 
 		try {
 			runInTransaction(() -> {
@@ -106,9 +101,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			});
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target", e.getMessage());
+			assertEquals(
+					Msg.code(839)
+							+ "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target",
+					e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -116,13 +113,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Missing source
 		ConceptMap conceptMap = new ConceptMap();
-		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup()
-			.setTarget(CS_URL_2)
-			.setSource(CS_URL);
-		group.addElement()
-			.setCode("12345")
-			.addTarget()
-			.setCode("34567");
+		ConceptMap.ConceptMapGroupComponent group =
+				conceptMap.addGroup().setTarget(CS_URL_2).setSource(CS_URL);
+		group.addElement().setCode("12345").addTarget().setCode("34567");
 
 		try {
 			runInTransaction(() -> {
@@ -132,7 +125,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url", e.getMessage());
 		}
-
 	}
 
 	@Test
@@ -142,22 +134,35 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		TermValueSet termValueSet = runInTransaction(()-> {
-			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		TermValueSet termValueSet = runInTransaction(() -> {
+			TermValueSet vs = myTermValueSetDao
+					.findByResourcePid(myExtensionalVsIdOnResourceTable)
+					.get();
 			Long termValueSetId = vs.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(
+					3,
+					myTermValueSetConceptDesignationDao
+							.countByTermValueSetId(termValueSetId)
+							.intValue());
 			assertEquals(3, vs.getTotalConceptDesignations().intValue());
-			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(
+					24,
+					myTermValueSetConceptDao
+							.countByTermValueSetId(termValueSetId)
+							.intValue());
 			assertEquals(24, vs.getTotalConcepts().intValue());
 			return vs;
 		});
@@ -167,11 +172,21 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+				assertEquals(
+						0,
+						myTermValueSetConceptDesignationDao
+								.countByTermValueSetId(termValueSetId)
+								.intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				assertEquals(
+						0,
+						myTermValueSetConceptDao
+								.countByTermValueSetId(termValueSetId)
+								.intValue());
 				myTermValueSetDao.deleteById(termValueSetId);
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				assertFalse(myTermValueSetDao
+						.findByResourcePid(myExtensionalVsIdOnResourceTable)
+						.isPresent());
 			}
 		});
 	}
@@ -183,20 +198,29 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = runInTransaction(()-> {
-			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		Long termValueSetId = runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+					.findByResourcePid(myExtensionalVsIdOnResourceTable)
+					.get();
 			Long id = termValueSet.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(id).intValue());
+			assertEquals(
+					3,
+					myTermValueSetConceptDesignationDao
+							.countByTermValueSetId(id)
+							.intValue());
 			assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(id).intValue());
 			assertEquals(24, termValueSet.getTotalConcepts().intValue());
@@ -207,11 +231,21 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+				assertEquals(
+						0,
+						myTermValueSetConceptDesignationDao
+								.countByTermValueSetId(termValueSetId)
+								.intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				assertEquals(
+						0,
+						myTermValueSetConceptDao
+								.countByTermValueSetId(termValueSetId)
+								.intValue());
 				myTermValueSetDao.deleteById(termValueSetId);
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				assertFalse(myTermValueSetDao
+						.findByResourcePid(myExtensionalVsIdOnResourceTable)
+						.isPresent());
 			}
 		});
 	}
@@ -224,10 +258,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			loadAndPersistCodeSystem();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart(), e.getMessage());
+			assertEquals(
+					Msg.code(848)
+							+ "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/"
+							+ myExtensionalCsId.getIdPart(),
+					e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
@@ -240,20 +277,34 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			loadAndPersistValueSet(HttpVerb.POST);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart(), e.getMessage());
+			assertEquals(
+					Msg.code(902)
+							+ "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/"
+							+ myExtensionalVsId.getIdPart(),
+					e.getMessage());
 		}
-
 	}
-
 
 	@Test
 	public void testValidateCode() {
 		createCodeSystem();
 
-		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(
+				new ValidationSupportContext(myValidationSupport),
+				new ConceptValidationOptions(),
+				CS_URL,
+				"ParentWithNoChildrenA",
+				null,
+				null);
 		assertTrue(validation.isOk());
 
-		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
+		validation = myTermSvc.validateCode(
+				new ValidationSupportContext(myValidationSupport),
+				new ConceptValidationOptions(),
+				CS_URL,
+				"ZZZZZZZ",
+				null,
+				null);
 		assertFalse(validation.isOk());
 	}
 
@@ -264,31 +315,37 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result =
+				myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result =
+				myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
@@ -300,7 +357,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -312,32 +370,37 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
+		IValidationSupport.CodeValidationResult result =
+				myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
 		assertNull(result);
-
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
 		assertFalse(result.isOk());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
+		result =
+				myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
 		assertFalse(result.isOk());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
@@ -349,7 +412,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
-		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(
+				optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -359,10 +423,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		codeSystem
-			.addConcept().setCode("A").setDisplay("Code A");
-		codeSystem
-			.addConcept().setCode("B").setDisplay("Code A");
+		codeSystem.addConcept().setCode("A").setDisplay("Code A");
+		codeSystem.addConcept().setCode("B").setDisplay("Code A");
 
 		codeSystem.setVersion("1");
 
@@ -384,12 +446,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
-
 		});
 
 		codeSystem.setVersion("2");
-		codeSystem
-			.addConcept().setCode("C").setDisplay("Code C");
+		codeSystem.addConcept().setCode("C").setDisplay("Code C");
 
 		IIdType id_v2 = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 		codes = myTermSvc.findCodesBelow(id_v2.getIdPartAsLong(), id_v2.getVersionIdPartAsLong(), "C");
@@ -414,10 +474,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		codeSystem
-			.addConcept().setCode("A").setDisplay("Code A");
-		codeSystem
-			.addConcept().setCode("B").setDisplay("Code A");
+		codeSystem.addConcept().setCode("A").setDisplay("Code A");
+		codeSystem.addConcept().setCode("B").setDisplay("Code A");
 
 		codeSystem.setVersion("1");
 
@@ -478,12 +536,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem = createCodeSystemWithManyCodes(2, 1002);
 		myCodeSystemDao.update(codeSystem, mySrd);
 
-		await().until(() -> {
-			myBatch2JobHelper.runMaintenancePass();
-			myTerminologyDeferredStorageSvc.saveAllDeferred();
-			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-			}, equalTo(true));
+		await().until(
+						() -> {
+							myBatch2JobHelper.runMaintenancePass();
+							myTerminologyDeferredStorageSvc.saveAllDeferred();
+							myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(
+									TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+							return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+						},
+						equalTo(true));
 
 		IValidationSupport.CodeValidationResult outcome;
 
@@ -495,7 +556,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1003", null, null);
 		assertFalse(outcome.isOk());
-
 	}
 
 	@Nonnull
@@ -506,8 +566,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		codeSystem.setVersion("1");
 		for (int i = theCodeCountStart; i <= theCodeCountEnd; i++) {
-			codeSystem
-				.addConcept().setCode("A" + i).setDisplay("Code A" + i);
+			codeSystem.addConcept().setCode("A" + i).setDisplay("Code A" + i);
 		}
 		return codeSystem;
 	}
@@ -517,10 +576,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		codeSystem
-			.addConcept().setCode("A").setDisplay("Code A");
-		codeSystem
-			.addConcept().setCode("B").setDisplay("Code A");
+		codeSystem.addConcept().setCode("A").setDisplay("Code A");
+		codeSystem.addConcept().setCode("B").setDisplay("Code A");
 
 		codeSystem.setVersion("1");
 
@@ -542,7 +599,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
-
 		});
 
 		// Remove concepts and changed ContentMode to NOTPRESENT

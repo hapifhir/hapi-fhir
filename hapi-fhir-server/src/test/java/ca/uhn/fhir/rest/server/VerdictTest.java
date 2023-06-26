@@ -36,7 +36,15 @@ public class VerdictTest {
 	public static class CustomRule implements IAuthRule {
 
 		@Override
-		public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+		public Verdict applyRule(
+				RestOperationTypeEnum theOperation,
+				RequestDetails theRequestDetails,
+				IBaseResource theInputResource,
+				IIdType theInputResourceId,
+				IBaseResource theOutputResource,
+				IRuleApplier theRuleApplier,
+				Set<AuthorizationFlagsEnum> theFlags,
+				Pointcut thePointcut) {
 			return new Verdict(PolicyEnum.ALLOW, this);
 		}
 

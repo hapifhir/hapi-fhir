@@ -32,12 +32,16 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		VersionSpecificWorkerContextWrapper wrapper =
+				new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
-		assertFalse(wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY), "wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY);
-
+		assertTrue(
+				wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
+		assertTrue(
+				wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
+		assertFalse(
+				wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY),
+				"wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY);
 	}
 
 	@Test
@@ -48,11 +52,14 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		VersionSpecificWorkerContextWrapper wrapper =
+				new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_1, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1));
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_2, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2));
-		assertNull(wrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY), "wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY);
+		assertNull(
+				wrapper.getBinaryForKey(NON_EXISTENT_BINARY_KEY),
+				"wrapper should return null for binary key " + NON_EXISTENT_BINARY_KEY);
 	}
 
 	@Test
@@ -63,7 +70,8 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
+		VersionSpecificWorkerContextWrapper wrapper =
+				new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		wrapper.cacheResource(mock(Resource.class));
 	}
@@ -76,14 +84,12 @@ public class VersionSpecificWorkerContextWrapperTest {
 		return validationSupport;
 	}
 
-
 	private static ValidationSupportContext mockValidationSupportContext(IValidationSupport validationSupport) {
 		ValidationSupportContext mockContext;
 		mockContext = mock(ValidationSupportContext.class);
 		when(mockContext.getRootValidationSupport()).thenReturn(validationSupport);
 		return mockContext;
 	}
-
 
 	private static IValidationSupport mockValidationSupport() {
 		IValidationSupport mockValidationSupport;

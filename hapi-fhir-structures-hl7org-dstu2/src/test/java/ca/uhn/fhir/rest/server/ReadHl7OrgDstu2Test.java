@@ -30,7 +30,7 @@ public class ReadHl7OrgDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
-	
+
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -80,13 +80,13 @@ public class ReadHl7OrgDstu2Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	/**
@@ -106,7 +106,5 @@ public class ReadHl7OrgDstu2Test {
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
-
 	}
-
 }

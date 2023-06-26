@@ -20,29 +20,30 @@ public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 	private List<IResourcePersistentId> baseResourceGoldenResourcePids;
 	private IResourcePersistentId incomingResourceGoldenResourcePid;
 
-	protected IsPossibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
+	protected IsPossibleLinkedTo(
+			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);
 	}
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theGoldenResource) {
-		incomingResourceGoldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
+		incomingResourceGoldenResourcePid =
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 
-		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
+		// OK, lets grab all the golden resource pids of the resources passed in via the constructor.
 		baseResourceGoldenResourcePids = myBaseResources.stream()
-			.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
-			.collect(Collectors.toList());
+				.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
+				.collect(Collectors.toList());
 
-		//The resources are linked if all golden resource pids match the incoming golden resource pid.
-		return baseResourceGoldenResourcePids.stream()
-			.allMatch(pid -> pid.equals(incomingResourceGoldenResourcePid));
+		// The resources are linked if all golden resource pids match the incoming golden resource pid.
+		return baseResourceGoldenResourcePids.stream().allMatch(pid -> pid.equals(incomingResourceGoldenResourcePid));
 	}
 
 	@Override
-	public void describeTo(Description theDescription) {
-	}
+	public void describeTo(Description theDescription) {}
 
-	public static Matcher<IAnyResource> possibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleLinkedTo(
+			IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }
