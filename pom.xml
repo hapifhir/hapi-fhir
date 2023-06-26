@@ -2254,16 +2254,16 @@
 							</format>
 						</formats>
 						<java>
-							<googleJavaFormat>
-								<version>1.17.0</version>
-								<style>AOSP</style>
-								<reflowLongStrings>true</reflowLongStrings>
-							</googleJavaFormat>
+							<!--This does the actual code reformatting-->
+							<palantirJavaFormat/>
+							<!--After formatting, replace the default 4-space indentation with tabs as per our editorconfig-->
 							<indent>
 								<tabs>true</tabs>
-								<spacesPerTab>3</spacesPerTab>
+								<spacesPerTab>4</spacesPerTab>
 							</indent>
+							<!--Just removes unused imports-->
 							<removeUnusedImports />
+							<!--Follow the editorconfig-defined order of imports-->
 							<importOrder>
 								<wildcardsLast>true</wildcardsLast>
 								<order>,java|javax,\#</order>
