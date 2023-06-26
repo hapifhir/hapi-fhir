@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
@@ -53,25 +54,24 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 	@Test
 	public void testSearchParameter_WithIdentifierValueUnder200Chars_ShouldHashBeforeTruncate() {
 		// setup
-		final int tokenMaxLength = ResourceIndexedSearchParamToken.MAX_LENGTH;
-		final String identifierValue = "Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890";
+		final String identifierValue = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);
 		final Identifier identifier = new Identifier().setSystem("http://www.acme.org.au/units").setValue(identifierValue);
 		final Organization organization = new Organization().addIdentifier(identifier);
 
 		// execute
 		myOrganizationDao.create(organization, mySrd);
 
-		// verify token
+		// verify token value
 		final ResourceIndexedSearchParamToken resultSearchTokens = myResourceIndexedSearchParamTokenDao.findAll().get(0);
 		final String tokenValue = resultSearchTokens.getValue();
-		final Long tokensHashValue = resultSearchTokens.getHashValue();
-
-		final String expectedValue = StringUtil.truncate(identifierValue, tokenMaxLength);
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
-
+		final String expectedValue = StringUtil.truncate(identifierValue, ResourceIndexedSearchParamToken.MAX_LENGTH);
 		assertEquals(expectedValue, tokenValue);
+
+		// verify hash
+		final Long tokensHashValue = resultSearchTokens.getHashValue();
+		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 		assertEquals(expectedHashValue, tokensHashValue);
-		
+
 		// verify resource
 		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam(identifierValue));
 		final List<IBaseResource> allResources = myOrganizationDao.search(searchParameterMap, mySrd).getAllResources();
@@ -87,24 +87,23 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 	@Test
 	public void testSearchParameter_WithIdentifierSystemUnder200Chars_ShouldHashBeforeTruncate() {
 		// setup
-		final int tokenMaxLength = ResourceIndexedSearchParamToken.MAX_LENGTH;
-		final String identifierSystem = "http://www.acme.org.au/units/Exclusive_Provider_Organization_(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)Exclusive_Provider_Organization(EPO)NICHOLAS_FITTANTE_ACT_FAMILY_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890_01234567890";
+		final String identifierSystem = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);;
 		final Identifier identifier = new Identifier().setSystem(identifierSystem).setValue("1234");
 		final Organization organization = new Organization().addIdentifier(identifier);
 
 		// execute
 		myOrganizationDao.create(organization, mySrd);
 
-		// verify token
+		// verify token system
 		final ResourceIndexedSearchParamToken resultSearchTokens = myResourceIndexedSearchParamTokenDao.findAll().get(0);
 		final String tokenSystem = resultSearchTokens.getSystem();
+		final String expectedSystem = StringUtil.truncate(identifierSystem, ResourceIndexedSearchParamToken.MAX_LENGTH);
+		assertEquals(expectedSystem, tokenSystem);
+
+		// verify hash
 		final Long tokensHashSystem = resultSearchTokens.getHashSystem();
-
-		final String expectedValue = StringUtil.truncate(identifierSystem, tokenMaxLength);
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
-
-		assertEquals(expectedValue, tokenSystem);
-		assertEquals(expectedHashValue, tokensHashSystem);
+		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+		assertEquals(expectedHashSystem, tokensHashSystem);
 
 		// verify resource
 		final SearchParameterMap searchParameterMap = SearchParameterMap.newSynchronous(Observation.SP_IDENTIFIER, new TokenParam("1234"));
