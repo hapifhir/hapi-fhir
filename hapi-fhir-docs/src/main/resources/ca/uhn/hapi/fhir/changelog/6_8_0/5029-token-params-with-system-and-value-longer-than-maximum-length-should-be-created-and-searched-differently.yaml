@@ -1,0 +1,5 @@
+---
+type: change
+issue: 5029
+title: "Previously, searching using token params with value exceeds the maximum length will be rejected. This is now a 
+valid request."
