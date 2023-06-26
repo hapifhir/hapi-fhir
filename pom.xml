@@ -2257,6 +2257,9 @@
 							</format>
 						</formats>
 						<java>
+							<excludes>
+								<exclude>**/test/**/*.java</exclude>
+							</excludes>
 							<!--This does the actual code reformatting-->
 							<palantirJavaFormat/>
 							<!--After formatting, replace the default 4-space indentation with tabs as per our editorconfig-->
