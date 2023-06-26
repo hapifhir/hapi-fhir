@@ -24,12 +24,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 
 /**
  * This interceptor captures and makes
@@ -53,9 +53,11 @@ public class ResponseSizeCapturingInterceptor {
 	 * be available before that time.
 	 * </p>
 	 */
-	public static final String RESPONSE_RESULT_KEY = ResponseSizeCapturingInterceptor.class.getName() + "_RESPONSE_RESULT_KEY";
+	public static final String RESPONSE_RESULT_KEY =
+			ResponseSizeCapturingInterceptor.class.getName() + "_RESPONSE_RESULT_KEY";
 
-	private static final String COUNTING_WRITER_KEY = ResponseSizeCapturingInterceptor.class.getName() + "_COUNTING_WRITER_KEY";
+	private static final String COUNTING_WRITER_KEY =
+			ResponseSizeCapturingInterceptor.class.getName() + "_COUNTING_WRITER_KEY";
 	private final List<Consumer<Result>> myConsumers = new ArrayList<>();
 
 	@Hook(Pointcut.SERVER_OUTGOING_WRITER_CREATED)
@@ -65,10 +67,12 @@ public class ResponseSizeCapturingInterceptor {
 		return retVal;
 	}
 
-
-	@Hook(value = Pointcut.SERVER_PROCESSING_COMPLETED, order = InterceptorOrders.RESPONSE_SIZE_CAPTURING_INTERCEPTOR_COMPLETED)
+	@Hook(
+			value = Pointcut.SERVER_PROCESSING_COMPLETED,
+			order = InterceptorOrders.RESPONSE_SIZE_CAPTURING_INTERCEPTOR_COMPLETED)
 	public void completed(RequestDetails theRequestDetails) {
-		CountingWriter countingWriter = (CountingWriter) theRequestDetails.getUserData().get(COUNTING_WRITER_KEY);
+		CountingWriter countingWriter =
+				(CountingWriter) theRequestDetails.getUserData().get(COUNTING_WRITER_KEY);
 		if (countingWriter != null) {
 			int charCount = countingWriter.getCount();
 			Result result = new Result(theRequestDetails, charCount);
@@ -112,9 +116,7 @@ public class ResponseSizeCapturingInterceptor {
 		public int getWrittenChars() {
 			return myWrittenChars;
 		}
-
 	}
-
 
 	private static class CountingWriter extends Writer {
 
@@ -145,5 +147,4 @@ public class ResponseSizeCapturingInterceptor {
 			return myCount;
 		}
 	}
-
 }

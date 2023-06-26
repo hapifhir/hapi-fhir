@@ -37,7 +37,8 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 	}
 
 	@Override
-	public SubscriptionStatus buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+	public SubscriptionStatus buildNotificationStatus(
+			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
 		long eventNumber = theActiveSubscription.getDeliveriesCount();
 
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
@@ -46,12 +47,14 @@ public class R5NotificationStatusBuilder implements INotificationStatusBuilder<S
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
 		// WIP STR5 events-since-subscription-start should be read from the database
 		subscriptionStatus.setEventsSinceSubscriptionStart(eventNumber);
-		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event = subscriptionStatus.addNotificationEvent();
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent event =
+				subscriptionStatus.addNotificationEvent();
 		event.setEventNumber(eventNumber);
 		if (theResources.size() > 0) {
 			event.setFocus(new Reference(theResources.get(0).getIdElement()));
 		}
-		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
+		subscriptionStatus.setSubscription(
+				new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		subscriptionStatus.setTopic(theTopicUrl);
 		return subscriptionStatus;
 	}

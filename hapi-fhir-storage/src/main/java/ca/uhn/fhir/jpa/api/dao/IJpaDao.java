@@ -32,25 +32,25 @@ import java.util.Date;
 public interface IJpaDao<T extends IBaseResource> {
 	@SuppressWarnings("unchecked")
 	IBasePersistedResource updateEntity(
-		RequestDetails theRequest,
-		IBaseResource theResource,
-		IBasePersistedResource theEntity,
-		Date theDeletedTimestampOrNull,
-		boolean thePerformIndexing,
-		boolean theUpdateVersion,
-		TransactionDetails theTransactionDetails,
-		boolean theForceUpdate,
-		boolean theCreateNewHistoryEntry);
+			RequestDetails theRequest,
+			IBaseResource theResource,
+			IBasePersistedResource theEntity,
+			Date theDeletedTimestampOrNull,
+			boolean thePerformIndexing,
+			boolean theUpdateVersion,
+			TransactionDetails theTransactionDetails,
+			boolean theForceUpdate,
+			boolean theCreateNewHistoryEntry);
 
 	DaoMethodOutcome updateInternal(
-		RequestDetails theRequestDetails,
-		T theResource,
-		String theMatchUrl,
-		boolean thePerformIndexing,
-		boolean theForceUpdateVersion,
-		IBasePersistedResource theEntity,
-		IIdType theResourceId,
-		IBaseResource theOldResource,
-		RestOperationTypeEnum theOperationType,
-		TransactionDetails theTransactionDetails);
+			RequestDetails theRequestDetails,
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			IBasePersistedResource theEntity,
+			IIdType theResourceId,
+			IBaseResource theOldResource,
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails);
 }

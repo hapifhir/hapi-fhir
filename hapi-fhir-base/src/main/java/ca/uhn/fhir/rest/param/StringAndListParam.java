@@ -19,11 +19,7 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.util.CoverageIgnore;
-
-
-public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
+public class StringAndListParam extends BaseAndListParam<StringOrListParam> {
 
 	@Override
 	StringOrListParam newInstance() {

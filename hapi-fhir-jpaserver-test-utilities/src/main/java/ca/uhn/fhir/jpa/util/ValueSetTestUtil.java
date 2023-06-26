@@ -25,9 +25,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,6 +51,8 @@ public class ValueSetTestUtil {
 	@Nonnull
 	public List<String> toCodes(IBaseResource theExpandedValueSet) {
 		ValueSet outcome = myCanonicalizer.valueSetToCanonical(theExpandedValueSet);
-		return outcome.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		return outcome.getExpansion().getContains().stream()
+				.map(t -> t.getCode())
+				.collect(Collectors.toList());
 	}
 }

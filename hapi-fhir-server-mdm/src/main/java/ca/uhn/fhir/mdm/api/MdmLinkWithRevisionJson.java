@@ -60,7 +60,9 @@ public class MdmLinkWithRevisionJson implements IModelJson {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		final MdmLinkWithRevisionJson that = (MdmLinkWithRevisionJson) theO;
-		return myMdmLink.equals(that.myMdmLink) && myRevisionNumber.equals(that.myRevisionNumber) && myRevisionTimestamp.equals(that.myRevisionTimestamp);
+		return myMdmLink.equals(that.myMdmLink)
+				&& myRevisionNumber.equals(that.myRevisionNumber)
+				&& myRevisionTimestamp.equals(that.myRevisionTimestamp);
 	}
 
 	@Override
@@ -71,9 +73,9 @@ public class MdmLinkWithRevisionJson implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myMdmLink", myMdmLink)
-			.append("myRevisionNumber", myRevisionNumber)
-			.append("myRevisionTimestamp", myRevisionTimestamp)
-			.toString();
+				.append("myMdmLink", myMdmLink)
+				.append("myRevisionNumber", myRevisionNumber)
+				.append("myRevisionTimestamp", myRevisionTimestamp)
+				.toString();
 	}
 }

@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
+import javax.persistence.EntityManager;
 
 /**
  * This service ensures uniqueness of resources during create or create-on-update by storing the resource searchUrl.
@@ -49,7 +49,11 @@ public class ResourceSearchUrlSvc {
 
 	private final FhirContext myFhirContext;
 
-	public ResourceSearchUrlSvc(EntityManager theEntityManager, IResourceSearchUrlDao theResourceSearchUrlDao, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+	public ResourceSearchUrlSvc(
+			EntityManager theEntityManager,
+			IResourceSearchUrlDao theResourceSearchUrlDao,
+			MatchUrlService theMatchUrlService,
+			FhirContext theFhirContext) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myMatchUrlService = theMatchUrlService;
@@ -65,32 +69,33 @@ public class ResourceSearchUrlSvc {
 		ourLog.info("Deleted {} SearchUrls", deletedCount);
 	}
 
-
 	/**
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
-	public void deleteByResId(long theResId){
+	public void deleteByResId(long theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId);
 	}
 
 	/**
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
-	public void enforceMatchUrlResourceUniqueness(String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
+	public void enforceMatchUrlResourceUniqueness(
+			String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
-		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourcePersistentId.getId());
+		ResourceSearchUrlEntity searchUrlEntity =
+				ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourcePersistentId.getId());
 		// calling dao.save performs a merge operation which implies a trip to
-		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling em.persist.
+		// the database to see if the resource exists.  Since we don't need the check, we avoid the trip by calling
+		// em.persist.
 		myEntityManager.persist(searchUrlEntity);
-
 	}
 
 	/**
 	 * Provides a sanitized matchUrl to circumvent ordering matters.
 	 */
-	private String createCanonicalizedUrlForStorage(String theResourceName, String theMatchUrl){
+	private String createCanonicalizedUrlForStorage(String theResourceName, String theMatchUrl) {
 
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		SearchParameterMap matchUrlSearchParameterMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
@@ -99,6 +104,4 @@ public class ResourceSearchUrlSvc {
 
 		return theResourceName + canonicalizedMatchUrl;
 	}
-
-
 }

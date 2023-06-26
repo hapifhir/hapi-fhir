@@ -42,10 +42,10 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,16 +73,20 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws InvalidRequestException, InternalErrorException {
+		return handlePagingRequest(
+				theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 	}
 
 	@Override
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
-		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
+		return handlePagingRequest(
+				theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 	}
 
-	private IBaseResource handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
+	private IBaseResource handlePagingRequest(
+			IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
 			throw new InvalidRequestException(Msg.code(416) + "This server does not support paging");
@@ -96,8 +100,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
 		if (theRequest.getInterceptorBroadcaster() != null) {
 			theRequest
-				.getInterceptorBroadcaster()
-				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 		}
 
 		Integer offsetI;
@@ -138,7 +142,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
+		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
+				theRequest, theServer.getDefaultResponseEncoding());
 
 		Set<Include> includes = new HashSet<>();
 		String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
@@ -150,7 +155,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		String linkSelfBase = theRequest.getFhirServerBase();
 		String completeUrl = theRequest.getCompleteUrl();
-		String linkSelf = linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
+		String linkSelf =
+				linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
 
 		BundleTypeEnum bundleType = null;
 		String[] bundleTypeValues = theRequest.getParameters().get(Constants.PARAM_BUNDLETYPE);
@@ -170,14 +176,25 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, encodingEnum, thePagingAction);
+		return createBundleFromBundleProvider(
+				theServer,
+				theRequest,
+				count,
+				linkSelf,
+				includes,
+				bundleProvider,
+				start,
+				bundleType,
+				encodingEnum,
+				thePagingAction);
 	}
 
 	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
 		// Return an HTTP 410 if the search is not known
 		if (theBundleProvider == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			String msg =
+					getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
 			throw new ResourceGoneException(Msg.code(417) + msg);
 		}
 	}
@@ -200,6 +217,4 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		return MethodMatchEnum.EXACT;
 	}
-
-
 }

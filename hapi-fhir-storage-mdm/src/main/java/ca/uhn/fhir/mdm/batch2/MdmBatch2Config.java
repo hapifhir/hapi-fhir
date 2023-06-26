@@ -34,15 +34,13 @@ import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAM
 import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
 
 @Configuration
-@Import({
-	MdmClearAppCtx.class,
-	MdmSubmitAppCtx.class
-})
+@Import({MdmClearAppCtx.class, MdmSubmitAppCtx.class})
 public class MdmBatch2Config {
 	@Bean
-	MdmJobDefinitionLoader mdmJobDefinitionLoader(JobDefinitionRegistry theJobDefinitionRegistry,
-																 @Qualifier(MDM_CLEAR_JOB_BEAN_NAME)  JobDefinition<MdmClearJobParameters> theClearJobDefinition,
-																 @Qualifier(MDM_SUBMIT_JOB_BEAN_NAME) JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
+	MdmJobDefinitionLoader mdmJobDefinitionLoader(
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			@Qualifier(MDM_CLEAR_JOB_BEAN_NAME) JobDefinition<MdmClearJobParameters> theClearJobDefinition,
+			@Qualifier(MDM_SUBMIT_JOB_BEAN_NAME) JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
 		return new MdmJobDefinitionLoader(theJobDefinitionRegistry, theClearJobDefinition, theSubmitJobDefinition);
 	}
 }

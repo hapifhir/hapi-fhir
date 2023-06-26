@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -34,13 +34,16 @@ import java.util.List;
 
 public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	public SearchParamExtractorDstu2() {
-	}
+	public SearchParamExtractorDstu2() {}
 
 	/**
 	 * Constructor for unit tests
 	 */
-	SearchParamExtractorDstu2(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	SearchParamExtractorDstu2(
+			StorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
+			FhirContext theCtx,
+			ISearchParamRegistry theSearchParamRegistry) {
 		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
 		start();
 	}
@@ -85,5 +88,4 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			return values;
 		};
 	}
-
 }

@@ -19,21 +19,20 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -47,8 +46,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
-					throw new ConfigurationException(Msg.code(1418) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
-							+ " methods");
+					throw new ConfigurationException(Msg.code(1418) + "Method '" + theMethod.getName() + "' in type "
+							+ theMethod.getDeclaringClass().getCanonicalName()
+							+ " has multiple parameters annotated with the @" + TransactionParam.class
+							+ " annotation, exactly one is required for @" + Transaction.class + " methods");
 				}
 				myTransactionParamIndex = index;
 			}
@@ -56,7 +57,9 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (myTransactionParamIndex == -1) {
-			throw new ConfigurationException(Msg.code(1419) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
+			throw new ConfigurationException(Msg.code(1419) + "Method '" + theMethod.getName() + "' in type "
+					+ theMethod.getDeclaringClass().getCanonicalName()
+					+ " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
 		}
 	}
 
@@ -75,32 +78,30 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return ReturnTypeEnum.BUNDLE;
 	}
 
-
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		FhirContext context = getContext();
 		Object arg = theArgs[myTransactionParamIndex];
-		
+
 		if (arg instanceof IBaseBundle) {
 			return createTransactionInvocation((IBaseBundle) arg, context);
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		List<IBaseResource> resources = (List<IBaseResource>) arg;
 		return createTransactionInvocation(resources, context);
 	}
 
-
 	public static BaseHttpClientInvocation createTransactionInvocation(IBaseBundle theBundle, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theBundle);
 	}
 
-	public static BaseHttpClientInvocation createTransactionInvocation(List<? extends IBaseResource> theResources, FhirContext theContext) {
+	public static BaseHttpClientInvocation createTransactionInvocation(
+			List<? extends IBaseResource> theResources, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(String theRawBundle, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theRawBundle, true, "");
 	}
-
 }

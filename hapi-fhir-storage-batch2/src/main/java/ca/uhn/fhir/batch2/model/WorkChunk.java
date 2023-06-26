@@ -45,7 +45,8 @@ public class WorkChunk implements IModelJson {
 	private String myId;
 
 	@JsonProperty("sequence")
-	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review after merge.
+	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review
+	// after merge.
 	private int mySequence;
 
 	@JsonProperty("status")
@@ -85,6 +86,7 @@ public class WorkChunk implements IModelJson {
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myUpdateTime;
+
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
 

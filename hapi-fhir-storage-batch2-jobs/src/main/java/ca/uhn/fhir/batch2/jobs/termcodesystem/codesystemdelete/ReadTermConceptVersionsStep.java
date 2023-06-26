@@ -29,10 +29,11 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
-public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
+public class ReadTermConceptVersionsStep
+		implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
@@ -43,9 +44,9 @@ public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCode
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
-		@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		TermCodeSystemDeleteJobParameters parameters = theStepExecutionDetails.getParameters();
 
 		long pid = parameters.getTermPid();

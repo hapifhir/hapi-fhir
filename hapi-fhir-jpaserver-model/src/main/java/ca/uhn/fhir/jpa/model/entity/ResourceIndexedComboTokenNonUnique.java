@@ -43,11 +43,14 @@ import javax.persistence.Transient;
 import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 
 @Entity
-@Table(name = "HFJ_IDX_CMB_TOK_NU", indexes = {
-	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
-	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
-})
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
+@Table(
+		name = "HFJ_IDX_CMB_TOK_NU",
+		indexes = {
+			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
+		})
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
+		implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
@@ -56,7 +59,10 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	private Long myId;
 
 	@ManyToOne
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
+	@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			foreignKey = @ForeignKey(name = "FK_IDXCMBTOKNU_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
@@ -81,7 +87,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		super();
 	}
 
-	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
+	public ResourceIndexedComboTokenNonUnique(
+			PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
@@ -151,9 +158,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myIndexString)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -192,19 +197,21 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("id", myId)
-			.append("resourceId", myResourceId)
-			.append("hashComplete", myHashComplete)
-			.append("indexString", myIndexString)
-			.toString();
+				.append("id", myId)
+				.append("resourceId", myResourceId)
+				.append("hashComplete", myHashComplete)
+				.append("indexString", myIndexString)
+				.toString();
 	}
 
-	public static long calculateHashComplete(PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+	public static long calculateHashComplete(
+			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
 		return hash(partitionSettings, requestPartitionId, queryString);
 	}
 
-	public static long calculateHashComplete(PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
+	public static long calculateHashComplete(
+			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
 		return hash(partitionSettings, partitionId, queryString);
 	}
 
