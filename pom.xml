@@ -2,6 +2,8 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+
+
 	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
@@ -2242,6 +2244,7 @@
 						</execution>
 					</executions>
 					<configuration>
+						<!--This does basic formatting of trailing whitespace and newlines-->
 						<formats>
 							<format>
 								<includes>
