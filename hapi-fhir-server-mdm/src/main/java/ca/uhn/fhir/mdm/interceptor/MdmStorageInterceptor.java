@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
@@ -74,8 +73,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSettings myMdmSettings;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IIdHelperService myIdHelperSvc;
 	@Autowired
