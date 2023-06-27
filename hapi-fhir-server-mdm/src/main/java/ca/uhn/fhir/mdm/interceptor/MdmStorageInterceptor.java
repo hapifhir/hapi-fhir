@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
-import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -77,9 +76,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private IMdmSettings myMdmSettings;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IMdmLinkExpandSvc mdmLinkExpandSvc;
-//	private MdmLinkExpandSvc mdmLinkExpandSvc = new MdmLinkExpandSvc();
 	@Autowired
 	private IIdHelperService myIdHelperSvc;
 	@Autowired
