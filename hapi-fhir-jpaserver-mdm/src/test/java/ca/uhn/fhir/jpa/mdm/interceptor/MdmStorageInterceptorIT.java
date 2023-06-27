@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.Constants;
@@ -64,10 +63,6 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-	@Autowired
-	private IIdHelperService myIdHelperService2;//todo jdjd think i can remove this test later
-	@Autowired
-	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 
 	@Override
