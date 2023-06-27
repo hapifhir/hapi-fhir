@@ -316,7 +316,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private boolean myNonResourceDbHistoryEnabled = true;
 
-
 	/**
 	 * Constructor
 	 */
@@ -353,8 +352,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public int getInlineResourceTextBelowSize() {
 		return myInlineResourceTextBelowSize;
 	}
-
-
 
 	/**
 	 * If set to a positive number, any resources with a character length at or below the given number
