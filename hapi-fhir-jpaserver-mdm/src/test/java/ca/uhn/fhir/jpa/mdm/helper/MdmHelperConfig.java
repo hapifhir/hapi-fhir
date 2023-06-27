@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.helper;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,5 +39,10 @@ public class MdmHelperConfig {
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
 			.setPreventMultipleEids(myPreventMultipleEids);
+	}
+
+	@Bean
+	MdmLinkExpandSvc mdmLinkExpandSvc() {
+		return new MdmLinkExpandSvc();
 	}
 }

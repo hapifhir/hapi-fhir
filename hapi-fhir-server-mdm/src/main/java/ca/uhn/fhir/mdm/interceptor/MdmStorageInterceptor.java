@@ -23,23 +23,35 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,7 +75,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSettings myMdmSettings;
-
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IMdmLinkExpandSvc mdmLinkExpandSvc;
+//	private MdmLinkExpandSvc mdmLinkExpandSvc = new MdmLinkExpandSvc();
+	@Autowired
+	private IIdHelperService myIdHelperSvc;
+	@Autowired
+	private IMdmLinkDao myMdmLinkDao;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -126,6 +146,9 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 	}
 
+	@Autowired
+	private IMdmClearHelperSvc<? extends IResourcePersistentId<?>> myIMdmClearHelperSvc;
+
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
 	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource) {
 		if (ourLinksDeletedBeforehand.get()) {
@@ -133,8 +156,32 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
+			IIdType sourceId = theResource.getIdElement().toVersionless();
+			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
+			List<MdmPidTuple> matches = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(sourcePid, MdmMatchResultEnum.MATCH);
+
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
+
+			if (matches.size() == 1) {
+				// We are attempting to delete the only source resource left linked to the golden resource
+				// In this case, we should automatically delete the golden resource to prevent orphaning
+				int numDeleted = deleteLinkedGoldenResource(matches.get(0).getGoldenPid());
+				if (numDeleted > 0) {
+					ourLog.info("Removed {} golden resource that references {}", numDeleted, sourceId);
+				}
+			}
 		}
+	}
+
+	private int deleteLinkedGoldenResource(IResourcePersistentId theMatches) {
+		setLinksDeletedBeforehand();
+
+		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
+		int numDeleted = deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theMatches)),
+			false,null);
+
+		resetLinksDeletedBeforehand();
+		return numDeleted;
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {

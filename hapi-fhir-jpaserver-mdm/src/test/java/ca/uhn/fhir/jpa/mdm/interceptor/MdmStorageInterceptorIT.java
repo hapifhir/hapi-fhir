@@ -9,12 +9,16 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -46,6 +50,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,6 +64,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private IIdHelperService myIdHelperService2;//todo jdjd think i can remove this test later
+	@Autowired
+	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 
 	@Override
@@ -91,6 +100,51 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_whenOnlyMatchedResourceDeleted() throws InterruptedException {
+		// Given
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertTrue(resources.isEmpty());
+		assertLinkCount(0);
+
+		try {
+			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
+		}
+	}
+
+	//TODO: The behaviour of this test may change
+	//      Design needs to be discussed about whether a remaining POSSIBLE_MATCH should delete the GR and create a new one
+	//      or keep the GR and the POSSIBLE_MATCH link
+	@Test
+	public void testGoldenResourceNotDeleted_whenPossibleMatchStillExists() throws InterruptedException {
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPatientWithNameAndId("Paula", PAUL_ID);
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+		assertLinkCount(2);
+
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(2, resources.size());
+
+		assertLinkCount(1);
 	}
 
 	@Test
