@@ -139,21 +139,21 @@ public class StorageSettings {
 	private boolean myQualifySubscriptionMatchingChannelName = true;
 
 	/**
-	 * If set to true, the server will prevent the creation of Search Parameters which cannot be evaluated IN-MEMORY. This can improve
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
 	 * overall server performance.
 	 *
 	 * @since 6.8.0
 	 */
-	public void setOnlyAllowInMemorySearchParams(boolean theAllowOnlyInMemorySearchParams) {
+	public void setOnlyAllowInMemorySubscriptions(boolean theAllowOnlyInMemorySearchParams) {
 		myAllowOnlyInMemorySubscriptions = theAllowOnlyInMemorySearchParams;
 	}
 
 	/**
-	 * If set to true, the server will prevent the creation of Search Parameters which cannot be evaluated IN-MEMORY. This can improve
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
 	 * overall server performance.
 	 *
 	 * @since 6.8.0
-	 * @return Returns the value of {@link #setOnlyAllowInMemorySearchParams(boolean)}
+	 * @return Returns the value of {@link #setOnlyAllowInMemorySubscriptions(boolean)}
 	 */
 	public boolean isOnlyAllowInMemorySubscriptions() {
 		return myAllowOnlyInMemorySubscriptions;

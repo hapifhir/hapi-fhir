@@ -125,7 +125,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
 
-		myStorageSettings.setOnlyAllowInMemorySearchParams(new JpaStorageSettings().isOnlyAllowInMemorySubscriptions());
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(new JpaStorageSettings().isOnlyAllowInMemorySubscriptions());
 	}
 
 	@BeforeEach
@@ -217,14 +217,14 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 	@Test
 	public void testForcedInMemoryPreventsDatabaseSubscriptions() throws InterruptedException {
-		myStorageSettings.setOnlyAllowInMemorySearchParams(true);
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		try {
 			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
 		}
-		myStorageSettings.setOnlyAllowInMemorySearchParams(true);
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
 	}
 
 
