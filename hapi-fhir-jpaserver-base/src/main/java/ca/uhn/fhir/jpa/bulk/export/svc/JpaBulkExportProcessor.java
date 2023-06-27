@@ -125,7 +125,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
 		return myHapiTransactionService
-			.withRequest(null)
+			.withSystemRequest()
+			.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
 			.readOnly()
 			.execute(() -> {
 				String resourceType = theParams.getResourceType();
