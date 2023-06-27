@@ -194,7 +194,9 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId == null || pageId.length == 0 || isBlank(pageId[0])) {
 			return MethodMatchEnum.NONE;
 		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
+
+		if (theRequest.getRequestType() != RequestTypeEnum.GET &&
+					theRequest.getRequestType() != RequestTypeEnum.POST) {
 			return MethodMatchEnum.NONE;
 		}
 
