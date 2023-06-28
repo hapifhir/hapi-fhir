@@ -665,6 +665,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			jobInfo.setInstanceId(jobId);
 			jobInfo.setStatus(StatusEnum.COMPLETED);
 			jobInfo.setReport(JsonUtil.serialize(results));
+			jobInfo.setParameters(new BulkExportJobParameters());
 
 			// Create a bulk job
 			BulkExportJobParameters options = new BulkExportJobParameters();

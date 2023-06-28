@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
@@ -205,6 +206,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		startRequest.setParameters(options);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 

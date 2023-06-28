@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Binary;
@@ -237,6 +238,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	private String startJob(BulkExportJobParameters theOptions) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		startRequest.setUseCache(false);
 		startRequest.setParameters(theOptions);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);

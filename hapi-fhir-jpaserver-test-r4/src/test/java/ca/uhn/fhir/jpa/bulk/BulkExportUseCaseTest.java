@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -447,6 +448,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myCaptureQueriesListener.clear();
 
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 			startRequest.setParameters(options);
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
@@ -569,6 +571,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 			startRequest.setParameters(options);
 			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
 			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
@@ -1472,6 +1475,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		startRequest.setParameters(options);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
