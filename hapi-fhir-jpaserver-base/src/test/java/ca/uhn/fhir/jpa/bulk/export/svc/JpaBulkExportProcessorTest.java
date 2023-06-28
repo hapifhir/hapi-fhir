@@ -145,11 +145,11 @@ public class JpaBulkExportProcessorTest {
 	@InjectMocks
 	private JpaBulkExportProcessor myProcessor;
 
-	private ExportPIDIteratorParameters createExportParameters(BulkDataExportOptions.ExportStyle theExportStyle) {
+	private ExportPIDIteratorParameters createExportParameters(BulkExportJobParameters.ExportStyle theExportStyle) {
 		ExportPIDIteratorParameters parameters = new ExportPIDIteratorParameters();
 		parameters.setInstanceId("instanceId");
 		parameters.setExportStyle(theExportStyle);
-		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
+		if (theExportStyle == BulkExportJobParameters.ExportStyle.GROUP) {
 			parameters.setGroupId("123");
 		}
 		parameters.setStartDate(new Date());
@@ -176,7 +176,7 @@ public class JpaBulkExportProcessorTest {
 	@ValueSource(booleans = {true, false})
 	public void getResourcePidIterator_paramsWithPatientExportStyle_returnsAnIterator(boolean thePartitioned) {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setResourceType("Patient");
 
 		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
@@ -242,7 +242,7 @@ public class JpaBulkExportProcessorTest {
 	@Test
 	public void getResourcePidIterator_patientStyleWithIndexMissingFieldsDisabled_throws() {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setResourceType("Patient");
 
 		// when
@@ -262,7 +262,7 @@ public class JpaBulkExportProcessorTest {
 	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
 	public void getResourcePidIterator_groupExportStyleWithPatientResource_returnsIterator(boolean theMdm, boolean thePartitioned) {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.GROUP);
 		parameters.setResourceType("Patient");
 
 		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
@@ -370,7 +370,7 @@ public class JpaBulkExportProcessorTest {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void getResourcePidIterator_groupExportStyleWithNonPatientResource_returnsIterator(boolean theMdm, boolean thePartitioned) {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.GROUP);
 		parameters.setResourceType("Observation");
 
 		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
@@ -484,7 +484,7 @@ public class JpaBulkExportProcessorTest {
 	@ValueSource(booleans = {true, false})
 	public void getResourcePidIterator_systemExport_returnsIterator(boolean thePartitioned) {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.SYSTEM);
 		parameters.setResourceType("Patient");
 
 		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
@@ -540,7 +540,7 @@ public class JpaBulkExportProcessorTest {
 	@ValueSource(booleans = {true, false})
 	public void getResourcePidIterator_groupExportStyleWithGroupResource_returnsAnIterator(boolean thePartitioned) {
 		// setup
-		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.GROUP);
 		parameters.setResourceType("Group");
 
 		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));

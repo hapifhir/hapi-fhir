@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
@@ -21,7 +21,6 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -82,7 +81,7 @@ public class ExpandResourcesStepTest {
 	private BulkExportJobParameters createParameters(boolean thePartitioned) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
 		parameters.setSince(new Date());
 		if (thePartitioned) {

@@ -4,7 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -77,7 +76,7 @@ public class FetchResourceIdsStepTest {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
 		jobParameters.setSince(new Date());
 		jobParameters.setOutputFormat("json");
-		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		jobParameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		if (thePartitioned) {
 			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));

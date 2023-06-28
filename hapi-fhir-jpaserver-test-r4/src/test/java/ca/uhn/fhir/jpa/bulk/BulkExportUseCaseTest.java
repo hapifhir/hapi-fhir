@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -16,13 +17,12 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -44,7 +44,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
@@ -96,7 +95,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
 	@Autowired
-	private IBatch2JobRunner myJobRunner;
+	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
@@ -439,15 +438,17 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				myPatientDao.update(patient);
 			}
 
-			BulkDataExportOptions options = new BulkDataExportOptions();
+			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Collections.singleton("Patient"));
 			options.setFilters(Collections.emptySet());
-			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 			myCaptureQueriesListener.clear();
 
-			Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setParameters(options);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
 			assertNotNull(startResponse);
 
@@ -562,25 +563,27 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
 			assertEquals(numPatients, patientsCreated);
 
-			BulkDataExportOptions options = new BulkDataExportOptions();
+			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
-			options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-			Batch2JobStartResponse job = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setParameters(options);
+			Batch2JobStartResponse job = myJobCoordinator.startInstance(mySrd, startRequest);
 			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
-			ourLog.debug("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getInstanceId()).getStatus());
+			ourLog.debug("Job status after awaiting - {}", myJobCoordinator.getInstance(job.getInstanceId()).getStatus());
 			await()
 				.atMost(300, TimeUnit.SECONDS)
 				.until(() -> {
-					BulkExportJobStatusEnum status = myJobRunner.getJobInfo(job.getInstanceId()).getStatus();
-					if (!BulkExportJobStatusEnum.COMPLETE.equals(status)) {
+					StatusEnum status = myJobCoordinator.getInstance(job.getInstanceId()).getStatus();
+					if (!StatusEnum.COMPLETED.equals(status)) {
 						fail("Job status was changed from COMPLETE to " + status);
 					}
-					return myJobRunner.getJobInfo(job.getInstanceId()).getReport() != null;
+					return myJobCoordinator.getInstance(job.getInstanceId()).getReport() != null;
 				});
 
-			String report = myJobRunner.getJobInfo(job.getInstanceId()).getReport();
+			String report = myJobCoordinator.getInstance(job.getInstanceId()).getReport();
 			BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
 
@@ -1364,15 +1367,15 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
 	}
 
 	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
 	}
 
 	BulkExportJobResults startBulkExportJobAndAwaitCompletion(
-		BulkDataExportOptions.ExportStyle theExportStyle,
+		BulkExportJobParameters.ExportStyle theExportStyle,
 		Set<String> theResourceTypes,
 		Set<String> theFilters,
 		String theGroupOrPatientId
@@ -1398,7 +1401,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 
 		MethodOutcome outcome;
-		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
+		if (theExportStyle == BulkExportJobParameters.ExportStyle.GROUP) {
 
 			outcome = myClient
 				.operation()
@@ -1408,7 +1411,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.returnMethodOutcome()
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
-		} else if (theExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && theGroupOrPatientId != null) {
+		} else if (theExportStyle == BulkExportJobParameters.ExportStyle.PATIENT && theGroupOrPatientId != null) {
 			//TODO add support for this actual processor.
 			fail("Bulk Exports that return no data do not return");
 			outcome = myClient
@@ -1453,32 +1456,34 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		myBatch2JobHelper.awaitJobCompletion(jobInstanceId, 60);
 
-		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(jobInstanceId).getReport() != null);
+		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobCoordinator.getInstance(jobInstanceId).getReport() != null);
 
-		String report = myJobRunner.getJobInfo(jobInstanceId).getReport();
+		String report = myJobCoordinator.getInstance(jobInstanceId).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		return results;
 	}
 
 	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setGroupId(new IdType("Group", theGroupId));
+		options.setGroupId("Group/" + theGroupId);
 		options.setFilters(theFilters);
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(mySrd, BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(options);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
+		await().until(() -> myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
+		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			List<String> binaryIds = file.getValue();
@@ -1500,6 +1505,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 
 	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
+		return startBulkExportJobAndAwaitCompletion(BulkExportJobParameters.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
 	}
 }

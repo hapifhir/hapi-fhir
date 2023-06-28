@@ -48,7 +48,7 @@ import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -135,9 +135,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
 				LinkedHashSet<JpaPid> pids;
-				if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
+				if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
 					pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, chunkId, def);
-				} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
+				} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
 					pids = getPidsForGroupStyleExport(theParams, resourceType, def);
 				} else {
 					pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);

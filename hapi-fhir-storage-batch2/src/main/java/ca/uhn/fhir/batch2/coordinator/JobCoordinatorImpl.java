@@ -96,6 +96,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
+		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
+
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(), getStatesThatTriggerCache());
@@ -142,6 +144,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	@Nonnull
 	public JobInstance getInstance(String theInstanceId) {
 		return myJobQuerySvc.fetchInstance(theInstanceId);
 	}

@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +68,7 @@ public interface IJobCoordinator {
 	 * @return Returns the current instance details
 	 * @throws ResourceNotFoundException If the instance ID can not be found
 	 */
+	@Nonnull
 	JobInstance getInstance(String theInstanceId) throws ResourceNotFoundException;
 
 	/**

@@ -1101,10 +1101,47 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_INITIATE_BULK_EXPORT(
 		void.class,
-		"ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions",
+		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a Bulk Export job is being processed. If any hook method is registered
+	 * for this pointcut, the hook method will be called once for each resource that is
+	 * loaded for inclusion in a bulk export file. Hook methods may modify
+	 * the resource object and this modification will affect the copy that is stored in the
+	 * bulk export data file (but will not affect the original). Hook methods may also
+	 * return <code>false</code> in order to request that the resource be filtered
+	 * from the export.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * </li>
+	 * <li>
+	 *org.hl7.fhir.instance.model.api.IBaseResource - The resource that will be included in the file
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks methods may return <code>false</code> to indicate that the resource should be
+	 * filtered out. Otherwise, hook methods should return <code>true</code>.
+	 * </p>
+	 *
+	 * @since 6.8.0
+	 */
+	STORAGE_BULK_EXPORT_RESOURCE_INCLUSION(
+		boolean.class,
+		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
+
+
+
 	/**
 	 * <b>Storage Hook:</b>
 	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
