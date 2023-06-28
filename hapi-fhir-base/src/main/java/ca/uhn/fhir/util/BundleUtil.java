@@ -40,6 +40,8 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,10 +60,10 @@ import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
  * Fetch resources from a bundle
  */
 public class BundleUtil {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleUtil.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BundleUtil.class);
 
-	private static final String PREV = "prev";
 	private static final String PREVIOUS = LINK_PREV;
+	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Set.of(PREVIOUS, PREV);
 
 	public static final String DIFFERENT_LINK_ERROR_MSG = "Mismatching 'previous' and 'prev' links exist. 'previous' " +
