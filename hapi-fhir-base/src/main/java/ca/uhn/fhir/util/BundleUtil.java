@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
@@ -51,29 +52,41 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_PREV;
+
 /**
  * Fetch resources from a bundle
  */
 public class BundleUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleUtil.class);
 
+	private static final String PREV = "prev";
+	private static final String PREVIOUS = LINK_PREV;
+	private static final Set<String> previousOrPrev = Set.of(PREVIOUS, PREV);
+
+	public static final String DIFFERENT_LINK_ERROR_MSG = "Mismatching 'previous' and 'prev' links exist. 'previous' " +
+		"is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
 	 */
 	public static String getLinkUrlOfType(FhirContext theContext, IBaseBundle theBundle, String theLinkRelation) {
+		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, true);
+	}
+
+	private static String getLinkUrlOfType(FhirContext theContext, IBaseBundle theBundle, String theLinkRelation, boolean isPreviousCheck) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("link");
 		List<IBase> links = entryChild.getAccessor().getValues(theBundle);
 		for (IBase nextLink : links) {
 
 			boolean isRightRel = false;
-			BaseRuntimeElementCompositeDefinition relDef = (BaseRuntimeElementCompositeDefinition) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeElementCompositeDefinition<?> relDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
 			BaseRuntimeChildDefinition relChild = relDef.getChildByName("relation");
 			List<IBase> relValues = relChild.getAccessor().getValues(nextLink);
 			for (IBase next : relValues) {
 				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) next;
-				if (theLinkRelation.equals(nextValue.getValueAsString())) {
+				if (isRelationMatch(theContext, theBundle,theLinkRelation, nextValue.getValueAsString(), isPreviousCheck)) {
 					isRightRel = true;
 				}
 			}
@@ -82,7 +95,7 @@ public class BundleUtil {
 				continue;
 			}
 
-			BaseRuntimeElementCompositeDefinition linkDef = (BaseRuntimeElementCompositeDefinition) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeElementCompositeDefinition<?> linkDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
 			BaseRuntimeChildDefinition urlChild = linkDef.getChildByName("url");
 			List<IBase> values = urlChild.getAccessor().getValues(nextLink);
 			for (IBase nextUrl : values) {
@@ -91,10 +104,38 @@ public class BundleUtil {
 					return nextValue.getValueAsString();
 				}
 			}
-
 		}
 
 		return null;
+	}
+
+	private static boolean isRelationMatch(FhirContext theContext, IBaseBundle theBundle, String value, String matching, boolean theIsPreviousCheck) {
+		if ( ! theIsPreviousCheck) {
+			return value.equals(matching);
+		}
+
+		if ( previousOrPrev.contains(value)  ) {
+			validateUniqueOrMatchingPreviousValues(theContext, theBundle);
+			if ( previousOrPrev.contains(matching) ) {
+				return true;
+			}
+		}
+		return (value.equals(matching));
+	}
+
+	private static void validateUniqueOrMatchingPreviousValues(FhirContext theContext, IBaseBundle theBundle) {
+		String previousLink = getLinkNoCheck(theContext, theBundle, PREVIOUS);
+		String prevLink = getLinkNoCheck(theContext, theBundle, PREV);
+		if (prevLink != null && previousLink != null) {
+			if ( ! previousLink.equals(prevLink)) {
+				String msg = DIFFERENT_LINK_ERROR_MSG.replace("$PREVIOUS", previousLink).replace("$PREV", prevLink);
+				throw new InternalErrorException(Msg.code(2368) + msg);
+			}
+		}
+	}
+
+	private static String getLinkNoCheck(FhirContext theContext, IBaseBundle theBundle, String theLinkRelation) {
+		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -160,6 +201,7 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
 		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
 		if (entries.size() > 0) {
+			@SuppressWarnings("unchecked")
 			IPrimitiveType<Number> typeElement = (IPrimitiveType<Number>) entries.get(0);
 			if (typeElement != null && typeElement.getValue() != null) {
 				return typeElement.getValue().intValue();
@@ -171,6 +213,7 @@ public class BundleUtil {
 	public static void setTotal(FhirContext theContext, IBaseBundle theBundle, Integer theTotal) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
+		@SuppressWarnings("unchecked")
 		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) entryChild.getChildByName("total").newInstance();
 		value.setValue(theTotal);
 		entryChild.getMutator().setValue(theBundle, value);
@@ -194,11 +237,11 @@ public class BundleUtil {
 	 * 1. Deletes
 	 * 2. Creates
 	 * 3. Updates
-	 *
+	 * <p>
 	 * Furthermore, within these operation types, the entries will be sorted based on the order in which they should be processed
 	 * e.g. if you have 2 CREATEs, one for a Patient, and one for an Observation which has this Patient as its Subject,
 	 * the patient will come first, then the observation.
-	 *
+	 * <p>
 	 * In cases of there being a cyclic dependency (e.g. Organization/1 is partOf Organization/2 and Organization/2 is partOf Organization/1)
 	 * this function will throw an IllegalStateException.
 	 *
@@ -207,12 +250,11 @@ public class BundleUtil {
 	 */
 	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) throws IllegalStateException {
 		Map<BundleEntryParts, IBase> partsToIBaseMap = getPartsToIBaseMap(theContext, theBundle);
-		LinkedHashSet<IBase> retVal = new LinkedHashSet<>();
 
 		//Get all deletions.
 		LinkedHashSet<IBase> deleteParts = sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
 		validatePartsNotNull(deleteParts);
-		retVal.addAll(deleteParts);
+		LinkedHashSet<IBase> retVal = new LinkedHashSet<>(deleteParts);
 
 		//Get all Creations
 		LinkedHashSet<IBase> createParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
@@ -408,8 +450,7 @@ public class BundleUtil {
 			}
 		}
 
-		SearchBundleEntryParts parts = new SearchBundleEntryParts(fullUrl, resource, matchMode);
-		return parts;
+		return new SearchBundleEntryParts(fullUrl, resource, matchMode);
 	}
 
 	/**
@@ -485,8 +526,7 @@ public class BundleUtil {
 				}
 			}
 		}
-		BundleEntryParts parts = new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
-		return parts;
+		return new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl);
 	}
 
 	/**
