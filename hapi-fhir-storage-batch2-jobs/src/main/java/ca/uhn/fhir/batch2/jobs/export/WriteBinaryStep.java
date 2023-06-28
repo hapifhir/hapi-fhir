@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.context.FhirContext;
@@ -36,8 +38,12 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -50,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, ExpandedResourcesList, BulkExportBinaryFileId> {
@@ -107,13 +114,34 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		}
 
 		SystemRequestDetails srd = new SystemRequestDetails();
-		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
+		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		RequestPartitionId partitionId = jobParameters.getPartitionId();
 		if (partitionId == null){
 			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		} else {
 			srd.setRequestPartitionId(partitionId);
 		}
-		DaoMethodOutcome outcome = binaryDao.create(binary,srd);
+
+		binary.setId(RandomTextUtils.newSecureRandomAlphaNumericString(64));
+
+		// Make sure we don't accidentally reuse an ID. This should be impossible given the
+		// amount of entropy in the IDs but might as well be sure.
+		try {
+			IBaseBinary existing = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+			Validate.isTrue(existing == null);
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
+		if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+			if (isNotBlank(jobParameters.getBinarySecurityContextIdentifierSystem()) || isNotBlank(jobParameters.getBinarySecurityContextIdentifierValue())) {
+				FhirTerser terser = myFhirContext.newTerser();
+				terser.setElement(binary, "securityContext.identifier.system", jobParameters.getBinarySecurityContextIdentifierSystem());
+				terser.setElement(binary, "securityContext.identifier.value", jobParameters.getBinarySecurityContextIdentifierValue());
+			}
+		}
+
+		DaoMethodOutcome outcome = binaryDao.update(binary,srd);
 		IIdType id = outcome.getId();
 
 		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();

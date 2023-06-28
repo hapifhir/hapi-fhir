@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -54,6 +55,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
@@ -69,6 +72,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -739,7 +743,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 			@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)
 			public boolean include(IBaseResource theResource) {
-				if (((Patient)theResource).getGender() == Enumerations.AdministrativeGender.FEMALE) {
+				if (((Patient) theResource).getGender() == Enumerations.AdministrativeGender.FEMALE) {
 					return false;
 				}
 				return true;
@@ -767,9 +771,37 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			assertEquals(10, finalJobInstance.getCombinedRecordsProcessed());
 
 		} finally {
-			myInterceptorRegistry.unregisterInterceptorsIf(t->t instanceof BoysOnlyInterceptor);
+			myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof BoysOnlyInterceptor);
 		}
 	}
+
+	@Test
+	public void testSystemBulkExport_WithSecurityContext() {
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			expectedIds.add(createPatient(withActiveTrue()).getValue());
+			expectedIds.add(createObservation(withStatus("final")).getValue());
+		}
+
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Set.of("Patient", "Observation"));
+		options.setFilters(Set.of("Patient?active=true", "Patient?active=false", "Observation?status=final"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setBinarySecurityContextIdentifierSystem("http://foo");
+		options.setBinarySecurityContextIdentifierValue("bar");
+
+		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
+		BulkExportJobResults results = JsonUtil.deserialize(finalJobInstance.getReport(), BulkExportJobResults.class);
+		List<String> binaryIds = results.getResourceTypeToBinaryIds().values().stream().flatMap(Collection::stream).toList();
+		assertEquals(2, binaryIds.size());
+		for (String next : binaryIds) {
+			Binary binary = myBinaryDao.read(new IdType(next), new SystemRequestDetails());
+			assertEquals("http://foo", binary.getSecurityContext().getIdentifier().getSystem());
+			assertEquals("bar", binary.getSecurityContext().getIdentifier().getValue());
+		}
+	}
+
 
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
@@ -797,6 +829,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
+
+				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
+				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{64}"));
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
