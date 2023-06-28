@@ -76,6 +76,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -88,6 +89,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -226,8 +228,24 @@ public class BulkDataExportProvider {
 
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm, theExportIdentifier, theTypePostFetchFilterUrl);
 
-		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
-			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+		// TODO:  theTypeFilter is not getting honoured here and as a result we're getting all resourceTypes
+		// TODO:  not a real fix, just an experiment
+//		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
+		if (isNotEmpty(bulkDataExportOptions.getResourceTypes()) || isNotEmpty(bulkDataExportOptions.getFilters())) {
+			if (isNotEmpty(bulkDataExportOptions.getResourceTypes()) && ! isNotEmpty(bulkDataExportOptions.getFilters())) {
+				validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+			} else if (! isNotEmpty(bulkDataExportOptions.getResourceTypes()) && isNotEmpty(bulkDataExportOptions.getFilters())) {
+				ourLog.info("4748:  ");
+				final Set<String> resourceTypesFromTypeFilter = bulkDataExportOptions.getFilters()
+					.stream()
+					.filter(stringFilter -> stringFilter.contains("?"))
+					.map(stringFiler -> stringFiler.split("\\?")[0])
+					.filter(split -> Arrays.stream(ResourceType.values()).anyMatch(resType -> resType.name().equals(split)))
+					.collect(Collectors.toUnmodifiableSet());
+
+				validateResourceTypesAllContainPatientSearchParams(resourceTypesFromTypeFilter);
+				bulkDataExportOptions.setResourceTypes(resourceTypesFromTypeFilter);
+			}
 		} else {
 			// all patient resource types
 			bulkDataExportOptions.setResourceTypes(getPatientCompartmentResources());
