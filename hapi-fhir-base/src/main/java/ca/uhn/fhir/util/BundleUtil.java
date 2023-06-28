@@ -582,12 +582,12 @@ public class BundleUtil {
 		boolean isPatch = false;
 		if (thePayloadResource instanceof IBaseBinary) {
 			String contentType = ((IBaseBinary) thePayloadResource).getContentType();
-			 try {
-				 PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(theContext, contentType);
-				 isPatch = true;
-			 } catch (InvalidRequestException e) {
-				 // ignore
-			 }
+			try {
+				PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(theContext, contentType);
+				isPatch = true;
+			} catch (InvalidRequestException e) {
+				// ignore
+			}
 		}
 		return isPatch;
 	}
