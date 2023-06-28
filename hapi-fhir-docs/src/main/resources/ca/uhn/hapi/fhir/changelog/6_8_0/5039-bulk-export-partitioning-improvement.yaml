@@ -1,5 +1,5 @@
 ---
 type: change
-issue: fixme
+issue: 5039
 title: "Bulk export fetch operations now properly account for the partition being searched, which
    should improve performance in some cases on partitioned systems."
