@@ -224,7 +224,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
 		}
-		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(false);
 	}
 
 

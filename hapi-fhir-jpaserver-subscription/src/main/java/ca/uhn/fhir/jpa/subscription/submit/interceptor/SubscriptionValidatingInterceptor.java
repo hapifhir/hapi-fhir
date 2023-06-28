@@ -151,7 +151,7 @@ public class SubscriptionValidatingInterceptor {
 
 			try {
 				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
-				if (!strategy.equals(SubscriptionMatchingStrategy.IN_MEMORY) && myStorageSettings.isOnlyAllowInMemorySubscriptions()) {
+				if (!(SubscriptionMatchingStrategy.IN_MEMORY == strategy) && myStorageSettings.isOnlyAllowInMemorySubscriptions()) {
 					throw new InvalidRequestException(Msg.code(2367)+ "This server is configured to only allow in-memory subscriptions. This subscription's criteria cannot be evaluated in-memory.");
 				}
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
