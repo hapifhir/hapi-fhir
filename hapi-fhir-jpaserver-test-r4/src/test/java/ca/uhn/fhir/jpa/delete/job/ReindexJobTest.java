@@ -447,11 +447,11 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindex_reindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
-		// make sure the resources auto-reindex after search parameter update is enabled
+	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
+		// make sure the resources auto-reindex after the search parameter update is enabled
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
 
-		// create Observation resource and SearchParameter for it to trigger re-index
+		// create an Observation resource and SearchParameter for it to trigger re-indexing
 		myReindexTestHelper.createObservationWithCode();
 		myReindexTestHelper.createCodeSearchParameter();
 
@@ -459,7 +459,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
 		assertEquals(1, jobInstances.size());
 
-		// check that job is completed (not stuck in QUEUED status)
+		// check that the job is completed (not stuck in QUEUED status)
 		myBatch2JobHelper.awaitJobCompletion(jobInstances.get(0).getInstanceId());
 	}
 
