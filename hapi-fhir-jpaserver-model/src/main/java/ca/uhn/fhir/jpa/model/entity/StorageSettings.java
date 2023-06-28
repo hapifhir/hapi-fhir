@@ -119,7 +119,7 @@ public class StorageSettings {
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
-	 * Since 6.8.0
+	 * @since 6.8.0
 	 * Prevents any non IN-MEMORY Search params from being created by users.
 	 */
 	private boolean myAllowOnlyInMemorySubscriptions = false;
