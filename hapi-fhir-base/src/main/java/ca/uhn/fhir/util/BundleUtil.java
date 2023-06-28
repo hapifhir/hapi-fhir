@@ -34,6 +34,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -64,7 +65,7 @@ public class BundleUtil {
 
 	private static final String PREVIOUS = LINK_PREV;
 	private static final String PREV = "prev";
-	private static final Set<String> previousOrPrev = Set.of(PREVIOUS, PREV);
+	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
 
 	public static final String DIFFERENT_LINK_ERROR_MSG = "Mismatching 'previous' and 'prev' links exist. 'previous' " +
 		"is: '$PREVIOUS' and 'prev' is: '$PREV'.";
