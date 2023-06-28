@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -49,6 +50,9 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IJobPersistence myJobPersistence;
 
 	private ReindexTestHelper myReindexTestHelper;
 	private PatientReindexTestHelper myPatientReindexTestHelper;
@@ -440,6 +444,23 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(StatusEnum.FAILED, outcome.getStatus());
 		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+	}
+
+	@Test
+	public void testReindex_reindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
+		// make sure the resources auto-reindex after search parameter update is enabled
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		// create Observation resource and SearchParameter for it to trigger re-index
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createCodeSearchParameter();
+
+		// check that reindex job was created
+		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
+		assertEquals(1, jobInstances.size());
+
+		// check that job is completed (not stuck in QUEUED status)
+		myBatch2JobHelper.awaitJobCompletion(jobInstances.get(0).getInstanceId());
 	}
 
 	private static Stream<Arguments> numResourcesParams(){
