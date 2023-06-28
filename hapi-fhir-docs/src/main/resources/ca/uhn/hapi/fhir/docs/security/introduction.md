@@ -31,6 +31,6 @@ The [Server Interceptor](/docs/interceptors/server_interceptors.html) framework 
 Note that if you are implementing HTTP Basic Auth, you may want to return a <code>WWW-Authenticate</code> header with the response. The following snippet shows how to add such a header with a custom realm:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/SecurityInterceptors.java|basicAuthInterceptorRealm}}
+{{snippet:classpath:ca/uhn/hapi/fhir/docs/interceptor/HeaderBasedBinarySecurityContextInterceptor.java}}
 ``` 
 
