@@ -4,6 +4,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
@@ -65,6 +66,9 @@ public class ExpandResourcesStepTest {
 
 	@Mock
 	IIdHelperService<JpaPid> myIdHelperService;
+
+	@Spy
+	private InterceptorService myInterceptorService = new InterceptorService();
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
