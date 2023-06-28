@@ -5,7 +5,6 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -46,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-	@Autowired private IBatch2JobRunner myJobRunner;
 	@Autowired private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("mySystemDaoR4")
