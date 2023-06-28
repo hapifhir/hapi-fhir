@@ -43,6 +43,7 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -123,8 +124,9 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
 		IJobPersistence.CreateResult instanceAndFirstChunk =
-			myTransactionService.withSystemRequest().execute(() ->
-				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
+			myTransactionService.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
