@@ -33,7 +33,7 @@ public class ResponseBundleBuilder {
 	}
 
 	IBaseBundle createBundleFromBundleProvider(ResponseBundleRequest theResponseBundleRequest) {
-		final ResponsePage pageResponse = getResponsePage(theResponseBundleRequest);
+		final ResponsePage pageResponse = buildResponsePage(theResponseBundleRequest);
 		removeNulls(pageResponse.resourceList);
 		validateIds(pageResponse.resourceList);
 
@@ -49,72 +49,8 @@ public class ResponseBundleBuilder {
 
 	}
 
-	private BundleLinks buildLinks(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse) {
-		final IRestfulServer<?> server = theResponseBundleRequest.server;
-		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
-		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
 
-		BundleLinks links = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
-		links.setSelf(theResponseBundleRequest.linkSelf);
-
-		if (bundleProvider.getCurrentPageOffset() != null) {
-
-			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), pageRequest.offset + pageRequest.limit, pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
-			}
-			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), Math.max(pageRequest.offset - pageRequest.limit, 0), pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
-			}
-
-		}
-
-		if (pageRequest.offset != null || (!server.canStoreSearchResults() && !isEverythingOperation(theResponseBundleRequest.requestDetails)) || myIsOffsetModeHistory) {
-			// Paging without caching
-			// We're doing offset pages
-			int requestedToReturn = pageResponse.numToReturn;
-			if (server.getPagingProvider() == null && pageRequest.offset != null) {
-				// There is no paging provider at all, so assume we're querying up to all the results we need every time
-				requestedToReturn += pageRequest.offset;
-			}
-			if (pageResponse.numTotalResults == null || requestedToReturn < pageResponse.numTotalResults) {
-				if (!pageResponse.resourceList.isEmpty()) {
-					links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), ObjectUtils.defaultIfNull(pageRequest.offset, 0) + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters()));
-				}
-			}
-			if (pageRequest.offset != null && pageRequest.offset > 0) {
-				int start = Math.max(0, pageRequest.offset - pageResponse.pageSize);
-				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
-			}
-		} else if (StringUtils.isNotBlank(bundleProvider.getCurrentPageId())) {
-			// We're doing named pages
-			final String uuid = bundleProvider.getUuid();
-			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getNextPageId(), theResponseBundleRequest.getRequestParameters()));
-			}
-			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getPreviousPageId(), theResponseBundleRequest.getRequestParameters()));
-			}
-		} else if (pageResponse.searchId != null) {
-			/*
-			 * We're doing offset pages - Note that we only return paging links if we actually
-			 * included some results in the response. We do this to avoid situations where
-			 * people have faked the offset number to some huge number to avoid them getting
-			 * back paging links that don't make sense.
-			 */
-			if (pageResponse.size() > 0) {
-				if (pageResponse.numTotalResults == null || theResponseBundleRequest.offset + pageResponse.numToReturn < pageResponse.numTotalResults) {
-					links.setNext((RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, theResponseBundleRequest.offset + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters())));
-				}
-				if (theResponseBundleRequest.offset > 0) {
-					int start = Math.max(0, theResponseBundleRequest.offset - pageResponse.pageSize);
-					links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
-				}
-			}
-		}
-		return links;
-	}
-
-	private ResponsePage getResponsePage(ResponseBundleRequest theResponseBundleRequest) {
+	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
@@ -213,6 +149,71 @@ public class ResponseBundleBuilder {
 			resourceList.removeIf(Objects::isNull);
 		}
 	}
+	private BundleLinks buildLinks(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse) {
+		final IRestfulServer<?> server = theResponseBundleRequest.server;
+		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
+
+		BundleLinks links = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
+		links.setSelf(theResponseBundleRequest.linkSelf);
+
+		if (bundleProvider.getCurrentPageOffset() != null) {
+
+			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), pageRequest.offset + pageRequest.limit, pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
+			}
+			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), Math.max(pageRequest.offset - pageRequest.limit, 0), pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
+			}
+
+		}
+
+		if (pageRequest.offset != null || (!server.canStoreSearchResults() && !isEverythingOperation(theResponseBundleRequest.requestDetails)) || myIsOffsetModeHistory) {
+			// Paging without caching
+			// We're doing offset pages
+			int requestedToReturn = pageResponse.numToReturn;
+			if (server.getPagingProvider() == null && pageRequest.offset != null) {
+				// There is no paging provider at all, so assume we're querying up to all the results we need every time
+				requestedToReturn += pageRequest.offset;
+			}
+			if (pageResponse.numTotalResults == null || requestedToReturn < pageResponse.numTotalResults) {
+				if (!pageResponse.resourceList.isEmpty()) {
+					links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), ObjectUtils.defaultIfNull(pageRequest.offset, 0) + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters()));
+				}
+			}
+			if (pageRequest.offset != null && pageRequest.offset > 0) {
+				int start = Math.max(0, pageRequest.offset - pageResponse.pageSize);
+				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
+			}
+		} else if (StringUtils.isNotBlank(bundleProvider.getCurrentPageId())) {
+			// We're doing named pages
+			final String uuid = bundleProvider.getUuid();
+			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
+				links.setNext(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getNextPageId(), theResponseBundleRequest.getRequestParameters()));
+			}
+			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
+				links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getPreviousPageId(), theResponseBundleRequest.getRequestParameters()));
+			}
+		} else if (pageResponse.searchId != null) {
+			/*
+			 * We're doing offset pages - Note that we only return paging links if we actually
+			 * included some results in the response. We do this to avoid situations where
+			 * people have faked the offset number to some huge number to avoid them getting
+			 * back paging links that don't make sense.
+			 */
+			if (pageResponse.size() > 0) {
+				if (pageResponse.numTotalResults == null || theResponseBundleRequest.offset + pageResponse.numToReturn < pageResponse.numTotalResults) {
+					links.setNext((RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, theResponseBundleRequest.offset + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters())));
+				}
+				if (theResponseBundleRequest.offset > 0) {
+					int start = Math.max(0, theResponseBundleRequest.offset - pageResponse.pageSize);
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
+				}
+			}
+		}
+		return links;
+	}
+
 
 
 	private boolean isEverythingOperation(RequestDetails theRequest) {
