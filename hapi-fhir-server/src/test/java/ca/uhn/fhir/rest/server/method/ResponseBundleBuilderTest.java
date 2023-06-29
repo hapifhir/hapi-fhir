@@ -72,9 +72,10 @@ class ResponseBundleBuilderTest {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void testEmpty(boolean theCanStoreSearchResults) {
+		Integer limit = null;
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults, null);
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(new SimpleBundleProvider(), null);
+		setCanStoreSearchResults(theCanStoreSearchResults, limit);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(new SimpleBundleProvider(), limit);
 
 		// run
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
@@ -88,9 +89,10 @@ class ResponseBundleBuilderTest {
 	@Test
 	void testOffsetNoPageSize() {
 		// setup
+		Integer limit = null;
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
 		// run
 		try {
@@ -106,9 +108,10 @@ class ResponseBundleBuilderTest {
 	@ValueSource(booleans = {true, false})
 	void testNoLimit(boolean theCanStoreSearchResults) {
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults, null);
+		Integer limit = null;
+		setCanStoreSearchResults(theCanStoreSearchResults, limit);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 		if (!theCanStoreSearchResults) {
 			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 		}
@@ -129,16 +132,17 @@ class ResponseBundleBuilderTest {
 	@ValueSource(booleans = {true, false})
 	void testWithLimit(boolean theCanStoreSearchResults) {
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults, LIMIT);
+		Integer limit = LIMIT;
+		setCanStoreSearchResults(theCanStoreSearchResults, limit);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, LIMIT);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
 		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
 		// run
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
+		verifyBundle(bundle, RESOURCE_COUNT, limit);
 		if (theCanStoreSearchResults) {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
@@ -154,8 +158,9 @@ class ResponseBundleBuilderTest {
 	@Test
 	void testNoLimitNoDefaultPageSize() {
 		// setup
+		Integer limit = null;
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
 		when(myServer.getDefaultPageSize()).thenReturn(null);
 		// run
@@ -170,8 +175,9 @@ class ResponseBundleBuilderTest {
 	@Test
 	void testOffset() {
 		// setup
+		Integer limit = LIMIT;
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, LIMIT);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
 		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
 
@@ -250,10 +256,13 @@ class ResponseBundleBuilderTest {
 
 	}
 
-	private static void verifyBundle(Bundle theBundle, int theExpectedTotal, int theLimit) {
+	private static void verifyBundle(Bundle theBundle, int theExpectedTotal, int theExpectedEntryCount) {
 		assertFalse(theBundle.isEmpty());
 		assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
 		assertEquals(theExpectedTotal, theBundle.getTotal());
-		assertEquals(theLimit, theBundle.getEntry().size());
+		assertEquals(theExpectedEntryCount, theBundle.getEntry().size());
+		if (theExpectedEntryCount > 0) {
+			assertEquals("A0", theBundle.getEntryFirstRep().getResource().getId());
+		}
 	}
 }
