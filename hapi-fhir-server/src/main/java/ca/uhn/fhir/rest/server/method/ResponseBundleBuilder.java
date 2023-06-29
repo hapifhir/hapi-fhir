@@ -2,7 +2,6 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.BundleLinks;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -13,7 +12,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,18 +35,17 @@ public class ResponseBundleBuilder {
 	IBaseBundle createBundleFromBundleProvider(ResponseBundleRequest theResponseBundleRequest) {
 		IRestfulServer<?> server = theResponseBundleRequest.server;
 
-		IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
 		IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 
-		final RequestedPage pageRequest = getRequestedPage(theResponseBundleRequest, bundleProvider);
-		final ResponsePage pageResponse = getResponsePage(theResponseBundleRequest, server, bundleProvider, pageRequest);
+		final ResponsePage pageResponse = getResponsePage(theResponseBundleRequest);
 
 		removeNulls(pageResponse.resourceList);
 
 		validateIds(pageResponse.resourceList);
 
-		BundleLinks links = setLinks(theResponseBundleRequest, server, bundleProvider, pageRequest, pageResponse);
+		BundleLinks links = setLinks(theResponseBundleRequest, server, bundleProvider, theResponseBundleRequest.requestedPage, pageResponse);
 
+		IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
 		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
 		bundleFactory.addResourcesToBundle(new ArrayList<>(pageResponse.resourceList), theResponseBundleRequest.bundleType, links.serverBase, server.getBundleInclusionRule(), theResponseBundleRequest.includes);
 
@@ -117,73 +114,73 @@ public class ResponseBundleBuilder {
 		return links;
 	}
 
-	private ResponsePage getResponsePage(ResponseBundleRequest theResponseBundleRequest, IRestfulServer<?> server, IBundleProvider bundleProvider, RequestedPage pageRequest) {
-		final ResponsePage pageResponse;
+	private ResponsePage getResponsePage(ResponseBundleRequest theResponseBundleRequest) {
+		final IRestfulServer<?> server = theResponseBundleRequest.server;
+		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
+		final List<IBaseResource> resourceList;
+		final int pageSize;
 
-		{
-			final List<IBaseResource> resourceList;
-			int numToReturn;
-			Integer numTotalResults = bundleProvider.size();
-			String searchId = null;
+		int numToReturn;
+		Integer numTotalResults = bundleProvider.size();
+		String searchId = null;
 
-			final int pageSize;
-			if (pageRequest.offset != null || !server.canStoreSearchResults()) {
-				if (pageRequest.limit != null) {
-					pageSize = pageRequest.limit;
-				} else {
-					if (server.getDefaultPageSize() != null) {
-						pageSize = server.getDefaultPageSize();
-					} else {
-						pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
-					}
-				}
-				numToReturn = pageSize;
-
-				if ((pageRequest.offset != null && !myIsOffsetModeHistory) || bundleProvider.getCurrentPageOffset() != null) {
-					// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
-					resourceList = bundleProvider.getResources(0, Integer.MAX_VALUE);
-				} else if (numToReturn > 0) {
-					resourceList = bundleProvider.getResources(0, numToReturn);
-				} else {
-					resourceList = Collections.emptyList();
-				}
-				RestfulServerUtils.validateResourceListNotNull(resourceList);
-
+		if (pageRequest.offset != null || !server.canStoreSearchResults()) {
+			if (pageRequest.limit != null) {
+				pageSize = pageRequest.limit;
 			} else {
-				IPagingProvider pagingProvider = server.getPagingProvider();
-				if (pageRequest.limit == null || pageRequest.limit.equals(0)) {
-					pageSize = pagingProvider.getDefaultPageSize();
+				if (server.getDefaultPageSize() != null) {
+					pageSize = server.getDefaultPageSize();
 				} else {
-					pageSize = Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
+					pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
 				}
-				numToReturn = pageSize;
+			}
+			numToReturn = pageSize;
 
-				if (numTotalResults != null) {
-					numToReturn = Math.min(numToReturn, numTotalResults - theResponseBundleRequest.offset);
-				}
+			if ((pageRequest.offset != null && !myIsOffsetModeHistory) || bundleProvider.getCurrentPageOffset() != null) {
+				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
+				resourceList = bundleProvider.getResources(0, Integer.MAX_VALUE);
+			} else if (numToReturn > 0) {
+				resourceList = bundleProvider.getResources(0, numToReturn);
+			} else {
+				resourceList = Collections.emptyList();
+			}
+			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-				if (numToReturn > 0 || bundleProvider.getCurrentPageId() != null) {
-					resourceList = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
-				} else {
-					resourceList = Collections.emptyList();
-				}
-				RestfulServerUtils.validateResourceListNotNull(resourceList);
+		} else {
+			IPagingProvider pagingProvider = server.getPagingProvider();
+			if (pageRequest.limit == null || pageRequest.limit.equals(0)) {
+				pageSize = pagingProvider.getDefaultPageSize();
+			} else {
+				pageSize = Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
+			}
+			numToReturn = pageSize;
 
-				if (theResponseBundleRequest.searchId != null) {
-					searchId = theResponseBundleRequest.searchId;
-				} else {
-					if (numTotalResults == null || numTotalResults > numToReturn) {
-						searchId = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, bundleProvider);
-						if (StringUtils.isBlank(searchId)) {
-							ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
-							searchId = null;
-						}
+			if (numTotalResults != null) {
+				numToReturn = Math.min(numToReturn, numTotalResults - theResponseBundleRequest.offset);
+			}
+
+			if (numToReturn > 0 || bundleProvider.getCurrentPageId() != null) {
+				resourceList = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
+			} else {
+				resourceList = Collections.emptyList();
+			}
+			RestfulServerUtils.validateResourceListNotNull(resourceList);
+
+			if (theResponseBundleRequest.searchId != null) {
+				searchId = theResponseBundleRequest.searchId;
+			} else {
+				if (numTotalResults == null || numTotalResults > numToReturn) {
+					searchId = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, bundleProvider);
+					if (StringUtils.isBlank(searchId)) {
+						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+						searchId = null;
 					}
 				}
 			}
-			pageResponse = new ResponsePage(searchId, resourceList, numToReturn, numTotalResults, pageSize);
 		}
-		return pageResponse;
+
+		return new ResponsePage(searchId, resourceList, numToReturn, numTotalResults, pageSize);
 	}
 
 	private static void validateIds(List<IBaseResource> resourceList) {
@@ -217,24 +214,6 @@ public class ResponseBundleBuilder {
 		}
 	}
 
-	private static RequestedPage getRequestedPage(ResponseBundleRequest theResponseBundleRequest, IBundleProvider bundleProvider) {
-		final RequestedPage page;
-		{
-			final Integer offset;
-			final Integer limit;
-
-			if (bundleProvider.getCurrentPageOffset() != null) {
-				offset = bundleProvider.getCurrentPageOffset();
-				limit = bundleProvider.getCurrentPageSize();
-				Validate.notNull(limit, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
-			} else {
-				offset = RestfulServerUtils.tryToExtractNamedParameter(theResponseBundleRequest.requestDetails, Constants.PARAM_OFFSET);
-				limit = theResponseBundleRequest.limit;
-			}
-			page = new RequestedPage(offset, limit);
-		}
-		return page;
-	}
 
 	private boolean isEverythingOperation(RequestDetails theRequest) {
 		return (theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_TYPE

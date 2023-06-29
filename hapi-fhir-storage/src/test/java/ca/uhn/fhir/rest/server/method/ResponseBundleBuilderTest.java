@@ -40,6 +40,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hl7.fhir.r4.model.Bundle.BundleType.SEARCHSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +66,7 @@ class ResponseBundleBuilderTest {
 
 	@BeforeEach
 	public void before() {
-		when(myServer.getFhirContext()).thenReturn(ourFhirContext);
+		lenient().when(myServer.getFhirContext()).thenReturn(ourFhirContext);
 	}
 
 	@AfterEach
@@ -97,12 +98,10 @@ class ResponseBundleBuilderTest {
 		Integer limit = null;
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
-		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
 		try {
-			svc.createBundleFromBundleProvider(responseBundleRequest);
+			buildResponseBundleRequest(bundleProvider, limit);
 
 			// verify
 		} catch (NullPointerException e) {
@@ -233,10 +232,10 @@ class ResponseBundleBuilderTest {
 		// setup
 		Integer limit = LIMIT;
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
 		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
 
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
