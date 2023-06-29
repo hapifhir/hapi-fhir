@@ -43,7 +43,7 @@ public class ResponseBundleBuilder {
 
 		validateIds(pageResponse.resourceList);
 
-		BundleLinks links = setLinks(theResponseBundleRequest, server, bundleProvider, theResponseBundleRequest.requestedPage, pageResponse);
+		BundleLinks links = buildLinks(theResponseBundleRequest, pageResponse);
 
 		IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
 		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
@@ -53,7 +53,11 @@ public class ResponseBundleBuilder {
 
 	}
 
-	private BundleLinks setLinks(ResponseBundleRequest theResponseBundleRequest, IRestfulServer<?> server, IBundleProvider bundleProvider, RequestedPage pageRequest, ResponsePage pageResponse) {
+	private BundleLinks buildLinks(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse) {
+		final IRestfulServer<?> server = theResponseBundleRequest.server;
+		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
+
 		BundleLinks links = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
 		links.setSelf(theResponseBundleRequest.linkSelf);
 
