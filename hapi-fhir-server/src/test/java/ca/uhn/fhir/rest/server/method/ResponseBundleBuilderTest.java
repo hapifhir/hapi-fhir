@@ -154,7 +154,6 @@ class ResponseBundleBuilderTest {
 		}
 	}
 
-
 	@Test
 	void testNoLimitNoDefaultPageSize() {
 		// setup
@@ -192,6 +191,33 @@ class ResponseBundleBuilderTest {
 		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
 		//noinspection ConstantValue
 		assertPrevLink(bundle, CURRENT_PAGE_SIZE, max(0, CURRENT_PAGE_OFFSET - CURRENT_PAGE_SIZE));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void unknownBundleSize(boolean theCanStoreSearchResults) {
+		// setup
+		Integer limit = LIMIT;
+		setCanStoreSearchResults(theCanStoreSearchResults, limit);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		bundleProvider.setSize(null);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+
+		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, null, limit);
+		if (theCanStoreSearchResults) {
+			assertThat(bundle.getLink(), hasSize(2));
+			assertSelfLink(bundle);
+			assertNextLink(bundle, LIMIT);
+		} else {
+			assertThat(bundle.getLink(), hasSize(2));
+			assertSelfLink(bundle);
+			assertNextLink(bundle, LIMIT);
+		}
 	}
 
 	private static void assertNextLink(Bundle theBundle, int theCount) {
@@ -256,10 +282,10 @@ class ResponseBundleBuilderTest {
 
 	}
 
-	private static void verifyBundle(Bundle theBundle, int theExpectedTotal, int theExpectedEntryCount) {
+	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount) {
 		assertFalse(theBundle.isEmpty());
 		assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
-		assertEquals(theExpectedTotal, theBundle.getTotal());
+		assertEquals(theExpectedTotal, theBundle.getTotalElement().getValue());
 		assertEquals(theExpectedEntryCount, theBundle.getEntry().size());
 		if (theExpectedEntryCount > 0) {
 			assertEquals("A0", theBundle.getEntryFirstRep().getResource().getId());

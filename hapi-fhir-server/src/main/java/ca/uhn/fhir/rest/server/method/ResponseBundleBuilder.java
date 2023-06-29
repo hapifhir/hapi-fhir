@@ -98,10 +98,6 @@ public class ResponseBundleBuilder {
 			}
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			if (numTotalResults == null) {
-				numTotalResults = bundleProvider.size();
-			}
-
 			if (theResponseBundleRequest.getSearchId() != null) {
 				searchId = theResponseBundleRequest.getSearchId();
 			} else {
