@@ -57,6 +57,7 @@ class ResponseBundleBuilderTest {
 	private static final String SEARCH_ID = "test-search-id";
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static final String TEST_REQUEST_PATH = "test/request/path";
+	private static final Integer REQUEST_OFFSET = 3;
 	@Mock
 	IRestfulServer<RequestDetails> myServer;
 	@Mock
@@ -357,11 +358,45 @@ class ResponseBundleBuilderTest {
 		verifyBundle(bundle, RESOURCE_COUNT, limit);
 		assertThat(bundle.getLink(), hasSize(2));
 		assertSelfLink(bundle);
-		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
-		assertEquals(LINK_NEXT, nextLink.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + limit + "&_count=" + limit + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+
+		assertNextLinkOffset(bundle, limit, limit);
 	}
 
+	@Test
+	void offsetSinceNonNullSearchIdWithRequestOffset() {
+		// setup
+		Integer limit = null;
+		setCanStoreSearchResults(true, limit);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID, REQUEST_OFFSET);
+
+		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+
+		// run
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE, "A3", "A17");
+		assertThat(bundle.getLink(), hasSize(3));
+		assertSelfLink(bundle);
+
+		assertNextLinkOffset(bundle, DEFAULT_PAGE_SIZE + REQUEST_OFFSET, DEFAULT_PAGE_SIZE);
+		assertPrevLinkOffset(bundle, 0, DEFAULT_PAGE_SIZE);
+	}
+
+
+	private static void assertNextLinkOffset(Bundle theBundle, Integer theOffset, Integer theCount) {
+		Bundle.BundleLinkComponent nextLink = theBundle.getLink().get(1);
+		assertEquals(LINK_NEXT, nextLink.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + theOffset + "&_count=" + theCount + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+	}
+
+	private static void assertPrevLinkOffset(Bundle theBundle, Integer theOffset, Integer theCount) {
+		Bundle.BundleLinkComponent nextLink = theBundle.getLink().get(2);
+		assertEquals(LINK_PREVIOUS, nextLink.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + theOffset + "&_count=" + theCount + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+	}
 	private static void assertNextLink(Bundle theBundle, int theCount) {
 		assertNextLink(theBundle, theCount, theCount);
 	}
@@ -414,15 +449,19 @@ class ResponseBundleBuilderTest {
 
 	@Nonnull
 	private ResponseBundleRequest buildResponseBundleRequest(IBundleProvider theBundleProvider, Integer theLimit, String theSearchId) {
+		return buildResponseBundleRequest(theBundleProvider, theLimit, theSearchId, 0);
+	}
+
+	@Nonnull
+	private ResponseBundleRequest buildResponseBundleRequest(IBundleProvider theBundleProvider, Integer theLimit, String theSearchId, Integer theOffset) {
 		Set<Include> includes = Collections.emptySet();
-		int start = 0;
 		BundleTypeEnum bundleType = BundleTypeEnum.SEARCHSET;
 
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		systemRequestDetails.setRequestPath(TEST_REQUEST_PATH);
 
-		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, start, bundleType, theSearchId);
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, theOffset, bundleType, theSearchId);
 		return responseBundleRequest;
 	}
 
