@@ -48,7 +48,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_PAGE_SIZE = 20000;
 
-	private static final int MAX_BATCH_OF_IDS = 500;
+	protected static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 

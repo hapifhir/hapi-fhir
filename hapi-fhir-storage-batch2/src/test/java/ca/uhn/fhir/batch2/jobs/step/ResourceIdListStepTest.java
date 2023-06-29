@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,16 +47,16 @@ class ResourceIdListStepTest {
 
 	private ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
-	private List<TypedResourcePid> idList = new ArrayList<>();
+	private List<TypedResourcePid> myIdList = new ArrayList<>();
 
 	@BeforeEach
 	void beforeEach() {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
-		for (int id = 0; id <= LIST_SIZE; id++) {
+		for (int id = 0; id < LIST_SIZE; id++) {
 			IResourcePersistentId theId = mock(IResourcePersistentId.class);
 			when(theId.toString()).thenReturn(Integer.toString(id + 1));
 			TypedResourcePid typedId = new TypedResourcePid("Patient", theId);
-			idList.add(typedId);
+			myIdList.add(typedId);
 		}
 	}
 
@@ -60,13 +65,18 @@ class ResourceIdListStepTest {
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
 		when(myParameters.getBatchSize()).thenReturn(LIST_SIZE);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
-		Date someDate = new Date();
-		//final HomogeneousResourcePidList homogeneousResourcePidList = new HomogeneousResourcePidList(ResourceType.Patient.name(), ids, someDate, null);
 		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
-		when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
-		when(homogeneousResourcePidList.getLastDate()).thenReturn(someDate);
+		when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(myIdList);
+		when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
 		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
 			.thenReturn(homogeneousResourcePidList);
+
+		doAnswer(i -> {
+			ResourceIdListWorkChunkJson list = i.getArgument(0);
+			Assertions.assertTrue(list.size() <= ResourceIdListStep.MAX_BATCH_OF_IDS,
+				"Id batch size should never exceed "+ResourceIdListStep.MAX_BATCH_OF_IDS);
+			return null;
+		}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
 		Assertions.assertNotEquals(null, run);
