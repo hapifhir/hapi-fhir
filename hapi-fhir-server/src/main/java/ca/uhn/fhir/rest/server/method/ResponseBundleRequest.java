@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import java.util.Map;
 import java.util.Set;
 
 public class ResponseBundleRequest {
@@ -30,4 +31,8 @@ public class ResponseBundleRequest {
         bundleType = theBundleType;
         searchId = theSearchId;
     }
+
+	public Map<String, String[]> getRequestParameters() {
+		 return requestDetails.getParameters();
+	}
 }
