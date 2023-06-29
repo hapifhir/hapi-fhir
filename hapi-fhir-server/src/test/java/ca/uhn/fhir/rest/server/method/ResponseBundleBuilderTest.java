@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -102,6 +103,24 @@ class ResponseBundleBuilderTest {
 			// verify
 		} catch (NullPointerException e) {
 			assertEquals("IBundleProvider returned a non-null offset, but did not return a non-null page size", e.getMessage());
+		}
+	}
+
+	@Test
+	void testNullId() {
+		// setup
+		Integer limit = null;
+		setCanStoreSearchResults(true, limit);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(new Patient());
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+
+		// run
+		try {
+			mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+			// verify
+		} catch (InternalErrorException e) {
+			assertEquals("HAPI-0435: Server method returned resource of type[Patient] with no ID specified (IResource#setId(IdDt) must be called)", e.getMessage());
 		}
 	}
 
