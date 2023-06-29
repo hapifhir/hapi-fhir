@@ -127,6 +127,30 @@ class ResponseBundleBuilderTest {
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testFilterNulls(boolean theCanStoreSearchResults) {
+		// setup
+		Integer limit = null;
+		setCanStoreSearchResults(theCanStoreSearchResults, limit);
+		List<IBaseResource> list = buildPatientList(RESOURCE_COUNT);
+		list.set(7, null);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(list);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+		if (!theCanStoreSearchResults) {
+			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
+		}
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
+
+		assertThat(bundle.getLink(), hasSize(2));
+		assertSelfLink(bundle);
+		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
+	}
+
 	// FIXME KHS test with Constants.PARAM_OFFSET in request details
 
 	@ParameterizedTest
@@ -285,12 +309,26 @@ class ResponseBundleBuilderTest {
 	}
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount) {
+		String firstId = null;
+		String lastId = null;
+		if (theExpectedEntryCount > 0) {
+			firstId = "A0";
+			lastId = "A" + (theExpectedEntryCount - 1);
+		}
+		verifyBundle(theBundle, theExpectedTotal, theExpectedEntryCount, firstId, lastId);
+	}
+
+	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount, String theFirstId, String theLastId) {
 		assertFalse(theBundle.isEmpty());
 		assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
 		assertEquals(theExpectedTotal, theBundle.getTotalElement().getValue());
-		assertEquals(theExpectedEntryCount, theBundle.getEntry().size());
-		if (theExpectedEntryCount > 0) {
-			assertEquals("A0", theBundle.getEntryFirstRep().getResource().getId());
+		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
+		assertEquals(theExpectedEntryCount, entries.size());
+		if (theFirstId != null) {
+			assertEquals(theFirstId, entries.get(0).getResource().getId());
+		}
+		if (theLastId != null) {
+			assertEquals(theLastId, entries.get(theExpectedEntryCount - 1).getResource().getId());
 		}
 	}
 }
