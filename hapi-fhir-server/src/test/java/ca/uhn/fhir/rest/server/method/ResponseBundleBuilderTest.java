@@ -50,6 +50,7 @@ class ResponseBundleBuilderTest {
 	public static final int DEFAULT_PAGE_SIZE = 15;
 	public static final int CURRENT_PAGE_OFFSET = 2;
 	private static final int CURRENT_PAGE_SIZE = 8;
+	private static final Integer MAX_PAGE_SIZE = 43;
 	FhirContext ourFhirContext = FhirContext.forR4Cached();
 	@Mock
 	IRestfulServer<RequestDetails> myServer;
@@ -72,14 +73,14 @@ class ResponseBundleBuilderTest {
 	@ValueSource(booleans = {true, false})
 	void testEmpty(boolean theCanStoreSearchResults) {
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults);
+		setCanStoreSearchResults(theCanStoreSearchResults, null);
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(new SimpleBundleProvider(), null);
 
 		// run
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, 0);
+		verifyBundle(bundle, 0, 0);
 		assertThat(bundle.getLink(), hasSize(1));
 		assertSelfLink(bundle);
 	}
@@ -105,7 +106,7 @@ class ResponseBundleBuilderTest {
 	@ValueSource(booleans = {true, false})
 	void testNoLimit(boolean theCanStoreSearchResults) {
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults);
+		setCanStoreSearchResults(theCanStoreSearchResults, null);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
 		if (!theCanStoreSearchResults) {
@@ -115,22 +116,20 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT);
-		if (theCanStoreSearchResults) {
-			assertThat(bundle.getLink(), hasSize(1));
-			assertSelfLink(bundle);
-		} else {
-			assertThat(bundle.getLink(), hasSize(2));
-			assertSelfLink(bundle);
-			assertNextLink(bundle, DEFAULT_PAGE_SIZE);
-		}
+		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE);
+
+		assertThat(bundle.getLink(), hasSize(2));
+		assertSelfLink(bundle);
+		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
 	}
+
+	// FIXME KHS test with Constants.PARAM_OFFSET in request details
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void testWithLimit(boolean theCanStoreSearchResults) {
 		// setup
-		setCanStoreSearchResults(theCanStoreSearchResults);
+		setCanStoreSearchResults(theCanStoreSearchResults, LIMIT);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, LIMIT);
 
@@ -139,10 +138,11 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT);
+		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
 		if (theCanStoreSearchResults) {
-			assertThat(bundle.getLink(), hasSize(1));
+			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
+			assertNextLink(bundle, LIMIT);
 		} else {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
@@ -162,7 +162,7 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT);
+		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
 		assertThat(bundle.getLink(), hasSize(1));
 		assertSelfLink(bundle);
 	}
@@ -180,7 +180,7 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
-		verifyBundle(bundle, RESOURCE_COUNT);
+		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
 		assertThat(bundle.getLink(), hasSize(3));
 		assertSelfLink(bundle);
 		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
@@ -196,10 +196,6 @@ class ResponseBundleBuilderTest {
 		Bundle.BundleLinkComponent link = theBundle.getLink().get(1);
 		assertEquals(LINK_NEXT, link.getRelation());
 		assertEquals(TEST_SERVER_BASE + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
-	}
-
-	private static void assertPrevLink(Bundle theBundle, int theCount) {
-		assertPrevLink(theBundle, theCount, theCount);
 	}
 
 	private static void assertPrevLink(Bundle theBundle, int theCount, int theOffset) {
@@ -225,9 +221,16 @@ class ResponseBundleBuilderTest {
 		return retval;
 	}
 
-	private void setCanStoreSearchResults(boolean theCanStoreSearchResults) {
+	private void setCanStoreSearchResults(boolean theCanStoreSearchResults, Integer theLimit) {
 		when(myServer.canStoreSearchResults()).thenReturn(theCanStoreSearchResults);
 		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
+		if (theCanStoreSearchResults) {
+			if (theLimit == null) {
+				when(myPagingProvider.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
+			} else {
+				when(myPagingProvider.getMaximumPageSize()).thenReturn(MAX_PAGE_SIZE);
+			}
+		}
 	}
 
 	@Nonnull
@@ -247,9 +250,10 @@ class ResponseBundleBuilderTest {
 
 	}
 
-	private static void verifyBundle(Bundle bundle, int expected) {
-		assertFalse(bundle.isEmpty());
-		assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
-		assertEquals(expected, bundle.getTotal());
+	private static void verifyBundle(Bundle theBundle, int theExpectedTotal, int theLimit) {
+		assertFalse(theBundle.isEmpty());
+		assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
+		assertEquals(theExpectedTotal, theBundle.getTotal());
+		assertEquals(theLimit, theBundle.getEntry().size());
 	}
 }
