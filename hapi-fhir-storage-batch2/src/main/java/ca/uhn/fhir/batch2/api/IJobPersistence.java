@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,16 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
+
+	// TODO:  LD:  implement this on Mongo in another ticket
+
+	Stream<JobInstance> findAllWithStream();
+
+	default List<JobInstance> fetchInstancesAfterUpdateTime(Date theUpdateTime, Pageable thePageable) {
+		// TODO: come up with a better HAPI code later
+		throw new UnsupportedOperationException(Msg.code(9999));
+	}
+
 
 	/**
 	 * Fetch all job instances for a given job definition id

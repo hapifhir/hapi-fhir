@@ -145,7 +145,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 				// We need to keep these for investigation but we also need a process to manually delete these jobs once we're done investigating
 				if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
-					ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
+					ourLog.info("skipping because the status is FAILED for ID: {}", jobInstanceForInstanceId.getInstanceId());
 					return null;
 				}
 
