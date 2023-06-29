@@ -71,9 +71,9 @@ public class CrProperties {
 
 		public MeasureProperties() {
 			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
-			myMeasureEvaluationOptions.setNumThreads(DEFAULT_THREADS_FOR_MEASURE_EVAL);
-			myMeasureEvaluationOptions.setThreadedBatchSize(DEFAULT_THREADS_BATCH_SIZE);
-			myMeasureEvaluationOptions.setThreadedEnabled(DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL);
+//			myMeasureEvaluationOptions.setNumThreads(DEFAULT_THREADS_FOR_MEASURE_EVAL);
+//			myMeasureEvaluationOptions.setThreadedBatchSize(DEFAULT_THREADS_BATCH_SIZE);
+//			myMeasureEvaluationOptions.setThreadedEnabled(DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL);
 		};
 
 
