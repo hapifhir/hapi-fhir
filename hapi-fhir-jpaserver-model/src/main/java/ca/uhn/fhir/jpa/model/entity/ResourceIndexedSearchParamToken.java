@@ -373,7 +373,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@PrePersist
-	public void truncateValueTo200Chars() {
+/**
+ * We truncate the fields at the last moment because the tables have limited size.
+ * We don't truncate earlier in the flow because the index hashes MUST be calculated on the full string.
+ */
+	public void truncateFieldsForDB() {
 		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
 		myValue = StringUtils.truncate(myValue, MAX_LENGTH);
 	}
