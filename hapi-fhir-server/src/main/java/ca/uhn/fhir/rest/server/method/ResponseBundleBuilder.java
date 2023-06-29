@@ -47,6 +47,16 @@ public class ResponseBundleBuilder {
 
 		validateIds(pageResponse.resourceList);
 
+		BundleLinks links = setLinks(theResponseBundleRequest, server, bundleProvider, pageRequest, pageResponse);
+
+		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<>(pageResponse.resourceList), theResponseBundleRequest.bundleType, links.serverBase, server.getBundleInclusionRule(), theResponseBundleRequest.includes);
+
+		return (IBaseBundle) bundleFactory.getResourceBundle();
+
+	}
+
+	private BundleLinks setLinks(ResponseBundleRequest theResponseBundleRequest, IRestfulServer<?> server, IBundleProvider bundleProvider, RequestedPage pageRequest, ResponsePage pageResponse) {
 		BundleLinks links = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
 		links.setSelf(theResponseBundleRequest.linkSelf);
 
@@ -104,12 +114,7 @@ public class ResponseBundleBuilder {
 				}
 			}
 		}
-
-		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
-		bundleFactory.addResourcesToBundle(new ArrayList<>(pageResponse.resourceList), theResponseBundleRequest.bundleType, links.serverBase, server.getBundleInclusionRule(), theResponseBundleRequest.includes);
-
-		return (IBaseBundle) bundleFactory.getResourceBundle();
-
+		return links;
 	}
 
 	private ResponsePage getResponsePage(ResponseBundleRequest theResponseBundleRequest, IRestfulServer<?> server, IBundleProvider bundleProvider, RequestedPage pageRequest) {
