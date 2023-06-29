@@ -51,6 +51,7 @@ class ResponseBundleBuilderTest {
 	public static final int CURRENT_PAGE_OFFSET = 2;
 	private static final int CURRENT_PAGE_SIZE = 8;
 	private static final Integer MAX_PAGE_SIZE = 43;
+	private static final String SEARCH_ID = "test-search-id";
 	FhirContext ourFhirContext = FhirContext.forR4Cached();
 	@Mock
 	IRestfulServer<RequestDetails> myServer;
@@ -201,7 +202,7 @@ class ResponseBundleBuilderTest {
 		setCanStoreSearchResults(theCanStoreSearchResults, limit);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		bundleProvider.setSize(null);
-		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
 
 		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
 		// run
@@ -267,19 +268,20 @@ class ResponseBundleBuilderTest {
 
 	@Nonnull
 	private ResponseBundleRequest buildResponseBundleRequest(IBundleProvider theBundleProvider, Integer theLimit) {
-		// setup
+		return buildResponseBundleRequest(theBundleProvider, theLimit, null);
+	}
+
+	@Nonnull
+	private ResponseBundleRequest buildResponseBundleRequest(IBundleProvider theBundleProvider, Integer theLimit, String theSearchId) {
 		Set<Include> includes = Collections.emptySet();
 		int start = 0;
 		BundleTypeEnum bundleType = BundleTypeEnum.SEARCHSET;
-		// FIXME KHS what is this?
-		String pagingAction = "testPagingAction";
 
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setFhirServerBase(TEST_SERVER_BASE);
 
-		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, start, bundleType, pagingAction);
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, start, bundleType, theSearchId);
 		return responseBundleRequest;
-
 	}
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount) {
