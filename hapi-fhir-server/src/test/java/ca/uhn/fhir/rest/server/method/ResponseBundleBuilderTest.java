@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -36,6 +37,7 @@ import static ca.uhn.fhir.rest.api.Constants.LINK_SELF;
 import static java.lang.Math.max;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hl7.fhir.r4.model.Bundle.BundleType.SEARCHSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.reset;
@@ -53,13 +55,12 @@ class ResponseBundleBuilderTest {
 	private static final int CURRENT_PAGE_SIZE = 8;
 	private static final Integer MAX_PAGE_SIZE = 43;
 	private static final String SEARCH_ID = "test-search-id";
-	FhirContext ourFhirContext = FhirContext.forR4Cached();
+	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
+	private static final String TEST_REQUEST_PATH = "test/request/path";
 	@Mock
 	IRestfulServer<RequestDetails> myServer;
 	@Mock
 	IPagingProvider myPagingProvider;
-
-	ResponseBundleBuilder mySvc = new ResponseBundleBuilder(true);
 
 	@BeforeEach
 	public void before() {
@@ -78,9 +79,10 @@ class ResponseBundleBuilderTest {
 		// setup
 		setCanStoreSearchResults(theCanStoreSearchResults, limit);
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(new SimpleBundleProvider(), limit);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, 0, 0);
@@ -95,10 +97,11 @@ class ResponseBundleBuilderTest {
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
 		try {
-			mySvc.createBundleFromBundleProvider(responseBundleRequest);
+			svc.createBundleFromBundleProvider(responseBundleRequest);
 
 			// verify
 		} catch (NullPointerException e) {
@@ -113,10 +116,11 @@ class ResponseBundleBuilderTest {
 		setCanStoreSearchResults(true, limit);
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(new Patient());
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
 		try {
-			mySvc.createBundleFromBundleProvider(responseBundleRequest);
+			svc.createBundleFromBundleProvider(responseBundleRequest);
 
 			// verify
 		} catch (InternalErrorException e) {
@@ -135,8 +139,10 @@ class ResponseBundleBuilderTest {
 		if (!theCanStoreSearchResults) {
 			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 		}
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE);
@@ -159,8 +165,10 @@ class ResponseBundleBuilderTest {
 		if (!theCanStoreSearchResults) {
 			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
 		}
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
@@ -182,19 +190,21 @@ class ResponseBundleBuilderTest {
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
 		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, limit);
 		if (theCanStoreSearchResults) {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
-			assertNextLink(bundle, LIMIT);
+			assertNextLink(bundle, limit);
 		} else {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
-			assertNextLink(bundle, LIMIT);
+			assertNextLink(bundle, limit);
 		}
 	}
 
@@ -206,8 +216,10 @@ class ResponseBundleBuilderTest {
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
 		when(myServer.getDefaultPageSize()).thenReturn(null);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -225,8 +237,10 @@ class ResponseBundleBuilderTest {
 		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
 
 		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -248,20 +262,80 @@ class ResponseBundleBuilderTest {
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
 
 		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
 		// run
-		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, null, limit);
 		if (theCanStoreSearchResults) {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
-			assertNextLink(bundle, LIMIT);
+			assertNextLink(bundle, limit);
 		} else {
 			assertThat(bundle.getLink(), hasSize(2));
 			assertSelfLink(bundle);
-			assertNextLink(bundle, LIMIT);
+			assertNextLink(bundle, limit);
 		}
+	}
+
+	@Test
+	void testCustomLinks() {
+		// setup
+		Integer limit = null;
+		setCanStoreSearchResults(true, limit);
+		String pageId = "testPageId";
+		String nextPageId = "testNextPageId";
+		String prevPageId = "testPrevPageId";
+		BundleProviderWithNamedPages bundleProvider = new BundleProviderWithNamedPages(buildPatientList(RESOURCE_COUNT), SEARCH_ID, pageId, RESOURCE_COUNT);
+		bundleProvider.setNextPageId(nextPageId);
+		bundleProvider.setPreviousPageId(prevPageId);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+
+		// run
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
+		assertThat(bundle.getLink(), hasSize(3));
+		assertSelfLink(bundle);
+
+		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
+		assertEquals(LINK_NEXT, nextLink.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + nextPageId + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+
+		Bundle.BundleLinkComponent prevLink = bundle.getLink().get(2);
+		assertEquals(LINK_PREVIOUS, prevLink.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_pageId=" + prevPageId + "&_bundletype=" + SEARCHSET.toCode(), prevLink.getUrl());
+	}
+
+	@Test
+	void testCustomLinksWithPageOffset() {
+		// setup
+		Integer limit = null;
+		String pageId = "testPageId";
+		String nextPageId = "testNextPageId";
+		String prevPageId = "testPrevPageId";
+		BundleProviderWithNamedPages bundleProvider = new BundleProviderWithNamedPages(buildPatientList(RESOURCE_COUNT), SEARCH_ID, pageId, RESOURCE_COUNT);
+		bundleProvider.setNextPageId(nextPageId);
+		bundleProvider.setPreviousPageId(prevPageId);
+		// Even though next and prev links are provided, a page offset will override them and force page offset mode
+		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
+		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
+
+		// run
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
+		assertThat(bundle.getLink(), hasSize(3));
+		assertSelfLink(bundle);
+		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
+		assertPrevLink(bundle, CURRENT_PAGE_SIZE, 0);
 	}
 
 	private static void assertNextLink(Bundle theBundle, int theCount) {
@@ -271,13 +345,13 @@ class ResponseBundleBuilderTest {
 	private static void assertNextLink(Bundle theBundle, int theCount, int theOffset) {
 		Bundle.BundleLinkComponent link = theBundle.getLink().get(1);
 		assertEquals(LINK_NEXT, link.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
+		assertEquals(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
 	}
 
 	private static void assertPrevLink(Bundle theBundle, int theCount, int theOffset) {
 		Bundle.BundleLinkComponent link = theBundle.getLink().get(2);
 		assertEquals(LINK_PREVIOUS, link.getRelation());
-		assertEquals(TEST_SERVER_BASE + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
+		assertEquals(TEST_SERVER_BASE + "/" + TEST_REQUEST_PATH + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
 	}
 
 	private static void assertSelfLink(Bundle bundle) {
@@ -322,6 +396,7 @@ class ResponseBundleBuilderTest {
 
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setFhirServerBase(TEST_SERVER_BASE);
+		systemRequestDetails.setRequestPath(TEST_REQUEST_PATH);
 
 		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, start, bundleType, theSearchId);
 		return responseBundleRequest;
@@ -338,8 +413,9 @@ class ResponseBundleBuilderTest {
 	}
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount, String theFirstId, String theLastId) {
+		ourLog.trace(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle));
 		assertFalse(theBundle.isEmpty());
-		assertEquals(Bundle.BundleType.SEARCHSET, theBundle.getType());
+		assertEquals(SEARCHSET, theBundle.getType());
 		assertEquals(theExpectedTotal, theBundle.getTotalElement().getValue());
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
 		assertEquals(theExpectedEntryCount, entries.size());
