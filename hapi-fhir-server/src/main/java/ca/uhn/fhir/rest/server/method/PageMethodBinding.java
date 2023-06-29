@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -158,11 +157,6 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
 		}
 
-		EncodingEnum encodingEnum = null;
-		if (responseEncoding != null) {
-			encodingEnum = responseEncoding.getEncoding();
-		}
-
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 		if (count == null) {
 			count = pagingProvider.getDefaultPageSize();
@@ -170,7 +164,8 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, encodingEnum, thePagingAction);
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, thePagingAction);
+		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
 	}
 
 	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {

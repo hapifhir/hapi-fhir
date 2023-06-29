@@ -1,0 +1,255 @@
+package ca.uhn.fhir.rest.server.method;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static ca.uhn.fhir.rest.api.Constants.LINK_NEXT;
+import static ca.uhn.fhir.rest.api.Constants.LINK_PREVIOUS;
+import static ca.uhn.fhir.rest.api.Constants.LINK_SELF;
+import static java.lang.Math.max;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ResponseBundleBuilderTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResponseBundleBuilderTest.class);
+	public static final String TEST_LINK_SELF = "http://test.link";
+	private static final String TEST_SERVER_BASE = "http://test.server/base";
+	public static final int RESOURCE_COUNT = 50;
+	public static final int LIMIT = 20;
+	public static final int DEFAULT_PAGE_SIZE = 15;
+	public static final int CURRENT_PAGE_OFFSET = 2;
+	private static final int CURRENT_PAGE_SIZE = 8;
+	FhirContext ourFhirContext = FhirContext.forR4Cached();
+	@Mock
+	IRestfulServer<RequestDetails> myServer;
+	@Mock
+	IPagingProvider myPagingProvider;
+
+	ResponseBundleBuilder mySvc = new ResponseBundleBuilder(true);
+
+	@BeforeEach
+	public void before() {
+		when(myServer.getFhirContext()).thenReturn(ourFhirContext);
+	}
+
+	@AfterEach
+	public void after() {
+		reset();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testEmpty(boolean theCanStoreSearchResults) {
+		// setup
+		setCanStoreSearchResults(theCanStoreSearchResults);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(new SimpleBundleProvider(), null);
+
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, 0);
+		assertThat(bundle.getLink(), hasSize(1));
+		assertSelfLink(bundle);
+	}
+
+	@Test
+	void testOffsetNoPageSize() {
+		// setup
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
+		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+
+		// run
+		try {
+			mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+			// verify
+		} catch (NullPointerException e) {
+			assertEquals("IBundleProvider returned a non-null offset, but did not return a non-null page size", e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testNoLimit(boolean theCanStoreSearchResults) {
+		// setup
+		setCanStoreSearchResults(theCanStoreSearchResults);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+		if (!theCanStoreSearchResults) {
+			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
+		}
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT);
+		if (theCanStoreSearchResults) {
+			assertThat(bundle.getLink(), hasSize(1));
+			assertSelfLink(bundle);
+		} else {
+			assertThat(bundle.getLink(), hasSize(2));
+			assertSelfLink(bundle);
+			assertNextLink(bundle, DEFAULT_PAGE_SIZE);
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testWithLimit(boolean theCanStoreSearchResults) {
+		// setup
+		setCanStoreSearchResults(theCanStoreSearchResults);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, LIMIT);
+
+		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT);
+		if (theCanStoreSearchResults) {
+			assertThat(bundle.getLink(), hasSize(1));
+			assertSelfLink(bundle);
+		} else {
+			assertThat(bundle.getLink(), hasSize(2));
+			assertSelfLink(bundle);
+			assertNextLink(bundle, LIMIT);
+		}
+	}
+
+
+	@Test
+	void testNoLimitNoDefaultPageSize() {
+		// setup
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, null);
+
+		when(myServer.getDefaultPageSize()).thenReturn(null);
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT);
+		assertThat(bundle.getLink(), hasSize(1));
+		assertSelfLink(bundle);
+	}
+
+	@Test
+	void testOffset() {
+		// setup
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, LIMIT);
+		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
+		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
+
+		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		// run
+		Bundle bundle = (Bundle) mySvc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT);
+		assertThat(bundle.getLink(), hasSize(3));
+		assertSelfLink(bundle);
+		assertNextLink(bundle, CURRENT_PAGE_SIZE, CURRENT_PAGE_OFFSET + CURRENT_PAGE_SIZE);
+		//noinspection ConstantValue
+		assertPrevLink(bundle, CURRENT_PAGE_SIZE, max(0, CURRENT_PAGE_OFFSET - CURRENT_PAGE_SIZE));
+	}
+
+	private static void assertNextLink(Bundle theBundle, int theCount) {
+		assertNextLink(theBundle, theCount, theCount);
+	}
+
+	private static void assertNextLink(Bundle theBundle, int theCount, int theOffset) {
+		Bundle.BundleLinkComponent link = theBundle.getLink().get(1);
+		assertEquals(LINK_NEXT, link.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
+	}
+
+	private static void assertPrevLink(Bundle theBundle, int theCount) {
+		assertPrevLink(theBundle, theCount, theCount);
+	}
+
+	private static void assertPrevLink(Bundle theBundle, int theCount, int theOffset) {
+		Bundle.BundleLinkComponent link = theBundle.getLink().get(2);
+		assertEquals(LINK_PREVIOUS, link.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_count=" + theCount + "&_offset=" + theOffset, link.getUrl());
+	}
+
+	private static void assertSelfLink(Bundle bundle) {
+		Bundle.BundleLinkComponent link = bundle.getLinkFirstRep();
+		assertEquals(LINK_SELF, link.getRelation());
+		assertEquals(TEST_LINK_SELF, link.getUrl());
+	}
+
+	private List<IBaseResource> buildPatientList(int theResourceCount) {
+		List<IBaseResource> retval = new ArrayList<>();
+		for (int i = 0; i < theResourceCount; ++i) {
+			Patient p = new Patient();
+			p.setId("A" + i);
+			p.setActive(true);
+			retval.add(p);
+		}
+		return retval;
+	}
+
+	private void setCanStoreSearchResults(boolean theCanStoreSearchResults) {
+		when(myServer.canStoreSearchResults()).thenReturn(theCanStoreSearchResults);
+		when(myServer.getPagingProvider()).thenReturn(myPagingProvider);
+	}
+
+	@Nonnull
+	private ResponseBundleRequest buildResponseBundleRequest(IBundleProvider theBundleProvider, Integer theLimit) {
+		// setup
+		Set<Include> includes = Collections.emptySet();
+		int start = 0;
+		BundleTypeEnum bundleType = BundleTypeEnum.SEARCHSET;
+		// FIXME KHS what is this?
+		String pagingAction = "testPagingAction";
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setFhirServerBase(TEST_SERVER_BASE);
+
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(myServer, systemRequestDetails, theLimit, TEST_LINK_SELF, includes, theBundleProvider, start, bundleType, pagingAction);
+		return responseBundleRequest;
+
+	}
+
+	private static void verifyBundle(Bundle bundle, int expected) {
+		assertFalse(bundle.isEmpty());
+		assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
+		assertEquals(expected, bundle.getTotal());
+	}
+}
