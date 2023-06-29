@@ -62,61 +62,89 @@ public class ResponseBundleBuilder {
 		String searchId = null;
 
 		if (pageRequest.offset != null || !server.canStoreSearchResults()) {
-			if (pageRequest.limit != null) {
-				pageSize = pageRequest.limit;
-			} else {
-				if (server.getDefaultPageSize() != null) {
-					pageSize = server.getDefaultPageSize();
-				} else {
-					pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
-				}
-			}
+			pageSize = offsetCalculatePageSize(server, pageRequest, numTotalResults);
 			numToReturn = pageSize;
 
-			if ((pageRequest.offset != null && !myIsOffsetModeHistory) || bundleProvider.getCurrentPageOffset() != null) {
-				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
-				resourceList = bundleProvider.getResources(0, Integer.MAX_VALUE);
-			} else if (numToReturn > 0) {
-				resourceList = bundleProvider.getResources(0, numToReturn);
-			} else {
-				resourceList = Collections.emptyList();
-			}
+			resourceList = offsetBuildResourceList(bundleProvider, pageRequest, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
-
 		} else {
 			IPagingProvider pagingProvider = server.getPagingProvider();
-			if (pageRequest.limit == null || pageRequest.limit.equals(0)) {
-				pageSize = pagingProvider.getDefaultPageSize();
-			} else {
-				pageSize = Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
-			}
+			pageSize = pagingCalculatePageSize(pageRequest, pagingProvider);
 			numToReturn = pageSize;
 
 			if (numTotalResults != null) {
 				numToReturn = Math.min(numToReturn, numTotalResults - theResponseBundleRequest.offset);
 			}
 
-			if (numToReturn > 0 || bundleProvider.getCurrentPageId() != null) {
-				resourceList = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
-			} else {
-				resourceList = Collections.emptyList();
-			}
+			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			if (theResponseBundleRequest.searchId != null) {
-				searchId = theResponseBundleRequest.searchId;
-			} else {
-				if (numTotalResults == null || numTotalResults > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, bundleProvider);
-					if (StringUtils.isBlank(searchId)) {
-						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
-						searchId = null;
-					}
-				}
-			}
+			searchId = pagingBuildSearchId(theResponseBundleRequest, bundleProvider, numToReturn, numTotalResults, searchId, pagingProvider);
 		}
 
 		return new ResponsePage(searchId, resourceList, numToReturn, numTotalResults, pageSize);
+	}
+
+	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, IBundleProvider bundleProvider, int numToReturn, Integer numTotalResults, String searchId, IPagingProvider pagingProvider) {
+		if (theResponseBundleRequest.searchId != null) {
+			searchId = theResponseBundleRequest.searchId;
+		} else {
+			if (numTotalResults == null || numTotalResults > numToReturn) {
+				searchId = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, bundleProvider);
+				if (StringUtils.isBlank(searchId)) {
+					ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+					searchId = null;
+				}
+			}
+		}
+		return searchId;
+	}
+
+	private static List<IBaseResource> pagingBuildResourceList(ResponseBundleRequest theResponseBundleRequest, IBundleProvider bundleProvider, int numToReturn) {
+		final List<IBaseResource> resourceList;
+		if (numToReturn > 0 || bundleProvider.getCurrentPageId() != null) {
+			resourceList = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
+		} else {
+			resourceList = Collections.emptyList();
+		}
+		return resourceList;
+	}
+
+	private static int pagingCalculatePageSize(RequestedPage pageRequest, IPagingProvider pagingProvider) {
+		final int pageSize;
+		if (pageRequest.limit == null || pageRequest.limit.equals(0)) {
+			pageSize = pagingProvider.getDefaultPageSize();
+		} else {
+			pageSize = Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
+		}
+		return pageSize;
+	}
+
+	private List<IBaseResource> offsetBuildResourceList(IBundleProvider bundleProvider, RequestedPage pageRequest, int numToReturn) {
+		final List<IBaseResource> resourceList;
+		if ((pageRequest.offset != null && !myIsOffsetModeHistory) || bundleProvider.getCurrentPageOffset() != null) {
+			// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
+			resourceList = bundleProvider.getResources(0, Integer.MAX_VALUE);
+		} else if (numToReturn > 0) {
+			resourceList = bundleProvider.getResources(0, numToReturn);
+		} else {
+			resourceList = Collections.emptyList();
+		}
+		return resourceList;
+	}
+
+	private static int offsetCalculatePageSize(IRestfulServer<?> server, RequestedPage pageRequest, Integer numTotalResults) {
+		final int pageSize;
+		if (pageRequest.limit != null) {
+			pageSize = pageRequest.limit;
+		} else {
+			if (server.getDefaultPageSize() != null) {
+				pageSize = server.getDefaultPageSize();
+			} else {
+				pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
+			}
+		}
+		return pageSize;
 	}
 
 	private static void validateIds(List<IBaseResource> resourceList) {
