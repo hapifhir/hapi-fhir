@@ -68,8 +68,7 @@ public class ResponseBundleBuilder {
 			resourceList = offsetBuildResourceList(bundleProvider, pageRequest, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 		} else {
-			IPagingProvider pagingProvider = server.getPagingProvider();
-			pageSize = pagingCalculatePageSize(pageRequest, pagingProvider);
+			pageSize = pagingCalculatePageSize(pageRequest, server.getPagingProvider());
 			numToReturn = pageSize;
 
 			if (numTotalResults != null) {
@@ -79,72 +78,73 @@ public class ResponseBundleBuilder {
 			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			searchId = pagingBuildSearchId(theResponseBundleRequest, bundleProvider, numToReturn, numTotalResults, searchId, pagingProvider);
+			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, numTotalResults);
 		}
 
 		return new ResponsePage(searchId, resourceList, numToReturn, numTotalResults, pageSize);
 	}
 
-	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, IBundleProvider bundleProvider, int numToReturn, Integer numTotalResults, String searchId, IPagingProvider pagingProvider) {
+	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, int numToReturn, Integer numTotalResults) {
+		final IPagingProvider pagingProvider = theResponseBundleRequest.server.getPagingProvider();
+		String retval = null;
+
 		if (theResponseBundleRequest.searchId != null) {
-			searchId = theResponseBundleRequest.searchId;
+			retval = theResponseBundleRequest.searchId;
 		} else {
 			if (numTotalResults == null || numTotalResults > numToReturn) {
-				searchId = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, bundleProvider);
-				if (StringUtils.isBlank(searchId)) {
+				retval = pagingProvider.storeResultList(theResponseBundleRequest.requestDetails, theResponseBundleRequest.bundleProvider);
+				if (StringUtils.isBlank(retval)) {
 					ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
-					searchId = null;
+					retval = null;
 				}
 			}
 		}
-		return searchId;
+		return retval;
 	}
 
 	private static List<IBaseResource> pagingBuildResourceList(ResponseBundleRequest theResponseBundleRequest, IBundleProvider bundleProvider, int numToReturn) {
-		final List<IBaseResource> resourceList;
+		final List<IBaseResource> retval;
 		if (numToReturn > 0 || bundleProvider.getCurrentPageId() != null) {
-			resourceList = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
+			retval = bundleProvider.getResources(theResponseBundleRequest.offset, numToReturn + theResponseBundleRequest.offset);
 		} else {
-			resourceList = Collections.emptyList();
+			retval = Collections.emptyList();
 		}
-		return resourceList;
+		return retval;
 	}
 
 	private static int pagingCalculatePageSize(RequestedPage pageRequest, IPagingProvider pagingProvider) {
-		final int pageSize;
 		if (pageRequest.limit == null || pageRequest.limit.equals(0)) {
-			pageSize = pagingProvider.getDefaultPageSize();
+			return pagingProvider.getDefaultPageSize();
 		} else {
-			pageSize = Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
+			return Math.min(pagingProvider.getMaximumPageSize(), pageRequest.limit);
 		}
-		return pageSize;
 	}
 
 	private List<IBaseResource> offsetBuildResourceList(IBundleProvider bundleProvider, RequestedPage pageRequest, int numToReturn) {
-		final List<IBaseResource> resourceList;
+		final List<IBaseResource> retval;
 		if ((pageRequest.offset != null && !myIsOffsetModeHistory) || bundleProvider.getCurrentPageOffset() != null) {
 			// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
-			resourceList = bundleProvider.getResources(0, Integer.MAX_VALUE);
+			retval = bundleProvider.getResources(0, Integer.MAX_VALUE);
 		} else if (numToReturn > 0) {
-			resourceList = bundleProvider.getResources(0, numToReturn);
+			retval = bundleProvider.getResources(0, numToReturn);
 		} else {
-			resourceList = Collections.emptyList();
+			retval = Collections.emptyList();
 		}
-		return resourceList;
+		return retval;
 	}
 
 	private static int offsetCalculatePageSize(IRestfulServer<?> server, RequestedPage pageRequest, Integer numTotalResults) {
-		final int pageSize;
+		final int retval;
 		if (pageRequest.limit != null) {
-			pageSize = pageRequest.limit;
+			retval = pageRequest.limit;
 		} else {
 			if (server.getDefaultPageSize() != null) {
-				pageSize = server.getDefaultPageSize();
+				retval = server.getDefaultPageSize();
 			} else {
-				pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
+				retval = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
 			}
 		}
-		return pageSize;
+		return retval;
 	}
 
 	private static void validateIds(List<IBaseResource> resourceList) {
@@ -177,21 +177,22 @@ public class ResponseBundleBuilder {
 			resourceList.removeIf(Objects::isNull);
 		}
 	}
+
 	private BundleLinks buildLinks(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
 		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
 
-		BundleLinks links = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
-		links.setSelf(theResponseBundleRequest.linkSelf);
+		BundleLinks retval = new BundleLinks(theResponseBundleRequest.requestDetails.getFhirServerBase(), theResponseBundleRequest.includes, RestfulServerUtils.prettyPrintResponse(server, theResponseBundleRequest.requestDetails), theResponseBundleRequest.bundleType);
+		retval.setSelf(theResponseBundleRequest.linkSelf);
 
 		if (bundleProvider.getCurrentPageOffset() != null) {
 
 			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), pageRequest.offset + pageRequest.limit, pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
+				retval.setNext(RestfulServerUtils.createOffsetPagingLink(retval, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), pageRequest.offset + pageRequest.limit, pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
 			}
 			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), Math.max(pageRequest.offset - pageRequest.limit, 0), pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
+				retval.setNext(RestfulServerUtils.createOffsetPagingLink(retval, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), Math.max(pageRequest.offset - pageRequest.limit, 0), pageRequest.limit, theResponseBundleRequest.getRequestParameters()));
 			}
 
 		}
@@ -206,21 +207,21 @@ public class ResponseBundleBuilder {
 			}
 			if (pageResponse.numTotalResults == null || requestedToReturn < pageResponse.numTotalResults) {
 				if (!pageResponse.resourceList.isEmpty()) {
-					links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), ObjectUtils.defaultIfNull(pageRequest.offset, 0) + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters()));
+					retval.setNext(RestfulServerUtils.createOffsetPagingLink(retval, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), ObjectUtils.defaultIfNull(pageRequest.offset, 0) + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters()));
 				}
 			}
 			if (pageRequest.offset != null && pageRequest.offset > 0) {
 				int start = Math.max(0, pageRequest.offset - pageResponse.pageSize);
-				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
+				retval.setPrev(RestfulServerUtils.createOffsetPagingLink(retval, theResponseBundleRequest.requestDetails.getRequestPath(), theResponseBundleRequest.requestDetails.getTenantId(), start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
 			}
 		} else if (StringUtils.isNotBlank(bundleProvider.getCurrentPageId())) {
 			// We're doing named pages
 			final String uuid = bundleProvider.getUuid();
 			if (StringUtils.isNotBlank(bundleProvider.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getNextPageId(), theResponseBundleRequest.getRequestParameters()));
+				retval.setNext(RestfulServerUtils.createPagingLink(retval, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getNextPageId(), theResponseBundleRequest.getRequestParameters()));
 			}
 			if (StringUtils.isNotBlank(bundleProvider.getPreviousPageId())) {
-				links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getPreviousPageId(), theResponseBundleRequest.getRequestParameters()));
+				retval.setPrev(RestfulServerUtils.createPagingLink(retval, theResponseBundleRequest.requestDetails, uuid, bundleProvider.getPreviousPageId(), theResponseBundleRequest.getRequestParameters()));
 			}
 		} else if (pageResponse.searchId != null) {
 			/*
@@ -231,17 +232,16 @@ public class ResponseBundleBuilder {
 			 */
 			if (pageResponse.size() > 0) {
 				if (pageResponse.numTotalResults == null || theResponseBundleRequest.offset + pageResponse.numToReturn < pageResponse.numTotalResults) {
-					links.setNext((RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, theResponseBundleRequest.offset + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters())));
+					retval.setNext((RestfulServerUtils.createPagingLink(retval, theResponseBundleRequest.requestDetails, pageResponse.searchId, theResponseBundleRequest.offset + pageResponse.numToReturn, pageResponse.numToReturn, theResponseBundleRequest.getRequestParameters())));
 				}
 				if (theResponseBundleRequest.offset > 0) {
 					int start = Math.max(0, theResponseBundleRequest.offset - pageResponse.pageSize);
-					links.setPrev(RestfulServerUtils.createPagingLink(links, theResponseBundleRequest.requestDetails, pageResponse.searchId, start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
+					retval.setPrev(RestfulServerUtils.createPagingLink(retval, theResponseBundleRequest.requestDetails, pageResponse.searchId, start, pageResponse.pageSize, theResponseBundleRequest.getRequestParameters()));
 				}
 			}
 		}
-		return links;
+		return retval;
 	}
-
 
 
 	private boolean isEverythingOperation(RequestDetails theRequest) {
