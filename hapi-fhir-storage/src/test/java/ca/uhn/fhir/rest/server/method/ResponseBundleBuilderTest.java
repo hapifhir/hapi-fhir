@@ -179,7 +179,7 @@ class ResponseBundleBuilderTest {
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
 	}
 
-	// FIXME KHS test with Constants.PARAM_OFFSET in request details
+	// WIP KHS test with Constants.PARAM_OFFSET in request details
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -190,7 +190,7 @@ class ResponseBundleBuilderTest {
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit);
 
-		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
@@ -237,7 +237,7 @@ class ResponseBundleBuilderTest {
 		bundleProvider.setCurrentPageOffset(CURRENT_PAGE_OFFSET);
 		bundleProvider.setCurrentPageSize(CURRENT_PAGE_SIZE);
 
-		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
@@ -262,7 +262,7 @@ class ResponseBundleBuilderTest {
 		bundleProvider.setSize(null);
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
 
-		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
@@ -348,7 +348,7 @@ class ResponseBundleBuilderTest {
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
 
-		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		// run
@@ -370,7 +370,7 @@ class ResponseBundleBuilderTest {
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID, REQUEST_OFFSET);
 
-		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		// run

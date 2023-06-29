@@ -9,61 +9,25 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.Set;
 
 public class ResponseBundleRequest {
-    private final IRestfulServer<?> myServer;
-    private final RequestDetails myRequest;
-    private final Integer myLimit;
-    private final String myLinkSelf;
-    private final Set<Include> myIncludes;
-    private final IBundleProvider myBundleProvider;
-    private final int myOffset;
-    private final BundleTypeEnum myBundleType;
-    private final String mySearchId;
+	public final IRestfulServer<?> server;
+	public final RequestDetails requestDetails;
+	public final Integer limit;
+	public final String linkSelf;
+	public final Set<Include> includes;
+	public final IBundleProvider bundleProvider;
+	public final int offset;
+	public final BundleTypeEnum bundleType;
+	public final String searchId;
 
     public ResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes, IBundleProvider theBundleProvider, int theOffset, BundleTypeEnum theBundleType, String theSearchId) {
-        myServer = theServer;
-        myRequest = theRequest;
-        myLimit = theLimit;
-        myLinkSelf = theLinkSelf;
-        myIncludes = theIncludes;
-        myBundleProvider = theBundleProvider;
-        myOffset = theOffset;
-        myBundleType = theBundleType;
-        mySearchId = theSearchId;
-    }
-
-    public IRestfulServer<?> getServer() {
-        return myServer;
-    }
-
-    public RequestDetails getRequest() {
-        return myRequest;
-    }
-
-    public Integer getLimit() {
-        return myLimit;
-    }
-
-    public String getLinkSelf() {
-        return myLinkSelf;
-    }
-
-    public Set<Include> getIncludes() {
-        return myIncludes;
-    }
-
-    public IBundleProvider getBundleProvider() {
-        return myBundleProvider;
-    }
-
-    public int getOffset() {
-        return myOffset;
-    }
-
-    public BundleTypeEnum getBundleType() {
-        return myBundleType;
-    }
-
-    public String getSearchId() {
-        return mySearchId;
+        server = theServer;
+        requestDetails = theRequest;
+        limit = theLimit;
+        linkSelf = theLinkSelf;
+        includes = theIncludes;
+        bundleProvider = theBundleProvider;
+        offset = theOffset;
+        bundleType = theBundleType;
+        searchId = theSearchId;
     }
 }
