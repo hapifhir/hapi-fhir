@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -54,6 +55,16 @@ public class JobInstanceStartRequest implements IModelJson {
 		super();
 		setJobDefinitionId(theJobInstance.getJobDefinitionId());
 		setParameters(theJobInstance.getParameters());
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @since 6.8.0
+	 */
+	public JobInstanceStartRequest(String theJobDefinitionId, IModelJson theParameters) {
+		setJobDefinitionId(theJobDefinitionId);
+		setParameters(theParameters);
 	}
 
 	public String getJobDefinitionId() {

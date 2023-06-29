@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public final class OperationRuleTestUtil {
 		return ((RuleBulkExportImpl)theRule).getGroupId();
 	}
 
-	public static BulkDataExportOptions.ExportStyle getWantExportStyle(IAuthRule theRule) {
+	public static BulkExportJobParameters.ExportStyle getWantExportStyle(IAuthRule theRule) {
 		return ((RuleBulkExportImpl)theRule).getWantExportStyle();
 	}
 }

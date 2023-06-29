@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
-import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
@@ -80,9 +78,8 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false)
 	private String myJobId;
 
-	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private BulkExportJobStatusEnum myStatus;
+	private String myStatus;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
@@ -168,11 +165,11 @@ public class BulkExportJobEntity implements Serializable {
 		return b.toString();
 	}
 
-	public BulkExportJobStatusEnum getStatus() {
+	public String getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(BulkExportJobStatusEnum theStatus) {
+	public void setStatus(String theStatus) {
 		if (myStatus != theStatus) {
 			myStatusTime = new Date();
 			myStatus = theStatus;
