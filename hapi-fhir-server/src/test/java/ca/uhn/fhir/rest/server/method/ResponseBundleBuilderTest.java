@@ -338,6 +338,30 @@ class ResponseBundleBuilderTest {
 		assertPrevLink(bundle, CURRENT_PAGE_SIZE, 0);
 	}
 
+
+	@Test
+	void offsetSinceNonNullSearchId() {
+		// setup
+		Integer limit = LIMIT;
+		setCanStoreSearchResults(true, limit);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(buildPatientList(RESOURCE_COUNT));
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, limit, SEARCH_ID);
+
+		responseBundleRequest.getRequest().setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+
+		// run
+		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, limit);
+		assertThat(bundle.getLink(), hasSize(2));
+		assertSelfLink(bundle);
+		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
+		assertEquals(LINK_NEXT, nextLink.getRelation());
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + limit + "&_count=" + limit + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+	}
+
 	private static void assertNextLink(Bundle theBundle, int theCount) {
 		assertNextLink(theBundle, theCount, theCount);
 	}
