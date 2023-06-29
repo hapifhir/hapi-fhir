@@ -64,7 +64,7 @@ public class HapiSchemaMigrationTest {
 		int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
 		VersionEnum from = allVersions[fromVersion];
 
-		VersionEnum toVersion = VersionEnum.V5_2_0;
+		VersionEnum toVersion = VersionEnum.V5_4_0;
 
 		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
 		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);

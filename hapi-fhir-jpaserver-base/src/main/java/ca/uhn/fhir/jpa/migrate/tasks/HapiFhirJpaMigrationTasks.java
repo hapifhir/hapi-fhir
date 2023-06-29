@@ -1172,6 +1172,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
 		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
+		// FIXME add some insert statement
+		/* FIXME setup workspace automatedmigrations  -
+			to get back to previous version of app
+			run it
+			grab our data
+			`add insert statements to workspace on m`aster branch
+
+		 */
 		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
 		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
@@ -1190,6 +1198,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE");
 		pkg.addIndex("20210109.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
 		pkg.addIndex("20210109.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
+
+
+		// FIXME - update statement to update rows inside HFJ_RESOURCE
 
 		//-- Link to the resourceTable
 		version.onTable("HFJ_RESOURCE").addColumn("20210109.10", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
