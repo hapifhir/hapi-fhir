@@ -60,7 +60,6 @@ import java.util.Date;
 import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
 
 	private MethodReturnTypeEnum myMethodReturnType;
@@ -125,21 +124,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	 */
 	protected Set<Class<?>> provideExpectedReturnTypes() {
 		return null;
-	}
-
-	IBaseResource createBundleFromBundleProvider(ResponseBundleRequest theResponseBundleRequest) {
-
-		/*
-		 * Remove any null entries in the list - This generally shouldn't happen but can if
-		 * data has been manually purged from the JPA database
-		 */
-
-		/*
-		 * Make sure all returned resources have an ID (if not, this is a bug
-		 * in the user server code)
-		 */
-
-		return myResponseBundleBuilder.createBundleFromBundleProvider(theResponseBundleRequest);
 	}
 
 	protected boolean isOffsetModeHistory() {
@@ -216,14 +200,14 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 			case RESOURCE: {
 				IBundleProvider result = (IBundleProvider) resultObj;
-				if (result.size() == 0) {
+				Integer size = result.size();
+				if (size == null || size == 0) {
 					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
-				} else if (result.size() > 1) {
+				} else if (size > 1) {
 					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
 
-				IBaseResource resource = result.getResources(0, 1).get(0);
-				responseObject = resource;
+				responseObject = result.getResources(0, 1).get(0);
 				break;
 			}
 			default:
@@ -317,9 +301,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseParams.add(HttpServletRequest.class, servletRequest);
 		responseParams.add(HttpServletResponse.class, servletResponse);
 		if (theRequest.getInterceptorBroadcaster() != null) {
-			if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
-				return false;
-			}
+			return theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams);
 		}
 		return true;
 	}

@@ -44,6 +44,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class R4BundleFactory implements IVersionSpecificBundleFactory {
   private String myBase;
   private Bundle myBundle;
-  private FhirContext myContext;
+  private final FhirContext myContext;
 
   public R4BundleFactory(FhirContext theContext) {
     myContext = theContext;
@@ -67,11 +68,11 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
   public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
     ensureBundle();
 
-    List<IAnyResource> includedResources = new ArrayList<IAnyResource>();
-    Set<IIdType> addedResourceIds = new HashSet<IIdType>();
+    List<IAnyResource> includedResources = new ArrayList<>();
+    Set<IIdType> addedResourceIds = new HashSet<>();
 
     for (IBaseResource next : theResult) {
-      if (next.getIdElement().isEmpty() == false) {
+      if (!next.getIdElement().isEmpty()) {
         addedResourceIds.add(next.getIdElement());
       }
     }
@@ -90,7 +91,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 
       List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
       do {
-        List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
+        List<IAnyResource> addedResourcesThisPass = new ArrayList<>();
 
         for (ResourceReferenceInfo nextRefInfo : references) {
           if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
@@ -106,7 +107,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
               }
 
               IIdType id = nextRes.getIdElement();
-              if (id.hasResourceType() == false) {
+              if (!id.hasResourceType()) {
                 String resName = myContext.getResourceType(nextRes);
                 id = id.withResourceType(resName);
               }
@@ -128,7 +129,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
           List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
           references.addAll(newReferences);
         }
-      } while (references.isEmpty() == false);
+      } while (!references.isEmpty());
 
       BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
       Resource nextAsResource = (Resource) next;
@@ -152,13 +153,16 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
           case BATCH_RESPONSE:
           case TRANSACTION_RESPONSE:
           case HISTORY:
-            if ("1".equals(id.getVersionIdPart())) {
-              entry.getResponse().setStatus("201 Created");
-            } else if (isNotBlank(id.getVersionIdPart())) {
-              entry.getResponse().setStatus("200 OK");
-            }
-            if (isNotBlank(id.getVersionIdPart())) {
-              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            if (id != null) {
+              String version = id.getVersionIdPart();
+              if ("1".equals(version)) {
+                entry.getResponse().setStatus("201 Created");
+              } else if (isNotBlank(version)) {
+                entry.getResponse().setStatus("200 OK");
+              }
+              if (isNotBlank(version)) {
+                entry.getResponse().setEtag(RestfulServerUtils.createEtag(version));
+              }
             }
             break;
         }
@@ -197,13 +201,13 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getMeta().getLastUpdatedElement().setValueAsString(theLastUpdated.getValueAsString());
     }
 
-    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
+    if (hasNoLinkOfType(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
       myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
     }
-    if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
+    if (hasNoLinkOfType(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
       myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
     }
-    if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
+    if (hasNoLinkOfType(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
       myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
     }
 
@@ -238,13 +242,13 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
     return myBundle;
   }
 
-  private boolean hasLink(String theLinkType, Bundle theBundle) {
+  private boolean hasNoLinkOfType(String theLinkType, Bundle theBundle) {
     for (BundleLinkComponent next : theBundle.getLink()) {
       if (theLinkType.equals(next.getRelation())) {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   @Override
@@ -252,16 +256,18 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
     myBundle = (Bundle) theBundle;
   }
 
-  private IIdType populateBundleEntryFullUrl(IBaseResource next, BundleEntryComponent entry) {
-    IIdType idElement = null;
-    if (next.getIdElement().hasBaseUrl()) {
-      idElement = next.getIdElement();
-      entry.setFullUrl(idElement.toVersionless().getValue());
+  @Nullable
+  private IIdType populateBundleEntryFullUrl(IBaseResource theResource, BundleEntryComponent theEntry) {
+    final IIdType idElement;
+    if (theResource.getIdElement().hasBaseUrl()) {
+      idElement = theResource.getIdElement();
+      theEntry.setFullUrl(idElement.toVersionless().getValue());
     } else {
-      if (isNotBlank(myBase) && next.getIdElement().hasIdPart()) {
-        idElement = next.getIdElement();
-        idElement = idElement.withServerBase(myBase, myContext.getResourceType(next));
-        entry.setFullUrl(idElement.toVersionless().getValue());
+      if (isNotBlank(myBase) && theResource.getIdElement().hasIdPart()) {
+        idElement = theResource.getIdElement().withServerBase(myBase, myContext.getResourceType(theResource));
+        theEntry.setFullUrl(idElement.toVersionless().getValue());
+      } else {
+        idElement = null;
       }
     }
     return idElement;
@@ -269,11 +275,11 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 
   @Override
   public List<IBaseResource> toListOfResources() {
-    ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+    ArrayList<IBaseResource> retVal = new ArrayList<>();
     for (BundleEntryComponent next : myBundle.getEntry()) {
       if (next.getResource() != null) {
         retVal.add(next.getResource());
-      } else if (next.getResponse().getLocationElement().isEmpty() == false) {
+      } else if (!next.getResponse().getLocationElement().isEmpty()) {
         IdType id = new IdType(next.getResponse().getLocation());
         String resourceType = id.getResourceType();
         if (isNotBlank(resourceType)) {

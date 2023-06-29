@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -89,15 +88,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
 		populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
-		HookParams preHandledParams = new HookParams();
-		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
-		preHandledParams.add(RequestDetails.class, theRequest);
-		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		if (theRequest.getInterceptorBroadcaster() != null) {
-			theRequest
-				.getInterceptorBroadcaster()
-				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
-		}
+		callPreHandledHooks(theRequest);
 
 		Integer offsetI;
 		int start = 0;
@@ -137,8 +128,6 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
-
 		Set<Include> includes = new HashSet<>();
 		String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
 		if (reqIncludes != null) {
@@ -166,6 +155,18 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, thePagingAction);
 		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
+	}
+
+	static void callPreHandledHooks(RequestDetails theRequest) {
+		HookParams preHandledParams = new HookParams();
+		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+		preHandledParams.add(RequestDetails.class, theRequest);
+		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			theRequest
+				.getInterceptorBroadcaster()
+				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+		}
 	}
 
 	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
