@@ -1121,7 +1121,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters - The details of the job being kicked off
 	 * </li>
 	 * <li>
 	 *org.hl7.fhir.instance.model.api.IBaseResource - The resource that will be included in the file
