@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,9 +22,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +46,9 @@ class ResourceIdListStepTest {
 	@Mock
 	private PartitionedUrlListJobParameters myParameters;
 
+	@Captor
+	private ArgumentCaptor<ResourceIdListWorkChunkJson> myDataCaptor;
+
 	private ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
 	private List<TypedResourcePid> myIdList = new ArrayList<>();
@@ -47,6 +56,7 @@ class ResourceIdListStepTest {
 	@BeforeEach
 	void beforeEach() {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
+		// TODO: parameterize this algorithm and pass in different list sizes from each @Test or @ParameterizedTest
 		for (int id = 0; id < LIST_SIZE; id++) {
 			IResourcePersistentId theId = mock(IResourcePersistentId.class);
 			when(theId.toString()).thenReturn(Integer.toString(id + 1));
@@ -74,6 +84,18 @@ class ResourceIdListStepTest {
 		}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
-		Assertions.assertNotEquals(null, run);
+		assertNotEquals(null, run);
+
+		verify(myDataSink, times(5)).accept(myDataCaptor.capture());
+
+		final List<ResourceIdListWorkChunkJson> allDataChunks = myDataCaptor.getAllValues();
+
+		assertEquals(5, allDataChunks.size());
+
+		assertEquals(500, allDataChunks.get(0).size());
+		assertEquals(500, allDataChunks.get(1).size());
+		assertEquals(500, allDataChunks.get(2).size());
+		assertEquals(500, allDataChunks.get(3).size());
+		assertEquals(345, allDataChunks.get(4).size());
 	}
 }
