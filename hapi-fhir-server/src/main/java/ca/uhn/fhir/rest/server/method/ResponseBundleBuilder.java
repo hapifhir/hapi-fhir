@@ -33,14 +33,14 @@ public class ResponseBundleBuilder {
 	}
 
 	IBaseBundle createBundleFromBundleProvider(ResponseBundleRequest theResponseBundleRequest) {
-		final ResponsePage pageResponse = buildResponsePage(theResponseBundleRequest);
+		final ResponsePage responsePage = buildResponsePage(theResponseBundleRequest);
 
-		removeNulls(pageResponse.resourceList);
-		validateIds(pageResponse.resourceList);
+		removeNulls(responsePage.resourceList);
+		validateIds(responsePage.resourceList);
 
-		BundleLinks links = buildLinks(theResponseBundleRequest, pageResponse);
+		BundleLinks links = buildLinks(theResponseBundleRequest, responsePage);
 
-		return buildBundle(theResponseBundleRequest, pageResponse, links);
+		return buildBundle(theResponseBundleRequest, responsePage, links);
 	}
 
 	private static IBaseBundle buildBundle(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
