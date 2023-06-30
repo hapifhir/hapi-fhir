@@ -123,6 +123,9 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			offset = OffsetCalculator.calculateOffset(theRequest, bundleProvider);
 		}
 
+		/**
+		 * TODO KHS can this be consolidated with PageMethodBinding.getRequestIncludesFromParams ?
+		 */
 		Set<Include> includes = new HashSet<>();
 		String[] reqIncludes = theRequest.getParameters().get(Constants.PARAM_INCLUDE);
 		if (reqIncludes != null) {
