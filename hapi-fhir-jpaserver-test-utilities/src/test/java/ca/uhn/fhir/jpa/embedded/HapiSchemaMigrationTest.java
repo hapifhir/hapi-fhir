@@ -34,13 +34,16 @@ public class HapiSchemaMigrationTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
 	public static final String TEST_SCHEMA_NAME = "test";
 
+	static {
+		HapiSystemProperties.enableUnitTestMode();
+	}
+
 	@RegisterExtension
 	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
 	@AfterEach
 	public void afterEach() {
 		myEmbeddedServersExtension.clearDatabases();
-		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@ParameterizedTest
