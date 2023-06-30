@@ -163,7 +163,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
 
       // Populate Bundle.entry.search
       BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
-      if (searchMode != null) {
+      if (searchMode != null && theBundleType == BundleTypeEnum.SEARCHSET) {
         entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
       }
 
@@ -174,7 +174,10 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
      */
     for (IAnyResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
-      entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
+      entry.setResource((Resource) next);
+      if (theBundleType == BundleTypeEnum.SEARCHSET) {
+        entry.getSearch().setMode(SearchEntryMode.INCLUDE);
+      }
       populateBundleEntryFullUrl(next, entry);
     }
 
@@ -220,7 +223,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
     }
 
-    if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
+    if (myBundle.getTotalElement().isEmpty() && theTotalResults != null && (theBundleType == BundleTypeEnum.SEARCHSET || theBundleType == BundleTypeEnum.HISTORY)) {
       myBundle.getTotalElement().setValue(theTotalResults);
     }
   }
