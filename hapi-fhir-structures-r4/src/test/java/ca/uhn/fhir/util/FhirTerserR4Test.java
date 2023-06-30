@@ -1465,6 +1465,22 @@ public class FhirTerserR4Test {
 		}
 	}
 
+	@Test
+	void conditionalNodeCreate() {
+		// TODO:   Patient.link.other.reference
+		final Patient patient = new Patient();
+		final List<IBase> values = myCtx.newTerser().getValues(patient, "Patient.link", true);
+
+		ourLog.info("values: {}", values);
+
+
+		final List<IBase> values2 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+		ourLog.info("values2: {}", values2);
+
+
+		final List<IBase> values3 = myCtx.newTerser().getValues(patient, "Patient.link.other.reference", true);
+		ourLog.info("values3 : {}", values3);
+	}
 
 
 	private List<String> toStrings(List<StringType> theStrings) {

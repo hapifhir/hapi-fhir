@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -13,12 +12,12 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
@@ -522,13 +521,177 @@ public class FhirPatchApplyR4Test {
 			);
 		patch.addParameter(addOperation);
 
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 		svc.apply(patient, patch);
-		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it adds the new extension correctly.
 		assertThat(patient.getExtension(), hasSize(1));
 		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
 		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
+	}
+
+	@Test
+	void patchPatientLink() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = new Patient();
+
+		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
+		final Reference other = patientLinkComponent.getOther();
+		other.setReference("Patient/123");
+
+		ourLog.info("old patient:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		final Reference referenceValue = new Reference();
+		referenceValue.setReference("Patient/456");
+
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+//			.setValue(new CodeType("insert"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.link.other"));
+//			.setValue(new StringType("Patient.link.other.reference"));
+//			.setValue(new StringType("Patient.link"));
+//			.setValue(new StringType("Patient.identifier"));
+//			.setValue(new StringType("Patient"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+//			.setValue(referenceValue);
+			.setValue(new StringType("Patient/456"));
+
+//		operation
+//			.addPart()
+//			.setName("path")
+//			.setValue(new StringType("Patient.link.other"));
+//		final Reference referenceValue = new Reference();
+//		referenceValue.setReference("Patient/123");
+//		operation.addPart()
+//			.setName("value")
+//			.setValue(referenceValue);
+
+
+		patch.addParameter(operation);
+
+		/*
+		{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "operation",
+    "part": [ {
+      "name": "type",
+      "valueCode": "add"
+    }, {
+      "name": "path",
+      "valueString": "Patient"
+    }, {
+      "name": "name",
+      "valueString": "extension"
+    }, {
+      "name": "value",
+      "part": [ {
+        "name": "url",
+        "valueUri": "http://foo/fhir/extension/foo"
+      }, {
+        "name": "value",
+        "valueString": "foo"
+      } ]
+    } ]
+  } ]
+}
+		 */
+
+		//vs
+
+		/*
+		{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "operation",
+    "part": [ {
+      "name": "type",
+      "valueCode": "add"
+    }, {
+      "name": "path",
+      "valueString": "Patient.link.other"
+    }, {
+      "name": "value",
+      "valueReference": {
+        "reference": "Patient/123"
+      }
+    } ]
+  } ]
+}
+		 */
+
+		ourLog.info("Parameters:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		svc.apply(patient, patch);
+
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+	}
+
+	@Test
+	void patchPatientLink2() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = new Patient();
+
+		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
+		final Reference other = patientLinkComponent.getOther();
+		other.setReference("Patient/123");
+
+		ourLog.info("old patient:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		final Reference referenceValue = new Reference();
+		referenceValue.setReference("Patient/456");
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient"));
+		operation
+			.addPart()
+			.setName("name")
+//			.setValue(new StringType("link.other.reference"));
+//			.setValue(new StringType("link.other"));
+			.setValue(new StringType("link"));
+
+		operation.addPart()
+			.setName("value")
+//			.setValue(new StringType("Patient/456"));
+			.setValue(referenceValue);
+
+
+		patch.addParameter(operation);
+
+		ourLog.info("Parameters:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		svc.apply(patient, patch);
+
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {
