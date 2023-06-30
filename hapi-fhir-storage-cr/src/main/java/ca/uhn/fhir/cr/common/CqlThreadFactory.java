@@ -22,22 +22,24 @@ package ca.uhn.fhir.cr.common;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * This class resolves issues with loading JAXB in a server environment and using CompletableFutures
  * https://stackoverflow.com/questions/49113207/completablefuture-forkjoinpool-set-class-loader
  **/
-public class CqlForkJoinWorkerThreadFactory implements ForkJoinWorkerThreadFactory {
+public class CqlThreadFactory implements ThreadFactory {
 
 	@Override
-	public final ForkJoinWorkerThread newThread(ForkJoinPool thePool) {
-		return new CqlForkJoinWorkerThread(thePool);
+	public Thread newThread(Runnable r) {
+		return new CqlThread(r);
 	}
 
-	private static class CqlForkJoinWorkerThread extends ForkJoinWorkerThread {
+	private static class CqlThread extends Thread {
 
-		private CqlForkJoinWorkerThread(final ForkJoinPool thePool) {
-			super(thePool);
+		private CqlThread(Runnable runnable) {
+			super(runnable);
+			//super(thePool);
 			// set the correct classloader here
 			setContextClassLoader(Thread.currentThread().getContextClassLoader());
 		}

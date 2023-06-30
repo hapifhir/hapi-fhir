@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
-import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
+import ca.uhn.fhir.cr.common.CqlThreadFactory;
 import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
@@ -57,7 +57,6 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDecorator;
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
@@ -73,14 +72,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 
 @Configuration
@@ -293,16 +292,15 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	public Executor cqlExecutor() {
-		CqlForkJoinWorkerThreadFactory factory = new CqlForkJoinWorkerThreadFactory();
-		ForkJoinPool myCommonPool = new ForkJoinPool(Math.min(32767, Runtime.getRuntime().availableProcessors()),
-			factory,
-			null, false);
+	public ExecutorService cqlExecutor() {
+		CqlThreadFactory factory = new CqlThreadFactory();
+		ExecutorService executor = Executors.
+			newFixedThreadPool(Runtime.getRuntime().availableProcessors()
+			,  factory);
+		executor = new DelegatingSecurityContextExecutorService(executor);
 
-		return new DelegatingSecurityContextExecutor(myCommonPool,
-			SecurityContextHolder.getContext());
+		return executor;
 	}
-
 	@Bean
 	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(ValidationSupportChain theSupportChain,
 																										  FhirContext theFhirContext) {

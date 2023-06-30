@@ -65,17 +65,9 @@ public class CrProperties {
 		private MeasureReportConfiguration myMeasureReportConfiguration;
 		private MeasureEvaluationOptions myMeasureEvaluationOptions;
 
-		public static final int DEFAULT_THREADS_FOR_MEASURE_EVAL = 4;
-		public static final int DEFAULT_THREADS_BATCH_SIZE = 250;
-		public static final boolean DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL = true;
-
 		public MeasureProperties() {
 			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
-			myMeasureEvaluationOptions.setNumThreads(DEFAULT_THREADS_FOR_MEASURE_EVAL);
-			myMeasureEvaluationOptions.setThreadedBatchSize(DEFAULT_THREADS_BATCH_SIZE);
-			myMeasureEvaluationOptions.setThreadedEnabled(DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL);
 		};
-
 
 		//care gaps
 		public boolean getThreadedCareGapsEnabled() {

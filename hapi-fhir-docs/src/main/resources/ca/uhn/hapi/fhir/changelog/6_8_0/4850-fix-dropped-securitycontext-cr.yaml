@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4850
+title: "When running clinical-reasoning module in partitioned environment with threading options enabled, security context 
+was dropping on async executor of measure processor, which blocked it from accessing required resources for measure evaluations (library, patients, etc). 
+To fix this we updated MeasureProcessor to have an injectable executor property which is now being loaded from a bean 
+in hapi-fhir's clinical-reasoning configuration, with needed security context delegation"

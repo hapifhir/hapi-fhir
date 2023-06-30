@@ -51,6 +51,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Named;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
