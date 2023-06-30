@@ -34,14 +34,20 @@ public class ResponseBundleBuilder {
 
 	IBaseBundle createBundleFromBundleProvider(ResponseBundleRequest theResponseBundleRequest) {
 		final ResponsePage pageResponse = buildResponsePage(theResponseBundleRequest);
+
 		removeNulls(pageResponse.resourceList);
 		validateIds(pageResponse.resourceList);
 
 		BundleLinks links = buildLinks(theResponseBundleRequest, pageResponse);
 
-		IRestfulServer<?> server = theResponseBundleRequest.server;
-		IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
-		IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+		return buildBundle(theResponseBundleRequest, pageResponse, links);
+	}
+
+	private static IBaseBundle buildBundle(ResponseBundleRequest theResponseBundleRequest, ResponsePage pageResponse, BundleLinks links) {
+		final IRestfulServer<?> server = theResponseBundleRequest.server;
+		final IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
+		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
+
 		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
 		bundleFactory.addResourcesToBundle(new ArrayList<>(pageResponse.resourceList), theResponseBundleRequest.bundleType, links.serverBase, server.getBundleInclusionRule(), theResponseBundleRequest.includes);
 
