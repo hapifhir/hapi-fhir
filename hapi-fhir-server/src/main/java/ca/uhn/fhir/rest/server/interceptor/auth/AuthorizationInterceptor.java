@@ -28,7 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import com.google.common.collect.Lists;
@@ -195,6 +195,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
 	}
 
+	@Override
 	@Nullable
 	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return myAuthorizationSearchParamMatcher;
@@ -410,7 +411,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.STORAGE_INITIATE_BULK_EXPORT)
-	public void initiateBulkExport(RequestDetails theRequestDetails, BulkDataExportOptions theBulkExportOptions, Pointcut thePointcut) {
+	public void initiateBulkExport(RequestDetails theRequestDetails, BulkExportJobParameters theBulkExportOptions, Pointcut thePointcut) {
 //		RestOperationTypeEnum restOperationType = determineRestOperationTypeFromBulkExportOptions(theBulkExportOptions);
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 
@@ -424,18 +425,18 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 * TODO GGG This method should eventually be used when invoking the rules applier.....however we currently rely on the incorrect
 	 * behaviour of passing down `EXTENDED_OPERATION_SERVER`.
 	 */
-	private RestOperationTypeEnum determineRestOperationTypeFromBulkExportOptions(BulkDataExportOptions theBulkExportOptions) {
+	private RestOperationTypeEnum determineRestOperationTypeFromBulkExportOptions(BulkExportJobParameters theBulkExportOptions) {
 		RestOperationTypeEnum restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		BulkDataExportOptions.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();
-		if (exportStyle.equals(BulkDataExportOptions.ExportStyle.SYSTEM)) {
+		BulkExportJobParameters.ExportStyle exportStyle = theBulkExportOptions.getExportStyle();
+		if (exportStyle.equals(BulkExportJobParameters.ExportStyle.SYSTEM)) {
 			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		} else if (exportStyle.equals(BulkDataExportOptions.ExportStyle.PATIENT)) {
+		} else if (exportStyle.equals(BulkExportJobParameters.ExportStyle.PATIENT)) {
 			if (theBulkExportOptions.getPatientIds().size() == 1) {
 				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 			} else {
 				restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 			}
-		} else if (exportStyle.equals(BulkDataExportOptions.ExportStyle.GROUP)) {
+		} else if (exportStyle.equals(BulkExportJobParameters.ExportStyle.GROUP)) {
 			restOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
 		return restOperationType;

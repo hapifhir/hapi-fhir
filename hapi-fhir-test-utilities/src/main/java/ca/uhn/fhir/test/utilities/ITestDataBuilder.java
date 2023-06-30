@@ -80,6 +80,13 @@ public interface ITestDataBuilder {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "active", "boolean", "false");
 	}
 
+	/**
+	 * Set Patient.gender
+	 */
+	default ICreationArgument withGender(String theGender) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "gender", "code", theGender);
+	}
+
 	default ICreationArgument withFamily(String theFamily) {
 		return t -> {
 			IPrimitiveType<?> family = (IPrimitiveType<?>) getFhirContext().getElementDefinition("string").newInstance();
