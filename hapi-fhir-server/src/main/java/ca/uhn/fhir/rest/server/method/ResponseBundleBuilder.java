@@ -23,6 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Service to build a FHIR Bundle from a request and a Bundle Provider
+ */
 public class ResponseBundleBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResponseBundleBuilder.class);
 
@@ -73,10 +76,11 @@ public class ResponseBundleBuilder {
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
-			numToReturn = pageSize;
 
-			if (bundleProviderSize != null) {
-				numToReturn = Math.min(numToReturn, bundleProviderSize - theResponseBundleRequest.offset);
+			if (bundleProviderSize == null) {
+				numToReturn = pageSize;
+			} else {
+				numToReturn = Math.min(pageSize, bundleProviderSize - theResponseBundleRequest.offset);
 			}
 
 			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
@@ -85,7 +89,7 @@ public class ResponseBundleBuilder {
 			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, bundleProviderSize);
 		}
 
-		return new ResponsePage(searchId, resourceList, numToReturn, bundleProviderSize, pageSize);
+		return new ResponsePage(searchId, resourceList, pageSize, numToReturn, bundleProviderSize);
 	}
 
 	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, int theNumToReturn, Integer theNumTotalResults) {

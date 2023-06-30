@@ -193,7 +193,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 						start = Math.max(0, Math.min(offset, resultSize));
 					}
 
-					ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, theRequest, count, linkSelf, includes, result, start, responseBundleType, null);
+					ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, result, theRequest, start, count, linkSelf, includes, responseBundleType, null);
 					responseObject = myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
 				}
 				break;

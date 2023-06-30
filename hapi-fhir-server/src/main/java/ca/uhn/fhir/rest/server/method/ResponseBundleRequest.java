@@ -12,26 +12,57 @@ import org.apache.commons.lang3.Validate;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This is a request object for selecting resources from a bundle provider and returning a bundle to the client
+ */
 public class ResponseBundleRequest {
+	/**
+	 * The FHIR REST server the request is coming from.  This is used to determine default page size.
+	 */
 	public final IRestfulServer<?> server;
-	public final RequestDetails requestDetails;
-	public final Integer limit;
-	public final String linkSelf;
-	public final Set<Include> includes;
+	/**
+	 * The bundle provider that will be used as the source of resources for the returned bundle.
+	 */
 	public final IBundleProvider bundleProvider;
+	/**
+	 * The user request details.  This is used to parse out parameters used to create the final bundle.
+	 */
+	public final RequestDetails requestDetails;
+	/**
+	 * The requested offset into the list of resources that should be used to create the returned bundle.
+	 */
 	public final int offset;
+	/**
+	 * The maximum number of resources that should be returned in the bundle.  Often corresponds to the _count parameter.
+	 */
+	public final Integer limit;
+	/**
+	 * The response bundle link to self.  This is used to create "self" link in the returned bundle.
+	 */
+	public final String linkSelf;
+	/**
+	 * The set of includes requested by the user.  This is used to determine which resources should be additionally
+	 * included in the returned bundle.
+	 */
+	public final Set<Include> includes;
+	/**
+	 * The type of bundle that should be returned to the client.
+	 */
 	public final BundleTypeEnum bundleType;
+	/**
+	 * The id of the search used to page through search results
+	 */
 	public final String searchId;
 	public final RequestedPage requestedPage;
 
-	public ResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes, IBundleProvider theBundleProvider, int theOffset, BundleTypeEnum theBundleType, String theSearchId) {
+	public ResponseBundleRequest(IRestfulServer<?> theServer, IBundleProvider theBundleProvider, RequestDetails theRequest, int theOffset, Integer theLimit, String theLinkSelf, Set<Include> theIncludes, BundleTypeEnum theBundleType, String theSearchId) {
 		server = theServer;
+		bundleProvider = theBundleProvider;
 		requestDetails = theRequest;
+		offset = theOffset;
 		limit = theLimit;
 		linkSelf = theLinkSelf;
 		includes = theIncludes;
-		bundleProvider = theBundleProvider;
-		offset = theOffset;
 		bundleType = theBundleType;
 		searchId = theSearchId;
 		requestedPage = getRequestedPage();

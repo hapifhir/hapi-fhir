@@ -439,7 +439,7 @@ class ResponseBundleBuilderTest {
 		systemRequestDetails.setFhirServerBase(TEST_SERVER_BASE);
 		systemRequestDetails.setRequestPath(TEST_REQUEST_PATH);
 
-		return new ResponseBundleRequest(myServer, systemRequestDetails, myLimit, TEST_LINK_SELF, includes, theBundleProvider, theOffset, bundleType, theSearchId);
+		return new ResponseBundleRequest(myServer, theBundleProvider, systemRequestDetails, theOffset, myLimit, TEST_LINK_SELF, includes, bundleType, theSearchId);
 	}
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount) {

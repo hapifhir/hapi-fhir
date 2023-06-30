@@ -153,7 +153,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, thePagingAction);
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, start, count, linkSelf, includes, bundleType, thePagingAction);
 		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
 	}
 
