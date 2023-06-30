@@ -52,8 +52,8 @@ public class ConsentInterceptors {
 		@Override
 		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			// In this basic example, we will filter out lab results so that they
-			// are never disclosed to the user. A real interceptor might do something
-			// more nuanced.
+			// are never disclosed to the user. A real interceptor might do something more nuance or entirely
+			// forbid the operation by returning ConsentOutcome.FORBID;
 			if (theResource instanceof Observation) {
 				Observation obs = (Observation)theResource;
 				if (obs.getCategoryFirstRep().hasCoding("http://hl7.org/fhir/codesystem-observation-category.html", "laboratory")) {

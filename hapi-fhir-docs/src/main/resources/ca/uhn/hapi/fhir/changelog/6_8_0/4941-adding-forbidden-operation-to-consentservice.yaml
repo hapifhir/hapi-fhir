@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4941
+jira: smile-6485
+title: "Performing javascript forbid operation during consent validation now returns error 403"

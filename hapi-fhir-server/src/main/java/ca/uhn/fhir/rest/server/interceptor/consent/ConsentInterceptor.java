@@ -165,6 +165,7 @@ public class ConsentInterceptor {
 			Validate.notNull(outcome, "Consent service returned null outcome");
 
 			switch (outcome.getStatus()) {
+				case FORBID:
 				case REJECT:
 					throw toForbiddenOperationException(outcome);
 				case PROCEED:
@@ -246,6 +247,8 @@ public class ConsentInterceptor {
 						thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 						skipSubsequentServices = true;
 						break;
+					case FORBID:
+						throw toForbiddenOperationException(outcome);
 				}
 
 				if (skipSubsequentServices) {
@@ -295,6 +298,8 @@ public class ConsentInterceptor {
 							thePreResourceShowDetails.setResource(i, newResource);
 						}
 						continue;
+					case FORBID:
+						throw toForbiddenOperationException(nextOutcome);
 					case REJECT:
 						if (nextOutcome.getOperationOutcome() != null) {
 							IBaseOperationOutcome newOperationOutcome = nextOutcome.getOperationOutcome();
@@ -345,6 +350,7 @@ public class ConsentInterceptor {
 				}
 
 				switch (outcome.getStatus()) {
+					case FORBID:
 					case REJECT:
 						if (outcome.getOperationOutcome() != null) {
 							theResource.setResponseResource(outcome.getOperationOutcome());
@@ -393,6 +399,7 @@ public class ConsentInterceptor {
 						boolean shouldReplaceResource = false;
 
 						switch (childOutcome.getStatus()) {
+							case FORBID:
 							case REJECT:
 								replacementResource = childOutcome.getOperationOutcome();
 								shouldReplaceResource = true;
