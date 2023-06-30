@@ -53,35 +53,35 @@ public class ResponseBundleBuilder {
 	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
-		final RequestedPage pageRequest = theResponseBundleRequest.requestedPage;
+		final Integer bundleProviderSize = bundleProvider.size();
+		final RequestedPage requestedPage = theResponseBundleRequest.requestedPage;
 		final List<IBaseResource> resourceList;
 		final int pageSize;
 
 		int numToReturn;
-		Integer numTotalResults = bundleProvider.size();
 		String searchId = null;
 
-		if (pageRequest.offset != null || !server.canStoreSearchResults()) {
-			pageSize = offsetCalculatePageSize(server, pageRequest, numTotalResults);
+		if (requestedPage.offset != null || !server.canStoreSearchResults()) {
+			pageSize = offsetCalculatePageSize(server, requestedPage, bundleProviderSize);
 			numToReturn = pageSize;
 
-			resourceList = offsetBuildResourceList(bundleProvider, pageRequest, numToReturn);
+			resourceList = offsetBuildResourceList(bundleProvider, requestedPage, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 		} else {
-			pageSize = pagingCalculatePageSize(pageRequest, server.getPagingProvider());
+			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 			numToReturn = pageSize;
 
-			if (numTotalResults != null) {
-				numToReturn = Math.min(numToReturn, numTotalResults - theResponseBundleRequest.offset);
+			if (bundleProviderSize != null) {
+				numToReturn = Math.min(numToReturn, bundleProviderSize - theResponseBundleRequest.offset);
 			}
 
 			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, numTotalResults);
+			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, bundleProviderSize);
 		}
 
-		return new ResponsePage(searchId, resourceList, numToReturn, numTotalResults, pageSize);
+		return new ResponsePage(searchId, resourceList, numToReturn, bundleProviderSize, pageSize);
 	}
 
 	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, int theNumToReturn, Integer theNumTotalResults) {
