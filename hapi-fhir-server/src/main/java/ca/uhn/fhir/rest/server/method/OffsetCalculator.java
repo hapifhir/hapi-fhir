@@ -9,17 +9,17 @@ public class OffsetCalculator {
 	/**
 	 * Calculate the offset into the list of resources that should be used to create the returned bundle.
 	 * @param theRequest
-	 * @param bundleProvider
+	 * @param theBundleProvider
 	 * @return
 	 */
 
-	public static int getOffset(RequestDetails theRequest, IBundleProvider bundleProvider) {
+	public static int calculateOffset(RequestDetails theRequest, IBundleProvider theBundleProvider) {
 		Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 		if (offset == null || offset < 0) {
 			offset = 0;
 		}
 
-		Integer resultSize = bundleProvider.size();
+		Integer resultSize = theBundleProvider.size();
 		int retval = offset;
 		if (resultSize != null) {
 			retval = Math.max(0, Math.min(offset, resultSize));

@@ -94,7 +94,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
 	}
 
-	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction, IPagingProvider pagingProvider) {
+	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction, IPagingProvider thePagingProvider) {
 		int offset = 0;
 		IBundleProvider bundleProvider;
 
@@ -111,16 +111,16 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId != null) {
 			// This is a page request by Search ID and Page ID
 
-			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
+			bundleProvider = thePagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
 			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
 		} else {
 			// This is a page request by Search ID and Offset
 
-			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
+			bundleProvider = thePagingProvider.retrieveResultList(theRequest, thePagingAction);
 			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
-			offset = OffsetCalculator.getOffset(theRequest, bundleProvider);
+			offset = OffsetCalculator.calculateOffset(theRequest, bundleProvider);
 		}
 
 		Set<Include> includes = new HashSet<>();
@@ -143,9 +143,9 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 		if (count == null) {
-			count = pagingProvider.getDefaultPageSize();
-		} else if (count > pagingProvider.getMaximumPageSize()) {
-			count = pagingProvider.getMaximumPageSize();
+			count = thePagingProvider.getDefaultPageSize();
+		} else if (count > thePagingProvider.getMaximumPageSize()) {
+			count = thePagingProvider.getMaximumPageSize();
 		}
 
 		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, offset, count, linkSelf, includes, bundleType, thePagingAction);

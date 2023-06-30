@@ -198,18 +198,16 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return responseObject;
 	}
 
-	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] params, IBundleProvider resultObj, Integer count, BundleTypeEnum responseBundleType, String linkSelf) {
-		Set<Include> includes = getRequestIncludesFromParams(params);
+	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theParams, IBundleProvider theBundleProvider, Integer theCount, BundleTypeEnum theBundleTypeEnum, String theLinkSelf) {
+		Set<Include> includes = getRequestIncludesFromParams(theParams);
 
-		IBundleProvider bundleProvider = resultObj;
-		if (count == null) {
-			count = bundleProvider.preferredPageSize();
+		if (theCount == null) {
+			theCount = theBundleProvider.preferredPageSize();
 		}
 
-		int offset = OffsetCalculator.getOffset(theRequest, bundleProvider);
+		int offset = OffsetCalculator.calculateOffset(theRequest, theBundleProvider);
 
-		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, offset, count, linkSelf, includes, responseBundleType, null);
-		return responseBundleRequest;
+		return new ResponseBundleRequest(theServer, theBundleProvider, theRequest, offset, theCount, theLinkSelf, includes, theBundleTypeEnum, null);
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {
