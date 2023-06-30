@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -33,8 +35,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceIdListStepTest {
-	private static final int LIST_SIZE = 2345;
-
 	@Mock
 	private IIdChunkProducer<PartitionedUrlChunkRangeJson> myIdChunkProducer;
 	@Mock
@@ -51,31 +51,25 @@ class ResourceIdListStepTest {
 
 	private ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
-	private List<TypedResourcePid> myIdList = new ArrayList<>();
-
 	@BeforeEach
 	void beforeEach() {
 		myResourceIdListStep = new ResourceIdListStep<>(myIdChunkProducer);
-		// TODO: parameterize this algorithm and pass in different list sizes from each @Test or @ParameterizedTest
-		for (int id = 0; id < LIST_SIZE; id++) {
-			IResourcePersistentId theId = mock(IResourcePersistentId.class);
-			when(theId.toString()).thenReturn(Integer.toString(id + 1));
-			TypedResourcePid typedId = new TypedResourcePid("Patient", theId);
-			myIdList.add(typedId);
-		}
 	}
 
-	@Test
-	void testResourceIdListBatchSizeLimit() {
+	@ParameterizedTest
+	@ValueSource(ints = {1,100,500,501,2345})
+	void testResourceIdListBatchSizeLimit(int theListSize) {
+		List<TypedResourcePid> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
-		when(myParameters.getBatchSize()).thenReturn(LIST_SIZE);
+		when(myParameters.getBatchSize()).thenReturn(theListSize);
 		when(myStepExecutionDetails.getParameters()).thenReturn(myParameters);
 		HomogeneousResourcePidList homogeneousResourcePidList = mock(HomogeneousResourcePidList.class);
-		when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(myIdList);
+		when(homogeneousResourcePidList.getTypedResourcePids()).thenReturn(idList);
 		when(homogeneousResourcePidList.getLastDate()).thenReturn(new Date());
 		when(myIdChunkProducer.fetchResourceIdsPage(any(), any(), any(), any(), any()))
 			.thenReturn(homogeneousResourcePidList);
 
+		// Ensure none of the work chunks exceed MAX_BATCH_OF_IDS in size:
 		doAnswer(i -> {
 			ResourceIdListWorkChunkJson list = i.getArgument(0);
 			Assertions.assertTrue(list.size() <= ResourceIdListStep.MAX_BATCH_OF_IDS,
@@ -86,16 +80,31 @@ class ResourceIdListStepTest {
 		final RunOutcome run = myResourceIdListStep.run(myStepExecutionDetails, myDataSink);
 		assertNotEquals(null, run);
 
-		verify(myDataSink, times(5)).accept(myDataCaptor.capture());
-
+		// The work should be divided into chunks of MAX_BATCH_OF_IDS in size (or less, but never more):
+		int expectedBatchCount = (int)Math.ceil((float)theListSize / ResourceIdListStep.MAX_BATCH_OF_IDS);
+		verify(myDataSink, times(expectedBatchCount)).accept(myDataCaptor.capture());
 		final List<ResourceIdListWorkChunkJson> allDataChunks = myDataCaptor.getAllValues();
+		assertEquals(expectedBatchCount, allDataChunks.size());
 
-		assertEquals(5, allDataChunks.size());
+		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
+		for (int i = 0; i < expectedBatchCount-1; i++) {
+			assertEquals(ResourceIdListStep.MAX_BATCH_OF_IDS, allDataChunks.get(i).size());
+		}
 
-		assertEquals(500, allDataChunks.get(0).size());
-		assertEquals(500, allDataChunks.get(1).size());
-		assertEquals(500, allDataChunks.get(2).size());
-		assertEquals(500, allDataChunks.get(3).size());
-		assertEquals(345, allDataChunks.get(4).size());
+		// The very last chunk should be whatever is left over (if there is a remainder):
+		int expectedLastBatchSize = theListSize % ResourceIdListStep.MAX_BATCH_OF_IDS;
+		expectedLastBatchSize = (expectedLastBatchSize==0) ? ResourceIdListStep.MAX_BATCH_OF_IDS : expectedLastBatchSize;
+      assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
+	}
+
+	private List<TypedResourcePid> generateIdList(int theListSize) {
+		List<TypedResourcePid> idList = new ArrayList<>();
+		for (int id = 0; id < theListSize; id++) {
+			IResourcePersistentId theId = mock(IResourcePersistentId.class);
+			when(theId.toString()).thenReturn(Integer.toString(id + 1));
+			TypedResourcePid typedId = new TypedResourcePid("Patient", theId);
+			idList.add(typedId);
+		}
+		return idList;
 	}
 }
