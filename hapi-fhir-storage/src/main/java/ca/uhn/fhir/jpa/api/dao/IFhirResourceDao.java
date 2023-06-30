@@ -164,7 +164,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	@Deprecated(since = "6.2")
 	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
-	IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails);
+	default IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails){
+		throw new UnsupportedOperationException(Msg.code(571));
+	}
 
 	/**
 	 * Not supported in DSTU1!
