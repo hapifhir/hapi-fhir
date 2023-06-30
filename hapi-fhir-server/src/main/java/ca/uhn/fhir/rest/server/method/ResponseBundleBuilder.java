@@ -46,9 +46,7 @@ public class ResponseBundleBuilder {
 		bundleFactory.addResourcesToBundle(new ArrayList<>(pageResponse.resourceList), theResponseBundleRequest.bundleType, links.serverBase, server.getBundleInclusionRule(), theResponseBundleRequest.includes);
 
 		return (IBaseBundle) bundleFactory.getResourceBundle();
-
 	}
-
 
 	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
