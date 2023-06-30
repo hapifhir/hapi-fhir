@@ -175,25 +175,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 					responseObject = resource;
 				} else {
-					Set<Include> includes = getRequestIncludesFromParams(params);
-
-					IBundleProvider result = (IBundleProvider) resultObj;
-					if (count == null) {
-						count = result.preferredPageSize();
-					}
-
-					Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-					if (offset == null || offset < 0) {
-						offset = 0;
-					}
-
-					Integer resultSize = result.size();
-					int start = offset;
-					if (resultSize != null) {
-						start = Math.max(0, Math.min(offset, resultSize));
-					}
-
-					ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, result, theRequest, start, count, linkSelf, includes, responseBundleType, null);
+					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(theServer, theRequest, params, (IBundleProvider) resultObj, count, responseBundleType, linkSelf);
 					responseObject = myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
 				}
 				break;
@@ -214,6 +196,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				throw new IllegalStateException(Msg.code(438)); // should not happen
 		}
 		return responseObject;
+	}
+
+	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] params, IBundleProvider resultObj, Integer count, BundleTypeEnum responseBundleType, String linkSelf) {
+		Set<Include> includes = getRequestIncludesFromParams(params);
+
+		IBundleProvider bundleProvider = resultObj;
+		if (count == null) {
+			count = bundleProvider.preferredPageSize();
+		}
+
+		int offset = OffsetCalculator.getOffset(theRequest, bundleProvider);
+
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, offset, count, linkSelf, includes, responseBundleType, null);
+		return responseBundleRequest;
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {

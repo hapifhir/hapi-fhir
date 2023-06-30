@@ -33,10 +33,6 @@ public class ResponseBundleRequest {
 	 */
 	public final int offset;
 	/**
-	 * The maximum number of resources that should be returned in the bundle.  Often corresponds to the _count parameter.
-	 */
-	public final Integer limit;
-	/**
 	 * The response bundle link to self.  This is used to create "self" link in the returned bundle.
 	 */
 	public final String linkSelf;
@@ -60,25 +56,26 @@ public class ResponseBundleRequest {
 		bundleProvider = theBundleProvider;
 		requestDetails = theRequest;
 		offset = theOffset;
-		limit = theLimit;
 		linkSelf = theLinkSelf;
 		includes = theIncludes;
 		bundleType = theBundleType;
 		searchId = theSearchId;
-		requestedPage = getRequestedPage();
+		requestedPage = getRequestedPage(theLimit);
 	}
 
 	public Map<String, String[]> getRequestParameters() {
 		return requestDetails.getParameters();
 	}
 
-	private RequestedPage getRequestedPage() {
+	private RequestedPage getRequestedPage(Integer theLimit) {
+		// If the BundleProvider has an offset and page size, we use that
 		if (bundleProvider.getCurrentPageOffset() != null) {
 			Validate.notNull(bundleProvider.getCurrentPageSize(), "IBundleProvider returned a non-null offset, but did not return a non-null page size");
 			return new RequestedPage(bundleProvider.getCurrentPageOffset(), bundleProvider.getCurrentPageSize());
+		// Otherwise, we build it from the request
 		} else {
 			Integer parameterOffset = RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_OFFSET);
-			return new RequestedPage(parameterOffset, limit);
+			return new RequestedPage(parameterOffset, theLimit);
 		}
 	}
 }

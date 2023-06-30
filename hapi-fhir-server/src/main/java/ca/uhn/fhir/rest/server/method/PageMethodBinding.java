@@ -90,8 +90,12 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
 		callPreHandledHooks(theRequest);
 
-		Integer offsetI;
-		int start = 0;
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(theServer, theRequest, thePagingAction, pagingProvider);
+		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
+	}
+
+	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction, IPagingProvider pagingProvider) {
+		int offset = 0;
 		IBundleProvider bundleProvider;
 
 		String pageId = null;
@@ -116,16 +120,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
 			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
-			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-			if (offsetI == null || offsetI < 0) {
-				offsetI = 0;
-			}
-
-			Integer totalNum = bundleProvider.size();
-			start = offsetI;
-			if (totalNum != null) {
-				start = Math.min(start, totalNum);
-			}
+			offset = OffsetCalculator.getOffset(theRequest, bundleProvider);
 		}
 
 		Set<Include> includes = new HashSet<>();
@@ -153,9 +148,10 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, start, count, linkSelf, includes, bundleType, thePagingAction);
-		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
+		ResponseBundleRequest responseBundleRequest = new ResponseBundleRequest(theServer, bundleProvider, theRequest, offset, count, linkSelf, includes, bundleType, thePagingAction);
+		return responseBundleRequest;
 	}
+
 
 	static void callPreHandledHooks(RequestDetails theRequest) {
 		HookParams preHandledParams = new HookParams();
