@@ -84,7 +84,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, 0, 0);
@@ -118,7 +118,7 @@ class ResponseBundleBuilderTest {
 
 		// run
 		try {
-			svc.createBundleFromBundleProvider(responseBundleRequest);
+			svc.buildResponseBundle(responseBundleRequest);
 
 			// verify
 		} catch (InternalErrorException e) {
@@ -139,7 +139,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE);
@@ -164,7 +164,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
@@ -189,7 +189,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
@@ -208,7 +208,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -228,7 +228,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -253,7 +253,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, null, LIMIT);
@@ -276,7 +276,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -308,7 +308,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(true);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT);
@@ -331,7 +331,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, LIMIT);
@@ -352,7 +352,7 @@ class ResponseBundleBuilderTest {
 		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
 
 		// run
-		Bundle bundle = (Bundle) svc.createBundleFromBundleProvider(responseBundleRequest);
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
 		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE, "A3", "A17");

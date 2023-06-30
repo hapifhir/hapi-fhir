@@ -176,7 +176,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					responseObject = resource;
 				} else {
 					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(theServer, theRequest, params, (IBundleProvider) resultObj, count, responseBundleType, linkSelf);
-					responseObject = myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
+					responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
 				}
 				break;
 			}

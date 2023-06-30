@@ -91,7 +91,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		callPreHandledHooks(theRequest);
 
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(theServer, theRequest, thePagingAction, pagingProvider);
-		return myResponseBundleBuilder.createBundleFromBundleProvider(responseBundleRequest);
+		return myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
 	}
 
 	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction, IPagingProvider thePagingProvider) {
