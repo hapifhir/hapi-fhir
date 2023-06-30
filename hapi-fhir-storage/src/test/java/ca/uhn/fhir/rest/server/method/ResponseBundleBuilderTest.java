@@ -174,7 +174,7 @@ class ResponseBundleBuilderTest {
 		assertNextLink(bundle, DEFAULT_PAGE_SIZE);
 	}
 
-	// WIP KHS test with Constants.PARAM_OFFSET in request details
+	// TODO KHS add test that relies on Constants.PARAM_OFFSET supplied from request details
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
