@@ -43,7 +43,13 @@ public class HapiSchemaMigrationTest {
 
 	@AfterEach
 	public void afterEach() {
-		myEmbeddedServersExtension.clearDatabases();
+		try {
+			myEmbeddedServersExtension.clearDatabases();
+			// The stack trace for this failure does not appear in CI logs.  Catching and rethrowing to log the error.
+		} catch (Exception e) {
+			ourLog.error("Failed to clear databases", e);
+			throw e;
+		}
 	}
 
 	@ParameterizedTest
