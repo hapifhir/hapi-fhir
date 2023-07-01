@@ -127,7 +127,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	 * @return an integer representing a partition ID that is not currently in use by the system.
 	 */
 	public int generateRandomUnusedPartitionId() {
-		int candidate = ThreadLocalRandom.current().nextInt();
+		int candidate = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
 		Optional<PartitionEntity> partition = myPartitionDao.findById(candidate);
 		while (partition.isPresent()) {
 			candidate = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
