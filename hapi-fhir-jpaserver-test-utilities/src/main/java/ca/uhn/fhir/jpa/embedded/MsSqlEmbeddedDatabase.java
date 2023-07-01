@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -38,7 +36,6 @@ import java.util.Map;
  * @see <a href="https://www.testcontainers.org/modules/databases/mssqlserver/">MS SQL Server TestContainer</a>
  */
 public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
-	private static final Logger ourLog = LoggerFactory.getLogger(MsSqlEmbeddedDatabase.class);
 
 	private final MSSQLServerContainer myContainer;
 
@@ -95,18 +92,8 @@ public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> queryResults = query("SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS");
 		for (Map<String, Object> row : queryResults) {
-			Object tableNameEntry = row.get("TABLE_NAME");
-			if (tableNameEntry == null) {
-				ourLog.warn("Found a constraint with no table name: {}", row);
-				continue;
-			}
-			String tableName = tableNameEntry.toString();
-			Object constraintNameEntry = row.get("CONSTRAINT_NAME");
-			if (constraintNameEntry == null) {
-				ourLog.warn("Found a constraint with no constraint name: {}", row);
-				continue;
-			}
-			String constraintName = constraintNameEntry.toString();
+			String tableName = row.get("TABLE_NAME").toString();
+			String constraintName = row.get("CONSTRAINT_NAME").toString();
 			sql.add(String.format("ALTER TABLE \"%s\" DROP CONSTRAINT \"%s\"", tableName, constraintName));
 		}
 		executeSqlAsBatch(sql);
