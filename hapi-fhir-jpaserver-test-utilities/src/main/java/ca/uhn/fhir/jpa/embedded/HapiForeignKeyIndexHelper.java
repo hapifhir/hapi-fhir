@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.embedded;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.intellij.lang.annotations.Language;
+import org.postgresql.jdbc.PgArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,40 +57,136 @@ public class HapiForeignKeyIndexHelper {
 
 	@Language("SQL")
 	private static final String FK_QUERY = """
-		SELECT c.conrelid::regclass AS "table",
-				 /* list of key column names in order */
-				 string_agg(a.attname, ',' ORDER BY x.n) AS columns,
-				 pg_catalog.pg_size_pretty(
-					 pg_catalog.pg_relation_size(c.conrelid)
-				 ) AS size,
-				 c.conname AS constraint,
-				 c.confrelid::regclass AS referenced_table
-		FROM pg_catalog.pg_constraint c
-			/* enumerated key column numbers per foreign key */
-			CROSS JOIN LATERAL
-				unnest(c.conkey) WITH ORDINALITY AS x(attnum, n)
-			/* name for each key column */
-			JOIN pg_catalog.pg_attribute a
-				ON a.attnum = x.attnum
-					AND a.attrelid = c.conrelid
-		WHERE NOT EXISTS
-				  /* is there a matching index for the constraint? */
-				  (SELECT 1 FROM pg_catalog.pg_index i
-					WHERE i.indrelid = c.conrelid
-					  /* it must not be a partial index */
-					  AND i.indpred IS NULL
-					  /* the first index columns must be the same as the
-						  key columns, but order doesn't matter */
-					  AND (i.indkey::smallint[])[0:cardinality(c.conkey)-1]
-							OPERATOR(pg_catalog.@>) c.conkey)
-		  AND c.contype = 'f'
-		GROUP BY c.conrelid, c.conname, c.confrelid
-		ORDER BY pg_catalog.pg_relation_size(c.conrelid) DESC;
-	""";
+		   WITH fk_actions ( code, action ) AS (
+		       VALUES ( 'a', 'error' ),
+		           ( 'r', 'restrict' ),
+		           ( 'c', 'cascade' ),
+		           ( 'n', 'set null' ),
+		           ( 'd', 'set default' )
+		   ),
+		   fk_list AS (
+		       SELECT pg_constraint.oid as fkoid, conrelid, confrelid as parentid,
+		           conname, relname, nspname,
+		           fk_actions_update.action as update_action,
+		           fk_actions_delete.action as delete_action,
+		           conkey as key_cols
+		       FROM pg_constraint
+		           JOIN pg_class ON conrelid = pg_class.oid
+		           JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid
+		           JOIN fk_actions AS fk_actions_update ON confupdtype = fk_actions_update.code
+		           JOIN fk_actions AS fk_actions_delete ON confdeltype = fk_actions_delete.code
+		       WHERE contype = 'f'
+		       -- unique keys are indexed by default; so exclude any UNIQUE column constraints
+		       AND not (conkey = any(select conkey from pg_constraint where contype = 'u'))
+		   ),
+		   fk_attributes AS (
+		       SELECT fkoid, conrelid, attname, attnum
+		       FROM fk_list
+		           JOIN pg_attribute
+		               ON conrelid = attrelid
+		               AND attnum = ANY( key_cols )
+		       ORDER BY fkoid, attnum
+		   ),
+		   fk_cols_list AS (
+		       SELECT fkoid, array_agg(attname) as cols_list
+		       FROM fk_attributes
+		       GROUP BY fkoid
+		   ),
+		   index_list AS (
+		       SELECT indexrelid as indexid,
+		           pg_class.relname as indexname,
+		           indrelid,
+		           indkey,
+		           indpred is not null as has_predicate,
+		           pg_get_indexdef(indexrelid) as indexdef
+		       FROM pg_index
+		           JOIN pg_class ON indexrelid = pg_class.oid
+		       WHERE indisvalid
+		   ),
+		   fk_index_match AS (
+		       SELECT fk_list.*,
+		           indexid,
+		           indexname,
+		           indkey::int[] as indexatts,
+		           has_predicate,
+		           indexdef,
+		           array_length(key_cols, 1) as fk_colcount,
+		           array_length(indkey,1) as index_colcount,
+		           round(pg_relation_size(conrelid)/(1024^2)::numeric) as table_mb,
+		           cols_list
+		       FROM fk_list
+		           JOIN fk_cols_list USING (fkoid)
+		           LEFT OUTER JOIN index_list
+		               ON conrelid = indrelid
+		               AND (indkey::int2[])[0:(array_length(key_cols,1) -1)] @> key_cols
+		   
+		   ),
+		   fk_perfect_match AS (
+		       SELECT fkoid
+		       FROM fk_index_match
+		       WHERE (index_colcount - 1) <= fk_colcount
+		           AND NOT has_predicate
+		           AND indexdef LIKE '%USING btree%'
+		   ),
+		   fk_index_check AS (
+		       SELECT 'no index' as issue, *, 1 as issue_sort
+		       FROM fk_index_match
+		       WHERE indexid IS NULL
+		       UNION ALL
+		       SELECT 'questionable index' as issue, *, 2
+		       FROM fk_index_match
+		       WHERE indexid IS NOT NULL
+		           AND fkoid NOT IN (
+		               SELECT fkoid
+		               FROM fk_perfect_match)
+		   ),
+		   parent_table_stats AS (
+		       SELECT fkoid, tabstats.relname as parent_name,
+		           (n_tup_ins + n_tup_upd + n_tup_del + n_tup_hot_upd) as parent_writes,
+		           round(pg_relation_size(parentid)/(1024^2)::numeric) as parent_mb
+		       FROM pg_stat_user_tables AS tabstats
+		           JOIN fk_list
+		               ON relid = parentid
+		   ),
+		   fk_table_stats AS (
+		       SELECT fkoid,
+		           (n_tup_ins + n_tup_upd + n_tup_del + n_tup_hot_upd) as writes,
+		           seq_scan as table_scans
+		       FROM pg_stat_user_tables AS tabstats
+		           JOIN fk_list
+		               ON relid = conrelid
+		   )
+		   SELECT nspname as schema_name,
+		       relname as table_name,
+		       conname as fk_name,
+		       issue,
+		       table_mb,
+		       writes,
+		       table_scans,
+		       parent_name,
+		       parent_mb,
+		       parent_writes,
+		       cols_list,
+		       indexdef
+		   FROM fk_index_check
+		       JOIN parent_table_stats USING (fkoid)
+		       JOIN fk_table_stats USING (fkoid)
+		   WHERE issue = 'no index'
+		   ORDER BY issue_sort, table_mb DESC, table_name, fk_name;
+		""";
+
+	// columns
+	private static final String TABLE_NAME = "table_name";
+	private static final String FK_NAME = "fk_name";
+	private static final String PARENT_TABLE_NAME = "parent_name";
+	private static final String COLS_LIST = "cols_list";
+	private static final String ISSUE = "issue";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiForeignKeyIndexHelper.class);
 
 	protected static final Multimap<String, String> ourTableToColumnsWhitelist = HashMultimap.create();
+
+	private static final String MESSAGE = "\nUnindexed foreign key detected!\nTable: %s, Column: %s, FKIndex Name: %s, Parent Table: %s, Issue: %s";
 
 	public HapiForeignKeyIndexHelper() {
 		populateWhiteList();
@@ -112,9 +209,6 @@ public class HapiForeignKeyIndexHelper {
 		// TODO - LS - entries below here require further investigation
 		// MPI_LINK_AID - autogenerated table
 		ourTableToColumnsWhitelist.put("MPI_LINK_AUD", "REV");
-
-		// hfj_history_tag - tag_id - do we ever delete by tag history by tag_id (or at all)?
-		ourTableToColumnsWhitelist.put("HFJ_HISTORY_TAG", "TAG_ID");
 	}
 
 	public void ensureAllForeignKeysAreIndexed(DataSource theDataSource) throws SQLException {
@@ -123,23 +217,31 @@ public class HapiForeignKeyIndexHelper {
 				ResultSet results = statement.executeQuery(FK_QUERY);
 
 				while (results.next()) {
-					String tableName = results.getString("table").toUpperCase();
-					String columns = results.getString("columns").toUpperCase();
-					String constraint = results.getString("constraint").toUpperCase();
-					String referenced_table = results.getString("referenced_table").toUpperCase();
+					PgArray postgresArray = (PgArray) results.getArray(COLS_LIST);
+					String[] columns = (String[]) postgresArray.getArray();
+					String tableName = results.getString(TABLE_NAME);
+					String fkConstraintName = results.getString(FK_NAME);
+					String parentTableName = results.getString(PARENT_TABLE_NAME);
+					String issue = results.getString(ISSUE);
 
-					ourLog.warn(String.format("Table %s, Columns %s, Constraint %s, Referenced Table %s", tableName, columns, constraint, referenced_table));
-
-					Collection<String> whiteListColumns = ourTableToColumnsWhitelist.get(tableName);
-					boolean isWhiteListed = whiteListColumns.contains(columns);
-
-					assertTrue(isWhiteListed,
-							String.format("Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s", tableName, columns, constraint)
-					);
+					Collection<String> whitelistColumns = ourTableToColumnsWhitelist.get(tableName.toUpperCase());
+					for (String col : columns) {
+						boolean isWhitelisted = whitelistColumns.contains(col.toUpperCase());
+						if (!isWhitelisted) {
+							ourLog.error(String.format(MESSAGE,
+								tableName,
+								col,
+								fkConstraintName,
+								parentTableName,
+								issue));
+						}
+						assertTrue(isWhitelisted,
+							String.format("Unindexed foreign key detected! Table.column: %s.%s.", tableName, col)
+						);
+					}
 				}
 			}
 		}
-
 	}
 
 }
