@@ -2330,7 +2330,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<trimStackTrace>true</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
 						<runOrder>alphabetical</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 						<forkCount>0.6C</forkCount>
