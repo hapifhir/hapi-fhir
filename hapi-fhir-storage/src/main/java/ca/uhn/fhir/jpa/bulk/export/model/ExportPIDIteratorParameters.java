@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -59,7 +59,7 @@ public class ExportPIDIteratorParameters {
 	/**
 	 * The export style
 	 */
-	private BulkDataExportOptions.ExportStyle myExportStyle;
+	private BulkExportJobParameters.ExportStyle myExportStyle;
 	/**
 	 * the group id
 	 */
@@ -123,11 +123,11 @@ public class ExportPIDIteratorParameters {
 		myInstanceId = theInstanceId;
 	}
 
-	public BulkDataExportOptions.ExportStyle getExportStyle() {
+	public BulkExportJobParameters.ExportStyle getExportStyle() {
 		return myExportStyle;
 	}
 
-	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+	public void setExportStyle(BulkExportJobParameters.ExportStyle theExportStyle) {
 		myExportStyle = theExportStyle;
 	}
 
