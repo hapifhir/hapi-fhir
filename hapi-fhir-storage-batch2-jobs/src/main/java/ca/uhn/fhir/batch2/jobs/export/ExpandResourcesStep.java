@@ -24,7 +24,10 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
@@ -90,6 +93,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	@Autowired
+	private InterceptorService myInterceptorService;
+
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Nonnull
@@ -113,6 +119,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			.stream()
 			.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
 			.collect(Collectors.toList());
+
 		if (!postFetchFilterUrls.isEmpty()) {
 			applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
 		}
@@ -130,6 +137,19 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
 			}
 			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+		}
+
+		// Interceptor call
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
+			for (Iterator<IBaseResource> iter = allResources.iterator(); iter.hasNext(); ) {
+				HookParams params = new HookParams()
+					.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
+					.add(IBaseResource.class, iter.next());
+				boolean outcome = myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
+				if (!outcome) {
+					iter.remove();
+				}
+			}
 		}
 
 		// encode them - Key is resource type, Value is a collection of serialized resources of that type

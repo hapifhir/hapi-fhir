@@ -43,6 +43,8 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -96,6 +98,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
+		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
+
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(), getStatesThatTriggerCache());
@@ -127,11 +131,35 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
-		myBatchJobSender.sendWorkChannelMessage(workNotification);
+		sendBatchJobWorkNotificationAfterCommit(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
 		return response;
+	}
+
+	/**
+	 * In order to make sure that the data is actually in the DB when JobWorkNotification is handled,
+	 * this method registers a transaction synchronization that sends JobWorkNotification to Job WorkChannel
+	 * if and when the current database transaction is successfully committed.
+	 * If the transaction is rolled back, the JobWorkNotification will not be sent to the job WorkChannel.
+	 */
+	private void sendBatchJobWorkNotificationAfterCommit(final JobWorkNotification theJobWorkNotification) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public int getOrder() {
+					return 0;
+				}
+
+				@Override
+				public void afterCommit() {
+					myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
+				}
+			});
+		} else {
+			myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
+		}
 	}
 
 	/**
@@ -142,6 +170,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	@Nonnull
 	public JobInstance getInstance(String theInstanceId) {
 		return myJobQuerySvc.fetchInstance(theInstanceId);
 	}

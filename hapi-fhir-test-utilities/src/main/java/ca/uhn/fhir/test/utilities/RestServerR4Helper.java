@@ -24,6 +24,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -268,6 +270,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setTransactionLatchEnabled(theTransactionLatchEnabled);
 	}
 
+	public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePagingHttpMethod) {
+		myRestServer.setHttpMethodForPagingRequest(thePagingHttpMethod);
+	}
+
 	private static class MyRestfulServer extends RestfulServer {
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -280,6 +286,8 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
 
 		private final boolean myInitialTransactionLatchEnabled;
+
+		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
 
 		public MyRestfulServer(FhirContext theFhirContext, boolean theInitialTransactionLatchEnabled) {
 			super(theFhirContext);
@@ -298,7 +306,18 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		public void setTransactionLatchEnabled(boolean theTransactionLatchEnabled) {
 			getPlainProvider().setTransactionLatchEnabled(theTransactionLatchEnabled);
 		}
-		
+
+		public void setHttpMethodForPagingRequest(PagingHttpMethodEnum thePagingHttpMethod) {
+			myPagingHttpMethod = thePagingHttpMethod;
+		}
+
+		@Override
+		protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			// emulate a GET request invocation in the case of a POST paging request, as POST paging is not supported by FHIR RestServer
+			RequestTypeEnum requestType = myPagingHttpMethod == PagingHttpMethodEnum.POST ? RequestTypeEnum.GET : RequestTypeEnum.POST;
+			super.handleRequest(requestType, request, response);
+		}
+
 		public void executeWithLatch(Runnable theRunnable) throws InterruptedException {
 			myPlainProvider.setExpectedCount(1);
 			theRunnable.run();

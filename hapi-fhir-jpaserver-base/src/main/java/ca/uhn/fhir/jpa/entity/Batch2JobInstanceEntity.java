@@ -42,6 +42,7 @@ import java.util.Date;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.WARNING_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -113,8 +114,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private String myEstimatedTimeRemaining;
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
-	@Lob
-	@Column(name = "WARNING_MSG", nullable = true)
+	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessages;
 
 	/**

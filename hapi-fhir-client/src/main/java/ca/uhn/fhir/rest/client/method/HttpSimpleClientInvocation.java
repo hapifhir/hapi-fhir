@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.client.method;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.UrlSourceEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
@@ -29,19 +29,22 @@ import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import java.util.List;
 import java.util.Map;
 
-public class HttpSimpleGetClientInvocation extends BaseHttpClientInvocation {
+public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 
 	private final String myUrl;
-	private UrlSourceEnum myUrlSource = UrlSourceEnum.GENERATED;
+	private UrlSourceEnum myUrlSource = UrlSourceEnum.EXPLICIT;
 
-	public HttpSimpleGetClientInvocation(FhirContext theContext, String theUrlPath) {
+	private PagingHttpMethodEnum myPagingHttpMethod;
+
+	public HttpSimpleClientInvocation(FhirContext theContext, String theUrlPath, PagingHttpMethodEnum thePagingHttpMethod) {
 		super(theContext);
 		myUrl = theUrlPath;
+		myPagingHttpMethod = thePagingHttpMethod;
 	}
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
-		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, RequestTypeEnum.GET);
+		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPagingHttpMethod.getRequestType());
 		retVal.setUrlSource(myUrlSource);
 		return retVal;
 	}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -30,6 +31,8 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -51,6 +54,7 @@ import static org.hl7.fhir.instance.model.api.IPrimitiveType.toValueOrNull;
  * </ul>
  */
 public class PartitionManagementProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
 	@Autowired
 	private FhirContext myCtx;
@@ -71,6 +75,11 @@ public class PartitionManagementProvider {
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription,
 		RequestDetails theRequestDetails
 	) {
+
+		if (thePartitionId == null && thePartitionName!= null && thePartitionName.hasValue()) {
+			thePartitionId = requestRandomPartitionId(thePartitionName);
+		}
+
 		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
@@ -81,6 +90,13 @@ public class PartitionManagementProvider {
 		IBaseParameters retVal = prepareOutput(output);
 
 		return retVal;
+	}
+
+	@Nonnull
+	private IPrimitiveType<Integer> requestRandomPartitionId(IPrimitiveType<String> thePartitionName) {
+		int unusedPartitionId = myPartitionLookupSvc.generateRandomUnusedPartitionId();
+		ourLog.info("Request to create partition came in without a partition ID. Auto-assigning an available ID.[partition_id={}, partition_name={}]", unusedPartitionId, thePartitionName);
+		return new IntegerDt(unusedPartitionId);
 	}
 
 	/**

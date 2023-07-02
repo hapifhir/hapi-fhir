@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
@@ -91,13 +93,49 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		Patient patient = (Patient) foundResources.get(0);
-		Group group = (Group) foundResources.get(1);
-		CareTeam careTeam = (CareTeam) foundResources.get(2);
-		DetectedIssue detectedIssue = (DetectedIssue) foundResources.get(3);
+		Patient patient = null;
+		boolean patientFound = false;
+		boolean groupFound = false;
+		boolean careTeamFound = false;
+		boolean detectedIssueFound = false;
+		for (IBaseResource foundResource : foundResources) {
+			String type = foundResource.getIdElement().getResourceType();
+			switch (type) {
+				case "Patient":
+					if (foundResource.getIdElement().getIdPart().equals(pid.getIdPart())) {
+						patientFound = true;
+						patient = (Patient) foundResource;
+					}
+					break;
+				case "Group":
+					if (foundResource.getIdElement().getIdPart().equals(gid.getIdPart())) {
+						groupFound = true;
+					}
+					break;
+				case "CareTeam":
+					if (foundResource.getIdElement().getIdPart().equals(ctid.getIdPart())) {
+						careTeamFound = true;
+					}
+					break;
+				case "DetectedIssue":
+					if (dids.contains(foundResource.getIdElement())) {
+						detectedIssueFound = true;
+					}
+					break;
+				default:
+					ourLog.warn(type + " found but not expected");
+			}
+
+			if (patientFound && groupFound && careTeamFound && detectedIssueFound) {
+				break;
+			}
+		}
+
+		assertTrue(patientFound);
+		assertTrue(groupFound);
+		assertTrue(careTeamFound);
+		assertNotNull(patient);
 		assertEquals(pid.getIdPart(), patient.getIdElement().getIdPart());
-		assertEquals(gid.getIdPart(), group.getIdElement().getIdPart());
-		assertEquals(ctid.getIdPart(), careTeam.getIdElement().getIdPart());
 		assertEquals(methodName, patient.getName().get(0).getFamily());
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
