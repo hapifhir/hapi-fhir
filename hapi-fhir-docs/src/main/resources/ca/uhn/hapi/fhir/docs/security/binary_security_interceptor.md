@@ -9,5 +9,9 @@ Note that this interceptor can currently only enforce identifier values found in
 This interceptor is intended to be subclassed. A simple example is shown below:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/SecurityInterceptors.java}}
-``` 
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/HeaderBasedBinarySecurityContextInterceptor.java}}
+```
+
+## Combining with Bulk Export
+
+The `setBinarySecurityContextIdentifierSystem(..)` and `setBinarySecurityContextIdentifierValue(..)` properties on the `BulkExportJobParameters` object can be used to automatically populate the security context on Binary resources created by Bulk Export jobs with values that can be verified by this interceptor. An interceptor on the `STORAGE_INITIATE_BULK_EXPORT` pointcut is the easiest way to set these properties when a new Bulk Export job is being kicked off. 
