@@ -122,7 +122,9 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			srd.setRequestPartitionId(partitionId);
 		}
 
-		binary.setId(RandomTextUtils.newSecureRandomAlphaNumericString(64));
+		// Use a random ID to make it harder to guess IDs - 32 characters of a-zA-Z0-9
+		// has 190 bts of entropy according to https://www.omnicalculator.com/other/password-entropy
+		binary.setId(RandomTextUtils.newSecureRandomAlphaNumericString(32));
 
 		// Make sure we don't accidentally reuse an ID. This should be impossible given the
 		// amount of entropy in the IDs but might as well be sure.
