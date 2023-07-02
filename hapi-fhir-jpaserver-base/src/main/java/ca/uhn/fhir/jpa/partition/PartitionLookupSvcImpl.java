@@ -123,14 +123,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	/**
-	 * Generate a random int which is guaranteed to  be unused by an existing partition.
+	 * Generate a random postive integer between 1 and Integer.MAX_VALUE, which is guaranteed to  be unused by an existing partition.
 	 * @return an integer representing a partition ID that is not currently in use by the system.
 	 */
 	public int generateRandomUnusedPartitionId() {
-		int candidate = ThreadLocalRandom.current().nextInt();
+		int candidate = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
 		Optional<PartitionEntity> partition = myPartitionDao.findById(candidate);
 		while (partition.isPresent()) {
-			candidate = ThreadLocalRandom.current().nextInt();
+			candidate = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
 			partition = myPartitionDao.findById(candidate);
 		}
 		return candidate;

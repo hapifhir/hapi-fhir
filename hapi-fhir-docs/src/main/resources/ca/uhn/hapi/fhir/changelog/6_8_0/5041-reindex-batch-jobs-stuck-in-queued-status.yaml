@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5041
+jira: SMILE-6428
+title: "Fixed an issue where reindex batch jobs failed to start and were stuck in QUEUED status after a SearchParameter update."
