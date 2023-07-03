@@ -28,39 +28,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
 import javax.annotation.PostConstruct;
+import java.util.Set;
 
 public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);
 
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
-
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
-
 	@Autowired(required = false)
 	private SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
-
 	@Autowired
 	private StorageSettings myStorageSettings;
-
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
-
 	private boolean mySubscriptionValidatingInterceptorRegistered;
 	private boolean mySubscriptionMatcherInterceptorRegistered;
 	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
 
 	@PostConstruct
 	public void start() {
-		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes =
-				myStorageSettings.getSupportedSubscriptionTypes();
+		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
-			ourLog.info(
-					"Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
+			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
 		} else {
 			if (!mySubscriptionMatcherInterceptorRegistered) {
 				ourLog.info("Registering subscription matcher interceptor");

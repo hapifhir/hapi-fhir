@@ -65,12 +65,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static java.util.Objects.nonNull;
@@ -79,22 +79,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).disableAllErrors();
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageResourceParser.class);
-
 	@Autowired
 	private FhirContext myFhirContext;
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-
 	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
-
 	@Autowired
 	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 
@@ -106,17 +100,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@Override
-	public <R extends IBaseResource> R toResource(
-			Class<R> theResourceType,
-			IBaseResourceEntity theEntity,
-			Collection<ResourceTag> theTagList,
-			boolean theForHistoryOperation) {
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation) {
 
 		// 1. get resource, it's encoding and the tags if any
 		byte[] resourceBytes;
 		String resourceText;
 		ResourceEncodingEnum resourceEncoding;
-		@Nullable Collection<? extends BaseTag> tagList = Collections.emptyList();
+		@Nullable
+		Collection<? extends BaseTag> tagList = Collections.emptyList();
 		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
@@ -159,8 +150,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 				while (history == null) {
 					if (version > 1L) {
 						version--;
-						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
-								theEntity.getId(), version);
+						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
 					} else {
 						return null;
 					}
@@ -232,13 +222,11 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		return retVal;
 	}
 
-	private <R extends IBaseResource> void populateResourcePartitionInformation(
-			IBaseResourceEntity theEntity, R retVal) {
+	private <R extends IBaseResource> void populateResourcePartitionInformation(IBaseResourceEntity theEntity, R retVal) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			PartitionablePartitionId partitionId = theEntity.getPartitionId();
 			if (partitionId != null && partitionId.getPartitionId() != null) {
-				PartitionEntity persistedPartition =
-						myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
+				PartitionEntity persistedPartition = myPartitionLookupSvc.getPartitionById(partitionId.getPartitionId());
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, persistedPartition.toRequestPartitionId());
 			} else {
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, null);
@@ -247,11 +235,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R parseResource(
-			IBaseResourceEntity theEntity,
-			ResourceEncodingEnum theResourceEncoding,
-			String theDecodedResourceText,
-			Class<R> theResourceType) {
+	private <R extends IBaseResource> R parseResource(IBaseResourceEntity theEntity, ResourceEncodingEnum theResourceEncoding, String theDecodedResourceText, Class<R> theResourceType) {
 		R retVal;
 		if (theResourceEncoding == ResourceEncodingEnum.ESR) {
 
@@ -261,14 +245,12 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			String address = theDecodedResourceText.substring(colonIndex + 1);
 			Validate.notBlank(providerId, "No provider ID in ESR address: %s", theDecodedResourceText);
 			Validate.notBlank(address, "No address in ESR address: %s", theDecodedResourceText);
-			IExternallyStoredResourceService provider =
-					myExternallyStoredResourceServiceRegistry.getProvider(providerId);
+			IExternallyStoredResourceService provider = myExternallyStoredResourceServiceRegistry.getProvider(providerId);
 			retVal = (R) provider.fetchResource(address);
 
 		} else if (theResourceEncoding != ResourceEncodingEnum.DEL) {
 
-			IParser parser = new TolerantJsonParser(
-					getContext(theEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, theEntity.getId());
+			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, theEntity.getId());
 
 			try {
 				retVal = parser.parseResource(theResourceType, theDecodedResourceText);
@@ -291,16 +273,14 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 		} else {
 
-			retVal = (R) myFhirContext
-					.getResourceDefinition(theEntity.getResourceType())
-					.newInstance();
+			retVal = (R) myFhirContext.getResourceDefinition(theEntity.getResourceType()).newInstance();
+
 		}
 		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> Class<R> determineTypeToParse(
-			Class<R> theResourceType, @Nullable Collection<? extends BaseTag> tagList) {
+	private <R extends IBaseResource> Class<R> determineTypeToParse(Class<R> theResourceType, @Nullable Collection<? extends BaseTag> tagList) {
 		Class<R> resourceType = theResourceType;
 		if (tagList != null) {
 			if (myFhirContext.hasDefaultTypeForProfile()) {
@@ -324,31 +304,19 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends IBaseResource> R populateResourceMetadata(
-			IBaseResourceEntity theEntitySource,
-			boolean theForHistoryOperation,
-			@Nullable Collection<? extends BaseTag> tagList,
-			long theVersion,
-			R theResourceTarget) {
+	public <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntitySource, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResourceTarget) {
 		if (theResourceTarget instanceof IResource) {
 			IResource res = (IResource) theResourceTarget;
-			theResourceTarget =
-					(R) populateResourceMetadataHapi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
+			theResourceTarget = (R) populateResourceMetadataHapi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
 		} else {
 			IAnyResource res = (IAnyResource) theResourceTarget;
-			theResourceTarget =
-					populateResourceMetadataRi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
+			theResourceTarget = populateResourceMetadataRi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
 		}
 		return theResourceTarget;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IResource> R populateResourceMetadataHapi(
-			IBaseResourceEntity theEntity,
-			@Nullable Collection<? extends BaseTag> theTagList,
-			boolean theForHistoryOperation,
-			R res,
-			Long theVersion) {
+	private <R extends IResource> R populateResourceMetadataHapi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, R res, Long theVersion) {
 		R retVal = res;
 		if (theEntity.getDeleted() != null) {
 			res = (R) myFhirContext.getResourceDefinition(res).newInstance();
@@ -389,8 +357,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 							profiles.add(new IdDt(nextTag.getCode()));
 							break;
 						case SECURITY_LABEL:
-							IBaseCoding secLabel =
-									(IBaseCoding) myFhirContext.getVersion().newCodingDt();
+							IBaseCoding secLabel = (IBaseCoding) myFhirContext.getVersion().newCodingDt();
 							secLabel.setSystem(nextTag.getSystem());
 							secLabel.setCode(nextTag.getCode());
 							secLabel.setDisplay(nextTag.getDisplay());
@@ -423,12 +390,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataRi(
-			IBaseResourceEntity theEntity,
-			@Nullable Collection<? extends BaseTag> theTagList,
-			boolean theForHistoryOperation,
-			IAnyResource res,
-			Long theVersion) {
+	private <R extends IBaseResource> R populateResourceMetadataRi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IAnyResource) myFhirContext.getResourceDefinition(res).newInstance();
@@ -524,8 +486,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		return FhirContext.forCached(theVersion);
 	}
 
-	private static String decodedResourceText(
-			byte[] resourceBytes, String resourceText, ResourceEncodingEnum resourceEncoding) {
+	private static String decodedResourceText(byte[] resourceBytes, String resourceText, ResourceEncodingEnum resourceEncoding) {
 		String decodedResourceText;
 		if (resourceText != null) {
 			decodedResourceText = resourceText;
@@ -542,4 +503,5 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		}
 		return retVal;
 	}
+
 }

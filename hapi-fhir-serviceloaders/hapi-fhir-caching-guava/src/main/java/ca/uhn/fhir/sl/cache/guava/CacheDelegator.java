@@ -20,13 +20,13 @@ package ca.uhn.fhir.sl.cache.guava;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import com.google.common.cache.CacheLoader;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+
+import ca.uhn.fhir.i18n.Msg;
+import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 
@@ -50,7 +50,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 		} catch (UncheckedExecutionException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				// Unwrap exception to match Caffeine
-				throw (RuntimeException) e.getCause();
+				throw (RuntimeException)e.getCause();
 			}
 			throw e;
 		} catch (CacheLoader.InvalidCacheLoadException e) {
@@ -61,9 +61,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public Map<K, V> getAllPresent(Iterable<? extends K> keys) {
-		return cache.getAllPresent(keys);
-	}
+	public Map<K, V> getAllPresent(Iterable<? extends K> keys) { return cache.getAllPresent(keys); }
 
 	@Override
 	public void put(K key, V value) {
@@ -76,12 +74,10 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void invalidate(K key) {
-		cache.invalidate(key);
-	}
+	public void invalidate(K key) { cache.invalidate(key); }
 
 	@Override
-	public void invalidateAll(Iterable<? extends K> keys) {
+	public void invalidateAll(Iterable<? extends K> keys)  {
 		cache.invalidateAll(keys);
 	}
 
@@ -96,7 +92,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void cleanUp() {
+	public void cleanUp(){
 		cache.cleanUp();
 	}
 }

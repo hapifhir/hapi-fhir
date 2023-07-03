@@ -47,13 +47,7 @@ public class WorkChunkCreateEvent {
 	 * @param theInstanceId           The instance ID associated with this chunk
 	 * @param theSerializedData       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
 	 */
-	public WorkChunkCreateEvent(
-			@Nonnull String theJobDefinitionId,
-			int theJobDefinitionVersion,
-			@Nonnull String theTargetStepId,
-			@Nonnull String theInstanceId,
-			int theSequence,
-			@Nullable String theSerializedData) {
+	public WorkChunkCreateEvent(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion, @Nonnull String theTargetStepId, @Nonnull String theInstanceId, int theSequence, @Nullable String theSerializedData) {
 		jobDefinitionId = theJobDefinitionId;
 		jobDefinitionVersion = theJobDefinitionVersion;
 		targetStepId = theTargetStepId;
@@ -66,7 +60,7 @@ public class WorkChunkCreateEvent {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null);
+		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
 	}
 
 	@Override
@@ -78,24 +72,24 @@ public class WorkChunkCreateEvent {
 		WorkChunkCreateEvent that = (WorkChunkCreateEvent) theO;
 
 		return new EqualsBuilder()
-				.append(jobDefinitionId, that.jobDefinitionId)
-				.append(jobDefinitionVersion, that.jobDefinitionVersion)
-				.append(targetStepId, that.targetStepId)
-				.append(instanceId, that.instanceId)
-				.append(sequence, that.sequence)
-				.append(serializedData, that.serializedData)
-				.isEquals();
+			.append(jobDefinitionId, that.jobDefinitionId)
+			.append(jobDefinitionVersion, that.jobDefinitionVersion)
+			.append(targetStepId, that.targetStepId)
+			.append(instanceId, that.instanceId)
+			.append(sequence, that.sequence)
+			.append(serializedData, that.serializedData)
+			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(jobDefinitionId)
-				.append(jobDefinitionVersion)
-				.append(targetStepId)
-				.append(instanceId)
-				.append(sequence)
-				.append(serializedData)
-				.toHashCode();
+			.append(jobDefinitionId)
+			.append(jobDefinitionVersion)
+			.append(targetStepId)
+			.append(instanceId)
+			.append(sequence)
+			.append(serializedData)
+			.toHashCode();
 	}
 }

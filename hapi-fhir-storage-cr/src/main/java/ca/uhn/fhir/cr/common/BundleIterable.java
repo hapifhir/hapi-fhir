@@ -23,18 +23,20 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * This class leverages IBundleProvider Iterable to provide an iterator for processing bundle search results into manageable paginated chunks. This helped to avoid loading large result sets into lists
  **/
+
 @NotThreadSafe
 public class BundleIterable implements Iterable<IBaseResource> {
 
 	private final IBundleProvider sourceBundleProvider;
 	private final RequestDetails requestDetails;
+
 
 	public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider) {
 		this.sourceBundleProvider = bundleProvider;
@@ -58,6 +60,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 
 		private int currentResourceListIndex = 0;
 
+
 		public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider) {
 			this.bundleProvider = bundleProvider;
 			this.requestDetails = requestDetails;
@@ -68,7 +71,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 			this.currentResourceList = this.bundleProvider.getResources(offset, increment + offset);
 			// next offset created
 			offset += increment;
-			// restart counter on new chunk
+			//restart counter on new chunk
 			currentResourceListIndex = 0;
 		}
 
@@ -91,6 +94,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 			return this.hasNext();
 		}
 
+
 		@Override
 		public IBaseResource next() {
 			assert this.currentResourceListIndex < this.currentResourceList.size();
@@ -101,3 +105,4 @@ public class BundleIterable implements Iterable<IBaseResource> {
 		}
 	}
 }
+

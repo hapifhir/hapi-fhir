@@ -30,4 +30,5 @@ import java.util.function.Supplier;
 public @interface ExampleSupplier {
 
 	Class<? extends Supplier<?>>[] value();
+
 }

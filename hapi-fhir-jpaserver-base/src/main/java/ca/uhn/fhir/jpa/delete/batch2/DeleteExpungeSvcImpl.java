@@ -27,9 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
 
 public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
@@ -38,10 +38,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private final DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilder;
 	private final IFulltextSearchSvc myFullTextSearchSvc;
 
-	public DeleteExpungeSvcImpl(
-			EntityManager theEntityManager,
-			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
-			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
+	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;
@@ -49,8 +46,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 
 	@Override
 	public int deleteExpunge(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
-		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult =
-				myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
+		DeleteExpungeSqlBuilder.DeleteExpungeSqlResult sqlResult = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids, theCascade, theCascadeMaxRounds);
 		List<String> sqlList = sqlResult.getSqlStatements();
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
@@ -62,7 +58,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 
 		ourLog.info("{} records deleted", totalDeleted);
 		clearHibernateSearchIndex(theJpaPids);
-
+		
 		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
 		return sqlResult.getRecordCount();
 	}
@@ -78,10 +74,11 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	 */
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
 		if (myFullTextSearchSvc != null && !myFullTextSearchSvc.isDisabled()) {
-			List<Object> objectIds =
-					thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
+			List<Object> objectIds = thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}
 	}
+
+
 }

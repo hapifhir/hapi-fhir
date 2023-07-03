@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 /**
  * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
@@ -32,6 +32,7 @@ import javax.persistence.MappedSuperclass;
  */
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
+
 
 	@Embedded
 	private PartitionablePartitionId myPartitionId;
@@ -54,8 +55,9 @@ public abstract class BasePartitionable implements Serializable {
 
 	@Override
 	public String toString() {
-		return "BasePartitionable{" + "myPartitionId="
-				+ myPartitionId + ", myPartitionIdValue="
-				+ myPartitionIdValue + '}';
+		return "BasePartitionable{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionIdValue=" + myPartitionIdValue +
+			'}';
 	}
 }

@@ -28,12 +28,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
 
 /**
  * Purely in-memory implementation of binary storage service. This is really
@@ -54,13 +54,8 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(
-			IIdType theResourceId,
-			String theBlobIdOrNull,
-			String theContentType,
-			InputStream theInputStream,
-			RequestDetails theRequestDetails)
-			throws IOException {
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
+											 InputStream theInputStream, RequestDetails theRequestDetails) throws IOException {
 
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
 		CountingInputStream countingIs = createCountingInputStream(hashingIs);
@@ -70,8 +65,7 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		String key = toKey(theResourceId, id);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
-		StoredDetails storedDetails =
-				new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
+		StoredDetails storedDetails = new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
 		myDetailsMap.put(key, storedDetails);
 		return storedDetails;
 	}

@@ -27,5 +27,7 @@ public enum JobFileRowProcessingModeEnum {
 	/**
 	 * Sorting OK
 	 */
+
 	FHIR_TRANSACTION
+
 }

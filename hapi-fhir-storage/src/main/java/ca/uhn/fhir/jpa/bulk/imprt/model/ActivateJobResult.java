@@ -34,7 +34,8 @@ public class ActivateJobResult {
 	@Nullable
 	public final String jobId;
 
-	public ActivateJobResult(boolean theIsActivated, @Nullable String theJobId) {
+	public ActivateJobResult(boolean theIsActivated,
+									 @Nullable String theJobId) {
 		isActivated = theIsActivated;
 		jobId = theJobId;
 	}

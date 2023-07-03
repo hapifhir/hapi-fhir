@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.method.SortParameter;
@@ -42,9 +42,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -63,11 +63,12 @@ public class TestDaoSearch {
 	public static class Config {
 		@Bean
 		TestDaoSearch testDaoSearch(
-				@Autowired FhirContext theFhirContext,
-				@Autowired DaoRegistry theDaoRegistry,
-				@Autowired MatchUrlService theMatchUrlService,
-				@Autowired ISearchParamRegistry theSearchParamRegistry) {
+			@Autowired FhirContext theFhirContext,
+			@Autowired DaoRegistry theDaoRegistry,
+			@Autowired MatchUrlService theMatchUrlService,
+			@Autowired ISearchParamRegistry theSearchParamRegistry
 
+		) {
 			return new TestDaoSearch(theFhirContext, theDaoRegistry, theMatchUrlService, theSearchParamRegistry);
 		}
 	}
@@ -80,11 +81,7 @@ public class TestDaoSearch {
 	final MatchUrlService myMatchUrlService;
 	final ISearchParamRegistry mySearchParamRegistry;
 
-	public TestDaoSearch(
-			FhirContext theFhirCtx,
-			DaoRegistry theDaoRegistry,
-			MatchUrlService theMatchUrlService,
-			ISearchParamRegistry theSearchParamRegistry) {
+	public TestDaoSearch(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService, ISearchParamRegistry theSearchParamRegistry) {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 		myFhirCtx = theFhirCtx;
@@ -101,7 +98,7 @@ public class TestDaoSearch {
 	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
 	 * @param theIds the resource ids to expect.
 	 */
-	public void assertSearchFinds(String theReason, String theQueryUrl, String... theIds) {
+	public void assertSearchFinds(String theReason, String theQueryUrl,  String ...theIds) {
 		assertSearchResultIds(theQueryUrl, theReason, hasItems(theIds));
 	}
 
@@ -111,7 +108,7 @@ public class TestDaoSearch {
 	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
 	 * @param theIds the id-part of the resource ids to expect.
 	 */
-	public void assertSearchFinds(String theReason, String theQueryUrl, IIdType... theIds) {
+	public void assertSearchFinds(String theReason, String theQueryUrl, IIdType...theIds) {
 		String[] bareIds = idTypeToIdParts(theIds);
 
 		assertSearchResultIds(theQueryUrl, theReason, hasItems(bareIds));
@@ -129,7 +126,7 @@ public class TestDaoSearch {
 	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
 	 * @param theIds the id-part of the resource ids to not-expect.
 	 */
-	public void assertSearchNotFound(String theReason, String theQueryUrl, IIdType... theIds) {
+	public void assertSearchNotFound(String theReason, String theQueryUrl, IIdType ...theIds) {
 		List<String> ids = searchForIds(theQueryUrl);
 
 		MatcherAssert.assertThat(theReason, ids, everyItem(not(in(idTypeToIdParts(theIds)))));
@@ -149,14 +146,13 @@ public class TestDaoSearch {
 		return result.getAllResources();
 	}
 
-	public List<String> searchForIds(String theQueryUrl) {
+	public List<String>  searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 
 		// getAllResources is not safe as size is not always set
-		return result.getResources(0, Integer.MAX_VALUE).stream()
-				.map(resource -> resource.getIdElement().getIdPart())
-				.collect(Collectors.toList());
+		return result.getResources(0, Integer.MAX_VALUE)
+					.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 	}
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl, boolean theSynchronousMode) {
@@ -165,16 +161,13 @@ public class TestDaoSearch {
 
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(theSynchronousMode);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx)
-				.translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
 
 		// for asynchronous mode, we also need to make the request paginated ar synchronous is forced
-		SystemRequestDetails reqDetails = theSynchronousMode
-				? fakeRequestDetailsFromUrl(theQueryUrl)
-				: fakePaginatedRequestDetailsFromUrl(theQueryUrl);
+		SystemRequestDetails reqDetails =  theSynchronousMode ? fakeRequestDetailsFromUrl(theQueryUrl) : fakePaginatedRequestDetailsFromUrl(theQueryUrl);
 		return dao.search(map, reqDetails);
 	}
 
@@ -187,8 +180,7 @@ public class TestDaoSearch {
 
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx)
-				.translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
@@ -198,20 +190,18 @@ public class TestDaoSearch {
 	@Nonnull
 	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
 		SystemRequestDetails request = new SystemRequestDetails();
-		UriComponents uriComponents =
-				UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents.getQueryParams().forEach((key, value) -> request.addParameter(key, value.toArray(new String[0])));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
+		uriComponents.getQueryParams()
+			.forEach((key, value) -> request.addParameter(key, value.toArray(new String[0])));
 		return request;
 	}
 
 	@Nonnull
 	private SystemRequestDetails fakePaginatedRequestDetailsFromUrl(String theQueryUrl) {
 		SystemRequestDetails spiedReqDetails = spy(SystemRequestDetails.class);
-		UriComponents uriComponents =
-				UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents
-				.getQueryParams()
-				.forEach((key, value) -> spiedReqDetails.addParameter(key, value.toArray(new String[0])));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
+		uriComponents.getQueryParams()
+			.forEach((key, value) -> spiedReqDetails.addParameter(key, value.toArray(new String[0])));
 
 		IPagingProvider mockPagingProvider = mock(IPagingProvider.class);
 		IRestfulServerDefaults mockServerDfts = mock(IRestfulServerDefaults.class);
@@ -219,4 +209,6 @@ public class TestDaoSearch {
 		doReturn(mockPagingProvider).when(mockServerDfts).getPagingProvider();
 		return spiedReqDetails;
 	}
+
+
 }

@@ -22,20 +22,15 @@ package ca.uhn.fhir.rest.param;
 import java.util.Map;
 
 public class HistorySearchDateRangeParam extends DateRangeParam {
-	public HistorySearchDateRangeParam(
-			Map<String, String[]> theParameters, DateRangeParam theDateRange, Integer theOffset) {
+	public HistorySearchDateRangeParam(Map<String, String[]> theParameters, DateRangeParam theDateRange,
+												  Integer theOffset){
 		super(theDateRange);
 		this.myOffset = theOffset;
 
-		this.myHistorySearchType = theParameters == null
-				? null
-				: theParameters.keySet().stream()
-						.map(key -> HistorySearchStyleEnum.parse(key))
-						.filter(type -> type != null)
-						.findAny()
-						.orElse(null);
+		this.myHistorySearchType = theParameters == null? null
+			: theParameters.keySet().stream().map(key -> HistorySearchStyleEnum.parse(key))
+			.filter(type -> type != null).findAny().orElse(null);
 	}
-
 	private HistorySearchStyleEnum myHistorySearchType;
 
 	private Integer myOffset;

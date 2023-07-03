@@ -41,14 +41,10 @@ public class JobWorkNotification implements IModelJson {
 	@JsonProperty(value = "instanceId")
 	private String myInstanceId;
 
-	public JobWorkNotification() {}
+	public JobWorkNotification() {
+	}
 
-	public JobWorkNotification(
-			@Nonnull String theJobDefinitionId,
-			int jobDefinitionVersion,
-			@Nonnull String theInstanceId,
-			@Nonnull String theTargetStepId,
-			@Nonnull String theChunkId) {
+	public JobWorkNotification(@Nonnull String theJobDefinitionId, int jobDefinitionVersion, @Nonnull String theInstanceId, @Nonnull String theTargetStepId, @Nonnull String theChunkId) {
 		setJobDefinitionId(theJobDefinitionId);
 		setJobDefinitionVersion(jobDefinitionVersion);
 		setChunkId(theChunkId);
@@ -56,17 +52,11 @@ public class JobWorkNotification implements IModelJson {
 		setTargetStepId(theTargetStepId);
 	}
 
-	public JobWorkNotification(JobInstance theInstance, String theNextStepId, String theNextChunkId) {
-		this(
-				theInstance.getJobDefinitionId(),
-				theInstance.getJobDefinitionVersion(),
-				theInstance.getInstanceId(),
-				theNextStepId,
-				theNextChunkId);
-	}
+    public JobWorkNotification(JobInstance theInstance, String theNextStepId, String theNextChunkId) {
+		this(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion(), theInstance.getInstanceId(), theNextStepId, theNextChunkId);
+    }
 
-	public static JobWorkNotification firstStepNotification(
-			JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
+    public static JobWorkNotification firstStepNotification(JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
@@ -115,7 +105,6 @@ public class JobWorkNotification implements IModelJson {
 
 	@Override
 	public String toString() {
-		return String.format(
-				"job[%s] instance[%s] step[%s] chunk[%s]", myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
+		return String.format("job[%s] instance[%s] step[%s] chunk[%s]", myJobDefinitionId, myInstanceId, myTargetStepId, myChunkId);
 	}
 }

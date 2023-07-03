@@ -28,20 +28,20 @@ import java.lang.annotation.Target;
  * Field modifier to be placed on a child field (a field also annotated with the {@link Child} annotation) which
  * indicates that this field is an extension.
  */
-@Target(value = {ElementType.FIELD})
+@Target(value = { ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Extension {
 
 	/**
 	 * This parameter affects how the extension is treated when the element definition containing this resource is
 	 * exported to a profile.
-	 *
+	 * 
 	 * <p>
 	 * If set to <b><code>true</code></b>, the resource is taken to be a local resource and its definition is exported
 	 * along with the reference. Use this option for extension defintions that you have added locally (i.e. within your
 	 * own organization)
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * If set to <b><code>false</code></b>, the resource is taken to be a remote resource and its definition is
 	 * <b>not</b> exported to the profile. Use this option for extensions that are defined by other organizations (i.e.
@@ -60,4 +60,5 @@ public @interface Extension {
 	 * The URL associated with this extension
 	 */
 	String url();
+
 }

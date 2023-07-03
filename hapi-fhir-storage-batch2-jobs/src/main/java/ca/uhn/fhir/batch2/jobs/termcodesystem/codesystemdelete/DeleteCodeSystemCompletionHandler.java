@@ -24,7 +24,8 @@ import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
-public class DeleteCodeSystemCompletionHandler implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
+public class DeleteCodeSystemCompletionHandler
+	implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 

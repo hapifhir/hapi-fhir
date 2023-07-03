@@ -40,6 +40,7 @@ public class ZipCollectionBuilder {
 
 	public static final String ZIP_ENTRY_PREFIX = "SnomedCT_Release_INT_20160131_Full/Terminology/";
 
+
 	private static final Logger ourLog = LoggerFactory.getLogger(ZipCollectionBuilder.class);
 	private final ArrayList<ITermLoaderSvc.FileDescriptor> myFiles;
 
@@ -75,8 +76,7 @@ public class ZipCollectionBuilder {
 		addFileZip(theClasspathPrefix, theClasspathFileName, theClasspathFileName);
 	}
 
-	public void addFileZip(String theClasspathPrefix, String theClasspathFileName, String theOutputFilename)
-			throws IOException {
+	public void addFileZip(String theClasspathPrefix, String theClasspathFileName, String theOutputFilename) throws IOException {
 		ByteArrayOutputStream bos;
 		bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);

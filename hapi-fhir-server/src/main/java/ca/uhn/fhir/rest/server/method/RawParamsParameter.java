@@ -19,19 +19,20 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.rest.annotation.RawParam;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.QualifierDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.Validate;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.annotation.RawParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.QualifierDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class RawParamsParameter implements IParameter {
 
@@ -41,52 +42,46 @@ public class RawParamsParameter implements IParameter {
 		myAllMethodParameters = theParameters;
 	}
 
+	
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		HashMap<String, List<String>> retVal = null;
 
 		for (String nextName : theRequest.getParameters().keySet()) {
 			if (nextName.startsWith("_")) {
 				continue;
 			}
-
+			
 			QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(nextName);
-
+			
 			boolean alreadyCaptured = false;
 			for (IParameter nextParameter : myAllMethodParameters) {
 				if (nextParameter instanceof SearchParameter) {
-					SearchParameter nextSearchParam = (SearchParameter) nextParameter;
+					SearchParameter nextSearchParam = (SearchParameter)nextParameter;
 					if (nextSearchParam.getName().equals(qualifiers.getParamName())) {
-						if (qualifiers.passes(
-								nextSearchParam.getQualifierWhitelist(), nextSearchParam.getQualifierBlacklist())) {
+						if (qualifiers.passes(nextSearchParam.getQualifierWhitelist(), nextSearchParam.getQualifierBlacklist())) {
 							alreadyCaptured = true;
 							break;
 						}
 					}
 				}
 			}
-
+			
 			if (!alreadyCaptured) {
 				if (retVal == null) {
 					retVal = new HashMap<>();
 				}
 				retVal.put(nextName, Arrays.asList(theRequest.getParameters().get(nextName)));
 			}
+			
 		}
-
+		
 		return retVal;
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
-		Validate.isTrue(
-				theParameterType.equals(Map.class),
-				"Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
-	}
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		Validate.isTrue(theParameterType.equals(Map.class), "Parameter with @" + RawParam.class + " must be of type Map<String, List<String>>");
+	} 
+
 }

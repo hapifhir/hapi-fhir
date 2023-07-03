@@ -29,11 +29,11 @@ public class TypedPidJson implements IModelJson {
 
 	@JsonProperty("type")
 	private String myResourceType;
-
 	@JsonProperty("id")
 	private String myPid;
 
-	public TypedPidJson() {}
+	public TypedPidJson() {
+	}
 
 	public TypedPidJson(String theResourceType, String theId) {
 		myResourceType = theResourceType;
@@ -78,10 +78,7 @@ public class TypedPidJson implements IModelJson {
 
 		TypedPidJson id = (TypedPidJson) theO;
 
-		return new EqualsBuilder()
-				.append(myResourceType, id.myResourceType)
-				.append(myPid, id.myPid)
-				.isEquals();
+		return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myPid, id.myPid).isEquals();
 	}
 
 	@Override

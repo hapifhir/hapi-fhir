@@ -19,4 +19,5 @@
  */
 package ca.uhn.fhir.mdm.interceptor;
 
-public interface IMdmStorageInterceptor {}
+public interface IMdmStorageInterceptor {
+}

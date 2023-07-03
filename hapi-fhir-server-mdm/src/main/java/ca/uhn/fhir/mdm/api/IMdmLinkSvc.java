@@ -37,12 +37,7 @@ public interface IMdmLinkSvc {
 	 * @param theLinkSource            MANUAL or AUTO: what caused the link.
 	 * @param theMdmTransactionContext
 	 */
-	void updateLink(
-			IAnyResource theGoldenResource,
-			IAnyResource theSourceResource,
-			MdmMatchOutcome theMatchResult,
-			MdmLinkSourceEnum theLinkSource,
-			MdmTransactionContext theMdmTransactionContext);
+	void updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
 
 	/**
 	 * Delete a link between given Golden Resource and the corresponding source resource
@@ -51,10 +46,7 @@ public interface IMdmLinkSvc {
 	 * @param theSourceResource
 	 * @param theMdmTransactionContext
 	 */
-	void deleteLink(
-			IAnyResource theExistingGoldenResource,
-			IAnyResource theSourceResource,
-			MdmTransactionContext theMdmTransactionContext);
+	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext);
 
 	/**
 	 * Delete all link records whose source or target points to the provided pids.

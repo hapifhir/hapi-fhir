@@ -36,19 +36,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -67,6 +54,19 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -1542,7 +1542,8 @@ public class XmlUtil {
 	/**
 	 * Non-instantiable
 	 */
-	private XmlUtil() {}
+	private XmlUtil() {
+	}
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
 		@Override
@@ -1605,15 +1606,14 @@ public class XmlUtil {
 				}
 			};
 		}
+
 	}
 
 	private static XMLOutputFactory createOutputFactory() throws FactoryConfigurationError {
 		try {
 			// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 			Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
-			System.setProperty(
-					javax.xml.stream.XMLOutputFactory.class.getName(),
-					com.ctc.wstx.stax.WstxOutputFactory.class.getName());
+			System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), com.ctc.wstx.stax.WstxOutputFactory.class.getName());
 		} catch (ClassNotFoundException e) {
 			// ok
 		}
@@ -1631,7 +1631,7 @@ public class XmlUtil {
 		try {
 			Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
 			if (outputFactory instanceof WstxOutputFactory) {
-				//				((WstxOutputFactory)outputFactory).getConfig().setAttrValueEscaperFactory(new MyEscaper());
+//				((WstxOutputFactory)outputFactory).getConfig().setAttrValueEscaperFactory(new MyEscaper());
 				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
 			}
 		} catch (ClassNotFoundException e) {
@@ -1640,8 +1640,7 @@ public class XmlUtil {
 		return outputFactory;
 	}
 
-	private static XMLEventWriter createXmlFragmentWriter(Writer theWriter)
-			throws FactoryConfigurationError, XMLStreamException {
+	private static XMLEventWriter createXmlFragmentWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		XMLOutputFactory outputFactory = getOrCreateFragmentOutputFactory();
 		return outputFactory.createXMLEventWriter(theWriter);
 	}
@@ -1655,16 +1654,14 @@ public class XmlUtil {
 		return inputFactory.createXMLEventReader(reader);
 	}
 
-	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter)
-			throws FactoryConfigurationError, XMLStreamException {
+	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		throwUnitTestExceptionIfConfiguredToDoSo();
 
 		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
 		return outputFactory.createXMLStreamWriter(theWriter);
 	}
 
-	public static XMLEventWriter createXmlWriter(Writer theWriter)
-			throws FactoryConfigurationError, XMLStreamException {
+	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
 		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
 		return outputFactory.createXMLEventWriter(theWriter);
 	}
@@ -1710,9 +1707,7 @@ public class XmlUtil {
 			try {
 				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLInputFactory");
-				System.setProperty(
-						javax.xml.stream.XMLInputFactory.class.getName(),
-						com.ctc.wstx.stax.WstxInputFactory.class.getName());
+				System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), com.ctc.wstx.stax.WstxInputFactory.class.getName());
 			} catch (ClassNotFoundException e) {
 				// ok
 			}
@@ -1730,10 +1725,9 @@ public class XmlUtil {
 			 * See https://github.com/hapifhir/hapi-fhir/issues/339
 			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
 			 */
-			inputFactory.setProperty(
-					XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
-			inputFactory.setProperty(
-					"javax.xml.stream.isSupportingExternalEntities", false); // disable external entities
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory
+			inputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", false); // disable external entities
+
 
 			/*
 			 * In the following few lines, you can uncomment the first and comment the second to disable automatic
@@ -1746,8 +1740,7 @@ public class XmlUtil {
 				Class.forName("com.ctc.wstx.stax.WstxInputFactory");
 				boolean isWoodstox = inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory;
 				if (!isWoodstox) {
-					// Check if implementation is woodstox by property since instanceof check does not work if running
-					// in JBoss
+					// Check if implementation is woodstox by property since instanceof check does not work if running in JBoss
 					try {
 						isWoodstox = inputFactory.getProperty("org.codehaus.stax2.implVersion") != null;
 					} catch (Exception e) {
@@ -1795,8 +1788,7 @@ public class XmlUtil {
 			}
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
-			throw new ConfigurationException(
-					Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e);
+			throw new ConfigurationException(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e);
 		}
 		return inputFactory;
 	}
@@ -1807,8 +1799,7 @@ public class XmlUtil {
 			outputFactory = XMLOutputFactory.newInstance();
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
-			throw new ConfigurationException(
-					Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e);
+			throw new ConfigurationException(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e);
 		}
 		return outputFactory;
 	}
@@ -1830,6 +1821,7 @@ public class XmlUtil {
 			return null;
 		}
 
+
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<>();
 			StringReader reader = new StringReader(val);
@@ -1849,10 +1841,7 @@ public class XmlUtil {
 			return value;
 
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(
-					Msg.code(1755) + "String does not appear to be valid XML/XHTML (error is \"" + e.getMessage()
-							+ "\"): " + theValue,
-					e);
+			throw new DataFormatException(Msg.code(1755) + "String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(Msg.code(1756) + e);
 		}
@@ -1865,8 +1854,7 @@ public class XmlUtil {
 		ourNextException = theException;
 	}
 
-	private static void throwUnitTestExceptionIfConfiguredToDoSo()
-			throws FactoryConfigurationError, XMLStreamException {
+	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
 		if (ourNextException != null) {
 			if (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
 				throw ((javax.xml.stream.FactoryConfigurationError) ourNextException);
@@ -1884,8 +1872,7 @@ public class XmlUtil {
 		return parseDocument(reader, true, false);
 	}
 
-	public static Document parseDocument(Reader theReader, boolean theNamespaceAware, boolean allowDoctypeDeclaration)
-			throws SAXException, IOException {
+	public static Document parseDocument(Reader theReader, boolean theNamespaceAware, boolean allowDoctypeDeclaration) throws SAXException, IOException {
 		DocumentBuilder builder;
 		try {
 			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -1893,8 +1880,7 @@ public class XmlUtil {
 			docBuilderFactory.setXIncludeAware(false);
 			docBuilderFactory.setExpandEntityReferences(false);
 			try {
-				docBuilderFactory.setFeature(
-						"http://apache.org/xml/features/disallow-doctype-decl", !allowDoctypeDeclaration);
+				docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !allowDoctypeDeclaration);
 				docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
 				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
 				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
@@ -1913,6 +1899,7 @@ public class XmlUtil {
 		return builder.parse(src);
 	}
 
+
 	public static List<Element> getChildrenByTagName(Element theParent, String theName) {
 		List<Element> nodeList = new ArrayList<Element>();
 		for (Node child = theParent.getFirstChild(); child != null; child = child.getNextSibling()) {
@@ -1923,6 +1910,7 @@ public class XmlUtil {
 
 		return nodeList;
 	}
+
 
 	public static String encodeDocument(Node theElement) throws TransformerException {
 		return encodeDocument(theElement, false);

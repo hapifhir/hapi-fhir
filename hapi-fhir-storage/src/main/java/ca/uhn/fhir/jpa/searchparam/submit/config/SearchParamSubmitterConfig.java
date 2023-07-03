@@ -30,17 +30,18 @@ import org.springframework.context.annotation.Configuration;
 public class SearchParamSubmitterConfig {
 
 	@Bean
-	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext) {
+	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext){
 		return new SearchParameterCanonicalizer(theFhirContext);
 	}
 
 	@Bean
-	public SearchParamValidatingInterceptor searchParamValidatingInterceptor() {
+	public SearchParamValidatingInterceptor searchParamValidatingInterceptor(){
 		return new SearchParamValidatingInterceptor();
 	}
 
 	@Bean
-	public SearchParamSubmitInterceptorLoader searchParamSubmitInterceptorLoader() {
+	public SearchParamSubmitInterceptorLoader searchParamSubmitInterceptorLoader(){
 		return new SearchParamSubmitInterceptorLoader();
 	}
+
 }

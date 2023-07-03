@@ -35,6 +35,7 @@ public class WebsocketConnectionValidator {
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
 
+
 	/**
 	 * Constructor
 	 */
@@ -44,8 +45,7 @@ public class WebsocketConnectionValidator {
 
 	public WebsocketValidationResponse validate(@Nonnull IdType id) {
 		if (!id.hasIdPart() || !id.isIdPartValid()) {
-			return WebsocketValidationResponse.INVALID_RESPONSE(
-					"Invalid bind request - No ID included: " + id.getValue());
+			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - No ID included: " + id.getValue());
 		}
 
 		if (!id.hasResourceType()) {
@@ -55,13 +55,11 @@ public class WebsocketConnectionValidator {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
 
 		if (activeSubscription == null) {
-			return WebsocketValidationResponse.INVALID_RESPONSE(
-					"Invalid bind request - Unknown subscription: " + id.getValue());
+			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - Unknown subscription: " + id.getValue());
 		}
 
 		if (activeSubscription.getSubscription().getChannelType() != CanonicalSubscriptionChannelType.WEBSOCKET) {
-			return WebsocketValidationResponse.INVALID_RESPONSE("Subscription " + id.getValue() + " is not a "
-					+ CanonicalSubscriptionChannelType.WEBSOCKET + " subscription");
+			return WebsocketValidationResponse.INVALID_RESPONSE("Subscription " + id.getValue() + " is not a " + CanonicalSubscriptionChannelType.WEBSOCKET + " subscription");
 		}
 
 		return WebsocketValidationResponse.VALID_RESPONSE(activeSubscription);

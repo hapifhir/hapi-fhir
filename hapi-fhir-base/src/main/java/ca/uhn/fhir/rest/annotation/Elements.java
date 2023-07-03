@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 /**
  * On a method which returns resource(s), a parameter of type
  * <code>Set&lt;String&gt;</code> with this annotation will be passed the
- * contents of the <code>_elements</code> parameter
+ * contents of the <code>_elements</code> parameter 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

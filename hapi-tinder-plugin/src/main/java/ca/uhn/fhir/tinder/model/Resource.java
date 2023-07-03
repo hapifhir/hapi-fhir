@@ -15,7 +15,7 @@ public class Resource extends BaseRootType {
 	public static String correctName(String theName) {
 		String name = theName;
 		if ("List".equals(name)) {
-			name = "ListResource";
+			name="ListResource";
 		}
 		if (name.endsWith(".List")) {
 			name = name + "Resource";
@@ -31,7 +31,6 @@ public class Resource extends BaseRootType {
 		}
 		return null;
 	}
-
 	public List<String> getSearchParameterNames() {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (SearchParameter next : getSearchParameters()) {
@@ -39,4 +38,5 @@ public class Resource extends BaseRootType {
 		}
 		return retVal;
 	}
+
 }

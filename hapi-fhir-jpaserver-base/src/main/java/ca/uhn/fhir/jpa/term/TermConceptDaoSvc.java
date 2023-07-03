@@ -79,6 +79,7 @@ public class TermConceptDaoSvc {
 			for (TermConceptDesignation next : theConcept.getDesignations()) {
 				myConceptDesignationDao.save(next);
 			}
+
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
@@ -105,3 +106,4 @@ public class TermConceptDaoSvc {
 		return retVal;
 	}
 }
+

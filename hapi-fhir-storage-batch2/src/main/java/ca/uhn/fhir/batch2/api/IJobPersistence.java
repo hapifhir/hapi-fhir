@@ -34,6 +34,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 
 /**
  *
@@ -53,6 +53,7 @@ import javax.annotation.Nonnull;
 // wipmb For 6.8 - regularize the tx boundary.  Probably make them all MANDATORY
 public interface IJobPersistence extends IWorkChunkPersistence {
 	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
+
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
@@ -70,8 +71,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Optional<JobInstance> fetchInstance(String theInstanceId);
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-	List<JobInstance> fetchInstances(
-			String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
+	List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
@@ -93,8 +93,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(
-			String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
+	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch all job instances for a given job definition id
@@ -136,7 +135,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Return true from the callback if the record write should continue, or false if
 	 * the change should be discarded.
 	 */
-	interface JobInstanceUpdateCallback {
+	interface JobInstanceUpdateCallback  {
 		/**
 		 * Modify theInstance within a write-lock transaction.
 		 * @param theInstance a copy of the instance to modify.
@@ -177,8 +176,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
 
 	@Transactional(propagation = Propagation.MANDATORY)
-	boolean markInstanceAsStatusWhenStatusIn(
-			String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
+	boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
 
 	/**
 	 * Marks an instance as cancelled
@@ -210,9 +208,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this)
-					.append("jobInstanceId", jobInstanceId)
-					.append("workChunkId", workChunkId)
-					.toString();
+				.append("jobInstanceId", jobInstanceId)
+				.append("workChunkId", workChunkId)
+				.toString();
 		}
 	}
 
@@ -234,16 +232,13 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = storeNewInstance(instance);
-		ourLog.info(
-				"Stored new {} job {} with status {}",
-				theJobDefinition.getJobDefinitionId(),
-				instanceId,
-				instance.getStatus());
+		ourLog.info("Stored new {} job {} with status {}", theJobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
 		ourLog.debug("Job parameters: {}", instance.getParameters());
 
 		WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(theJobDefinition, instanceId);
 		String chunkId = onWorkChunkCreate(batchWorkChunk);
 		return new CreateResult(instanceId, chunkId);
+
 	}
 
 	/**
@@ -253,7 +248,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.MANDATORY)
 	default boolean onChunkDequeued(String theJobInstanceId) {
-		return markInstanceAsStatusWhenStatusIn(
-				theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
+		return markInstanceAsStatusWhenStatusIn(theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}
+
 }

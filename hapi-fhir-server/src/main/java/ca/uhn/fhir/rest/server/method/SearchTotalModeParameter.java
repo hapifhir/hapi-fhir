@@ -31,18 +31,12 @@ import java.util.Collection;
 class SearchTotalModeParameter implements IParameter {
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
-			throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		return getTypeForRequestOrThrowInvalidRequestException(theRequest);
 	}
 
 	@Override
-	public void initializeTypes(
-			Method theMethod,
-			Class<? extends Collection<?>> theOuterCollectionType,
-			Class<? extends Collection<?>> theInnerCollectionType,
-			Class<?> theParameterType) {
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore
 	}
 
@@ -54,4 +48,5 @@ class SearchTotalModeParameter implements IParameter {
 
 		return null;
 	}
+
 }

@@ -27,12 +27,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * This class returns the vocabulary that is shipped with the base FHIR
@@ -46,15 +46,13 @@ import javax.annotation.Nullable;
  */
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
-	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations =
-			Collections.synchronizedMap(new HashMap<>());
+	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations = Collections.synchronizedMap(new HashMap<>());
 	private final FhirContext myCtx;
 	/**
 	 * This module just delegates all calls to a concrete implementation which will
 	 * be in this field. Which implementation gets used depends on the FHIR version.
 	 */
 	private final IValidationSupport myDelegate;
-
 	private final Runnable myFlush;
 
 	/**
@@ -78,12 +76,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 					 * make this hard to clean up. At some point it'd be nice to figure out
 					 * a cleaner solution though.
 					 */
-					strategy = ReflectionUtil.newInstance(
-							"org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy",
-							IValidationSupport.class,
-							new Class[] {FhirContext.class},
-							new Object[] {theFhirContext});
-					((ILockable) strategy).lock();
+					strategy = ReflectionUtil.newInstance("org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy", IValidationSupport.class, new Class[]{FhirContext.class}, new Object[]{theFhirContext});
+					((ILockable)strategy).lock();
 				} else {
 					strategy = new DefaultProfileValidationSupportBundleStrategy(theFhirContext);
 				}
@@ -93,9 +87,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 		myDelegate = strategy;
 		if (myDelegate instanceof DefaultProfileValidationSupportBundleStrategy) {
-			myFlush = () -> ((DefaultProfileValidationSupportBundleStrategy) myDelegate).flush();
+			myFlush = ()->((DefaultProfileValidationSupportBundleStrategy) myDelegate).flush();
 		} else {
-			myFlush = () -> {};
+			myFlush = ()->{};
 		}
 	}
 
@@ -114,6 +108,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
 		return myDelegate.fetchAllNonBaseStructureDefinitions();
 	}
+
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
@@ -139,18 +134,17 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return myCtx;
 	}
 
+
 	@Nullable
 	public static String getConformanceResourceUrl(FhirContext theFhirContext, IBaseResource theResource) {
 		String urlValueString = null;
-		Optional<IBase> urlValue = theFhirContext
-				.getResourceDefinition(theResource)
-				.getChildByName("url")
-				.getAccessor()
-				.getFirstValueOrNull(theResource);
+		Optional<IBase> urlValue = theFhirContext.getResourceDefinition(theResource).getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
 		if (urlValue.isPresent()) {
 			IPrimitiveType<?> urlValueType = (IPrimitiveType<?>) urlValue.get();
 			urlValueString = urlValueType.getValueAsString();
 		}
 		return urlValueString;
 	}
+
+
 }

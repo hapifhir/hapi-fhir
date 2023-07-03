@@ -25,8 +25,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -40,19 +38,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Collection;
 
 @Entity
 @Table(
-		name = "HFJ_TAG_DEF",
-		indexes = {
-			@Index(
-					name = "IDX_TAG_DEF_TP_CD_SYS",
-					columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID, TAG_VERSION, TAG_USER_SELECTED"),
-		})
+	name = "HFJ_TAG_DEF",
+	indexes = {
+		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID, TAG_VERSION, TAG_USER_SELECTED"),
+	}
+)
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
 	@Column(name = "TAG_CODE", length = 200)
 	private String myCode;
 
@@ -65,16 +63,10 @@ public class TagDefinition implements Serializable {
 	@Column(name = "TAG_ID")
 	private Long myId;
 
-	@OneToMany(
-			cascade = {},
-			fetch = FetchType.LAZY,
-			mappedBy = "myTag")
+	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
 
-	@OneToMany(
-			cascade = {},
-			fetch = FetchType.LAZY,
-			mappedBy = "myTag")
+	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceHistoryTag> myResourceVersions;
 
 	@Column(name = "TAG_SYSTEM", length = 200)
@@ -175,6 +167,7 @@ public class TagDefinition implements Serializable {
 	public void setUserSelected(Boolean theUserSelected) {
 		myUserSelected = theUserSelected;
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {

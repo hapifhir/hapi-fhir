@@ -98,6 +98,7 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 		myIdSupplier = theIdSupplier;
 	}
 
+
 	public static class EntityAndResource {
 		private final IBasePersistedResource myEntity;
 		private final IBaseResource myResource;
@@ -115,4 +116,5 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 			return myResource;
 		}
 	}
+
 }

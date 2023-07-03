@@ -29,8 +29,8 @@ indent_size = 3
 [*.java]
 charset = utf-8
 indent_style = tab
-tab_width = 4
-indent_size = 4
+tab_width = 3
+indent_size = 3
 continuation_indent_size=3
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false

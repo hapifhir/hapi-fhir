@@ -27,24 +27,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.*;
 
 @Entity
-@Table(
-		name = ResourceHistoryTable.HFJ_RES_VER,
-		uniqueConstraints = {
-			@UniqueConstraint(
-					name = ResourceHistoryTable.IDX_RESVER_ID_VER,
-					columnNames = {"RES_ID", "RES_VER"})
-		},
-		indexes = {
-			@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
-			@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
-			@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
-		})
+@Table(name = ResourceHistoryTable.HFJ_RES_VER, uniqueConstraints = {
+	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
+}, indexes = {
+	@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
+	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
+	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
+})
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	public static final int SOURCE_URI_LENGTH = 100;
@@ -54,55 +49,38 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	// Don't reduce the visibility here, we reference this from Smile
 	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
-
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
 	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
-
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
-
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "RES_ID",
-			nullable = false,
-			updatable = false,
-			foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
+	@JoinColumn(name = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
 	private ResourceTable myResourceTable;
-
 	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
 	private Long myResourceId;
-
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
-
 	@Column(name = "RES_VER", nullable = false)
 	private Long myResourceVersion;
-
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
-
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = true)
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
-
 	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
-
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
-
-	@OneToOne(
-			mappedBy = "myResourceHistoryTable",
-			cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
 	private ResourceHistoryProvenanceEntity myProvenance;
 	// TODO: This was added in 6.8.0 - In the future we should drop ResourceHistoryProvenanceEntity
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
@@ -137,11 +115,11 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("resourceId", myResourceId)
-				.append("resourceType", myResourceType)
-				.append("resourceVersion", myResourceVersion)
-				.append("pid", myId)
-				.toString();
+			.append("resourceId", myResourceId)
+			.append("resourceType", myResourceType)
+			.append("resourceVersion", myResourceVersion)
+			.append("pid", myId)
+			.toString();
 	}
 
 	public String getResourceTextVc() {

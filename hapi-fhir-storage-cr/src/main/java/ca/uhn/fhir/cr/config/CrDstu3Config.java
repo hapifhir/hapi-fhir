@@ -35,8 +35,7 @@ import java.util.function.Function;
 public class CrDstu3Config {
 
 	@Bean
-	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(
-			ApplicationContext theApplicationContext) {
+	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext theApplicationContext) {
 		return r -> {
 			var ms = theApplicationContext.getBean(MeasureService.class);
 			ms.setRequestDetails(r);
@@ -54,4 +53,5 @@ public class CrDstu3Config {
 	public MeasureOperationsProvider dstu3measureOperationsProvider() {
 		return new MeasureOperationsProvider();
 	}
+
 }

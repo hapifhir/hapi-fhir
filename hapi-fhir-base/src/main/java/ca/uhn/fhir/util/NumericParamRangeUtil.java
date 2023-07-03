@@ -34,7 +34,9 @@ public class NumericParamRangeUtil {
 	 * @return a Pair of BigDecimal(s) with the low and high range boundaries
 	 */
 	public static Pair<BigDecimal, BigDecimal> getRange(BigDecimal theNumber) {
-		BigDecimal halfRange = BigDecimal.valueOf(.5).movePointLeft(theNumber.scale());
+		BigDecimal halfRange = BigDecimal.valueOf(.5).movePointLeft( theNumber.scale() );
 		return Pair.of(theNumber.subtract(halfRange), theNumber.add(halfRange));
 	}
+
+
 }

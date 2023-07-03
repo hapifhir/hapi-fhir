@@ -32,8 +32,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class SearchNarrowingConsentService implements IConsentService {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingConsentService.class);
@@ -57,8 +57,7 @@ public class SearchNarrowingConsentService implements IConsentService {
 	 * @param theValidationSupport   The validation support module
 	 * @param theSearchParamRegistry The search param registry
 	 */
-	public SearchNarrowingConsentService(
-			IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchNarrowingConsentService(IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		myValidationSupport = theValidationSupport;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
@@ -74,29 +73,25 @@ public class SearchNarrowingConsentService implements IConsentService {
 	}
 
 	@Override
-	public boolean shouldProcessCanSeeResource(
-			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-		List<AllowedCodeInValueSet> postFilteringList =
-				SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
+	public boolean shouldProcessCanSeeResource(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		List<AllowedCodeInValueSet> postFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 		return postFilteringList != null && !postFilteringList.isEmpty();
 	}
 
+
 	@Override
-	public ConsentOutcome canSeeResource(
-			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return applyFilterForResource(theRequestDetails, theResource);
 	}
 
 	@Override
-	public ConsentOutcome willSeeResource(
-			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return applyFilterForResource(theRequestDetails, theResource);
 	}
 
 	@Nonnull
 	private ConsentOutcome applyFilterForResource(RequestDetails theRequestDetails, IBaseResource theResource) {
-		List<AllowedCodeInValueSet> postFilteringList =
-				SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
+		List<AllowedCodeInValueSet> postFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 		if (postFilteringList == null) {
 			return ConsentOutcome.PROCEED;
 		}
@@ -113,20 +108,9 @@ public class SearchNarrowingConsentService implements IConsentService {
 			String searchParamName = next.getSearchParameterName();
 			String valueSetUrl = next.getValueSetUrl();
 
-			SearchParameterAndValueSetRuleImpl.CodeMatchCount outcome =
-					SearchParameterAndValueSetRuleImpl.countMatchingCodesInValueSetForSearchParameter(
-							theResource,
-							myValidationSupport,
-							mySearchParamRegistry,
-							returnOnFirstMatch,
-							searchParamName,
-							valueSetUrl,
-							myTroubleshootingLog,
-							"Search Narrowing");
+			SearchParameterAndValueSetRuleImpl.CodeMatchCount outcome = SearchParameterAndValueSetRuleImpl.countMatchingCodesInValueSetForSearchParameter(theResource, myValidationSupport, mySearchParamRegistry, returnOnFirstMatch, searchParamName, valueSetUrl, myTroubleshootingLog, "Search Narrowing");
 			if (outcome.isAtLeastOneUnableToValidate()) {
-				myTroubleshootingLog.warn("Terminology Services failed to validate value from " + next.getResourceName()
-						+ ":" + next.getSearchParameterName() + " in ValueSet " + next.getValueSetUrl()
-						+ " - Assuming REJECT");
+				myTroubleshootingLog.warn("Terminology Services failed to validate value from " + next.getResourceName() + ":" + next.getSearchParameterName() + " in ValueSet " + next.getValueSetUrl() + " - Assuming REJECT");
 				return ConsentOutcome.REJECT;
 			}
 
@@ -140,6 +124,7 @@ public class SearchNarrowingConsentService implements IConsentService {
 					break;
 				}
 			}
+
 		}
 
 		if (!allPositiveRulesMatched) {

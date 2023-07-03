@@ -10,8 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSupportWrapper
-		implements IValidationSupport {
+public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSupportWrapper implements IValidationSupport {
 	private final FhirContext myHapiCtx;
 
 	/**
@@ -31,9 +30,11 @@ public class HapiToHl7OrgDstu2ValidatingSupportWrapper extends BaseValidationSup
 
 	@Override
 	public List<IBaseResource> fetchAllStructureDefinitions() {
-		return super.fetchAllStructureDefinitions().stream()
-				.map(t -> translate(t))
-				.collect(Collectors.toList());
+		return super
+			.fetchAllStructureDefinitions()
+			.stream()
+			.map(t -> translate(t))
+			.collect(Collectors.toList());
 	}
 
 	@Override

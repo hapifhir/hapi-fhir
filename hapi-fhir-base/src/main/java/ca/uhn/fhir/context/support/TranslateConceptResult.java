@@ -52,14 +52,14 @@ public class TranslateConceptResult {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("system", mySystem)
-				.append("code", myCode)
-				.append("display", myDisplay)
-				.append("equivalence", myEquivalence)
-				.append("conceptMapUrl", myConceptMapUrl)
-				.append("valueSet", myValueSet)
-				.append("systemVersion", mySystemVersion)
-				.toString();
+			.append("system", mySystem)
+			.append("code", myCode)
+			.append("display", myDisplay)
+			.append("equivalence", myEquivalence)
+			.append("conceptMapUrl", myConceptMapUrl)
+			.append("valueSet", myValueSet)
+			.append("systemVersion", mySystemVersion)
+			.toString();
 	}
 
 	public String getCode() {

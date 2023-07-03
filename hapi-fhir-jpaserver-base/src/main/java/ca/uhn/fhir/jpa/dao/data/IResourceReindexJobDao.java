@@ -62,4 +62,5 @@ public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJob
 	@Query("UPDATE ResourceReindexJobEntity j SET j.myReindexCount = :newCount WHERE j.myId = :id")
 	@Modifying
 	void setReindexCount(@Param("id") Long theId, @Param("newCount") int theNewCount);
+
 }

@@ -32,10 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
+
 
 public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
@@ -66,11 +67,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		SearchParameterMap map = new SearchParameterMap();
 
 		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
-			map.add(
-					Subscription.SP_STATUS,
-					new TokenOrListParam()
-							.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-							.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 		}
 		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 		return map;
@@ -107,10 +106,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		}
 
 		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-		ourLog.debug(
-				"Finished sync subscriptions - activated {} and registered {}",
-				theResourceList.size(),
-				registeredCount);
+		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
 		return activatedCount;
 	}
 
@@ -121,8 +117,7 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
 		boolean successfullyActivated = false;
 
-		if (SubscriptionConstants.REQUESTED_STATUS.equals(
-				mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
 			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
 				// internally, subscriptions that cannot activate will be set to error
 				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
@@ -131,10 +126,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 				}
 			} else {
-				ourLog.debug(
-						"Could not activate subscription {} because channel type {} is not supported.",
-						theSubscription.getIdElement(),
-						mySubscriptionCanonicalizer.getChannelType(theSubscription));
+				ourLog.debug("Could not activate subscription {} because channel type {} is not supported.",
+					theSubscription.getIdElement(),
+					mySubscriptionCanonicalizer.getChannelType(theSubscription));
 			}
 		}
 
@@ -158,13 +152,15 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 			error = "";
 		}
 		ourLog.error("Subscription "
-				+ theSubscription.getIdElement().getIdPart()
-				+ " could not be activated."
-				+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-				+ (StringUtils.isBlank(error) ? "" : "Error: " + error));
+			+ theSubscription.getIdElement().getIdPart()
+			+ " could not be activated."
+			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
+			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
+		);
 	}
 
 	public void syncSubscriptions() {
 		super.syncDatabaseToCache();
 	}
 }
+

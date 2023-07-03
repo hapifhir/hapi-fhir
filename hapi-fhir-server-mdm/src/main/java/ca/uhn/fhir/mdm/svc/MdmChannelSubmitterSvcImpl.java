@@ -51,12 +51,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = new ResourceModifiedJsonMessage();
-		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(
-				myFhirContext,
-				theResource,
-				ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED,
-				null,
-				(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED, null, (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		resourceModifiedMessage.setOperationType(ResourceModifiedMessage.OperationTypeEnum.MANUALLY_TRIGGERED);
 		resourceModifiedJsonMessage.setPayload(resourceModifiedMessage);
 		boolean success = getMdmChannelProducer().send(resourceModifiedJsonMessage);
@@ -73,8 +68,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private void init() {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(
-				EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
+		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
 	private MessageChannel getMdmChannelProducer() {

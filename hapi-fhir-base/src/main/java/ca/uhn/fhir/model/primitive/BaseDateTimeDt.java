@@ -44,8 +44,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final Map<String, TimeZone> timezoneCache = new ConcurrentHashMap<>();
 
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
-	private static final FastDateFormat ourHumanDateTimeFormat =
-			FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
+	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
 	public static final String NOW_DATE_CONSTANT = "%now";
 	public static final String TODAY_DATE_CONSTANT = "%today";
 	private String myFractionalSeconds;
@@ -62,15 +61,14 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @throws DataFormatException
 	 *            If the specified precision is not allowed for this type
 	 */
 	public BaseDateTimeDt(Date theDate, TemporalPrecisionEnum thePrecision) {
 		setValue(theDate, thePrecision);
 		if (isPrecisionAllowed(thePrecision) == false) {
-			throw new DataFormatException(Msg.code(1880) + "Invalid date/time string (datatype "
-					+ getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
+			throw new DataFormatException(Msg.code(1880) + "Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
 		}
 	}
 
@@ -84,7 +82,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @throws DataFormatException
 	 *            If the specified precision is not allowed for this type
 	 */
@@ -246,7 +244,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	/**
 	 * Gets the precision for this datatype (using the default for the given type if not set)
-	 *
+	 * 
 	 * @see #setPrecision(TemporalPrecisionEnum)
 	 */
 	public TemporalPrecisionEnum getPrecision() {
@@ -312,7 +310,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	/**
 	 * Returns <code>true</code> if this object represents a date that is today's date
-	 *
+	 * 
 	 * @throws NullPointerException
 	 *            if {@link #getValue()} returns <code>null</code>
 	 */
@@ -371,7 +369,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					int offsetIdx = getOffsetIndex(value);
 					String time;
 					if (offsetIdx == -1) {
-						// throwBadDateFormat(theValue);
+						//throwBadDateFormat(theValue);
 						// No offset - should this be an error?
 						time = value.substring(11);
 					} else {
@@ -436,9 +434,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		if (precision == TemporalPrecisionEnum.MINUTE) {
 			validatePrecisionAndThrowDataFormatException(value, precision);
 		}
-
+		
 		setPrecision(precision);
 		return cal.getTime();
+
 	}
 
 	private int parseInt(String theValue, String theSubstring, int theLowerBound, int theUpperBound) {
@@ -464,8 +463,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		return this;
 	}
 
-	private void setFieldValue(
-			int theField, int theValue, String theFractionalSeconds, int theMinimum, int theMaximum) {
+	private void setFieldValue(int theField, int theValue, String theFractionalSeconds, int theMinimum, int theMaximum) {
 		validateValueInRange(theValue, theMinimum, theMaximum);
 		Calendar cal;
 		if (getValue() == null) {
@@ -528,24 +526,24 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * </p>
 	 */
 	public BaseDateTimeDt setNanos(long theNanos) {
-		validateValueInRange(theNanos, 0, NANOS_PER_SECOND - 1);
+		validateValueInRange(theNanos, 0, NANOS_PER_SECOND-1);
 		String fractionalSeconds = StringUtils.leftPad(Long.toString(theNanos), 9, '0');
 
 		// Strip trailing 0s
 		for (int i = fractionalSeconds.length(); i > 0; i--) {
-			if (fractionalSeconds.charAt(i - 1) != '0') {
+			if (fractionalSeconds.charAt(i-1) != '0') {
 				fractionalSeconds = fractionalSeconds.substring(0, i);
 				break;
 			}
 		}
-		int millis = (int) (theNanos / NANOS_PER_MILLIS);
+		int millis = (int)(theNanos / NANOS_PER_MILLIS);
 		setFieldValue(Calendar.MILLISECOND, millis, fractionalSeconds, 0, 999);
 		return this;
 	}
 
 	/**
 	 * Sets the precision for this datatype
-	 *
+	 * 
 	 * @throws DataFormatException
 	 */
 	public BaseDateTimeDt setPrecision(TemporalPrecisionEnum thePrecision) throws DataFormatException {
@@ -617,7 +615,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as
 	 * well as the local timezone as determined by the local operating system. Both of
 	 * these properties may be modified in subsequent calls if neccesary.
-	 *
+	 * 
 	 * @param theValue
 	 *           The date value
 	 * @param thePrecision
@@ -668,8 +666,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	private void throwBadDateFormat(String theValue, String theMesssage) {
-		throw new DataFormatException(
-				Msg.code(1883) + "Invalid date/time format: \"" + theValue + "\": " + theMesssage);
+		throw new DataFormatException(Msg.code(1883) + "Invalid date/time format: \"" + theValue + "\": " + theMesssage);
 	}
 
 	/**
@@ -688,42 +685,39 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		value.setTime(getValue());
 
 		switch (getPrecision()) {
-			case YEAR:
-			case MONTH:
-			case DAY:
-				return ourHumanDateFormat.format(value);
-			case MILLI:
-			case SECOND:
-			default:
-				return ourHumanDateTimeFormat.format(value);
+		case YEAR:
+		case MONTH:
+		case DAY:
+			return ourHumanDateFormat.format(value);
+		case MILLI:
+		case SECOND:
+		default:
+			return ourHumanDateTimeFormat.format(value);
 		}
 	}
 
 	/**
 	 * Returns a human readable version of this date/time using the system local format, converted to the local timezone
 	 * if neccesary.
-	 *
+	 * 
 	 * @see #toHumanDisplay() for a method which does not convert the time to the local timezone before rendering it.
 	 */
 	public String toHumanDisplayLocalTimezone() {
 		switch (getPrecision()) {
-			case YEAR:
-			case MONTH:
-			case DAY:
-				return ourHumanDateFormat.format(getValue());
-			case MILLI:
-			case SECOND:
-			default:
-				return ourHumanDateTimeFormat.format(getValue());
+		case YEAR:
+		case MONTH:
+		case DAY:
+			return ourHumanDateFormat.format(getValue());
+		case MILLI:
+		case SECOND:
+		default:
+			return ourHumanDateTimeFormat.format(getValue());
 		}
 	}
 
 	private void validateCharAtIndexIs(String theValue, int theIndex, char theChar) {
 		if (theValue.charAt(theIndex) != theChar) {
-			throwBadDateFormat(
-					theValue,
-					"Expected character '" + theChar + "' at index " + theIndex + " but found "
-							+ theValue.charAt(theIndex));
+			throwBadDateFormat(theValue, "Expected character '" + theChar + "' at index " + theIndex + " but found " + theValue.charAt(theIndex));
 		}
 	}
 
@@ -735,15 +729,14 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private void validateValueInRange(long theValue, long theMinimum, long theMaximum) {
 		if (theValue < theMinimum || theValue > theMaximum) {
-			throw new IllegalArgumentException(Msg.code(1884) + "Value " + theValue
-					+ " is not between allowable range: " + theMinimum + " - " + theMaximum);
+			throw new IllegalArgumentException(Msg.code(1884) + "Value " + theValue + " is not between allowable range: " + theMinimum + " - " + theMaximum);
 		}
 	}
 
 	private void validatePrecisionAndThrowDataFormatException(String theValue, TemporalPrecisionEnum thePrecision) {
 		if (isPrecisionAllowed(thePrecision) == false) {
-			throw new DataFormatException(Msg.code(1885) + "Invalid date/time string (datatype "
-					+ getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theValue);
+			throw new DataFormatException(Msg.code(1885) + "Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theValue);
 		}
 	}
+
 }

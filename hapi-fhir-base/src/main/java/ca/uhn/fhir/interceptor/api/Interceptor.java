@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 public @interface Interceptor {
 
 	/**
-	 * @see #order()
+	 * @see #order() 
 	 */
 	int DEFAULT_ORDER = 0;
 

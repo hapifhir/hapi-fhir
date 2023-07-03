@@ -40,78 +40,83 @@ public class FhirTesterConfig {
 	@Bean
 	public TesterConfig testerConfig() {
 		TesterConfig retVal = new TesterConfig();
-		retVal.addServer()
-				.withId("home_r4")
-				.withFhirVersion(FhirVersionEnum.R4)
-				.withBaseUrl("http://hapi.fhir.org/baseR4")
-				.withName("HAPI Test Server (R4 FHIR)")
-				.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-				.withSearchResultRowOperation(
-						"$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
-				.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
-				.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
-				.addServer()
-				.withId("home_r5")
-				.withFhirVersion(FhirVersionEnum.R5)
-				.withBaseUrl("http://hapi.fhir.org/baseR5")
-				.withName("HAPI Test Server (R5 FHIR)")
-				.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-				.withSearchResultRowOperation(
-						"$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
-				.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
-				.addServer()
-				.withId("home_audit")
-				.withFhirVersion(FhirVersionEnum.R4)
-				.withBaseUrl("http://hapi.fhir.org/baseAudit")
-				.withName("HAPI Test Server (R4 Audit)")
-				.addServer()
-				.withId("home_r4b")
-				.withFhirVersion(FhirVersionEnum.R4B)
-				.withBaseUrl("http://hapi.fhir.org/baseR4B")
-				.withName("HAPI Test Server (R4B FHIR)")
-				.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-				.withSearchResultRowOperation(
-						"$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
-				.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
-				.addServer()
-				.withId("home_21")
-				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://hapi.fhir.org/baseDstu3")
-				.withName("HAPI Test Server (STU3 FHIR)")
-				.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-				.withSearchResultRowOperation(
-						"$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
-				.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
-				.addServer()
-				.withId("hapi_dev")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://hapi.fhir.org/baseDstu2")
-				.withName("HAPI Test Server (DSTU2 FHIR)")
-				.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
-				.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+		retVal
+			.addServer()
+			.withId("home_r4")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withBaseUrl("http://hapi.fhir.org/baseR4")
+			.withName("HAPI Test Server (R4 FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+			.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
 
-				// Non-HAPI servers follow
+			.addServer()
+			.withId("home_r5")
+			.withFhirVersion(FhirVersionEnum.R5)
+			.withBaseUrl("http://hapi.fhir.org/baseR5")
+			.withName("HAPI Test Server (R5 FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
 
-				.addServer()
-				.withId("hi4")
-				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://test.fhir.org/r4")
-				.withName("Health Intersections (R4 FHIR)")
-				.addServer()
-				.withId("hi3")
-				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://test.fhir.org/r3")
-				.withName("Health Intersections (STU3 FHIR)")
-				.addServer()
-				.withId("hi2")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://test.fhir.org/r2")
-				.withName("Health Intersections (DSTU2 FHIR)")
-				.addServer()
-				.withId("spark2")
-				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://vonk.fire.ly/")
-				.withName("Vonk - Firely (STU3 FHIR)");
+			.addServer()
+			.withId("home_audit")
+			.withFhirVersion(FhirVersionEnum.R4)
+			.withBaseUrl("http://hapi.fhir.org/baseAudit")
+			.withName("HAPI Test Server (R4 Audit)")
+
+			.addServer()
+			.withId("home_r4b")
+			.withFhirVersion(FhirVersionEnum.R4B)
+			.withBaseUrl("http://hapi.fhir.org/baseR4B")
+			.withName("HAPI Test Server (R4B FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+
+			.addServer()
+			.withId("home_21")
+			.withFhirVersion(FhirVersionEnum.DSTU3)
+			.withBaseUrl("http://hapi.fhir.org/baseDstu3")
+			.withName("HAPI Test Server (STU3 FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+
+			.addServer()
+			.withId("hapi_dev")
+			.withFhirVersion(FhirVersionEnum.DSTU2)
+			.withBaseUrl("http://hapi.fhir.org/baseDstu2")
+			.withName("HAPI Test Server (DSTU2 FHIR)")
+			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
+			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+
+			// Non-HAPI servers follow
+
+			.addServer()
+			.withId("hi4")
+			.withFhirVersion(FhirVersionEnum.DSTU3)
+			.withBaseUrl("http://test.fhir.org/r4")
+			.withName("Health Intersections (R4 FHIR)")
+
+			.addServer()
+			.withId("hi3")
+			.withFhirVersion(FhirVersionEnum.DSTU3)
+			.withBaseUrl("http://test.fhir.org/r3")
+			.withName("Health Intersections (STU3 FHIR)")
+
+			.addServer()
+			.withId("hi2")
+			.withFhirVersion(FhirVersionEnum.DSTU2)
+			.withBaseUrl("http://test.fhir.org/r2")
+			.withName("Health Intersections (DSTU2 FHIR)")
+
+			.addServer()
+			.withId("spark2")
+			.withFhirVersion(FhirVersionEnum.DSTU3)
+			.withBaseUrl("http://vonk.fire.ly/")
+			.withName("Vonk - Firely (STU3 FHIR)");
 
 		return retVal;
 	}
@@ -120,4 +125,5 @@ public class FhirTesterConfig {
 	public SubscriptionPlaygroundController subscriptionPlaygroundController() {
 		return new SubscriptionPlaygroundController();
 	}
+
 }

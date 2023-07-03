@@ -25,9 +25,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 public interface IDelete {
 
 	IDeleteTyped resource(IBaseResource theResource);
-
+	
 	IDeleteTyped resourceById(IIdType theId);
-
+	
 	IDeleteTyped resourceById(String theResourceType, String theLogicalId);
 
 	/**
@@ -51,4 +51,5 @@ public interface IDelete {
 	 * @since HAPI 1.3
 	 */
 	IDeleteWithQuery resourceConditionalByType(Class<? extends IBaseResource> theResourceType);
+
 }

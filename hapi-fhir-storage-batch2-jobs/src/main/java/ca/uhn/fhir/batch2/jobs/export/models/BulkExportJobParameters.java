@@ -199,4 +199,5 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		this.myPartitionId = thePartitionId;
 	}
+
 }

@@ -28,13 +28,12 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
+import java.util.Collection;
 
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;
-	private Multimap<T, BaseTask> myTasks =
-			MultimapBuilder.hashKeys().arrayListValues().build();
+	private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@SuppressWarnings("unchecked")
 	public MigrationTaskList getTaskList(@Nonnull T theFrom, @Nonnull T theTo) {
@@ -86,13 +85,12 @@ public class BaseMigrationTasks<T extends Enum> {
 
 	protected BaseTask getTaskWithVersion(String theMigrationVersion) {
 		// First normalize the version number
-		String expectedVersion =
-				MigrationVersion.fromVersion(theMigrationVersion).getVersion();
+		String expectedVersion = MigrationVersion.fromVersion(theMigrationVersion).getVersion();
 
 		return myTasks.values().stream()
-				.filter(task -> expectedVersion.equals(task.getMigrationVersion()))
-				.findFirst()
-				.get();
+			.filter(task -> expectedVersion.equals(task.getMigrationVersion()))
+			.findFirst()
+			.get();
 	}
 
 	void validate(Collection<BaseTask> theTasks) {
@@ -102,9 +100,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {
 				if (migrationVersion.compareTo(lastVersion) <= 0) {
-					throw new IllegalStateException(
-							Msg.code(51) + "Migration version " + migrationVersion + " found after migration version "
-									+ lastVersion + ".  Migrations need to be in order by version number.");
+					throw new IllegalStateException(Msg.code(51) + "Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
 				}
 			}
 			lastVersion = migrationVersion;

@@ -27,15 +27,17 @@ import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.INTEGER_0;
 
 public class SearchParameterMapCalculator {
 
-	public static boolean isWantCount(SearchParameterMap myParams) {
+	static public boolean isWantCount(SearchParameterMap myParams) {
 		return isWantCount(myParams.getSearchTotalMode());
 	}
 
-	public static boolean isWantCount(SearchTotalModeEnum theSearchTotalModeEnum) {
+	static public boolean isWantCount(SearchTotalModeEnum theSearchTotalModeEnum){
 		return SearchTotalModeEnum.ACCURATE.equals(theSearchTotalModeEnum);
 	}
 
-	public static boolean isWantOnlyCount(SearchParameterMap myParams) {
-		return SummaryEnum.COUNT.equals(myParams.getSummaryMode()) | INTEGER_0.equals(myParams.getCount());
+	static public boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+			| INTEGER_0.equals(myParams.getCount());
 	}
+
 }

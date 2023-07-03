@@ -1,3 +1,5 @@
 package ca.uhn.fhir.tinder.model;
 
-public class SimpleChild extends Child {}
+public class SimpleChild extends Child {
+
+}

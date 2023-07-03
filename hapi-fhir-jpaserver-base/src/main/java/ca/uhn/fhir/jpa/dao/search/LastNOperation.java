@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -42,10 +42,7 @@ public class LastNOperation {
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final ExtendedHSearchSearchBuilder myExtendedHSearchSearchBuilder = new ExtendedHSearchSearchBuilder();
 
-	public LastNOperation(
-			SearchSession theSession,
-			FhirContext theFhirContext,
-			StorageSettings theStorageSettings,
+	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, StorageSettings theStorageSettings,
 			ISearchParamRegistry theSearchParamRegistry) {
 		mySession = theSession;
 		myFhirContext = theFhirContext;
@@ -55,23 +52,19 @@ public class LastNOperation {
 
 	public List<Long> executeLastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		boolean lastNGroupedBySubject = isLastNGroupedBySubject(theParams);
-		LastNAggregation lastNAggregation =
-				new LastNAggregation(getLastNMaxParamValue(theParams), lastNGroupedBySubject);
+		LastNAggregation lastNAggregation = new LastNAggregation(getLastNMaxParamValue(theParams), lastNGroupedBySubject);
 		AggregationKey<JsonObject> observationsByCodeKey = AggregationKey.of("lastN_aggregation");
 
-		SearchResult<ResourceTable> result = mySession
-				.search(ResourceTable.class)
-				.extension(ElasticsearchExtension.get())
-				.where(f -> f.bool(b -> {
-					// Must match observation type
-					b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-					ExtendedHSearchClauseBuilder builder =
-							new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
-					myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(
-							builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
-				}))
-				.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
-				.fetch(0);
+		SearchResult<ResourceTable> result = mySession.search(ResourceTable.class)
+			.extension(ElasticsearchExtension.get())
+			.where(f -> f.bool(b -> {
+				// Must match observation type
+				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
+				ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myStorageSettings, b, f);
+				myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
+			}))
+			.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
+			.fetch(0);
 
 		JsonObject resultAggregation = result.aggregation(observationsByCodeKey);
 		List<Long> pidList = lastNAggregation.extractResourceIds(resultAggregation);

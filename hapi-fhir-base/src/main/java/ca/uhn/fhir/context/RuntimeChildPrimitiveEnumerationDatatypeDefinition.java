@@ -31,13 +31,7 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 	private Object myBinder;
 	private Class<? extends Enum<?>> myEnumType;
 
-	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(
-			Field theField,
-			String theElementName,
-			Child theChildAnnotation,
-			Description theDescriptionAnnotation,
-			Class<? extends IBase> theDatatype,
-			Class<? extends Enum<?>> theBinderType) {
+	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<? extends Enum<?>> theBinderType) {
 		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
 		myEnumType = theBinderType;
@@ -70,4 +64,5 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 		}
 		return retVal;
 	}
+
 }

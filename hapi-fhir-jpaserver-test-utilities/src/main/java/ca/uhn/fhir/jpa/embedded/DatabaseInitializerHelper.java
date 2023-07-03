@@ -30,17 +30,14 @@ public class DatabaseInitializerHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseInitializerHelper.class);
 
 	public void initializePersistenceSchema(JpaEmbeddedDatabase theDatabase) {
-		String fileName = String.format(
-				"migration/releases/%s/schema/%s.sql",
-				HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
+		String fileName = String.format("migration/releases/%s/schema/%s.sql", HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.executeSqlAsBatch(sql);
 	}
 
+
 	public void insertPersistenceTestData(JpaEmbeddedDatabase theDatabase) {
-		String fileName = String.format(
-				"migration/releases/%s/data/%s.sql",
-				HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
+		String fileName = String.format("migration/releases/%s/data/%s.sql", HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION, theDatabase.getDriverType());
 		String sql = getSqlFromResourceFile(fileName);
 		theDatabase.insertTestData(sql);
 	}

@@ -32,8 +32,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
@@ -41,38 +41,15 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 
 	@Transactional
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IBaseCoding theCoding,
-			RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, RequestDetails theRequestDetails);
 
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IBaseCoding theCoding,
-			IPrimitiveType<String> theDisplayLanguage,
-			RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails);
 
-	SubsumesResult subsumes(
-			IPrimitiveType<String> theCodeA,
-			IPrimitiveType<String> theCodeB,
-			IPrimitiveType<String> theSystem,
-			IBaseCoding theCodingA,
-			IBaseCoding theCodingB,
-			RequestDetails theRequestDetails);
+	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, RequestDetails theRequestDetails);
 
 	@Nonnull
-	IValidationSupport.CodeValidationResult validateCode(
-			IIdType theCodeSystemId,
-			IPrimitiveType<String> theCodeSystemUrl,
-			IPrimitiveType<String> theVersion,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theDisplay,
-			IBaseCoding theCoding,
-			IBaseDatatype theCodeableConcept,
-			RequestDetails theRequestDetails);
+	IValidationSupport.CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails);
 
 	class SubsumesResult {
 
@@ -90,12 +67,13 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 		public IBaseParameters toParameters(FhirContext theFhirContext) {
 			IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
 
-			IPrimitiveType<String> outcomeValue = (IPrimitiveType<String>)
-					theFhirContext.getElementDefinition("code").newInstance();
+			IPrimitiveType<String> outcomeValue = (IPrimitiveType<String>) theFhirContext.getElementDefinition("code").newInstance();
 			outcomeValue.setValueAsString(getOutcome().toCode());
 			ParametersUtil.addParameterToParameters(theFhirContext, retVal, "outcome", outcomeValue);
 
 			return retVal;
 		}
 	}
+
+
 }

@@ -27,9 +27,7 @@ public final class HapiSystemProperties {
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
-	static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS =
-			"TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
-
+	static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
 	static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 	static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
 	static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
@@ -37,7 +35,8 @@ public final class HapiSystemProperties {
 	static final String UNIT_TEST_MODE = "unit_test_mode";
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
-	private HapiSystemProperties() {}
+	private HapiSystemProperties() {
+	}
 
 	/**
 	 * This property is used by unit tests - do not rely on it in production code
@@ -66,6 +65,7 @@ public final class HapiSystemProperties {
 	 * It causes logged stack traces to skip a number of packages that are
 	 * just noise.
 	 */
+
 	public static void setStackFilterPattern(String thePattern) {
 		System.setProperty(STACKFILTER_PATTERN_PROP, thePattern);
 	}
@@ -83,6 +83,7 @@ public final class HapiSystemProperties {
 	 * Get the validation resource cache expireAfterWrite timeout in milliseconds.  If it has not been set, the default
 	 * value is 10 seconds.
 	 */
+
 	public static long getTestValidationResourceCachesMs() {
 		String property = System.getProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS);
 		if (property == null) {
@@ -108,7 +109,6 @@ public final class HapiSystemProperties {
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());
 	}
-
 	public static void disableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.FALSE.toString());
 	}
@@ -158,4 +158,5 @@ public final class HapiSystemProperties {
 	public static boolean isSuppressHapiFhirVersionLogEnabled() {
 		return Boolean.parseBoolean(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
 	}
+
 }

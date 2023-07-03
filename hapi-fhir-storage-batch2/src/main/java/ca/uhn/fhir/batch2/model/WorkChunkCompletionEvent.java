@@ -36,8 +36,7 @@ public class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
 		myRecoveredErrorCount = theRecoveredErrorCount;
 	}
 
-	public WorkChunkCompletionEvent(
-			String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount, String theRecoveredWarningMessage) {
+	public WorkChunkCompletionEvent(String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount, String theRecoveredWarningMessage) {
 		this(theChunkId, theRecordsProcessed, theRecoveredErrorCount);
 		myRecoveredWarningMessage = theRecoveredWarningMessage;
 	}
@@ -62,21 +61,11 @@ public class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
 
 		WorkChunkCompletionEvent that = (WorkChunkCompletionEvent) theO;
 
-		return new EqualsBuilder()
-				.appendSuper(super.equals(theO))
-				.append(myRecordsProcessed, that.myRecordsProcessed)
-				.append(myRecoveredErrorCount, that.myRecoveredErrorCount)
-				.append(myRecoveredWarningMessage, that.myRecoveredWarningMessage)
-				.isEquals();
+		return new EqualsBuilder().appendSuper(super.equals(theO)).append(myRecordsProcessed, that.myRecordsProcessed).append(myRecoveredErrorCount, that.myRecoveredErrorCount).append(myRecoveredWarningMessage, that.myRecoveredWarningMessage).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(myRecordsProcessed)
-				.append(myRecoveredErrorCount)
-				.append(myRecoveredWarningMessage)
-				.toHashCode();
+		return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(myRecordsProcessed).append(myRecoveredErrorCount).append(myRecoveredWarningMessage).toHashCode();
 	}
 }

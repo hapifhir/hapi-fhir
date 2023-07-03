@@ -20,6 +20,12 @@ package ca.uhn.fhir.cr.repo;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -39,12 +45,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,17 +58,10 @@ public class BundleProviderUtil {
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 
-	public static IBaseResource createBundleFromBundleProvider(
-			IRestfulServer<?> theServer,
-			RequestDetails theRequest,
-			Integer theLimit,
-			String theLinkSelf,
-			Set<Include> theIncludes,
-			IBundleProvider theResult,
-			int theOffset,
-			BundleTypeEnum theBundleType,
-			EncodingEnum theLinkEncoding,
-			String theSearchId) {
+	public static IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer,
+																				  RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
+																				  IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType,
+																				  EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 		final Integer offset;
 		Integer limit = theLimit;
@@ -76,8 +69,8 @@ public class BundleProviderUtil {
 		if (theResult.getCurrentPageOffset() != null) {
 			offset = theResult.getCurrentPageOffset();
 			limit = theResult.getCurrentPageSize();
-			Validate.notNull(
-					limit, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
+			Validate.notNull(limit,
+					"IBundleProvider returned a non-null offset, but did not return a non-null page size");
 		} else {
 			offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
 		}
@@ -172,43 +165,33 @@ public class BundleProviderUtil {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
 					throw new InternalErrorException(Msg.code(2311)
-							+ "Server method returned resource of type["
-							+ next.getClass().getSimpleName()
+							+ "Server method returned resource of type[" + next.getClass().getSimpleName()
 							+ "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
 		}
 
-		BundleLinks links = new BundleLinks(
-				theRequest.getFhirServerBase(),
-				theIncludes,
-				RestfulServerUtils.prettyPrintResponse(theServer, theRequest),
-				theBundleType);
+		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes,
+				RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
 		if (theResult.getCurrentPageOffset() != null) {
 
 			if (isNotBlank(theResult.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(
-						links,
-						theRequest.getRequestPath(),
-						theRequest.getTenantId(),
-						offset + limit,
-						limit,
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links,
+						theRequest.getRequestPath(), theRequest.getTenantId(), offset + limit, limit,
 						theRequest.getParameters()));
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(
-						links,
-						theRequest.getRequestPath(),
-						theRequest.getTenantId(),
-						Math.max(offset - limit, 0),
-						limit,
-						theRequest.getParameters()));
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links,
+						theRequest.getRequestPath(), theRequest.getTenantId(),
+						Math.max(offset - limit, 0), limit, theRequest.getParameters()));
 			}
+
 		}
 
-		if (offset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest))) {
+		if (offset != null
+				|| (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest))) {
 			// Paging without caching
 			// We're doing offset pages
 			int requestedToReturn = numToReturn;
@@ -219,35 +202,28 @@ public class BundleProviderUtil {
 			}
 			if (numTotalResults == null || requestedToReturn < numTotalResults) {
 				if (!resourceList.isEmpty()) {
-					links.setNext(RestfulServerUtils.createOffsetPagingLink(
-							links,
-							theRequest.getRequestPath(),
-							theRequest.getTenantId(),
-							defaultIfNull(offset, 0) + numToReturn,
-							numToReturn,
-							theRequest.getParameters()));
+					links.setNext(
+							RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(),
+									theRequest.getTenantId(), defaultIfNull(offset, 0) + numToReturn,
+									numToReturn, theRequest.getParameters()));
 				}
 			}
 			if (offset != null && offset > 0) {
 				int start = Math.max(0, theOffset - pageSize);
-				links.setPrev(RestfulServerUtils.createOffsetPagingLink(
-						links,
-						theRequest.getRequestPath(),
-						theRequest.getTenantId(),
-						start,
-						pageSize,
-						theRequest.getParameters()));
+				links.setPrev(
+						RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(),
+								theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				links.setNext(RestfulServerUtils.createPagingLink(
-						links, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters()));
+				links.setNext(RestfulServerUtils.createPagingLink(links, theRequest, searchId,
+						theResult.getNextPageId(), theRequest.getParameters()));
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				links.setPrev(RestfulServerUtils.createPagingLink(
-						links, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters()));
+				links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId,
+						theResult.getPreviousPageId(), theRequest.getParameters()));
 			}
 		} else if (searchId != null) {
 			/*
@@ -258,37 +234,30 @@ public class BundleProviderUtil {
 			 */
 			if (resourceList.size() > 0) {
 				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-					links.setNext((RestfulServerUtils.createPagingLink(
-							links,
-							theRequest,
-							searchId,
-							theOffset + numToReturn,
-							numToReturn,
-							theRequest.getParameters())));
+					links.setNext((RestfulServerUtils.createPagingLink(links, theRequest, searchId,
+							theOffset + numToReturn, numToReturn, theRequest.getParameters())));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - pageSize);
-					links.setPrev(RestfulServerUtils.createPagingLink(
-							links, theRequest, searchId, start, pageSize, theRequest.getParameters()));
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start,
+							pageSize, theRequest.getParameters()));
 				}
 			}
 		}
 
-		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), links, theResult.size(), theResult.getPublished());
-		bundleFactory.addResourcesToBundle(
-				new ArrayList<>(resourceList),
-				theBundleType,
-				links.serverBase,
-				theServer.getBundleInclusionRule(),
-				theIncludes);
+		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), links, theResult.size(),
+				theResult.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType,
+				links.serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
 		return bundleFactory.getResourceBundle();
+
 	}
 
 	private static boolean isEverythingOperation(RequestDetails theRequest) {
 		return (theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_TYPE
-						|| theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE)
-				&& theRequest.getOperation() != null
-				&& theRequest.getOperation().equals("$everything");
+				|| theRequest
+						.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE)
+				&& theRequest.getOperation() != null && theRequest.getOperation().equals("$everything");
 	}
 }

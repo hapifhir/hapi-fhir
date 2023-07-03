@@ -23,4 +23,5 @@ public abstract class BaseStaticResourceValidationSupport extends BaseValidation
 		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
+
 }

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.interceptor.validation;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -35,10 +35,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 
@@ -94,6 +94,7 @@ public class RepositoryValidatingInterceptor {
 
 		String rulesDescription = "RepositoryValidatingInterceptor has rules:\n" + describeRules();
 		ourLog.info(rulesDescription);
+
 	}
 
 	/**
@@ -103,12 +104,13 @@ public class RepositoryValidatingInterceptor {
 	 */
 	@Nonnull
 	public String describeRules() {
-		return " * "
-				+ myRules.values().stream()
-						.distinct()
-						.map(t -> t.toString())
-						.sorted()
-						.collect(Collectors.joining("\n * "));
+		return " * " + myRules
+			.values()
+			.stream()
+			.distinct()
+			.map(t -> t.toString())
+			.sorted()
+			.collect(Collectors.joining("\n * "));
 	}
 
 	/**
@@ -128,7 +130,7 @@ public class RepositoryValidatingInterceptor {
 	}
 
 	private void handle(RequestDetails theRequestDetails, IBaseResource theNewResource) {
-
+		
 		Validate.notNull(myFhirContext, "No FhirContext has been set for this interceptor of type: %s", getClass());
 		if (!isPlaceholderResource(theNewResource)) {
 			String resourceType = myFhirContext.getResourceType(theNewResource);
@@ -139,7 +141,7 @@ public class RepositoryValidatingInterceptor {
 					handleFailure(outcome);
 				}
 			}
-		}
+		} 
 	}
 
 	/**
@@ -153,10 +155,10 @@ public class RepositoryValidatingInterceptor {
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
-			String firstIssue =
-					OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
+			String firstIssue = OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
 			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
 		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());
 	}
+
 }

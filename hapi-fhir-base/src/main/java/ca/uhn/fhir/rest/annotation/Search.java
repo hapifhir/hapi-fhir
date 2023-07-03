@@ -19,31 +19,33 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+
+
 /**
  * RESTful method annotation used for a method which provides
  * the FHIR "search" method.
- *
+ * 
  * See the <a href="http://hl7.org/implement/standards/fhir/http.html#search">FHIR Search</a> definition
  * for more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = ElementType.METHOD)
+@Target(value=ElementType.METHOD)
 public @interface Search {
-
+	
 	/**
 	 * If specified, this the name for the Named Query
-	 *
+	 * 
 	 * <p>
-	 * See the FHIR specification section on
+	 * See the FHIR specification section on 
 	 * 	<a href="http://www.hl7.org/implement/standards/fhir/search.html#advanced">named queries</a>
 	 * </p>
 	 */
@@ -51,9 +53,9 @@ public @interface Search {
 
 	/**
 	 * If specified, this the name for the compartment
-	 *
+	 * 
 	 * <p>
-	 * See the FHIR specification section on
+	 * See the FHIR specification section on 
 	 * 	<a href="http://hl7-fhir.github.io/extras.html#compartments">compartments</a>
 	 * </p>
 	 */
@@ -61,15 +63,15 @@ public @interface Search {
 
 	/**
 	 * The return type for this method. This generally does not need
-	 * to be populated for IResourceProvider instances in a server implementation,
+	 * to be populated for IResourceProvider instances in a server implementation, 
 	 * but often does need to be populated in client implementations using {@link IBasicClient} or
 	 * {@link IRestfulClient}, or in plain providers on a server.
 	 * <p>
-	 * This value also does not need to be populated if the return type for a method annotated with
-	 * this annotation is sufficient to determine the type of resource provided. E.g. if the
-	 * method returns <code>Patient</code> or <code>List&lt;Patient&gt;</code>, the server/client
+	 * This value also does not need to be populated if the return type for a method annotated with 
+	 * this annotation is sufficient to determine the type of resource provided. E.g. if the 
+	 * method returns <code>Patient</code> or <code>List&lt;Patient&gt;</code>, the server/client 
 	 * will automatically determine that the Patient resource is the return type, and this value
-	 * may be left blank.
+	 * may be left blank. 
 	 * </p>
 	 */
 	// NB: Read, Search (maybe others) share this annotation method, so update the javadocs everywhere
@@ -86,7 +88,7 @@ public @interface Search {
 	String typeName() default "";
 
 	/**
-	 * In a REST server, should this method be invoked even if it does not have method parameters
+	 * In a REST server, should this method be invoked even if it does not have method parameters 
 	 * which correspond to all of the URL parameters passed in by the client (default is <code>false</code>).
 	 * <p>
 	 * Use this method with caution: Methods marked with a value of <code>true</code> will
@@ -98,4 +100,5 @@ public @interface Search {
 	 * </p>
 	 */
 	boolean allowUnknownParams() default false;
+
 }

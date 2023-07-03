@@ -24,4 +24,5 @@ import org.hl7.fhir.instance.model.api.IIdType;
 public interface IMetaAddOrDeleteUnsourced {
 
 	IMetaAddOrDeleteSourced onResource(IIdType theId);
+	
 }

@@ -28,6 +28,7 @@ import java.util.Objects;
 public abstract class BaseTableTask extends BaseTask {
 	private String myTableName;
 
+
 	public BaseTableTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -54,9 +55,7 @@ public abstract class BaseTableTask extends BaseTask {
 	}
 
 	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
-		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType()
-				.get(theColumnType)
-				.get(getDriverType());
+		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(theColumnType).get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (theColumnType == ColumnTypeEnum.STRING) {

@@ -94,6 +94,7 @@ public interface IWorkChunkPersistence {
 	@Transactional(propagation = Propagation.REQUIRED)
 	void onWorkChunkFailed(String theChunkId, String theErrorMessage);
 
+
 	/**
 	 * Report success and complete the chunk.
 	 * Transition to {@link WorkChunkStatusEnum#COMPLETED}
@@ -112,8 +113,7 @@ public interface IWorkChunkPersistence {
 	 * @param theErrorMsg   - error message (if status warrants it)
 	 */
 	@Transactional(propagation = Propagation.MANDATORY)
-	void markWorkChunksWithStatusAndWipeData(
-			String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
 	/**
 	 * Fetch all chunks for a given instance.
@@ -123,6 +123,7 @@ public interface IWorkChunkPersistence {
 	 * wipmb replace with a stream and a consumer in 6.8
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
+
 
 	/**
 	 * Fetch all chunks with data for a given instance for a given step id
@@ -139,6 +140,7 @@ public interface IWorkChunkPersistence {
 	 * @param theStepId     the step that is starting
 	 * @return the WorkChunk ids
 	 */
-	List<String> fetchAllChunkIdsForStepWithStatus(
-			String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
+	List<String> fetchAllChunkIdsForStepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
+
+
 }

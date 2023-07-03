@@ -29,7 +29,6 @@ public class BatchResourceId implements IModelJson {
 
 	@JsonProperty("type")
 	private String myResourceType;
-
 	@JsonProperty("id")
 	private String myId;
 
@@ -66,10 +65,7 @@ public class BatchResourceId implements IModelJson {
 
 		BatchResourceId batchResourceId = (BatchResourceId) theO;
 
-		return new EqualsBuilder()
-				.append(myResourceType, batchResourceId.myResourceType)
-				.append(myId, batchResourceId.myId)
-				.isEquals();
+		return new EqualsBuilder().append(myResourceType, batchResourceId.myResourceType).append(myId, batchResourceId.myId).isEquals();
 	}
 
 	@Override

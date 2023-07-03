@@ -29,12 +29,7 @@ public class BundleEntryParts {
 	private final String myConditionalUrl;
 	private final String myFullUrl;
 
-	public BundleEntryParts(
-			String theFullUrl,
-			RequestTypeEnum theRequestType,
-			String theUrl,
-			IBaseResource theResource,
-			String theConditionalUrl) {
+	public BundleEntryParts(String theFullUrl, RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
 		super();
 		myFullUrl = theFullUrl;
 		myRequestType = theRequestType;

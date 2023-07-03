@@ -29,7 +29,6 @@ import java.util.List;
 public abstract class BaseCandidateFinder {
 	@Autowired
 	IIdHelperService myIdHelperService;
-
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 

@@ -30,12 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This implementation of the {@link IBalpAuditEventSink} transmits audit events to
@@ -66,10 +67,10 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 * @param theTargetBaseUrl The FHIR server base URL for the target/sink server to
 	 *                         receive audit events.
 	 */
-	public AsyncMemoryQueueBackedFhirClientBalpSink(
-			@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl) {
 		this(theFhirContext, theTargetBaseUrl, null);
 	}
+
 
 	/**
 	 * Sets the FhirContext to use when initiating outgoing connections
@@ -83,10 +84,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 * @param theClientInterceptors An optional list of interceptors to register against
 	 *                              the client. May be {@literal null}.
 	 */
-	public AsyncMemoryQueueBackedFhirClientBalpSink(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull String theTargetBaseUrl,
-			@Nullable List<Object> theClientInterceptors) {
+	public AsyncMemoryQueueBackedFhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
@@ -97,8 +95,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 	 */
 	public AsyncMemoryQueueBackedFhirClientBalpSink(IGenericClient theClient) {
 		super(theClient);
-		myThreadPool = ThreadPoolUtil.newThreadPool(
-				1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", Integer.MAX_VALUE);
+		myThreadPool = ThreadPoolUtil.newThreadPool(1, 1, "BalpClientSink-" + ourNextThreadId.getAndIncrement() + "-", Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -142,10 +139,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 				myClient.transaction().withBundle(transactionBundle).execute();
 				return;
 			} catch (BaseServerResponseException e) {
-				ourLog.error(
-						"Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}",
-						queue.length,
-						e.toString());
+				ourLog.error("Failed to transmit AuditEvent items to target. Will re-attempt {} failed events once. Error: {}", queue.length, e.toString());
 			}
 
 			// Retry once then give up
@@ -158,4 +152,5 @@ public class AsyncMemoryQueueBackedFhirClientBalpSink extends FhirClientBalpSink
 			}
 		}
 	}
+
 }

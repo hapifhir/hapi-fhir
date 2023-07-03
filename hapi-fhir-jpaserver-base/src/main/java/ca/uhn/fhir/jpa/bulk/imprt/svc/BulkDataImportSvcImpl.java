@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -37,7 +38,6 @@ import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.apicatalog.jsonld.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -53,29 +53,25 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
-
 	@Autowired
 	private IBulkImportJobDao myJobDao;
-
 	@Autowired
 	private IBulkImportJobFileDao myJobFileDao;
-
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-
 	private TransactionTemplate myTxTemplate;
 
 	@Autowired
@@ -89,6 +85,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		myTxTemplate = new TransactionTemplate(myTxManager);
 	}
 
+
 	@Override
 	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// This job should be local so that each node in the cluster can pick up jobs
@@ -98,20 +95,17 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
+
 	@Override
 	@Transactional
-	public String createNewJob(
-			BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles) {
+	public String createNewJob(BulkImportJobJson theJobDescription, @Nonnull List<BulkImportJobFileJson> theInitialFiles) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription, "Job must not be null");
-		ValidateUtil.isNotNullOrThrowUnprocessableEntity(
-				theJobDescription.getProcessingMode(), "Job File Processing mode must not be null");
-		ValidateUtil.isTrueOrThrowInvalidRequest(
-				theJobDescription.getBatchSize() > 0, "Job File Batch Size must be > 0");
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription.getProcessingMode(), "Job File Processing mode must not be null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theJobDescription.getBatchSize() > 0, "Job File Batch Size must be > 0");
 
 		String biJobId = UUID.randomUUID().toString();
 
-		ourLog.info(
-				"Creating new Bulk Import job with {} files, assigning bijob ID: {}", theInitialFiles.size(), biJobId);
+		ourLog.info("Creating new Bulk Import job with {} files, assigning bijob ID: {}", theInitialFiles.size(), biJobId);
 
 		BulkImportJobEntity job = new BulkImportJobEntity();
 		job.setJobId(biJobId);
@@ -135,11 +129,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 
 		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(
-				job.getStatus() == BulkImportJobStatusEnum.STAGING,
-				"bijob id %s has status %s and can not be added to",
-				theBiJobId,
-				job.getStatus());
+		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "bijob id %s has status %s and can not be added to", theBiJobId, job.getStatus());
 
 		addFilesToJob(theFiles, job, job.getFileCount());
 
@@ -148,8 +138,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	}
 
 	private BulkImportJobEntity findJobByBiJobId(String theBiJobId) {
-		BulkImportJobEntity job = myJobDao.findByJobId(theBiJobId)
-				.orElseThrow(() -> new InvalidRequestException("Unknown bijob id: " + theBiJobId));
+		BulkImportJobEntity job = myJobDao
+			.findByJobId(theBiJobId)
+			.orElseThrow(() -> new InvalidRequestException("Unknown bijob id: " + theBiJobId));
 		return job;
 	}
 
@@ -159,11 +150,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		ourLog.info("Activating bulk import bijob {}", theBiJobId);
 
 		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
-		ValidateUtil.isTrueOrThrowInvalidRequest(
-				job.getStatus() == BulkImportJobStatusEnum.STAGING,
-				"Bulk import bijob %s can not be activated in status: %s",
-				theBiJobId,
-				job.getStatus());
+		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "Bulk import bijob %s can not be activated in status: %s", theBiJobId, job.getStatus());
 
 		job.setStatus(BulkImportJobStatusEnum.READY);
 		myJobDao.save(job);
@@ -176,8 +163,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	@Override
 	public ActivateJobResult activateNextReadyJob() {
 		if (!myStorageSettings.isEnableTaskBulkImportJobExecution()) {
-			Logs.getBatchTroubleshootingLog()
-					.trace("Bulk import job execution is not enabled on this server. No action taken.");
+			Logs.getBatchTroubleshootingLog().trace("Bulk import job execution is not enabled on this server. No action taken.");
 			return new ActivateJobResult(false, null);
 		}
 
@@ -255,14 +241,14 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		return job.toJson();
 	}
 
-	@Override
-	public JobInfo getJobStatus(String theBiJobId) {
-		BulkImportJobEntity theJob = findJobByBiJobId(theBiJobId);
-		return new JobInfo()
-				.setStatus(theJob.getStatus())
-				.setStatusMessage(theJob.getStatusMessage())
-				.setStatusTime(theJob.getStatusTime());
-	}
+        @Override
+        public JobInfo getJobStatus(String theBiJobId) {
+                BulkImportJobEntity theJob = findJobByBiJobId(theBiJobId);
+                return new JobInfo()
+                        .setStatus(theJob.getStatus())
+                        .setStatusMessage(theJob.getStatusMessage())
+                        .setStatusTime(theJob.getStatusTime());
+        }
 
 	@Transactional
 	@Override
@@ -270,10 +256,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 
 		return myJobFileDao
-				.findForJob(job, theFileIndex)
-				.map(t -> t.toJson())
-				.orElseThrow(() ->
-						new IllegalArgumentException("Invalid index " + theFileIndex + " for bijob " + theBiJobId));
+			.findForJob(job, theFileIndex)
+			.map(t -> t.toJson())
+			.orElseThrow(() -> new IllegalArgumentException("Invalid index " + theFileIndex + " for bijob " + theBiJobId));
 	}
 
 	@Transactional
@@ -312,11 +297,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 		return myJobCoordinator.startInstance(request).getInstanceId();
 	}
 
-	private void addFilesToJob(
-			@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {
+	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {
 		for (BulkImportJobFileJson nextFile : theInitialFiles) {
-			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(
-					nextFile.getContents(), "Job File Contents mode must not be null");
+			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextFile.getContents(), "Job File Contents mode must not be null");
 
 			BulkImportJobFileEntity jobFile = new BulkImportJobFileEntity();
 			jobFile.setJob(job);

@@ -36,10 +36,8 @@ public class MdmLoader {
 
 	@Autowired
 	IMdmSettings myMdmSettings;
-
 	@Autowired
 	MdmProviderLoader myMdmProviderLoader;
-
 	@Autowired
 	MdmSubscriptionLoader myMdmSubscriptionLoader;
 

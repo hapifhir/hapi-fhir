@@ -39,40 +39,27 @@ public class CompositeInterceptorBroadcaster {
 	 * Broadcast hooks to both the interceptor service associated with the request, as well
 	 * as the one associated with the JPA module.
 	 */
-	public static boolean doCallHooks(
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			@Nullable RequestDetails theRequestDetails,
-			Pointcut thePointcut,
-			HookParams theParams) {
-		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails)
-				.callHooks(thePointcut, theParams);
+	public static boolean doCallHooks(IInterceptorBroadcaster theInterceptorBroadcaster, @Nullable RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).callHooks(thePointcut, theParams);
 	}
 
 	/**
 	 * Broadcast hooks to both the interceptor service associated with the request, as well
 	 * as the one associated with the JPA module.
 	 */
-	public static Object doCallHooksAndReturnObject(
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			RequestDetails theRequestDetails,
-			Pointcut thePointcut,
-			HookParams theParams) {
-		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails)
-				.callHooksAndReturnObject(thePointcut, theParams);
+	public static Object doCallHooksAndReturnObject(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).callHooksAndReturnObject(thePointcut, theParams);
 	}
 
 	// TODO: JA - Refactor to make thePointcut the last argument in order to be consistent with thr other methods here
-	public static boolean hasHooks(
-			Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
-		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails)
-				.hasHooks(thePointcut);
+	public static boolean hasHooks(Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
+		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).hasHooks(thePointcut);
 	}
 
 	/**
 	 * @since 5.5.0
 	 */
-	public static IInterceptorBroadcaster newCompositeBroadcaster(
-			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
+	public static IInterceptorBroadcaster newCompositeBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
 		return new IInterceptorBroadcaster() {
 			@Override
 			public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
@@ -93,9 +80,7 @@ public class CompositeInterceptorBroadcaster {
 				if (theInterceptorBroadcaster != null) {
 					retVal = theInterceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 				}
-				if (theRequestDetails != null
-						&& theRequestDetails.getInterceptorBroadcaster() != null
-						&& retVal == null) {
+				if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal == null) {
 					IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 					retVal = interceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 				}
@@ -107,9 +92,9 @@ public class CompositeInterceptorBroadcaster {
 				if (theInterceptorBroadcaster != null && theInterceptorBroadcaster.hasHooks(thePointcut)) {
 					return true;
 				}
-				return theRequestDetails != null
-						&& theRequestDetails.getInterceptorBroadcaster() != null
-						&& theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
+				return theRequestDetails != null &&
+					theRequestDetails.getInterceptorBroadcaster() != null &&
+					theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
 			}
 		};
 	}

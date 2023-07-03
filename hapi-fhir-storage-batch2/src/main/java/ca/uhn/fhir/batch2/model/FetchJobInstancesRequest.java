@@ -19,25 +19,27 @@
  */
 package ca.uhn.fhir.batch2.model;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 public class FetchJobInstancesRequest {
-
+	
 	private final String myJobDefinition;
-
+	
 	private final String myParameters;
 
 	private final Set<StatusEnum> myStatuses = new HashSet<>();
 
-	public FetchJobInstancesRequest(@Nonnull String theJobDefinition, @Nonnull String theParameters) {
+	public FetchJobInstancesRequest(@Nonnull String theJobDefinition,
+											  @Nonnull String theParameters) {
 		myJobDefinition = theJobDefinition;
 		myParameters = theParameters;
 	}
 
-	public FetchJobInstancesRequest(
-			@Nonnull String theJobDefinition, @Nonnull String theParameters, StatusEnum... theStatuses) {
+	public FetchJobInstancesRequest(@Nonnull String theJobDefinition,
+											  @Nonnull String theParameters,
+											  StatusEnum... theStatuses) {
 		myJobDefinition = theJobDefinition;
 		myParameters = theParameters;
 		for (StatusEnum status : theStatuses) {

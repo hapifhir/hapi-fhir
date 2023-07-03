@@ -62,4 +62,5 @@ public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDat
 		}
 		return "false";
 	}
+
 }

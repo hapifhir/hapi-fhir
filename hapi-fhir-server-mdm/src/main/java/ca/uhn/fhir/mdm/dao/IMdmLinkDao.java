@@ -35,6 +35,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
+import org.springframework.data.history.Revision;
 
 import java.util.Date;
 import java.util.List;
@@ -45,18 +46,15 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(
-			P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(
-			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
-	List<P> findPidByResourceNameAndThresholdAndPartitionId(
-			String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
+	List<P> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
 
 	List<M> findAllById(List<P> thePids);
 
@@ -82,16 +80,9 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
 	@Deprecated
-	Page<M> search(
-			IIdType theGoldenResourceId,
-			IIdType theSourceId,
-			MdmMatchResultEnum theMatchResult,
-			MdmLinkSourceEnum theLinkSource,
-			MdmPageRequest thePageRequest,
-			List<Integer> thePartitionId);
+	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
 	Page<M> search(MdmQuerySearchParameters theMdmQuerySearchParameters);
-
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);

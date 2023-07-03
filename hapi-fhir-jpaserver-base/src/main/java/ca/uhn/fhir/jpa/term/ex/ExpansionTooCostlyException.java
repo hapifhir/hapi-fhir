@@ -26,4 +26,5 @@ public class ExpansionTooCostlyException extends InternalErrorException {
 	public ExpansionTooCostlyException(String theMessage) {
 		super(theMessage);
 	}
+
 }

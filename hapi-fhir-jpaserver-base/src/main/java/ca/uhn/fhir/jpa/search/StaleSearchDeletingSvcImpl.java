@@ -43,10 +43,8 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 //
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
 

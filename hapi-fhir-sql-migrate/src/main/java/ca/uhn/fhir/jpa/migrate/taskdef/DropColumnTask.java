@@ -55,30 +55,18 @@ public class DropColumnTask extends BaseTableColumnTask {
 	public void doExecute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			logInfo(
-					ourLog,
-					"Column {} does not exist on table {} - No action performed",
-					getColumnName(),
-					getTableName());
+			logInfo(ourLog, "Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
-		if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7)
-				|| getDriverType().equals(DriverTypeEnum.MARIADB_10_1)
-				|| getDriverType().equals(DriverTypeEnum.MSSQL_2012)) {
-			// Some DBs such as MYSQL and Maria DB require that foreign keys depending on the column be dropped before
-			// the column itself is dropped.
-			logInfo(
-					ourLog,
-					"Dropping any foreign keys on table {} depending on column {}",
-					getTableName(),
-					getColumnName());
-			Set<String> foreignKeys =
-					JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), getColumnName(), getTableName());
+		if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || getDriverType().equals(DriverTypeEnum.MARIADB_10_1)
+			|| getDriverType().equals(DriverTypeEnum.MSSQL_2012)) {
+			// Some DBs such as MYSQL and Maria DB require that foreign keys depending on the column be dropped before the column itself is dropped.
+			logInfo(ourLog, "Dropping any foreign keys on table {} depending on column {}", getTableName(), getColumnName());
+			Set<String> foreignKeys = JdbcUtils.getForeignKeysForColumn(getConnectionProperties(), getColumnName(), getTableName());
 			if (foreignKeys != null) {
 				for (String foreignKey : foreignKeys) {
-					List<String> dropFkSqls =
-							DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
+					List<String> dropFkSqls = DropForeignKeyTask.generateSql(getTableName(), foreignKey, getDriverType());
 					for (String dropFkSql : dropFkSqls) {
 						executeSql(getTableName(), dropFkSql);
 					}
@@ -92,4 +80,6 @@ public class DropColumnTask extends BaseTableColumnTask {
 		logInfo(ourLog, "Dropping column {} on table {}", getColumnName(), getTableName());
 		executeSql(getTableName(), sql);
 	}
+
+
 }

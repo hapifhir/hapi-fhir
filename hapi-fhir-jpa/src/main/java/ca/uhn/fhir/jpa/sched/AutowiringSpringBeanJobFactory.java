@@ -51,13 +51,7 @@ public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory impleme
 		String next = toString(bundle.getNextFireTime());
 		String fireInstanceId = bundle.getTrigger().getFireInstanceId();
 		JobKey key = bundle.getJobDetail().getKey();
-		ourLog.trace(
-				"Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]",
-				key,
-				fireInstanceId,
-				prev,
-				scheduled,
-				next);
+		ourLog.trace("Firing job[{}] ID[{}] - Previous[{}] Scheduled[{}] Next[{}]", key, fireInstanceId, prev, scheduled, next);
 
 		Object job = super.createJobInstance(bundle);
 		myBeanFactory.autowireBean(job);

@@ -27,4 +27,5 @@ import java.io.Writer;
 public interface IStreamingDatatype<T> extends IPrimitiveType<T> {
 
 	void writeAsText(Writer theWriter) throws IOException;
+
 }

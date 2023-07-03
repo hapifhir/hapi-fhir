@@ -47,9 +47,7 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 	abstract T newInstance();
 
 	@Override
-	public void setValuesAsQueryTokens(
-			FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
-			throws InvalidRequestException {
+	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters) throws InvalidRequestException {
 		myValues.clear();
 		for (QualifiedParamList nextParam : theParameters) {
 			T nextList = newInstance();

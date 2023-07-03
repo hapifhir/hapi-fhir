@@ -39,6 +39,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+
+
 /**
  * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
  */
@@ -46,7 +48,6 @@ public class HapiLocalizer {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
 	private static boolean ourFailOnMissingMessage;
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
@@ -147,18 +148,19 @@ public class HapiLocalizer {
 	MessageFormat newMessageFormat(String theFormatString) {
 		StringBuilder pattern = new StringBuilder(theFormatString.trim());
 
-		for (int i = 0; i < (pattern.length() - 1); i++) {
+
+		for (int i = 0; i < (pattern.length()-1); i++) {
 			if (pattern.charAt(i) == '{') {
-				char nextChar = pattern.charAt(i + 1);
+				char nextChar = pattern.charAt(i+1);
 				if (nextChar >= '0' && nextChar <= '9') {
 					continue;
 				}
 
-				pattern.replace(i, i + 1, "'{'");
+				pattern.replace(i, i+1, "'{'");
 				int closeBraceIndex = pattern.indexOf("}", i);
 				if (closeBraceIndex > 0) {
 					i = closeBraceIndex;
-					pattern.replace(i, i + 1, "'}'");
+					pattern.replace(i, i+1, "'}'");
 				}
 			}
 		}
@@ -173,11 +175,11 @@ public class HapiLocalizer {
 		}
 	}
 
-	public Locale getLocale() {
+    public Locale getLocale() {
 		return myLocale;
-	}
+    }
 
-	/**
+    /**
 	 * This <b>global setting</b> causes the localizer to fail if any attempts
 	 * are made to retrieve a key that does not exist. This method is primarily for
 	 * unit tests.
@@ -189,4 +191,5 @@ public class HapiLocalizer {
 	public static String toKey(Class<?> theType, String theKey) {
 		return theType.getName() + '.' + theKey;
 	}
+
 }

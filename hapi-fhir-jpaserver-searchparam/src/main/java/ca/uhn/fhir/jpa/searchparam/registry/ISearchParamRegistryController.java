@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+	 */
 package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
@@ -24,4 +24,5 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 public interface ISearchParamRegistryController {
 
 	ResourceChangeResult refreshCacheIfNecessary();
+
 }

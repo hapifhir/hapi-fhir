@@ -36,13 +36,10 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
-
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -85,4 +82,5 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 		String uuid = theList.getUuid();
 		return uuid;
 	}
+
 }

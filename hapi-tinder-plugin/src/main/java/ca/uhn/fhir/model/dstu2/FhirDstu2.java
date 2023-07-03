@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,9 +19,15 @@
  */
 package ca.uhn.fhir.model.dstu2;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
+import java.io.InputStream;
+import java.util.Date;
+
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.*;
+
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.*;
 import ca.uhn.fhir.model.dstu2.composite.*;
@@ -29,11 +35,6 @@ import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
-
-import java.io.InputStream;
-import java.util.Date;
 
 public class FhirDstu2 implements IFhirVersion {
 
@@ -43,6 +44,7 @@ public class FhirDstu2 implements IFhirVersion {
 	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
 		throw new UnsupportedOperationException(Msg.code(74) + "FluentPath is not supported in DSTU2 contexts");
 	}
+
 
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
@@ -71,8 +73,7 @@ public class FhirDstu2 implements IFhirVersion {
 			str = FhirDstu2.class.getResourceAsStream("ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException(Msg.code(75) + "Can not find model property file on classpath: "
-					+ "/ca/uhn/fhir/model/dstu2/fhirversion.properties");
+			throw new ConfigurationException(Msg.code(75) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		return str;
 	}
@@ -112,8 +113,13 @@ public class FhirDstu2 implements IFhirVersion {
 		return new IdDt();
 	}
 
+
+	
+
 	@Override
 	public Object getServerVersion() {
 		return ReflectionUtil.newInstanceOfFhirServerType("ca.uhn.fhir.model.dstu2.FhirServerDstu2");
 	}
+
+
 }

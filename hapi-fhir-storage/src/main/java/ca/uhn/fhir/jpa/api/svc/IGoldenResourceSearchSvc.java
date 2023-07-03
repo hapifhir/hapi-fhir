@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.api.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Date;
 
 public interface IGoldenResourceSearchSvc {
 
@@ -37,10 +37,6 @@ public interface IGoldenResourceSearchSvc {
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theResourceType the type of resource.
 	 */
-	IResourcePidList fetchGoldenResourceIdsPage(
-			Date theStart,
-			Date theEnd,
-			@Nonnull Integer thePageSize,
-			@Nullable RequestPartitionId theRequestPartitionId,
-			@Nullable String theResourceType);
+	IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
+
 }

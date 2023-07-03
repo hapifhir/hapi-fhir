@@ -19,18 +19,19 @@
  */
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.Include;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.Include;
 
 /**
  * Created by Bill de Beaubien on 2/26/2015.
@@ -41,20 +42,17 @@ public class ResourceReferenceInfo {
 	private IBaseReference myResource;
 	private FhirContext myContext;
 
-	public ResourceReferenceInfo(
-			FhirContext theContext,
-			IBaseResource theOwningResource,
-			List<String> thePathToElement,
-			IBaseReference theElement) {
+	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IBaseReference theElement) {
 		myContext = theContext;
 		myOwningResource = theContext.getResourceType(theOwningResource);
 
 		myResource = theElement;
 		if (thePathToElement != null && !thePathToElement.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = thePathToElement.iterator(); iterator.hasNext(); ) {
+			for (Iterator<String> iterator = thePathToElement.iterator(); iterator.hasNext();) {
 				sb.append(iterator.next());
-				if (iterator.hasNext()) sb.append(".");
+				if (iterator.hasNext())
+					sb.append(".");
 			}
 			myName = sb.toString();
 		} else {
@@ -79,9 +77,11 @@ public class ResourceReferenceInfo {
 	}
 
 	public boolean matchesIncludeSet(Set<Include> theIncludes) {
-		if (theIncludes == null) return false;
+		if (theIncludes == null)
+			return false;
 		for (Include include : theIncludes) {
-			if (matchesInclude(include)) return true;
+			if (matchesInclude(include))
+				return true;
 		}
 		return false;
 	}
@@ -98,13 +98,13 @@ public class ResourceReferenceInfo {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceName);
 			if (resourceDef != null) {
 				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
-				if (searchParamDef != null) {
+				if (searchParamDef!=null) {
 					final String completeName = myOwningResource + "." + myName;
 					boolean matched = false;
 					for (String s : searchParamDef.getPathsSplit()) {
-						if (s.equals(completeName) || s.startsWith(completeName + ".")) {
-							matched = true;
-							break;
+						if (s.equals(completeName) ||
+								       s.startsWith(completeName + ".")) {
+							matched = true; break;
 						}
 					}
 					return matched;

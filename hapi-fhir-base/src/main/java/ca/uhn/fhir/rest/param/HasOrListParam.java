@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
+
 public class HasOrListParam extends BaseOrListParam<HasOrListParam, HasParam> {
 
 	@CoverageIgnore
@@ -35,4 +36,5 @@ public class HasOrListParam extends BaseOrListParam<HasOrListParam, HasParam> {
 		add(theParameter);
 		return this;
 	}
+
 }

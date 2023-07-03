@@ -28,9 +28,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 class RuleDisallowProfile extends BaseTypedRule {
 	private final Set<String> myProfileUrls;
@@ -52,9 +52,7 @@ class RuleDisallowProfile extends BaseTypedRule {
 			String nextUrl = next.getValueAsString();
 			String nextUrlNormalized = UrlUtil.normalizeCanonicalUrlForComparison(nextUrl);
 			if (myProfileUrls.contains(nextUrlNormalized)) {
-				String msg = getFhirContext()
-						.getLocalizer()
-						.getMessage(RuleRequireProfileDeclaration.class, "illegalProfile", getResourceType(), nextUrl);
+				String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "illegalProfile", getResourceType(), nextUrl);
 				return RuleEvaluation.forFailure(this, msg);
 			}
 		}
@@ -65,8 +63,10 @@ class RuleDisallowProfile extends BaseTypedRule {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("resourceType", getResourceType())
-				.append("profiles", myProfileUrls)
-				.toString();
+			.append("resourceType", getResourceType())
+			.append("profiles", myProfileUrls)
+			.toString();
 	}
+
+
 }

@@ -158,4 +158,5 @@ public @interface Operation {
 	 * </p>
 	 */
 	String canonicalUrl() default "";
+
 }

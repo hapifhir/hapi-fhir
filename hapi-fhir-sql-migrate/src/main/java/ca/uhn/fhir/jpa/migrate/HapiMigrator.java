@@ -30,12 +30,12 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -53,8 +53,7 @@ public class HapiMigrator {
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
-		myHapiMigrationStorageSvc =
-				new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
+		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
 	}
 
 	public DataSource getDataSource() {
@@ -81,15 +80,13 @@ public class HapiMigrator {
 		return myDriverType;
 	}
 
+
 	protected StringBuilder buildExecutedStatementsString(MigrationResult theMigrationResult) {
 		StringBuilder statementBuilder = new StringBuilder();
 		String lastTable = null;
 		for (BaseTask.ExecutedStatement next : theMigrationResult.executedStatements) {
 			if (!Objects.equals(lastTable, next.getTableName())) {
-				statementBuilder
-						.append("\n\n-- Table: ")
-						.append(next.getTableName())
-						.append("\n");
+				statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
 				lastTable = next.getTableName();
 			}
 
@@ -123,15 +120,12 @@ public class HapiMigrator {
 		// Lock the migration table so only one server migrates the database at once
 		try (HapiMigrationLock ignored = new HapiMigrationLock(myHapiMigrationStorageSvc)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
-			ourLog.info(
-					"{} of these {} migration tasks are new.  Executing them now.",
-					newTaskList.size(),
-					myTaskList.size());
+			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
-			try (DriverTypeEnum.ConnectionProperties connectionProperties =
-					getDriverType().newConnectionProperties(getDataSource())) {
+			try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
 				newTaskList.forEach(next -> {
+
 					next.setDriverType(getDriverType());
 					next.setDryRun(isDryRun());
 					next.setNoColumnShrink(isNoColumnShrink());
@@ -149,9 +143,7 @@ public class HapiMigrator {
 
 		if (isDryRun()) {
 			StringBuilder statementBuilder = buildExecutedStatementsString(retval);
-			ourLog.info(
-					"SQL that would be executed:\n\n***********************************\n{}***********************************",
-					statementBuilder);
+			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
 
 		return retval;
@@ -185,6 +177,7 @@ public class HapiMigrator {
 
 	private void preExecute(BaseTask theTask) {
 		myCallbacks.forEach(action -> action.preExecution(theTask));
+
 	}
 
 	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {

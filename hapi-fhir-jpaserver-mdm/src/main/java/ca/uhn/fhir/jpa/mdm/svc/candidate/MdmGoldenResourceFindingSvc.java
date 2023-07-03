@@ -67,16 +67,15 @@ public class MdmGoldenResourceFindingSvc {
 		}
 
 		if (matchedGoldenResourceCandidates.isEmpty()) {
-			// OK, so we have not found any links in the MdmLink table with us as a source. Next, let's find
-			// possible Golden Resources matches by following MDM rules.
+			//OK, so we have not found any links in the MdmLink table with us as a source. Next, let's find
+			//possible Golden Resources matches by following MDM rules.
 			matchedGoldenResourceCandidates = myFindCandidateByExampleSvc.findCandidates(theResource);
 		}
 
 		return matchedGoldenResourceCandidates;
 	}
 
-	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(
-			MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
+	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
 		IResourcePersistentId goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
 		return myMdmResourceDaoSvc.readGoldenResourceByPid(goldenResourcePid, theResourceType);
 	}

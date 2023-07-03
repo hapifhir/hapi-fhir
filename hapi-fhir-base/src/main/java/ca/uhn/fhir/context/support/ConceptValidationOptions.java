@@ -39,8 +39,8 @@ public class ConceptValidationOptions {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("inferSystem", myInferSystem)
-				.toString();
+			.append("inferSystem", myInferSystem)
+			.toString();
 	}
 
 	public boolean isValidateDisplay() {

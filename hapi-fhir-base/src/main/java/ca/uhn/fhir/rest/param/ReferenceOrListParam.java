@@ -21,7 +21,8 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
-public class ReferenceOrListParam extends BaseOrListParam<ReferenceOrListParam, ReferenceParam> {
+
+public class ReferenceOrListParam  extends BaseOrListParam<ReferenceOrListParam, ReferenceParam> {
 
 	@CoverageIgnore
 	@Override
@@ -35,4 +36,5 @@ public class ReferenceOrListParam extends BaseOrListParam<ReferenceOrListParam, 
 		add(theParameter);
 		return this;
 	}
+
 }

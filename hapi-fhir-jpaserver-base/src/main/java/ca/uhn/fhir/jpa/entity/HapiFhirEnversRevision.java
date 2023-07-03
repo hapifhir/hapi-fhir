@@ -24,8 +24,6 @@ import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
 
-import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,6 +31,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * This class exists strictly to override the default names used to generate Hibernate Envers revision table.
@@ -84,8 +84,8 @@ public class HapiFhirEnversRevision implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("myRev", myRev)
-				.append("myRevtstmp", myRevtstmp)
-				.toString();
+			.append("myRev", myRev)
+			.append("myRevtstmp", myRevtstmp)
+			.toString();
 	}
 }

@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.validation;
 
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
-import java.util.List;
 import javax.annotation.Nonnull;
 
 public interface IValidationContext<T> {
@@ -38,9 +39,10 @@ public interface IValidationContext<T> {
 	void addValidationMessage(SingleValidationMessage theMessage);
 
 	List<SingleValidationMessage> getMessages();
-
+	
 	ValidationResult toResult();
 
 	@Nonnull
 	ValidationOptions getOptions();
+
 }

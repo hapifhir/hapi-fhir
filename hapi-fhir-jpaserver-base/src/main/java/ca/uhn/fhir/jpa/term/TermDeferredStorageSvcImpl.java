@@ -84,8 +84,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	private final List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	private final List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
-	private final List<TermConceptParentChildLink> myConceptLinksToSaveLater =
-			Collections.synchronizedList(new ArrayList<>());
+	private final List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
 
 	// TODO - why is this needed? it's cumbersome to maintain; consider removing it
 	/**
@@ -96,21 +95,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 	@Autowired
 	protected ITermConceptDao myConceptDao;
-
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
-
 	@Autowired
 	protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
-
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
-
 	private boolean myProcessDeferred = true;
-
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
 
@@ -146,12 +139,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 	@Override
 	public void deleteCodeSystemForResource(ResourceTable theCodeSystemToDelete) {
-		// there are use cases (at least in tests) where the code system is not present for the resource but versions
-		// are,
-		// so, as code system deletion also deletes versions, we try the system first but if not present we also try
-		// versions
-		TermCodeSystem termCodeSystemToDelete =
-				myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
+		// there are use cases (at least in tests) where the code system is not present for the resource but versions are,
+		// so, as code system deletion also deletes versions, we try the system first but if not present we also try versions
+		TermCodeSystem termCodeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
 		if (termCodeSystemToDelete != null) {
 			termCodeSystemToDelete.setCodeSystemUri("urn:uuid:" + UUID.randomUUID());
 			myCodeSystemDao.save(termCodeSystemToDelete);
@@ -159,14 +149,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 			return;
 		}
 
-		List<TermCodeSystemVersion> codeSystemVersionsToDelete =
-				myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
+		List<TermCodeSystemVersion> codeSystemVersionsToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
 		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete) {
 			if (codeSystemVersionToDelete != null) {
 				myDeferredCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
 			}
 		}
 	}
+
 
 	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
@@ -191,35 +181,22 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		ourLog.debug("Saving {} deferred concepts...", count);
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
-			if (myCodeSystemVersionDao
-					.findById(next.getCodeSystemVersion().getPid())
-					.isPresent()) {
+			if (myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
 				try {
 					codeCount += myTermConceptDaoSvc.saveConcept(next);
 				} catch (Exception theE) {
-					ourLog.error(
-							"Exception thrown when attempting to save TermConcept {} in Code System {}",
-							next.getCode(),
-							next.getCodeSystemVersion().getCodeSystemDisplayName(),
-							theE);
+					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
+						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
 				}
 			} else {
-				ourLog.warn(
-						"Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
-						next.getCode(),
-						next.getCodeSystemVersion().getCodeSystemDisplayName(),
-						next.getCodeSystemVersion().getPid());
+				ourLog.warn("Unable to save deferred TermConcept {} because Code System {} version PID {} is no longer valid. Code system may have since been replaced.",
+					next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), next.getCodeSystemVersion().getPid());
 			}
 		}
 
 		if (codeCount > 0) {
-			ourLog.info(
-					"Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({} codes/sec)",
-					codeCount,
-					myDeferredConcepts.size(),
-					myConceptLinksToSaveLater.size(),
-					stopwatch.getMillis(),
-					stopwatch.formatThroughput(codeCount, TimeUnit.SECONDS));
+			ourLog.info("Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({} codes/sec)",
+				codeCount, myDeferredConcepts.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.formatThroughput(codeCount, TimeUnit.SECONDS));
 		}
 
 		if (codeCount == 0) {
@@ -230,18 +207,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 				assert next.getChild() != null;
 				assert next.getParent() != null;
 
-				if ((next.getChild().getId() == null
-								|| !myConceptDao
-										.findById(next.getChild().getId())
-										.isPresent())
-						|| (next.getParent().getId() == null
-								|| !myConceptDao
-										.findById(next.getParent().getId())
-										.isPresent())) {
-					ourLog.warn(
-							"Not inserting link from child {} to parent {} because it appears to have been deleted",
-							next.getParent().getCode(),
-							next.getChild().getCode());
+				if ((next.getChild().getId() == null || !myConceptDao.findById(next.getChild().getId()).isPresent())
+					|| (next.getParent().getId() == null || !myConceptDao.findById(next.getParent().getId()).isPresent())) {
+					ourLog.warn("Not inserting link from child {} to parent {} because it appears to have been deleted", next.getParent().getCode(), next.getChild().getCode());
 					continue;
 				}
 
@@ -251,12 +219,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		}
 
 		if (relCount > 0) {
-			ourLog.info(
-					"Saved {} deferred relationships ({} remain) in {}ms ({} entries/sec)",
-					relCount,
-					myConceptLinksToSaveLater.size(),
-					stopwatch.getMillis(),
-					stopwatch.formatThroughput(relCount, TimeUnit.SECONDS));
+			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({} entries/sec)",
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.formatThroughput(relCount, TimeUnit.SECONDS));
 		}
 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
@@ -311,10 +275,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	public void saveAllDeferred() {
 		TimeoutManager timeoutManager = null;
 		if (myAllowDeferredTasksTimeout) {
-			timeoutManager = new TimeoutManager(
-					TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
-					Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
-					Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+			timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
+				Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+				Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
 		}
 
 		// Don't include executing jobs here since there's no point in thrashing over and over
@@ -337,11 +300,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		}
 
 		for (int i = 0; i < 10; i++) {
-			if (!isDeferredConcepts()
-					&& !isConceptLinksToSaveLater()
-					&& !isDeferredValueSets()
-					&& !isDeferredConceptMaps()
-					&& !isDeferredCodeSystemDeletions()) {
+			if (!isDeferredConcepts() &&
+				!isConceptLinksToSaveLater() &&
+				!isDeferredValueSets() &&
+				!isDeferredConceptMaps() &&
+				!isDeferredCodeSystemDeletions()) {
 				return;
 			}
 
@@ -393,12 +356,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		myDeferredCodeSystemsDeletions.clear();
 	}
 
+
 	private void processDeferredCodeSystemVersionDeletions() {
 		for (TermCodeSystemVersion next : myDeferredCodeSystemVersionsDeletions) {
 			deleteTermCodeSystemVersionOffline(next.getPid());
 		}
 		myDeferredCodeSystemVersionsDeletions.clear();
 	}
+
 
 	private void deleteTermCodeSystemVersionOffline(Long theCodeSystemVersionPid) {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -421,6 +386,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		myJobExecutions.add(response.getInstanceId());
 	}
+
 
 	@Override
 	public boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs) {
@@ -501,6 +467,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		myTransactionMgr = theTxManager;
 	}
 
+
 	@VisibleForTesting
 	void setTermConceptDaoSvc(TermConceptDaoSvc theTermConceptDaoSvc) {
 		myTermConceptDaoSvc = theTermConceptDaoSvc;
@@ -561,14 +528,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("myDeferredCodeSystemsDeletions", myDeferredCodeSystemsDeletions.size())
-				.append("myDeferredCodeSystemVersionsDeletions", myDeferredCodeSystemVersionsDeletions.size())
-				.append("myDeferredConcepts", myDeferredConcepts.size())
-				.append("myDeferredValueSets", myDeferredValueSets.size())
-				.append("myDeferredConceptMaps", myDeferredConceptMaps.size())
-				.append("myConceptLinksToSaveLater", myConceptLinksToSaveLater.size())
-				.append("myJobExecutions", myJobExecutions.size())
-				.append("myProcessDeferred", myProcessDeferred)
-				.toString();
+			.append("myDeferredCodeSystemsDeletions", myDeferredCodeSystemsDeletions.size())
+			.append("myDeferredCodeSystemVersionsDeletions", myDeferredCodeSystemVersionsDeletions.size())
+			.append("myDeferredConcepts", myDeferredConcepts.size())
+			.append("myDeferredValueSets", myDeferredValueSets.size())
+			.append("myDeferredConceptMaps", myDeferredConceptMaps.size())
+			.append("myConceptLinksToSaveLater", myConceptLinksToSaveLater.size())
+			.append("myJobExecutions", myJobExecutions.size())
+			.append("myProcessDeferred", myProcessDeferred)
+			.toString();
 	}
 }

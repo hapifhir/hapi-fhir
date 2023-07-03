@@ -45,8 +45,7 @@ public class PartitionSettings {
 	 *
 	 * @since 6.6.0
 	 */
-	public void setAlwaysOpenNewTransactionForDifferentPartition(
-			boolean theAlwaysOpenNewTransactionForDifferentPartition) {
+	public void setAlwaysOpenNewTransactionForDifferentPartition(boolean theAlwaysOpenNewTransactionForDifferentPartition) {
 		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
 	}
 
@@ -159,8 +158,7 @@ public class PartitionSettings {
 	 * If enabled the JPA server will allow unqualified cross partition reference
 	 */
 	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(
-				PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 	public enum CrossPartitionReferenceMode {
@@ -175,5 +173,7 @@ public class PartitionSettings {
 		 * will be managed by the database.
 		 */
 		ALLOWED_UNQUALIFIED,
+
 	}
+
 }

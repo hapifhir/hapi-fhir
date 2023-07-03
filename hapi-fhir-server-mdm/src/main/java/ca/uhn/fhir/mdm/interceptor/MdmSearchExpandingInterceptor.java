@@ -23,8 +23,8 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -84,24 +84,22 @@ public class MdmSearchExpandingInterceptor {
 				ReferenceParam refParam = (ReferenceParam) iQueryParameterType;
 				if (refParam.isMdmExpand()) {
 					ourLog.debug("Found a reference parameter to expand: {}", refParam);
-					// First, attempt to expand as a source resource.
-					Set<String> expandedResourceIds =
-							myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
+					//First, attempt to expand as a source resource.
+					Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(new IdDt(refParam.getValue()));
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
-						expandedResourceIds =
-								myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
+						expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
 					}
 
-					// Rebuild the search param list.
+					//Rebuild the search param list.
 					if (!expandedResourceIds.isEmpty()) {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
 						expandedResourceIds.stream()
-								.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
-								.map(ReferenceParam::new)
-								.forEach(toAdd::add);
+							.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
+							.map(ReferenceParam::new)
+							.forEach(toAdd::add);
 					}
 				}
 			} else if (theParamName.equalsIgnoreCase("_id")) {
@@ -129,10 +127,9 @@ public class MdmSearchExpandingInterceptor {
 	 * @param theAddList
 	 * @param theRemoveList
 	 */
-	private void expandIdParameter(
-			IQueryParameterType theIdParameter,
-			List<IQueryParameterType> theAddList,
-			List<IQueryParameterType> theRemoveList) {
+	private void expandIdParameter(IQueryParameterType theIdParameter,
+											 List<IQueryParameterType> theAddList,
+											 List<IQueryParameterType> theRemoveList) {
 		// id parameters can either be StringParam (for $everything operation)
 		// or TokenParam (for searches)
 		// either case, we want to expand it out and grab all related resources
@@ -151,9 +148,8 @@ public class MdmSearchExpandingInterceptor {
 
 		if (id == null) {
 			// in case the _id paramter type is different from the above
-			ourLog.warn(
-					"_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
-					theIdParameter.getClass().getSimpleName());
+			ourLog.warn("_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
+				theIdParameter.getClass().getSimpleName());
 		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
@@ -163,7 +159,7 @@ public class MdmSearchExpandingInterceptor {
 				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId((IdDt) id);
 			}
 
-			// Rebuild
+			//Rebuild
 			if (!expandedResourceIds.isEmpty()) {
 				ourLog.debug("_id parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 
@@ -171,7 +167,9 @@ public class MdmSearchExpandingInterceptor {
 				theRemoveList.add(theIdParameter);
 
 				// add in all the linked values
-				expandedResourceIds.stream().map(creator::create).forEach(theAddList::add);
+				expandedResourceIds.stream()
+					.map(creator::create)
+					.forEach(theAddList::add);
 			}
 		}
 		// else - no expansion required

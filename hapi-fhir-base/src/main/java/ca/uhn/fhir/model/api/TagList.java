@@ -34,7 +34,7 @@ import java.util.Set;
 /**
  * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of
  * added tags will be consistent, but duplicates will not be preserved.
- *
+ * 
  * <p>
  * <b>Thread safety:</b> This class is not thread safe
  * </p>
@@ -101,7 +101,7 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 
 	/**
 	 * Add a new tag instance
-	 *
+	 * 
 	 * @param theScheme
 	 *           The tag scheme (the system)
 	 * @param theTerm
@@ -118,7 +118,7 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 
 	/**
 	 * Add a new tag instance
-	 *
+	 * 
 	 * @param theScheme
 	 *           The tag scheme
 	 * @param theTerm
@@ -153,13 +153,18 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		TagList other = (TagList) obj;
 		if (myTagSet == null) {
-			if (other.myTagSet != null) return false;
-		} else if (!myTagSet.equals(other.myTagSet)) return false;
+			if (other.myTagSet != null)
+				return false;
+		} else if (!myTagSet.equals(other.myTagSet))
+			return false;
 		return true;
 	}
 
@@ -285,4 +290,5 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	public void setUserData(String theName, Object theValue) {
 		throw new UnsupportedOperationException(Msg.code(1898));
 	}
+
 }

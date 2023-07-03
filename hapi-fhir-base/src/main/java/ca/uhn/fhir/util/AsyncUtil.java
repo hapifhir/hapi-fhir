@@ -33,7 +33,8 @@ public class AsyncUtil {
 	/**
 	 * Non instantiable
 	 */
-	private AsyncUtil() {}
+	private AsyncUtil() {
+	}
 
 	/**
 	 * Calls Thread.sleep and if an InterruptedException occurs, logs a warning but otherwise continues
@@ -52,8 +53,7 @@ public class AsyncUtil {
 		}
 	}
 
-	public static boolean awaitLatchAndThrowInternalErrorExceptionOnInterrupt(
-			CountDownLatch theInitialCollectionLatch, long theTime, TimeUnit theTimeUnit) {
+	public static boolean awaitLatchAndThrowInternalErrorExceptionOnInterrupt(CountDownLatch theInitialCollectionLatch, long theTime, TimeUnit theTimeUnit) {
 		try {
 			return theInitialCollectionLatch.await(theTime, theTimeUnit);
 		} catch (InterruptedException e) {
@@ -62,8 +62,7 @@ public class AsyncUtil {
 		}
 	}
 
-	public static boolean awaitLatchAndIgnoreInterrupt(
-			CountDownLatch theInitialCollectionLatch, long theTime, TimeUnit theTimeUnit) {
+	public static boolean awaitLatchAndIgnoreInterrupt(CountDownLatch theInitialCollectionLatch, long theTime, TimeUnit theTimeUnit) {
 		try {
 			return theInitialCollectionLatch.await(theTime, theTimeUnit);
 		} catch (InterruptedException e) {

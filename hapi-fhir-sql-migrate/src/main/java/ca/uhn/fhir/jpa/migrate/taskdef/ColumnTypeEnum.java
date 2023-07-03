@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 public enum ColumnTypeEnum {
+
 	LONG,
 	STRING,
 	DATE_ONLY,

@@ -9,9 +9,9 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * This class is a wrapper for an existing {@link @IContextValidationSupport} object, intended to be
@@ -73,35 +73,17 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	}
 
 	@Override
-	public CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
-		return myWrap.validateCode(
-				theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		return myWrap.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override
-	public IValidationSupport.CodeValidationResult validateCodeInValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			ConceptValidationOptions theValidationOptions,
-			String theCodeSystem,
-			String theCode,
-			String theDisplay,
-			@Nonnull IBaseResource theValueSet) {
-		return myWrap.validateCodeInValueSet(
-				theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		return myWrap.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 		return myWrap.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
 	}
 
@@ -111,10 +93,7 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	}
 
 	@Override
-	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			ValueSetExpansionOptions theExpansionOptions,
-			@Nonnull IBaseResource theValueSetToExpand) {
+	public IValidationSupport.ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return myWrap.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 	}
 
@@ -128,18 +107,14 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 		return myWrap.fetchValueSet(theUri);
 	}
 
+
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		return myWrap.fetchStructureDefinition(theUrl);
 	}
 
 	@Override
-	public IBaseResource generateSnapshot(
-			ValidationSupportContext theValidationSupportContext,
-			IBaseResource theInput,
-			String theUrl,
-			String theWebUrl,
-			String theProfileName) {
+	public IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return myWrap.generateSnapshot(theValidationSupportContext, theInput, theUrl, theWebUrl, theProfileName);
 	}
 

@@ -45,9 +45,9 @@ public class PartTypeAndPartName {
 		PartTypeAndPartName that = (PartTypeAndPartName) theO;
 
 		return new EqualsBuilder()
-				.append(myPartType, that.myPartType)
-				.append(myPartName, that.myPartName)
-				.isEquals();
+			.append(myPartType, that.myPartType)
+			.append(myPartName, that.myPartName)
+			.isEquals();
 	}
 
 	public String getPartName() {
@@ -60,14 +60,17 @@ public class PartTypeAndPartName {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myPartType).append(myPartName).toHashCode();
+		return new HashCodeBuilder(17, 37)
+			.append(myPartType)
+			.append(myPartName)
+			.toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-				.append("partType", myPartType)
-				.append("partName", myPartName)
-				.toString();
+			.append("partType", myPartType)
+			.append("partName", myPartName)
+			.toString();
 	}
 }

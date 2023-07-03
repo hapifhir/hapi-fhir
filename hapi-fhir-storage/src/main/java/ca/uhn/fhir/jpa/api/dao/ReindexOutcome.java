@@ -39,4 +39,5 @@ public class ReindexOutcome {
 		}
 		myWarnings.add(theWarning);
 	}
+
 }

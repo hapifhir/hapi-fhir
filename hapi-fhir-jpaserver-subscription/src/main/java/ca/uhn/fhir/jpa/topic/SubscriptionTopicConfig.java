@@ -37,8 +37,7 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	SubscriptionTopicSupport subscriptionTopicSupport(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
+	SubscriptionTopicSupport subscriptionTopicSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
 		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
 	}
 
@@ -53,8 +52,7 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(
-			FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
+	SubscriptionTopicValidatingInterceptor subscriptionTopicValidatingInterceptor(FhirContext theFhirContext, SubscriptionQueryValidator theSubscriptionQueryValidator) {
 		return new SubscriptionTopicValidatingInterceptor(theFhirContext, theSubscriptionQueryValidator);
 	}
 }

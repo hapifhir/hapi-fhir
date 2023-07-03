@@ -34,4 +34,5 @@ public class BulkExportJobConfig {
 	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
 		return new MdmExpansionCacheSvc();
 	}
+
 }

@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, profiles, etc.)
  *
@@ -83,10 +84,7 @@ public class FhirValidator {
 		}
 	}
 
-	private void addOrRemoveValidator(
-			boolean theValidateAgainstStandardSchema,
-			Class<? extends IValidatorModule> type,
-			IValidatorModule theInstance) {
+	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidatorModule> type, IValidatorModule theInstance) {
 		if (theValidateAgainstStandardSchema) {
 			boolean found = haveValidatorOfType(type);
 			if (!found) {
@@ -125,8 +123,7 @@ public class FhirValidator {
 	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
 	public synchronized FhirValidator setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
-		addOrRemoveValidator(
-				theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
+		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
 		return this;
 	}
 
@@ -148,11 +145,9 @@ public class FhirValidator {
 	 *
 	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
-	public synchronized FhirValidator setValidateAgainstStandardSchematron(
-			boolean theValidateAgainstStandardSchematron) {
+	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
 		if (theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
-			throw new IllegalArgumentException(
-					Msg.code(1970) + myContext.getLocalizer().getMessage(I18N_KEY_NO_PH_ERROR));
+			throw new IllegalArgumentException(Msg.code(1970) + myContext.getLocalizer().getMessage(I18N_KEY_NO_PH_ERROR));
 		}
 		if (!theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
 			return this;
@@ -193,6 +188,7 @@ public class FhirValidator {
 		myValidators = newValidators;
 	}
 
+
 	private void applyDefaultValidators() {
 		if (myValidators.isEmpty()) {
 			setValidateAgainstStandardSchema(true);
@@ -201,6 +197,7 @@ public class FhirValidator {
 			}
 		}
 	}
+
 
 	/**
 	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
@@ -234,10 +231,8 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
-		IValidationContext<IBaseResource> validationContext =
-				ValidationContext.forText(myContext, theResource, theOptions);
-		Function<ValidationResult, ValidationResult> callback =
-				result -> invokeValidationCompletedHooks(null, theResource, result);
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forText(myContext, theResource, theOptions);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(null, theResource, result);
 		return doValidate(validationContext, theOptions, callback);
 	}
 
@@ -251,23 +246,18 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(IBaseResource theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
-		IValidationContext<IBaseResource> validationContext =
-				ValidationContext.forResource(myContext, theResource, theOptions);
-		Function<ValidationResult, ValidationResult> callback =
-				result -> invokeValidationCompletedHooks(theResource, null, result);
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forResource(myContext, theResource, theOptions);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(theResource, null, result);
 		return doValidate(validationContext, theOptions, callback);
 	}
 
-	private ValidationResult doValidate(
-			IValidationContext<IBaseResource> theValidationContext,
-			ValidationOptions theOptions,
-			Function<ValidationResult, ValidationResult> theValidationCompletionCallback) {
+	private ValidationResult doValidate(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions,
+													Function<ValidationResult, ValidationResult> theValidationCompletionCallback) {
 		applyDefaultValidators();
 
 		ValidationResult result;
-		if (myConcurrentBundleValidation
-				&& theValidationContext.getResource() instanceof IBaseBundle
-				&& myExecutorService != null) {
+		if (myConcurrentBundleValidation && theValidationContext.getResource() instanceof IBaseBundle
+			&& myExecutorService != null) {
 			result = validateBundleEntriesConcurrently(theValidationContext, theOptions);
 		} else {
 			result = validateResource(theValidationContext);
@@ -276,32 +266,27 @@ public class FhirValidator {
 		return theValidationCompletionCallback.apply(result);
 	}
 
-	private ValidationResult validateBundleEntriesConcurrently(
-			IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions) {
-		List<IBaseResource> entries =
-				BundleUtil.toListOfResources(myContext, (IBaseBundle) theValidationContext.getResource());
+	private ValidationResult validateBundleEntriesConcurrently(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions) {
+		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, (IBaseBundle) theValidationContext.getResource());
 		// Async validation tasks
 		List<ConcurrentValidationTask> validationTasks = IntStream.range(0, entries.size())
-				.mapToObj(index -> {
-					IBaseResource resourceToValidate;
-					IBaseResource entry = entries.get(index);
+			.mapToObj(index -> {
+				IBaseResource resourceToValidate;
+				IBaseResource entry = entries.get(index);
 
-					if (mySkipContainedReferenceValidation) {
-						resourceToValidate = withoutContainedResources(entry);
-					} else {
-						resourceToValidate = entry;
-					}
+				if (mySkipContainedReferenceValidation) {
+					resourceToValidate = withoutContainedResources(entry);
+				} else {
+					resourceToValidate = entry;
+				}
 
-					String entryPathPrefix =
-							String.format("Bundle.entry[%d].resource.ofType(%s)", index, resourceToValidate.fhirType());
-					Future<ValidationResult> future = myExecutorService.submit(() -> {
-						IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(
-								theValidationContext.getFhirContext(), resourceToValidate, theOptions);
-						return validateResource(entryValidationContext);
-					});
-					return new ConcurrentValidationTask(entryPathPrefix, future);
-				})
-				.collect(Collectors.toList());
+				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, resourceToValidate.fhirType());
+				Future<ValidationResult> future = myExecutorService.submit(() -> {
+					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), resourceToValidate, theOptions);
+					return validateResource(entryValidationContext);
+				});
+				return new ConcurrentValidationTask(entryPathPrefix, future);
+			}).collect(Collectors.toList());
 
 		List<SingleValidationMessage> validationMessages = buildValidationMessages(validationTasks);
 		return new ValidationResult(myContext, validationMessages);
@@ -324,26 +309,26 @@ public class FhirValidator {
 				ValidationResult result = validationTask.getFuture().get();
 				final String bundleEntryPathPrefix = validationTask.getResourcePathPrefix();
 				List<SingleValidationMessage> messages = result.getMessages().stream()
-						.map(message -> {
-							String currentPath;
+					.map(message -> {
+						String currentPath;
 
-							String locationString = StringUtils.defaultIfEmpty(message.getLocationString(), "");
+						String locationString = StringUtils.defaultIfEmpty(message.getLocationString(), "");
 
-							int dotIndex = locationString.indexOf('.');
-							if (dotIndex >= 0) {
-								currentPath = locationString.substring(dotIndex);
+						int dotIndex = locationString.indexOf('.');
+						if (dotIndex >= 0) {
+							currentPath = locationString.substring(dotIndex);
+						} else {
+							if (isBlank(bundleEntryPathPrefix) || isBlank(locationString)) {
+								currentPath = locationString;
 							} else {
-								if (isBlank(bundleEntryPathPrefix) || isBlank(locationString)) {
-									currentPath = locationString;
-								} else {
-									currentPath = "." + locationString;
-								}
+								currentPath = "." + locationString;
 							}
+						}
 
-							message.setLocationString(bundleEntryPathPrefix + currentPath);
-							return message;
-						})
-						.collect(Collectors.toList());
+						message.setLocationString(bundleEntryPathPrefix + currentPath);
+						return message;
+					})
+					.collect(Collectors.toList());
 				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
@@ -359,16 +344,14 @@ public class FhirValidator {
 		return theValidationContext.toResult();
 	}
 
-	private ValidationResult invokeValidationCompletedHooks(
-			IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
+	private ValidationResult invokeValidationCompletedHooks(IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
 		if (myInterceptorBroadcaster != null) {
 			if (myInterceptorBroadcaster.hasHooks(Pointcut.VALIDATION_COMPLETED)) {
 				HookParams params = new HookParams()
-						.add(IBaseResource.class, theResourceParsed)
-						.add(String.class, theResourceRaw)
-						.add(ValidationResult.class, theValidationResult);
-				Object newResult =
-						myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.VALIDATION_COMPLETED, params);
+					.add(IBaseResource.class, theResourceParsed)
+					.add(String.class, theResourceRaw)
+					.add(ValidationResult.class, theValidationResult);
+				Object newResult = myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.VALIDATION_COMPLETED, params);
 				if (newResult != null) {
 					theValidationResult = (ValidationResult) newResult;
 				}
@@ -395,6 +378,7 @@ public class FhirValidator {
 	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
 	 * only the resources in its entries.
 	 */
+
 	public boolean isConcurrentBundleValidation() {
 		return myConcurrentBundleValidation;
 	}
@@ -443,4 +427,5 @@ public class FhirValidator {
 			return myFuture;
 		}
 	}
+
 }

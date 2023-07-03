@@ -19,6 +19,8 @@
  */
 package org.hl7.fhir.instance.model.api;
 
+
+
 import javax.annotation.Nullable;
 
 public interface IPrimitiveType<T> extends IBaseDatatype {
@@ -40,4 +42,5 @@ public interface IPrimitiveType<T> extends IBaseDatatype {
 	static <T> T toValueOrNull(@Nullable IPrimitiveType<T> thePrimitiveType) {
 		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
 	}
+
 }

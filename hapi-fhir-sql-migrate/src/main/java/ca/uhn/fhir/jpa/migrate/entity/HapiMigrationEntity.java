@@ -25,12 +25,12 @@ import org.hibernate.annotations.GenericGenerator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
 // so these annotations are for informational purposes only
@@ -44,11 +44,8 @@ public class HapiMigrationEntity {
 	public static final int CREATE_TABLE_PID = -1;
 	public static final String INITIAL_RECORD_DESCRIPTION = "<< HAPI FHIR Schema History table created >>";
 	public static final String INITIAL_RECORD_SCRIPT = "HAPI FHIR";
-
 	@Id
-	@GenericGenerator(
-			name = "SEQ_FLY_HFJ_MIGRATION",
-			strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@GenericGenerator(name = "SEQ_FLY_HFJ_MIGRATION", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_FLY_HFJ_MIGRATION")
 	@Column(name = "INSTALLED_RANK")
 	private Integer myPid;
@@ -212,11 +209,7 @@ public class HapiMigrationEntity {
 				ps.setInt(6, getChecksum());
 			}
 			ps.setString(7, getInstalledBy());
-			ps.setDate(
-					8,
-					getInstalledOn() != null
-							? new java.sql.Date(getInstalledOn().getTime())
-							: null);
+			ps.setDate(8, getInstalledOn() != null ? new java.sql.Date(getInstalledOn().getTime()) : null);
 			ps.setInt(9, getExecutionTime());
 			ps.setBoolean(10, getSuccess());
 		};

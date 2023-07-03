@@ -20,17 +20,18 @@ package ca.uhn.fhir.cr.repo;
  * #L%
  */
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
@@ -38,32 +39,23 @@ import javax.annotation.Nonnull;
  */
 public class SearchConverter {
 	// hardcoded list from FHIR specs: https://www.hl7.org/fhir/search.html
-	private final List<String> searchResultParameters = Arrays.asList(
-			"_sort",
-			"_count",
-			"_include",
-			"_revinclude",
-			"_summary",
-			"_total",
-			"_elements",
-			"_contained",
-			"_containedType");
+	private final List<String> searchResultParameters = Arrays.asList("_sort", "_count", "_include",
+			"_revinclude", "_summary", "_total", "_elements", "_contained", "_containedType");
 	public final Map<String, List<IQueryParameterType>> separatedSearchParameters = new HashMap<>();
 	public final Map<String, List<IQueryParameterType>> separatedResultParameters = new HashMap<>();
 	public final SearchParameterMap searchParameterMap = new SearchParameterMap();
 	public final Map<String, String[]> resultParameters = new HashMap<>();
 
-	void convertParameters(Map<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
-		if (theParameters == null) {
-			return;
-		}
+	void convertParameters(Map<String, List<IQueryParameterType>> theParameters,
+			FhirContext theFhirContext) {
+		if (theParameters == null) { return; }
 		separateParameterTypes(theParameters);
 		convertToSearchParameterMap(separatedSearchParameters);
 		convertToStringMap(separatedResultParameters, theFhirContext);
 	}
 
-	public void convertToStringMap(
-			@Nonnull Map<String, List<IQueryParameterType>> theParameters, @Nonnull FhirContext theFhirContext) {
+	public void convertToStringMap(@Nonnull Map<String, List<IQueryParameterType>> theParameters,
+			@Nonnull FhirContext theFhirContext) {
 		for (var entry : theParameters.entrySet()) {
 			String[] values = new String[entry.getValue().size()];
 			for (int i = 0; i < entry.getValue().size(); i++) {
@@ -94,7 +86,8 @@ public class SearchConverter {
 		}
 	}
 
-	public void separateParameterTypes(@Nonnull Map<String, List<IQueryParameterType>> theParameters) {
+	public void separateParameterTypes(
+			@Nonnull Map<String, List<IQueryParameterType>> theParameters) {
 		for (var entry : theParameters.entrySet()) {
 			if (isSearchResultParameter(entry.getKey())) {
 				separatedResultParameters.put(entry.getKey(), entry.getValue());

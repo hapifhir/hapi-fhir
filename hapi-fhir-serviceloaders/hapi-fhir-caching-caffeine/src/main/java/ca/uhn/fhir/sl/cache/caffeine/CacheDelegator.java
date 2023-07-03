@@ -42,9 +42,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public Map<K, V> getAllPresent(Iterable<? extends K> keys) {
-		return cache.getAllPresent(keys);
-	}
+	public Map<K, V> getAllPresent(Iterable<? extends K> keys) { return cache.getAllPresent(keys); }
 
 	@Override
 	public void put(K key, V value) {
@@ -57,12 +55,10 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void invalidate(K key) {
-		cache.invalidate(key);
-	}
+	public void invalidate(K key) { cache.invalidate(key); }
 
 	@Override
-	public void invalidateAll(Iterable<? extends K> keys) {
+	public void invalidateAll(Iterable<? extends K> keys)  {
 		cache.invalidateAll(keys);
 	}
 
@@ -77,7 +73,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 	}
 
 	@Override
-	public void cleanUp() {
+	public void cleanUp(){
 		cache.cleanUp();
 	}
 }

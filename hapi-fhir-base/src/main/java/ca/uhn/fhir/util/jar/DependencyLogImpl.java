@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.util.jar;
 
-import ca.uhn.fhir.util.XmlUtil;
-
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+
+import ca.uhn.fhir.util.XmlUtil;
 
 public class DependencyLogImpl implements IDependencyLog {
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");
@@ -35,7 +35,7 @@ public class DependencyLogImpl implements IDependencyLog {
 	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
 	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
-
+	
 	@Override
 	public void logStaxImplementation(Class<?> theClass) {
 		try {
@@ -69,9 +69,7 @@ public class DependencyLogImpl implements IDependencyLog {
 					version = attrs.getValue(BUNDLE_VERSION);
 				}
 				if (ourLog.isDebugEnabled()) {
-					ourLog.debug(
-							"FHIR XML procesing will use StAX implementation at {}\n  Title:         {}\n  Symbolic name: {}\n  Vendor:        {}\n  Version:       {}",
-							new Object[] {rootUrl, title, symbolicName, vendor, version});
+					ourLog.debug("FHIR XML procesing will use StAX implementation at {}\n  Title:         {}\n  Symbolic name: {}\n  Vendor:        {}\n  Version:       {}", new Object[] { rootUrl, title, symbolicName, vendor, version } );
 				} else {
 					ourLog.info("FHIR XML procesing will use StAX implementation '{}' version '{}'", title, version);
 				}
@@ -80,7 +78,7 @@ public class DependencyLogImpl implements IDependencyLog {
 			ourLog.info("Unable to determine StAX implementation: " + e.getMessage());
 		}
 	}
-
+	
 	private static URL getRootUrlForClass(Class<?> cls) {
 		ClassLoader classLoader = cls.getClassLoader();
 		String resource = cls.getName().replace('.', '/') + ".class";
@@ -97,11 +95,7 @@ public class DependencyLogImpl implements IDependencyLog {
 		String file = url.getFile();
 		if (file.endsWith(resource)) {
 			try {
-				return new URL(
-						url.getProtocol(),
-						url.getHost(),
-						url.getPort(),
-						file.substring(0, file.length() - resource.length()));
+				return new URL(url.getProtocol(), url.getHost(), url.getPort(), file.substring(0, file.length() - resource.length()));
 			} catch (MalformedURLException ex) {
 				return null;
 			}

@@ -29,12 +29,7 @@ import java.util.List;
 
 @Schema(description = "Represents an NPM package deletion response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(
-		creatorVisibility = JsonAutoDetect.Visibility.NONE,
-		fieldVisibility = JsonAutoDetect.Visibility.NONE,
-		getterVisibility = JsonAutoDetect.Visibility.NONE,
-		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-		setterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageDeleteOutcomeJson {
 
 	@JsonProperty("messages")
@@ -46,4 +41,5 @@ public class PackageDeleteOutcomeJson {
 		}
 		return myMessage;
 	}
+
 }

@@ -43,7 +43,6 @@ public interface IBaseEnumFactory<T extends Enum<?>> extends Serializable {
 	/**
 	 * Get the system for a given enum value
 	 */
-	default String toSystem(T theValue) {
-		return null;
-	}
+	default String toSystem(T theValue) { return null; }
+
 }

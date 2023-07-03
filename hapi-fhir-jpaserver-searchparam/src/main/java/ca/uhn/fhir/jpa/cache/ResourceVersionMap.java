@@ -41,7 +41,6 @@ public class ResourceVersionMap {
 	private final Set<IIdType> mySourceIds = new HashSet<>();
 	// Key versionless id, value version
 	private final Map<IIdType, Long> myMap = new HashMap<>();
-
 	private ResourceVersionMap() {}
 
 	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource> theEntities) {

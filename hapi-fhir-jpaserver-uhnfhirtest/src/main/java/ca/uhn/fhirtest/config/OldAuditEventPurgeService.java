@@ -23,10 +23,8 @@ public class OldAuditEventPurgeService {
 
 	@Autowired
 	private ISchedulerService mySchedulerSvc;
-
 	@Autowired
 	private IDeleteExpungeJobSubmitter myDeleteExpungeSubmitter;
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -62,4 +60,5 @@ public class OldAuditEventPurgeService {
 			mySvc.doPass();
 		}
 	}
+
 }

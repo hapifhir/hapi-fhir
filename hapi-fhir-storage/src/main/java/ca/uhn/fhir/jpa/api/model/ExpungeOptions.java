@@ -31,11 +31,11 @@ public class ExpungeOptions {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("limit", myLimit)
-				.append("oldVersions", myExpungeOldVersions)
-				.append("deletedResources", myExpungeDeletedResources)
-				.append("everything", myExpungeEverything)
-				.toString();
+			.append("limit", myLimit)
+			.append("oldVersions", myExpungeOldVersions)
+			.append("deletedResources", myExpungeDeletedResources)
+			.append("everything", myExpungeEverything)
+			.toString();
 	}
 
 	/**

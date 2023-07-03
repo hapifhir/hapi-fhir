@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Collection;
 import java.util.List;
 
+
 /**
  * In DSTU3, the near-distance search parameter is separate from near.  In this utility method,
  * we search for near-distance search parameters and if we find any, remove them from the list
@@ -66,8 +67,7 @@ public class Dstu3DistanceHelper {
 					ReferenceParam referenceParam = (ReferenceParam) param;
 					if (Location.SP_NEAR_DISTANCE.equals(referenceParam.getChain())) {
 						if (retval != null) {
-							throw new IllegalArgumentException(Msg.code(494) + "Only one " + Location.SP_NEAR_DISTANCE
-									+ " parameter may be present");
+							throw new IllegalArgumentException(Msg.code(494) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 						} else {
 							retval = referenceParam;
 							orParamToRemove = param;
@@ -94,13 +94,12 @@ public class Dstu3DistanceHelper {
 		// No near-distance Param
 		if (sum == 0) {
 			return null;
-			// A single near-distance Param
+		// A single near-distance Param
 		} else if (sum == 1) {
 			return (QuantityParam) theParamAndList.get(0).get(0);
-			// Too many near-distance params
+		// Too many near-distance params
 		} else {
-			throw new IllegalArgumentException(
-					Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+			throw new IllegalArgumentException(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 	}
 }

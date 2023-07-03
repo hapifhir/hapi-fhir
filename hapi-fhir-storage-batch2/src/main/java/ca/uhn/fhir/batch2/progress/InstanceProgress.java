@@ -67,9 +67,8 @@ public class InstanceProgress {
 	}
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
-		// Update the status map first.
-		Map<WorkChunkStatusEnum, Integer> statusToCountMap =
-				myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
+		//Update the status map first.
+		Map<WorkChunkStatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
 		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
 
 		switch (theChunk.getStatus()) {
@@ -95,15 +94,13 @@ public class InstanceProgress {
 	}
 
 	private void updateLatestEndTime(WorkChunk theChunk) {
-		if (theChunk.getEndTime() != null
-				&& (myLatestEndTime == null || myLatestEndTime.before(theChunk.getEndTime()))) {
+		if (theChunk.getEndTime() != null && (myLatestEndTime == null || myLatestEndTime.before(theChunk.getEndTime()))) {
 			myLatestEndTime = theChunk.getEndTime();
 		}
 	}
 
 	private void updateEarliestTime(WorkChunk theChunk) {
-		if (theChunk.getStartTime() != null
-				&& (myEarliestStartTime == null || myEarliestStartTime.after(theChunk.getStartTime()))) {
+		if (theChunk.getStartTime() != null && (myEarliestStartTime == null || myEarliestStartTime.after(theChunk.getStartTime()))) {
 			myEarliestStartTime = theChunk.getStartTime();
 		}
 	}
@@ -163,8 +160,7 @@ public class InstanceProgress {
 				double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
 				theInstance.setCombinedRecordsProcessedPerSecond(throughput);
 
-				String estimatedTimeRemaining =
-						StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, getChunkCount(), elapsedTime);
+				String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, getChunkCount(), elapsedTime);
 				theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
 			}
 		}
@@ -176,13 +172,8 @@ public class InstanceProgress {
 		}
 
 		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
-		ourLog.trace(
-				"Statistics for job {}: complete/in-progress/errored/failed chunk count {}/{}/{}/{}",
-				theInstance.getInstanceId(),
-				myCompleteChunkCount,
-				myIncompleteChunkCount,
-				myErroredChunkCount,
-				myFailedChunkCount);
+		ourLog.trace("Statistics for job {}: complete/in-progress/errored/failed chunk count {}/{}/{}/{}",
+			theInstance.getInstanceId(), myCompleteChunkCount, myIncompleteChunkCount, myErroredChunkCount, myFailedChunkCount);
 	}
 
 	private int getChunkCount() {
@@ -205,16 +196,18 @@ public class InstanceProgress {
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this)
-				.append("myIncompleteChunkCount", myIncompleteChunkCount)
-				.append("myCompleteChunkCount", myCompleteChunkCount)
-				.append("myErroredChunkCount", myErroredChunkCount)
-				.append("myFailedChunkCount", myFailedChunkCount)
-				.append("myErrormessage", myErrormessage)
-				.append("myRecordsProcessed", myRecordsProcessed);
+			.append("myIncompleteChunkCount", myIncompleteChunkCount)
+			.append("myCompleteChunkCount", myCompleteChunkCount)
+			.append("myErroredChunkCount", myErroredChunkCount)
+			.append("myFailedChunkCount", myFailedChunkCount)
+			.append("myErrormessage", myErrormessage)
+			.append("myRecordsProcessed", myRecordsProcessed);
 
 		builder.append("myStepToStatusCountMap", myStepToStatusCountMap);
 
 		return builder.toString();
+
+
 	}
 
 	public StatusEnum getNewStatus() {

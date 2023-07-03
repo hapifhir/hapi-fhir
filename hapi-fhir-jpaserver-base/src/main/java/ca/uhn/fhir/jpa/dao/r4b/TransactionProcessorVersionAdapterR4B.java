@@ -34,8 +34,7 @@ import org.hl7.fhir.r4b.model.Resource;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionProcessorVersionAdapterR4B
-		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+public class TransactionProcessorVersionAdapterR4B implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
 	@Override
 	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
@@ -65,13 +64,12 @@ public class TransactionProcessorVersionAdapterR4B
 	}
 
 	@Override
-	public void populateEntryWithOperationOutcome(
-			BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
+	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue()
-				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setDiagnostics(theCaughtEx.getMessage())
-				.setCode(OperationOutcome.IssueType.EXCEPTION);
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 
@@ -115,6 +113,7 @@ public class TransactionProcessorVersionAdapterR4B
 	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
 		return theEntry.getFullUrl();
 	}
+
 
 	@Override
 	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
@@ -170,4 +169,5 @@ public class TransactionProcessorVersionAdapterR4B
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
 	}
+
 }

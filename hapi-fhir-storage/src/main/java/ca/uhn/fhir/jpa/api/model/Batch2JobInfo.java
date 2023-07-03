@@ -121,4 +121,5 @@ public class Batch2JobInfo {
 	public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
 		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
 	}
+
 }

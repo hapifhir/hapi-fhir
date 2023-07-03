@@ -25,10 +25,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
@@ -130,8 +130,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return (List<IBaseResource>)
-				myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
+		return (List<IBaseResource>) myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
 	}
 
 	@Override
@@ -171,6 +170,8 @@ public class SimpleBundleProvider implements IBundleProvider {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("mySize", mySize).toString();
+		return new ToStringBuilder(this)
+			.append("mySize", mySize)
+			.toString();
 	}
 }

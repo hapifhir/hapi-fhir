@@ -49,21 +49,11 @@ public class JobInstanceStatusUpdater {
 			return false;
 		}
 		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
-			ourLog.error(
-					"Ignoring illegal state transition for job instance {} of type {} from {} to {}",
-					theJobInstance.getInstanceId(),
-					theJobInstance.getJobDefinitionId(),
-					origStatus,
-					theNewStatus);
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 			return false;
 		}
 		theJobInstance.setStatus(theNewStatus);
-		ourLog.debug(
-				"Updating job instance {} of type {} from {} to {}",
-				theJobInstance.getInstanceId(),
-				theJobInstance.getJobDefinitionId(),
-				origStatus,
-				theNewStatus);
+		ourLog.debug("Updating job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 		handleStatusChange(theJobInstance);
 
 		return true;
@@ -90,10 +80,7 @@ public class JobInstanceStatusUpdater {
 		}
 	}
 
-	private <PT extends IModelJson> void invokeCompletionHandler(
-			JobInstance theJobInstance,
-			JobDefinition<PT> theJobDefinition,
-			IJobCompletionHandler<PT> theJobCompletionHandler) {
+	private <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance, JobDefinition<PT> theJobDefinition, IJobCompletionHandler<PT> theJobCompletionHandler) {
 		if (theJobCompletionHandler == null) {
 			return;
 		}
@@ -101,4 +88,5 @@ public class JobInstanceStatusUpdater {
 		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
 		theJobCompletionHandler.jobComplete(completionDetails);
 	}
+
 }

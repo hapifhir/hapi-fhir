@@ -36,11 +36,7 @@ public class DeferConceptIndexingRoutingBinder implements RoutingBinder {
 
 	private class TermConceptBridge implements RoutingBridge<TermConcept> {
 		@Override
-		public void route(
-				DocumentRoutes theDocumentRoutes,
-				Object theO,
-				TermConcept theTermConcept,
-				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void route(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			if (theTermConcept.getIndexStatus() == null) {
 				theDocumentRoutes.notIndexed();
 			} else {
@@ -49,11 +45,7 @@ public class DeferConceptIndexingRoutingBinder implements RoutingBinder {
 		}
 
 		@Override
-		public void previousRoutes(
-				DocumentRoutes theDocumentRoutes,
-				Object theO,
-				TermConcept theTermConcept,
-				RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
+		public void previousRoutes(DocumentRoutes theDocumentRoutes, Object theO, TermConcept theTermConcept, RoutingBridgeRouteContext theRoutingBridgeRouteContext) {
 			theDocumentRoutes.addRoute();
 		}
 	}

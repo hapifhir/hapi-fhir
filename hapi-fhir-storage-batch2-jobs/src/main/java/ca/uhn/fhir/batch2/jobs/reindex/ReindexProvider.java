@@ -57,11 +57,7 @@ public class ReindexProvider {
 	/**
 	 * Constructor
 	 */
-	public ReindexProvider(
-			FhirContext theFhirContext,
-			IJobCoordinator theJobCoordinator,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			UrlPartitioner theUrlPartitioner) {
+	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
@@ -70,28 +66,20 @@ public class ReindexProvider {
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters reindex(
-			@Description(
-							"Optionally provides one ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed. Note that the URL applies to the resources as they are currently indexed, so you should not use a search parameter that needs reindexing in the URL or some resources may be missed. If no URLs are provided, all resources of all types will be reindexed.")
-					@OperationParam(
-							name = ProviderConstants.OPERATION_REINDEX_PARAM_URL,
-							typeName = "string",
-							min = 0,
-							max = OperationParam.MAX_UNLIMITED)
-					List<IPrimitiveType<String>> theUrlsToReindex,
-			@Description("Should search parameters be reindexed (default: "
-							+ ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING + ")")
-					@OperationParam(name = REINDEX_SEARCH_PARAMETERS, typeName = "code", min = 0, max = 1)
-					IPrimitiveType<String> theReindexSearchParameters,
-			@Description("Should we attempt to optimize storage for resources (default: "
-							+ ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING + ")")
-					@OperationParam(name = OPTIMIZE_STORAGE, typeName = "code", min = 0, max = 1)
-					IPrimitiveType<String> theOptimizeStorage,
-			@Description(
-							"Should we attempt to optimistically lock resources being reindexed in order to avoid concurrency issues (default: "
-									+ ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
-					@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
-					IPrimitiveType<Boolean> theOptimisticLock,
-			RequestDetails theRequestDetails) {
+		@Description("Optionally provides one ore more relative search parameter URLs (e.g. \"Patient?active=true\" or \"Observation?\") that will be reindexed. Note that the URL applies to the resources as they are currently indexed, so you should not use a search parameter that needs reindexing in the URL or some resources may be missed. If no URLs are provided, all resources of all types will be reindexed.")
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED)
+		List<IPrimitiveType<String>> theUrlsToReindex,
+		@Description("Should search parameters be reindexed (default: " + ReindexParameters.REINDEX_SEARCH_PARAMETERS_DEFAULT_STRING + ")")
+		@OperationParam(name = REINDEX_SEARCH_PARAMETERS, typeName = "code", min = 0, max = 1)
+		IPrimitiveType<String> theReindexSearchParameters,
+		@Description("Should we attempt to optimize storage for resources (default: " + ReindexParameters.OPTIMIZE_STORAGE_DEFAULT_STRING + ")")
+		@OperationParam(name = OPTIMIZE_STORAGE, typeName = "code", min = 0, max = 1)
+		IPrimitiveType<String> theOptimizeStorage,
+		@Description("Should we attempt to optimistically lock resources being reindexed in order to avoid concurrency issues (default: " + ReindexParameters.OPTIMISTIC_LOCK_DEFAULT + ")")
+		@OperationParam(name = ReindexJobParameters.OPTIMISTIC_LOCK, typeName = "boolean", min = 0, max = 1)
+		IPrimitiveType<Boolean> theOptimisticLock,
+		RequestDetails theRequestDetails
+	) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
 
@@ -99,10 +87,7 @@ public class ReindexProvider {
 			String value = theReindexSearchParameters.getValue();
 			if (value != null) {
 				value = Ascii.toUpperCase(value);
-				ValidateUtil.isTrueOrThrowInvalidRequest(
-						EnumUtils.isValidEnum(ReindexParameters.ReindexSearchParametersEnum.class, value),
-						"Invalid " + REINDEX_SEARCH_PARAMETERS + " value: "
-								+ UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
+				ValidateUtil.isTrueOrThrowInvalidRequest(EnumUtils.isValidEnum(ReindexParameters.ReindexSearchParametersEnum.class, value), "Invalid " + REINDEX_SEARCH_PARAMETERS + " value: " + UrlUtil.sanitizeUrlPart(theReindexSearchParameters.getValue()));
 				params.setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.valueOf(value));
 			}
 		}
@@ -110,10 +95,7 @@ public class ReindexProvider {
 			String value = theOptimizeStorage.getValue();
 			if (value != null) {
 				value = Ascii.toUpperCase(value);
-				ValidateUtil.isTrueOrThrowInvalidRequest(
-						EnumUtils.isValidEnum(ReindexParameters.OptimizeStorageModeEnum.class, value),
-						"Invalid " + OPTIMIZE_STORAGE + " value: "
-								+ UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
+				ValidateUtil.isTrueOrThrowInvalidRequest(EnumUtils.isValidEnum(ReindexParameters.OptimizeStorageModeEnum.class, value), "Invalid " + OPTIMIZE_STORAGE + " value: " + UrlUtil.sanitizeUrlPart(theOptimizeStorage.getValue()));
 				params.setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.valueOf(value));
 			}
 		}
@@ -123,16 +105,14 @@ public class ReindexProvider {
 
 		if (theUrlsToReindex != null) {
 			theUrlsToReindex.stream()
-					.map(IPrimitiveType::getValue)
-					.filter(StringUtils::isNotBlank)
-					.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-					.forEach(params::addPartitionedUrl);
+				.map(IPrimitiveType::getValue)
+				.filter(StringUtils::isNotBlank)
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(params::addPartitionedUrl);
 		}
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -141,8 +121,9 @@ public class ReindexProvider {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(
-				myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getInstanceId());
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getInstanceId());
 		return retVal;
 	}
+
+
 }

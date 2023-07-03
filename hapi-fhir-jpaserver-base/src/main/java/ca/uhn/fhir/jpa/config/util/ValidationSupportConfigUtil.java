@@ -25,19 +25,15 @@ import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 public final class ValidationSupportConfigUtil {
 	private ValidationSupportConfigUtil() {}
 
-	public static CachingValidationSupport newCachingValidationSupport(
-			JpaValidationSupportChain theJpaValidationSupportChain) {
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain) {
 		return newCachingValidationSupport(theJpaValidationSupportChain, false);
 	}
 
-	public static CachingValidationSupport newCachingValidationSupport(
-			JpaValidationSupportChain theJpaValidationSupportChain,
-			boolean theIsEnabledValidationForCodingsLogicalAnd) {
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
-		CachingValidationSupport.CacheTimeouts cacheTimeouts =
-				CachingValidationSupport.CacheTimeouts.defaultValues().setTranslateCodeMillis(1000);
+		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
+			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(
-				theJpaValidationSupportChain, cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }

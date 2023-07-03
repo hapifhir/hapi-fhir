@@ -28,7 +28,8 @@ import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ReferenceClientParam extends BaseClientParam implements IParam {
+
+public class ReferenceClientParam extends BaseClientParam  implements IParam {
 
 	private String myName;
 
@@ -135,5 +136,7 @@ public class ReferenceClientParam extends BaseClientParam implements IParam {
 		public String getParameterValue(FhirContext theContext) {
 			return myWrappedCriterion.getParameterValue(theContext);
 		}
+
 	}
+
 }

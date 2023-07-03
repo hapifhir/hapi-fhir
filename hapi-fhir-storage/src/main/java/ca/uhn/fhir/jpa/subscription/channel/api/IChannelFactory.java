@@ -39,8 +39,7 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for subscribers.
 	 */
-	IChannelReceiver getOrCreateReceiver(
-			String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
+	IChannelReceiver getOrCreateReceiver(String theChannelName, Class<?> theMessageType, ChannelConsumerSettings theChannelSettings);
 
 	/**
 	 * Create a channel that is used to send messages to the queue.
@@ -54,8 +53,7 @@ public interface IChannelFactory {
 	 * @param theMessageType     The object type that will be placed on this queue. Objects will be Jackson-annotated structures.
 	 * @param theChannelSettings Contains the configuration for senders.
 	 */
-	IChannelProducer getOrCreateProducer(
-			String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
+	IChannelProducer getOrCreateProducer(String theChannelName, Class<?> theMessageType, ChannelProducerSettings theChannelSettings);
 
 	/**
 	 * @return the IChannelNamer used by this factory

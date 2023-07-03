@@ -33,13 +33,7 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 	}
 
 	@Override
-	public void incorrectJsonType(
-			IParseLocation theLocation,
-			String theElementName,
-			ValueType theExpected,
-			ScalarType theExpectedScalarType,
-			ValueType theFound,
-			ScalarType theFoundScalarType) {
+	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
 		// NOP
 	}
 

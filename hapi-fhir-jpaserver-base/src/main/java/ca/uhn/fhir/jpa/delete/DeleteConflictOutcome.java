@@ -34,4 +34,5 @@ public class DeleteConflictOutcome {
 		myShouldRetryCount = theShouldRetryCount;
 		return this;
 	}
+
 }

@@ -34,11 +34,11 @@ public class MdmPidTuple<T extends IResourcePersistentId> {
 		return new MdmPidTuple<>(theGoldenPid, theSourcePid);
 	}
 
-	public T getGoldenPid() {
+	public T getGoldenPid(){
 		return myGoldenPid;
 	}
 
-	public T getSourcePid() {
+	public T getSourcePid(){
 		return mySourcePid;
 	}
 }

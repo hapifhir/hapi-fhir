@@ -25,21 +25,18 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(
-		name = "TRM_VALUESET_C_DESIGNATION",
-		indexes = {
-			// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index
-			// automatically
-			@Index(name = "FK_TRM_VALUESET_CONCEPT_PID", columnList = "VALUESET_CONCEPT_PID", unique = false),
-			@Index(name = "FK_TRM_VSCD_VS_PID", columnList = "VALUESET_PID")
-		})
+@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_TRM_VALUESET_CONCEPT_PID",  columnList = "VALUESET_CONCEPT_PID", unique = false),
+	@Index(name = "FK_TRM_VSCD_VS_PID", columnList = "VALUESET_PID")
+})
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -51,22 +48,14 @@ public class TermValueSetConceptDesignation implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_CONCEPT_PID",
-			referencedColumnName = "PID",
-			nullable = false,
-			foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
+	@JoinColumn(name = "VALUESET_CONCEPT_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
 
 	@Column(name = "VALUESET_CONCEPT_PID", insertable = false, updatable = false, nullable = false)
 	private Long myConceptPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(
-			name = "VALUESET_PID",
-			referencedColumnName = "PID",
-			nullable = false,
-			foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
+	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
 	private TermValueSet myValueSet;
 
 	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
@@ -139,10 +128,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setLanguage(String theLanguage) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theLanguage,
-				TermConceptDesignation.MAX_LENGTH,
-				"Language exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theLanguage));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, TermConceptDesignation.MAX_LENGTH,
+			"Language exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theLanguage));
 		myLanguage = theLanguage;
 		return this;
 	}
@@ -152,11 +139,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseSystem(String theUseSystem) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theUseSystem,
-				TermConceptDesignation.MAX_LENGTH,
-				"Use system exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): "
-						+ length(theUseSystem));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, TermConceptDesignation.MAX_LENGTH,
+			"Use system exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseSystem));
 		myUseSystem = theUseSystem;
 		return this;
 	}
@@ -166,10 +150,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseCode(String theUseCode) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theUseCode,
-				TermConceptDesignation.MAX_LENGTH,
-				"Use code exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, TermConceptDesignation.MAX_LENGTH,
+			"Use code exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseCode));
 		myUseCode = theUseCode;
 		return this;
 	}
@@ -189,10 +171,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	public TermValueSetConceptDesignation setValue(@Nonnull String theValue) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
-				theValue,
-				TermConceptDesignation.MAX_VAL_LENGTH,
-				"Value exceeds maximum length (" + TermConceptDesignation.MAX_VAL_LENGTH + "): " + length(theValue));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, TermConceptDesignation.MAX_VAL_LENGTH,
+			"Value exceeds maximum length (" + TermConceptDesignation.MAX_VAL_LENGTH + "): " + length(theValue));
 		myValue = theValue;
 		return this;
 	}
@@ -206,24 +186,24 @@ public class TermValueSetConceptDesignation implements Serializable {
 		TermValueSetConceptDesignation that = (TermValueSetConceptDesignation) theO;
 
 		return new EqualsBuilder()
-				.append(getLanguage(), that.getLanguage())
-				.append(getUseSystem(), that.getUseSystem())
-				.append(getUseCode(), that.getUseCode())
-				.append(getUseDisplay(), that.getUseDisplay())
-				.append(getValue(), that.getValue())
-				.isEquals();
+			.append(getLanguage(), that.getLanguage())
+			.append(getUseSystem(), that.getUseSystem())
+			.append(getUseCode(), that.getUseCode())
+			.append(getUseDisplay(), that.getUseDisplay())
+			.append(getValue(), that.getValue())
+			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		if (myHashCode == null) {
 			myHashCode = new HashCodeBuilder(17, 37)
-					.append(getLanguage())
-					.append(getUseSystem())
-					.append(getUseCode())
-					.append(getUseDisplay())
-					.append(getValue())
-					.toHashCode();
+				.append(getLanguage())
+				.append(getUseSystem())
+				.append(getUseCode())
+				.append(getUseDisplay())
+				.append(getValue())
+				.toHashCode();
 		}
 		return myHashCode;
 	}
@@ -231,18 +211,18 @@ public class TermValueSetConceptDesignation implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("myId", myId)
-				.append(myConcept != null ? ("myConcept - id=" + myConcept.getId()) : ("myConcept=(null)"))
-				.append("myConceptPid", myConceptPid)
-				.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
-				.append("myValueSetPid", myValueSetPid)
-				.append("myValueSetUrl", this.getValueSetUrl())
-				.append("myValueSetName", this.getValueSetName())
-				.append("myLanguage", myLanguage)
-				.append("myUseSystem", myUseSystem)
-				.append("myUseCode", myUseCode)
-				.append("myUseDisplay", myUseDisplay)
-				.append("myValue", myValue)
-				.toString();
+			.append("myId", myId)
+			.append(myConcept != null ? ("myConcept - id=" + myConcept.getId()) : ("myConcept=(null)"))
+			.append("myConceptPid", myConceptPid)
+			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetPid", myValueSetPid)
+			.append("myValueSetUrl", this.getValueSetUrl())
+			.append("myValueSetName", this.getValueSetName())
+			.append("myLanguage", myLanguage)
+			.append("myUseSystem", myUseSystem)
+			.append("myUseCode", myUseCode)
+			.append("myUseDisplay", myUseDisplay)
+			.append("myValue", myValue)
+			.toString();
 	}
 }

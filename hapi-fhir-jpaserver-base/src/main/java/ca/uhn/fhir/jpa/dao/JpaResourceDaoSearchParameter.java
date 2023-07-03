@@ -20,12 +20,13 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumeration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -35,8 +36,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
-		implements IFhirResourceDaoSearchParameter<T> {
+public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoSearchParameter<T> {
 
 	private final AtomicBoolean myCacheReloadTriggered = new AtomicBoolean(false);
 
@@ -70,13 +70,11 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 		// N.B. Don't do this on the canonicalized version
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 
-		org.hl7.fhir.r5.model.SearchParameter searchParameter =
-				myVersionCanonicalizer.searchParameterToCanonical(theResource);
-		List<String> base = theResource != null
-				? searchParameter.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList())
-				: null;
+		org.hl7.fhir.r5.model.SearchParameter searchParameter = myVersionCanonicalizer.searchParameterToCanonical(theResource);
+		List<String> base = theResource != null ? searchParameter.getBase().stream().map(Enumeration::getCode).collect(Collectors.toList()) : null;
 		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
+
 
 	@Override
 	protected void postPersist(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
@@ -104,8 +102,7 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 	}
 
 	public void validateSearchParam(IBaseResource theResource) {
-		org.hl7.fhir.r5.model.SearchParameter searchParameter =
-				myVersionCanonicalizer.searchParameterToCanonical(theResource);
+		org.hl7.fhir.r5.model.SearchParameter searchParameter = myVersionCanonicalizer.searchParameterToCanonical(theResource);
 		mySearchParameterDaoValidator.validate(searchParameter);
 	}
 
@@ -115,7 +112,7 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 	}
 
 	@VisibleForTesting
-	public void setSearchParameterDaoValidatorForUnitTest(SearchParameterDaoValidator theSearchParameterDaoValidator) {
+	public void setSearchParameterDaoValidatorForUnitTest(SearchParameterDaoValidator theSearchParameterDaoValidator){
 		mySearchParameterDaoValidator = theSearchParameterDaoValidator;
 	}
 }

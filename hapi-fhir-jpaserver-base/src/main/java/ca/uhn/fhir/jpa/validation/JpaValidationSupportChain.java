@@ -46,16 +46,12 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Qualifier("myDefaultProfileValidationSupport")
 	@Autowired
 	private IValidationSupport myDefaultProfileValidationSupport;
-
 	@Autowired
 	private ITermReadSvc myTerminologyService;
-
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
-
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
-
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
@@ -90,4 +86,5 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		// This needs to be last in the chain, it was designed for that
 		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
+
 }

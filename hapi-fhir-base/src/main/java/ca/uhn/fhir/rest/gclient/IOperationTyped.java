@@ -19,4 +19,8 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-public interface IOperationTyped {}
+public interface IOperationTyped {
+
+	
+	
+}

@@ -20,6 +20,9 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 
-@DatatypeDef(name = "DurationDt", profileOf = QuantityDt.class)
-public class DurationDt extends QuantityDt {}
+@DatatypeDef(name="DurationDt", profileOf=QuantityDt.class) 
+public class DurationDt extends QuantityDt  {
+
+}

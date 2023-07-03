@@ -93,4 +93,5 @@ public class ValidateUtil {
 			throw new InvalidRequestException(Msg.code(1770) + theMessage);
 		}
 	}
+
 }

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 
 	public enum BaseRequestGeneratingCommandOptions {
@@ -44,9 +45,11 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 		TLS_AUTH
 	}
 
+
 	protected static final String HEADER_PASSTHROUGH = "hp";
 	protected static final String HEADER_PASSTHROUGH_NAME = "header";
 	protected static final String HEADER_PASSTHROUGH_LONGOPT = "header-passthrough";
+
 
 	@Override
 	public Options getOptions() {
@@ -59,83 +62,78 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 	protected Options getSomeOptions(Collection<BaseRequestGeneratingCommandOptions> theExcludeOptions) {
 		Options options = new Options();
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.VERSION)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.VERSION)) {
 			addFhirVersionOption(options);
 		}
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.BASE_URL)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.BASE_URL)) {
 			addBaseUrlOption(options);
 		}
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.BASIC_AUTH)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.BASIC_AUTH)) {
 			addBasicAuthOption(options);
 		}
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.VERBOSE_LOGGING)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.VERBOSE_LOGGING)) {
 			addVerboseLoggingOption(options);
 		}
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.HEADER_PASSTHROUGH)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.HEADER_PASSTHROUGH)) {
 			addHeaderPassthroughOption(options);
 		}
 
-		if (!theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.TLS_AUTH)) {
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.TLS_AUTH)) {
 			addHttpsAuthOption(options);
 		}
+
 
 		return options;
 	}
 
+
 	@Override
-	protected IGenericClient newClientWithBaseUrl(
-			CommandLine theCommandLine,
-			String theBaseUrl,
-			String theBasicAuthOptionName,
-			String theBearerTokenOptionName,
-			String theTlsAuthOptionName)
-			throws ParseException {
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl,
+			String theBasicAuthOptionName, String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 
 		IGenericClient client = super.newClientWithBaseUrl(
-				theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
+			theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 		registerHeaderPassthrough(theCommandLine, client);
 
 		return client;
 	}
 
+
 	private void registerHeaderPassthrough(CommandLine theCommandLine, IGenericClient theClient) throws ParseException {
 		if (theCommandLine.hasOption(HEADER_PASSTHROUGH)) {
-			theClient.registerInterceptor(new AdditionalRequestHeadersInterceptor(
+			theClient.registerInterceptor(
+				new AdditionalRequestHeadersInterceptor(
 					getAndParseOptionHeadersPassthrough(theCommandLine, HEADER_PASSTHROUGH)));
 		}
+
 	}
 
 	private void addHeaderPassthroughOption(Options theOptions) {
-		addOptionalOption(
-				theOptions,
-				HEADER_PASSTHROUGH,
-				HEADER_PASSTHROUGH_LONGOPT,
-				HEADER_PASSTHROUGH_NAME,
-				"If specified, this argument specifies headers to include in the generated request");
+		addOptionalOption(theOptions, HEADER_PASSTHROUGH, HEADER_PASSTHROUGH_LONGOPT, HEADER_PASSTHROUGH_NAME,
+			"If specified, this argument specifies headers to include in the generated request");
 	}
 
 	/**
 	 * @return Returns the optional pass-through header name and value
 	 */
 	private Map<String, List<String>> getAndParseOptionHeadersPassthrough(
-			CommandLine theCommandLine, String theOptionName) throws ParseException {
+		CommandLine theCommandLine, String theOptionName) throws ParseException {
 
-		if (!theCommandLine.hasOption(theOptionName)) {
+		if (! theCommandLine.hasOption(theOptionName)) {
 			return Collections.emptyMap();
 		}
 
 		Map<String, List<String>> headersMap = new HashMap<>();
-		for (String nextOptionValue : theCommandLine.getOptionValues(theOptionName)) {
+		for (String nextOptionValue: theCommandLine.getOptionValues(theOptionName)) {
 			Pair<String, String> nextHeader = parseNameValueParameter(":", theOptionName, nextOptionValue);
-			headersMap
-					.compute(nextHeader.getKey(), (k, v) -> v == null ? new ArrayList<>() : v)
-					.add(nextHeader.getValue());
+			headersMap.compute(nextHeader.getKey(), (k, v) -> v == null ? new ArrayList<>() : v).add(nextHeader.getValue());
 		}
 
 		return headersMap;
 	}
+
 }

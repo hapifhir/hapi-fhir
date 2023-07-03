@@ -29,6 +29,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 	private static final long serialVersionUID = 1L;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParamWithPrefix.class);
 
+
 	public static final String MSG_PREFIX_INVALID_FORMAT = "Invalid date/time/quantity format: ";
 
 	private ParamPrefixEnum myPrefix;
@@ -64,40 +65,38 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 
 		String prefix = theString.substring(0, offset);
 		if (!isBlank(prefix)) {
-
+		
 			myPrefix = ParamPrefixEnum.forValue(prefix);
 
 			if (myPrefix == null) {
 				// prefix doesn't match standard values.  Try legacy values
 				switch (prefix) {
-					case ">=":
-						myPrefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-						break;
-					case ">":
-						myPrefix = ParamPrefixEnum.GREATERTHAN;
-						break;
-					case "<=":
-						myPrefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-						break;
-					case "<":
-						myPrefix = ParamPrefixEnum.LESSTHAN;
-						break;
-					case "~":
-						myPrefix = ParamPrefixEnum.APPROXIMATE;
-						break;
-					case "=":
-						myPrefix = ParamPrefixEnum.EQUAL;
-						break;
-					default:
-						throw new DataFormatException(Msg.code(1941) + "Invalid prefix: \"" + prefix + "\"");
+				case ">=":
+					myPrefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+					break;
+				case ">":
+					myPrefix = ParamPrefixEnum.GREATERTHAN;
+					break;
+				case "<=":
+					myPrefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+					break;
+				case "<":
+					myPrefix = ParamPrefixEnum.LESSTHAN;
+					break;
+				case "~":
+					myPrefix = ParamPrefixEnum.APPROXIMATE;
+					break;
+				case "=":
+					myPrefix = ParamPrefixEnum.EQUAL;
+					break;
+				default :
+					throw new DataFormatException(Msg.code(1941) + "Invalid prefix: \"" + prefix + "\"");
 				}
-				ourLog.warn(
-						"Date parameter has legacy prefix '{}' which has been removed from FHIR. This should be replaced with '{}'",
-						prefix,
-						myPrefix.getValue());
+				ourLog.warn("Date parameter has legacy prefix '{}' which has been removed from FHIR. This should be replaced with '{}'", prefix, myPrefix.getValue());
 			}
+			
 		}
-
+		
 		return theString.substring(offset);
 	}
 
@@ -116,4 +115,5 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		myPrefix = thePrefix;
 		return (T) this;
 	}
+
 }

@@ -19,19 +19,20 @@
  */
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import org.hl7.fhir.instance.model.api.*;
-
 import java.io.InputStream;
 import java.util.Date;
+
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import org.hl7.fhir.instance.model.api.*;
+
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
 /**
  * Each structure version JAR will have an implementation of this interface.
  * This is used internally by HAPI and subject to change. Do not use this interface
  * directly in user code.
- *
+ * 
  * See also IFhirVersionServer for the hapi-fhir-server equivalent.
  */
 public interface IFhirVersion {
@@ -64,4 +65,5 @@ public interface IFhirVersion {
 	 * JAR is on the classpath. Otherwise it will result in a {@link ClassNotFoundException}
 	 */
 	Object getServerVersion();
+
 }

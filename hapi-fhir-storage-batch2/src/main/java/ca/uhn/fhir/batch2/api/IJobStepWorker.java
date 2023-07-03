@@ -47,6 +47,5 @@ public interface IJobStepWorker<PT extends IModelJson, IT extends IModelJson, OT
 	 *                                     job will be aborted.
 	 */
 	@Nonnull
-	RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink)
-			throws JobExecutionFailedException;
+	RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink) throws JobExecutionFailedException;
 }

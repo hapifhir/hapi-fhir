@@ -54,19 +54,14 @@ public class MdmMessageHandler implements MessageHandler {
 
 	@Autowired
 	private MdmMatchLinkSvc myMdmMatchLinkSvc;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
 	@Autowired
 	private FhirContext myFhirContext;
-
 	@Autowired
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
-
 	@Autowired
 	private IMdmSettings myMdmSettings;
-
 	@Autowired
 	private IMdmModelConverterSvc myModelConverter;
 
@@ -101,7 +96,7 @@ public class MdmMessageHandler implements MessageHandler {
 		String resourceType = theSourceResource.getIdElement().getResourceType();
 		validateResourceType(resourceType);
 
-		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)){
 			HookParams params = new HookParams().add(IBaseResource.class, theSourceResource);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED, params);
 		}
@@ -128,17 +123,16 @@ public class MdmMessageHandler implements MessageHandler {
 		} finally {
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
-					.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
-					.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-					.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
+				.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
+				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
+				.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
 
 	private MdmTransactionContext createMdmContext(ResourceModifiedMessage theMsg, String theResourceType) {
-		TransactionLogMessages transactionLogMessages =
-				TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
 		MdmTransactionContext.OperationType mdmOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -153,25 +147,23 @@ public class MdmMessageHandler implements MessageHandler {
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an MdmTransactionContext for {}", theMsg.getOperationType());
-				throw new InvalidRequestException(
-						Msg.code(734) + "We can't handle non-update/create operations in MDM");
+				throw new InvalidRequestException(Msg.code(734) + "We can't handle non-update/create operations in MDM");
 		}
 		return new MdmTransactionContext(transactionLogMessages, mdmOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new IllegalStateException(
-					Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
+			throw new IllegalStateException(Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
 		}
 	}
 
 	private void handleCreateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource) theResource, theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
 	}
 
 	private void handleUpdateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource) theResource, theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmContext, String theMessage, Exception theException) {
@@ -181,19 +173,21 @@ public class MdmMessageHandler implements MessageHandler {
 
 	private MdmLinkEvent buildLinkChangeEvent(MdmTransactionContext theMdmContext) {
 		MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
-		theMdmContext.getMdmLinks().stream().forEach(l -> {
-			linkChangeEvent.addMdmLink(myModelConverter.toJson(l));
-		});
+		theMdmContext.getMdmLinks()
+			.stream()
+			.forEach(l -> {
+				linkChangeEvent.addMdmLink(myModelConverter.toJson(l));
+			});
 
 		return linkChangeEvent;
 	}
 
 	private ResourceOperationMessage getOutgoingMessage(ResourceModifiedMessage theMsg) {
 		IBaseResource targetResource = theMsg.getPayload(myFhirContext);
-		ResourceOperationMessage outgoingMsg =
-				new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
+		ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 		outgoingMsg.setTransactionId(theMsg.getTransactionId());
 
 		return outgoingMsg;
 	}
+
 }

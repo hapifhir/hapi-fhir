@@ -26,4 +26,5 @@ public class Counter {
 	public long getThenAdd() {
 		return myCount++;
 	}
+
 }

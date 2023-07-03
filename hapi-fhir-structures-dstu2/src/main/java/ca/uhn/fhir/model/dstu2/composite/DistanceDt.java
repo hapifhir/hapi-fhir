@@ -20,6 +20,10 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 
-@DatatypeDef(name = "DistanceDt", profileOf = QuantityDt.class)
-public class DistanceDt extends QuantityDt {}
+@DatatypeDef(name="DistanceDt", profileOf=QuantityDt.class) 
+public class DistanceDt extends QuantityDt {
+
+}

@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.interceptor.api;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
 
 public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBaseInterceptorBroadcaster<POINTCUT> {
 

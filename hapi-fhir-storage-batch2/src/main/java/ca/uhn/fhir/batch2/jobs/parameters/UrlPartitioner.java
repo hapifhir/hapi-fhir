@@ -32,16 +32,12 @@ public class UrlPartitioner {
 	public UrlPartitioner(MatchUrlService theMatchUrlService, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myMatchUrlService = theMatchUrlService;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+
 	}
 
 	public PartitionedUrl partitionUrl(String theUrl, RequestDetails theRequestDetails) {
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
-		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails,
-						resourceSearch.getResourceName(),
-						resourceSearch.getSearchParameterMap(),
-						null);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap(), null);
 		PartitionedUrl retval = new PartitionedUrl();
 		retval.setUrl(theUrl);
 		retval.setRequestPartitionId(requestPartitionId);

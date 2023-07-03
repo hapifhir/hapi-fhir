@@ -56,12 +56,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -71,90 +71,62 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Autowired
 	FhirContext myFhirContext;
-
 	@Autowired
 	MdmControllerHelper myMdmControllerHelper;
-
 	@Autowired
 	IGoldenResourceMergerSvc myGoldenResourceMergerSvc;
-
 	@Autowired
 	IMdmLinkQuerySvc myMdmLinkQuerySvc;
-
 	@Autowired
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
-
 	@Autowired
 	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
-
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	@Autowired
 	IJobCoordinator myJobCoordinator;
 
-	public MdmControllerSvcImpl() {}
+	public MdmControllerSvcImpl() {
+	}
 
 	@Override
-	public IAnyResource mergeGoldenResources(
-			String theFromGoldenResourceId,
-			String theToGoldenResourceId,
-			IAnyResource theManuallyMergedGoldenResource,
-			MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
-		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
+	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
+		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		myMdmControllerHelper.validateMergeResources(fromGoldenResource, toGoldenResource);
 		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theFromGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(toGoldenResource, theToGoldenResourceId);
 
-		return myGoldenResourceMergerSvc.mergeGoldenResources(
-				fromGoldenResource, theManuallyMergedGoldenResource, toGoldenResource, theMdmTransactionContext);
+		return myGoldenResourceMergerSvc.mergeGoldenResources(fromGoldenResource, theManuallyMergedGoldenResource, toGoldenResource, theMdmTransactionContext);
 	}
 
 	@Override
 	@Deprecated
-	public Page<MdmLinkJson> queryLinks(
-			@Nullable String theGoldenResourceId,
-			@Nullable String theSourceResourceId,
-			@Nullable String theMatchResult,
-			@Nullable String theLinkSource,
-			MdmTransactionContext theMdmTransactionContext,
-			MdmPageRequest thePageRequest) {
+	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-				.setGoldenResourceId(theGoldenResourceId)
-				.setSourceId(theSourceResourceId)
-				.setMatchResult(theMatchResult)
-				.setLinkSource(theLinkSource);
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceResourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource);
 		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
 	@Deprecated
-	public Page<MdmLinkJson> queryLinks(
-			@Nullable String theGoldenResourceId,
-			@Nullable String theSourceResourceId,
-			@Nullable String theMatchResult,
-			@Nullable String theLinkSource,
-			MdmTransactionContext theMdmTransactionContext,
-			MdmPageRequest thePageRequest,
-			@Nullable RequestDetails theRequestDetails) {
+	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId,
+													@Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext,
+													MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-				.setGoldenResourceId(theGoldenResourceId)
-				.setSourceId(theSourceResourceId)
-				.setMatchResult(theMatchResult)
-				.setLinkSource(theLinkSource);
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceResourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource);
 		return queryLinks(mdmQuerySearchParameters, theMdmTransactionContext, theRequestDetails);
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinks(
-			MdmQuerySearchParameters theMdmQuerySearchParameters,
-			MdmTransactionContext theMdmTransactionContext,
-			RequestDetails theRequestDetails) {
-		RequestPartitionId theReadPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails) {
+		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
 			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
@@ -166,61 +138,44 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public List<MdmLinkWithRevisionJson> queryLinkHistory(
-			MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
+	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
 		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
 	}
 
 	@Override
 	@Deprecated
-	public Page<MdmLinkJson> queryLinksFromPartitionList(
-			@Nullable String theGoldenResourceId,
-			@Nullable String theSourceResourceId,
-			@Nullable String theMatchResult,
-			@Nullable String theLinkSource,
-			MdmTransactionContext theMdmTransactionContext,
-			MdmPageRequest thePageRequest,
-			@Nullable List<Integer> thePartitionIds) {
+	public Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId,
+																		  @Nullable String theMatchResult, @Nullable String theLinkSource,
+																		  MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest,
+																		  @Nullable List<Integer> thePartitionIds) {
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
-				.setGoldenResourceId(theGoldenResourceId)
-				.setSourceId(theSourceResourceId)
-				.setMatchResult(theMatchResult)
-				.setLinkSource(theLinkSource)
-				.setPartitionIds(thePartitionIds);
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceResourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource)
+			.setPartitionIds(thePartitionIds);
 		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinksFromPartitionList(
-			MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext) {
+	public Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext) {
 		return myMdmLinkQuerySvc.queryLinks(theMdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
-	public Page<MdmLinkJson> getDuplicateGoldenResources(
-			MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
 		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, null);
 	}
 
 	@Override
-	public Page<MdmLinkJson> getDuplicateGoldenResources(
-			MdmTransactionContext theMdmTransactionContext,
-			MdmPageRequest thePageRequest,
-			RequestDetails theRequestDetails,
-			String theRequestResourceType) {
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
-		RequestPartitionId readPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
 
 		if (readPartitionId.isAllPartitions()) {
-			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(
-					theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
+			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
 		} else {
-			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(
-					theMdmTransactionContext,
-					thePageRequest,
-					readPartitionId.getPartitionIds(),
-					theRequestResourceType);
+			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds(), theRequestResourceType);
 		}
 
 		validateMdmQueryPermissions(readPartitionId, resultPage.getContent(), theRequestDetails);
@@ -229,16 +184,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource updateLink(
-			String theGoldenResourceId,
-			String theSourceResourceId,
-			String theMatchResult,
-			MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(
-				ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theSourceResourceId);
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theSourceResourceId);
 		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
@@ -246,16 +195,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource createLink(
-			String theGoldenResourceId,
-			String theSourceResourceId,
-			@Nullable String theMatchResult,
-			MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(
-				ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
 		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
@@ -263,22 +206,15 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IBaseParameters submitMdmClearJob(
-			@Nonnull List<String> theResourceNames,
-			IPrimitiveType<BigDecimal> theBatchSize,
-			ServletRequestDetails theRequestDetails) {
+	public IBaseParameters submitMdmClearJob(@Nonnull List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmClearJobParameters params = new MdmClearJobParameters();
 		params.setResourceNames(theResourceNames);
-		if (theBatchSize != null
-				&& theBatchSize.getValue() != null
-				&& theBatchSize.getValue().longValue() > 0) {
+		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_MDM_CLEAR);
-		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_MDM_CLEAR);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -288,19 +224,16 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		String id = response.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(
-				myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
 		return retVal;
 	}
 
+
 	@Override
-	public IBaseParameters submitMdmSubmitJob(
-			List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+	public IBaseParameters submitMdmSubmitJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
 
-		if (theBatchSize != null
-				&& theBatchSize.getValue() != null
-				&& theBatchSize.getValue().longValue() > 0) {
+		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 		params.setRequestPartitionId(RequestPartitionId.allPartitions());
@@ -315,35 +248,25 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		String id = batch2JobStartResponse.getInstanceId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(
-				myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
 		return retVal;
 	}
 
 	@Override
-	public void notDuplicateGoldenResource(
-			String theGoldenResourceId,
-			String theTargetGoldenResourceId,
-			MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
-				ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
+	public void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
 
 		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
 	}
 
-	private void validateMdmQueryPermissions(
-			RequestPartitionId theRequestPartitionId,
-			List<MdmLinkJson> theMdmLinkJsonList,
-			RequestDetails theRequestDetails) {
+	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails) {
 		Set<String> seenResourceTypes = new HashSet<>();
 		for (MdmLinkJson mdmLinkJson : theMdmLinkJsonList) {
 			IdDt idDt = new IdDt(mdmLinkJson.getSourceId());
 
 			if (!seenResourceTypes.contains(idDt.getResourceType())) {
-				myRequestPartitionHelperSvc.validateHasPartitionPermissions(
-						theRequestDetails, idDt.getResourceType(), theRequestPartitionId);
+				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, idDt.getResourceType(), theRequestPartitionId);
 				seenResourceTypes.add(idDt.getResourceType());
 			}
 		}

@@ -53,17 +53,15 @@ public class MdmCandidateSearchSvc {
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
-
 	@Autowired
 	private IIdHelperService myIdHelperService;
-
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
-
 	@Autowired
 	private CandidateSearcher myCandidateSearcher;
 
-	public MdmCandidateSearchSvc() {}
+	public MdmCandidateSearchSvc() {
+	}
 
 	/**
 	 * Given a source resource, search for all resources that are considered an MDM match based on defined MDM rules.
@@ -75,20 +73,16 @@ public class MdmCandidateSearchSvc {
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	@Transactional
-	public Collection<IAnyResource> findCandidates(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 		Map<IResourcePersistentId, IAnyResource> matchedPidsToResources = new HashMap<>();
-		List<MdmFilterSearchParamJson> filterSearchParams =
-				myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
+		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
-		List<MdmResourceSearchParamJson> candidateSearchParams =
-				myMdmSettings.getMdmRules().getCandidateSearchParams();
+		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
 
-		// If there are zero MdmResourceSearchParamJson, we end up only making a single search, otherwise we
-		// must perform one search per MdmResourceSearchParamJson.
+		//If there are zero MdmResourceSearchParamJson, we end up only making a single search, otherwise we
+		//must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
-			searchForIdsAndAddToMap(
-					theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -96,32 +90,19 @@ public class MdmCandidateSearchSvc {
 					continue;
 				}
 
-				searchForIdsAndAddToMap(
-						theResourceType,
-						theResource,
-						matchedPidsToResources,
-						filterCriteria,
-						resourceSearchParam,
-						theRequestPartitionId);
+				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam, theRequestPartitionId);
 			}
 		}
 		// Obviously we don't want to consider the incoming resource as a potential candidate.
 		// Sometimes, we are running this function on a resource that has not yet been persisted,
 		// so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			if (matchedPidsToResources.remove(
-							myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource))
-					!= null) {
-				ourLog.debug(
-						"Removing incoming resource {} from list of candidates.",
-						theResource.getIdElement().toUnqualifiedVersionless());
+			if (matchedPidsToResources.remove(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource)) != null) {
+				ourLog.debug("Removing incoming resource {} from list of candidates.", theResource.getIdElement().toUnqualifiedVersionless());
 			}
 		}
 
-		ourLog.info(
-				"Candidate search found {} matching resources for {}",
-				matchedPidsToResources.size(),
-				idOrType(theResource, theResourceType));
+		ourLog.info("Candidate search found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
 	}
 
@@ -138,36 +119,26 @@ public class MdmCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(
-			String theResourceType,
-			IAnyResource theResource,
-			Map<IResourcePersistentId, IAnyResource> theMatchedPidsToResources,
-			List<String> theFilterCriteria,
-			MdmResourceSearchParamJson resourceSearchParam,
-			RequestPartitionId theRequestPartitionId) {
-		// 1.
-		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
-				theResourceType, theResource, theFilterCriteria, resourceSearchParam);
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<IResourcePersistentId, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
+		//1.
+		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {
 			return;
 		}
 		String resourceCriteria = oResourceCriteria.get();
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
-		// 2.
-		Optional<IBundleProvider> bundleProvider =
-				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
+		//2.
+		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
-			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 
 		int initialSize = theMatchedPidsToResources.size();
 
-		// 4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource), (IAnyResource) resource));
+		//4.
+		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 
@@ -176,17 +147,15 @@ public class MdmCandidateSearchSvc {
 		}
 	}
 
-	private List<String> buildFilterQuery(
-			List<MdmFilterSearchParamJson> theFilterSearchParams, String theResourceType) {
+	private List<String> buildFilterQuery(List<MdmFilterSearchParamJson> theFilterSearchParams, String theResourceType) {
 		return Collections.unmodifiableList(theFilterSearchParams.stream()
-				.filter(spFilterJson -> paramIsOnCorrectType(theResourceType, spFilterJson))
-				.map(this::convertToQueryString)
-				.collect(Collectors.toList()));
+			.filter(spFilterJson -> paramIsOnCorrectType(theResourceType, spFilterJson))
+			.map(this::convertToQueryString)
+			.collect(Collectors.toList()));
 	}
 
 	private boolean paramIsOnCorrectType(String theResourceType, MdmFilterSearchParamJson spFilterJson) {
-		return spFilterJson.getResourceType().equals(theResourceType)
-				|| spFilterJson.getResourceType().equalsIgnoreCase(ALL_RESOURCE_SEARCH_PARAM_TYPE);
+		return spFilterJson.getResourceType().equals(theResourceType) || spFilterJson.getResourceType().equalsIgnoreCase(ALL_RESOURCE_SEARCH_PARAM_TYPE);
 	}
 
 	private String convertToQueryString(MdmFilterSearchParamJson theSpFilterJson) {

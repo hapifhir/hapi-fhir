@@ -56,7 +56,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Import({FhirContextR4Config.class, GeneratedDaoAndResourceProviderConfigR4.class, JpaConfig.class})
+@Import({
+	FhirContextR4Config.class,
+	GeneratedDaoAndResourceProviderConfigR4.class,
+	JpaConfig.class
+})
 public class JpaR4Config {
 
 	@Bean
@@ -71,18 +75,8 @@ public class JpaR4Config {
 
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider(
-			FhirContext theFhirContext,
-			IGraphQLStorageServices theGraphqlStorageServices,
-			IValidationSupport theValidationSupport,
-			ISearchParamRegistry theSearchParamRegistry,
-			IDaoRegistry theDaoRegistry) {
-		return new GraphQLProviderWithIntrospection(
-				theFhirContext,
-				theValidationSupport,
-				theGraphqlStorageServices,
-				theSearchParamRegistry,
-				theDaoRegistry);
+	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Bean(name = "mySystemDaoR4")
@@ -100,25 +94,29 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public ITermLoaderSvc termLoaderService(
-			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
+	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
 
 	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(
-			@Autowired FhirContext theContext,
-			@Autowired IFhirResourceDao<Coverage> theCoverageDao,
-			@Autowired IFhirResourceDao<Patient> thePatientDao,
-			@Autowired IFhirResourceDao<Consent> theConsentDao,
-			@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider) {
+		@Autowired FhirContext theContext,
+		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
+		@Autowired IFhirResourceDao<Patient> thePatientDao,
+		@Autowired IFhirResourceDao<Consent> theConsentDao,
+		@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider
+	) {
 		return new MemberMatcherR4Helper(
-				theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider);
+			theContext,
+			theCoverageDao,
+			thePatientDao,
+			theConsentDao,
+			theExtensionProvider
+		);
 	}
 
 	@Bean
-	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(
-			FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
+	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
 		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
 	}
 }

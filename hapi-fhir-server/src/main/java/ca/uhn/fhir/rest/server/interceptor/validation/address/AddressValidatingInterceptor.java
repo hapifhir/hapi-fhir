@@ -19,21 +19,26 @@
  */
 package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,11 +90,10 @@ public class AddressValidatingInterceptor {
 			Class validatorClass = Class.forName(validatorClassName);
 			IAddressValidator addressValidator;
 			try {
-				addressValidator = (IAddressValidator)
-						validatorClass.getDeclaredConstructor(Properties.class).newInstance(theProperties);
+				addressValidator = (IAddressValidator) validatorClass
+					.getDeclaredConstructor(Properties.class).newInstance(theProperties);
 			} catch (Exception e) {
-				addressValidator = (IAddressValidator)
-						validatorClass.getDeclaredConstructor().newInstance();
+				addressValidator = (IAddressValidator) validatorClass.getDeclaredConstructor().newInstance();
 			}
 			setAddressValidator(addressValidator);
 		} catch (Exception e) {
@@ -104,8 +108,7 @@ public class AddressValidatingInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreUpdate(
-			RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		ourLog.debug("Validating address on for update {}, {}, {}", theOldResource, theNewResource, theRequest);
 		handleRequest(theRequest, theNewResource);
 	}
@@ -127,9 +130,10 @@ public class AddressValidatingInterceptor {
 		}
 
 		FhirContext ctx = theRequest.getFhirContext();
-		List<IBase> addresses = getAddresses(theResource, ctx).stream()
-				.filter(this::isValidating)
-				.collect(Collectors.toList());
+		List<IBase> addresses = getAddresses(theResource, ctx)
+			.stream()
+			.filter(this::isValidating)
+			.collect(Collectors.toList());
 
 		if (!addresses.isEmpty()) {
 			validateAddresses(theRequest, theResource, addresses);
@@ -141,8 +145,7 @@ public class AddressValidatingInterceptor {
 	 *
 	 * @return Returns true if all addresses are valid, or false if there is at least one invalid address
 	 */
-	protected boolean validateAddresses(
-			RequestDetails theRequest, IBaseResource theResource, List<IBase> theAddresses) {
+	protected boolean validateAddresses(RequestDetails theRequest, IBaseResource theResource, List<IBase> theAddresses) {
 		boolean retVal = true;
 		for (IBase address : theAddresses) {
 			retVal &= validateAddress(address, theRequest.getFhirContext());
@@ -169,8 +172,7 @@ public class AddressValidatingInterceptor {
 			ourLog.debug("Validated address {}", validationResult);
 
 			clearPossibleDuplicatesDueToTerserCloning(theAddress, theFhirContext);
-			ExtensionUtil.setExtension(
-					theFhirContext, theAddress, getExtensionUrl(), "boolean", !validationResult.isValid());
+			ExtensionUtil.setExtension(theFhirContext, theAddress, getExtensionUrl(), "boolean", !validationResult.isValid());
 			if (validationResult.getValidatedAddress() != null) {
 				theFhirContext.newTerser().cloneInto(validationResult.getValidatedAddress(), theAddress, true);
 			} else {
@@ -205,9 +207,11 @@ public class AddressValidatingInterceptor {
 		List<IBase> retVal = new ArrayList<>();
 		for (BaseRuntimeChildDefinition c : definition.getChildren()) {
 			Class childClass = c.getClass();
-			List<IBase> allValues = c.getAccessor().getValues(theResource).stream()
-					.filter(v -> ADDRESS_TYPE_NAME.equals(v.getClass().getSimpleName()))
-					.collect(Collectors.toList());
+			List<IBase> allValues = c.getAccessor()
+				.getValues(theResource)
+				.stream()
+				.filter(v -> ADDRESS_TYPE_NAME.equals(v.getClass().getSimpleName()))
+				.collect(Collectors.toList());
 
 			retVal.addAll(allValues);
 		}

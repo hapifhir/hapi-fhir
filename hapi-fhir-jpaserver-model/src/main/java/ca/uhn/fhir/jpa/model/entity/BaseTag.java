@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 @MappedSuperclass
 public abstract class BaseTag extends BasePartitionable implements Serializable {
@@ -48,4 +48,5 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
 	}
+
 }

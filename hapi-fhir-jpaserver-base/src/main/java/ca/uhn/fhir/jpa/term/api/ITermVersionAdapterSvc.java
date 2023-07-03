@@ -41,4 +41,5 @@ public interface ITermVersionAdapterSvc {
 	void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 
 	void createOrUpdateValueSet(ValueSet theValueSet);
+
 }

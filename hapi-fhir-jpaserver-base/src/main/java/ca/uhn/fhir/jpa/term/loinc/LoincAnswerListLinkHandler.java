@@ -74,5 +74,7 @@ public class LoincAnswerListLinkHandler implements IZipContentsHandlerCsv {
 		if (answerListCode != null) {
 			answerListCode.addPropertyString("answers-for", loincNumber);
 		}
+
 	}
+
 }

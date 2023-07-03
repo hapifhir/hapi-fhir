@@ -30,18 +30,15 @@ import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
+import java.util.Date;
 
 public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(
-			@Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails,
-			@Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink)
-			throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink) throws JobExecutionFailedException {
 		MdmClearJobParameters params = theStepExecutionDetails.getParameters();
 
 		Date start = Batch2Constants.BATCH_START_DATE;
@@ -58,4 +55,5 @@ public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJ
 
 		return RunOutcome.SUCCESS;
 	}
+
 }

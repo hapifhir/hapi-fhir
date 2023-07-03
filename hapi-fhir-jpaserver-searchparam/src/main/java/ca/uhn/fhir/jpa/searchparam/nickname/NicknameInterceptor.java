@@ -68,14 +68,16 @@ public class NicknameInterceptor {
 				if (stringParam.isNicknameExpand()) {
 					ourLog.debug("Found a nickname parameter to expand: {} {}", theParamName, stringParam);
 					toRemove.add(stringParam);
-					// First, attempt to expand as a formal name
+					//First, attempt to expand as a formal name
 					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
 					Collection<String> expansions = myNicknameSvc.getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
 					}
 					ourLog.debug("Parameter has been expanded to: {} {}", theParamName, String.join(", ", expansions));
-					expansions.stream().map(StringParam::new).forEach(toAdd::add);
+					expansions.stream()
+						.map(StringParam::new)
+						.forEach(toAdd::add);
 				}
 			}
 		}

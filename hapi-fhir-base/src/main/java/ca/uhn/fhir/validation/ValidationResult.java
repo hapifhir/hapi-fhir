@@ -67,12 +67,13 @@ public class ValidationResult {
 	 * severity {@link ResultSeverityEnum#ERROR} or {@link ResultSeverityEnum#FATAL}. A validation
 	 * is still considered successful if it only has issues at level {@link ResultSeverityEnum#WARNING} or
 	 * lower.
-	 *
+	 * 
 	 * @return true if the validation was successful
 	 */
 	public boolean isSuccessful() {
 		return myIsSuccessful;
 	}
+
 
 	private String toDescription() {
 		if (myMessages.isEmpty()) {
@@ -83,12 +84,8 @@ public class ValidationResult {
 		int shownMsgQty = Math.min(myErrorDisplayLimit, myMessages.size());
 
 		if (shownMsgQty < myMessages.size()) {
-			b.append("(showing first ")
-					.append(shownMsgQty)
-					.append(" messages out of ")
-					.append(myMessages.size())
-					.append(" total)")
-					.append(ourNewLine);
+			b.append("(showing first ").append(shownMsgQty).append(" messages out of ")
+				.append(myMessages.size()).append(" total)").append(ourNewLine);
 		}
 
 		for (int i = 0; i < shownMsgQty; i++) {
@@ -106,6 +103,7 @@ public class ValidationResult {
 		return b.toString();
 	}
 
+
 	/**
 	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
 	 *             {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
@@ -120,14 +118,13 @@ public class ValidationResult {
 	 * Create an OperationOutcome resource which contains all of the messages found as a result of this validation
 	 */
 	public IBaseOperationOutcome toOperationOutcome() {
-		IBaseOperationOutcome oo = (IBaseOperationOutcome)
-				myCtx.getResourceDefinition("OperationOutcome").newInstance();
+		IBaseOperationOutcome oo = (IBaseOperationOutcome) myCtx.getResourceDefinition("OperationOutcome").newInstance();
 		populateOperationOutcome(oo);
 		return oo;
 	}
 
 	/**
-	 * Populate an operation outcome with the results of the validation
+	 * Populate an operation outcome with the results of the validation 
 	 */
 	public void populateOperationOutcome(IBaseOperationOutcome theOperationOutcome) {
 		for (SingleValidationMessage next : myMessages) {
@@ -140,15 +137,8 @@ public class ValidationResult {
 				location = null;
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
-			IBase issue = OperationOutcomeUtil.addIssueWithMessageId(
-					myCtx,
-					theOperationOutcome,
-					severity,
-					next.getMessage(),
-					next.getMessageId(),
-					location,
-					Constants.OO_INFOSTATUS_PROCESSING);
-
+			IBase issue = OperationOutcomeUtil.addIssueWithMessageId(myCtx, theOperationOutcome, severity, next.getMessage(), next.getMessageId(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			
 			if (next.getLocationLine() != null || next.getLocationCol() != null) {
 				String unknown = "(unknown)";
 				String line = unknown;
@@ -173,8 +163,7 @@ public class ValidationResult {
 
 	@Override
 	public String toString() {
-		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful
-				+ ", description='" + toDescription() + '\'' + '}';
+		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
 	}
 
 	/**
@@ -184,13 +173,10 @@ public class ValidationResult {
 		return myCtx;
 	}
 
-	public int getErrorDisplayLimit() {
-		return myErrorDisplayLimit;
-	}
+	public int getErrorDisplayLimit() { return myErrorDisplayLimit; }
 
-	public void setErrorDisplayLimit(int theErrorDisplayLimit) {
-		myErrorDisplayLimit = theErrorDisplayLimit;
-	}
+	public void setErrorDisplayLimit(int theErrorDisplayLimit) { myErrorDisplayLimit = theErrorDisplayLimit; }
 
-	private static final String ourNewLine = System.getProperty("line.separator");
+
+	private static final String  ourNewLine = System.getProperty("line.separator");
 }

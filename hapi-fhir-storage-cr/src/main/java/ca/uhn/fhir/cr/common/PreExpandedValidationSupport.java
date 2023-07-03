@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
  * This class provides an implementation of IValidationSupport
  * interface which is used for validation of terminology services.
  */
+
 public class PreExpandedValidationSupport implements IValidationSupport {
 	private final FhirContext myFhirContext;
 
@@ -41,22 +42,16 @@ public class PreExpandedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionOutcome expandValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			@Nullable ValueSetExpansionOptions theExpansionOptions,
-			@Nonnull IBaseResource theValueSetToExpand) {
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext,
+																  @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		Validate.notNull(theValueSetToExpand, "theValueSetToExpand must not be null or blank");
 
-		if (!getFhirContext()
-				.getResourceDefinition("ValueSet")
-				.getChildByName("expansion")
-				.getAccessor()
-				.getValues(theValueSetToExpand)
-				.isEmpty()) {
+		if (!getFhirContext().getResourceDefinition("ValueSet").getChildByName("expansion").getAccessor()
+			.getValues(theValueSetToExpand).isEmpty()) {
 			return new ValueSetExpansionOutcome(theValueSetToExpand);
 		} else {
-			return IValidationSupport.super.expandValueSet(
-					theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
+			return IValidationSupport.super.expandValueSet(theValidationSupportContext, theExpansionOptions,
+				theValueSetToExpand);
 		}
 	}
 
@@ -64,4 +59,5 @@ public class PreExpandedValidationSupport implements IValidationSupport {
 	public FhirContext getFhirContext() {
 		return this.myFhirContext;
 	}
+
 }

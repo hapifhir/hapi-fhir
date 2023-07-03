@@ -31,20 +31,23 @@ import org.hl7.fhir.r4.model.Patient;
 
 public abstract class ServerExceptionsExample implements IResourceProvider {
 
-	private boolean databaseIsDown;
+private boolean databaseIsDown;
 
-	// START SNIPPET: returnOO
-	@Read
-	public Patient read(@IdParam IdType theId) {
-		if (databaseIsDown) {
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("Database is down");
-			throw new InternalErrorException(Msg.code(641) + "Database is down", oo);
-		}
+//START SNIPPET: returnOO
+@Read
+public Patient read(@IdParam IdType theId) {
+   if (databaseIsDown) {
+      OperationOutcome oo = new OperationOutcome();
+      oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("Database is down");
+      throw new InternalErrorException(Msg.code(641) + "Database is down", oo);
+   }
+   
+   Patient patient = new Patient(); // populate this
+   return patient;
+}
+//END SNIPPET: returnOO
 
-		Patient patient = new Patient(); // populate this
-		return patient;
-	}
-	// END SNIPPET: returnOO
 
 }
+
+

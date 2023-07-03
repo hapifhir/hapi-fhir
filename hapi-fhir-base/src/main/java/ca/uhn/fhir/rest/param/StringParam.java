@@ -20,9 +20,11 @@
 package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -44,10 +46,12 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 	private Boolean myNicknameExpand;
 
+
 	/**
 	 * Constructor
 	 */
-	public StringParam() {}
+	public StringParam() {
+	}
 
 	/**
 	 * Constructor
@@ -94,12 +98,12 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(myExact)
-				.append(myText)
-				.append(myContains)
-				.append(myValue)
-				.append(getMissing())
-				.toHashCode();
+			.append(myExact)
+			.append(myText)
+			.append(myContains)
+			.append(myValue)
+			.append(getMissing())
+			.toHashCode();
 	}
 
 	@Override
@@ -108,9 +112,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			myNicknameExpand = true;
 			theQualifier = "";
 
-			if (!("name".equals(theParamName) || "given".equals(theParamName))) {
-				ourLog.debug(
-						":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"");
+			if (!("name".equals(theParamName) || "given".equals(theParamName))){
+				ourLog.debug(":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"");
 			}
 		}
 
@@ -125,7 +128,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setContains(false);
 		}
 
-		setText(Constants.PARAMQUALIFIER_STRING_TEXT.equals(theQualifier));
+		setText( Constants.PARAMQUALIFIER_STRING_TEXT.equals(theQualifier) );
 
 		myValue = ParameterUtil.unescape(theValue);
 	}
@@ -171,9 +174,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		return defaultString(myValue);
 	}
 
-	public boolean isText() {
-		return myText;
-	}
+	public boolean isText() { return myText; }
 
 	public void setText(boolean theText) {
 		myText = theText;
@@ -181,6 +182,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setContains(false);
 			setExact(false);
 			setMissing(null);
+
 		}
 	}
 
@@ -240,4 +242,5 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		}
 		return builder.toString();
 	}
+
 }

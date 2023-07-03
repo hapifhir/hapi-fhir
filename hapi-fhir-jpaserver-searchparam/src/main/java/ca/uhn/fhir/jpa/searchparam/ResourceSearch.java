@@ -31,10 +31,7 @@ public class ResourceSearch {
 	private final SearchParameterMap mySearchParameterMap;
 	private final RequestPartitionId myRequestPartitionId;
 
-	public ResourceSearch(
-			RuntimeResourceDefinition theRuntimeResourceDefinition,
-			SearchParameterMap theSearchParameterMap,
-			RequestPartitionId theRequestPartitionId) {
+	public ResourceSearch(RuntimeResourceDefinition theRuntimeResourceDefinition, SearchParameterMap theSearchParameterMap, RequestPartitionId theRequestPartitionId) {
 		myRuntimeResourceDefinition = theRuntimeResourceDefinition;
 		mySearchParameterMap = theSearchParameterMap;
 		myRequestPartitionId = theRequestPartitionId;

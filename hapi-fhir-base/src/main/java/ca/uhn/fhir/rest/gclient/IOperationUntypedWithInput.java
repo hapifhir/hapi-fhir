@@ -28,7 +28,7 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 * The client should invoke this method using an HTTP GET instead of an HTTP POST. Note that
 	 * according the the FHIR specification, all methods must support using the POST method, but
 	 * only certain methods may support the HTTP GET method, so it is generally not necessary
-	 * to use this feature.
+	 * to use this feature. 
 	 * <p>
 	 * If you have a specific reason for needing to use a GET however, this method will enable it.
 	 * </p>

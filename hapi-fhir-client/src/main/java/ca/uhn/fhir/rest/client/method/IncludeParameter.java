@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.api.Constants;
@@ -44,10 +44,8 @@ class IncludeParameter extends BaseQueryParameter {
 	private Class<?> mySpecType;
 	private boolean myReverse;
 
-	public IncludeParameter(
-			IncludeParam theAnnotation,
-			Class<? extends Collection<Include>> theInstantiableCollectionType,
-			Class<?> theSpecType) {
+
+	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
@@ -63,9 +61,9 @@ class IncludeParameter extends BaseQueryParameter {
 
 		mySpecType = theSpecType;
 		if (mySpecType != Include.class && mySpecType != String.class) {
-			throw new ConfigurationException(Msg.code(1462) + "Invalid @" + IncludeParam.class.getSimpleName()
-					+ " parameter type: " + mySpecType);
+			throw new ConfigurationException(Msg.code(1462) + "Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
 		}
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,8 +87,7 @@ class IncludeParameter extends BaseQueryParameter {
 		return retVal;
 	}
 
-	private void convertAndAddIncludeToList(
-			ArrayList<QualifiedParamList> theQualifiedParamLists, Include theInclude, FhirContext theContext) {
+	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> theQualifiedParamLists, Include theInclude, FhirContext theContext) {
 		String qualifier = null;
 		if (theInclude.isRecurse()) {
 			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
@@ -120,4 +117,5 @@ class IncludeParameter extends BaseQueryParameter {
 	public boolean isRequired() {
 		return false;
 	}
+
 }

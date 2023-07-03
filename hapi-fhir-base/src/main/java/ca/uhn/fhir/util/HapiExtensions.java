@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.util;
 
+import java.util.Set;
+
 public class HapiExtensions {
 
 	/**
@@ -27,8 +29,7 @@ public class HapiExtensions {
 	 * placed on the <code>Subscription.channel</code> element
 	 * </p>
 	 */
-	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
+	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
 
 	/**
 	 * This extension URL indicates whether a REST HOOK delivery should
@@ -38,8 +39,7 @@ public class HapiExtensions {
 	 * placed on the <code>Subscription.channel</code> element.
 	 * </p>
 	 */
-	public static final String EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-strip-version-ids";
+	public static final String EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-strip-version-ids";
 
 	/**
 	 * This extension URL indicates whether a REST HOOK delivery should
@@ -57,14 +57,12 @@ public class HapiExtensions {
 	 * placed on the <code>Subscription.channel</code> element.
 	 * </p>
 	 */
-	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
+	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
 
 	/**
 	 * Indicate which strategy will be used to match this subscription
 	 */
-	public static final String EXT_SUBSCRIPTION_MATCHING_STRATEGY =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-matching-strategy";
+	public static final String EXT_SUBSCRIPTION_MATCHING_STRATEGY = "http://hapifhir.io/fhir/StructureDefinition/subscription-matching-strategy";
 
 	/**
 	 * <p>
@@ -72,32 +70,27 @@ public class HapiExtensions {
 	 * placed on the <code>Subscription.channel</code> element
 	 * </p>
 	 */
-	public static final String EXT_SUBSCRIPTION_EMAIL_FROM =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
+	public static final String EXT_SUBSCRIPTION_EMAIL_FROM = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
 
 	/**
 	 * Extension ID for external binary references
 	 */
-	public static final String EXT_EXTERNALIZED_BINARY_ID =
-			"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
+	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
 	 * For subscription, deliver a bundle containing a search result instead of just a single resource
 	 */
-	public static final String EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-payload-search-criteria";
+	public static final String EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA = "http://hapifhir.io/fhir/StructureDefinition/subscription-payload-search-criteria";
 
 	/**
 	 * Message added to expansion valueset
 	 */
-	public static final String EXT_VALUESET_EXPANSION_MESSAGE =
-			"http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
 
 	/**
 	 * Extension URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */
-	public static final String EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING =
-			"http://hapifhir.io/fhir/StructureDefinition/searchparameter-token-suppress-text-index";
+	public static final String EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-token-suppress-text-index";
 	/**
 	 * <p>
 	 * This extension represents the equivalent of the
@@ -107,33 +100,28 @@ public class HapiExtensions {
 	 * </p>
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
-
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
 	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
 	 */
-	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER =
-			"http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
 
 	/**
 	 * URL for boolean extension added to all placeholder resources
 	 */
-	public static final String EXT_RESOURCE_PLACEHOLDER =
-			"http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
+	public static final String EXT_RESOURCE_PLACEHOLDER = "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder";
 
 	/**
 	 * URL for extension in a Group Bulk Export which identifies the golden patient of a given exported resource.
 	 */
-	public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL =
-			"https://hapifhir.org/associated-patient-golden-resource/";
+    public static final String ASSOCIATED_GOLDEN_RESOURCE_EXTENSION_URL = "https://hapifhir.org/associated-patient-golden-resource/";
 
 	/**
 	 * This extension provides an example value for a parameter value for
 	 * a REST operation (eg for an OperationDefinition)
 	 */
-	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE =
-			"http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
+	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE = "http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
 
 	/**
 	 * This extension provides a way for subscribers to provide
@@ -141,27 +129,23 @@ public class HapiExtensions {
 	 * If provided, subscriptions will be retried this many times
 	 * (to a total of retry-count + 1 (for original attempt)
 	 */
-	public static final String EX_RETRY_COUNT =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
+	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
 
 	/**
 	 * This extension provides a way for subscribers to indicate if DELETE messages must be sent (default is ignoring them)
 	 */
-	public static final String EX_SEND_DELETE_MESSAGES =
-			"http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages";
+	public static final String EX_SEND_DELETE_MESSAGES = "http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages";
 
 	/**
 	 * This entension allows subscriptions to be marked as cross partition and with correct settings, listen to incoming resources from all partitions.
 	 */
-	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION =
-			"https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
+	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION = "https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
 
 	/**
 	 * This extension is used for "uplifted refchains" on search parameters. See the
 	 * HAPI FHIR documentation for an explanation of how these work.
 	 */
-	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN =
-			"https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN = "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
 	/**
 	 * This extension is used for "uplifted refchains" on search parameters. See the
 	 * HAPI FHIR documentation for an explanation of how these work.
@@ -173,13 +157,14 @@ public class HapiExtensions {
 	 */
 	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
 
-	public static final String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE =
-			"http://hl7.org/fhir/tools/CustomBaseResource";
-	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE =
-			"http://hl7.org/fhir/tools/CustomTargetResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE = "http://hl7.org/fhir/tools/CustomBaseResource";
+	public static final String EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE = "http://hl7.org/fhir/tools/CustomTargetResource";
 
 	/**
 	 * Non instantiable
 	 */
-	private HapiExtensions() {}
+	private HapiExtensions() {
+	}
+
+
 }

@@ -21,11 +21,12 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -36,13 +37,7 @@ public interface IRuleApplier {
 	@Nonnull
 	Logger getTroubleshootingLog();
 
-	Verdict applyRulesAndReturnDecision(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			Pointcut thePointcut);
+	Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut);
 
 	@Nullable
 	IValidationSupport getValidationSupport();
@@ -50,6 +45,5 @@ public interface IRuleApplier {
 	@Nullable
 	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		return null;
-	}
-	;
+	};
 }

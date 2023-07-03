@@ -39,12 +39,12 @@ public class MigrationTaskSkipper {
 			return;
 		}
 		Set<String> skippedVersionSet = Stream.of(theSkipVersions.split(","))
-				.map(String::trim)
-				// TODO KHS filter out all characters that aren't numbers, periods and underscores
-				.map(s -> s.replace("'", ""))
-				.map(s -> s.replace("\"", ""))
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.toSet());
+			.map(String::trim)
+			// TODO KHS filter out all characters that aren't numbers, periods and underscores
+			.map(s -> s.replace("'", ""))
+			.map(s -> s.replace("\"", ""))
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toSet());
 
 		for (BaseTask task : theTasks) {
 			if (skippedVersionSet.contains(task.getMigrationVersion())) {

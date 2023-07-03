@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,13 +40,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,12 +73,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private final String myQueryName;
 	private final boolean myAllowUnknownParams;
 
-	public SearchMethodBinding(
-			Class<? extends IBaseResource> theReturnResourceType,
-			Class<? extends IBaseResource> theResourceProviderResourceType,
-			Method theMethod,
-			FhirContext theContext,
-			Object theProvider) {
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Class<? extends IBaseResource> theResourceProviderResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
@@ -90,12 +86,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 * Only compartment searching methods may have an ID parameter
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
-			String msg = theContext
-					.getLocalizer()
-					.getMessage(
-							getClass().getName() + ".idWithoutCompartment",
-							theMethod.getName(),
-							theMethod.getDeclaringClass());
+			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
 			throw new ConfigurationException(Msg.code(412) + msg);
 		}
 
@@ -105,14 +96,17 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			this.myResourceProviderResourceName = null;
 		}
 
-		myRequiredParamNames = getQueryParameters().stream()
-				.filter(t -> t.isRequired())
-				.map(t -> t.getName())
-				.collect(Collectors.toList());
-		myOptionalParamNames = getQueryParameters().stream()
-				.filter(t -> !t.isRequired())
-				.map(t -> t.getName())
-				.collect(Collectors.toList());
+		myRequiredParamNames = getQueryParameters()
+			.stream()
+			.filter(t -> t.isRequired())
+			.map(t -> t.getName())
+			.collect(Collectors.toList());
+		myOptionalParamNames = getQueryParameters()
+			.stream()
+			.filter(t -> !t.isRequired())
+			.map(t -> t.getName())
+			.collect(Collectors.toList());
+
 	}
 
 	public String getDescription() {
@@ -155,11 +149,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return MethodMatchEnum.NONE;
 		}
 		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
-			ourLog.trace(
-					"Method {} doesn't match because it is for compartment {} but request is compartment {}",
-					getMethod(),
-					myCompartmentName,
-					theRequest.getCompartmentName());
+			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
 			return MethodMatchEnum.NONE;
 		}
 
@@ -183,8 +173,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		Set<String> unqualifiedNames =
-				theRequest.getUnqualifiedToQualifiedNames().keySet();
+		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
 		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
 
 		MethodMatchEnum retVal = MethodMatchEnum.EXACT;
@@ -200,27 +189,23 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 				if (nextRequestParam.equals(nextMethodParam.getName())) {
 					QualifierDetails qualifiers = QualifierDetails.extractQualifiersFromParameterName(nextRequestParam);
-					if (qualifiers.passes(
-							nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
+					if (qualifiers.passes(nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
 						parameterMatches = true;
 					}
 				} else if (nextUnqualifiedRequestParam.equals(nextMethodParam.getName())) {
-					List<String> qualifiedNames =
-							theRequest.getUnqualifiedToQualifiedNames().get(nextUnqualifiedRequestParam);
-					if (passesWhitelistAndBlacklist(
-							qualifiedNames,
-							nextMethodParam.getQualifierWhitelist(),
-							nextMethodParam.getQualifierBlacklist())) {
+					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(nextUnqualifiedRequestParam);
+					if (passesWhitelistAndBlacklist(qualifiedNames, nextMethodParam.getQualifierWhitelist(), nextMethodParam.getQualifierBlacklist())) {
 						parameterMatches = true;
 					}
 				}
 
 				// Repetitions supplied by URL but not supported by this parameter
-				if (theRequest.getParameters().get(nextRequestParam).length > 1
-						!= nextMethodParam.supportsRepetition()) {
+				if (theRequest.getParameters().get(nextRequestParam).length > 1 != nextMethodParam.supportsRepetition()) {
 					approx = true;
 				}
+
 			}
+
 
 			if (parameterMatches) {
 
@@ -235,11 +220,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				} else {
 					retVal = retVal.weakerOf(MethodMatchEnum.NONE);
 				}
+
 			}
 
 			if (retVal == MethodMatchEnum.NONE) {
 				break;
 			}
+
 		}
 
 		if (retVal != MethodMatchEnum.NONE) {
@@ -282,13 +269,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	private static boolean mightBeSearchRequest(RequestDetails theRequest) {
-		if (theRequest.getRequestType() == RequestTypeEnum.GET
-				&& theRequest.getOperation() != null
-				&& !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			return false;
 		}
-		if (theRequest.getRequestType() == RequestTypeEnum.POST
-				&& !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			return false;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
@@ -301,9 +285,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(
-			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
-			throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -311,6 +293,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Object response = invokeServerMethod(theRequest, theMethodParams);
 
 		return toResourceList(response);
+
 	}
 
 	@Override
@@ -318,8 +301,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return false;
 	}
 
-	private boolean passesWhitelistAndBlacklist(
-			List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
+
+	private boolean passesWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
 			return true;
 		}
@@ -336,4 +319,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	public String toString() {
 		return getMethod().toString();
 	}
+
+
 }

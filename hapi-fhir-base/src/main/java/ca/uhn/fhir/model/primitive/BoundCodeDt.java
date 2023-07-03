@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import org.apache.commons.lang3.Validate;
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+
+import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name = "code", isSpecialization = true)
 public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
@@ -54,10 +55,9 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	public IValueSetEnumBinder<T> getBinder() {
 		return myBinder;
 	}
-
+	
 	public T getValueAsEnum() {
-		Validate.notNull(
-				myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
 		T retVal = myBinder.fromCodeString(getValue());
 		if (retVal == null) {
 			// TODO: throw special exception type?
@@ -73,9 +73,8 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	}
 
 	public void setValueAsEnum(T theValue) {
-		Validate.notNull(
-				myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
-		if (theValue == null) {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
+		if (theValue==null) {
 			setValue(null);
 		} else {
 			setValue(myBinder.toCodeString(theValue));

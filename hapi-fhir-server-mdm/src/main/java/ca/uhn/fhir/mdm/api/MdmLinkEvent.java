@@ -20,9 +20,14 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MdmLinkEvent implements IModelJson {
 
@@ -43,6 +48,8 @@ public class MdmLinkEvent implements IModelJson {
 
 	@Override
 	public String toString() {
-		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
+		return "MdmLinkEvent{" +
+			"myMdmLinks=" + myMdmLinks +
+			'}';
 	}
 }

@@ -42,12 +42,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	/**
 	 * Constructor
 	 */
-	public RuntimeChildResourceDefinition(
-			Field theField,
-			String theElementName,
-			Child theChildAnnotation,
-			Description theDescriptionAnnotation,
-			List<Class<? extends IBaseResource>> theResourceTypes) {
+	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceTypes = theResourceTypes;
 
@@ -84,14 +79,12 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myRuntimeDef = findResourceReferenceDefinition(theClassToElementDefinitions);
 
 		myValidChildNames = new HashSet<String>();
 		myValidChildNames.add(getElementName());
-
+		
 		/*
 		 * [elementName]Resource is not actually valid FHIR but we've encountered it in the wild
 		 * so we'll accept it just to be nice
@@ -101,28 +94,26 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 		/*
 		 * Below has been disabled- We used to allow field names to contain the name of the resource
 		 * that they accepted. This wasn't valid but we accepted it just to be flexible because there
-		 * were some bad examples containing this. This causes conflicts with actual field names in
-		 * recent definitions though, so it has been disabled as of HAPI 0.9
+		 * were some bad examples containing this. This causes conflicts with actual field names in 
+		 * recent definitions though, so it has been disabled as of HAPI 0.9 
 		 */
-		//		for (Class<? extends IBaseResource> next : myResourceTypes) {
-		//			if (next == IResource.class) {
-		//				for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry :
-		// theClassToElementDefinitions.entrySet()) {
-		//					if (IResource.class.isAssignableFrom(nextEntry.getKey())) {
-		//						RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) nextEntry.getValue();
-		//						myValidChildNames.add(getElementName() + nextDef.getName());
-		//					}
-		//				}
-		//			}
-		//			else {
-		//				RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);
-		//				if (nextDef == null) {
-		//					throw new ConfigurationException(Msg.code(1691) + "Can't find child of type: " + next.getCanonicalName()
-		// + " in " + getField().getDeclaringClass());
-		//				}
-		//				myValidChildNames.add(getElementName() + nextDef.getName());
-		//			}
-		//		}
+//		for (Class<? extends IBaseResource> next : myResourceTypes) {
+//			if (next == IResource.class) {
+//				for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : theClassToElementDefinitions.entrySet()) {
+//					if (IResource.class.isAssignableFrom(nextEntry.getKey())) {
+//						RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) nextEntry.getValue();
+//						myValidChildNames.add(getElementName() + nextDef.getName());
+//					}
+//				}
+//			} 
+//			else {
+//				RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);
+//				if (nextDef == null) {
+//					throw new ConfigurationException(Msg.code(1691) + "Can't find child of type: " + next.getCanonicalName() + " in " + getField().getDeclaringClass());
+//				}
+//				myValidChildNames.add(getElementName() + nextDef.getName());
+//			}
+//		}
 
 		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);

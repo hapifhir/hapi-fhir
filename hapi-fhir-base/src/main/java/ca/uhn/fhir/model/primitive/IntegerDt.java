@@ -46,7 +46,7 @@ public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDat
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theIntegerAsString
 	 *            A string representation of an integer
 	 * @throws DataFormatException
@@ -69,4 +69,5 @@ public class IntegerDt extends BasePrimitive<Integer> implements IBaseIntegerDat
 	protected String encode(Integer theValue) {
 		return Integer.toString(theValue);
 	}
+
 }

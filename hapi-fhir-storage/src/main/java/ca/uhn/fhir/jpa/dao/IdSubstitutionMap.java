@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 public class IdSubstitutionMap {
 
 	private final Map<Entry, Entry> myMap = new HashMap<>();
-	private final Multimap<Entry, Entry> myReverseMap =
-			MultimapBuilder.hashKeys().arrayListValues().build();
+	private final Multimap<Entry, Entry> myReverseMap = MultimapBuilder.hashKeys().arrayListValues().build();
+
 
 	public boolean containsSource(IIdType theId) {
 		if (theId.isLocal()) {
@@ -63,6 +63,7 @@ public class IdSubstitutionMap {
 		return null;
 	}
 
+
 	public IIdType getForSource(String theId) {
 		Entry target = myMap.get(new Entry(theId));
 		if (target != null) {
@@ -73,9 +74,11 @@ public class IdSubstitutionMap {
 	}
 
 	public List<Pair<IIdType, IIdType>> entrySet() {
-		return myMap.entrySet().stream()
-				.map(t -> Pair.of(t.getKey().myId, t.getValue().myId))
-				.collect(Collectors.toList());
+		return myMap
+			.entrySet()
+			.stream()
+			.map(t->Pair.of(t.getKey().myId, t.getValue().myId))
+			.collect(Collectors.toList());
 	}
 
 	public void put(IIdType theSource, IIdType theTarget) {
@@ -86,6 +89,7 @@ public class IdSubstitutionMap {
 	public boolean isEmpty() {
 		return myMap.isEmpty();
 	}
+
 
 	private static class Entry {
 
@@ -118,6 +122,7 @@ public class IdSubstitutionMap {
 		public int hashCode() {
 			return myUnversionedId.hashCode();
 		}
+
 	}
 
 	static String toVersionlessValue(IIdType theId) {

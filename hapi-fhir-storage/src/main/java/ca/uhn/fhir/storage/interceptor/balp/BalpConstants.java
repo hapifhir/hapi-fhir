@@ -27,22 +27,19 @@ public class BalpConstants {
 	 * <code>1 - Machine name</code>. This constant is used only for convenience since the
 	 * existing Enum uses numerical codes that are not great for readability.
 	 */
-	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_MACHINE_NAME =
-			AuditEvent.AuditEventAgentNetworkType._1;
+	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_MACHINE_NAME = AuditEvent.AuditEventAgentNetworkType._1;
 	/**
 	 * Constant for {@link AuditEvent.AuditEventAgentNetworkType} representing the code
 	 * <code>2 - IP Address</code>. This constant is used only for convenience since the
 	 * existing Enum uses numerical codes that are not great for readability.
 	 */
-	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_IP_ADDRESS =
-			AuditEvent.AuditEventAgentNetworkType._2;
+	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_IP_ADDRESS = AuditEvent.AuditEventAgentNetworkType._2;
 	/**
 	 * Constant for {@link AuditEvent.AuditEventAgentNetworkType} representing the code
 	 * <code>3 - URI</code>. This constant is used only for convenience since the
 	 * existing Enum uses numerical codes that are not great for readability.
 	 */
-	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_URI =
-			AuditEvent.AuditEventAgentNetworkType._5;
+	public static final AuditEvent.AuditEventAgentNetworkType AUDIT_EVENT_AGENT_NETWORK_TYPE_URI = AuditEvent.AuditEventAgentNetworkType._5;
 
 	public static final String CS_AUDIT_EVENT_TYPE = "http://terminology.hl7.org/CodeSystem/audit-event-type";
 	public static final String CS_AUDIT_ENTITY_TYPE = "http://terminology.hl7.org/CodeSystem/audit-entity-type";

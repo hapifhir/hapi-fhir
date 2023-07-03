@@ -35,7 +35,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@Import({FhirContextDstu2Config.class, GeneratedDaoAndResourceProviderConfigDstu2.class, JpaConfig.class})
+@Import({
+	FhirContextDstu2Config.class,
+	GeneratedDaoAndResourceProviderConfigDstu2.class,
+	JpaConfig.class
+})
 public class JpaDstu2Config {
 	@Bean
 	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
@@ -60,4 +64,5 @@ public class JpaDstu2Config {
 		retVal.setContext(theFhirContext);
 		return retVal;
 	}
+
 }

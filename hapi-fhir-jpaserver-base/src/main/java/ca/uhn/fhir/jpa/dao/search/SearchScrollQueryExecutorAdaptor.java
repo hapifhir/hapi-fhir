@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import org.hibernate.search.engine.backend.common.DocumentReference;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.SearchScrollResult;
 

@@ -34,11 +34,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincParentGroupFileHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
-	public LoincParentGroupFileHandler(
-			Map<String, TermConcept> theCode2concept,
-			List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps,
-			Properties theUploadProperties) {
+	public LoincParentGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
@@ -57,4 +53,6 @@ public class LoincParentGroupFileHandler extends BaseLoincHandler implements IZi
 
 		getValueSet(valueSetId, LoincGroupFileHandler.VS_URI_PREFIX + parentGroupId, parentGroupName, null);
 	}
+
+
 }

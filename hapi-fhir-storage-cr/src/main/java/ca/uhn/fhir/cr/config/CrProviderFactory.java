@@ -45,8 +45,7 @@ public class CrProviderFactory {
 			case R4:
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider.class);
 			default:
-				throw new ConfigurationException(Msg.code(1654) + "CQL is not supported for FHIR version "
-						+ myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1654) + "CQL is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

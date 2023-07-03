@@ -25,40 +25,42 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.sql.Clob;
 import java.sql.SQLException;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
 
 @Entity
 @Immutable
 @Subselect(
-		/*
-		 * Note about the CONCAT function below- We need a primary key (an @Id) column
-		 * because hibernate won't allow the view the function without it, but
-		 */
-		"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " + "       vsc.PID                         AS CONCEPT_PID, "
-				+ "       vsc.VALUESET_PID                AS CONCEPT_VALUESET_PID, "
-				+ "       vsc.VALUESET_ORDER              AS CONCEPT_VALUESET_ORDER, "
-				+ "       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, "
-				+ "       vsc.CODEVAL                     AS CONCEPT_CODEVAL, "
-				+ "       vsc.DISPLAY                     AS CONCEPT_DISPLAY, "
-				+ "       vsc.SYSTEM_VER                  AS SYSTEM_VER, "
-				+ "       vsc.SOURCE_PID                  AS SOURCE_PID, "
-				+ "       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, "
-				+ "       vscd.PID                        AS DESIGNATION_PID, "
-				+ "       vscd.LANG                       AS DESIGNATION_LANG, "
-				+ "       vscd.USE_SYSTEM                 AS DESIGNATION_USE_SYSTEM, "
-				+ "       vscd.USE_CODE                   AS DESIGNATION_USE_CODE, "
-				+ "       vscd.USE_DISPLAY                AS DESIGNATION_USE_DISPLAY, "
-				+ "       vscd.VAL                        AS DESIGNATION_VAL "
-				+ "FROM TRM_VALUESET_CONCEPT vsc "
-				+ "LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID")
+	/*
+	 * Note about the CONCAT function below- We need a primary key (an @Id) column
+	 * because hibernate won't allow the view the function without it, but
+	 */
+	"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " +
+		"       vsc.PID                         AS CONCEPT_PID, " +
+		"       vsc.VALUESET_PID                AS CONCEPT_VALUESET_PID, " +
+		"       vsc.VALUESET_ORDER              AS CONCEPT_VALUESET_ORDER, " +
+		"       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, " +
+		"       vsc.CODEVAL                     AS CONCEPT_CODEVAL, " +
+		"       vsc.DISPLAY                     AS CONCEPT_DISPLAY, " +
+		"       vsc.SYSTEM_VER                  AS SYSTEM_VER, " +
+		"       vsc.SOURCE_PID                  AS SOURCE_PID, " +
+		"       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, " +
+		"       vscd.PID                        AS DESIGNATION_PID, " +
+		"       vscd.LANG                       AS DESIGNATION_LANG, " +
+		"       vscd.USE_SYSTEM                 AS DESIGNATION_USE_SYSTEM, " +
+		"       vscd.USE_CODE                   AS DESIGNATION_USE_CODE, " +
+		"       vscd.USE_DISPLAY                AS DESIGNATION_USE_DISPLAY, " +
+		"       vscd.VAL                        AS DESIGNATION_VAL " +
+		"FROM TRM_VALUESET_CONCEPT vsc " +
+		"LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID"
+)
 public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
 
@@ -84,7 +86,7 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 	@Column(name = "CONCEPT_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
 	private String myConceptDisplay;
 
-	@Column(name = "SYSTEM_VER", length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
+	@Column(name="SYSTEM_VER", length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
 	private String myConceptSystemVersion;
 
 	@Column(name = "DESIGNATION_PID")
@@ -183,4 +185,5 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 	public String getConceptSystemVersion() {
 		return myConceptSystemVersion;
 	}
+
 }

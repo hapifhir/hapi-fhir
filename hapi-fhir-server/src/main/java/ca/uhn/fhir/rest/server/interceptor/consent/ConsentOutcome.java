@@ -54,14 +54,9 @@ public class ConsentOutcome {
 		this(theStatus, null, theResource);
 	}
 
-	private ConsentOutcome(
-			ConsentOperationStatusEnum theStatus,
-			IBaseOperationOutcome theOperationOutcome,
-			IBaseResource theResource) {
+	private ConsentOutcome(ConsentOperationStatusEnum theStatus, IBaseOperationOutcome theOperationOutcome, IBaseResource theResource) {
 		Validate.notNull(theStatus, "theStatus must not be null");
-		Validate.isTrue(
-				!(theOperationOutcome != null && theResource != null),
-				"theOperationOutcome and theResource must not both be null");
+		Validate.isTrue(!(theOperationOutcome != null && theResource != null), "theOperationOutcome and theResource must not both be null");
 		myStatus = theStatus;
 		myOperationOutcome = theOperationOutcome;
 		myResource = theResource;
@@ -78,4 +73,5 @@ public class ConsentOutcome {
 	public IBaseResource getResource() {
 		return myResource;
 	}
+
 }

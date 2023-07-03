@@ -27,12 +27,11 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Subscription;
 
-public class FhirResourceDaoSubscriptionR4B extends BaseHapiFhirResourceDao<Subscription>
-		implements IFhirResourceDaoSubscription<Subscription> {
+public class FhirResourceDaoSubscriptionR4B extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(
-			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		throw new UnsupportedOperationException(Msg.code(2150));
 	}
+
 }

@@ -41,11 +41,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
-public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT>
-		implements IJpaSystemProvider {
+public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT> implements IJpaSystemProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSystemProvider.class);
 
 	public static final String RESP_PARAM_SUCCESS = "success";
@@ -69,6 +68,7 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
+
 	public BaseJpaSystemProvider() {
 		// nothing
 	}
@@ -79,20 +79,20 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 
 	@History
 	public IBundleProvider historyServer(
-			HttpServletRequest theRequest,
-			@Offset Integer theOffset,
-			@Since Date theDate,
-			@At DateRangeParam theAt,
-			RequestDetails theRequestDetails) {
+		HttpServletRequest theRequest,
+		@Offset Integer theOffset,
+		@Since Date theDate,
+		@At DateRangeParam theAt,
+		RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			DateRangeParam range = super.processSinceOrAt(theDate, theAt);
-			return myDao.history(
-					range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theOffset, theRequestDetails);
+			return myDao.history(range.getLowerBoundAsInstant(), range.getUpperBoundAsInstant(), theOffset, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
 	}
+
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX_TERMINOLOGY, idempotent = false)
 	public IBaseParameters reindexTerminology(RequestDetails theRequestDetails) {
@@ -103,18 +103,17 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 			result = myTermReadSvc.reindexTerminology();
 
 		} catch (Exception theE) {
-			throw new InternalErrorException(
-					Msg.code(2072) + "Re-creating terminology freetext indexes failed with exception: "
-							+ theE.getMessage() + NL
-							+ "With trace:" + NL + ExceptionUtils.getStackTrace(theE));
+			throw new InternalErrorException(Msg.code(2072) +
+				"Re-creating terminology freetext indexes failed with exception: " + theE.getMessage() +
+				NL +  "With trace:" + NL + ExceptionUtils.getStackTrace(theE));
 		}
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		if (!result.equals(ReindexTerminologyResult.SUCCESS)) {
+		if ( ! result.equals(ReindexTerminologyResult.SUCCESS) ) {
 			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, false);
 			String msg = result.equals(ReindexTerminologyResult.SEARCH_SVC_DISABLED)
-					? "Freetext service is not configured. Operation didn't run."
-					: "Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.";
+				? "Freetext service is not configured. Operation didn't run."
+				: "Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.";
 			ParametersUtil.addParameterToParametersString(getContext(), retVal, "message", msg);
 			return retVal;
 		}
@@ -124,5 +123,7 @@ public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProv
 		return retVal;
 	}
 
+
 	public static final String NL = System.getProperty("line.separator");
+
 }

@@ -38,10 +38,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
+import javax.net.ssl.SSLContext;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLContext;
 
 /**
  * Intended for use with the HapiFhir CLI only.
@@ -72,20 +72,16 @@ public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(
-			StringBuilder theUrl,
-			Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString,
-			RequestTypeEnum theRequestType,
-			List<Header> theHeaders) {
-		return new ApacheHttpClient(
-				getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+																 String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			RequestConfig defaultRequestConfig = RequestConfig.custom()
+			RequestConfig defaultRequestConfig =
+				RequestConfig.custom()
 					.setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout())
 					.setConnectionRequestTimeout(getConnectionRequestTimeout())
@@ -93,21 +89,24 @@ public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 					.build();
 
 			HttpClientBuilder builder = HttpClients.custom()
-					.useSystemProperties()
-					.setDefaultRequestConfig(defaultRequestConfig)
-					.disableCookieManagement();
+				.useSystemProperties()
+				.setDefaultRequestConfig(defaultRequestConfig)
+				.disableCookieManagement();
 
 			PoolingHttpClientConnectionManager connectionManager;
-			if (myTlsAuthentication != null) {
+			if(myTlsAuthentication != null){
 				SSLContext sslContext = TlsAuthenticationSvc.createSslContext(myTlsAuthentication);
 				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
 				builder.setSSLSocketFactory(sslConnectionSocketFactory);
-				Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-						.register("https", sslConnectionSocketFactory)
-						.build();
-				connectionManager =
-						new PoolingHttpClientConnectionManager(registry, null, null, null, 5000, TimeUnit.MILLISECONDS);
-			} else {
+				Registry<ConnectionSocketFactory> registry = RegistryBuilder
+					.<ConnectionSocketFactory> create()
+					.register("https", sslConnectionSocketFactory)
+					.build();
+				connectionManager = new PoolingHttpClientConnectionManager(
+					registry, null, null, null, 5000, TimeUnit.MILLISECONDS
+				);
+			}
+			else {
 				connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			}
 
@@ -126,12 +125,12 @@ public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 		myHttpClient = null;
 	}
 
-	public void useHttp() {
+	public void useHttp(){
 		myTlsAuthentication = null;
 		resetHttpClient();
 	}
 
-	public void useHttps(TlsAuthentication theTlsAuthentication) {
+	public void useHttps(TlsAuthentication theTlsAuthentication){
 		myTlsAuthentication = theTlsAuthentication;
 		resetHttpClient();
 	}
@@ -145,4 +144,5 @@ public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 	public void setProxy(String theHost, Integer thePort) {
 		throw new UnsupportedOperationException(Msg.code(2120));
 	}
+
 }

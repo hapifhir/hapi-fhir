@@ -29,10 +29,9 @@ import java.util.function.Function;
 
 public abstract class BaseTableColumnTask extends BaseTableTask {
 
-	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators =
-			new HashMap<>();
+	protected Map<String, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object>> myCalculators = new HashMap<>();
 	protected String myColumnName;
-	// If a concrete class decides to, they can define a custom WHERE clause for the task.
+	//If a concrete class decides to, they can define a custom WHERE clause for the task.
 	protected String myWhereClause;
 
 	public BaseTableColumnTask(String theProductVersion, String theSchemaVersion) {
@@ -79,9 +78,7 @@ public abstract class BaseTableColumnTask extends BaseTableTask {
 		theBuilder.append(myColumnName);
 	}
 
-	public BaseTableColumnTask addCalculator(
-			String theColumnName,
-			Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
+	public BaseTableColumnTask addCalculator(String theColumnName, Function<BaseColumnCalculatorTask.MandatoryKeyMap<String, Object>, Object> theConsumer) {
 		Validate.isTrue(myCalculators.containsKey(theColumnName) == false);
 		myCalculators.put(theColumnName, theConsumer);
 		return this;

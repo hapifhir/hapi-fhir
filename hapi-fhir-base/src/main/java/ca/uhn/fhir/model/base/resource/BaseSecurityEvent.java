@@ -21,4 +21,6 @@ package ca.uhn.fhir.model.base.resource;
 
 import ca.uhn.fhir.model.api.IResource;
 
-public interface BaseSecurityEvent extends IResource {}
+public interface BaseSecurityEvent extends IResource {
+
+}

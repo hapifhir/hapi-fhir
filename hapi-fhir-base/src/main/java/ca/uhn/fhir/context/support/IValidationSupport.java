@@ -34,6 +34,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,8 +43,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -80,6 +80,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
 
+
 	/**
 	 * Expands the given portion of a ValueSet
 	 *
@@ -90,10 +91,7 @@ public interface IValidationSupport {
 	 * @return The expansion, or null
 	 */
 	@Nullable
-	default ValueSetExpansionOutcome expandValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			@Nullable ValueSetExpansionOptions theExpansionOptions,
-			@Nonnull IBaseResource theValueSetToExpand) {
+	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
 	}
 
@@ -109,16 +107,11 @@ public interface IValidationSupport {
 	 * @since 6.0.0
 	 */
 	@Nullable
-	default ValueSetExpansionOutcome expandValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			@Nullable ValueSetExpansionOptions theExpansionOptions,
-			@Nonnull String theValueSetUrlToExpand)
-			throws ResourceNotFoundException {
+	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetUrlToExpand) throws ResourceNotFoundException {
 		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
 		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
 		if (valueSet == null) {
-			throw new ResourceNotFoundException(
-					Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
+			throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
 		}
 		return expandValueSet(theValidationSupportContext, theExpansionOptions, valueSet);
 	}
@@ -207,14 +200,17 @@ public interface IValidationSupport {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
 		if (theClass == null) {
-			Supplier<IBaseResource>[] sources = new Supplier[] {
-				() -> fetchStructureDefinition(theUri), () -> fetchValueSet(theUri), () -> fetchCodeSystem(theUri)
+			Supplier<IBaseResource>[] sources = new Supplier[]{
+				() -> fetchStructureDefinition(theUri),
+				() -> fetchValueSet(theUri),
+				() -> fetchCodeSystem(theUri)
 			};
-			return (T) Arrays.stream(sources)
-					.map(t -> t.get())
-					.filter(t -> t != null)
-					.findFirst()
-					.orElse(null);
+			return (T) Arrays
+				.stream(sources)
+				.map(t -> t.get())
+				.filter(t -> t != null)
+				.findFirst()
+				.orElse(null);
 		}
 
 		switch (getFhirContext().getResourceType(theClass)) {
@@ -293,13 +289,7 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 */
 	@Nullable
-	default CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
+	default CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
@@ -317,13 +307,7 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
 	@Nullable
-	default CodeValidationResult validateCodeInValueSet(
-			ValidationSupportContext theValidationSupportContext,
-			ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCode,
-			String theDisplay,
-			@Nonnull IBaseResource theValueSet) {
+	default CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		return null;
 	}
 
@@ -337,11 +321,7 @@ public interface IValidationSupport {
 	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
 	@Nullable
-	default LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext,
-			String theSystem,
-			String theCode,
-			String theDisplayLanguage) {
+	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 		return null;
 	}
 
@@ -354,8 +334,7 @@ public interface IValidationSupport {
 	 * @param theCode                     The code
 	 */
 	@Nullable
-	default LookupCodeResult lookupCode(
-			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 	}
 
@@ -379,12 +358,7 @@ public interface IValidationSupport {
 	 * @return Returns null if this module does not know how to handle this request
 	 */
 	@Nullable
-	default IBaseResource generateSnapshot(
-			ValidationSupportContext theValidationSupportContext,
-			IBaseResource theInput,
-			String theUrl,
-			String theWebUrl,
-			String theProfileName) {
+	default IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
 
@@ -781,13 +755,11 @@ public interface IValidationSupport {
 
 		public void throwNotFoundIfAppropriate() {
 			if (isFound() == false) {
-				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode()
-						+ "] in system[" + getSearchedForSystem() + "]");
+				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
 			}
 		}
 
-		public IBaseParameters toParameters(
-				FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+		public IBaseParameters toParameters(FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -803,9 +775,10 @@ public interface IValidationSupport {
 
 				Set<String> properties = Collections.emptySet();
 				if (theProperties != null) {
-					properties = theProperties.stream()
-							.map(IPrimitiveType::getValueAsString)
-							.collect(Collectors.toSet());
+					properties = theProperties
+						.stream()
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toSet());
 				}
 
 				for (IValidationSupport.BaseConceptProperty next : myProperties) {
@@ -824,8 +797,7 @@ public interface IValidationSupport {
 						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
 					} else if (next instanceof IValidationSupport.CodingConceptProperty) {
 						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
-						ParametersUtil.addPartCoding(
-								theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
+						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
 						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
@@ -837,8 +809,7 @@ public interface IValidationSupport {
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
 					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
-					ParametersUtil.addPartCoding(
-							theContext, property, "use", next.getUseSystem(), next.getUseCode(), next.getUseDisplay());
+					ParametersUtil.addPartCoding(theContext, property, "use", next.getUseSystem(), next.getUseCode(), next.getUseDisplay());
 					ParametersUtil.addPartString(theContext, property, "value", next.getValue());
 				}
 			}
@@ -848,11 +819,12 @@ public interface IValidationSupport {
 
 		public static LookupCodeResult notFound(String theSearchedForSystem, String theSearchedForCode) {
 			return new LookupCodeResult()
-					.setFound(false)
-					.setSearchedForSystem(theSearchedForSystem)
-					.setSearchedForCode(theSearchedForCode);
+				.setFound(false)
+				.setSearchedForSystem(theSearchedForSystem)
+				.setSearchedForCode(theSearchedForCode);
 		}
 	}
+
 
 	class TranslateCodeRequest {
 		private final String myTargetSystemUrl;
@@ -876,14 +848,14 @@ public interface IValidationSupport {
 		}
 
 		public TranslateCodeRequest(
-				List<IBaseCoding> theCodings,
-				String theTargetSystemUrl,
-				String theConceptMapUrl,
-				String theConceptMapVersion,
-				String theSourceValueSetUrl,
-				String theTargetValueSetUrl,
-				IIdType theResourceId,
-				boolean theReverse) {
+			List<IBaseCoding> theCodings,
+			String theTargetSystemUrl,
+			String theConceptMapUrl,
+			String theConceptMapVersion,
+			String theSourceValueSetUrl,
+			String theTargetValueSetUrl,
+			IIdType theResourceId,
+			boolean theReverse) {
 			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
 			myConceptMapUrl = theConceptMapUrl;
@@ -907,29 +879,29 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-					.append(myCodings, that.myCodings)
-					.append(myTargetSystemUrl, that.myTargetSystemUrl)
-					.append(myConceptMapUrl, that.myConceptMapUrl)
-					.append(myConceptMapVersion, that.myConceptMapVersion)
-					.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
-					.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
-					.append(myResourceId, that.myResourceId)
-					.append(myReverse, that.myReverse)
-					.isEquals();
+				.append(myCodings, that.myCodings)
+				.append(myTargetSystemUrl, that.myTargetSystemUrl)
+				.append(myConceptMapUrl, that.myConceptMapUrl)
+				.append(myConceptMapVersion, that.myConceptMapVersion)
+				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
+				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
+				.append(myResourceId, that.myResourceId)
+				.append(myReverse, that.myReverse)
+				.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-					.append(myCodings)
-					.append(myTargetSystemUrl)
-					.append(myConceptMapUrl)
-					.append(myConceptMapVersion)
-					.append(mySourceValueSetUrl)
-					.append(myTargetValueSetUrl)
-					.append(myResourceId)
-					.append(myReverse)
-					.toHashCode();
+				.append(myCodings)
+				.append(myTargetSystemUrl)
+				.append(myConceptMapUrl)
+				.append(myConceptMapVersion)
+				.append(mySourceValueSetUrl)
+				.append(myTargetValueSetUrl)
+				.append(myResourceId)
+				.append(myReverse)
+				.toHashCode();
 		}
 
 		public List<IBaseCoding> getCodings() {

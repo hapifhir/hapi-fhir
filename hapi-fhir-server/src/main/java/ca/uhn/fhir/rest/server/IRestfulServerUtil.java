@@ -19,28 +19,25 @@
  */
 package ca.uhn.fhir.rest.server;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IRestfulServerUtil {
 
-	Object getResourceParameter(
-			RequestDetails requestDetails,
-			Mode myMode,
-			BaseMethodBinding theMethodBinding,
-			Class<? extends IBaseResource> myResourceType);
+    Object getResourceParameter(
+            RequestDetails requestDetails, 
+            Mode myMode, 
+            BaseMethodBinding theMethodBinding,
+            Class<? extends IBaseResource> myResourceType);
 
-	Object getRequestResource(
-			RequestDetails theRequest, ParamStyle myParamStyle, Class<? extends IBaseResource> myResourceBundleType);
+    Object getRequestResource(RequestDetails theRequest, ParamStyle myParamStyle, Class<? extends IBaseResource> myResourceBundleType);
 
-	<T extends IBaseResource> T loadResourceFromRequest(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<T> theResourceType);
+    <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<T> theResourceType);
 
-	IBaseResource parseResourceFromRequest(
-			RequestDetails theRequest,
-			BaseMethodBinding theMethodBinding,
-			Class<? extends IBaseResource> theResourceType);
+    IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType);
+
 }

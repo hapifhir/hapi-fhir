@@ -19,4 +19,7 @@
  */
 package ca.uhn.fhir.i18n;
 
-public final class HapiErrorCode {}
+public final class HapiErrorCode {
+
+}
+

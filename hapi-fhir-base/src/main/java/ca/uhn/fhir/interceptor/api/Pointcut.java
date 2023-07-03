@@ -27,13 +27,13 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
+import javax.annotation.Nonnull;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * Value for {@link Hook#value()}
@@ -74,8 +74,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hook methods must return <code>void</code>.
 	 */
-	CLIENT_REQUEST(
-			void.class, "ca.uhn.fhir.rest.client.api.IHttpRequest", "ca.uhn.fhir.rest.client.api.IRestfulClient"),
+	CLIENT_REQUEST(void.class,
+		"ca.uhn.fhir.rest.client.api.IHttpRequest",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
+	),
 
 	/**
 	 * <b>Client Hook:</b>
@@ -97,11 +99,11 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hook methods must return <code>void</code>.
 	 */
-	CLIENT_RESPONSE(
-			void.class,
-			"ca.uhn.fhir.rest.client.api.IHttpRequest",
-			"ca.uhn.fhir.rest.client.api.IHttpResponse",
-			"ca.uhn.fhir.rest.client.api.IRestfulClient"),
+	CLIENT_RESPONSE(void.class,
+		"ca.uhn.fhir.rest.client.api.IHttpRequest",
+		"ca.uhn.fhir.rest.client.api.IHttpResponse",
+		"ca.uhn.fhir.rest.client.api.IRestfulClient"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -136,11 +138,11 @@ public enum Pointcut implements IPointcut {
 	 * chooses to modify the <code>CapabilityStatement</code> that was supplied to the interceptor, it is fine
 	 * for your hook method to return <code>void</code> or <code>null</code>.
 	 */
-	SERVER_CAPABILITY_STATEMENT_GENERATED(
-			IBaseConformance.class,
-			"org.hl7.fhir.instance.model.api.IBaseConformance",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	SERVER_CAPABILITY_STATEMENT_GENERATED(IBaseConformance.class,
+		"org.hl7.fhir.instance.model.api.IBaseConformance",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -165,8 +167,10 @@ public enum Pointcut implements IPointcut {
 	 * letting HAPI handle the response normally, you must return <code>false</code>. In this case,
 	 * no further processing will occur and no further interceptors will be called.
 	 */
-	SERVER_INCOMING_REQUEST_PRE_PROCESSED(
-			boolean.class, "javax.servlet.http.HttpServletRequest", "javax.servlet.http.HttpServletResponse"),
+	SERVER_INCOMING_REQUEST_PRE_PROCESSED(boolean.class,
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -211,13 +215,13 @@ public enum Pointcut implements IPointcut {
 	 * should return <code>false</code>, to indicate that they have handled the request and processing should stop.
 	 * </p>
 	 */
-	SERVER_HANDLE_EXCEPTION(
-			boolean.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse",
-			"ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException"),
+	SERVER_HANDLE_EXCEPTION(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse",
+		"ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -259,12 +263,12 @@ public enum Pointcut implements IPointcut {
 	 *
 	 * @since 5.4.0
 	 */
-	SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED(
-			boolean.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+	SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -304,12 +308,13 @@ public enum Pointcut implements IPointcut {
 	 * to indicate that the interceptor has detected an unauthorized access
 	 * attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	SERVER_INCOMING_REQUEST_POST_PROCESSED(
-			boolean.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+	SERVER_INCOMING_REQUEST_POST_PROCESSED(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -348,11 +353,12 @@ public enum Pointcut implements IPointcut {
 	 * will be aborted with an appropriate error returned to the client.
 	 * </p>
 	 */
-	SERVER_INCOMING_REQUEST_PRE_HANDLED(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.RestOperationTypeEnum"),
+	SERVER_INCOMING_REQUEST_PRE_HANDLED(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.RestOperationTypeEnum"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -369,8 +375,9 @@ public enum Pointcut implements IPointcut {
 	 * Hook methods  may modify the method binding, replace it, or return <code>null</code> to cancel the binding.
 	 * </p>
 	 */
-	SERVER_PROVIDER_METHOD_BOUND(
-			"ca.uhn.fhir.rest.server.method.BaseMethodBinding", "ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
+	SERVER_PROVIDER_METHOD_BOUND("ca.uhn.fhir.rest.server.method.BaseMethodBinding",
+		"ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -424,13 +431,13 @@ public enum Pointcut implements IPointcut {
 	 * should return an exception.
 	 * </p>
 	 */
-	SERVER_PRE_PROCESS_OUTGOING_EXCEPTION(
-			BaseServerResponseException.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"java.lang.Throwable",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+	SERVER_PRE_PROCESS_OUTGOING_EXCEPTION(BaseServerResponseException.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"java.lang.Throwable",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -476,14 +483,15 @@ public enum Pointcut implements IPointcut {
 	 * has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401
 	 * will be returned to the client.
 	 */
-	SERVER_OUTGOING_RESPONSE(
-			boolean.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.ResponseDetails",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+	SERVER_OUTGOING_RESPONSE(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.ResponseDetails",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -517,11 +525,12 @@ public enum Pointcut implements IPointcut {
 	 *
 	 * @since 5.0.0
 	 */
-	SERVER_OUTGOING_WRITER_CREATED(
-			Writer.class,
-			"java.io.Writer",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	SERVER_OUTGOING_WRITER_CREATED(Writer.class,
+		"java.io.Writer",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -567,14 +576,15 @@ public enum Pointcut implements IPointcut {
 	 * has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401
 	 * will be returned to the client.
 	 */
-	SERVER_OUTGOING_GRAPHQL_RESPONSE(
-			boolean.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"java.lang.String",
-			"java.lang.String",
-			"javax.servlet.http.HttpServletRequest",
-			"javax.servlet.http.HttpServletResponse"),
+	SERVER_OUTGOING_GRAPHQL_RESPONSE(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"java.lang.String",
+		"java.lang.String",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -605,10 +615,12 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"),
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"
+	),
+
 
 	/**
 	 * <b>Server Hook:</b>
@@ -648,10 +660,12 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	SERVER_PROCESSING_COMPLETED_NORMALLY(
-			void.class,
-			new ExceptionHandlingSpec().addLogAndSwallow(Throwable.class),
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		void.class,
+		new ExceptionHandlingSpec()
+			.addLogAndSwallow(Throwable.class),
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Server Hook:</b>
@@ -685,10 +699,12 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	SERVER_PROCESSING_COMPLETED(
-			void.class,
-			new ExceptionHandlingSpec().addLogAndSwallow(Throwable.class),
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		void.class,
+		new ExceptionHandlingSpec()
+			.addLogAndSwallow(Throwable.class),
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -709,6 +725,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_RESOURCE_MODIFIED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -731,11 +748,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, delivery will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_MATCHED(
-			boolean.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage",
-			"ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
+	SUBSCRIPTION_RESOURCE_MATCHED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -751,8 +764,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(
-			void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -774,10 +786,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_DELIVERY(
-			boolean.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -794,10 +803,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_DELIVERY(
-			void.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -820,8 +827,7 @@ public enum Pointcut implements IPointcut {
 	 * taken for the delivery.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_DELIVERY_FAILED(
-			boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "java.lang.Exception"),
+	SUBSCRIPTION_AFTER_DELIVERY_FAILED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "java.lang.Exception"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -839,10 +845,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY(
-			void.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -863,10 +866,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(
-			boolean.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -884,10 +884,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_MESSAGE_DELIVERY(
-			void.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_MESSAGE_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -912,11 +909,8 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(
-			boolean.class,
-			"ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage",
-			"ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
+
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -935,8 +929,8 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(
-			boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -953,8 +947,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(
-			void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -973,8 +967,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(
-			void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription"),
+	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(void.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription"),
 
 	/**
 	 * <b>Subscription Hook:</b>
@@ -1031,11 +1024,12 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_CASCADE_DELETE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
-			"org.hl7.fhir.instance.model.api.IBaseResource"),
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
 
 	/**
 	 * <b>Subscription Topic Hook:</b>
@@ -1054,8 +1048,8 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED(
-			boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+	SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Subscription Topic Hook:</b>
@@ -1072,8 +1066,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED(
-			void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+	SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage"),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1106,10 +1100,11 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_INITIATE_BULK_EXPORT(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		void.class,
+		"ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 	/**
 	 * <b>Storage Hook:</b>
 	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
@@ -1140,11 +1135,13 @@ public enum Pointcut implements IPointcut {
 	 * which case the delete expunge will not occur.
 	 * </p>
 	 */
+
 	STORAGE_PRE_DELETE_EXPUNGE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"java.lang.String"),
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"java.lang.String"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1187,13 +1184,15 @@ public enum Pointcut implements IPointcut {
 	 * which case the delete expunge will not occur.
 	 * </p>
 	 */
+
 	STORAGE_PRE_DELETE_EXPUNGE_PID_LIST(
-			void.class,
-			"java.lang.String",
-			"java.util.List",
-			"java.util.concurrent.atomic.AtomicLong",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		void.class,
+		"java.lang.String",
+		"java.util.List",
+		"java.util.concurrent.atomic.AtomicLong",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1236,11 +1235,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PREACCESS_RESOURCES(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	STORAGE_PREACCESS_RESOURCES(void.class,
+		"ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1274,11 +1273,11 @@ public enum Pointcut implements IPointcut {
 	 * search no matter what.
 	 * </p>
 	 */
-	STORAGE_PRECHECK_FOR_CACHED_SEARCH(
-			boolean.class,
-			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	STORAGE_PRECHECK_FOR_CACHED_SEARCH(boolean.class,
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1317,13 +1316,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESEARCH_REGISTERED(
-			void.class,
-			"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId"),
+	STORAGE_PRESEARCH_REGISTERED(void.class,
+		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1368,11 +1367,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESHOW_RESOURCES(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.IPreResourceShowDetails",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	STORAGE_PRESHOW_RESOURCES(void.class,
+		"ca.uhn.fhir.rest.api.server.IPreResourceShowDetails",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1407,13 +1406,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_RESOURCE_CREATED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId"),
+	STORAGE_PRESTORAGE_RESOURCE_CREATED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1438,8 +1437,10 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(
-			void.class, "org.hl7.fhir.instance.model.api.IBaseResource", "ca.uhn.fhir.rest.api.server.RequestDetails"),
+	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1476,13 +1477,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_RESOURCE_UPDATED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+	STORAGE_PRESTORAGE_RESOURCE_UPDATED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1517,12 +1518,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_RESOURCE_DELETED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+	STORAGE_PRESTORAGE_RESOURCE_DELETED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1565,13 +1567,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRECOMMIT_RESOURCE_CREATED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-			"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"),
+	STORAGE_PRECOMMIT_RESOURCE_CREATED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1612,14 +1614,15 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRECOMMIT_RESOURCE_UPDATED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-			"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"),
+	STORAGE_PRECOMMIT_RESOURCE_UPDATED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1655,13 +1658,13 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRECOMMIT_RESOURCE_DELETED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
-			"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"),
+	STORAGE_PRECOMMIT_RESOURCE_DELETED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1693,11 +1696,11 @@ public enum Pointcut implements IPointcut {
 	 * @see #STORAGE_TRANSACTION_PROCESSED
 	 * @since 6.2.0
 	 */
-	STORAGE_TRANSACTION_PROCESSING(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseBundle",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	STORAGE_TRANSACTION_PROCESSING(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseBundle",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1733,13 +1736,14 @@ public enum Pointcut implements IPointcut {
 	 *
 	 * @see #STORAGE_TRANSACTION_PROCESSING
 	 */
-	STORAGE_TRANSACTION_PROCESSED(
-			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseBundle",
-			"ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+	STORAGE_TRANSACTION_PROCESSED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseBundle",
+		"ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1760,10 +1764,10 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE(
-			void.class,
-			"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1786,10 +1790,10 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_TRANSACTION_WRITE_OPERATIONS_POST(
-			void.class,
-			"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_POST(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1824,13 +1828,14 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESTORAGE_DELETE_CONFLICTS(
-			// Return type
-			"ca.uhn.fhir.jpa.delete.DeleteConflictOutcome",
-			// Params
-			"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+		// Return type
+		"ca.uhn.fhir.jpa.delete.DeleteConflictOutcome",
+		// Params
+		"ca.uhn.fhir.jpa.api.model.DeleteConflictList",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1865,14 +1870,15 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESTORAGE_EXPUNGE_RESOURCE(
-			// Return type
-			void.class,
-			// Params
-			"java.util.concurrent.atomic.AtomicInteger",
-			"org.hl7.fhir.instance.model.api.IIdType",
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		// Return type
+		void.class,
+		// Params
+		"java.util.concurrent.atomic.AtomicInteger",
+		"org.hl7.fhir.instance.model.api.IIdType",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1903,12 +1909,13 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING(
-			// Return type
-			void.class,
-			// Params
-			"java.util.concurrent.atomic.AtomicInteger",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		// Return type
+		void.class,
+		// Params
+		"java.util.concurrent.atomic.AtomicInteger",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1943,12 +1950,13 @@ public enum Pointcut implements IPointcut {
 	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_CREATE(
-			// Return type
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId",
-			// Params
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -1987,12 +1995,13 @@ public enum Pointcut implements IPointcut {
 	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_READ(
-			// Return type
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId",
-			// Params
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"),
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -2033,11 +2042,12 @@ public enum Pointcut implements IPointcut {
 	 * @see #STORAGE_PARTITION_IDENTIFY_CREATE
 	 */
 	STORAGE_PARTITION_IDENTIFY_ANY(
-			// Return type
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId",
-			// Params
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -2073,12 +2083,14 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PARTITION_CREATED(
-			// Return type
-			void.class,
-			// Params
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		// Return type
+		void.class,
+		// Params
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -2118,13 +2130,14 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PARTITION_SELECTED(
-			// Return type
-			void.class,
-			// Params
-			"ca.uhn.fhir.interceptor.model.RequestPartitionId",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.context.RuntimeResourceDefinition"),
+		// Return type
+		void.class,
+		// Params
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.context.RuntimeResourceDefinition"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>
@@ -2157,9 +2170,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_VERSION_CONFLICT(
-			"ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+		"ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Validation Hook:</b>
@@ -2185,11 +2199,11 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hook methods may return an instance of {@link ca.uhn.fhir.validation.ValidationResult} if they wish to override the validation results, or they may return <code>null</code> or <code>void</code> otherwise.
 	 */
-	VALIDATION_COMPLETED(
-			ValidationResult.class,
-			"org.hl7.fhir.instance.model.api.IBaseResource",
-			"java.lang.String",
-			"ca.uhn.fhir.validation.ValidationResult"),
+	VALIDATION_COMPLETED(ValidationResult.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"java.lang.String",
+		"ca.uhn.fhir.validation.ValidationResult"
+	),
 
 	/**
 	 * <b>MDM(EMPI) Hook:</b>
@@ -2206,7 +2220,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_BEFORE_PERSISTED_RESOURCE_CHECKED(void.class, "org.hl7.fhir.instance.model.api.IBaseResource"),
+	MDM_BEFORE_PERSISTED_RESOURCE_CHECKED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
 	 * <b>MDM(EMPI) Hook:</b>
@@ -2224,11 +2239,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(
-			void.class,
-			"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
-			"ca.uhn.fhir.rest.server.TransactionLogMessages",
-			"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
+	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class,
+		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
+		"ca.uhn.fhir.rest.server.TransactionLogMessages",
+		"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
+
 
 	/**
 	 * <b>JPA Hook:</b>
@@ -2250,9 +2265,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_RESOLVE_CROSS_PARTITION_REFERENCE(
-			"ca.uhn.fhir.jpa.model.cross.IResourceLookup",
-			"ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails"),
+	JPA_RESOLVE_CROSS_PARTITION_REFERENCE("ca.uhn.fhir.jpa.model.cross.IResourceLookup",
+		"ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2286,11 +2300,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_INFO(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"),
+	JPA_PERFTRACE_INFO(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2324,11 +2338,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_WARNING(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"),
+	JPA_PERFTRACE_WARNING(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2363,11 +2377,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2404,11 +2418,12 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_SELECT_COMPLETE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_SELECT_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
+
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2442,11 +2457,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_FAILED(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_FAILED(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2482,11 +2497,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2520,11 +2535,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2560,11 +2575,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_REUSING_CACHED(
-			boolean.class,
-			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+	JPA_PERFTRACE_SEARCH_REUSING_CACHED(boolean.class,
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2599,11 +2614,12 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_COMPLETE(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
+
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2632,7 +2648,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_FOUND_ID(void.class, "java.lang.Integer", "java.lang.Object"),
+	JPA_PERFTRACE_SEARCH_FOUND_ID(void.class,
+		"java.lang.Integer",
+		"java.lang.Object"
+	),
+
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
@@ -2667,11 +2687,11 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_RAW_SQL(
-			void.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-			"ca.uhn.fhir.jpa.util.SqlQueryList"),
+	JPA_PERFTRACE_RAW_SQL(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.util.SqlQueryList"
+	),
 
 	/**
 	 * <b> Binary Blob Prefix Assigning Hook:</b>
@@ -2694,20 +2714,21 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>String</code>, which represents the full prefix to be applied to the blob.
 	 * </p>
 	 */
-	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(
-			String.class,
-			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"org.hl7.fhir.instance.model.api.IBaseResource"),
+	STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX(String.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
+
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
 	TEST_RB(
-			boolean.class,
-			new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
-			String.class.getName(),
-			String.class.getName()),
+		boolean.class,
+		new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
+		String.class.getName(),
+		String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
@@ -2723,10 +2744,7 @@ public enum Pointcut implements IPointcut {
 		this(toReturnTypeClass(theReturnType), new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
-	Pointcut(
-			@Nonnull Class<?> theReturnType,
-			@Nonnull ExceptionHandlingSpec theExceptionHandlingSpec,
-			String... theParameterTypes) {
+	Pointcut(@Nonnull Class<?> theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
@@ -2758,7 +2776,8 @@ public enum Pointcut implements IPointcut {
 		return myParameterTypes;
 	}
 
-	private static class UnknownType {}
+	private static class UnknownType {
+	}
 
 	private static class ExceptionHandlingSpec {
 
@@ -2768,6 +2787,7 @@ public enum Pointcut implements IPointcut {
 			myTypesToLogAndSwallow.add(theType);
 			return this;
 		}
+
 	}
 
 	private static Class<?> toReturnTypeClass(String theReturnType) {
@@ -2777,4 +2797,5 @@ public enum Pointcut implements IPointcut {
 			return UnknownType.class;
 		}
 	}
+
 }

@@ -22,10 +22,10 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Return type for {@link SearchNarrowingInterceptor#buildAuthorizedList(RequestDetails)}
@@ -122,8 +122,7 @@ public class AuthorizedList {
 	 * @see AuthorizationInterceptor If search narrowing by code is being used for security reasons, consider also using AuthorizationInterceptor as a failsafe to ensure that no inapproproiate resources are returned
 	 * @since 6.0.0
 	 */
-	public AuthorizedList addCodeInValueSet(
-			@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+	public AuthorizedList addCodeInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
 		Validate.notBlank(theResourceName, "theResourceName must not be missing or null");
 		Validate.notBlank(theSearchParameterName, "theSearchParameterName must not be missing or null");
 		Validate.notBlank(theValueSetUrl, "theResourceUrl must not be missing or null");
@@ -142,8 +141,7 @@ public class AuthorizedList {
 	 * @see AuthorizationInterceptor If search narrowing by code is being used for security reasons, consider also using AuthorizationInterceptor as a failsafe to ensure that no inapproproiate resources are returned
 	 * @since 6.0.0
 	 */
-	public AuthorizedList addCodeNotInValueSet(
-			@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+	public AuthorizedList addCodeNotInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
 		Validate.notBlank(theResourceName, "theResourceName must not be missing or null");
 		Validate.notBlank(theSearchParameterName, "theSearchParameterName must not be missing or null");
 		Validate.notBlank(theValueSetUrl, "theResourceUrl must not be missing or null");
@@ -151,13 +149,11 @@ public class AuthorizedList {
 		return doAddCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, true);
 	}
 
-	private AuthorizedList doAddCodeInValueSet(
-			String theResourceName, String theSearchParameterName, String theValueSetUrl, boolean negate) {
+	private AuthorizedList doAddCodeInValueSet(String theResourceName, String theSearchParameterName, String theValueSetUrl, boolean negate) {
 		if (myAllowedCodeInValueSets == null) {
 			myAllowedCodeInValueSets = new ArrayList<>();
 		}
-		myAllowedCodeInValueSets.add(
-				new AllowedCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, negate));
+		myAllowedCodeInValueSets.add(new AllowedCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, negate));
 
 		return this;
 	}

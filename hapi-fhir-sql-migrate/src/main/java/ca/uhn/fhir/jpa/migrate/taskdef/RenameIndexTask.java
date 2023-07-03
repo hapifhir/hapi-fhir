@@ -43,13 +43,7 @@ public class RenameIndexTask extends BaseTableTask {
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	static List<String> createRenameIndexSql(
-			DriverTypeEnum.ConnectionProperties theConnectionProperties,
-			String theTableName,
-			String theOldIndexName,
-			String theNewIndexName,
-			DriverTypeEnum theDriverType)
-			throws SQLException {
+	static List<String> createRenameIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theOldIndexName, String theNewIndexName, DriverTypeEnum theDriverType) throws SQLException {
 		Validate.notBlank(theOldIndexName, "theOldIndexName must not be blank");
 		Validate.notBlank(theNewIndexName, "theNewIndexName must not be blank");
 		Validate.notBlank(theTableName, "theTableName must not be blank");
@@ -73,7 +67,7 @@ public class RenameIndexTask extends BaseTableTask {
 			case H2_EMBEDDED:
 			case POSTGRES_9_4:
 			case ORACLE_12C:
-			case COCKROACHDB_21_1:
+			case COCKROACHDB_21_1:	
 				sql.add("alter index " + theOldIndexName + " rename to " + theNewIndexName);
 				break;
 			case MSSQL_2012:
@@ -101,8 +95,7 @@ public class RenameIndexTask extends BaseTableTask {
 			return;
 		}
 
-		List<String> sqls = createRenameIndexSql(
-				getConnectionProperties(), getTableName(), myOldIndexName, myNewIndexName, getDriverType());
+		List<String> sqls = createRenameIndexSql(getConnectionProperties(), getTableName(), myOldIndexName, myNewIndexName, getDriverType());
 		if (!sqls.isEmpty()) {
 			logInfo(ourLog, "Renaming index from {} to {} on table {}", myOldIndexName, myNewIndexName, getTableName());
 		}

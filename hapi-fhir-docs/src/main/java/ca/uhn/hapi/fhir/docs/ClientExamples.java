@@ -39,29 +39,30 @@ import org.hl7.fhir.r4.model.Patient;
 
 public class ClientExamples {
 
-	public interface IPatientClient extends IBasicClient {
-		// nothing yet
-	}
+   public interface IPatientClient extends IBasicClient {
+      // nothing yet
+   }
 
-	@SuppressWarnings("unused")
-	public void createProxy() {
-		// START SNIPPET: proxy
-		FhirContext ctx = FhirContext.forR4();
+   @SuppressWarnings("unused")
+   public void createProxy() {
+      // START SNIPPET: proxy
+      FhirContext ctx = FhirContext.forR4();
 
-		// Set connections to access the network via the HTTP proxy at
-		// example.com : 8888
-		ctx.getRestfulClientFactory().setProxy("example.com", 8888);
+      // Set connections to access the network via the HTTP proxy at
+      // example.com : 8888
+      ctx.getRestfulClientFactory().setProxy("example.com", 8888);
 
-		// If the proxy requires authentication, use the following as well
-		ctx.getRestfulClientFactory().setProxyCredentials("theUsername", "thePassword");
+      // If the proxy requires authentication, use the following as well
+      ctx.getRestfulClientFactory().setProxyCredentials("theUsername", "thePassword");
+      
+      // Create the client
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      // END SNIPPET: proxy
+   }
 
-		// Create the client
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		// END SNIPPET: proxy
-	}
 
-	public void tenantId() {
-		// START SNIPPET: tenantId
+   public void tenantId() {
+   	// START SNIPPET: tenantId
 		FhirContext ctx = FhirContext.forR4();
 
 		// Create the client
@@ -73,34 +74,34 @@ public class ClientExamples {
 
 		// Read from tenant A
 		tenantSelection.setTenantId("TENANT-A");
-		Patient patientA =
-				genericClient.read().resource(Patient.class).withId("123").execute();
+		Patient patientA = genericClient.read().resource(Patient.class).withId("123").execute();
 
 		// Read from tenant B
 		tenantSelection.setTenantId("TENANT-B");
-		Patient patientB =
-				genericClient.read().resource(Patient.class).withId("456").execute();
+		Patient patientB = genericClient.read().resource(Patient.class).withId("456").execute();
 		// END SNIPPET: tenantId
 	}
 
-	@SuppressWarnings("unused")
-	public void processMessage() {
-		// START SNIPPET: processMessage
-		FhirContext ctx = FhirContext.forDstu3();
 
-		// Create the client
-		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+   @SuppressWarnings("unused")
+   public void processMessage() {
+      // START SNIPPET: processMessage
+      FhirContext ctx = FhirContext.forDstu3();
 
-		Bundle bundle = new Bundle();
-		// ..populate the bundle..
-
-		Bundle response = client.operation()
-				.processMessage() // New operation for sending messages
-				.setMessageBundle(bundle)
-				.asynchronous(Bundle.class)
-				.execute();
-		// END SNIPPET: processMessage
-	}
+      // Create the client
+      IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      
+      Bundle bundle = new Bundle();
+      // ..populate the bundle..
+      
+      Bundle response = client
+            .operation()
+            .processMessage() // New operation for sending messages
+            .setMessageBundle(bundle)
+            .asynchronous(Bundle.class)
+            .execute();
+      // END SNIPPET: processMessage
+   }
 
 	@SuppressWarnings("unused")
 	public void cacheControl() {
@@ -113,85 +114,86 @@ public class ClientExamples {
 		// ..populate the bundle..
 
 		// START SNIPPET: cacheControl
-		Bundle response = client.search()
-				.forResource(Patient.class)
-				.returnBundle(Bundle.class)
-				.cacheControl(new CacheControlDirective().setNoCache(true)) // <-- add a directive
-				.execute();
+		Bundle response = client
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoCache(true)) // <-- add a directive
+			.execute();
 		// END SNIPPET: cacheControl
 	}
 
-	@SuppressWarnings("unused")
-	public void createOkHttp() {
-		// START SNIPPET: okhttp
-		FhirContext ctx = FhirContext.forDstu3();
+   @SuppressWarnings("unused")
+   public void createOkHttp() {
+      // START SNIPPET: okhttp
+      FhirContext ctx = FhirContext.forDstu3();
 
-		// Use OkHttp
-		ctx.setRestfulClientFactory(new OkHttpRestfulClientFactory(ctx));
+      // Use OkHttp
+      ctx.setRestfulClientFactory(new OkHttpRestfulClientFactory(ctx));
+      
+      // Create the client
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      // END SNIPPET: okhttp
+   }
 
-		// Create the client
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		// END SNIPPET: okhttp
-	}
+   @SuppressWarnings("unused")
+   public void createTimeouts() {
+      // START SNIPPET: timeouts
+      FhirContext ctx = FhirContext.forR4();
 
-	@SuppressWarnings("unused")
-	public void createTimeouts() {
-		// START SNIPPET: timeouts
-		FhirContext ctx = FhirContext.forR4();
+      // Set how long to try and establish the initial TCP connection (in ms)
+      ctx.getRestfulClientFactory().setConnectTimeout(20 * 1000);
+      
+      // Set how long to block for individual read/write operations (in ms)
+      ctx.getRestfulClientFactory().setSocketTimeout(20 * 1000);
+      
+      // Create the client
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      // END SNIPPET: timeouts
+   }
 
-		// Set how long to try and establish the initial TCP connection (in ms)
-		ctx.getRestfulClientFactory().setConnectTimeout(20 * 1000);
+   @SuppressWarnings("unused")
+   public void createSecurity() {
+      // START SNIPPET: security
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = FhirContext.forR4();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-		// Set how long to block for individual read/write operations (in ms)
-		ctx.getRestfulClientFactory().setSocketTimeout(20 * 1000);
-
-		// Create the client
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		// END SNIPPET: timeouts
-	}
-
-	@SuppressWarnings("unused")
-	public void createSecurity() {
-		// START SNIPPET: security
-		// Create a context and get the client factory so it can be configured
-		FhirContext ctx = FhirContext.forR4();
-		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
-
-		// Create an HTTP basic auth interceptor
-		String username = "foobar";
-		String password = "boobear";
-		IClientInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
+      // Create an HTTP basic auth interceptor
+      String username = "foobar";
+      String password = "boobear";
+      IClientInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
 		// If you're using an annotation client, use this style to
 		// register it
-		IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
 		annotationClient.registerInterceptor(authInterceptor);
 
 		// If you're using a generic client, use this instead
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		genericClient.registerInterceptor(authInterceptor);
-		// END SNIPPET: security
-	}
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      genericClient.registerInterceptor(authInterceptor);
+      // END SNIPPET: security
+   }
 
-	@SuppressWarnings("unused")
-	public void createCookie() {
-		// START SNIPPET: cookie
-		// Create a context and get the client factory so it can be configured
-		FhirContext ctx = FhirContext.forR4();
-		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+   @SuppressWarnings("unused")
+   public void createCookie() {
+      // START SNIPPET: cookie
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = FhirContext.forR4();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-		// Create a cookie interceptor. This cookie will have the name "mycookie" and
-		// the value "Chips Ahoy"
-		CookieInterceptor interceptor = new CookieInterceptor("mycookie=Chips Ahoy");
+      // Create a cookie interceptor. This cookie will have the name "mycookie" and
+      // the value "Chips Ahoy"
+      CookieInterceptor interceptor = new CookieInterceptor("mycookie=Chips Ahoy");
 
-		// Register the interceptor with your client (either style)
-		IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
-		annotationClient.registerInterceptor(interceptor);
+      // Register the interceptor with your client (either style)
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(interceptor);
 
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		annotationClient.registerInterceptor(interceptor);
-		// END SNIPPET: cookie
-	}
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(interceptor);
+      // END SNIPPET: cookie
+   }
 
 	@SuppressWarnings("unused")
 	public void addHeaders() {
@@ -201,7 +203,7 @@ public class ClientExamples {
 		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
 		// Create a client
-		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+		IGenericClient client = ctx.newRestfulGenericClient( "http://localhost:9999/fhir");
 
 		// Register an additional headers interceptor and add one header to it
 		AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
@@ -213,86 +215,88 @@ public class ClientExamples {
 		// END SNIPPET: addHeaders
 
 		// START SNIPPET: addHeadersNoInterceptor
-		Patient p = client.read()
-				.resource(Patient.class)
-				.withId(123L)
-				.withAdditionalHeader("X-Message", "Help I'm a Bug")
-				.execute();
+		Patient p = client
+			.read()
+			.resource(Patient.class)
+			.withId(123L)
+			.withAdditionalHeader("X-Message", "Help I'm a Bug")
+			.execute();
 		// END SNIPPET: addHeadersNoInterceptor
 	}
 
-	@SuppressWarnings("unused")
-	public void gzip() {
-		// START SNIPPET: gzip
-		// Create a context and get the client factory so it can be configured
-		FhirContext ctx = FhirContext.forR4();
-		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+   @SuppressWarnings("unused")
+   public void gzip() {
+      // START SNIPPET: gzip
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = FhirContext.forR4();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-		// Register the interceptor with your client (either style)
-		IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
-		annotationClient.registerInterceptor(new GZipContentInterceptor());
-		// END SNIPPET: gzip
-	}
+      // Register the interceptor with your client (either style)
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(new GZipContentInterceptor());
+      // END SNIPPET: gzip
+   }
+   
+   @SuppressWarnings("unused")
+   public void createSecurityBearer() {
+      // START SNIPPET: securityBearer
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = FhirContext.forR4();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-	@SuppressWarnings("unused")
-	public void createSecurityBearer() {
-		// START SNIPPET: securityBearer
-		// Create a context and get the client factory so it can be configured
-		FhirContext ctx = FhirContext.forR4();
-		IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+      // In reality the token would have come from an authorization server 
+      String token = "3w03fj.r3r3t"; 
+      
+      BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(token);
 
-		// In reality the token would have come from an authorization server
-		String token = "3w03fj.r3r3t";
+      // Register the interceptor with your client (either style)
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(authInterceptor);
 
-		BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(token);
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(authInterceptor);
+      // END SNIPPET: securityBearer
+   }
 
-		// Register the interceptor with your client (either style)
-		IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
-		annotationClient.registerInterceptor(authInterceptor);
+   @SuppressWarnings("unused")
+   public void createLogging() {
+      {
+         // START SNIPPET: logging
+         // Create a context and get the client factory so it can be configured
+         FhirContext ctx = FhirContext.forR4();
+         IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
-		IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-		annotationClient.registerInterceptor(authInterceptor);
-		// END SNIPPET: securityBearer
-	}
+         // Create a logging interceptor
+         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 
-	@SuppressWarnings("unused")
-	public void createLogging() {
-		{
-			// START SNIPPET: logging
-			// Create a context and get the client factory so it can be configured
-			FhirContext ctx = FhirContext.forR4();
-			IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+         // Optionally you may configure the interceptor (by default only
+         // summary info is logged)
+         loggingInterceptor.setLogRequestSummary(true);
+         loggingInterceptor.setLogRequestBody(true);
 
-			// Create a logging interceptor
-			LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+         // Register the interceptor with your client (either style)
+         IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+         annotationClient.registerInterceptor(loggingInterceptor);
 
-			// Optionally you may configure the interceptor (by default only
-			// summary info is logged)
-			loggingInterceptor.setLogRequestSummary(true);
-			loggingInterceptor.setLogRequestBody(true);
+         IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+         genericClient.registerInterceptor(loggingInterceptor);
+         // END SNIPPET: logging
+      }
 
-			// Register the interceptor with your client (either style)
-			IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
-			annotationClient.registerInterceptor(loggingInterceptor);
+      /******************************/
+      {
+         // START SNIPPET: clientConfig
+         // Create a client
+         FhirContext ctx = FhirContext.forR4();
+         IPatientClient client = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/");
 
-			IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-			genericClient.registerInterceptor(loggingInterceptor);
-			// END SNIPPET: logging
-		}
+         // Request JSON encoding from the server (_format=json)
+         client.setEncoding(EncodingEnum.JSON);
 
-		/******************************/
-		{
-			// START SNIPPET: clientConfig
-			// Create a client
-			FhirContext ctx = FhirContext.forR4();
-			IPatientClient client = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/");
+         // Request pretty printing from the server (_pretty=true)
+         client.setPrettyPrint(true);
+         // END SNIPPET: clientConfig
+      }
+   }
 
-			// Request JSON encoding from the server (_format=json)
-			client.setEncoding(EncodingEnum.JSON);
-
-			// Request pretty printing from the server (_pretty=true)
-			client.setPrettyPrint(true);
-			// END SNIPPET: clientConfig
-		}
-	}
 }

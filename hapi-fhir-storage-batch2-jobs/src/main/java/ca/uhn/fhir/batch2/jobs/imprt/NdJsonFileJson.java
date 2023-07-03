@@ -26,7 +26,6 @@ public class NdJsonFileJson implements IModelJson {
 
 	@JsonProperty("ndJsonText")
 	private String myNdJsonText;
-
 	@JsonProperty("sourceName")
 	private String mySourceName;
 

@@ -50,25 +50,25 @@ public class LoincCodingPropertiesHandler implements IZipContentsHandlerCsv {
 	public static final String ASSOCIATED_OBSERVATIONS_PROP_NAME = "AssociatedObservations";
 	public static final String LOINC_NUM = "LOINC_NUM";
 
+
 	private final Map<String, TermConcept> myCode2Concept;
 	private final Map<String, CodeSystem.PropertyType> myPropertyNameTypeMap;
 
-	public LoincCodingPropertiesHandler(
-			Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNameTypeMap) {
+
+	public LoincCodingPropertiesHandler(Map<String, TermConcept> theCode2concept,
+													Map<String, CodeSystem.PropertyType> thePropertyNameTypeMap) {
 		myCode2Concept = theCode2concept;
 		myPropertyNameTypeMap = thePropertyNameTypeMap;
 	}
 
+
 	@Override
 	public void accept(CSVRecord theRecord) {
-		if (!anyValidProperty()) {
-			return;
-		}
+		if ( ! anyValidProperty()) { return; }
 
 		String code = trim(theRecord.get(LOINC_NUM));
-		if (isBlank(code)) {
-			return;
-		}
+		if (isBlank(code)) { return; }
+
 
 		String askAtOrderEntryValue = trim(theRecord.get(ASK_AT_ORDER_ENTRY_PROP_NAME));
 		String associatedObservationsValue = trim(theRecord.get(ASSOCIATED_OBSERVATIONS_PROP_NAME));
@@ -89,36 +89,37 @@ public class LoincCodingPropertiesHandler implements IZipContentsHandlerCsv {
 		}
 	}
 
+	
 	/**
 	 * Validates that at least one ot target properties is defined in loinc.xml file and is of type "CODING"
 	 */
 	private boolean anyValidProperty() {
 		CodeSystem.PropertyType askAtOrderEntryPropType = myPropertyNameTypeMap.get(ASK_AT_ORDER_ENTRY_PROP_NAME);
-		CodeSystem.PropertyType associatedObservationsPropType =
-				myPropertyNameTypeMap.get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
+		CodeSystem.PropertyType associatedObservationsPropType = myPropertyNameTypeMap.get(ASSOCIATED_OBSERVATIONS_PROP_NAME);
 
 		return askAtOrderEntryPropType == CodeSystem.PropertyType.CODING
-				|| associatedObservationsPropType == CodeSystem.PropertyType.CODING;
+			|| associatedObservationsPropType == CodeSystem.PropertyType.CODING;
 	}
+
 
 	private void addCodingProperties(TermConcept theSrcTermConcept, String thePropertyName, String thePropertyValue) {
 		List<String> propertyCodeValues = parsePropertyCodeValues(thePropertyValue);
 		for (String propertyCodeValue : propertyCodeValues) {
 			TermConcept targetTermConcept = myCode2Concept.get(propertyCodeValue);
 			if (targetTermConcept == null) {
-				ourLog.error(
-						"Couldn't find TermConcept for code: '{}'. Display property set to blank for property: '{}'",
-						propertyCodeValue,
-						thePropertyName);
+				ourLog.error("Couldn't find TermConcept for code: '{}'. Display property set to blank for property: '{}'",
+					propertyCodeValue, thePropertyName);
 				continue;
 			}
-			theSrcTermConcept.addPropertyCoding(
-					thePropertyName, ITermLoaderSvc.LOINC_URI, propertyCodeValue, targetTermConcept.getDisplay());
+			theSrcTermConcept.addPropertyCoding(thePropertyName, ITermLoaderSvc.LOINC_URI, propertyCodeValue, targetTermConcept.getDisplay());
 			ourLog.trace("Adding coding property: {} to concept.code {}", thePropertyName, theSrcTermConcept.getCode());
 		}
 	}
 
+
 	private List<String> parsePropertyCodeValues(String theValue) {
-		return Arrays.stream(theValue.split(";")).map(String::trim).collect(Collectors.toList());
+		return Arrays.stream( theValue.split(";") )
+			.map(String::trim)
+			.collect(Collectors.toList());
 	}
 }

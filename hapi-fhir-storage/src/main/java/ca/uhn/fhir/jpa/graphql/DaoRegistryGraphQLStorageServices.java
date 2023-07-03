@@ -65,6 +65,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,22 +87,16 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 	static final String SEARCH_OFFSET_PARAM = "search-offset";
 
 	private static final int MAX_SEARCH_SIZE = 500;
-
 	@Autowired
 	private FhirContext myContext;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-
 	@Autowired
 	private IPagingProvider myPagingProvider;
 
@@ -123,8 +119,8 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 	private SearchParameterMap buildSearchParams(String theType, List<Argument> theSearchParams) {
 		List<Argument> resourceSearchParam = theSearchParams.stream()
-				.filter(it -> !PARAM_COUNT.equals(it.getName()))
-				.collect(Collectors.toList());
+			.filter(it -> !PARAM_COUNT.equals(it.getName()))
+			.collect(Collectors.toList());
 
 		FhirContext fhirContext = myContext;
 		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
@@ -144,15 +140,9 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
 			if (searchParam == null) {
 				Set<String> graphqlArguments = searchParams.getSearchParamNames().stream()
-						.map(this::searchParamToGraphqlArgument)
-						.collect(Collectors.toSet());
-				String msg = myContext
-						.getLocalizer()
-						.getMessageSanitized(
-								DaoRegistryGraphQLStorageServices.class,
-								"invalidGraphqlArgument",
-								nextArgument.getName(),
-								new TreeSet<>(graphqlArguments));
+					.map(this::searchParamToGraphqlArgument)
+					.collect(Collectors.toSet());
+				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
 				throw new InvalidRequestException(Msg.code(1275) + msg);
 			}
 
@@ -214,9 +204,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 				case URI:
 				case HAS:
 				default:
-					throw new InvalidRequestException(Msg.code(1276)
-							+ String.format(
-									"%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
+					throw new InvalidRequestException(Msg.code(1276) + String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
 			}
 
 			params.add(searchParamName, queryParam);
@@ -227,19 +215,17 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
-	public void listResources(
-			Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches)
-			throws FHIRException {
+	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 		SearchParameterMap params = buildSearchParams(theType, theSearchParams);
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
 		IBundleProvider response = getDao(theType).search(params, requestDetails);
 		Integer size = response.size();
-		// We set size to null in SearchCoordinatorSvcImpl.executeQuery() if matching results exceeds count
-		// so don't throw here
-		if ((response.preferredPageSize() != null && size != null && response.preferredPageSize() < size)
-				|| size == null) {
+		//We set size to null in SearchCoordinatorSvcImpl.executeQuery() if matching results exceeds count
+		//so don't throw here
+		if ((response.preferredPageSize() != null && size != null && response.preferredPageSize() < size) ||
+			size == null) {
 			size = response.preferredPageSize();
 		}
 
@@ -263,8 +249,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public ReferenceResolution lookup(Object theAppInfo, IBaseResource theContext, IBaseReference theReference)
-			throws FHIRException {
+	public ReferenceResolution lookup(Object theAppInfo, IBaseResource theContext, IBaseReference theReference) throws FHIRException {
 		IBaseResource outcome = lookup(theAppInfo, theReference.getReferenceElement());
 		if (outcome == null) {
 			return null;
@@ -274,9 +259,9 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 	private Optional<String> getArgument(List<Argument> params, String name) {
 		return params.stream()
-				.filter(it -> name.equals(it.getName()))
-				.map(it -> it.getValues().get(0).getValue())
-				.findAny();
+			.filter(it -> name.equals(it.getName()))
+			.map(it -> it.getValues().get(0).getValue())
+			.findAny();
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -296,23 +281,16 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			searchId = searchIdArgument.get();
 			searchOffset = Integer.parseInt(searchOffsetArgument.get());
 
-			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId))
-					.orElseThrow(() -> {
-						String msg = myContext
-								.getLocalizer()
-								.getMessageSanitized(
-										DaoRegistryGraphQLStorageServices.class,
-										"invalidGraphqlCursorArgument",
-										searchId);
-						return new InvalidRequestException(Msg.code(2076) + msg);
-					});
+			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId)).orElseThrow(()->{
+				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlCursorArgument", searchId);
+				return new InvalidRequestException(Msg.code(2076) + msg);
+			});
 
-			pageSize =
-					Optional.ofNullable(response.preferredPageSize()).orElseGet(myPagingProvider::getDefaultPageSize);
+			pageSize = Optional.ofNullable(response.preferredPageSize())
+				.orElseGet(myPagingProvider::getDefaultPageSize);
 		} else {
-			pageSize = getArgument(theSearchParams, "_count")
-					.map(Integer::parseInt)
-					.orElseGet(myPagingProvider::getDefaultPageSize);
+			pageSize = getArgument(theSearchParams, "_count").map(Integer::parseInt)
+				.orElseGet(myPagingProvider::getDefaultPageSize);
 
 			SearchParameterMap params = buildSearchParams(theType, theSearchParams);
 			params.setCount(pageSize);
@@ -320,27 +298,20 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			CacheControlDirective cacheControlDirective = new CacheControlDirective();
 			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
-			RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-					requestDetails, theType, params, null);
-			response = mySearchCoordinatorSvc.registerSearch(
-					getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
+			RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetails, theType, params, null);
+			response = mySearchCoordinatorSvc.registerSearch(getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
 
 			searchOffset = 0;
 			searchId = myPagingProvider.storeResultList(requestDetails, response);
 		}
 
+
 		// response.size() may return {@literal null}, in that case use pageSize
 		String serverBase = requestDetails.getFhirServerBase();
 		Optional<Integer> numTotalResults = Optional.ofNullable(response.size());
-		int numToReturn = numTotalResults
-				.map(integer -> Math.min(pageSize, integer - searchOffset))
-				.orElse(pageSize);
+		int numToReturn = numTotalResults.map(integer -> Math.min(pageSize, integer - searchOffset)).orElse(pageSize);
 
-		BundleLinks links = new BundleLinks(
-				requestDetails.getServerBaseForRequest(),
-				null,
-				RestfulServerUtils.prettyPrintResponse(requestDetails.getServer(), requestDetails),
-				BundleTypeEnum.SEARCHSET);
+		BundleLinks links = new BundleLinks(requestDetails.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(requestDetails.getServer(), requestDetails), BundleTypeEnum.SEARCHSET);
 
 		// RestfulServerUtils.createLinkSelf not suitable here
 		String linkFormat = "%s/%s?_format=application/json&search-id=%s&search-offset=%d&_count=%d";
@@ -348,19 +319,15 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 		String linkSelf = String.format(linkFormat, serverBase, theType, searchId, searchOffset, pageSize);
 		links.setSelf(linkSelf);
 
-		boolean hasNext = numTotalResults
-				.map(total -> (searchOffset + numToReturn) < total)
-				.orElse(true);
+		boolean hasNext = numTotalResults.map(total -> (searchOffset + numToReturn) < total).orElse(true);
 
 		if (hasNext) {
-			String linkNext =
-					String.format(linkFormat, serverBase, theType, searchId, searchOffset + numToReturn, pageSize);
+			String linkNext = String.format(linkFormat, serverBase, theType, searchId, searchOffset+numToReturn, pageSize);
 			links.setNext(linkNext);
 		}
 
 		if (searchOffset > 0) {
-			String linkPrev = String.format(
-					linkFormat, serverBase, theType, searchId, Math.max(0, searchOffset - pageSize), pageSize);
+			String linkPrev = String.format(linkFormat, serverBase, theType, searchId, Math.max(0, searchOffset-pageSize), pageSize);
 			links.setPrev(linkPrev);
 		}
 
@@ -373,4 +340,5 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 		IBaseResource result = bundleFactory.getResourceBundle();
 		return (IBaseBundle) result;
 	}
+
 }

@@ -44,6 +44,7 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 		myColumnRequestId = getTable().addColumn("REQUEST_ID");
 	}
 
+
 	@Override
 	public DbColumn getResourceIdColumn() {
 		return myResourceIdColumn;
@@ -56,4 +57,5 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 	public Condition createPredicateRequestId(String theRequestId) {
 		return BinaryCondition.equalTo(myColumnRequestId, generatePlaceholder(theRequestId));
 	}
+
 }

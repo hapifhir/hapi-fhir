@@ -76,4 +76,5 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
+
 }

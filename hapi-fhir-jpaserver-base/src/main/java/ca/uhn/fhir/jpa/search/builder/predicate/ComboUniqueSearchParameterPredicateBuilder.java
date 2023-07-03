@@ -38,6 +38,7 @@ public class ComboUniqueSearchParameterPredicateBuilder extends BaseSearchParamP
 		myColumnString = getTable().addColumn("IDX_STRING");
 	}
 
+
 	public Condition createPredicateIndexString(RequestPartitionId theRequestPartitionId, String theIndexString) {
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnString, generatePlaceholder(theIndexString));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);

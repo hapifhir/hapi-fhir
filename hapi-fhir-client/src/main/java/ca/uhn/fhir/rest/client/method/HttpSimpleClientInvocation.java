@@ -36,19 +36,14 @@ public class HttpSimpleClientInvocation extends BaseHttpClientInvocation {
 
 	private PagingHttpMethodEnum myPagingHttpMethod;
 
-	public HttpSimpleClientInvocation(
-			FhirContext theContext, String theUrlPath, PagingHttpMethodEnum thePagingHttpMethod) {
+	public HttpSimpleClientInvocation(FhirContext theContext, String theUrlPath, PagingHttpMethodEnum thePagingHttpMethod) {
 		super(theContext);
 		myUrl = theUrlPath;
 		myPagingHttpMethod = thePagingHttpMethod;
 	}
 
 	@Override
-	public IHttpRequest asHttpRequest(
-			String theUrlBase,
-			Map<String, List<String>> theExtraParams,
-			EncodingEnum theEncoding,
-			Boolean thePrettyPrint) {
+	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
 		IHttpRequest retVal = createHttpRequest(myUrl, theEncoding, myPagingHttpMethod.getRequestType());
 		retVal.setUrlSource(myUrlSource);
 		return retVal;

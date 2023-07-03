@@ -31,14 +31,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class SubmitDataService {
+public class SubmitDataService{
 	private static final Logger ourLogger = LoggerFactory.getLogger(SubmitDataService.class);
 
 	private final DaoRegistry myDaoRegistry;
 
 	private final RequestDetails myRequestDetails;
 
-	public SubmitDataService(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
+	public SubmitDataService(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails){
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 	}
@@ -59,8 +59,9 @@ public class SubmitDataService {
 		 * StructureDefinition from URL or must it be stored in Ruler?)
 		 */
 
-		Bundle transactionBundle =
-				new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(createEntry(theReport));
+		Bundle transactionBundle = new Bundle()
+			.setType(Bundle.BundleType.TRANSACTION)
+			.addEntry(createEntry(theReport));
 
 		if (theResources != null) {
 			for (IBaseResource res : theResources) {
@@ -80,17 +81,20 @@ public class SubmitDataService {
 
 	private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
 		return new Bundle.BundleEntryComponent()
-				.setResource((Resource) theResource)
-				.setRequest(createRequest(theResource));
+			.setResource((Resource) theResource)
+			.setRequest(createRequest(theResource));
 	}
 
 	private Bundle.BundleEntryRequestComponent createRequest(IBaseResource theResource) {
 		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
 		if (theResource.getIdElement().hasValue()) {
-			request.setMethod(Bundle.HTTPVerb.PUT)
-					.setUrl(theResource.getIdElement().getValue());
+			request
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl(theResource.getIdElement().getValue());
 		} else {
-			request.setMethod(Bundle.HTTPVerb.POST).setUrl(theResource.fhirType());
+			request
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl(theResource.fhirType());
 		}
 
 		return request;

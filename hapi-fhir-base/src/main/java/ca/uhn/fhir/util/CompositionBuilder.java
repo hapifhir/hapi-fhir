@@ -28,8 +28,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.Date;
 import javax.annotation.Nonnull;
+import java.util.Date;
 
 /**
  * This class can be used to generate <code>Composition</code> resources in
@@ -70,6 +70,7 @@ public class CompositionBuilder {
 	public void setStatus(String theStatusCode) {
 		myTerser.setElement(myComposition, "Composition.status", theStatusCode);
 	}
+
 
 	/**
 	 * Set a value in <code>Composition.subject</code>
@@ -166,4 +167,7 @@ public class CompositionBuilder {
 			myTerser.setElement(text, "div", theDivHtml);
 		}
 	}
+
+
 }
+

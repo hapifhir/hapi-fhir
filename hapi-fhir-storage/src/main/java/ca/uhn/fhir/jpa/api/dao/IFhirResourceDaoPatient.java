@@ -29,15 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider patientInstanceEverything(
-			HttpServletRequest theServletRequest,
-			RequestDetails theRequestDetails,
-			PatientEverythingParameters theQueryParams,
-			IIdType theId);
+	IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest,
+															RequestDetails theRequestDetails,
+															PatientEverythingParameters theQueryParams,
+															IIdType theId);
 
-	IBundleProvider patientTypeEverything(
-			HttpServletRequest theServletRequest,
-			RequestDetails theRequestDetails,
-			PatientEverythingParameters theQueryParams,
-			TokenOrListParam theId);
+	IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest,
+													  RequestDetails theRequestDetails,
+													  PatientEverythingParameters theQueryParams,
+													  TokenOrListParam theId);
+
+
 }

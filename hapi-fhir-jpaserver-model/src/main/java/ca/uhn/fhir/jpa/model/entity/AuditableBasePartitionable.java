@@ -23,11 +23,11 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
-import java.io.Serializable;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 /**
  * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.
@@ -57,4 +57,5 @@ public class AuditableBasePartitionable implements Serializable {
 	public void setPartitionId(PartitionablePartitionId thePartitionId) {
 		myPartitionId = thePartitionId;
 	}
+
 }

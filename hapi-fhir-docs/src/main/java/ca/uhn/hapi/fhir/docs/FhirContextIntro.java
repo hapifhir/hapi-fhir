@@ -37,8 +37,8 @@ public class FhirContextIntro {
 		// END SNIPPET: creatingContext
 	}
 
-	@SuppressWarnings("unused")
-	public static void creatingContextHl7org() {
+   @SuppressWarnings("unused")
+   public static void creatingContextHl7org() {
 		// START SNIPPET: creatingContextHl7org
 		// Create a context for DSTU3
 		FhirContext ctx = FhirContext.forDstu3();
@@ -52,92 +52,93 @@ public class FhirContextIntro {
 		String encoded = ctx.newJsonParser().encodeResourceToString(patient);
 
 		// END SNIPPET: creatingContextHl7org
-	}
+   }
+
 
 	public void encodeMsg() throws DataFormatException {
-		FhirContext ctx = new FhirContext(Patient.class, Observation.class);
-		// START SNIPPET: encodeMsg
+FhirContext ctx = new FhirContext(Patient.class, Observation.class);
+//START SNIPPET: encodeMsg
 
-		/**
-		 * FHIR model types in HAPI are simple POJOs. To create a new
-		 * one, invoke the default constructor and then
-		 * start populating values.
-		 */
-		Patient patient = new Patient();
+/**
+ * FHIR model types in HAPI are simple POJOs. To create a new
+ * one, invoke the default constructor and then
+ * start populating values.
+ */
+Patient patient = new Patient();
 
-		// Add an MRN (a patient identifier)
-		Identifier id = patient.addIdentifier();
-		id.setSystem("http://example.com/fictitious-mrns");
-		id.setValue("MRN001");
+// Add an MRN (a patient identifier)
+Identifier id = patient.addIdentifier();
+id.setSystem("http://example.com/fictitious-mrns");
+id.setValue("MRN001");
 
-		// Add a name
-		HumanName name = patient.addName();
-		name.setUse(HumanName.NameUse.OFFICIAL);
-		name.setFamily("Tester");
-		name.addGiven("John");
-		name.addGiven("Q");
+// Add a name
+HumanName name = patient.addName();
+name.setUse(HumanName.NameUse.OFFICIAL);
+name.setFamily("Tester");
+name.addGiven("John");
+name.addGiven("Q");
 
-		// We can now use a parser to encode this resource into a string.
-		String encoded = ctx.newXmlParser().encodeResourceToString(patient);
-		System.out.println(encoded);
-		// END SNIPPET: encodeMsg
+// We can now use a parser to encode this resource into a string.
+String encoded = ctx.newXmlParser().encodeResourceToString(patient);
+System.out.println(encoded);
+//END SNIPPET: encodeMsg
 
-		// START SNIPPET: encodeMsgJson
-		IParser jsonParser = ctx.newJsonParser();
-		jsonParser.setPrettyPrint(true);
-		encoded = jsonParser.encodeResourceToString(patient);
-		System.out.println(encoded);
-		// END SNIPPET: encodeMsgJson
+//START SNIPPET: encodeMsgJson
+IParser jsonParser = ctx.newJsonParser();
+jsonParser.setPrettyPrint(true);
+encoded = jsonParser.encodeResourceToString(patient);
+System.out.println(encoded);
+//END SNIPPET: encodeMsgJson
 
-	}
-
-	public void fluent() throws DataFormatException {
-		FhirContext ctx = new FhirContext(Patient.class, Observation.class);
-		String encoded;
-		// START SNIPPET: encodeMsgFluent
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://example.com/fictitious-mrns").setValue("MRN001");
-		patient.addName()
-				.setUse(HumanName.NameUse.OFFICIAL)
-				.setFamily("Tester")
-				.addGiven("John")
-				.addGiven("Q");
-
-		encoded = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
-		System.out.println(encoded);
-		// END SNIPPET: encodeMsgFluent
 
 	}
+
+
+public void fluent() throws DataFormatException {
+FhirContext ctx = new FhirContext(Patient.class, Observation.class);
+String encoded;
+//START SNIPPET: encodeMsgFluent
+Patient patient = new Patient();
+patient.addIdentifier().setSystem("http://example.com/fictitious-mrns").setValue("MRN001");
+patient.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Tester").addGiven("John").addGiven("Q");
+
+encoded = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+System.out.println(encoded);
+//END SNIPPET: encodeMsgFluent
+
+}
+
 
 	public static void parseMsg() {
-		FhirContext ctx = FhirContext.forR4();
+FhirContext ctx = FhirContext.forR4();
 
-		// START SNIPPET: parseMsg
-		// The following is an example Patient resource
-		String msgString = "<Patient xmlns=\"http://hl7.org/fhir\">"
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal</div></text>"
-				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-				+ "</Patient>";
+//START SNIPPET: parseMsg
+// The following is an example Patient resource
+String msgString = "<Patient xmlns=\"http://hl7.org/fhir\">"
+  + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal</div></text>"
+  + "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+  + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+  + "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+  + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+  + "</Patient>";
 
-		// The hapi context object is used to create a new XML parser
-		// instance. The parser can then be used to parse (or unmarshall) the
-		// string message into a Patient object
-		IParser parser = ctx.newXmlParser();
-		Patient patient = parser.parseResource(Patient.class, msgString);
+// The hapi context object is used to create a new XML parser
+// instance. The parser can then be used to parse (or unmarshall) the 
+// string message into a Patient object 
+IParser parser = ctx.newXmlParser();
+Patient patient = parser.parseResource(Patient.class, msgString);
 
-		// The patient object has accessor methods to retrieve all of the
-		// data which has been parsed into the instance.
-		String patientId = patient.getIdentifier().get(0).getValue();
-		String familyName = patient.getName().get(0).getFamily();
-		Enumerations.AdministrativeGender gender = patient.getGender();
+// The patient object has accessor methods to retrieve all of the
+// data which has been parsed into the instance. 
+String patientId = patient.getIdentifier().get(0).getValue();
+String familyName = patient.getName().get(0).getFamily();
+Enumerations.AdministrativeGender gender = patient.getGender();
 
-		System.out.println(patientId); // PRP1660
-		System.out.println(familyName); // Cardinal
-		System.out.println(gender.toCode()); // male
-		// END SNIPPET: parseMsg
+System.out.println(patientId); // PRP1660
+System.out.println(familyName); // Cardinal
+System.out.println(gender.toCode()); // male
+//END SNIPPET: parseMsg
 
 	}
+
 }

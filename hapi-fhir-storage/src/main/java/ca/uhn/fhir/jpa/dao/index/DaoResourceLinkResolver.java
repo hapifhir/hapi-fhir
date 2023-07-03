@@ -57,41 +57,30 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
-
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
 	@Autowired
 	private FhirContext myContext;
-
 	@Autowired
 	private IIdHelperService<T> myIdHelperService;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
 	@Override
-	public IResourceLookup findTargetResource(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theSourceResourceName,
-			PathAndRef thePathAndRef,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
+	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
 		IBaseReference targetReference = thePathAndRef.getRef();
 		String sourcePath = thePathAndRef.getPath();
@@ -105,15 +94,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
 		Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
 
-		RuntimeSearchParam searchParam =
-				mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
 
 		T persistentId = null;
 		if (theTransactionDetails != null) {
 			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null
-					&& resolvedResourceId.getId() != null
-					&& resolvedResourceId.getAssociatedResourceId() != null) {
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
 				persistentId = resolvedResourceId;
 			}
 		}
@@ -122,16 +108,14 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				resolvedResource =
-						myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
 				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
 			}
 		} catch (ResourceNotFoundException e) {
 
-			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-					type, targetReference, idPart, theRequest, theTransactionDetails);
+			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (myStorageSettings.isEnforceReferentialIntegrityOnWrite() == false) {
@@ -140,35 +124,25 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart
-						+ " not found, specified in path: " + sourcePath);
+				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart + " not found, specified in path: " + sourcePath);
+
 			}
 			resolvedResource = createdTableOpt.get();
 		}
 
-		ourLog.trace(
-				"Resolved resource of type {} as PID: {}",
-				resolvedResource.getResourceType(),
-				resolvedResource.getPersistentId());
+		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getPersistentId());
 		if (!resourceType.equals(resolvedResource.getResourceType())) {
-			ourLog.error(
-					"Resource with PID {} was of type {} and wanted {}",
-					resolvedResource.getPersistentId(),
-					resourceType,
-					resolvedResource.getResourceType());
-			throw new UnprocessableEntityException(Msg.code(1095)
-					+ "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getPersistentId(), resourceType, resolvedResource.getResourceType());
+			throw new UnprocessableEntityException(Msg.code(1095) + "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
 		}
 
 		if (resolvedResource.getDeleted() != null) {
 			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart
-					+ " is deleted, specified in path: " + sourcePath);
+			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart + " is deleted, specified in path: " + sourcePath);
 		}
 
 		if (persistentId == null) {
-			persistentId =
-					myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
+			persistentId = myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
@@ -184,32 +158,22 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 
 	@Nullable
 	@Override
-	public IBaseResource loadTargetResource(
-			@Nonnull RequestPartitionId theRequestPartitionId,
-			String theSourceResourceName,
-			PathAndRef thePathAndRef,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
+	public IBaseResource loadTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		return myTransactionService
-				.withRequest(theRequest)
-				.withTransactionDetails(theTransactionDetails)
-				.withRequestPartitionId(theRequestPartitionId)
-				.execute(() -> {
-					IIdType targetId = thePathAndRef.getRef().getReferenceElement();
-					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(targetId.getResourceType());
-					return dao.read(targetId, theRequest);
-				});
+			.withRequest(theRequest)
+			.withTransactionDetails(theTransactionDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(()->{
+				IIdType targetId = thePathAndRef.getRef().getReferenceElement();
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(targetId.getResourceType());
+				return dao.read(targetId, theRequest);
+			});
 	}
 
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
-	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(
-			Class<T> theType,
-			IBaseReference theReference,
-			@Nullable String theIdToAssignToPlaceholder,
-			RequestDetails theRequest,
-			TransactionDetails theTransactionDetails) {
+	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		IBasePersistedResource valueOf = null;
 
 		if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
@@ -222,9 +186,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			tryToAddPlaceholderExtensionToResource(newResource);
 
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
-			ourLog.debug(
-					"Automatically creating empty placeholder resource: {}",
-					newResource.getIdElement().getValue());
+			ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
 
 			if (myStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
 				tryToCopyIdentifierFromReferenceToTargetResource(theReference, missingResourceDef, newResource);
@@ -258,11 +220,9 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		}
 	}
 
-	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(
-			IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
-		//		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
-		CanonicalIdentifier referenceMatchUrlIdentifier = extractIdentifierFromUrl(
-				theSourceReference.getReferenceElement().getValue());
+	private <T extends IBaseResource> void tryToCopyIdentifierFromReferenceToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
+//		boolean referenceHasIdentifier = theSourceReference.hasIdentifier();
+		CanonicalIdentifier referenceMatchUrlIdentifier = extractIdentifierFromUrl(theSourceReference.getReferenceElement().getValue());
 		CanonicalIdentifier referenceIdentifier = extractIdentifierReference(theSourceReference);
 
 		if (referenceIdentifier == null && referenceMatchUrlIdentifier != null) {
@@ -274,14 +234,12 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
 			} else {
 				addSubjectIdentifierToTargetResource(theSourceReference, theTargetResourceDef, theTargetResource);
-				addMatchUrlIdentifierToTargetResource(
-						theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
+				addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, referenceMatchUrlIdentifier);
 			}
 		}
 	}
 
-	private <T extends IBaseResource> void addSubjectIdentifierToTargetResource(
-			IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
+	private <T extends IBaseResource> void addSubjectIdentifierToTargetResource(IBaseReference theSourceReference, RuntimeResourceDefinition theTargetResourceDef, T theTargetResource) {
 		BaseRuntimeChildDefinition targetIdentifier = theTargetResourceDef.getChildByName("identifier");
 		if (targetIdentifier != null) {
 			BaseRuntimeElementDefinition<?> identifierElement = targetIdentifier.getChildByName("identifier");
@@ -289,32 +247,20 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			boolean targetHasIdentifierElement = identifierElementName.equals("Identifier");
 			if (targetHasIdentifierElement) {
 
-				BaseRuntimeElementCompositeDefinition<?> referenceElement = (BaseRuntimeElementCompositeDefinition<?>)
-						myContext.getElementDefinition(theSourceReference.getClass());
+				BaseRuntimeElementCompositeDefinition<?> referenceElement = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSourceReference.getClass());
 				BaseRuntimeChildDefinition referenceIdentifierChild = referenceElement.getChildByName("identifier");
-				Optional<IBase> identifierOpt =
-						referenceIdentifierChild.getAccessor().getFirstValueOrNull(theSourceReference);
-				identifierOpt.ifPresent(
-						theIBase -> targetIdentifier.getMutator().addValue(theTargetResource, theIBase));
+				Optional<IBase> identifierOpt = referenceIdentifierChild.getAccessor().getFirstValueOrNull(theSourceReference);
+				identifierOpt.ifPresent(theIBase -> targetIdentifier.getMutator().addValue(theTargetResource, theIBase));
 			}
 		}
 	}
 
-	private <T extends IBaseResource> void addMatchUrlIdentifierToTargetResource(
-			RuntimeResourceDefinition theTargetResourceDef,
-			T theTargetResource,
-			CanonicalIdentifier referenceMatchUrlIdentifier) {
+	private <T extends IBaseResource> void addMatchUrlIdentifierToTargetResource(RuntimeResourceDefinition theTargetResourceDef, T theTargetResource, CanonicalIdentifier referenceMatchUrlIdentifier) {
 		BaseRuntimeChildDefinition identifierDefinition = theTargetResourceDef.getChildByName("identifier");
-		IBase identifierIBase = identifierDefinition
-				.getChildByName("identifier")
-				.newInstance(identifierDefinition.getInstanceConstructorArguments());
-		IBase systemIBase = TerserUtil.newElement(
-				myContext, "uri", referenceMatchUrlIdentifier.getSystemElement().getValueAsString());
-		IBase valueIBase = TerserUtil.newElement(
-				myContext,
-				"string",
-				referenceMatchUrlIdentifier.getValueElement().getValueAsString());
-		// Set system in the IBase Identifier
+		IBase identifierIBase = identifierDefinition.getChildByName("identifier").newInstance(identifierDefinition.getInstanceConstructorArguments());
+		IBase systemIBase = TerserUtil.newElement(myContext, "uri", referenceMatchUrlIdentifier.getSystemElement().getValueAsString());
+		IBase valueIBase = TerserUtil.newElement(myContext, "string", referenceMatchUrlIdentifier.getValueElement().getValueAsString());
+		//Set system in the IBase Identifier
 
 		BaseRuntimeElementDefinition<?> elementDefinition = myContext.getElementDefinition(identifierIBase.getClass());
 
@@ -324,21 +270,18 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		BaseRuntimeChildDefinition valueDefinition = elementDefinition.getChildByName("value");
 		valueDefinition.getMutator().setValue(identifierIBase, valueIBase);
 
-		// Set Value in the IBase identifier
+		//Set Value in the IBase identifier
 		identifierDefinition.getMutator().addValue(theTargetResource, identifierIBase);
 	}
 
 	private CanonicalIdentifier extractIdentifierReference(IBaseReference theSourceReference) {
-		Optional<IBase> identifier =
-				myContext.newFhirPath().evaluateFirst(theSourceReference, "identifier", IBase.class);
+		Optional<IBase> identifier = myContext.newFhirPath().evaluateFirst(theSourceReference, "identifier", IBase.class);
 		if (!identifier.isPresent()) {
 			return null;
 		} else {
 			CanonicalIdentifier canonicalIdentifier = new CanonicalIdentifier();
-			Optional<IPrimitiveType> system =
-					myContext.newFhirPath().evaluateFirst(identifier.get(), "system", IPrimitiveType.class);
-			Optional<IPrimitiveType> value =
-					myContext.newFhirPath().evaluateFirst(identifier.get(), "value", IPrimitiveType.class);
+			Optional<IPrimitiveType> system = myContext.newFhirPath().evaluateFirst(identifier.get(), "system", IPrimitiveType.class);
+			Optional<IPrimitiveType> value = myContext.newFhirPath().evaluateFirst(identifier.get(), "value", IPrimitiveType.class);
 
 			system.ifPresent(theIPrimitiveType -> canonicalIdentifier.setSystem(theIPrimitiveType.getValueAsString()));
 			value.ifPresent(theIPrimitiveType -> canonicalIdentifier.setValue(theIPrimitiveType.getValueAsString()));
@@ -359,10 +302,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			return null;
 		}
 
-		List<NameValuePair> params =
-				URLEncodedUtils.parse(theValue.substring(identifierIndex), StandardCharsets.UTF_8, '&', ';');
-		Optional<NameValuePair> idOptional =
-				params.stream().filter(p -> p.getName().equals("identifier")).findFirst();
+		List<NameValuePair> params = URLEncodedUtils.parse(theValue.substring(identifierIndex), StandardCharsets.UTF_8, '&', ';');
+		Optional<NameValuePair> idOptional = params.stream().filter(p -> p.getName().equals("identifier")).findFirst();
 		if (!idOptional.isPresent()) {
 			return null;
 		}
@@ -371,8 +312,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		String identifierString = id.getValue();
 		String[] split = identifierString.split("\\|");
 		if (split.length != 2) {
-			throw new IllegalArgumentException(Msg.code(1097) + "Can't create a placeholder reference with identifier "
-					+ theValue + ". It is not a valid identifier");
+			throw new IllegalArgumentException(Msg.code(1097) + "Can't create a placeholder reference with identifier " + theValue + ". It is not a valid identifier");
 		}
 
 		CanonicalIdentifier identifier = new CanonicalIdentifier();

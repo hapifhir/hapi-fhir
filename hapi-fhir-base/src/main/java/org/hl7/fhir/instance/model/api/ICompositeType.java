@@ -19,4 +19,7 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-public interface ICompositeType extends IBaseDatatype {}
+
+public interface ICompositeType extends IBaseDatatype {
+
+}

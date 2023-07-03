@@ -48,13 +48,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private final FhirVersionEnum myStructureVersion;
 	private volatile RuntimeResourceDefinition myBaseDefinition;
 
-	public RuntimeResourceDefinition(
-			FhirContext theContext,
-			String theResourceName,
-			Class<? extends IBaseResource> theClass,
-			ResourceDef theResourceAnnotation,
-			boolean theStandardType,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+
+
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theResourceName, theClass, theStandardType, theContext, theClassToElementDefinitions);
 		myContext = theContext;
 		myResourceProfile = theResourceAnnotation.profile();
@@ -64,34 +60,22 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		try {
 			instance = theClass.getConstructor().newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException(
-					Msg.code(1730)
-							+ myContext
-									.getLocalizer()
-									.getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()),
-					e);
+			throw new ConfigurationException(Msg.code(1730) + myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}
 		myStructureVersion = instance.getStructureFhirVersionEnum();
 		if (myStructureVersion != theContext.getVersion().getVersion()) {
-			if (myStructureVersion == FhirVersionEnum.R5
-					&& theContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			if (myStructureVersion == FhirVersionEnum.R5 && theContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
 				// TODO: remove this exception once we've bumped FHIR core to a new version
 				// TODO: also fix the TODO in ModelScanner
 				// TODO: also fix the TODO in RestfulServerUtils
 				// TODO: also fix the TODO in BaseParser
 			} else {
-				throw new ConfigurationException(Msg.code(1731)
-						+ myContext
-								.getLocalizer()
-								.getMessage(
-										getClass(),
-										"typeWrongVersion",
-										theContext.getVersion().getVersion(),
-										theClass.getName(),
-										myStructureVersion));
+				throw new ConfigurationException(Msg.code(1731) + myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
 			}
 		}
+
 	}
+
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
 		myNameToSearchParam.put(theParam.getName(), theParam);
@@ -129,8 +113,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	@SuppressWarnings("unchecked")
 	public <T> Class<T> getImplementingClass(Class<T> theClass) {
 		if (!theClass.isAssignableFrom(getImplementingClass())) {
-			throw new ConfigurationException(
-					Msg.code(1732) + "Unable to convert " + getImplementingClass() + " to " + theClass);
+			throw new ConfigurationException(Msg.code(1732) + "Unable to convert " + getImplementingClass() + " to " + theClass);
 		}
 		return (Class<T>) getImplementingClass();
 	}
@@ -193,9 +176,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sealAndInitialize(
-			FhirContext theContext,
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
@@ -221,8 +202,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 					if (!compartmentNameToSearchParams.containsKey(nextCompartment)) {
 						compartmentNameToSearchParams.put(nextCompartment, new ArrayList<>());
 					}
-					List<RuntimeSearchParam> searchParamsForCompartment =
-							compartmentNameToSearchParams.get(nextCompartment);
+					List<RuntimeSearchParam> searchParamsForCompartment = compartmentNameToSearchParams.get(nextCompartment);
 					searchParamsForCompartment.add(next);
 
 					/*
@@ -259,7 +239,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 				myBaseType = (Class<? extends IBaseResource>) target;
 			}
 		} while (target.equals(Object.class) == false);
-
+		
 		/*
 		 * See #504:
 		 * Bundle types may not have extensions
@@ -267,11 +247,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		if (hasExtensions()) {
 			if (IAnyResource.class.isAssignableFrom(getImplementingClass())) {
 				if (!IDomainResource.class.isAssignableFrom(getImplementingClass())) {
-					throw new ConfigurationException(Msg.code(1733) + "Class \"" + getImplementingClass()
-							+ "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+					throw new ConfigurationException(Msg.code(1733) + "Class \"" + getImplementingClass() + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
 				}
 			}
 		}
+
 	}
 
 	private String massagePathForCompartmentSimilarity(String thePath) {
@@ -306,4 +286,5 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		return retVal;
 	}
+
 }

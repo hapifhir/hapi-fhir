@@ -96,4 +96,5 @@ public interface IHttpRequest {
 	 * @since 5.0.0
 	 */
 	void setUrlSource(UrlSourceEnum theUrlSource);
+
 }

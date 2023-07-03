@@ -23,4 +23,5 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public interface IHapiFhirJpaRepository {}
+public interface IHapiFhirJpaRepository {
+}

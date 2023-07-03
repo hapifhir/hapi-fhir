@@ -60,7 +60,8 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 			case Batch2JobDefinitionConstants.BULK_EXPORT:
 				if (theParameters instanceof BulkExportParameters) {
 					return startBatch2BulkExportJob(theRequestDetails, (BulkExportParameters) theParameters);
-				} else {
+				}
+				else {
 					ourLog.error("Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT);
 				}
 				break;
@@ -90,8 +91,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
 	}
 
-	private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(
-			@Nonnull JobOperationResultJson theResultJson) {
+	private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(@Nonnull JobOperationResultJson theResultJson) {
 		Batch2JobOperationResult result = new Batch2JobOperationResult();
 		result.setOperation(theResultJson.getOperation());
 		result.setMessage(theResultJson.getMessage());
@@ -112,7 +112,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
 		info.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		if (Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
+		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
 			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
 			info.setRequestPartitionId(parameters.getPartitionId());
 		}
@@ -120,8 +120,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		return info;
 	}
 
-	private Batch2JobStartResponse startBatch2BulkExportJob(
-			RequestDetails theRequestDetails, BulkExportParameters theParameters) {
+	private Batch2JobStartResponse startBatch2BulkExportJob(RequestDetails theRequestDetails, BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
 		BulkExportJobParameters parameters = BulkExportJobParameters.createFromExportJobParameters(theParameters);
 		request.setParameters(parameters);

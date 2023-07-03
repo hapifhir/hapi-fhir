@@ -44,13 +44,13 @@ public class ProcessMessageProvider {
 	@Description("Accept a FHIR Message Bundle for processing")
 	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
 	public IBaseBundle processMessage(
-			HttpServletRequest theServletRequest,
-			RequestDetails theRequestDetails,
-			@OperationParam(name = "content", min = 1, max = 1, typeName = "Bundle")
-					@Description(
-							shortDefinition =
-									"The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-					IBaseBundle theMessageToProcess) {
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1, typeName = "Bundle")
+		@Description(shortDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+		IBaseBundle theMessageToProcess
+	) {
 
 		startRequest(theServletRequest);
 		try {
@@ -58,5 +58,7 @@ public class ProcessMessageProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
+
 	}
+
 }

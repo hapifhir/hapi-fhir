@@ -71,29 +71,23 @@ public class ResourceOrderUtil {
 				String typeAtCurrentIndex = retVal.get(i);
 
 				RuntimeResourceDefinition typeDefinition = theFhirContext.getResourceDefinition(typeAtCurrentIndex);
-				List<RuntimeSearchParam> params = typeDefinition.getSearchParams().stream()
-						.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-						.collect(Collectors.toList());
+				List<RuntimeSearchParam> params = typeDefinition
+					.getSearchParams()
+					.stream()
+					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+					.collect(Collectors.toList());
 				for (RuntimeSearchParam nextParam : params) {
 					for (String targetType : nextParam.getTargets()) {
 						int targetIndex = retVal.indexOf(targetType);
 						if (targetIndex > i) {
 
 							String nextParamName = nextParam.getName();
-							String key = typeAtCurrentIndex + " " + nextParamName + " " + targetType + " " + i + " "
-									+ targetIndex;
+							String key = typeAtCurrentIndex + " " + nextParamName + " " + targetType + " " + i + " " + targetIndex;
 							if (!moves.add(key)) {
 								continue;
 							}
 
-							ourLog.debug(
-									"Resource[{}] at index[{}] has SP[{}] with target[{}] at index[{}] - moving to index[{}]",
-									typeAtCurrentIndex,
-									i,
-									nextParamName,
-									targetType,
-									targetIndex,
-									i);
+							ourLog.debug("Resource[{}] at index[{}] has SP[{}] with target[{}] at index[{}] - moving to index[{}]", typeAtCurrentIndex, i, nextParamName, targetType, targetIndex, i);
 
 							retVal.set(targetIndex, typeAtCurrentIndex);
 							retVal.set(i, targetType);
@@ -105,6 +99,7 @@ public class ResourceOrderUtil {
 						}
 					}
 				}
+
 			}
 
 			ourLog.debug("Finished pass {} with {} changes", passCount, changeCount);
@@ -118,56 +113,56 @@ public class ResourceOrderUtil {
 		return retVal;
 	}
 
-	//	public static List<String> getResourceOrder(FhirContext theFhirContext) {
-	//		LinkedList<String> retVal = new LinkedList<>(theFhirContext.getResourceTypes());
-	//		Set<String> moves = new HashSet<>();
-	//		StopWatch sw = new StopWatch();
-	//
-	//		for (int rep = 0; rep < retVal.size(); rep++) {
-	//			ourLog.debug("Starting rep {}", rep);
-	//			int changeCount = 0;
-	//
-	//			for (int i = retVal.size() - 1; i >= 0; i--) {
-	//				String typeAtCurrentIndex = retVal.get(i);
-	//
-	//				RuntimeResourceDefinition typeDefinition = theFhirContext.getResourceDefinition(typeAtCurrentIndex);
-	//				List<RuntimeSearchParam> params = typeDefinition
-	//					.getSearchParams()
-	//					.stream()
-	//					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-	//					.collect(Collectors.toList());
-	//				for (RuntimeSearchParam nextParam : params) {
-	//					for (String targetType : nextParam.getTargets()) {
-	//						int targetIndex = retVal.indexOf(targetType);
-	//						if (targetIndex > i) {
-	//
-	//							String nextParamName = nextParam.getName();
-	//							String key = typeAtCurrentIndex + " " + nextParamName + " " + targetType + " " + i + " " + targetIndex;
-	//							if (!moves.add(key)) {
-	//								continue;
-	//							}
-	//
-	//							ourLog.debug("Resource[{}] at index[{}] has SP[{}] with target[{}] at index[{}] - moving to index[{}]",
-	// typeAtCurrentIndex, i, nextParamName, targetType, targetIndex, i);
-	//							retVal.remove(targetIndex);
-	//							retVal.add(i, targetType);
-	//							i++;
-	//							changeCount++;
-	//						}
-	//					}
-	//				}
-	//
-	//			}
-	//
-	//			ourLog.debug("Finished pass {} with {} changes", rep, changeCount);
-	//			if (changeCount == 0) {
-	//				break;
-	//			}
-	//		}
-	//
-	//		ourLog.info("Calculated optimal resource order in {}", sw);
-	//
-	//		return retVal;
-	//	}
+
+//	public static List<String> getResourceOrder(FhirContext theFhirContext) {
+//		LinkedList<String> retVal = new LinkedList<>(theFhirContext.getResourceTypes());
+//		Set<String> moves = new HashSet<>();
+//		StopWatch sw = new StopWatch();
+//
+//		for (int rep = 0; rep < retVal.size(); rep++) {
+//			ourLog.debug("Starting rep {}", rep);
+//			int changeCount = 0;
+//
+//			for (int i = retVal.size() - 1; i >= 0; i--) {
+//				String typeAtCurrentIndex = retVal.get(i);
+//
+//				RuntimeResourceDefinition typeDefinition = theFhirContext.getResourceDefinition(typeAtCurrentIndex);
+//				List<RuntimeSearchParam> params = typeDefinition
+//					.getSearchParams()
+//					.stream()
+//					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+//					.collect(Collectors.toList());
+//				for (RuntimeSearchParam nextParam : params) {
+//					for (String targetType : nextParam.getTargets()) {
+//						int targetIndex = retVal.indexOf(targetType);
+//						if (targetIndex > i) {
+//
+//							String nextParamName = nextParam.getName();
+//							String key = typeAtCurrentIndex + " " + nextParamName + " " + targetType + " " + i + " " + targetIndex;
+//							if (!moves.add(key)) {
+//								continue;
+//							}
+//
+//							ourLog.debug("Resource[{}] at index[{}] has SP[{}] with target[{}] at index[{}] - moving to index[{}]", typeAtCurrentIndex, i, nextParamName, targetType, targetIndex, i);
+//							retVal.remove(targetIndex);
+//							retVal.add(i, targetType);
+//							i++;
+//							changeCount++;
+//						}
+//					}
+//				}
+//
+//			}
+//
+//			ourLog.debug("Finished pass {} with {} changes", rep, changeCount);
+//			if (changeCount == 0) {
+//				break;
+//			}
+//		}
+//
+//		ourLog.info("Calculated optimal resource order in {}", sw);
+//
+//		return retVal;
+//	}
 
 }

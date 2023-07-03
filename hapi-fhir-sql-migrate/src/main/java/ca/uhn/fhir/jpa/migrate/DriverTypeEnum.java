@@ -32,13 +32,14 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
+
 	H2_EMBEDDED("org.h2.Driver", false),
 	DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
 	MARIADB_10_1("org.mariadb.jdbc.Driver", false),
@@ -53,6 +54,7 @@ public enum DriverTypeEnum {
 	MSSQL_2012("com.microsoft.sqlserver.jdbc.SQLServerDriver", false),
 
 	COCKROACHDB_21_1("org.postgresql.Driver", false),
+
 	;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
@@ -106,8 +108,7 @@ public enum DriverTypeEnum {
 				retval = "cockroachdb201.sql";
 				break;
 			default:
-				throw new ConfigurationException(
-						Msg.code(45) + "No schema initialization script available for driver " + this);
+				throw new ConfigurationException(Msg.code(45) + "No schema initialization script available for driver " + this);
 		}
 		return retval;
 	}
@@ -136,11 +137,7 @@ public enum DriverTypeEnum {
 	public ConnectionProperties newConnectionProperties(DataSource theDataSource) {
 		try {
 			Class.forName(myDriverClassName).getConstructor().newInstance();
-		} catch (ClassNotFoundException
-				| InstantiationException
-				| IllegalAccessException
-				| NoSuchMethodException
-				| InvocationTargetException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			throw new InternalErrorException(Msg.code(46) + "Unable to find driver class: " + myDriverClassName, e);
 		}
 
@@ -165,8 +162,7 @@ public enum DriverTypeEnum {
 		/**
 		 * Constructor
 		 */
-		public ConnectionProperties(
-				DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
+		public ConnectionProperties(DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
 			Validate.notNull(theDataSource);
 			Validate.notNull(theTxTemplate);
 			Validate.notNull(theDriverType);

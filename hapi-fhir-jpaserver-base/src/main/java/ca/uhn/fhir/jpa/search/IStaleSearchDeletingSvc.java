@@ -24,4 +24,5 @@ public interface IStaleSearchDeletingSvc {
 	void pollForStaleSearchesAndDeleteThem();
 
 	void schedulePollForStaleSearches();
+
 }

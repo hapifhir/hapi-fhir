@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,35 +18,33 @@
  * #L%
  */
 package ca.uhn.fhir.tinder;
-
 import ca.uhn.fhir.i18n.Msg;
+import java.util.List;
+
+import javax.security.auth.login.FailedLoginException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.plugins.annotations.Parameter;
+
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.plugins.annotations.Parameter;
-
-import java.util.List;
 
 /**
  * @author Bill.Denton
  *
  */
 public class GeneratorContext {
-	public enum ResourceSource {
-		SPREADSHEET,
-		MODEL
-	};
-
+	public enum ResourceSource {SPREADSHEET, MODEL};
 	public static final ResourceSource DEFAULT_RESOURCE_SOURCE = ResourceSource.SPREADSHEET;
-
+	
 	private String version;
 	private String packageSuffix;
 	private String baseDir;
 	private List<String> includeResources;
 	private List<String> excludeResources;
-	private ResourceSource resourceSource = DEFAULT_RESOURCE_SOURCE;
+	private ResourceSource resourceSource = DEFAULT_RESOURCE_SOURCE; 
 	private List<ValueSetFileDefinition> valueSetFiles;
 	private BaseStructureParser resourceGenerator = null;
 	private ValueSetGenerator valueSetGenerator = null;
@@ -79,7 +77,6 @@ public class GeneratorContext {
 	public List<String> getIncludeResources() {
 		return includeResources;
 	}
-
 	public void setIncludeResources(List<String> includeResources) {
 		this.includeResources = includeResources;
 	}
@@ -94,11 +91,13 @@ public class GeneratorContext {
 
 	public void setResourceSource(String resourceSource) throws FailureException {
 		resourceSource = StringUtils.stripToNull(resourceSource);
-		if (null == resourceSource) {
+		if (null == resourceSource) { 
 			this.resourceSource = DEFAULT_RESOURCE_SOURCE;
-		} else if (ResourceSource.SPREADSHEET.name().equalsIgnoreCase(resourceSource)) {
+		} else 
+		if (ResourceSource.SPREADSHEET.name().equalsIgnoreCase(resourceSource)) {
 			this.resourceSource = ResourceSource.SPREADSHEET;
-		} else if (ResourceSource.MODEL.name().equalsIgnoreCase(resourceSource)) {
+		} else 
+		if (ResourceSource.MODEL.name().equalsIgnoreCase(resourceSource)) {
 			this.resourceSource = ResourceSource.MODEL;
 		} else {
 			throw new FailureException(Msg.code(112) + "Unknown resource-source option: " + resourceSource);
@@ -132,7 +131,6 @@ public class GeneratorContext {
 	public ValueSetGenerator getValueSetGenerator() {
 		return valueSetGenerator;
 	}
-
 	public void setValueSetGenerator(ValueSetGenerator valueSetGenerator) {
 		this.valueSetGenerator = valueSetGenerator;
 	}

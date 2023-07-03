@@ -54,4 +54,5 @@ public class GZipUtil {
 			throw new DataFormatException(Msg.code(517) + "Compress contents", e);
 		}
 	}
+
 }

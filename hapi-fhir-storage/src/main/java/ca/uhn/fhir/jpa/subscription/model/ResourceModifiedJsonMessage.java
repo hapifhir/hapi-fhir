@@ -73,6 +73,8 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
+		return new ToStringBuilder(this)
+			.append("myPayload", myPayload)
+			.toString();
 	}
 }

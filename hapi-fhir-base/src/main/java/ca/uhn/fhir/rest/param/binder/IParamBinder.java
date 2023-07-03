@@ -19,18 +19,18 @@
  */
 package ca.uhn.fhir.rest.param.binder;
 
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-import java.util.List;
-
 public interface IParamBinder<T> {
-
+	
 	List<IQueryParameterOr<?>> encode(FhirContext theContext, T theString) throws InternalErrorException;
 
-	T parse(FhirContext theContext, String theName, List<QualifiedParamList> theList)
-			throws InternalErrorException, InvalidRequestException;
+	T parse(FhirContext theContext, String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+
 }

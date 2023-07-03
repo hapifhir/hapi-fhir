@@ -27,9 +27,9 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public abstract class BaseResponseTerminologyInterceptor {
 	protected final IValidationSupport myValidationSupport;
@@ -52,7 +52,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 
 		switch (theRequestDetails.getRestOperationType()) {
-				// Don't apply to these operations
+			// Don't apply to these operations
 			case ADD_TAGS:
 			case DELETE_TAGS:
 			case GET_TAGS:
@@ -74,7 +74,7 @@ public abstract class BaseResponseTerminologyInterceptor {
 			default:
 				return Collections.emptyList();
 
-				// Do apply to these operations
+			// Do apply to these operations
 			case HISTORY_INSTANCE:
 			case HISTORY_SYSTEM:
 			case HISTORY_TYPE:
@@ -93,4 +93,5 @@ public abstract class BaseResponseTerminologyInterceptor {
 		}
 		return resources;
 	}
+
 }

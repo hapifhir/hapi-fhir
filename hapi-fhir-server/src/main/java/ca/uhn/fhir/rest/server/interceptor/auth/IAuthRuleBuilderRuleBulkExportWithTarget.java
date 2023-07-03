@@ -36,4 +36,5 @@ public interface IAuthRuleBuilderRuleBulkExportWithTarget extends IAuthRuleFinis
 	 * @since 5.5.0
 	 */
 	IAuthRuleBuilderRuleBulkExportWithTarget withResourceTypes(Collection<String> theResourceTypes);
+
 }

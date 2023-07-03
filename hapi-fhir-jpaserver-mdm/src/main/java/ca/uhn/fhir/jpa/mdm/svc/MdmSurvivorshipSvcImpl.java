@@ -43,22 +43,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	 * @param <T>
 	 */
 	@Override
-	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(
-			T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		switch (theMdmTransactionContext.getRestOperation()) {
 			case MERGE_GOLDEN_RESOURCES:
-				TerserUtil.mergeFields(
-						myFhirContext,
-						(IBaseResource) theTargetResource,
-						(IBaseResource) theGoldenResource,
-						TerserUtil.EXCLUDE_IDS_AND_META);
+				TerserUtil.mergeFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
 				break;
 			default:
-				TerserUtil.replaceFields(
-						myFhirContext,
-						(IBaseResource) theTargetResource,
-						(IBaseResource) theGoldenResource,
-						TerserUtil.EXCLUDE_IDS_AND_META);
+				TerserUtil.replaceFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
 				break;
 		}
 	}

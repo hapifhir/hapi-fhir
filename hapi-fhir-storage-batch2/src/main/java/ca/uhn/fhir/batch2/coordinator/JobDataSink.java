@@ -28,17 +28,16 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
-class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-		extends BaseDataSink<PT, IT, OT> {
+class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final BatchJobSender myBatchJobSender;
@@ -50,12 +49,11 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final boolean myGatedExecution;
 
-	JobDataSink(
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull IJobPersistence theJobPersistence,
-			@Nonnull JobDefinition<?> theDefinition,
-			@Nonnull String theInstanceId,
-			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	JobDataSink(@Nonnull BatchJobSender theBatchJobSender,
+					@Nonnull IJobPersistence theJobPersistence,
+					@Nonnull JobDefinition<?> theDefinition,
+					@Nonnull String theInstanceId,
+					@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
@@ -74,14 +72,12 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
-				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(
-					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
 	}
@@ -93,9 +89,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 	public String getOnlyChunkId() {
 		if (getWorkChunkCount() != 1) {
-			String msg = String.format(
-					"Expected this sink to have exactly one work chunk but there are %d.  Job %s v%s step %s",
-					getWorkChunkCount(), myJobDefinitionId, myJobDefinitionVersion, myTargetStep);
+			String msg = String.format("Expected this sink to have exactly one work chunk but there are %d.  Job %s v%s step %s", getWorkChunkCount(), myJobDefinitionId, myJobDefinitionVersion, myTargetStep);
 			throw new IllegalStateException(Msg.code(2082) + msg);
 		}
 		return myLastChunkId.get();

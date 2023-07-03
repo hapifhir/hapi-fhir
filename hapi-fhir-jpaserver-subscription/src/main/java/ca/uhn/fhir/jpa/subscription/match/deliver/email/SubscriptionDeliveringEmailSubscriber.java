@@ -43,7 +43,6 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 	@Autowired
 	private StorageSettings myStorageSettings;
-
 	@Autowired
 	private FhirContext myCtx;
 
@@ -77,10 +76,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			}
 		}
 
-		String from = processEmailAddressUri(
-				defaultString(subscription.getEmailDetails().getFrom(), myStorageSettings.getEmailFromAddress()));
-		String subjectTemplate =
-				defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
+		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myStorageSettings.getEmailFromAddress()));
+		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
@@ -95,8 +92,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private String processEmailAddressUri(String next) {
 		next = trim(defaultString(next));
 		if (next.startsWith("mailto:")) {
-			next = next.substring("mailto:".length());
-		}
+         next = next.substring("mailto:".length());
+      }
 		return next;
 	}
 
@@ -109,7 +106,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	}
 
 	@VisibleForTesting
-	public IEmailSender getEmailSender() {
+	public IEmailSender getEmailSender(){
 		return myEmailSender;
 	}
 }

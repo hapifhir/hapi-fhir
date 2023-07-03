@@ -28,4 +28,5 @@ public class AuthorizationConstants {
 	private AuthorizationConstants() {
 		super();
 	}
+
 }

@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Implementations of this interface represent a response back to the client from the server. It is
@@ -59,8 +59,7 @@ public interface IRestfulResponse {
 	 * @return Returns a {@link Writer} that can accept the response body.
 	 */
 	@Nonnull
-	Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip)
-			throws IOException;
+	Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException;
 
 	/**
 	 * Initiate a new binary response. The OutputStream returned by this method must be finalized by
@@ -80,8 +79,7 @@ public interface IRestfulResponse {
 	 * @return Returns an {@link OutputStream} that can accept the response body.
 	 */
 	@Nonnull
-	OutputStream getResponseOutputStream(int theStatusCode, String theContentType, @Nullable Integer theContentLength)
-			throws IOException;
+	OutputStream getResponseOutputStream(int theStatusCode, String theContentType, @Nullable Integer theContentLength) throws IOException;
 
 	/**
 	 * Finalizes the response streaming using the writer that was returned by calling either
@@ -107,8 +105,10 @@ public interface IRestfulResponse {
 	 */
 	void addHeader(String headerKey, String headerValue);
 
+
 	/**
 	 * Returns the headers added to this response
 	 */
 	Map<String, List<String>> getHeaders();
+
 }

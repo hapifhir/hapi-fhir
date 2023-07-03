@@ -25,7 +25,7 @@ public enum SubscriptionMatchingStrategy {
 	 */
 	IN_MEMORY,
 
-	/**
+    /**
 	 * Resources cannot be matched against this subscription in-memory.  We need to make a call to a FHIR Repository to determine a match
 	 */
 	DATABASE,
@@ -35,3 +35,4 @@ public enum SubscriptionMatchingStrategy {
 	 */
 	TOPIC
 }
+

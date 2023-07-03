@@ -44,11 +44,7 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
 	private final Map<PartTypeAndPartName, String> myPartTypeAndPartNameToPartNumber;
 
-	public LoincHandler(
-			TermCodeSystemVersion theCodeSystemVersion,
-			Map<String, TermConcept> theCode2concept,
-			Map<String, CodeSystem.PropertyType> thePropertyNames,
-			Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
+	public LoincHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, Map<PartTypeAndPartName, String> thePartTypeAndPartNameToPartNumber) {
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myPropertyNames = thePropertyNames;
@@ -68,7 +64,10 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 			concept.setDisplay(display);
 
 			if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
-				concept.addDesignation().setUseDisplay("ShortName").setValue(shortName);
+				concept
+					.addDesignation()
+					.setUseDisplay("ShortName")
+					.setValue(shortName);
 			}
 
 			for (String nextPropertyName : myPropertyNames.keySet()) {
@@ -85,15 +84,11 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 					switch (nextPropertyType) {
 						case STRING:
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
-							ourLog.trace(
-									"Adding string property: {} to concept.code {}",
-									nextPropertyName,
-									concept.getCode());
+							ourLog.trace("Adding string property: {} to concept.code {}", nextPropertyName, concept.getCode());
 							break;
 
 						case CODING:
-							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy,
-							// RsnaPlaybook or DocumentOntology handlers
+							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy, RsnaPlaybook or DocumentOntology handlers
 							break;
 
 						case DECIMAL:
@@ -102,9 +97,9 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 						case BOOLEAN:
 						case DATETIME:
 						case NULL:
-							throw new InternalErrorException(Msg.code(915)
-									+ "Don't know how to handle LOINC property of type: " + nextPropertyType);
+							throw new InternalErrorException(Msg.code(915) + "Don't know how to handle LOINC property of type: " + nextPropertyType);
 					}
+
 				}
 			}
 

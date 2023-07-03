@@ -11,4 +11,5 @@ public class Slicing {
 	public void setDiscriminator(String theDiscriminator) {
 		myDiscriminator = theDiscriminator;
 	}
+	
 }

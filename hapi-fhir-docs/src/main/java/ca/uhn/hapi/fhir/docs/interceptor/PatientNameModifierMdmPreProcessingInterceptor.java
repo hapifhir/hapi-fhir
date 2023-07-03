@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,8 @@ public class PatientNameModifierMdmPreProcessingInterceptor {
 		List<HumanName> nameList = patient.getName();
 
 		List<HumanName> validHumanNameList = nameList.stream()
-				.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
-				.collect(Collectors.toList());
+			.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
+			.collect(Collectors.toList());
 
 		patient.setName(validHumanNameList);
 	}

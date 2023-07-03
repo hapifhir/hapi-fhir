@@ -24,12 +24,12 @@ import ca.uhn.fhir.util.Logs;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * Status of a Batch2 Job Instance.
@@ -65,8 +65,7 @@ public enum StatusEnum {
 	 * to indicate that there has been a transient error.
 	 */
 	@Deprecated(since = "6.6")
-	// wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use message in ui to
-	// show danger status
+		// wipmb For 6.8 - remove all inbound transitions, and allow transition back to IN_PROGRESS. use message in ui to show danger status
 	ERRORED(true, false, true),
 
 	/**
@@ -91,12 +90,12 @@ public enum StatusEnum {
 		EnumMap<StatusEnum, Set<StatusEnum>> fromStates = new EnumMap<>(StatusEnum.class);
 		EnumMap<StatusEnum, Set<StatusEnum>> toStates = new EnumMap<>(StatusEnum.class);
 
-		for (StatusEnum nextEnum : StatusEnum.values()) {
+		for (StatusEnum nextEnum: StatusEnum.values()) {
 			fromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
 			toStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
 		}
-		for (StatusEnum nextPriorEnum : StatusEnum.values()) {
-			for (StatusEnum nextNextEnum : StatusEnum.values()) {
+		for (StatusEnum nextPriorEnum: StatusEnum.values()) {
+			for (StatusEnum nextNextEnum: StatusEnum.values()) {
 				if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
 					fromStates.get(nextNextEnum).add(nextPriorEnum);
 					toStates.get(nextPriorEnum).add(nextNextEnum);
@@ -195,10 +194,10 @@ public enum StatusEnum {
 				break;
 			case CANCELLED:
 				// terminal state cannot transition
-				canTransition = false;
+				canTransition =  false;
 				break;
 			case COMPLETED:
-				canTransition = false;
+				canTransition =  false;
 				break;
 			case FAILED:
 				canTransition = theNewStatus == FAILED;
@@ -212,10 +211,7 @@ public enum StatusEnum {
 
 		if (!canTransition) {
 			// we have a bug?
-			ourLog.debug(
-					"Tried to execute an illegal state transition. [origStatus={}, newStatus={}]",
-					theOrigStatus,
-					theNewStatus);
+			ourLog.debug("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
 		return canTransition;
 	}

@@ -23,10 +23,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class BulkExportParameters extends Batch2BaseJobParameters {
 
@@ -75,6 +75,7 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 */
 	private boolean myExpandMdm;
 
+
 	/**
 	 * Patient id(s)
 	 */
@@ -84,8 +85,9 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 * The request which originated the request.
 	 */
 	private String myOriginalRequestUrl;
-
 	private String myExportIdentifier;
+
+
 
 	/**
 	 * The partition for the request if applicable.
@@ -111,7 +113,6 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	public void setExportIdentifier(String theExportIdentifier) {
 		myExportIdentifier = theExportIdentifier;
 	}
-
 	public String getExportIdentifier() {
 		return myExportIdentifier;
 	}

@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -54,10 +54,8 @@ public class JobDefinitionRegistry {
 	 * @param <PT> the job parameter type for the definition
 	 * @return true if it did not already exist and was registered
 	 */
-	public synchronized <PT extends IModelJson> boolean addJobDefinitionIfNotRegistered(
-			@Nonnull JobDefinition<PT> theDefinition) {
-		Optional<JobDefinition<?>> orig =
-				getJobDefinition(theDefinition.getJobDefinitionId(), theDefinition.getJobDefinitionVersion());
+	public synchronized <PT extends IModelJson> boolean addJobDefinitionIfNotRegistered(@Nonnull JobDefinition<PT> theDefinition) {
+		Optional<JobDefinition<?>> orig = getJobDefinition(theDefinition.getJobDefinitionId(), theDefinition.getJobDefinitionVersion());
 		if (orig.isPresent()) {
 			return false;
 		}
@@ -75,24 +73,17 @@ public class JobDefinitionRegistry {
 		Set<String> stepIds = new HashSet<>();
 		for (JobDefinitionStep<?, ?, ?> next : theDefinition.getSteps()) {
 			if (!stepIds.add(next.getStepId())) {
-				throw new ConfigurationException(
-						Msg.code(2046) + "Duplicate step[" + next.getStepId() + "] in definition[" + jobDefinitionId
-								+ "] version: " + theDefinition.getJobDefinitionVersion());
+				throw new ConfigurationException(Msg.code(2046) + "Duplicate step[" + next.getStepId() + "] in definition[" + jobDefinitionId + "] version: " + theDefinition.getJobDefinitionVersion());
 			}
 		}
 
-		NavigableMap<Integer, JobDefinition<?>> versionMap =
-				myJobDefinitions.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
 		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
 			if (versionMap.get(theDefinition.getJobDefinitionVersion()) == theDefinition) {
-				ourLog.warn(
-						"job[{}] version: {} already registered.  Not registering again.",
-						jobDefinitionId,
-						theDefinition.getJobDefinitionVersion());
+				ourLog.warn("job[{}] version: {} already registered.  Not registering again.", jobDefinitionId, theDefinition.getJobDefinitionVersion());
 				return;
 			}
-			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + jobDefinitionId
-					+ "] version: " + theDefinition.getJobDefinitionVersion());
+			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + jobDefinitionId + "] version: " + theDefinition.getJobDefinitionVersion());
 		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
 	}
@@ -118,8 +109,7 @@ public class JobDefinitionRegistry {
 		return Optional.of(versionMap.lastEntry().getValue());
 	}
 
-	public Optional<JobDefinition<?>> getJobDefinition(
-			@Nonnull String theJobDefinitionId, int theJobDefinitionVersion) {
+	public Optional<JobDefinition<?>> getJobDefinition(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion) {
 		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobDefinitions.get(theJobDefinitionId);
 		if (versionMap == null || versionMap.isEmpty()) {
 			return Optional.empty();
@@ -133,8 +123,7 @@ public class JobDefinitionRegistry {
 	public JobDefinition<?> getJobDefinitionOrThrowException(String theJobDefinitionId, int theJobDefinitionVersion) {
 		Optional<JobDefinition<?>> opt = getJobDefinition(theJobDefinitionId, theJobDefinitionVersion);
 		if (opt.isEmpty()) {
-			String msg =
-					"Unknown job definition ID[" + theJobDefinitionId + "] version[" + theJobDefinitionVersion + "]";
+			String msg = "Unknown job definition ID[" + theJobDefinitionId + "] version[" + theJobDefinitionVersion + "]";
 			ourLog.warn(msg);
 			throw new JobExecutionFailedException(Msg.code(2043) + msg);
 		}
@@ -150,7 +139,10 @@ public class JobDefinitionRegistry {
 	 * @return a list of Job Definition Ids in alphabetical order
 	 */
 	public List<String> getJobDefinitionIds() {
-		return myJobDefinitions.keySet().stream().sorted().collect(Collectors.toList());
+		return myJobDefinitions.keySet()
+			.stream()
+			.sorted()
+			.collect(Collectors.toList());
 	}
 
 	public boolean isEmpty() {
@@ -159,13 +151,10 @@ public class JobDefinitionRegistry {
 
 	@SuppressWarnings("unchecked")
 	public <T extends IModelJson> JobDefinition<T> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
-		return (JobDefinition<T>) getJobDefinitionOrThrowException(
-				theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+		return (JobDefinition<T>) getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
 	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {
-		return myJobDefinitions
-				.getOrDefault(theDefinitionId, ImmutableSortedMap.of())
-				.keySet();
+		return myJobDefinitions.getOrDefault(theDefinitionId, ImmutableSortedMap.of()).keySet();
 	}
 }

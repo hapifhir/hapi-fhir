@@ -19,9 +19,10 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 403 Forbidden</b> response, which generally indicates one of two conditions:
@@ -29,13 +30,13 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
  * <li>Authentication was provided, but the authenticated user is not permitted to perform the requested operation.</li>
  * <li>The operation is forbidden to all users. Repeating the request with authentication would serve no purpose.</li>
  * </ul>
- *
+ * 
  * <p>
  * For security failures, you should use
  * {@link AuthenticationException} if you want to indicate that the
- * user could not be authenticated (e.g. credential failures), also
- * known as an <b>authentication</b> failure.
- * You should use {@link ForbiddenOperationException} if you want to
+ * user could not be authenticated (e.g. credential failures), also 
+ * known as an <b>authentication</b> failure. 
+ * You should use {@link ForbiddenOperationException} if you want to 
  * indicate that the authenticated user does not have permission to
  * perform the requested operation, also known as an <b>authorization</b>
  * failure.
@@ -57,7 +58,7 @@ public class ForbiddenOperationException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 *
+	 * 
 	 * @param theMessage
 	 *            The message
 	 * @param theOperationOutcome
@@ -66,4 +67,5 @@ public class ForbiddenOperationException extends BaseServerResponseException {
 	public ForbiddenOperationException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
+
 }

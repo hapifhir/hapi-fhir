@@ -30,9 +30,9 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
@@ -47,11 +47,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorDstu3(
-			StorageSettings theStorageSettings,
-			PartitionSettings thePartitionSettings,
-			FhirContext theCtx,
-			ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParamExtractorDstu3(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		super(theStorageSettings, thePartitionSettings, theCtx, theSearchParamRegistry);
 		initFhirPathEngine();
 		start();
@@ -70,6 +66,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		};
 	}
 
+
 	@Override
 	@PostConstruct
 	public void start() {
@@ -83,4 +80,5 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
+
 }

@@ -30,4 +30,5 @@ public enum UrlSourceEnum {
 	 * URL was supplied (i.e. it came from a paging link in a bundle)
 	 */
 	EXPLICIT
+
 }

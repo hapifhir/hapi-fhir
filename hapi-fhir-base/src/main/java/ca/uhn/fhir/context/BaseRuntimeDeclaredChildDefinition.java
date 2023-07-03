@@ -46,15 +46,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private boolean myModifier;
 	private boolean mySummary;
 
-	BaseRuntimeDeclaredChildDefinition(
-			Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName)
-			throws ConfigurationException {
+	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
 		Validate.notNull(theField, "No field specified");
 		ValidateUtil.isGreaterThanOrEqualTo(theChildAnnotation.min(), 0, "Min must be >= 0");
-		Validate.isTrue(
-				theChildAnnotation.max() == -1 || theChildAnnotation.max() >= theChildAnnotation.min(),
-				"Max must be >= Min (unless it is -1 / unlimited)");
+		Validate.isTrue(theChildAnnotation.max() == -1 || theChildAnnotation.max() >= theChildAnnotation.min(), "Max must be >= Min (unless it is -1 / unlimited)");
 		Validate.notBlank(theElementName, "Element name must not be blank");
 
 		myField = theField;
@@ -80,6 +76,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			myAccessor = new FieldPlainAccessor();
 			myMutator = new FieldPlainMutator();
 		}
+
 	}
 
 	@Override
@@ -150,6 +147,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			}
 			return retVal;
 		}
+
 	}
 
 	protected final class FieldListMutator implements IMutator {
@@ -183,12 +181,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		public void remove(IBase theTarget, int theIndex) {
 			List<IBase> existingList = (List<IBase>) getFieldValue(theTarget, myField);
 			if (existingList == null) {
-				throw new IndexOutOfBoundsException(
-						Msg.code(2143) + "Can not remove element at index " + theIndex + " from list - List is null");
+				throw new IndexOutOfBoundsException(Msg.code(2143) + "Can not remove element at index " + theIndex + " from list - List is null");
 			}
 			if (theIndex >= existingList.size()) {
-				throw new IndexOutOfBoundsException(Msg.code(2144) + "Can not remove element at index " + theIndex
-						+ " from list - List size is " + existingList.size());
+				throw new IndexOutOfBoundsException(Msg.code(2144) + "Can not remove element at index " + theIndex + " from list - List size is " + existingList.size());
 			}
 			existingList.remove(theIndex);
 		}
@@ -206,7 +202,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@Override
 		public <T extends IBase> Optional<T> getFirstValueOrNull(IBase theTarget) {
-			return Optional.ofNullable(((T) getFieldValue(theTarget, myField)));
+			return Optional.ofNullable(((T)getFieldValue(theTarget, myField)));
 		}
 	}
 
@@ -223,9 +219,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@Override
 		public void remove(IBase theTarget, int theIndex) {
-			throw new UnsupportedOperationException(
-					Msg.code(2142) + "Remove by index can only be called on a list-valued field.  '" + myField.getName()
-							+ "' is a single-valued field.");
+			throw new UnsupportedOperationException(Msg.code(2142) + "Remove by index can only be called on a list-valued field.  '" + myField.getName() + "' is a single-valued field.");
 		}
 	}
 
@@ -244,4 +238,5 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			throw new ConfigurationException(Msg.code(1737) + "Failed to get value", e);
 		}
 	}
+
 }

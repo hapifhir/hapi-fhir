@@ -19,19 +19,21 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 
 public class ClientInvocationHandlerFactory {
 
@@ -42,11 +44,7 @@ public class ClientInvocationHandlerFactory {
 	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
 	private final String myUrlBase;
 
-	public ClientInvocationHandlerFactory(
-			IHttpClient theClient,
-			FhirContext theContext,
-			String theUrlBase,
-			Class<? extends IRestfulClient> theClientType) {
+	public ClientInvocationHandlerFactory(IHttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
 		myClient = theClient;
 		myUrlBase = theUrlBase;
 		myContext = theContext;
@@ -58,21 +56,15 @@ public class ClientInvocationHandlerFactory {
 
 			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
 			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", Boolean.class), new SetPrettyPrintLambda());
-			myMethodToLambda.put(
-					theClientType.getMethod("registerInterceptor", Object.class), new RegisterInterceptorLambda());
-			myMethodToLambda.put(
-					theClientType.getMethod("unregisterInterceptor", Object.class), new UnregisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", Object.class), new RegisterInterceptorLambda());
+			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", Object.class), new UnregisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("setSummary", SummaryEnum.class), new SetSummaryLambda());
-			myMethodToLambda.put(
-					theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class),
-					new FetchResourceFromUrlLambda());
+			myMethodToLambda.put(theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class), new FetchResourceFromUrlLambda());
 
 		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException(
-					Msg.code(1352) + "Failed to find methods on client. This is a HAPI bug!", e);
+			throw new ConfigurationException(Msg.code(1352) + "Failed to find methods on client. This is a HAPI bug!", e);
 		} catch (SecurityException e) {
-			throw new ConfigurationException(
-					Msg.code(1353) + "Failed to find methods on client. This is a HAPI bug!", e);
+			throw new ConfigurationException(Msg.code(1353) + "Failed to find methods on client. This is a HAPI bug!", e);
 		}
 	}
 
@@ -81,14 +73,7 @@ public class ClientInvocationHandlerFactory {
 	}
 
 	ClientInvocationHandler newInvocationHandler(RestfulClientFactory theRestfulClientFactory) {
-		return new ClientInvocationHandler(
-				myClient,
-				myContext,
-				myUrlBase,
-				myMethodToReturnValue,
-				myBindings,
-				myMethodToLambda,
-				theRestfulClientFactory);
+		return new ClientInvocationHandler(myClient, myContext, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda, theRestfulClientFactory);
 	}
 
 	public interface ILambda {
@@ -103,18 +88,18 @@ public class ClientInvocationHandlerFactory {
 			return null;
 		}
 	}
-
+	
 	class FetchResourceFromUrlLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> type = (Class<? extends IBaseResource>) theArgs[0];
 			String url = (String) theArgs[1];
-
+			
 			return theTarget.fetchResourceFromUrl(type, url);
 		}
 	}
-
+	
 	class SetEncodingLambda implements ILambda {
 		@Override
 		public Object handle(ClientInvocationHandler theTarget, Object[] theArgs) {
@@ -150,4 +135,5 @@ public class ClientInvocationHandlerFactory {
 			return null;
 		}
 	}
+
 }

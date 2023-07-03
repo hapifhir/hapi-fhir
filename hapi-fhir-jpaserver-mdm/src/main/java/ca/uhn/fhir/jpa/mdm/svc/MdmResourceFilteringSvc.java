@@ -38,10 +38,8 @@ public class MdmResourceFilteringSvc {
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
-
 	@Autowired
 	MdmSearchParamSvc myMdmSearchParamSvc;
-
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -64,19 +62,17 @@ public class MdmResourceFilteringSvc {
 		}
 
 		String resourceType = myFhirContext.getResourceType(theResource);
-		List<MdmResourceSearchParamJson> candidateSearchParams =
-				myMdmSettings.getMdmRules().getCandidateSearchParams();
+		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
 
 		if (candidateSearchParams.isEmpty()) {
 			return true;
 		}
 
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
-				.filter(csp ->
-						myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
-				.flatMap(csp -> csp.getSearchParams().stream())
-				.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
-				.anyMatch(valueList -> !valueList.isEmpty());
+			.filter(csp -> myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
+			.flatMap(csp -> csp.getSearchParams().stream())
+			.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
+			.anyMatch(valueList -> !valueList.isEmpty());
 
 		ourLog.trace("Is {} suitable for MDM processing? : {}", theResource.getId(), containsValueForSomeSearchParam);
 		return containsValueForSomeSearchParam;

@@ -36,26 +36,11 @@ public class RuleImplUpdateHistoryRewrite extends BaseRule {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict applyRule(
-			RestOperationTypeEnum theOperation,
-			RequestDetails theRequestDetails,
-			IBaseResource theInputResource,
-			IIdType theInputResourceId,
-			IBaseResource theOutputResource,
-			IRuleApplier theRuleApplier,
-			Set<AuthorizationFlagsEnum> theFlags,
-			Pointcut thePointcut) {
+	public AuthorizationInterceptor.Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
+																	  IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		if (myAllRequests) {
-			if (theRequestDetails.getId() != null
-					&& theRequestDetails.getId().hasVersionIdPart()
-					&& theOperation == RestOperationTypeEnum.UPDATE) {
-				return newVerdict(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						theRuleApplier);
+			if (theRequestDetails.getId() != null && theRequestDetails.getId().hasVersionIdPart() && theOperation == RestOperationTypeEnum.UPDATE) {
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 		}
 

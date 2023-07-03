@@ -14,4 +14,5 @@ public class TransactionRequest extends HomeRequest {
 	public void setTransactionBody(String theTransactionBody) {
 		myTransactionBody = theTransactionBody;
 	}
+	
 }

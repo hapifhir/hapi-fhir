@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.dstu3.activitydefinition;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -28,21 +29,22 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.function.Function;
 
 @Component
 public class ActivityDefinitionOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
-
 	@Autowired
 	IActivityDefinitionProcessorFactory myDstu3ActivityDefinitionServiceFactory;
 
@@ -80,43 +82,40 @@ public class ActivityDefinitionOperationsProvider {
 	 * @return The resource that is the result of applying the definition
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
-	public IBaseResource apply(
-			@IdParam IdType theId,
-			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "activityDefinition") ActivityDefinition theActivityDefinition,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "encounter") String theEncounter,
-			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "organization") String theOrganization,
-			@OperationParam(name = "userType") String theUserType,
-			@OperationParam(name = "userLanguage") String theUserLanguage,
-			@OperationParam(name = "userTaskContext") String theUserTaskContext,
-			@OperationParam(name = "setting") String theSetting,
-			@OperationParam(name = "settingContext") String theSettingContext,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
+	public IBaseResource apply(@IdParam IdType theId,
+										@OperationParam(name = "canonical") String theCanonical,
+										@OperationParam(name = "activityDefinition") ActivityDefinition theActivityDefinition,
+										@OperationParam(name = "subject") String theSubject,
+										@OperationParam(name = "encounter") String theEncounter,
+										@OperationParam(name = "practitioner") String thePractitioner,
+										@OperationParam(name = "organization") String theOrganization,
+										@OperationParam(name = "userType") String theUserType,
+										@OperationParam(name = "userLanguage") String theUserLanguage,
+										@OperationParam(name = "userTaskContext") String theUserTaskContext,
+										@OperationParam(name = "setting") String theSetting,
+										@OperationParam(name = "settingContext") String theSettingContext,
+										@OperationParam(name = "parameters") Parameters theParameters,
+										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3ActivityDefinitionServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
-				.apply(
-						theId,
-						new StringType(theCanonical),
-						theActivityDefinition,
-						theSubject,
-						theEncounter,
-						thePractitioner,
-						theOrganization,
-						theUserType,
-						theUserLanguage,
-						theUserTaskContext,
-						theSetting,
-						theSettingContext,
-						theParameters,
-						theDataEndpoint,
-						theContentEndpoint,
-						theTerminologyEndpoint);
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.apply(theId,
+				new StringType(theCanonical),
+				theActivityDefinition,
+				theSubject,
+				theEncounter,
+				thePractitioner,
+				theOrganization,
+				theUserType,
+				theUserLanguage,
+				theUserTaskContext,
+				theSetting,
+				theSettingContext,
+				theParameters,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
 	}
 }

@@ -27,7 +27,6 @@ public class JobInfo {
 	 * but the actual id of the record storing metadata of the job
 	 */
 	private String myJobMetadataId;
-
 	private BulkExportJobStatusEnum myStatus;
 
 	public String getJobMetadataId() {

@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -30,9 +30,13 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
@@ -55,8 +59,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		return myColumnPartitionId;
 	}
 
-	public Condition combineWithRequestPartitionIdPredicate(
-			RequestPartitionId theRequestPartitionId, Condition theCondition) {
+	public Condition combineWithRequestPartitionIdPredicate(RequestPartitionId theRequestPartitionId, Condition theCondition) {
 		Condition partitionIdPredicate = createPartitionIdPredicate(theRequestPartitionId);
 		if (partitionIdPredicate == null) {
 			return theCondition;
@@ -64,8 +67,10 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		return QueryParameterUtils.toAndPredicate(partitionIdPredicate, theCondition);
 	}
 
+
 	@Nullable
 	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
+
 
 		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
 			Condition condition;
@@ -76,8 +81,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 			} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
 				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
-				Condition partitionIdsPredicate =
-						QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
+				Condition partitionIdsPredicate = QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
 				condition = QueryParameterUtils.toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
 			} else {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
@@ -96,22 +100,24 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
 		// Handle the _id parameter by adding it to the tail
-		Condition inResourceIds =
-				QueryParameterUtils.toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
+		Condition inResourceIds = QueryParameterUtils.toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
 		if (theInverse) {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
 		return inResourceIds;
+
 	}
 
-	public static List<Integer> replaceDefaultPartitionIdIfNonNull(
-			PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
+	public static List<Integer> replaceDefaultPartitionIdIfNonNull(PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
 		List<Integer> partitionIds = thePartitionIds;
 		if (thePartitionSettings.getDefaultPartitionId() != null) {
-			partitionIds = partitionIds.stream()
-					.map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
-					.collect(Collectors.toList());
+			partitionIds = partitionIds
+				.stream()
+				.map(t -> t == null ? thePartitionSettings.getDefaultPartitionId() : t)
+				.collect(Collectors.toList());
 		}
 		return partitionIds;
 	}
+
+
 }

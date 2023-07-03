@@ -40,57 +40,41 @@ public interface ITermCodeSystemStorageSvc {
 
 	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
 
+
 	/**
 	 * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
 	 */
 	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
-		return theRequestDetails == null
-				|| (boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+		return theRequestDetails == null ||
+			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
-	void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
-			String theSystemUri,
-			String theSystemName,
-			String theSystemVersionId,
-			TermCodeSystemVersion theCodeSystemVersion,
-			ResourceTable theCodeSystemResourceTable,
-			RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersion(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+											 String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
+											 RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
 	@Transactional
-	default void storeNewCodeSystemVersion(
-			IResourcePersistentId theCodeSystemResourcePid,
-			String theSystemUri,
-			String theSystemName,
-			String theSystemVersionId,
-			TermCodeSystemVersion theCodeSystemVersion,
-			ResourceTable theCodeSystemResourceTable) {
+	default void storeNewCodeSystemVersion(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+														String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 
-		storeNewCodeSystemVersion(
-				theCodeSystemResourcePid,
-				theSystemUri,
-				theSystemName,
-				theSystemVersionId,
-				theCodeSystemVersion,
-				theCodeSystemResourceTable,
-				null);
+		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
+			theCodeSystemVersion, theCodeSystemResourceTable, null);
 	}
+
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
-	IIdType storeNewCodeSystemVersion(
-			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
-			TermCodeSystemVersion theCodeSystemVersion,
-			RequestDetails theRequestDetails,
-			List<ValueSet> theValueSets,
-			List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
+		TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets,
+		List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-	void storeNewCodeSystemVersionIfNeeded(
-			CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
+
+
+	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity, RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
@@ -99,9 +83,12 @@ public interface ITermCodeSystemStorageSvc {
 		storeNewCodeSystemVersionIfNeeded(theCodeSystem, theResourceEntity, null);
 	}
 
+
+
 	UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
 	UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
 	int saveConcept(TermConcept theNextConcept);
+
 }

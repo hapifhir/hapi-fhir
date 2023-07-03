@@ -19,15 +19,17 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+
 public class HttpPostClientInvocation extends BaseHttpClientInvocationWithContents {
+
 
 	public HttpPostClientInvocation(FhirContext theContext, IBaseResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
@@ -37,18 +39,15 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theResource, null);
 	}
 
-	public HttpPostClientInvocation(
-			FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public HttpPostClientInvocation(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
 	}
 
-	public HttpPostClientInvocation(
-			FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
+	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
 		super(theContext, theContents, theIsBundle, theUrlExtension);
 	}
 
-	public HttpPostClientInvocation(
-			FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
+	public HttpPostClientInvocation(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
 		super(theContext, theParams, theUrlExtension);
 	}
 
@@ -56,4 +55,5 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 	protected RequestTypeEnum getRequestType() {
 		return RequestTypeEnum.POST;
 	}
+
 }

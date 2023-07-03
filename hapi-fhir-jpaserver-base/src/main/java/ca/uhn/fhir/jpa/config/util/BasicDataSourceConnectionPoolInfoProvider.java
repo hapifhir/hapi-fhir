@@ -36,16 +36,17 @@ public class BasicDataSourceConnectionPoolInfoProvider implements IConnectionPoo
 
 	@Override
 	public Optional<Integer> getTotalConnectionSize() {
-		return Optional.of(myDataSource.getMaxTotal());
+		return Optional.of( myDataSource.getMaxTotal() );
 	}
 
 	@Override
 	public Optional<Integer> getActiveConnections() {
-		return Optional.of(myDataSource.getNumActive());
+		return Optional.of( myDataSource.getNumActive() );
 	}
 
 	@Override
 	public Optional<Long> getMaxWaitMillis() {
-		return Optional.of(myDataSource.getMaxWaitMillis());
+		return Optional.of( myDataSource.getMaxWaitMillis() );
 	}
 }
+

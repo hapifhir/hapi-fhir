@@ -19,16 +19,17 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import java.lang.annotation.*;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.lang.annotation.*;
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a> and <a
  * href="http://hl7.org/implement/standards/fhir/http.html#vread">vread</a> method.
- *
+ * 
  * <p>
  * If this method has a parameter annotated with the {@link IdParam} annotation and a parameter annotated with the {@link VersionIdParam} annotation, the method will be treated as a vread method. If
  * the method has only a parameter annotated with the {@link IdParam} annotation, it will be treated as a read operation.

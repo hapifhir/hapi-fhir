@@ -60,7 +60,6 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -74,11 +73,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		myColumnHashUri = getTable().addColumn("HASH_URI");
 	}
 
-	public Condition addPredicate(
-			List<? extends IQueryParameterType> theUriOrParameterList,
-			String theParamName,
-			SearchFilterParser.CompareOperation theOperation,
-			RequestDetails theRequestDetails) {
+
+	public Condition addPredicate(List<? extends IQueryParameterType> theUriOrParameterList, String theParamName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequestDetails) {
 
 		List<Condition> codePredicates = new ArrayList<>();
 		boolean predicateIsHash = false;
@@ -105,24 +101,20 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					 *
 					 * If we ever need to make this more efficient, lucene could certainly be used as an optimization.
 					 */
-					String msg = "Searching for candidate URI:above parameters for Resource[" + getResourceType()
-							+ "] param[" + theParamName + "]";
+					String msg = "Searching for candidate URI:above parameters for Resource["+getResourceType()+"] param["+theParamName+"]";
 					ourLog.info(msg);
 
 					StorageProcessingMessage message = new StorageProcessingMessage();
 					ourLog.warn(msg);
 					message.setMessage(msg);
 					HookParams params = new HookParams()
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-							.add(StorageProcessingMessage.class, message);
-					CompositeInterceptorBroadcaster.doCallHooks(
-							myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(StorageProcessingMessage.class, message);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-							getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
-					Collection<String> candidates =
-							myResourceIndexedSearchParamUriDao.findAllByHashIdentity(hashIdentity);
+					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
+					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByHashIdentity(hashIdentity);
 					List<String> toFind = new ArrayList<>();
 					for (String next : candidates) {
 						if (value.length() >= next.length()) {
@@ -136,37 +128,27 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 						continue;
 					}
 
-					Condition uriPredicate =
-							QueryParameterUtils.toEqualToOrInPredicate(myColumnUri, generatePlaceholders(toFind));
-					Condition hashAndUriPredicate =
-							combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
+					Condition uriPredicate = QueryParameterUtils.toEqualToOrInPredicate(myColumnUri, generatePlaceholders(toFind));
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
 
-					Condition uriPredicate = BinaryCondition.like(
-							myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
-					Condition hashAndUriPredicate =
-							combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
+					Condition uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
+					Condition hashAndUriPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, uriPredicate);
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
 
 					Condition uriPredicate = null;
 					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
-						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(
-								getPartitionSettings(),
-								getRequestPartitionId(),
-								getResourceType(),
-								theParamName,
-								value);
+						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName, value);
 						uriPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
 						predicateIsHash = true;
 					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 						uriPredicate = BinaryCondition.notEqualTo(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
-						uriPredicate = BinaryCondition.like(
-								myColumnUri, generatePlaceholder(createLeftAndRightMatchLikeExpression(value)));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftAndRightMatchLikeExpression(value)));
 					} else if (theOperation == SearchFilterParser.CompareOperation.gt) {
 						uriPredicate = BinaryCondition.greaterThan(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.lt) {
@@ -176,16 +158,12 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					} else if (theOperation == SearchFilterParser.CompareOperation.le) {
 						uriPredicate = BinaryCondition.lessThanOrEq(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.sw) {
-						uriPredicate = BinaryCondition.like(
-								myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createLeftMatchLikeExpression(value)));
 					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
-						uriPredicate = BinaryCondition.like(
-								myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
+						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
 					} else {
-						throw new IllegalArgumentException(Msg.code(1226)
-								+ String.format(
-										"Unsupported operator specified in _filter clause, %s",
-										theOperation.toString()));
+						throw new IllegalArgumentException(Msg.code(1226) + String.format("Unsupported operator specified in _filter clause, %s",
+							theOperation.toString()));
 					}
 
 					codePredicates.add(uriPredicate);
@@ -194,6 +172,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			} else {
 				throw new IllegalArgumentException(Msg.code(1227) + "Invalid URI type: " + nextOr.getClass());
 			}
+
 		}
 
 		/*
@@ -210,6 +189,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		} else {
 			return combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate);
 		}
+
 	}
 
 	public DbColumn getColumnValue() {

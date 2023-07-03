@@ -37,10 +37,7 @@ public class InitializeSchemaTask extends BaseTask {
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 	private boolean myInitializedSchema;
 
-	public InitializeSchemaTask(
-			String theProductVersion,
-			String theSchemaVersion,
-			ISchemaInitializationProvider theSchemaInitializationProvider) {
+	public InitializeSchemaTask(String theProductVersion, String theSchemaVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		super(theProductVersion, theSchemaVersion);
 		mySchemaInitializationProvider = theSchemaInitializationProvider;
 		setDescription(DESCRIPTION_PREFIX + mySchemaInitializationProvider.getSchemaDescription());
@@ -63,19 +60,11 @@ public class InitializeSchemaTask extends BaseTask {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		String schemaExistsIndicatorTable = mySchemaInitializationProvider.getSchemaExistsIndicatorTable();
 		if (tableNames.contains(schemaExistsIndicatorTable)) {
-			logInfo(
-					ourLog,
-					"The table {} already exists.  Skipping schema initialization for {}",
-					schemaExistsIndicatorTable,
-					driverType);
+			logInfo(ourLog, "The table {} already exists.  Skipping schema initialization for {}", schemaExistsIndicatorTable, driverType);
 			return;
 		}
 
-		logInfo(
-				ourLog,
-				"Initializing {} schema for {}",
-				driverType,
-				mySchemaInitializationProvider.getSchemaDescription());
+		logInfo(ourLog, "Initializing {} schema for {}", driverType, mySchemaInitializationProvider.getSchemaDescription());
 
 		List<String> sqlStatements = mySchemaInitializationProvider.getSqlStatements(driverType);
 
@@ -87,11 +76,7 @@ public class InitializeSchemaTask extends BaseTask {
 			myInitializedSchema = true;
 		}
 
-		logInfo(
-				ourLog,
-				"{} schema for {} initialized successfully",
-				driverType,
-				mySchemaInitializationProvider.getSchemaDescription());
+		logInfo(ourLog, "{} schema for {} initialized successfully", driverType, mySchemaInitializationProvider.getSchemaDescription());
 	}
 
 	@Override

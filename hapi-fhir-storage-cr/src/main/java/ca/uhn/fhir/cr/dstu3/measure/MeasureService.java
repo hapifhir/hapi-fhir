@@ -65,36 +65,43 @@ import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
 public class MeasureService implements IDaoRegistryUser {
 
-	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
-			.addTelecom(new ContactPoint()
+	public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(
+		new ContactDetail()
+			.addTelecom(
+				new ContactPoint()
 					.setSystem(ContactPoint.ContactPointSystem.URL)
 					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
-	public static final List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(new CodeableConcept()
-			.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
+	public static final List<CodeableConcept> US_JURISDICTION_CODING =  Collections.singletonList(
+		new CodeableConcept()
+			.addCoding(
+				new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
 
 	public static final SearchParameter SUPPLEMENTAL_DATA_SEARCHPARAMETER = (SearchParameter) new SearchParameter()
-			.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
-			.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
-			.setName("DEQMMeasureReportSupplementalData")
-			.setStatus(Enumerations.PublicationStatus.ACTIVE)
-			.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
-			.setPublisher("HL7 International - Clinical Quality Information Work Group")
-			.setContact(CQI_CONTACT_DETAIL)
-			.setDescription(String.format(
-					"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
-					MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-			.setJurisdiction(US_JURISDICTION_CODING)
-			.addBase("MeasureReport")
-			.setCode("supplemental-data")
-			.setType(Enumerations.SearchParamType.REFERENCE)
-			.setExpression(String.format(
-					"MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-			.setXpath(String.format(
-					"f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-			.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
-			.setTitle("Supplemental Data")
-			.setId("deqm-measurereport-supplemental-data");
+		.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
+		.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
+		.setName("DEQMMeasureReportSupplementalData")
+		.setStatus(Enumerations.PublicationStatus.ACTIVE)
+		.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
+		.setPublisher("HL7 International - Clinical Quality Information Work Group")
+		.setContact(CQI_CONTACT_DETAIL)
+		.setDescription(
+			String.format(
+				"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setJurisdiction(US_JURISDICTION_CODING)
+		.addBase("MeasureReport")
+		.setCode("supplemental-data")
+		.setType(Enumerations.SearchParamType.REFERENCE)
+		.setExpression(
+			String.format("MeasureReport.extension('%s').value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpath(
+			String.format("f:MeasureReport/f:extension[@url='%s'].value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+		.setTitle("Supplemental Data")
+		.setId("deqm-measurereport-supplemental-data");
 
 	@Autowired
 	protected ITerminologyProviderFactory myTerminologyProviderFactory;
@@ -112,8 +119,7 @@ public class MeasureService implements IDaoRegistryUser {
 	protected IFhirDalFactory myFhirDalFactory;
 
 	@Autowired
-	protected Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library>
-			myGlobalLibraryCache;
+	protected Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> myGlobalLibraryCache;
 
 	@Autowired
 	protected CqlOptions myCqlOptions;
@@ -159,17 +165,16 @@ public class MeasureService implements IDaoRegistryUser {
 	 * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
 	 * @return the calculated MeasureReport
 	 */
-	public MeasureReport evaluateMeasure(
-			IdType theId,
-			String thePeriodStart,
-			String thePeriodEnd,
-			String theReportType,
-			String theSubject,
-			String thePractitioner,
-			String theLastReceivedOn,
-			String theProductLine,
-			Bundle theAdditionalData,
-			Endpoint theTerminologyEndpoint) {
+	public MeasureReport evaluateMeasure(IdType theId,
+													 String thePeriodStart,
+													 String thePeriodEnd,
+													 String theReportType,
+													 String theSubject,
+													 String thePractitioner,
+													 String theLastReceivedOn,
+													 String theProductLine,
+													 Bundle theAdditionalData,
+													 Endpoint theTerminologyEndpoint) {
 
 		ensureSupplementalDataElementSearchParameter();
 
@@ -189,31 +194,12 @@ public class MeasureService implements IDaoRegistryUser {
 		FhirDal fhirDal = this.myFhirDalFactory.create(myRequestDetails);
 
 		var measureProcessor = new org.opencds.cqf.cql.evaluator.measure.dstu3.Dstu3MeasureProcessor(
-				null,
-				this.myDataProviderFactory,
-				null,
-				null,
-				null,
-				terminologyProvider,
-				libraryContentProvider,
-				dataProvider,
-				fhirDal,
-				myMeasureEvaluationOptions,
-				myCqlOptions,
-				null);
+			null, this.myDataProviderFactory, null, null, null, terminologyProvider, libraryContentProvider, dataProvider,
+			fhirDal, myMeasureEvaluationOptions, myCqlOptions,
+			null);
 
-		MeasureReport report = measureProcessor.evaluateMeasure(
-				measure.getUrl(),
-				thePeriodStart,
-				thePeriodEnd,
-				theReportType,
-				theSubject,
-				null,
-				theLastReceivedOn,
-				null,
-				null,
-				null,
-				theAdditionalData);
+		MeasureReport report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+			theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
 
 		if (theProductLine != null) {
 			Extension ext = new Extension();
@@ -231,10 +217,10 @@ public class MeasureService implements IDaoRegistryUser {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		// create a transaction bundle
+		//create a transaction bundle
 		BundleBuilder builder = new BundleBuilder(getFhirContext());
 
-		// set the request to be condition on code == supplemental data
+		//set the request to be condition on code == supplemental data
 		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
 		transaction(builder.getBundle(), this.myRequestDetails);
 	}

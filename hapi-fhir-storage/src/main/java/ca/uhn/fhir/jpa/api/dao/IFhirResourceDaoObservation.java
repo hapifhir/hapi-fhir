@@ -38,6 +38,6 @@ public interface IFhirResourceDaoObservation<T extends IBaseResource> extends IF
 	 * @param theServletResponse
 	 * @return
 	 */
-	IBundleProvider observationsLastN(
-			SearchParameterMap paramMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+	IBundleProvider observationsLastN(SearchParameterMap paramMap, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+
 }

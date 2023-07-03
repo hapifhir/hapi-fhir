@@ -42,11 +42,7 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 	public PostgresEmbeddedDatabase() {
 		myContainer = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 		myContainer.start();
-		super.initialize(
-				DriverTypeEnum.POSTGRES_9_4,
-				myContainer.getJdbcUrl(),
-				myContainer.getUsername(),
-				myContainer.getPassword());
+		super.initialize(DriverTypeEnum.POSTGRES_9_4, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
 	}
 
 	@Override
@@ -88,9 +84,7 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private void dropSequences() {
 		List<String> sql = new ArrayList<>();
-		List<Map<String, Object>> sequenceResult = getJdbcTemplate()
-				.queryForList(
-						"SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'");
+		List<Map<String, Object>> sequenceResult = getJdbcTemplate().queryForList("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'");
 		for (Map<String, Object> sequence : sequenceResult) {
 			String sequenceName = sequence.get("sequence_name").toString();
 			sql.add(String.format("DROP SEQUENCE \"%s\" CASCADE", sequenceName));
@@ -100,8 +94,7 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private List<String> getAllTableNames() {
 		List<String> allTableNames = new ArrayList<>();
-		List<Map<String, Object>> queryResults =
-				query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+		List<Map<String, Object>> queryResults = query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
 		for (Map<String, Object> row : queryResults) {
 			String tableName = row.get("table_name").toString();
 			allTableNames.add(tableName);

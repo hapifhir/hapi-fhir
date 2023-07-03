@@ -19,19 +19,19 @@
  */
 package ca.uhn.fhir.rest.api;
 
-import org.apache.commons.lang3.Validate;
-
 import java.util.HashMap;
 
+import org.apache.commons.lang3.Validate;
+
 /**
- * Validation mode parameter for the $validate operation (DSTU2+ only)
+ * Validation mode parameter for the $validate operation (DSTU2+ only) 
  */
 public enum ValidationModeEnum {
 	/**
 	 * The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints)
 	 */
 	CREATE("create"),
-
+	
 	/**
 	 * The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate)
 	 */
@@ -51,12 +51,12 @@ public enum ValidationModeEnum {
 			myCodeToValue.put(next.getCode(), next);
 		}
 	}
-
+	
 	public static ValidationModeEnum forCode(String theCode) {
 		Validate.notBlank(theCode, "theCode must not be blank");
 		return myCodeToValue.get(theCode);
 	}
-
+	
 	public String getCode() {
 		return myCode;
 	}
@@ -64,9 +64,9 @@ public enum ValidationModeEnum {
 	private ValidationModeEnum(String theCode) {
 		myCode = theCode;
 	}
-
-	//	@Override
-	//	public boolean isEmpty() {
-	//		return false;
-	//	}
+	
+//	@Override
+//	public boolean isEmpty() {
+//		return false;
+//	}
 }

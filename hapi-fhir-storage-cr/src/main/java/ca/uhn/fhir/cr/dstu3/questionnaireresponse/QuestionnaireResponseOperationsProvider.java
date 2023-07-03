@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -37,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class QuestionnaireResponseOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
-
 	@Autowired
 	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
 
@@ -54,13 +54,10 @@ public class QuestionnaireResponseOperationsProvider {
 	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(
-			@IdParam IdType theId,
-			@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
+	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireResponseServiceFactory
-				.create(myRepositoryFactory.create(theRequestDetails))
-				.extract(theId, theQuestionnaireResponse, null, null, null);
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 }

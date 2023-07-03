@@ -15,4 +15,5 @@ public class ToBindingInitializer implements WebBindingInitializer {
 	public void initBinder(WebDataBinder theBinder, WebRequest theRequest) {
 		// nothing
 	}
+
 }

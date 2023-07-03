@@ -56,13 +56,12 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return myColumnLongitude;
 	}
 
-	public Condition createPredicateCoords(
-			SearchParameterMap theParams,
-			IQueryParameterType theParam,
-			String theResourceName,
-			RuntimeSearchParam theSearchParam,
-			CoordsPredicateBuilder theFrom,
-			RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateCoords(SearchParameterMap theParams,
+														IQueryParameterType theParam,
+														String theResourceName,
+														RuntimeSearchParam theSearchParam,
+														CoordsPredicateBuilder theFrom,
+														RequestPartitionId theRequestPartitionId) {
 
 		ParsedLocationParam params = ParsedLocationParam.from(theParams, theParam);
 		double distanceKm = params.getDistanceKm();
@@ -75,11 +74,9 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			latitudePredicate = theFrom.createPredicateLatitudeExact(latitudeValue);
 			longitudePredicate = theFrom.createPredicateLongitudeExact(longitudeValue);
 		} else if (distanceKm < 0.0) {
-			throw new IllegalArgumentException(Msg.code(1233) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '"
-					+ distanceKm + "' must be >= 0.0");
+			throw new IllegalArgumentException(Msg.code(1233) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
 		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
-			throw new IllegalArgumentException(Msg.code(1234) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '"
-					+ distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
+			throw new IllegalArgumentException(Msg.code(1234) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
 		} else {
 			GeoBoundingBox box = CoordCalculator.getBox(latitudeValue, longitudeValue, distanceKm);
 			latitudePredicate = theFrom.createLatitudePredicateFromBox(box);
@@ -88,6 +85,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		ComboCondition singleCode = ComboCondition.and(latitudePredicate, longitudePredicate);
 		return combineWithHashIdentityPredicate(theResourceName, theSearchParam.getName(), singleCode);
 	}
+
 
 	public Condition createPredicateLatitudeExact(double theLatitudeValue) {
 		return BinaryCondition.equalTo(myColumnLatitude, generatePlaceholder(theLatitudeValue));
@@ -99,30 +97,22 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	public Condition createLatitudePredicateFromBox(GeoBoundingBox theBox) {
 		return ComboCondition.and(
-				BinaryCondition.greaterThanOrEq(
-						myColumnLatitude,
-						generatePlaceholder(theBox.bottomRight().latitude())),
-				BinaryCondition.lessThanOrEq(
-						myColumnLatitude, generatePlaceholder(theBox.topLeft().latitude())));
+			BinaryCondition.greaterThanOrEq(myColumnLatitude, generatePlaceholder(theBox.bottomRight().latitude())),
+			BinaryCondition.lessThanOrEq(myColumnLatitude, generatePlaceholder(theBox.topLeft().latitude()))
+		);
 	}
 
 	public Condition createLongitudePredicateFromBox(GeoBoundingBox theBox) {
 		if (theBox.bottomRight().longitude() < theBox.topLeft().longitude()) {
 			return ComboCondition.or(
-					BinaryCondition.greaterThanOrEq(
-							myColumnLongitude,
-							generatePlaceholder(theBox.bottomRight().longitude())),
-					BinaryCondition.lessThanOrEq(
-							myColumnLongitude,
-							generatePlaceholder(theBox.topLeft().longitude())));
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude()))
+			);
 		} else {
 			return ComboCondition.and(
-					BinaryCondition.greaterThanOrEq(
-							myColumnLongitude,
-							generatePlaceholder(theBox.topLeft().longitude())),
-					BinaryCondition.lessThanOrEq(
-							myColumnLongitude,
-							generatePlaceholder(theBox.bottomRight().longitude())));
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
+			);
 		}
 	}
 }

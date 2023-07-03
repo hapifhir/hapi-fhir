@@ -27,8 +27,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 
-public interface ITermConceptParentChildLinkDao
-		extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
+public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
@@ -36,4 +35,5 @@ public interface ITermConceptParentChildLinkDao
 	@Modifying
 	@Query("DELETE FROM TermConceptParentChildLink WHERE myCodeSystemVersionPid = :cs_pid")
 	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
 }

@@ -28,7 +28,7 @@ public interface IJobMaintenanceService {
 	 */
 	boolean triggerMaintenancePass();
 
-	void runMaintenancePass();
+    void runMaintenancePass();
 
 	/**
 	 * Forces a second maintenance run.

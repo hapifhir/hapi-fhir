@@ -27,8 +27,7 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType>
-		implements IQueryParameterOr<PT> {
+public abstract class BaseOrListParam<MT extends BaseOrListParam<?, ?>, PT extends IQueryParameterType> implements IQueryParameterOr<PT> {
 
 	private List<PT> myList = new ArrayList<>();
 

@@ -26,6 +26,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	Long getSubscriptionTablePidForSubscriptionResource(
-			IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+
 }
