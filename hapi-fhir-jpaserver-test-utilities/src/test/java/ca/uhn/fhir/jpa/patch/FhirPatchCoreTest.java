@@ -13,6 +13,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import org.hl7.fhir.r5.model.Composition;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import javax.xml.transform.TransformerException;
@@ -99,6 +104,20 @@ public class FhirPatchCoreTest extends BaseTest {
 
 		return retVal;
 	}
+
+	@Test
+	void doDiffOnComposition() throws FileNotFoundException {
+
+		FhirPatch differ = new FhirPatch(FhirContext.forR5());
+
+		var original = FhirContext.forR5().newJsonParser().parseResource(Composition.class, new DataInputStream(new FileInputStream("src/test/resources/origin.json")));
+		var focused = FhirContext.forR5().newJsonParser().parseResource(Composition.class, new DataInputStream(new FileInputStream("src/test/resources/focused.json")));
+
+		var diff = differ.diff(original, focused);
+		FhirContext.forR5().newJsonParser().encodeResourceToString(diff);
+	}
+
+
 
 	private static Element getFirstChildElement(Element theInput) {
 		for (int i = 0; i < theInput.getChildNodes().getLength(); i++) {
