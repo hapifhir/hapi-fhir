@@ -2274,6 +2274,7 @@
 								</excludes>
 								<licenseHeader>
 									<file>COPYRIGHT.txt</file>
+									<delimiter>package </delimiter>
 								</licenseHeader>
 							</format>
 						</formats>
