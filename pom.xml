@@ -2272,6 +2272,9 @@
 									<exclude>hapi-fhir-structures-r5/</exclude>
 									<exclude>hapi-fhir-validation/</exclude>
 								</excludes>
+								<licenseHeader>
+									<file>COPYRIGHT.txt</file>
+								</licenseHeader>
 							</format>
 						</formats>
 						<java>
