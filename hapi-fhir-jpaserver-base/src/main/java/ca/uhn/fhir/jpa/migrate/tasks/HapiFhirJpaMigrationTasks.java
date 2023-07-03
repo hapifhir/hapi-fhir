@@ -42,7 +42,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
-import software.amazon.awssdk.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Index;
 import java.util.Arrays;
@@ -317,7 +317,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		String postgresTuningStatementsAll = ClasspathUtil.loadResource("ca/uhn/fhir/jpa/docs/database/hapifhirpostgres94-init01.sql");
 		List<String> postgresTuningStatements = Arrays
 			.stream(postgresTuningStatementsAll.split("\\n"))
-			.map(org.apache.commons.lang3.StringUtils::trim)
+			.map(StringUtils::trim)
 			.filter(StringUtils::isNotBlank)
 			.filter(t -> !t.startsWith("--"))
 			.collect(Collectors.toList());
