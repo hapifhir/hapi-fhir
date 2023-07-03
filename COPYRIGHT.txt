@@ -1,6 +1,6 @@
 /*
  *
- * HAPI FHIR JPA Server
+ * HAPI FHIR
  * %%
  * Copyright (C) $YEAR Smile CDR, Inc.
  * %%
