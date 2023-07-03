@@ -2255,6 +2255,20 @@
 								<trimTrailingWhitespace/>
 								<endWithNewline/>
 							</format>
+							<format>
+								<includes>*.java</includes>
+								<!-- Do not add license files to structures -->
+								<excludes>
+									<exclude>hapi-fhir-structures-hl7org-dstu2/</exclude>
+									<exclude>hapi-fhir-structures-dstu2/</exclude>
+									<exclude>hapi-fhir-structures-dstu2.1/</exclude>
+									<exclude>hapi-fhir-structures-dstu3/</exclude>
+									<exclude>hapi-fhir-structures-r4/</exclude>
+									<exclude>hapi-fhir-structures-r4b/</exclude>
+									<exclude>hapi-fhir-structures-r5/</exclude>
+									<exclude>hapi-fhir-validation/</exclude>
+								</excludes>
+							</format>
 						</formats>
 						<java>
 							<excludes>
