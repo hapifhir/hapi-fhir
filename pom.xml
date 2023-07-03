@@ -2275,7 +2275,6 @@
 								<trimTrailingWhitespace/>
 								<endWithNewline/>
 							</format>
-
 						</formats>
 
 					</configuration>
