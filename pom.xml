@@ -2258,7 +2258,7 @@
 							<format>
 								<includes>
 									<include>
-										**/*.java
+										src/main/java/**/*.java
 									</include>
 								</includes>
 								<!-- Do not add license files to structures -->
