@@ -25,7 +25,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

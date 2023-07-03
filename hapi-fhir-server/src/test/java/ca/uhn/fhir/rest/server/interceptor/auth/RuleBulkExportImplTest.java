@@ -1,10 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -41,7 +40,7 @@ public class RuleBulkExportImplTest {
 		Set<String> myWantTypes = new HashSet<>();
 		myWantTypes.add("Questionnaire");
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
 		
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -63,7 +62,7 @@ public class RuleBulkExportImplTest {
 		myWantTypes.add("Patient");
 		myWantTypes.add("Practitioner");
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
+		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
 		
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -78,9 +77,9 @@ public class RuleBulkExportImplTest {
 		myRule.setAppliesToGroupExportOnGroup("invalid group");
 		myRule.setMode(PolicyEnum.ALLOW);
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		options.setGroupId(new IdDt("Group/123"));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setGroupId("Group/123");
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -94,9 +93,9 @@ public class RuleBulkExportImplTest {
 		myRule.setAppliesToGroupExportOnGroup("Group/1");
 		myRule.setMode(PolicyEnum.ALLOW);
 
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		options.setGroupId(new IdDt("Group/1"));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+		options.setGroupId("Group/1");
 
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -110,9 +109,9 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-		options.setPatientIds(Set.of(new IdDt("Patient/123")));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/123"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -128,9 +127,9 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-		options.setPatientIds(Set.of(new IdDt("Patient/456")));
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setPatientIds(Set.of("Patient/456"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -146,8 +145,8 @@ public class RuleBulkExportImplTest {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		//When
@@ -163,8 +162,8 @@ public class RuleBulkExportImplTest {
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		final BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -182,8 +181,8 @@ public class RuleBulkExportImplTest {
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		final BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
 		options.setResourceTypes(Set.of("Patient", "Condition", "Immunization"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -201,8 +200,8 @@ public class RuleBulkExportImplTest {
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		final BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
 		options.setResourceTypes(Set.of("Observation"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
@@ -220,8 +219,8 @@ public class RuleBulkExportImplTest {
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		final BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=123"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -238,8 +237,8 @@ public class RuleBulkExportImplTest {
 		final RuleBulkExportImpl myRule = new RuleBulkExportImpl("b");
 		myRule.setAppliesToPatientExport("Patient/123");
 		myRule.setMode(PolicyEnum.ALLOW);
-		final BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setFilters(Set.of("Patient?_id=456"));
 		options.setResourceTypes(Set.of("Patient"));
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
