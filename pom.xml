@@ -2256,7 +2256,11 @@
 								<endWithNewline/>
 							</format>
 							<format>
-								<includes>*.java</includes>
+								<includes>
+									<include>
+										*.java
+									</include>
+								</includes>
 								<!-- Do not add license files to structures -->
 								<excludes>
 									<exclude>hapi-fhir-structures-hl7org-dstu2/</exclude>
