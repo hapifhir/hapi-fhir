@@ -2264,6 +2264,7 @@
 								<!-- Do not add license files to structures -->
 								<excludes>
 									<exclude>.mvn_/</exclude>
+									<exclude>hapi-fhir-checkstyle/</exclude>
 									<exclude>hapi-fhir-structures-hl7org-dstu2/</exclude>
 									<exclude>hapi-fhir-structures-dstu2/</exclude>
 									<exclude>hapi-fhir-structures-dstu2.1/</exclude>
