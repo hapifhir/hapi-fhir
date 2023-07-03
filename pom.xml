@@ -2263,6 +2263,7 @@
 								<order>,java|javax,\#</order>
 							</importOrder>
 						</java>
+
 						<!--This does basic formatting of trailing whitespace and newlines-->
 						<formats>
 							<format>
@@ -2274,30 +2275,7 @@
 								<trimTrailingWhitespace/>
 								<endWithNewline/>
 							</format>
-							<format>
-								<includes>
-									<include>
-										src/main/java/**/*.java
-									</include>
-								</includes>
-								<!-- Do not add license files to structures -->
-								<excludes>
-									<exclude>.mvn_/</exclude>
-									<exclude>hapi-fhir-checkstyle/</exclude>
-									<exclude>hapi-fhir-structures-hl7org-dstu2/</exclude>
-									<exclude>hapi-fhir-structures-dstu2/</exclude>
-									<exclude>hapi-fhir-structures-dstu2.1/</exclude>
-									<exclude>hapi-fhir-structures-dstu3/</exclude>
-									<exclude>hapi-fhir-structures-r4/</exclude>
-									<exclude>hapi-fhir-structures-r4b/</exclude>
-									<exclude>hapi-fhir-structures-r5/</exclude>
-									<exclude>hapi-fhir-validation/</exclude>
-								</excludes>
-								<licenseHeader>
-									<file>COPYRIGHT.txt</file>
-									<delimiter>(package |import )</delimiter>
-								</licenseHeader>
-							</format>
+
 						</formats>
 
 					</configuration>
