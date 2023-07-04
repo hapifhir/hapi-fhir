@@ -72,6 +72,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
 	private final List<List<String>> myRequestHeaders = new ArrayList<>();
 	private final List<String> myRequestContentTypes = new ArrayList<>();
+	private final List<Filter> myServletFilters = new ArrayList<>();
 	private String myServletPath = "/*";
 	private Server myServer;
 	private CloseableHttpClient myHttpClient;
@@ -101,6 +102,13 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		myContextPath = defaultString(theContextPath);
 		return (T) this;
 	}
+
+	public T withServletFilter(Filter theFilter) {
+		Validate.notNull(theFilter, "theFilter must not be null");
+		myServletFilters.add(theFilter);
+		return (T) this;
+	}
+
 
 	/**
 	 * Returns the total number of connections that this server has received. This
@@ -173,6 +181,9 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		contextHandler.setContextPath(myContextPath);
 		contextHandler.addServlet(servletHolder, myServletPath);
 		contextHandler.addFilter(new FilterHolder(requestCapturingFilter()), "/*", EnumSet.allOf(DispatcherType.class));
+		for (Filter next : myServletFilters) {
+			contextHandler.addFilter(new FilterHolder(next), "/*", EnumSet.allOf(DispatcherType.class));
+		}
 		handlerList.addHandler(contextHandler);
 
 		if (myEnableSpringWebsocketSupport != null) {

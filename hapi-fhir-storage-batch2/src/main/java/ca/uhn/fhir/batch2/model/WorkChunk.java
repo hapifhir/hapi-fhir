@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;

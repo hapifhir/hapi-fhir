@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;

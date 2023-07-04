@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5014
+title: "There was a bug with automatic partition ID selection where it was not bound to positive integers and could return a value that was out of range. This has been fixed."

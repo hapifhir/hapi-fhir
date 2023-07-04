@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,12 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.rest.server.util;
 
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hl7.fhir.dstu3.model.InstantType;
 
 import java.io.IOException;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class JsonDateSerializer extends JsonSerializer<Date> {
 	@Override
 	public void serialize(Date theValue, JsonGenerator theGen, SerializerProvider theSerializers) throws IOException {
 		if (theValue != null) {
-			theGen.writeString(new InstantType(theValue).getValueAsString());
+			theGen.writeString(new InstantDt(theValue).getValueAsString());
 		}
 	}
 
