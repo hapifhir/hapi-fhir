@@ -122,17 +122,24 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			srd.setRequestPartitionId(partitionId);
 		}
 
-		// Use a random ID to make it harder to guess IDs - 32 characters of a-zA-Z0-9
-		// has 190 bts of entropy according to https://www.omnicalculator.com/other/password-entropy
-		binary.setId(RandomTextUtils.newSecureRandomAlphaNumericString(32));
+		// Pick a unique ID and retry until we get one that isn't already used. This is just to
+		// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
+		while (true) {
+			// Use a random ID to make it harder to guess IDs - 32 characters of a-zA-Z0-9
+			// has 190 bts of entropy according to https://www.omnicalculator.com/other/password-entropy
+			String proposedId = RandomTextUtils.newSecureRandomAlphaNumericString(32);
+			binary.setId(proposedId);
 
-		// Make sure we don't accidentally reuse an ID. This should be impossible given the
-		// amount of entropy in the IDs but might as well be sure.
-		try {
-			IBaseBinary existing = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
-			Validate.isTrue(existing == null);
-		} catch (ResourceNotFoundException e) {
-			// good
+			// Make sure we don't accidentally reuse an ID. This should be impossible given the
+			// amount of entropy in the IDs but might as well be sure.
+			try {
+				binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+				continue;
+			} catch (ResourceNotFoundException e) {
+				// good
+			}
+
+			break;
 		}
 
 		if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {

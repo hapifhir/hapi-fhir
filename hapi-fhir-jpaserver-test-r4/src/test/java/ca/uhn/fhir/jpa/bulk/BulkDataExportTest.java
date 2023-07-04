@@ -831,7 +831,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			for (var nextBinaryId : binaryIds) {
 
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
-				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{64}"));
+				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{32}"));
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
