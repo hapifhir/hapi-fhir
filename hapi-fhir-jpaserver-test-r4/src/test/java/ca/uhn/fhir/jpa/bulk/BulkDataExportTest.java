@@ -90,6 +90,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	void afterEach() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 	}
 
 	@BeforeEach
@@ -735,6 +736,28 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
 		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
 	}
+
+	@Test
+	public void testSystemBulkExport_ClientIdModeNone() {
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			expectedIds.add(createPatient(withActiveTrue()).getValue());
+			expectedIds.add(createObservation(withStatus("final")).getValue());
+		}
+
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Set.of("Patient", "Observation"));
+		options.setFilters(Set.of("Patient?active=true", "Patient?active=false", "Observation?status=final"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+	}
+
+
 
 	@Test
 	public void testSystemBulkExport_WithBulkExportInclusionInterceptor() {
