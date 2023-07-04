@@ -133,8 +133,10 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			// Make sure we don't accidentally reuse an ID. This should be impossible given the
 			// amount of entropy in the IDs but might as well be sure.
 			try {
-				binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
-				continue;
+				IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+				if (output != null) {
+					continue;
+				}
 			} catch (ResourceNotFoundException e) {
 				// good
 			}
