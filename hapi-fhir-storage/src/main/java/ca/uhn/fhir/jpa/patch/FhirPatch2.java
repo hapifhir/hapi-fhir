@@ -30,15 +30,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.slf4j.Logger;
@@ -46,21 +38,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class FhirPatch {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatch.class);
+public class FhirPatch2 {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirPatch2.class);
 
 	public static final String OPERATION_ADD = "add";
 	public static final String OPERATION_DELETE = "delete";
@@ -80,7 +65,7 @@ public class FhirPatch {
 	private boolean myIncludePreviousValueInDiff;
 	private Set<EncodeContextPath> myIgnorePaths = Collections.emptySet();
 
-	public FhirPatch(FhirContext theContext) {
+	public FhirPatch2(FhirContext theContext) {
 		myContext = theContext;
 	}
 
@@ -112,7 +97,8 @@ public class FhirPatch {
 			if (OPERATION_DELETE.equals(type)) {
 				handleDeleteOperation(theResource, nextOperation);
 			} else if (OPERATION_ADD.equals(type)) {
-				handleAddOperation3(theResource, nextOperation);
+//				handleAddOperation(theResource, nextOperation);
+				handleAddOperation2(theResource, nextOperation);
 			} else if (OPERATION_REPLACE.equals(type)) {
 				handleReplaceOperation(theResource, nextOperation);
 			} else if (OPERATION_INSERT.equals(type)) {
@@ -121,35 +107,6 @@ public class FhirPatch {
 				handleMoveOperation(theResource, nextOperation);
 			} else {
 				throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
-			}
-		}
-	}
-
-	private void handleAddOperation3(IBaseResource theResource, IBase theParameters) {
-
-		final FhirTerser fhirTerser = myContext.newTerser();
-
-		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
-		String elementName = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_NAME);
-		final Optional<IBase> optPartValue = ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
-
-		String containingPath = defaultString(path);
-
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
-
-		if (! containingElements.isEmpty()) {
-
-		} else {
-			final List<IBase> values = fhirTerser.getValues(theResource, path, true);
-			for (IBase value : values) {
-				if (value instanceof IPrimitiveType<?>) {
-					final IPrimitiveType primitiveType = (IPrimitiveType) value;
-
-					optPartValue.ifPresent(primitiveType::setValue);
-				}
-//				for (IPrimitiveType reference : fhirTerser.getValues(value, "reference", IPrimitiveType.class)) {
-//					optPartValue.ifPresent(reference::setValue);
-//				}
 			}
 		}
 	}
@@ -164,56 +121,21 @@ public class FhirPatch {
 
 		String containingPath = defaultString(path);
 
-		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
+		final List<IBase> valuesFromTerser = fhirTerser.getValues(theResource, path, true);
 
-		if (containingElements.isEmpty()) {
-			final List<IBase> valuesFromTerser = fhirTerser.getValues(theResource, path, true);
-
-			for (IBase valueFromTerser : valuesFromTerser) {
-				boolean doAnyMatch = false;
-				if (optValuePartValue.isPresent()) {
-					final IBase valueFromParameter = optValuePartValue.get();
-					for (IPrimitiveType<?> primitiveType : fhirTerser.getValues(valueFromTerser, elementName, IPrimitiveType.class)) {
-						if (primitiveType.getValue().equals(valueFromParameter)) {
-							doAnyMatch = true;
-						}
+		for (IBase valueFromTerser : valuesFromTerser) {
+			boolean doAnyMatch = false;
+			if (optValuePartValue.isPresent()) {
+				final IBase valueFromParameter = optValuePartValue.get();
+				for (IPrimitiveType<?> primitiveType : fhirTerser.getValues(valueFromTerser, elementName, IPrimitiveType.class)) {
+					if (primitiveType.getValue().equals(valueFromParameter)) {
+						doAnyMatch = true;
 					}
-
-					if (!doAnyMatch) {
-						// TODO:  James said get the child definition
-					}
-				}
-			}
-		} else {
-			ourLog.info("containingElements is empty for path: {}", path);
-
-			final String[] split = path.split("\\.");
-
-			ourLog.info("split: {}", Arrays.toString(split));
-
-			String previousSubPath = null;
-			for (int index = 0; index < split.length; index++) {
-				if (! path.equals(previousSubPath)) {
-					final String subPath = subPath(split, index + 2, ".");
-					final List<IBase> values = fhirTerser.getValues(theResource, subPath, true);
-					ourLog.info("values: {}", values);
-					if (values.size() == 1) {
-						final IBase iBase = values.get(0);
-						if (iBase instanceof IPrimitiveType) {
-							// TODO:  generics
-							final IPrimitiveType primitiveType = (IPrimitiveType) iBase;
-							optValuePartValue.ifPresent(primitiveType::setValue);
-//							optValuePartValue.ifPresent(valuePart -> ((IBaseReference) iBase)
-//								.setReference(valuePart.toString()));
-						}
-					}
-					previousSubPath = subPath;
-				} else {
-					ourLog.info("we're done!");
-					break;
 				}
 			}
 		}
+
+		List<IBase> containingElements = myContext.newFhirPath().evaluate(theResource, containingPath, IBase.class);
 	}
 
 	private void handleAddOperation(IBaseResource theResource, IBase theParameters) {
@@ -251,20 +173,33 @@ public class FhirPatch {
 						ourLog.info("value.getClass(): {}", value.getClass());
 						// TODO:  I want to match up the parameter value for the element in question with the existing value and ensure they're different
 						// TODO:  how do I automagically do a value comparison for a leaf node?
-						if (value instanceof Reference && optValuePartValue.get() instanceof StringType) {
+						// TODO: handle multiple primitive value
+//						final String singlePrimitiveValueOrNull = fhirTerser.getSinglePrimitiveValueOrNull(value, elementName);
+						final List<IBase> valuesFromBase = fhirTerser.getValues(value, elementName);
+						// TODO:  loop over them, check if it's a primitive, and then compare to the parameter value
+//						if (value instanceof Reference && optValuePartValue.get() instanceof StringType) {
+
+						for (IBase valueFromBase : valuesFromBase) {
+							if( valueFromBase instanceof IPrimitiveType<?>) {
+								final IPrimitiveType<?> castedValue = (IPrimitiveType<?>)valuesFromBase;
+							}
+						}
+
+						if (optValuePartValue.get() instanceof IPrimitiveType<?>) {
 							ourLog.info("value  instanceof IPrimitiveType: {}", value  instanceof IPrimitiveType);
 							// TODO:  false
-							final Reference existingReference = (Reference) value;
+//							final Reference existingReference = (Reference) value;
 							final StringType parameterStringType = (StringType) optValuePartValue.get();
 
-							if (existingReference.getReference().equals(parameterStringType.getValue())) {
+//							if (parameterStringType.getValue().equals(singlePrimitiveValueOrNull)) {
+								if (parameterStringType.getValue().equals("")) {
+//							if (existingReference.getReference().equals(parameterStringType.getValue())) {
 								ourLog.info("Trying to add duplicate reference");
 							} else {
 								ourLog.info("Trying to add new reference");
 
 								if (split.length > 1) {
 									final String firstChunkOfPath = split[0] + "." + split[1];
-									// TODO:  addElement?
 									IBase iBase = fhirTerser.addElement(theResource, firstChunkOfPath);
 									ourLog.info("iBase: {}", iBase);
 
@@ -295,21 +230,29 @@ public class FhirPatch {
 			ourLog.info("split: {}", Arrays.toString(split));
 
 			String previousSubPath = null;
+			// TODO:  what if there is only one split?
 			for (int index = 0; index < split.length; index++) {
 				// TODO:  this works even though it's a little gross
-				// TODO:  how do I set the reference?
 
+				// Add new elements until we reach the end of the path and don't bust the array limit
 				if (! path.equals(previousSubPath)) {
 					final String subPath = subPath(split, index + 2, ".");
 					final List<IBase> values = fhirTerser.getValues(theResource, subPath, true);
 					ourLog.info("values: {}", values);
-					if (values.size() == 1) {
-						final IBase iBase = values.get(0);
-						// TODO:  this is no doubt totally wrong but hack it to make the unit test pass
-						if (iBase instanceof IBaseReference) {
-							optValuePartValue.ifPresent(valuePart -> ((IBaseReference) iBase).setReference(valuePart.toString()));
+					for (IBase value : values) {
+						if(value instanceof IPrimitiveType<?>) {
+							final IPrimitiveType<?> castedValue = (IPrimitiveType<?>)value;
+//							optValuePartValue.ifPresent(valuePart -> ((IBaseReference) iBase).setReference(valuePart.toString()));
 						}
 					}
+//					// TODO:  what happens if we have zero elements?  is that even possible?
+//					if (values.size() == 1) {
+//						final IBase iBase = values.get(0);
+//						// TODO: do we need a hornet's nest of ugly conditional logical or is there code that automatically handles different IBase values?
+//						if (iBase instanceof IBaseReference) {
+//							optValuePartValue.ifPresent(valuePart -> ((IBaseReference) iBase).setReference(valuePart.toString()));
+//						}
+//					}
 					previousSubPath = subPath;
 				} else {
 					ourLog.info("we're done!");
@@ -350,7 +293,7 @@ public class FhirPatch {
 
 			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (insertIndex == null || insertIndex < 0 || insertIndex > existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
+				String msg = myContext.getLocalizer().getMessage(FhirPatch2.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1270) + msg);
 			}
 			existingValues.add(insertIndex, newValue);
@@ -451,13 +394,13 @@ public class FhirPatch {
 
 			List<IBase> existingValues = new ArrayList<>(childDefinition.getChildDef().getAccessor().getValues(nextElement));
 			if (removeIndex == null || removeIndex < 0 || removeIndex >= existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
+				String msg = myContext.getLocalizer().getMessage(FhirPatch2.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1268) + msg);
 			}
 			IBase newValue = existingValues.remove(removeIndex.intValue());
 
 			if (insertIndex == null || insertIndex < 0 || insertIndex > existingValues.size()) {
-				String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
+				String msg = myContext.getLocalizer().getMessage(FhirPatch2.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
 				throw new InvalidRequestException(Msg.code(1269) + msg);
 			}
 			existingValues.add(insertIndex, newValue);

@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -30,6 +31,8 @@ import org.springframework.test.util.XmlExpectationsHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +40,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class FhirPatchApplyR4Test {
 
@@ -532,13 +537,255 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
-	void patchPatientLink() {
+	void patchPatientGeneralPractitionerNoPreexisting() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = buildPatient("system", "value");
+
+//		patient.addGeneralPractitioner().setReference("Practitioner/123");
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.generalPractitioner"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+			.setValue(new StringType("Practitioner/456"));
+
+		patch.addParameter(operation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final List<Reference> generalPractitionersAfterPatch = patient.getGeneralPractitioner();
+
+		assertNotNull(generalPractitionersAfterPatch);
+		assertFalse(generalPractitionersAfterPatch.isEmpty());
+		assertEquals(1, generalPractitionersAfterPatch.size());
+		assertEquals("Practitioner/456", generalPractitionersAfterPatch.get(0).getReference());
+	}
+
+	@Test
+	void patchPatientGeneralPractitionerOnePreexisting() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = buildPatient("system", "value");
+
+		patient.addGeneralPractitioner().setReference("Practitioner/123");
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.generalPractitioner"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+			.setValue(new StringType("Practitioner/456"));
+
+		patch.addParameter(operation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final List<Reference> generalPractitionersAfterPatch = patient.getGeneralPractitioner();
+
+		assertNotNull(generalPractitionersAfterPatch);
+		assertFalse(generalPractitionersAfterPatch.isEmpty());
+		assertEquals(2, generalPractitionersAfterPatch.size());
+
+		final Set<String> generalPractionerRefs = generalPractitionersAfterPatch.stream()
+			.map(Reference::getReference)
+			.collect(Collectors.toUnmodifiableSet());
+
+		assertTrue(generalPractionerRefs.containsAll(Set.of("Practitioner/123", "Practitioner/456")));
+	}
+
+	@Test
+	void patchPatientLinkNoPreExistingLinks() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = buildPatient("system", "value");
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		final Reference referenceValue = new Reference();
+		referenceValue.setReference("Patient/123");
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.link.other"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+			.setValue(new StringType("Patient/456"));
+
+		patch.addParameter(operation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final List<Patient.PatientLinkComponent> patientLinkAfterPatch = patient.getLink();
+
+		assertNotNull(patientLinkAfterPatch);
+		assertFalse(patientLinkAfterPatch.isEmpty());
+		assertEquals(1, patientLinkAfterPatch.size());
+		final Patient.PatientLinkComponent patientLinkComponentAfterPatch = patientLinkAfterPatch.get(0);
+		final Reference otherAfterPatch = patientLinkComponentAfterPatch.getOther();
+		assertNotNull(otherAfterPatch);
+		assertEquals("Patient/456", otherAfterPatch.getReference());
+	}
+
+	@Test
+	void patchPatientLinkOnePreExistingLinkDifferentId() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = buildPatient("system", "value");
+
+		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
+		final Reference other = patientLinkComponent.getOther();
+		other.setReference("Patient/456");
+
+		ourLog.info("Orig patient:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.link.other"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+			.setValue(new StringType("Patient/123"));
+
+		patch.addParameter(operation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final List<Patient.PatientLinkComponent> patientLinkAfterPatch = patient.getLink();
+
+		assertNotNull(patientLinkAfterPatch);
+		assertFalse(patientLinkAfterPatch.isEmpty());
+		assertEquals(2, patientLinkAfterPatch.size());
+
+		final Set<String> linkOtherRefs = patientLinkAfterPatch.stream()
+			.map(Patient.PatientLinkComponent::getOther)
+			.map(Reference::getReference)
+			.collect(Collectors.toUnmodifiableSet());
+
+		assertTrue(linkOtherRefs.containsAll(Set.of("Patient/123", "Patient/456")));
+	}
+
+	@Test
+	void patchPatientLinkOnePreExistingLinkSameId() {
+		// TODO:  add javadoc or comment on the assert specifyng why we do this
 		final FhirPatch svc = new FhirPatch(ourCtx);
 		final Patient patient = new Patient();
 
 		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
 		final Reference other = patientLinkComponent.getOther();
 		other.setReference("Patient/123");
+
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.link.other"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("reference"));
+
+		operation.addPart()
+			.setName("value")
+			.setValue(new StringType("Patient/123"));
+
+		patch.addParameter(operation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		final List<Patient.PatientLinkComponent> patientLinkAfterPatch = patient.getLink();
+
+		assertNotNull(patientLinkAfterPatch);
+		assertFalse(patientLinkAfterPatch.isEmpty());
+		assertEquals(1, patientLinkAfterPatch.size());
+		final Patient.PatientLinkComponent patientLinkComponentAfterPatch = patientLinkAfterPatch.get(0);
+		final Reference otherAfterPatch = patientLinkComponentAfterPatch.getOther();
+		assertNotNull(otherAfterPatch);
+		assertEquals("Patient/123", otherAfterPatch.getReference());
+	}
+
+	@Test
+	@Disabled
+	// TODO: get rid of this
+	void patchPatientLink() {
+		final FhirPatch svc = new FhirPatch(ourCtx);
+		final Patient patient = new Patient();
+
+//		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
+//		final Reference other = patientLinkComponent.getOther();
+//		other.setReference("Patient/123");
 
 		ourLog.info("old patient:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
@@ -646,6 +893,8 @@ public class FhirPatchApplyR4Test {
 	}
 
 	@Test
+	@Disabled
+	// TODO:  get rid of this
 	void patchPatientLink2() {
 		final FhirPatch svc = new FhirPatch(ourCtx);
 		final Patient patient = new Patient();
@@ -692,6 +941,16 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 
 		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+	}
+
+	private Patient buildPatient(String system, String value) {
+		final Patient patient = new Patient();
+
+		patient.addIdentifier()
+			.setValue(value)
+			.setSystem(system);
+
+		return patient;
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {

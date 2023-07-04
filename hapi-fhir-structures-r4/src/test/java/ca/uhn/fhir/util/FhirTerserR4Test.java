@@ -1466,20 +1466,119 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
-	void conditionalNodeCreate() {
+	void conditionalNodeCreateNoPatientLink() {
 		// TODO:   Patient.link.other.reference
 		final Patient patient = new Patient();
-		final List<IBase> values = myCtx.newTerser().getValues(patient, "Patient.link", true);
+//		final List<IBase> values = myCtx.newTerser().getValues(patient, "Patient.link", true);
+//
+//		ourLog.info("values: {}", values);
+//
+//
+//		final List<IBase> values2 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+//		ourLog.info("values2: {}", values2);
 
-		ourLog.info("values: {}", values);
+
+//		final List<IBase> values3 = myCtx.newTerser().getValues(patient, "Patient.link.other.reference", true);
+//		ourLog.info("values3 : {}", values3);
+
+		final List<IBase> values4 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+
+		final String newValue = "123";
+
+		for (IBase iBase : values4) {
+			boolean doAnyMatch = false;
+			for (IPrimitiveType reference : myCtx.newTerser().getValues(iBase, "reference", IPrimitiveType.class)) {
+				if (reference.getValue().equals(newValue)) {
+					doAnyMatch = true;
+				}
+			}
+
+			if (! doAnyMatch) {
+				// TODO:  James says don't do this, but instead try to get the relevant child definition
+				IBase reference = myCtx.newTerser().addElement(iBase, "reference");
 
 
-		final List<IBase> values2 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
-		ourLog.info("values2: {}", values2);
+
+			}
+		}
+
+		// TODO:  James notes:
+		// 1.  Forget the distinction between containingElements empty and not.... just do getValues on that full part of the fhir path (ie: Patient.link.other)
+		// 2.  Once you have the nodes created, run getValues on the reference, or the elementName
+		// 3.  Loop through those IPrimitiveTypes to check if any have the value in question
+	}
+
+	@Test
+	void conditionalNodeCreateExistingPatientLink() {
+		// TODO:   Patient.link.other.reference
+		final Patient patient = new Patient();
+
+		final Patient.PatientLinkComponent patientLinkComponent = patient.addLink();
+		final Reference other = patientLinkComponent.getOther();
+		other.setReference("Patient/456");
+		final String newValue = "Patient/123";
+		final IBase stringType = new StringType(newValue);
+
+		final List<IBase> values = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+
+		final IBase iBase1 = values.get(0);
+
+		ourLog.info("values: {}", values.stream().filter(IPrimitiveType.class::isInstance).map(IPrimitiveType.class::cast).toList());
+
+		final IBase iBase = values.get(0);
+
+//		((IPrimitiveType)iBase).setValue(newValue);
+
+		ourLog.info("patient: {}", patient);
+
+//		final List<IBase> values2 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+//		ourLog.info("values2: {}", values2);
 
 
-		final List<IBase> values3 = myCtx.newTerser().getValues(patient, "Patient.link.other.reference", true);
-		ourLog.info("values3 : {}", values3);
+//		final List<IBase> values3 = myCtx.newTerser().getValues(patient, "Patient.link.other.reference", true);
+//		ourLog.info("values3 : {}", values3);
+
+//		final List<IBase> values4 = myCtx.newTerser().getValues(patient, "Patient.link.other", true);
+//		final List<IBase> patientLinks = myCtx.newTerser().getValues(patient, "Patient.link");
+//		final List<IBase> values = myCtx.newTerser().getValues(patient, "Patient.link.other");
+
+//		final List<IBase> one = myCtx.newTerser().getValues(patient, "Patient.link", true);
+//		final IBase addedLink = myCtx.newTerser().addElement(patient, "Patient.link");
+//		final IBase addedOther = myCtx.newTerser().addElement(addedLink, "other.reference");
+//		if (addedOther instanceof IPrimitiveType) {
+//			// TODO:  proper generics
+//			((IPrimitiveType) addedOther).setValue(newValue);
+//			ourLog.info("addedOther: {}", addedOther);
+//		}
+//
+//		final List<IBase> three = myCtx.newTerser().addElement(patient, "Patient.link.other.reference")
+//		final List<IBase> three = myCtx.newTerser().getValues(patient, "Patient.link.other.reference", true);
+
+//		for (IBase patientLink : patientLinks) {
+//			final List<IBase> patientLinkOthers = myCtx.newTerser().addElement(patientLink, "Patient.link.other");
+//		}
+//
+
+//		for (IBase iBase : values) {
+//			boolean doAnyMatch = false;
+//			for (IPrimitiveType reference : myCtx.newTerser().getValues(iBase, "reference", IPrimitiveType.class)) {
+//				if (reference.getValue().equals(newValue)) {
+//					doAnyMatch = true;
+//				}
+//			}
+//
+//			if (! doAnyMatch) {
+//				// TODO:  James says don't do this, but instead try to get the relevant child definition
+//				IBase iBase2 = myCtx.newTerser().addElement(iBase, "reference");
+//
+//
+//			}
+//		}
+
+		// TODO:  James notes:
+		// 1.  Forget the distinction between containingElements empty and not.... just do getValues on that full part of the fhir path (ie: Patient.link.other)
+		// 2.  Once you have the nodes created, run getValues on the reference, or the elementName
+		// 3.  Loop through those IPrimitiveTypes to check if any have the value in question
 	}
 
 
