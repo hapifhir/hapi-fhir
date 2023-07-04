@@ -79,6 +79,8 @@ public class MdmMatchLinkSvc {
 	}
 
 	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		// TODO - check if resource is blocked here
+
 		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
 
 		if (candidateList.isEmpty()) {
