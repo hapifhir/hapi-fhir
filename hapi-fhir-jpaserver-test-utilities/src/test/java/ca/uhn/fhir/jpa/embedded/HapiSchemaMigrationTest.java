@@ -34,13 +34,22 @@ public class HapiSchemaMigrationTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiSchemaMigrationTest.class);
 	public static final String TEST_SCHEMA_NAME = "test";
 
+	static {
+		HapiSystemProperties.enableUnitTestMode();
+	}
+
 	@RegisterExtension
 	static HapiEmbeddedDatabasesExtension myEmbeddedServersExtension = new HapiEmbeddedDatabasesExtension();
 
 	@AfterEach
 	public void afterEach() {
-		myEmbeddedServersExtension.clearDatabases();
-		HapiSystemProperties.enableUnitTestMode();
+		try {
+			myEmbeddedServersExtension.clearDatabases();
+			// The stack trace for this failure does not appear in CI logs.  Catching and rethrowing to log the error.
+		} catch (Exception e) {
+			ourLog.error("Failed to clear databases", e);
+			throw e;
+		}
 	}
 
 	@ParameterizedTest
