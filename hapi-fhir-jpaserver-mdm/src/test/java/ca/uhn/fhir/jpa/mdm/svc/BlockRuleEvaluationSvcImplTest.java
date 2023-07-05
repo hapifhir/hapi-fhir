@@ -533,20 +533,4 @@ public class BlockRuleEvaluationSvcImplTest {
 		// test
 		assertFalse(myRuleEvaluationSvc.isMdmMatchingBlocked(patient));
 	}
-
-	@Test
-	public void isMdmMatchingBlocked_unknownBlockRule_returnsTrue() {
-		// setup
-		Patient patient = new Patient();
-		patient.addName()
-			.addGiven("doe")
-			.addGiven("jane");
-		BlockListJson blockListJson = new BlockListJson();
-		BlockListRuleJson rule = new BlockListRuleJson();
-		rule.setResourceType("Patient");
-
-
-		// when
-
-	}
 }
