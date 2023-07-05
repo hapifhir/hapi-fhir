@@ -1,14 +1,15 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListRuleJson;
 import ca.uhn.fhir.mdm.blocklist.json.BlockedFieldJson;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
-import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
@@ -21,14 +22,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 	private static final Logger ourLog = getLogger(BlockRuleEvaluationSvcImpl.class);
 
-	private final FhirContext myFhirContext;
+	private final IFhirPath myFhirPath;
+
 	private final IBlockListRuleProvider myBlockListRuleProvider;
 
 	public BlockRuleEvaluationSvcImpl(
 		FhirContext theContext,
 		@Nullable IBlockListRuleProvider theIBlockListRuleProvider
 	) {
-		myFhirContext = theContext;
+		myFhirPath = theContext.newFhirPath();
 		myBlockListRuleProvider = theIBlockListRuleProvider;
 	}
 
@@ -53,13 +55,10 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 			.stream().filter(r -> r.getResourceType().equals(resourceType))
 			.collect(Collectors.toList());
 
-		// we'll want to reuse the same resource definition since it's
-		// "costly" to make
-		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResource.fhirType());
 		for (BlockListRuleJson rule : rulesForResource) {
 			// these rules are 'or''d, so if any match,
 			// mdm matching is blocked
-			if (isMdmBlocked(runtimeResourceDefinition, theResource, rule)) {
+			if (isMdmBlockedForFhirPath(theResource, rule)) {
 				return true;
 			}
 		}
@@ -67,60 +66,84 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 		return false;
 	}
 
-	private boolean isMdmBlocked(RuntimeResourceDefinition theResourceDef, IAnyResource theResource, BlockListRuleJson theRule) {
+	private boolean isMdmBlockedForFhirPath(IAnyResource theResource, BlockListRuleJson theRule) {
 		List<BlockedFieldJson> blockedFields = theRule.getBlockedFields();
-		FhirTerser terser = myFhirContext.newTerser();
 
-		// rules are anded
+		// rules are 'and'ed
 		// This means that if we detect any reason *not* to block
 		// we don't; only if all block rules pass do we block
 		for (BlockedFieldJson field : blockedFields) {
 			String path = field.getFhirPath();
 			String blockedValue = field.getBlockedValue();
 
-			List<IPrimitiveType> values = terser.getValues(theResource, path, IPrimitiveType.class);
-
-			if (values.isEmpty()) {
-				// if there's no values at the given fhir path,
-				// it can't be blocked
+			List<IBase> results;
+			try {
+				// can throw FhirPathExecutionException if path is incorrect
+				// or functions are invalid.
+				// single() explicitly throws this (but may be what is desired)
+				// so we'll catch and not block if this fails
+				results = myFhirPath.evaluate(theResource, path, IBase.class);
+			} catch (FhirPathExecutionException ex) {
+				ourLog.warn("FhirPath evaluation failed with an exception."
+					+ " No blocking will be applied and mdm matching will continue as before.", ex);
 				return false;
 			}
 
-			switch (field.getBlockRule()) {
-				case EXACT: {
-					if (values.size() > 1) {
-						// exact necessitates 1 and only 1 matching value;
-						// more than 1 means it cannot be an exact match
-						return false;
-					}
+			// fhir path should return exact values
+			if (results.size() != 1) {
+				// no results means no blocking
+				// too many matches means no blocking
+				ourLog.trace("Too many values at field {}", path);
+				return false;
+			}
 
-					IPrimitiveType primitiveType = values.get(0);
-					if (!primitiveType.getValueAsString().equalsIgnoreCase(blockedValue)) {
-						// if the one value we have does *not* equal the blocked value
-						// we aren't blocking on this
-						return false;
-					}
-					break;
-				}
-				case ANY: {
-					List<IPrimitiveType> matches = values.stream()
-						.filter(v -> v.getValueAsString().equalsIgnoreCase(blockedValue))
-						.collect(Collectors.toList());
-					if (matches.isEmpty()) {
-						// if there are no values that match our block value
-						// then we do not block
-						return false;
-					}
-					break;
-				}
-				default: {
-					// unrecognized rule: do not block; log warning for now
-					ourLog.warn("Unrecognized block rule type: {}. Blocking will not occur.", field.getBlockRule().name());
+			IBase first = results.get(0);
+
+			if (isPrimitiveType(first.fhirType())) {
+				IPrimitiveType<?> primitiveType = (IPrimitiveType<?>) first;
+				if (!primitiveType.getValueAsString().equalsIgnoreCase(blockedValue)) {
+					// doesn't match
+					// no block
+					ourLog.trace("Value at path {} does not match - mdm will not block.", path);
 					return false;
 				}
+			} else {
+				// blocking can only be done by evaluating primitive types
+				// additional fhirpath values required
+				ourLog.warn("FhirPath {} yields a non-primitive value; blocking is only supported on primitive field types.", path);
+				return false;
 			}
 		}
 
+		// if we got here, all blocking rules evaluated to true
 		return true;
+	}
+
+	private boolean isPrimitiveType(String theFhirType) {
+		switch (theFhirType) {
+			default:
+				// non-primitive type (or unknown type)
+				return false;
+			case "string":
+			case "code":
+			case "markdown":
+			case "id":
+			case "uri":
+			case "url":
+			case "canonical":
+			case "oid":
+			case "uuid":
+			case "boolean":
+			case "unsignedInt":
+			case "positiveInt":
+			case "decimal":
+			case "integer64":
+			case "date":
+			case "dateTime":
+			case "time":
+			case "instant":
+			case "base6Binary":
+				return true;
+		}
 	}
 }

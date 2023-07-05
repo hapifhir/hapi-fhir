@@ -5,6 +5,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class BlockRuleTestCase {
 
+	private final String myId;
+
 	/**
 	 * Block rule being tested
 	 */
@@ -21,13 +23,19 @@ public class BlockRuleTestCase {
 	private final boolean myExpectedBlockResult;
 
 	public BlockRuleTestCase(
+		String theId,
 		BlockListJson theJson,
 		IBaseResource theResource,
 		boolean theExpectedResult
 	) {
+		myId = theId;
 		myBlockRule = theJson;
 		myPatientResource = theResource;
 		myExpectedBlockResult = theExpectedResult;
+	}
+
+	public String getId() {
+		return myId;
 	}
 
 	public BlockListJson getBlockRule() {

@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.svc.testmodels.BlockRuleTestCase;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListRuleJson;
-import ca.uhn.fhir.mdm.blocklist.models.BlockFieldBlockRuleEnum;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -46,19 +45,14 @@ public class BlockRuleEvaluationSvcImplTest {
 	 * Provides a list of test cases to maximize coverage
 	 * and type matching.
 	 */
-	private static Collection<BlockRuleTestCase> getTestCases() {
+	private static Collection<BlockRuleTestCase> getTestCasesFhir() {
 		IParser parser = ourFhirContext.newJsonParser();
 
 		List<BlockRuleTestCase> data = new ArrayList<>();
 
 		/*
-		 * String
-		 *
-		 * Exact block on: name.given && name.family
-		 * Patient with only blocked names
-		 * isBlocked = true
-		 *
-		 * Basic block case
+		 * Basic start case
+		 * Blocking on single() name that is jane doe
 		 */
 		{
 			String patientStr = """
@@ -76,14 +70,15 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("name.family")
+				.setFhirPath("name.single().family")
 				.setBlockedValue("Doe");
 			rule.addBlockListField()
-				.setFhirPath("name.given")
+				.setFhirPath("name.single().given.first()")
 				.setBlockedValue("Jane");
 			blockListJson.addBlockListRule(rule);
 			data.add(
 				new BlockRuleTestCase(
+					"Basic happy path test - Block on Jane Doe",
 					blockListJson,
 					parser.parseResource(Patient.class, patientStr),
 					true
@@ -92,22 +87,92 @@ public class BlockRuleEvaluationSvcImplTest {
 		}
 
 		/*
-		 * String/Identifier
-		 *
-		 * Exact block on: identifier.system && identifier.value
-		 * Patient with more than 1 identifier with matching system
-		 * isBlocked = false
-		 *
-		 * Exact match on system means only 1 matching system should be found,
-		 * but there are 2 (so no block)
+		 * Blocking on official name with "Jane Doe".
+		 * Patient has multiple given names on official name
+		 * Mdm is not blocked (no unique value found to compare)
 		 */
 		{
-			// block on identifier
+			String patientStr = """
+				{
+					"resourceType": "Patient",
+					"name": [{
+				     	   "family": "smith",
+				   		"given": [
+				         	"jane"
+				   		]
+				 	},
+				 	{
+				 			"family": "doe",
+				 			"use": "official",
+				 			"given": [
+				 				"trixie",
+				 				"janet",
+				 				"jane"
+				 			]
+				 	}]
+				}
+				""";
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.where(use = 'official').family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.where(use = 'official').given")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+			data.add(
+				new BlockRuleTestCase(
+					"Blocking on official name 'Jane Doe'",
+					blockListJson,
+					parser.parseResource(Patient.class, patientStr),
+					false
+				)
+			);
+		}
+
+		/*
+		 * Blocking on extension
+		 */
+		{
+			String patientStr = """
+				{
+					"resourceType": "Patient",
+					"extension": [{
+						"url": "http://localhost/test",
+						"valueString": "example"
+					}]
+				}
+			""";
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("extension.where(url = 'http://localhost/test').value.first()")
+				.setBlockedValue("example");
+			blockListJson.addBlockListRule(rule);
+			data.add(
+				new BlockRuleTestCase(
+					"Blocking on extension value",
+					blockListJson,
+					parser.parseResource(Patient.class, patientStr),
+					true
+				)
+			);
+		}
+
+		/*
+		 * Block on identifier with specific system and value
+		 * Patient contains specific identifier (and others)
+		 * Mdm is blocked
+		 */
+		{
 			String patientStr = """
 				 			{
 				 				"resourceType": "Patient",
 				 				"identifier": [{
-				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"system": "urn:oid:2.2.36.146.595.217.0.1",
 				 					"value": "23456"
 				 				}, {
 				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
@@ -119,59 +184,12 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("identifier.system")
-				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1");
-			rule.addBlockListField()
-				.setFhirPath("identifier.value")
+				.setFhirPath("identifier.where(system = 'urn:oid:1.2.36.146.595.217.0.1').value")
 				.setBlockedValue("12345");
 			blockListJson.addBlockListRule(rule);
 			data.add(
 				new BlockRuleTestCase(
-					blockListJson,
-					parser.parseResource(Patient.class, patientStr),
-					false
-				)
-			);
-		}
-
-		/*
-		 * String/Identifier
-		 *
-		 * Block on patient with any identifier.system and identifier.value
-		 * Patient with an identifier with blocked system
-		 * isBlocked = true
-		 *
-		 * Block on any system or value means if any system matches, it blocks.
-		 */
-		{
-			// block on identifier
-			String patientStr = """
-				 			{
-				 				"resourceType": "Patient",
-				 				"identifier": [{
-				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
-				 					"value": "44444"
-				 				}, {
-				 					"system": "urn:oid:2.2.22.146.595.217.0.1",
-				 					"value": "12345"
-				 				}]
-				 			}
-				""";
-
-			BlockListJson blockListJson = new BlockListJson();
-			BlockListRuleJson rule = new BlockListRuleJson();
-			rule.setResourceType("Patient");
-			rule.addBlockListField()
-				.setFhirPath("identifier.system")
-				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
-			rule.addBlockListField()
-				.setFhirPath("identifier.value")
-				.setBlockedValue("12345")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
-			blockListJson.addBlockListRule(rule);
-			data.add(
-				new BlockRuleTestCase(
+					"Blocking on identifier with specific system and value",
 					blockListJson,
 					parser.parseResource(Patient.class, patientStr),
 					true
@@ -180,12 +198,43 @@ public class BlockRuleEvaluationSvcImplTest {
 		}
 
 		/*
-		 * String/Identifier
-		 *
-		 * Block on patient with any identifier.system and identifier.value
-		 * Patient with no identifier
-		 * isBlocked = false
-		 *
+		 * Block on first identifier with provided system
+		 * and value.
+		 */
+		{
+			String patientStr = """
+				 			{
+				 				"resourceType": "Patient",
+				 				"identifier": [{
+				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"value": "44444"
+				 				}, {
+				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"value": "12345"
+				 				}]
+				 			}
+				""";
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("identifier.first().system")
+				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1");
+			rule.addBlockListField()
+				.setFhirPath("identifier.first().value")
+				.setBlockedValue("12345");
+			blockListJson.addBlockListRule(rule);
+			data.add(
+				new BlockRuleTestCase(
+					"Block on first identifier with value and system",
+					blockListJson,
+					parser.parseResource(Patient.class, patientStr),
+					false
+				)
+			);
+		}
+
+		/*
 		 * Blocked fields do not exist on resource, so mdm is not blocked
 		 */
 		{
@@ -205,15 +254,14 @@ public class BlockRuleEvaluationSvcImplTest {
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
 				.setFhirPath("identifier.system")
-				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
+				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1");
 			rule.addBlockListField()
 				.setFhirPath("identifier.value")
-				.setBlockedValue("12345")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
+				.setBlockedValue("12345");
 			blockListJson.addBlockListRule(rule);
 			data.add(
 				new BlockRuleTestCase(
+					"Blocking on field that doesn't exist",
 					blockListJson,
 					parser.parseResource(patientStr),
 					false
@@ -223,11 +271,6 @@ public class BlockRuleEvaluationSvcImplTest {
 
 		/*
 		 * DateTime
-		 *
-		 * Block on patient with exact match on deceasedDateTime
-		 * Patient with matching deceasedDateTime
-		 * isBlocked = true
-		 *
 		 * multi-type field is blocked on specific date; resource has matching
 		 * specific date so mdm is blocked
 		 */
@@ -248,10 +291,11 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("deceasedDateTime")
+				.setFhirPath("deceased.value")
 				.setBlockedValue("2000-01-01");
 			blockListJson.addBlockListRule(rule);
 			data.add(new BlockRuleTestCase(
+				"Blocking on multi-type field (date or boolean) with specific date value.",
 				blockListJson,
 				parser.parseResource(patientStr),
 				true
@@ -260,11 +304,6 @@ public class BlockRuleEvaluationSvcImplTest {
 
 		/*
 		 * DateTime
-		 *
-		 * Block on patient with exact match on deceasedDateTime
-		 * Patient with deceasedBoolean
-		 * isBlocked = false
-		 *
 		 * Block is specified on multi-type datetime. Resource
 		 * has a multi-type boolean value, so MDM is not blocked
 		 */
@@ -285,10 +324,11 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("deceasedDateTime")
+				.setFhirPath("deceased.value")
 				.setBlockedValue("2000-01-01");
 			blockListJson.addBlockListRule(rule);
 			data.add(new BlockRuleTestCase(
+				"Blocking on multi-value (boolean, date) value on date value when actual value is boolean",
 				blockListJson,
 				parser.parseResource(patientStr),
 				false
@@ -296,107 +336,7 @@ public class BlockRuleEvaluationSvcImplTest {
 		}
 
 		/*
-		 * String
-		 *
-		 * Block on Patient with EXACT match on name.family and name.given
-		 * Patient with 2 names: one with name blocked name.given, the other with blocked name.family
-		 * isBlocked = false
-		 *
-		 * Block is on exact name.family. But since there are multiple
-		 * name.family values, mdm is not blocked.
-		 */
-		{
-			String patientStr = """
-				{
-					"resourceType": "Patient",
-					"name": [{
-				     	   "family": "doe",
-				   			"given": [
-				            	 "trixie"
-				   			]
-				 			}, {
-				 				"family": "smith",
-				 				"given": [
-				 					"jane"
-				 				]
-				 			}]
-				}
-				""";
-			BlockListJson blockListJson = new BlockListJson();
-			BlockListRuleJson rule = new BlockListRuleJson();
-			rule.setResourceType("Patient");
-			rule.addBlockListField()
-				.setFhirPath("name.family")
-				.setBlockedValue("Doe");
-			rule.addBlockListField()
-				.setFhirPath("name.given")
-				.setBlockedValue("Jane");
-			blockListJson.addBlockListRule(rule);
-			data.add(
-				new BlockRuleTestCase(
-					blockListJson,
-					parser.parseResource(Patient.class, patientStr),
-					false
-				)
-			);
-		}
-
-		/*
-		 * Block on Patient with EXACT match on name.family and ANY name.given
-		 * Patient with 2 names: one with name blocked name.given (with no family name),
-		 * 		the other with blocked on name.family (with no given name)
-		 * isBlocked = true
-		 *
-		 * Blocking is on exact name.family and any name.given.
-		 * There is only one name.family and it is blocked.
-		 * There are multiple name.given, and one of them is blocked.
-		 * This means that mdm will be blocked (even though the
-		 * name.given is not in the same name object as the blocked name.family)
-		 * Unintuitive, but corect.
-		 */
-		{
-			String patientStr = """
-				{
-					"resourceType": "Patient",
-					"name": [{
-				     	   "family": "doe",
-				     	   "given": [
-				     	   	"yui"
-				     	   ]
-				 			}, {
-				 				"given": [
-				 					"jane"
-				 				]
-				 			}]
-				}
-				""";
-			BlockListJson blockListJson = new BlockListJson();
-			BlockListRuleJson rule = new BlockListRuleJson();
-			rule.setResourceType("Patient");
-			rule.addBlockListField()
-				.setFhirPath("name.family")
-				.setBlockedValue("Doe");
-			rule.addBlockListField()
-				.setFhirPath("name.given")
-				.setBlockedValue("Jane")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
-			blockListJson.addBlockListRule(rule);
-			data.add(
-				new BlockRuleTestCase(
-					blockListJson,
-					parser.parseResource(Patient.class, patientStr),
-					true
-				)
-			);
-		}
-
-		/*
 		 * Code (Enum)
-		 *
-		 * Block on Patient with EXACT match on link.type.
-		 * Patient with a link with blocked type
-		 * isBlocked = true
-		 *
 		 * Blocking is on exact link.type value.
 		 * Patient has this exact enum value and so mdm is blocked.
 		 */
@@ -419,10 +359,11 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("link.type")
+				.setFhirPath("link.first().type")
 				.setBlockedValue("seealso");
 			blockListJson.addBlockListRule(rule);
 			data.add(new BlockRuleTestCase(
+				"Blocking on link.type value (an enum)",
 				blockListJson,
 				parser.parseResource(patientStr),
 				true
@@ -431,11 +372,6 @@ public class BlockRuleEvaluationSvcImplTest {
 
 		/*
 		 * CodableConcept
-		 *
-		 * Block on Patient with EXACT match on maritalStatus.coding.code
-		 * Patient with a link with blocked maritalStatus
-		 * isBlocked = true
-		 *
 		 * Blocking is on exact maritalStatus.coding.code.
 		 * Patient has this value, so the value is blocked.
 		 */
@@ -461,13 +397,11 @@ public class BlockRuleEvaluationSvcImplTest {
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("maritalStatus.coding.code")
+				.setFhirPath("maritalStatus.coding.where(system = 'http://terminology.hl7.org/CodeSystem/v3-MaritalStatus').code")
 				.setBlockedValue("m");
 			blockListJson.addBlockListRule(rule);
-			rule.addBlockListField()
-				.setFhirPath("maritalStatus.coding.system")
-				.setBlockedValue("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus");
 			data.add(new BlockRuleTestCase(
+				"Blocking on maritalStatus with specific system and blocked value",
 				blockListJson,
 				parser.parseResource(patientStr),
 				true
@@ -476,11 +410,6 @@ public class BlockRuleEvaluationSvcImplTest {
 
 		/*
 		 * Boolean (trivial, but completions sake)
-		 *
-		 * Block on Patient with match on active
-		 * Patient with blocked active value
-		 * isBlocked = true
-		 *
 		 * Blocking on active = true.
 		 * Patient is active, so mdm is blocked.
 		 */
@@ -499,6 +428,7 @@ public class BlockRuleEvaluationSvcImplTest {
 				.setBlockedValue("true");
 			json.addBlockListRule(rule);
 			data.add(new BlockRuleTestCase(
+				"Blocking on boolean field",
 				json,
 				parser.parseResource(patientStr),
 				true
@@ -506,78 +436,79 @@ public class BlockRuleEvaluationSvcImplTest {
 		}
 
 		/*
-		 * String
-		 *
-		 * Block on EXACT name.family
-		 * Patient with different name.famiy
-		 * isBlocked = false
-		 *
-		 * Patient does not have blocked name.family,
-		 * and so mdm is not blocked
+		 * Blocking using 'single()' when no single value exists
 		 */
 		{
 			String patientStr = """
-    				{
-    					"resourceType": "Patient",
-    					"name": [{
-    						"family": "smith"
-    					}]
-    				}
+				 			{
+				 				"resourceType": "Patient",
+				 				"identifier": [{
+				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"value": "44444"
+				 				}, {
+				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"value": "12345"
+				 				}]
+				 			}
 				""";
-			BlockListJson json = new BlockListJson();
+			BlockListJson blockListJson = new BlockListJson();
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("name.family")
-				.setBlockedValue("doe");
-			json.addBlockListRule(rule);
-			data.add(new BlockRuleTestCase(
-				json,
-				parser.parseResource(patientStr),
-				false
-			));
+				.setFhirPath("identifier.single().system")
+				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1");
+			rule.addBlockListField()
+				.setFhirPath("identifier.single().value")
+				.setBlockedValue("12345");
+			blockListJson.addBlockListRule(rule);
+			data.add(
+				new BlockRuleTestCase(
+					"Block on single() identifier with multiple present identifiers",
+					blockListJson,
+					parser.parseResource(Patient.class, patientStr),
+					false
+				)
+			);
 		}
 
 		/*
-		 * String
-		 *
-		 * Block on ANY name.family
-		 * Patient with no matching name.family
-		 * isBlocked = false
-		 *
-		 * Patient does not have blocked name.family,
-		 * and so mdm is not blocked
+		 * Block attempt on non-primitive value
 		 */
 		{
 			String patientStr = """
-    				{
-    					"resourceType": "Patient",
-    					"name": [{
-    						"family": "smith"
-    					}]
-    				}
+				 			{
+				 				"resourceType": "Patient",
+				 				"identifier": [{
+				 					"system": "urn:oid:1.2.36.146.595.217.0.1",
+				 					"value": "12345"
+				 				}]
+				 			}
 				""";
-			BlockListJson json = new BlockListJson();
+			BlockListJson blockListJson = new BlockListJson();
 			BlockListRuleJson rule = new BlockListRuleJson();
 			rule.setResourceType("Patient");
 			rule.addBlockListField()
-				.setFhirPath("name.family")
-				.setBlockedValue("doe")
-				.setBlockRule(BlockFieldBlockRuleEnum.ANY);
-			json.addBlockListRule(rule);
-			data.add(new BlockRuleTestCase(
-				json,
-				parser.parseResource(patientStr),
-				false
-			));
+				.setFhirPath("identifier")
+				.setBlockedValue("urn:oid:1.2.36.146.595.217.0.1");
+			blockListJson.addBlockListRule(rule);
+			data.add(
+				new BlockRuleTestCase(
+					"Block on identifier field (non-primitive)",
+					blockListJson,
+					parser.parseResource(Patient.class, patientStr),
+					false
+				)
+			);
 		}
 
 		return data;
 	}
 
 	@ParameterizedTest
-	@MethodSource("getTestCases")
+	@MethodSource("getTestCasesFhir")
 	public void isMdmMatchingBlocked_givenResourceAndRules_returnsExpectedValue(BlockRuleTestCase theTestCase) {
+		ourLog.info(theTestCase.getId());
+
 		// setup
 		BlockListJson blockList = theTestCase.getBlockRule();
 		IBaseResource patient = theTestCase.getPatientResource();
@@ -588,7 +519,7 @@ public class BlockRuleEvaluationSvcImplTest {
 			.thenReturn(blockList);
 
 		// test
-		assertEquals(expected, myRuleEvaluationSvc.isMdmMatchingBlocked((IAnyResource) patient));
+		assertEquals(expected, myRuleEvaluationSvc.isMdmMatchingBlocked((IAnyResource) patient), theTestCase.getId());
 	}
 
 	@Test
