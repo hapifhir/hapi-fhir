@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -70,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TokenPredicateBuilder.class);
 
 	private final DbColumn myColumnResId;
 	private final DbColumn myColumnHashSystemAndValue;
@@ -160,11 +162,11 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			}
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(Msg.code(1237) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+				ourLog.info("Parameter[{}] has system ({}) that is longer than maximum ({}) so will truncate: {} ", paramName, system.length(), ResourceIndexedSearchParamToken.MAX_LENGTH, system);
 			}
 
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(Msg.code(1238) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+				ourLog.info("Parameter[{}] has code ({}) that is longer than maximum ({}) so will truncate: {} ", paramName, code.length(), ResourceIndexedSearchParamToken.MAX_LENGTH, code);
 			}
 
 			/*

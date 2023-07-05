@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,24 +17,26 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.batch2.jobs.export.models;
+package ca.uhn.fhir.rest.api.server.bulk;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class BulkExportJobParameters extends BulkExportJobBase {
+public class BulkExportJobParameters implements IModelJson {
 
-	// list of resource types to export
+	/**
+	 * List of resource types to export.
+	 */
 	@JsonProperty("resourceTypes")
 	private List<String> myResourceTypes;
 
@@ -50,22 +52,43 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("exportId")
 	private String myExportId;
 
+	/**
+	 * Filters are used to narrow down the resources to export.
+	 * Eg:
+	 * Patient/123?group=a
+	 * "group=a" is a filter
+	 */
 	@JsonProperty("filters")
 	private List<String> myFilters;
 
+	/**
+	 * URLs to be applied by the inMemoryMatcher after the SQL select
+	 */
 	@JsonProperty("postFetchFilterUrls")
 	private List<String> myPostFetchFilterUrls;
 
+	/**
+	 * Output format.
+	 * Currently unsupported (all outputs are ndjson)
+	 */
 	@JsonProperty("outputFormat")
 	private String myOutputFormat;
 
-	// TODO - move enum
+	/**
+	 * Export style - Patient, Group or Everything
+	 */
 	@JsonProperty("exportStyle")
-	private BulkDataExportOptions.ExportStyle myExportStyle;
+	private ExportStyle myExportStyle;
 
+	/**
+	 * Patient id(s)
+	 */
 	@JsonProperty("patientIds")
 	private List<String> myPatientIds;
 
+	/**
+	 * The request which originated the request.
+	 */
 	@JsonProperty("originalRequestUrl")
 	private String myOriginalRequestUrl;
 
@@ -75,31 +98,29 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("groupId")
 	private String myGroupId;
 
+	/**
+	 * For group export;
+	 * whether or not to expand mdm
+	 */
 	@JsonProperty("expandMdm")
 	private boolean myExpandMdm;
 
+	/**
+	 * The partition for the request if applicable.
+	 */
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
-
-	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
-		BulkExportJobParameters params = new BulkExportJobParameters();
-		params.setResourceTypes(theParameters.getResourceTypes());
-		params.setExportStyle(theParameters.getExportStyle());
-		params.setExportIdentifier(theParameters.getExportIdentifier());
-		params.setFilters(theParameters.getFilters());
-		params.setPostFetchFilterUrls(theParameters.getPostFetchFilterUrls());
-		params.setGroupId(theParameters.getGroupId());
-		params.setOutputFormat(theParameters.getOutputFormat());
-		params.setSince(theParameters.getSince());
-		params.setExpandMdm(theParameters.isExpandMdm());
-		params.setPatientIds(theParameters.getPatientIds());
-		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
-		params.setPartitionId(theParameters.getPartitionId());
-		return params;
-	}
+	@JsonProperty("binarySecurityContextIdentifierSystem")
+	private String myBinarySecurityContextIdentifierSystem;
+	@JsonProperty("binarySecurityContextIdentifierValue")
+	private String myBinarySecurityContextIdentifierValue;
 
 	public String getExportIdentifier() {
 		return myExportId;
+	}
+
+	public void setExportIdentifier(String theExportId) {
+		myExportId = theExportId;
 	}
 
 	public List<String> getResourceTypes() {
@@ -109,12 +130,11 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return myResourceTypes;
 	}
 
-	public void setExportIdentifier(String theExportId) {
-		myExportId = theExportId;
-	}
-
-	public void setResourceTypes(List<String> theResourceTypes) {
-		myResourceTypes = theResourceTypes;
+	public void setResourceTypes(Collection<String> theResourceTypes) {
+		getResourceTypes().clear();
+		if (theResourceTypes != null) {
+			getResourceTypes().addAll(theResourceTypes);
+		}
 	}
 
 	public Date getSince() {
@@ -126,11 +146,17 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	}
 
 	public List<String> getFilters() {
+		if (myFilters == null) {
+			myFilters = new ArrayList<>();
+		}
 		return myFilters;
 	}
 
-	public void setFilters(List<String> theFilters) {
-		myFilters = theFilters;
+	public void setFilters(Collection<String> theFilters) {
+		getFilters().clear();
+		if (theFilters != null) {
+			getFilters().addAll(theFilters);
+		}
 	}
 
 	public List<String> getPostFetchFilterUrls() {
@@ -140,8 +166,11 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return myPostFetchFilterUrls;
 	}
 
-	public void setPostFetchFilterUrls(List<String> thePostFetchFilterUrls) {
-		myPostFetchFilterUrls = thePostFetchFilterUrls;
+	public void setPostFetchFilterUrls(Collection<String> thePostFetchFilterUrls) {
+		getPostFetchFilterUrls().clear();
+		if (thePostFetchFilterUrls != null) {
+			getPostFetchFilterUrls().addAll(thePostFetchFilterUrls);
+		}
 	}
 
 	public String getOutputFormat() {
@@ -152,20 +181,26 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myOutputFormat = theOutputFormat;
 	}
 
-	public BulkDataExportOptions.ExportStyle getExportStyle() {
+	public ExportStyle getExportStyle() {
 		return myExportStyle;
 	}
 
-	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+	public void setExportStyle(ExportStyle theExportStyle) {
 		myExportStyle = theExportStyle;
 	}
 
 	public List<String> getPatientIds() {
+		if (myPatientIds == null) {
+			myPatientIds = new ArrayList<>();
+		}
 		return myPatientIds;
 	}
 
-	public void setPatientIds(List<String> thePatientIds) {
-		myPatientIds = thePatientIds;
+	public void setPatientIds(Collection<String> thePatientIds) {
+		getPatientIds().clear();
+		if (thePatientIds != null) {
+			getPatientIds().addAll(thePatientIds);
+		}
 	}
 
 	public String getGroupId() {
@@ -188,7 +223,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return myOriginalRequestUrl;
 	}
 
-	private void setOriginalRequestUrl(String theOriginalRequestUrl) {
+	public void setOriginalRequestUrl(String theOriginalRequestUrl) {
 		this.myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 
@@ -200,4 +235,39 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		this.myPartitionId = thePartitionId;
 	}
 
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierSystem(String theBinarySecurityContextIdentifierSystem) {
+		myBinarySecurityContextIdentifierSystem = theBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierSystem() {
+		return myBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierValue(String theBinarySecurityContextIdentifierValue) {
+		myBinarySecurityContextIdentifierValue = theBinarySecurityContextIdentifierValue;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierValue() {
+		return myBinarySecurityContextIdentifierValue;
+	}
+
+	public enum ExportStyle {
+		PATIENT, GROUP, SYSTEM
+	}
 }

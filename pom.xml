@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.10-SNAPSHOT</version>
+	<version>6.7.12-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -2330,7 +2330,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<trimStackTrace>true</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
 						<runOrder>alphabetical</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 						<forkCount>0.6C</forkCount>

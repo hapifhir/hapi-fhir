@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,23 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.bulk.export.model;
+package ca.uhn.fhir.rest.server.method;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
- * This may be in a "jpa" package, but it is not a jpa model!
+ * This is an intermediate record object that holds the offset and limit (count) the user requested for the page of results.
  */
-@JsonFormat(shape = JsonFormat.Shape.STRING)
-public enum BulkExportJobStatusEnum {
-
+public class RequestedPage {
 	/**
-	 * Sorting OK!
+	 * The search results offset requested by the user
 	 */
+	public final Integer offset;
+	/**
+	 * The number of results starting from the offset requested by the user
+	 */
+	public final Integer limit;
 
-	SUBMITTED,
-	BUILDING,
-	COMPLETE,
-	ERROR;
-
+	public RequestedPage(Integer theOffset, Integer theLimit) {
+		offset = theOffset;
+		limit = theLimit;
+	}
 }
