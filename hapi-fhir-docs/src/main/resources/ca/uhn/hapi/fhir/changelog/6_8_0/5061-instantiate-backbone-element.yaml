@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5061
+title: "Added a utility method to the TerserUtil class to facilitate the creation of new instances of BackboneElement classes."
