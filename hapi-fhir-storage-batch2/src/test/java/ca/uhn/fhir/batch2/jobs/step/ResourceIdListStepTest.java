@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -57,7 +56,7 @@ class ResourceIdListStepTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(ints = {1,100,500,501,2345})
+	@ValueSource(ints = {1, 100, 500, 501, 2345})
 	void testResourceIdListBatchSizeLimit(int theListSize) {
 		List<TypedResourcePid> idList = generateIdList(theListSize);
 		when(myStepExecutionDetails.getData()).thenReturn(myData);
@@ -73,7 +72,7 @@ class ResourceIdListStepTest {
 		doAnswer(i -> {
 			ResourceIdListWorkChunkJson list = i.getArgument(0);
 			Assertions.assertTrue(list.size() <= ResourceIdListStep.MAX_BATCH_OF_IDS,
-				"Id batch size should never exceed "+ResourceIdListStep.MAX_BATCH_OF_IDS);
+				"Id batch size should never exceed " + ResourceIdListStep.MAX_BATCH_OF_IDS);
 			return null;
 		}).when(myDataSink).accept(any(ResourceIdListWorkChunkJson.class));
 
@@ -81,20 +80,20 @@ class ResourceIdListStepTest {
 		assertNotEquals(null, run);
 
 		// The work should be divided into chunks of MAX_BATCH_OF_IDS in size (or less, but never more):
-		int expectedBatchCount = (int)Math.ceil((float)theListSize / ResourceIdListStep.MAX_BATCH_OF_IDS);
+		int expectedBatchCount = (int) Math.ceil((float) theListSize / ResourceIdListStep.MAX_BATCH_OF_IDS);
 		verify(myDataSink, times(expectedBatchCount)).accept(myDataCaptor.capture());
 		final List<ResourceIdListWorkChunkJson> allDataChunks = myDataCaptor.getAllValues();
 		assertEquals(expectedBatchCount, allDataChunks.size());
 
 		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
-		for (int i = 0; i < expectedBatchCount-1; i++) {
+		for (int i = 0; i < expectedBatchCount - 1; i++) {
 			assertEquals(ResourceIdListStep.MAX_BATCH_OF_IDS, allDataChunks.get(i).size());
 		}
 
 		// The very last chunk should be whatever is left over (if there is a remainder):
 		int expectedLastBatchSize = theListSize % ResourceIdListStep.MAX_BATCH_OF_IDS;
-		expectedLastBatchSize = (expectedLastBatchSize==0) ? ResourceIdListStep.MAX_BATCH_OF_IDS : expectedLastBatchSize;
-      assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
+		expectedLastBatchSize = (expectedLastBatchSize == 0) ? ResourceIdListStep.MAX_BATCH_OF_IDS : expectedLastBatchSize;
+		assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
 	}
 
 	private List<TypedResourcePid> generateIdList(int theListSize) {
