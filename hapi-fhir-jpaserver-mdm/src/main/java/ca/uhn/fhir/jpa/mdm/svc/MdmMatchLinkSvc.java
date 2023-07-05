@@ -26,6 +26,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
@@ -60,6 +61,9 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private MdmEidUpdateService myEidUpdateService;
 
+	@Autowired
+	private IBlockRuleEvaluationSvc myBlockRuleEvaluationSvc;
+
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
@@ -79,11 +83,20 @@ public class MdmMatchLinkSvc {
 	}
 
 	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		// TODO - check if resource is blocked here
+		CandidateList candidateList = null;
 
-		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
+		/*
+		 * If a resource is blocked, we will not conduct
+		 * MDM matching. But we will still create golden resources
+		 * (so that future resources may match to it).
+		 */
+		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
 
-		if (candidateList.isEmpty()) {
+		if (!isResourceBlocked) {
+			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
+		}
+
+		if (isResourceBlocked || candidateList == null || candidateList.isEmpty()) {
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
 			handleMdmWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);

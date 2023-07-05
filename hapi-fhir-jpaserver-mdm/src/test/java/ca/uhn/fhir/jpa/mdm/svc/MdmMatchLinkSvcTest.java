@@ -13,6 +13,9 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
+import ca.uhn.fhir.mdm.blocklist.json.BlockListRuleJson;
+import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -22,18 +25,24 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 public class MdmMatchLinkSvcTest {
 	@Nested
@@ -688,26 +698,73 @@ public class MdmMatchLinkSvcTest {
 		BlockListConfig.class
 	})
 	public class BlockLinkTest extends BaseMdmR4Test {
+
+		@Autowired
+		private IBlockListRuleProvider myBlockListRuleProvider;
+
 		@Test
-		public void updateMdmLinksForMdmSource_whenResourceIsBlockListed_alwaysCreatesNewGoldenResource() {
+		public void updateMdmLinksForMdmSource_createBlockedResource_alwaysCreatesNewGoldenResource() {
 			// setup
 			String blockedFirstName = "Jane";
 			String blockedLastName = "Doe";
-			// TODO - create a blocklist rules and inject them into service
-			// TODO - create a resource that does not match blocklist (but has matchable fields)
-			// our blocked name is Jane Doe... let's make sure that's the case
-			Patient original = buildJanePatient();
-			assertEquals(blockedLastName, original.getName().get(0).getFamily());
-			assertEquals(blockedFirstName, original.getName().get(0).getGivenAsSingleString());
-			original.getName().get(0).getFamily();
-			Patient result = createPatient(original);
-			original.setId(result.getIdElement());
+
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue(blockedLastName);
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue(blockedFirstName);
+			blockListJson.addBlockListRule(rule);
+
+			MdmTransactionContext mdmContext = createContextForCreate("Patient");
+
+			// when
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			// create patients
+			Patient unblockedPatient;
+			{
+				unblockedPatient = buildJanePatient();
+				unblockedPatient = createPatient(unblockedPatient);
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unblockedPatient, mdmContext);
+			}
+
+				// our blocked name is Jane Doe... let's make sure that's the case
+				Patient blockedPatient = buildJanePatient();
+				assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
+				assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
+				blockedPatient = createPatient(blockedPatient);
 
 			// test
-			// TODO - create a resource that has matchable fields, but also matches blocklist
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
 
 			// verify
-			// TODO - verify that 2 unique GRs are created (and that these GRs are not linked)
+			List<IBaseResource> grs = getAllGoldenPatients();
+			assertEquals(2, grs.size());
+			assertEquals(0, myMdmLinkDaoSvc.getPossibleDuplicates().size());
+
+			List<MdmLink> links = new ArrayList<>();
+			for (IBaseResource gr : grs) {
+				links.addAll(getAllMdmLinks((Patient)gr));
+			}
+			assertEquals(2, links.size());
+			Set<Long> ids = new HashSet<>();
+			for (MdmLink link : links) {
+				JpaPid pid = link.getSourcePersistenceId();
+				assertTrue(ids.add(pid.getId()));
+				JpaPid gpid = link.getGoldenResourcePersistenceId();
+				assertTrue(ids.add(gpid.getId()));
+			}
+		}
+
+		public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
+			return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
+				.map( link -> (MdmLink) link)
+				.collect(Collectors.toList());
 		}
 	}
 }
