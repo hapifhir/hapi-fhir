@@ -8,6 +8,7 @@ import ca.uhn.fhir.mdm.blocklist.json.BlockListRuleJson;
 import ca.uhn.fhir.mdm.blocklist.json.BlockedFieldJson;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
+import ca.uhn.fhir.util.FhirTypeUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -19,6 +20,11 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * An implementation of IBlockRuleEvaluationSvc.
+ * Evaluates whether or not a provided resource
+ * is blocked from mdm matching or not.
+ */
 public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 	private static final Logger ourLog = getLogger(BlockRuleEvaluationSvcImpl.class);
 
@@ -99,7 +105,7 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 
 			IBase first = results.get(0);
 
-			if (isPrimitiveType(first.fhirType())) {
+			if (FhirTypeUtil.isPrimitiveType(first.fhirType())) {
 				IPrimitiveType<?> primitiveType = (IPrimitiveType<?>) first;
 				if (!primitiveType.getValueAsString().equalsIgnoreCase(blockedValue)) {
 					// doesn't match
@@ -119,31 +125,4 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 		return true;
 	}
 
-	private boolean isPrimitiveType(String theFhirType) {
-		switch (theFhirType) {
-			default:
-				// non-primitive type (or unknown type)
-				return false;
-			case "string":
-			case "code":
-			case "markdown":
-			case "id":
-			case "uri":
-			case "url":
-			case "canonical":
-			case "oid":
-			case "uuid":
-			case "boolean":
-			case "unsignedInt":
-			case "positiveInt":
-			case "decimal":
-			case "integer64":
-			case "date":
-			case "dateTime":
-			case "time":
-			case "instant":
-			case "base6Binary":
-				return true;
-		}
-	}
 }
