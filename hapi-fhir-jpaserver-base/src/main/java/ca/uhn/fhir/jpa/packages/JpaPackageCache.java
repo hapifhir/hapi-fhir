@@ -315,7 +315,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			String dirName = "package";
 			NpmPackage.NpmPackageFolder packageFolder = npmPackage.getFolders().get(dirName);
-			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolder.getTypes().entrySet()) {
+			Map<String, List<String>> packageFolderTypes = null;
+			try {
+				packageFolderTypes = packageFolder.getTypes();
+			} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(2371) + e);
+			}
+			for (Map.Entry<String, List<String>> nextTypeToFiles : packageFolderTypes.entrySet()) {
 				String nextType = nextTypeToFiles.getKey();
 				for (String nextFile : nextTypeToFiles.getValue()) {
 

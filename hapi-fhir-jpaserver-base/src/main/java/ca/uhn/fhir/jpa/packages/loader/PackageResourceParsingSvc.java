@@ -49,7 +49,12 @@ public class PackageResourceParsingSvc {
 			return Collections.emptyList();
 		}
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		List<String> filesForType = thePkg.getFolders().get("package").getTypes().get(theType);
+		List<String> filesForType = null;
+		try {
+			filesForType = thePkg.getFolders().get("package").getTypes().get(theType);
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2370) + "Cannot install resource of type " + theType + ": Could not get types", e);
+		}
 		if (filesForType != null) {
 			for (String file : filesForType) {
 				try {
