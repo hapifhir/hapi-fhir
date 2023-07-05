@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.Constants;
@@ -130,11 +131,14 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
 
-		Patient paulPatientPossibleMatch = buildPatientWithNameAndId("Paula", PAUL_ID);
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
 		assertLinkCount(2);
+		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
 
 		myPatientDao.delete(paulPatient.getIdElement());
+//		myMdmHelper.doWaitForAfterMdmLatch();
 
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(2, resources.size());

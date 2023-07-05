@@ -24,24 +24,32 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -77,6 +85,16 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private IIdHelperService myIdHelperSvc;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private IMdmSubmitSvc myMdmSubmitSvc;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+//	@Autowired
+//	private MdmMatchLinkSvc
+	@Autowired
+	private IMdmLinkUpdaterSvc mdmLinkUpdaterSvc;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -151,26 +169,58 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
 			IIdType sourceId = theResource.getIdElement().toVersionless();
 			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
+			//todo jdjd make this one sql query maybe
 			List<MdmPidTuple> matches = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(sourcePid, MdmMatchResultEnum.MATCH);
 
-			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 
 			if (matches.size() == 1) {
+				// TODO JDJD handle the case where matches.size == 0, then the next statement is going to be out of bounds
+				List<MdmPidTuple> possibleMatches = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(matches.get(0).getGoldenPid(), MdmMatchResultEnum.POSSIBLE_MATCH);
+//				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 				// We are attempting to delete the only source resource left linked to the golden resource
 				// In this case, we should automatically delete the golden resource to prevent orphaning
+//				setLinksDeletedBeforehand();
+//				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+//				dao.deletePidList("",Collections.singleton(matches.get(0).getGoldenPid()),new DeleteConflictList(),theRequest);
+//				IIdType id = myIdHelperSvc.translatePidIdToForcedId(myFhirContext,theResource.fhirType(),matches.get(0).getGoldenPid());
+//				dao.delete(id);
+//				resetLinksDeletedBeforehand();
+
+				// case to handle: we are deleting a possible match source resource
+				if (possibleMatches.size() >= 1) {
+					for (MdmPidTuple possibleMatch : possibleMatches) {
+						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+						IBaseResource resource = dao.readByPid(possibleMatch.getSourcePid());
+//						myMdmChannelSubmitterSvc.submitResourceToMdmChannel(resource);
+
+						IBaseResource gr = dao.readByPid(matches.get(0).getGoldenPid());
+
+						mdmLinkUpdaterSvc.updateLink((IAnyResource) gr, (IAnyResource) resource, MdmMatchResultEnum.NO_MATCH,
+							createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, theResource.fhirType()));
+					}
+				}
+
 				int numDeleted = deleteLinkedGoldenResource(matches.get(0).getGoldenPid());
 				if (numDeleted > 0) {
-					ourLog.info("Removed {} golden resource that references {}", numDeleted, sourceId);
+					ourLog.info("Removed {} golden resource with references to {}", numDeleted, sourceId);
 				}
 			}
+			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 		}
 	}
 
-	private int deleteLinkedGoldenResource(IResourcePersistentId theMatches) {
+	private MdmTransactionContext createMdmContext(MdmTransactionContext.OperationType theOperation, String theResourceType) {
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createNew();
+		MdmTransactionContext retVal = new MdmTransactionContext(transactionLogMessages, theOperation);
+		retVal.setResourceType(theResourceType);
+		return retVal;
+	}
+
+	private int deleteLinkedGoldenResource(IResourcePersistentId theGoldenPid) {
 		setLinksDeletedBeforehand();
 
 		IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-		int numDeleted = deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theMatches)),
+		int numDeleted = deleteExpungeSvc.deleteExpunge(new ArrayList<>(Collections.singleton(theGoldenPid)),
 			false,null);
 
 		resetLinksDeletedBeforehand();
