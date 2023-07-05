@@ -79,7 +79,6 @@ public class ResponseBundleBuilder {
 	private ResponsePage buildResponsePage(ResponseBundleRequest theResponseBundleRequest) {
 		final IRestfulServer<?> server = theResponseBundleRequest.server;
 		final IBundleProvider bundleProvider = theResponseBundleRequest.bundleProvider;
-		final Integer bundleProviderSize = bundleProvider.size();
 		final RequestedPage requestedPage = theResponseBundleRequest.requestedPage;
 		final List<IBaseResource> resourceList;
 		final int pageSize;
@@ -88,7 +87,7 @@ public class ResponseBundleBuilder {
 		String searchId = null;
 
 		if (requestedPage.offset != null || !server.canStoreSearchResults()) {
-			pageSize = offsetCalculatePageSize(server, requestedPage, bundleProviderSize);
+			pageSize = offsetCalculatePageSize(server, requestedPage, bundleProvider.size());
 			numToReturn = pageSize;
 
 			resourceList = offsetBuildResourceList(bundleProvider, requestedPage, numToReturn);
@@ -96,19 +95,19 @@ public class ResponseBundleBuilder {
 		} else {
 			pageSize = pagingCalculatePageSize(requestedPage, server.getPagingProvider());
 
-			if (bundleProviderSize == null) {
+			if (bundleProvider.size() == null) {
 				numToReturn = pageSize;
 			} else {
-				numToReturn = Math.min(pageSize, bundleProviderSize - theResponseBundleRequest.offset);
+				numToReturn = Math.min(pageSize, bundleProvider.size() - theResponseBundleRequest.offset);
 			}
 
 			resourceList = pagingBuildResourceList(theResponseBundleRequest, bundleProvider, numToReturn);
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, bundleProviderSize);
+			searchId = pagingBuildSearchId(theResponseBundleRequest, numToReturn, bundleProvider.size());
 		}
 
-		return new ResponsePage(searchId, resourceList, pageSize, numToReturn, bundleProviderSize);
+		return new ResponsePage(searchId, resourceList, pageSize, numToReturn, bundleProvider.size());
 	}
 
 	private static String pagingBuildSearchId(ResponseBundleRequest theResponseBundleRequest, int theNumToReturn, Integer theNumTotalResults) {

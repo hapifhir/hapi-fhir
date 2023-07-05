@@ -59,6 +59,7 @@ class ResponseBundleBuilderTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static final String TEST_REQUEST_PATH = "test/request/path";
 	private static final Integer REQUEST_OFFSET = 3;
+	private static final Integer NEAR_END_NO_NEXT_REQUEST_OFFSET = 49;
 	@Mock
 	IRestfulServer<RequestDetails> myServer;
 	@Mock
@@ -363,6 +364,30 @@ class ResponseBundleBuilderTest {
 		assertPrevLinkOffset(bundle);
 	}
 
+	@Test
+	void testHighOffsetWithSearchIdAndInitiallyUnknownBundleSize() {
+		// setup
+		setCanStoreSearchResults(true);
+		SimpleBundleProvider bundleProvider = new TestBundleProvider(buildPatientList());
+		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider, SEARCH_ID, NEAR_END_NO_NEXT_REQUEST_OFFSET);
+
+		responseBundleRequest.requestDetails.setFhirServerBase(TEST_SERVER_BASE);
+		ResponseBundleBuilder svc = new ResponseBundleBuilder(false);
+
+		// run
+		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
+
+		// verify
+		verifyBundle(bundle, RESOURCE_COUNT, RESOURCE_COUNT - NEAR_END_NO_NEXT_REQUEST_OFFSET, "A49", "A49");
+		assertThat(bundle.getLink(), hasSize(2));
+		assertSelfLink(bundle);
+
+		Bundle.BundleLinkComponent nextLink = bundle.getLink().get(1);
+		assertEquals(LINK_PREVIOUS, nextLink.getRelation());
+		int prevOffset = NEAR_END_NO_NEXT_REQUEST_OFFSET - DEFAULT_PAGE_SIZE;
+		assertEquals(TEST_SERVER_BASE + "?_getpages=" + SEARCH_ID + "&_getpagesoffset=" + prevOffset + "&_count=" + ResponseBundleBuilderTest.DEFAULT_PAGE_SIZE + "&_bundletype=" + SEARCHSET.toCode(), nextLink.getUrl());
+	}
+
 
 	private static void assertNextLinkOffset(Bundle theBundle, Integer theOffset, Integer theCount) {
 		Bundle.BundleLinkComponent nextLink = theBundle.getLink().get(1);
@@ -464,6 +489,29 @@ class ResponseBundleBuilderTest {
 		}
 		if (theLastId != null) {
 			assertEquals(theLastId, entries.get(theExpectedEntryCount - 1).getResource().getId());
+		}
+	}
+
+	private static class TestBundleProvider extends SimpleBundleProvider {
+		boolean getResourcesCalled = false;
+		public TestBundleProvider(List<IBaseResource> theResourceList) {
+			super(theResourceList);
+		}
+
+		@Nonnull
+		@Override
+		public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+			getResourcesCalled = true;
+			return super.getResources(theFromIndex, theToIndex);
+		}
+
+		// Emulate the behaviour of PersistedJpaBundleProvider where size() is only set after getResources() has been called
+		@Override
+		public Integer size() {
+			if (getResourcesCalled) {
+				return super.size();
+			}
+			return null;
 		}
 	}
 }
