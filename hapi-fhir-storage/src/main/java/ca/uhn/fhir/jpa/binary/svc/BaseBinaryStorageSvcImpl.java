@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
@@ -59,8 +60,6 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	public static long DEFAULT_MAXIMUM_BINARY_SIZE = Long.MAX_VALUE - 1;
 	public static String BLOB_ID_PREFIX_APPLIED = "blob-id-prefix-applied";
 
-	private final SecureRandom myRandom;
-	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
 	private long myMaximumBinarySize = DEFAULT_MAXIMUM_BINARY_SIZE;
 	private int myMinimumBinarySize;
@@ -72,7 +71,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 
 	public BaseBinaryStorageSvcImpl() {
-		myRandom = new SecureRandom();
+		super();
 	}
 
 	@Override
@@ -98,12 +97,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
 	public String newBlobId() {
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < ID_LENGTH; i++) {
-			int nextInt = Math.abs(myRandom.nextInt());
-			b.append(CHARS.charAt(nextInt % CHARS.length()));
-		}
-		return b.toString();
+		return RandomTextUtils.newSecureRandomAlphaNumericString(ID_LENGTH);
 	}
 
 	/**
