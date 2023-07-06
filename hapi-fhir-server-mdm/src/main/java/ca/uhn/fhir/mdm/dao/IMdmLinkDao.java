@@ -35,7 +35,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
-import org.springframework.data.history.Revision;
 
 import java.util.Date;
 import java.util.List;
@@ -49,6 +48,8 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+
+	List<M> expandPidsAndMatchResultBySourcePid(P theSourcePid);
 
 	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 

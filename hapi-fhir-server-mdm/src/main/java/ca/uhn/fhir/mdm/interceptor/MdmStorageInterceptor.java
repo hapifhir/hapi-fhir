@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
@@ -38,7 +39,6 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -60,7 +60,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmStorageInterceptor implements IMdmStorageInterceptor {
@@ -170,12 +172,17 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			IIdType sourceId = theResource.getIdElement().toVersionless();
 			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
 			//todo jdjd make this one sql query maybe
-			List<MdmPidTuple> matches = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(sourcePid, MdmMatchResultEnum.MATCH);
+//			List<MdmPidTuple> matches = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(sourcePid, MdmMatchResultEnum.MATCH);
+			List<? extends IMdmLink> allLinks = myMdmLinkDao.expandPidsAndMatchResultBySourcePid(sourcePid);
 
+			Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult = allLinks.stream()
+				.collect(Collectors.groupingBy(IMdmLink::getMatchResult));
+			List<IMdmLink> matches2 = linksByMatchResult.get(MdmMatchResultEnum.MATCH);
+			List<IMdmLink> possibleMatches2 = linksByMatchResult.get(MdmMatchResultEnum.POSSIBLE_MATCH);
 
-			if (matches.size() == 1) {
+			if (matches2 == null || matches2.size() == 1) {
 				// TODO JDJD handle the case where matches.size == 0, then the next statement is going to be out of bounds
-				List<MdmPidTuple> possibleMatches = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(matches.get(0).getGoldenPid(), MdmMatchResultEnum.POSSIBLE_MATCH);
+//				List<MdmPidTuple> possibleMatches = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(matches.get(0).getGoldenPid(), MdmMatchResultEnum.POSSIBLE_MATCH);
 //				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 				// We are attempting to delete the only source resource left linked to the golden resource
 				// In this case, we should automatically delete the golden resource to prevent orphaning
@@ -186,24 +193,33 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 //				dao.delete(id);
 //				resetLinksDeletedBeforehand();
 
+				IResourcePersistentId grPid = matches2 == null ? null : matches2.get(0).getGoldenResourcePersistenceId();
+
 				// case to handle: we are deleting a possible match source resource
-				if (possibleMatches.size() >= 1) {
-					for (MdmPidTuple possibleMatch : possibleMatches) {
+				if (possibleMatches2 != null && possibleMatches2.size() >= 1) {
+					if (grPid == null) {
+						grPid = possibleMatches2.get(0).getGoldenResourcePersistenceId();
+					}
+					for (IMdmLink possibleMatch : possibleMatches2) {
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-						IBaseResource resource = dao.readByPid(possibleMatch.getSourcePid());
+						IBaseResource resource = dao.readByPid(possibleMatch.getSourcePersistenceId());
 //						myMdmChannelSubmitterSvc.submitResourceToMdmChannel(resource);
 
-						IBaseResource gr = dao.readByPid(matches.get(0).getGoldenPid());
+						IBaseResource gr = dao.readByPid(possibleMatch.getGoldenResourcePersistenceId());//todo jdjd u don't realy need to call this every loop
 
+						//todo jdjd consider taking parts of updatelink and just doing it here - so it goes through less code?
 						mdmLinkUpdaterSvc.updateLink((IAnyResource) gr, (IAnyResource) resource, MdmMatchResultEnum.NO_MATCH,
 							createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, theResource.fhirType()));
 					}
 				}
 
-				int numDeleted = deleteLinkedGoldenResource(matches.get(0).getGoldenPid());
-				if (numDeleted > 0) {
-					ourLog.info("Removed {} golden resource with references to {}", numDeleted, sourceId);
+				if (grPid != null) {
+					int numDeleted = deleteLinkedGoldenResource(grPid);
+					if (numDeleted > 0) {
+						ourLog.info("Removed {} golden resource(s) with references to {}", numDeleted, sourceId);
+					}
 				}
+
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
 		}

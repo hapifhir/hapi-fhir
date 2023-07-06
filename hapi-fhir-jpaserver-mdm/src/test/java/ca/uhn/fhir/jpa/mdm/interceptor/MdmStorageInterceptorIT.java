@@ -122,11 +122,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		}
 	}
 
-	//TODO: The behaviour of this test may change
-	//      Design needs to be discussed about whether a remaining POSSIBLE_MATCH should delete the GR and create a new one
-	//      or keep the GR and the POSSIBLE_MATCH link
 	@Test
-	public void testGoldenResourceNotDeleted_whenPossibleMatchStillExists() throws InterruptedException {
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButPossibleMatchExists() throws InterruptedException {
 		Patient paulPatient = buildPaulPatient();
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
@@ -138,12 +135,41 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
 
 		myPatientDao.delete(paulPatient.getIdElement());
-//		myMdmHelper.doWaitForAfterMdmLatch();
 
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(2, resources.size());
 
 		assertLinkCount(1);
+	}
+
+	@Test
+	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButMultiplePossibleMatchesExist() throws InterruptedException {
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		assertLinkCount(3);
+		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
+		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(2).getMatchResult());
+
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(3, resources.size());
+
+		assertLinkCount(2);
+		assertEquals(MdmMatchResultEnum.MATCH, myMdmLinkDao.findAll().get(0).getMatchResult());
+		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
 	}
 
 	@Test
