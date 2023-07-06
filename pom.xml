@@ -2244,7 +2244,7 @@
 						</execution>
 					</executions>
 					<configuration>
-						<ratchetFrom>origin/main</ratchetFrom>
+						<ratchetFrom>origin/master</ratchetFrom>
 						<java>
 							<excludes>
 								<exclude>**/test/**/*.java</exclude>
