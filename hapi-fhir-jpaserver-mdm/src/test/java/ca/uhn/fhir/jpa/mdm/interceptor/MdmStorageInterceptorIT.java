@@ -9,8 +9,10 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -64,6 +66,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 
 	@Override
@@ -170,6 +174,55 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertLinkCount(2);
 		assertEquals(MdmMatchResultEnum.MATCH, myMdmLinkDao.findAll().get(0).getMatchResult());
 		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
+	}
+
+	@Test
+	public void testDeleteSourceResource_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		Patient paulPatient = buildPaulPatient();
+		paulPatient.setActive(true);
+		myMdmHelper.createWithLatch(paulPatient);
+
+		Patient paulPatientPossibleMatch = buildPaulPatient();
+		paulPatientPossibleMatch.setActive(true);
+		paulPatientPossibleMatch.getNameFirstRep().setFamily("DifferentName");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
+
+		myMdmLinkUpdaterSvc.updateLink(getOnlyGoldenPatient(), paulPatientPossibleMatch, MdmMatchResultEnum.NO_MATCH, getPatientUpdateLinkContext());
+
+		Patient paulPatientPossibleMatch2 = buildPaulPatient();
+		paulPatientPossibleMatch2.setActive(true);
+		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
+		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
+
+		// Paul 1 MATCH to GR1
+		// Paul 2 NO_MATCH to GR1
+		// Paul 2 MATCH to GR2
+		// Paul 3 POSSIBLE_MATCH to GR1
+		// Paul 3 POSSIBLE_MATCH to GR2
+		// GR1 POSSIBLE_DUPLICATE GR2
+		assertLinkCount(6);
+
+		// Paul 1 MATCH to GR1 --> DELETED
+		// Paul 2 NO_MATCH to GR1 --> DELETED
+		// Paul 2 MATCH to GR2 --> KEPT
+		// Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		// Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		// GR1 POSSIBLE_DUPLICATE GR2 --> DELETED
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(3, resources.size());
+
+		assertLinkCount(2);
+		assertEquals(MdmMatchResultEnum.MATCH, myMdmLinkDao.findAll().get(0).getMatchResult());
+		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
+	}
+
+	private MdmTransactionContext getPatientUpdateLinkContext() {
+		MdmTransactionContext ctx = new MdmTransactionContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
+		ctx.setResourceType("Patient");
+		return ctx;
 	}
 
 	@Test
