@@ -8,4 +8,4 @@ repos:
     hooks:
     -   id: maven-spotless-apply
         stages:
-           - pre-push
+           - push
