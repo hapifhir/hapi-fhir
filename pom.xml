@@ -2226,7 +2226,6 @@
 						</execution>
 					</executions>
 					<configuration>
-						<ratchetFrom>origin/master</ratchetFrom>
 						<java>
 							<excludes>
 								<exclude>**/test/**/*.java</exclude>

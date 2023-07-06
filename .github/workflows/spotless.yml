@@ -18,5 +18,4 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: spotless:check
-
-        run: mvn spotless:check -DratchetFrom=${{ github.base_ref }}
+        run: mvn spotless:check
