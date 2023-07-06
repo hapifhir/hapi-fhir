@@ -1121,6 +1121,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		{
 			Device device = new Device();
 			device.addIdentifier().setSystem("urn:system").setValue("DEVICEID");
+			device.addIdentifier().setSystem("http://hl7.org/fhir/NamingSystem/device-ids").setValue("DEVICEID");
 			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
 
 			Patient patient = new Patient();
@@ -1136,12 +1137,17 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		SearchParameterMap params;
 
-// KHS JA When we switched _has from two queries to a nested subquery, we broke support for chains within _has
-// We have decided for now to prefer the performance optimization of the subquery over the slower full capability
-//		params = new SearchParameterMap();
-//		params.setLoadSynchronous(true);
-//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+		params = new SearchParameterMap();
+
+		// Target exists and is linked
+		params.setLoadSynchronous(true);
+		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+
+		params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "http://hl7.org/fhir/NamingSystem/device-ids|DEVICEID"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
 
 		// No targets exist
 		params = new SearchParameterMap();
