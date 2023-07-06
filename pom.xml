@@ -2572,16 +2572,6 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>com.rudikershaw.gitbuildhook</groupId>
-				<artifactId>git-build-hook-maven-plugin</artifactId>
-				<inherited>false</inherited>
-			</plugin>
-<!--			<plugin>-->
-<!--				<groupId>com.diffplug.spotless</groupId>-->
-<!--				<artifactId>spotless-maven-plugin</artifactId>-->
-<!--				<inherited>false</inherited>-->
-<!--			</plugin>-->
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<version>3.3.0</version>
