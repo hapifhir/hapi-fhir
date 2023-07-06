@@ -7,5 +7,4 @@ repos:
     rev: v0.3.3
     hooks:
     -   id: maven-spotless-apply
-        stages:
-           - push
+        stages: [pre-push]
