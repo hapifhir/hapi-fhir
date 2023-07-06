@@ -48,7 +48,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_PAGE_SIZE = 20000;
 
-	private static final int MAX_BATCH_OF_IDS = 500;
+	protected static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -91,6 +91,12 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				break;
 			}
 
+			// If we get the same last time twice in a row, we've clearly reached the end
+			if (nextChunk.getLastDate().getTime() == previousLastTime) {
+				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
+				break;
+			}
+
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
 			if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
 				// TODO: I've added this in order to troubleshoot MultitenantBatchOperationR4Test
@@ -101,12 +107,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
 				TypedPidJson nextId = new TypedPidJson(typedResourcePid);
 				idBuffer.add(nextId);
-			}
-
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
 			}
 
 			previousLastTime = nextChunk.getLastDate().getTime();
