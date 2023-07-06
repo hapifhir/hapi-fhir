@@ -218,6 +218,27 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, myMdmLinkDao.findAll().get(1).getMatchResult());
 	}
 
+	@Test
+	public void testGoldenResourceKept_whenAutoDeleteDisabled() throws InterruptedException {
+		// Given
+		myMdmSettings.setMyAutoDeleteGoldenResources(false);
+		Patient paulPatient = buildPaulPatient();
+		myMdmHelper.createWithLatch(paulPatient);
+		assertLinkCount(1);
+		Patient goldenPatient = getOnlyGoldenPatient();
+
+		// When
+		myPatientDao.delete(paulPatient.getIdElement());
+
+		// Then
+		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
+		assertEquals(1, resources.size());
+		assertLinkCount(0);
+		assertEquals(goldenPatient.getIdElement(), resources.get(0).getIdElement());
+
+		myMdmSettings.setMyAutoDeleteGoldenResources(true);
+	}
+
 	private MdmTransactionContext getPatientUpdateLinkContext() {
 		MdmTransactionContext ctx = new MdmTransactionContext();
 		ctx.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
