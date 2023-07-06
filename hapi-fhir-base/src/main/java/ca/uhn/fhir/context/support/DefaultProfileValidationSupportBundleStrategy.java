@@ -241,7 +241,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				 */
 				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4 || myCtx.getVersion().getVersion() == FhirVersionEnum.R4B || myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
 					String end = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
-					if (Character.isUpperCase(end.charAt(0))) {
+					if (end.length() > 0 && Character.isUpperCase(end.charAt(0))) {
 						String newEnd = Character.toLowerCase(end.charAt(0)) + end.substring(1);
 						String alternateUrl = URL_PREFIX_STRUCTURE_DEFINITION + newEnd;
 						retVal = structureDefinitionMap.get(alternateUrl);

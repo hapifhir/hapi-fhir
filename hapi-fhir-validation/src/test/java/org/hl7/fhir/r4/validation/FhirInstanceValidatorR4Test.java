@@ -1603,6 +1603,17 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testReferencesToExternalURLsWithoutPathDoNotThrowException() {
+		Patient p = new Patient();
+		p.getManagingOrganization().setReference("http://example.org");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(p);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		assertTrue(errors.isEmpty());
+	}
+
+	@Test
 	public void testPatientSingleCommunicationLanguage_en() throws IOException {
 		final String encoded = loadResource("patient-with-single-comm-lang-en.json");
 
