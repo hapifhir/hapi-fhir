@@ -52,6 +52,10 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 class JdbcResultSet implements ResultSet {
 
+	/**
+	 * @see <a href="https://en.wikipedia.org/wiki/SQLSTATE">https://en.wikipedia.org/wiki/SQLSTATE</a>
+	 */
+	public static final String SQL_STATE_CODE_0F001_LOCATOR_EXCEPTION = "0F001";
 	private final IHfqlExecutionResult myResult;
 	private final Statement myStatement;
 	private List<Object> myNextRow;
@@ -90,7 +94,13 @@ class JdbcResultSet implements ResultSet {
 	@Override
 	public boolean next() throws SQLException {
 		if (myResult.hasNext()) {
-			myNextRow = myResult.getNextRow().getRowValues();
+			IHfqlExecutionResult.Row nextRow = myResult.getNextRow();
+			if (nextRow.getRowOffset() == IHfqlExecutionResult.ROW_OFFSET_ERROR) {
+				String errorMessage = nextRow.getRowValues().get(0).toString();
+				throw new SQLException(errorMessage, SQL_STATE_CODE_0F001_LOCATOR_EXCEPTION, -1);
+			}
+
+			myNextRow = nextRow.getRowValues();
 			myRowCount++;
 			return true;
 		}

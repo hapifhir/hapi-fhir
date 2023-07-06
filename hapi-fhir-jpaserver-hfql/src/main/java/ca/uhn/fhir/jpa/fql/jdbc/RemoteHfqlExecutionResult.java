@@ -209,10 +209,14 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 						newValue = Boolean.parseBoolean(existingValue);
 						break;
 					case DATE:
-						newValue = new DateType(existingValue).getValue();
+						DateType dateType = new DateType();
+						dateType.setValueAsString(existingValue);
+						newValue = dateType.getValue();
 						break;
 					case TIMESTAMP:
-						newValue = new DateTimeType(existingValue).getValue();
+						DateTimeType dateTimeType = new DateTimeType();
+						dateTimeType.setValueAsString(existingValue);
+						newValue = dateTimeType.getValue();
 						break;
 					case LONGINT:
 						newValue = Long.parseLong(existingValue);

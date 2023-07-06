@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +46,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -143,6 +143,39 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
+	public void testSelect_InvalidWhereClause() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
+		String statement = """
+					select foo()
+					from Patient
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IHfqlExecutionResult.Row row = result.getNextRow();
+		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
+		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: Error in ?? at 1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
+		assertFalse(result.hasNext());
+	}
+
+	@Test
+	public void testSelect_InvalidHavingClause() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
+		String statement = """
+					select name
+					from Patient
+					having meta.versionId > 1
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		IHfqlExecutionResult.Row row = result.getNextRow();
+		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
+		assertEquals("Unable to evaluate FHIRPath expression \"meta.versionId > 1\". Error: HAPI-0255: Error evaluating FHIRPath expression: Unable to compare values of type id and integer (@char 3)", row.getRowValues().get(0));
+		assertFalse(result.hasNext());
+	}
+
+	@Test
 	public void testFromSelectStar() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
@@ -160,6 +193,31 @@ public class HfqlExecutorTest {
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), not(hasItem(
 			"address.period.start"
 		)));
+	}
+
+	@Test
+	public void testSelect_Limit() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates());
+
+		String statement = """
+					select name.given
+					from Patient
+					limit 5
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertTrue(result.hasNext());
+		assertThat(result.getNextRow().getRowValues(), contains("Homer"));
+		assertTrue(result.hasNext());
+		assertThat(result.getNextRow().getRowValues(), contains("Homer"));
+		assertTrue(result.hasNext());
+		assertThat(result.getNextRow().getRowValues(), contains("Ned"));
+		assertTrue(result.hasNext());
+		assertThat(result.getNextRow().getRowValues(), contains("Ned"));
+		assertTrue(result.hasNext());
+		assertThat(result.getNextRow().getRowValues(), contains("Bart"));
+		assertFalse(result.hasNext());
 	}
 
 	@Test
@@ -222,15 +280,6 @@ public class HfqlExecutorTest {
 		));
 	}
 
-	@Nonnull
-	private static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
-		List<List<Object>> rowValues = new ArrayList<>();
-		while (result.hasNext()) {
-			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
-		}
-		return rowValues;
-	}
-
 	@Test
 	public void testFromSelectCount_TooMany() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
@@ -247,26 +296,39 @@ public class HfqlExecutorTest {
 					group by name.family
 			""";
 
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertErrorMessage(result, "Can not group on > 10000 terms");
+	}
+
+	@Test
+	public void testFromSelectCount_NoGroup() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+
+		// Only 0+1 have a family name
+		Patient pt0 = new Patient();
+		pt0.addName().setFamily("Simpson");
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Smithers");
+		Patient pt2 = new Patient();
+		pt2.addName().addGiven("Blah");
+
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(pt0, pt1, pt2));
+		String statement = """
+					select count(*), count(name.family)
+					from Patient
+			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "count(*)"
+			"count(*)", "count(name.family)"
 		));
 		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
+			HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
-		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList("Flanders", "Ned", 2L),
-			Lists.newArrayList("Simpson", "Jay", 2L),
-			Lists.newArrayList("Simpson", "Marie", 1L),
-			Lists.newArrayList("Simpson", "Evelyn", 1L),
-			Lists.newArrayList("Simpson", "Homer", 2L),
-			Lists.newArrayList("Simpson", "Lisa", 1L),
-			Lists.newArrayList("Simpson", "Bart", 1L),
-			Lists.newArrayList("Simpson", "El Barto", 1L),
-			Lists.newArrayList("Simpson", "Maggie", 1L)
+		assertThat(rowValues.toString(), rowValues, contains(
+			Lists.newArrayList(3L, 2L)
 		));
 	}
 
@@ -532,6 +594,32 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
+	public void testFromHavingComplexFhirPath_Cast() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
+		String statement = """
+					select name.given
+					from Patient
+					having meta.versionId.toInteger() > 1
+			""";
+
+		IHfqlExecutionResult.Row row;
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		assertTrue(result.hasNext());
+		row = result.getNextRow();
+		assertThat(row.getRowValues().toString(), row.getRowValues(), contains("Homer"));
+
+		assertTrue(result.hasNext());
+		row = result.getNextRow();
+		assertThat(row.getRowValues().toString(), row.getRowValues(), contains("Bart"));
+
+		assertFalse(result.hasNext());
+	}
+
+
+
+	@Test
 	public void testSelectComplexFhirPath_StringConcat() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 
@@ -683,12 +771,15 @@ public class HfqlExecutorTest {
 			"where " + theParamName + " = 'abc' " +
 			"select name.given";
 
-		try {
-			myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unknown/unsupported search parameter: " + theParamName, e.getMessage());
-		}
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertErrorMessage(result, "Unknown/unsupported search parameter: " + theParamName);
+	}
+
+	private static void assertErrorMessage(IHfqlExecutionResult result, String expected) {
+		assertTrue(result.hasNext());
+		IHfqlExecutionResult.Row nextRow = result.getNextRow();
+		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, nextRow.getRowOffset());
+		assertThat(nextRow.getRowValues(), contains(expected));
 	}
 
 	@Test
@@ -906,8 +997,8 @@ public class HfqlExecutorTest {
 			select Foo.blah
 			""";
 
-		assertEquals("Invalid FROM statement. Unknown resource type 'Foo' at position: [line=0, column=5]",
-			assertThrows(DataFormatException.class, () -> myHfqlExecutor.executeInitialSearch(input, null, mySrd)).getMessage());
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
+		assertErrorMessage(result, "Invalid FROM statement. Unknown resource type 'Foo' at position: [line=0, column=5]");
 	}
 
 	@Test
@@ -919,8 +1010,8 @@ public class HfqlExecutorTest {
 			select count(*), name.family
 			""";
 
-		assertEquals("Unable to select on non-grouped column in a count expression: name.family",
-			assertThrows(InvalidRequestException.class, () -> myHfqlExecutor.executeInitialSearch(input, null, mySrd)).getMessage());
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
+		assertErrorMessage(result, "Unable to select on non-grouped column in a count expression: name.family");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -929,6 +1020,15 @@ public class HfqlExecutorTest {
 		String type = myCtx.getResourceType(theType);
 		when(myDaoRegistry.getResourceDao(type)).thenReturn(retVal);
 		return retVal;
+	}
+
+	@Nonnull
+	private static List<List<Object>> readAllRowValues(IHfqlExecutionResult result) {
+		List<List<Object>> rowValues = new ArrayList<>();
+		while (result.hasNext()) {
+			rowValues.add(new ArrayList<>(result.getNextRow().getRowValues()));
+		}
+		return rowValues;
 	}
 
 	@Nonnull
@@ -980,25 +1080,25 @@ public class HfqlExecutorTest {
 
 	@Nonnull
 	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlanders() {
-		return new SimpleBundleProvider(List.of(
+		return new SimpleBundleProvider(
 			createPatientHomerSimpson(),
 			createPatientNedFlanders(),
 			createPatientBartSimpson(),
 			createPatientLisaSimpson(),
 			createPatientMaggieSimpson()
-		));
+		);
 	}
 
 	@Nonnull
 	private static SimpleBundleProvider createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates() {
-		return new SimpleBundleProvider(List.of(
+		return new SimpleBundleProvider(
 			createPatientHomerSimpson(),
 			createPatientHomerSimpson(),
 			createPatientNedFlanders(),
 			createPatientNedFlanders(),
 			createPatientBartSimpson(),
 			createPatientLisaSimpson(),
-			createPatientMaggieSimpson()));
+			createPatientMaggieSimpson());
 	}
 
 	@Nonnull
@@ -1012,6 +1112,7 @@ public class HfqlExecutorTest {
 	@Nonnull
 	private static Patient createPatientLisaSimpson() {
 		Patient lisa = new Patient();
+		lisa.getMeta().setVersionId("1");
 		lisa.addName().setFamily("Simpson").addGiven("Lisa").addGiven("Marie");
 		lisa.addIdentifier().setSystem("http://system").setValue("value3");
 		return lisa;
@@ -1020,6 +1121,7 @@ public class HfqlExecutorTest {
 	@Nonnull
 	private static Patient createPatientBartSimpson() {
 		Patient bart = new Patient();
+		bart.getMeta().setVersionId("3");
 		bart.addName().setFamily("Simpson").addGiven("Bart").addGiven("El Barto");
 		bart.addIdentifier().setSystem("http://system").setValue("value2");
 		return bart;
@@ -1028,6 +1130,7 @@ public class HfqlExecutorTest {
 	@Nonnull
 	private static Patient createPatientNedFlanders() {
 		Patient nedFlanders = new Patient();
+		nedFlanders.getMeta().setVersionId("1");
 		nedFlanders.addName().setFamily("Flanders").addGiven("Ned");
 		nedFlanders.addIdentifier().setSystem("http://system").setValue("value1");
 		return nedFlanders;
@@ -1036,6 +1139,7 @@ public class HfqlExecutorTest {
 	@Nonnull
 	private static Patient createPatientHomerSimpson() {
 		Patient homer = new Patient();
+		homer.getMeta().setVersionId("2");
 		homer.addName().setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		homer.addIdentifier().setSystem("http://system").setValue("value0");
 		homer.setBirthDateElement(new DateType("1950-01-01"));

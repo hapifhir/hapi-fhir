@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -103,6 +105,36 @@ public class JdbcDriverTest {
 		assertEquals(2, outcome.size());
 	}
 
+	@Test
+	public void testExecuteStatement_ReturnsError() {
+		String errorMessage = "this is an error!";
+
+		HfqlStatement statement = createFakeStatement();
+		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
+		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
+		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
+		when(myMockFqlResult.hasNext()).thenReturn(true, false);
+		when(myMockFqlResult.getNextRow()).thenReturn(
+			new IHfqlExecutionResult.Row(IHfqlExecutionResult.ROW_OFFSET_ERROR, List.of(errorMessage))
+		);
+		when(myMockFqlResult.getSearchId()).thenReturn("my-search-id");
+		when(myMockFqlResult.getLimit()).thenReturn(999);
+
+		String input = """
+				from Patient
+				select name.family, name.given
+			""";
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDs);
+
+		try {
+			jdbcTemplate.query(input, new ColumnMapRowMapper());
+			fail();
+		} catch (UncategorizedSQLException e) {
+			assertEquals(SQLException.class, e.getCause().getClass());
+			assertEquals("this is an error!", e.getCause().getMessage());
+		}
+	}
 
 	@Test
 	public void testDataTypes() throws SQLException {

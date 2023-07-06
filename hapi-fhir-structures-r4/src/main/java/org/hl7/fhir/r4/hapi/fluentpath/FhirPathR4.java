@@ -53,7 +53,7 @@ public class FhirPathR4 implements IFhirPath {
     try {
       result = myEngine.evaluate((Base) theInput, expressionNode);
     } catch (FHIRException e) {
-      throw new FhirPathExecutionException(Msg.code(255) + e);
+      throw new FhirPathExecutionException(Msg.code(255) + e.getMessage(), e);
     }
 
     for (IBase next : result) {

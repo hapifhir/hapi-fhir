@@ -27,6 +27,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.utils.FHIRLexer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private IBaseResource myNextResource;
 	private boolean myExhausted = false;
 	private int myNextResourceSearchRow;
+	private Row myErrorRow;
 
 	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, HfqlExecutor.HfqlExecutionContext theExecutionContext, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate, FhirContext theFhirContext) {
 		myStatement = theStatement;
@@ -85,44 +87,63 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	}
 
 	private void fetchNextResource() {
-		while (myNextResource == null && !myExhausted) {
-			if (myNextBatch == null) {
-				myNextBatch = mySearchResult.getResources(myNextSearchResultRow, myNextSearchResultRow + HfqlExecutor.BATCH_SIZE);
-				myNextBatchRow = 0;
-				myNextSearchResultRow += HfqlExecutor.BATCH_SIZE;
-			}
-			if (myNextBatch.isEmpty()) {
-				myExhausted = true;
-			} else if (myNextBatch.size() > myNextBatchRow) {
-				myNextResource = myNextBatch.get(myNextBatchRow);
-				myNextResourceSearchRow = (myNextSearchResultRow - HfqlExecutor.BATCH_SIZE) + myNextBatchRow;
-				myNextBatchRow++;
-			} else {
-				myNextBatch = null;
-			}
-
-			if (myNextResource != null && !myWhereClausePredicate.test(myNextResource)) {
-				myNextResource = null;
-			}
-		}
-
 		if (myNextResource != null) {
-			myTotalRowsFetched++;
-			if (myLimit != null && myTotalRowsFetched >= myLimit) {
-				myExhausted = true;
+			return;
+		}
+		try {
+			while (myNextResource == null && !myExhausted) {
+				if (myNextBatch == null) {
+					myNextBatch = mySearchResult.getResources(myNextSearchResultRow, myNextSearchResultRow + HfqlExecutor.BATCH_SIZE);
+					myNextBatchRow = 0;
+					myNextSearchResultRow += HfqlExecutor.BATCH_SIZE;
+				}
+				if (myNextBatch.isEmpty()) {
+					myExhausted = true;
+				} else if (myNextBatch.size() > myNextBatchRow) {
+					myNextResource = myNextBatch.get(myNextBatchRow);
+					myNextResourceSearchRow = (myNextSearchResultRow - HfqlExecutor.BATCH_SIZE) + myNextBatchRow;
+					myNextBatchRow++;
+				} else {
+					myNextBatch = null;
+				}
+
+				if (myNextResource != null && !myWhereClausePredicate.test(myNextResource)) {
+					myNextResource = null;
+				}
 			}
+
+			if (myNextResource != null) {
+				myTotalRowsFetched++;
+				if (myLimit != null && myTotalRowsFetched >= myLimit) {
+					myExhausted = true;
+				}
+			}
+		} catch (Exception e) {
+			createAndStoreErrorRow(e.getMessage());
 		}
 	}
 
 	@Override
 	public Row getNextRow() {
 		fetchNextResource();
+		if (myErrorRow != null) {
+			Row errorRow = myErrorRow;
+			myErrorRow = null;
+			return errorRow;
+		}
+
 		Validate.isTrue(myNextResource != null, "No more results");
 
 		List<Object> values = new ArrayList<>();
 		for (HfqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
 			String clause = nextColumn.getClause();
-			List<IBase> columnValues = myExecutionContext.evaluate(myNextResource, clause, IBase.class);
+			List<IBase> columnValues;
+			try {
+				columnValues = myExecutionContext.evaluate(myNextResource, clause, IBase.class);
+			} catch (Exception e) {
+				String errorMessage = "Failed to evaluate FHIRPath expression \"" + clause + "\". Error: " + e.getMessage();
+				return createAndStoreErrorRow(errorMessage);
+			}
 			String value = null;
 			if (!columnValues.isEmpty()) {
 				IBase firstColumnValue = columnValues.get(0);
@@ -137,6 +158,13 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 
 		myNextResource = null;
 		return new Row(myNextResourceSearchRow, values);
+	}
+
+	private Row createAndStoreErrorRow(String errorMessage) {
+		myExhausted = true;
+		myNextResource = null;
+		myErrorRow = new Row(IHfqlExecutionResult.ROW_OFFSET_ERROR, List.of(errorMessage));
+		return myErrorRow;
 	}
 
 	@Override

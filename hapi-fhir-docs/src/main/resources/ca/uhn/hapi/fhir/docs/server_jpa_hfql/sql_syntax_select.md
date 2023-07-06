@@ -2,9 +2,9 @@
 
 This module uses a proprietary flavour of SQL that is specific to HAPI FHIR. This syntax is referred to as **HFQL**, the _HAPI FHIR Query Language_.
 
-HFQL is structurally similar to the [Firely Query Language](https://simplifier.net/docs/fql), although it also has differences. It is also designed to be similar to SQL.
+HFQL is inspired by the [Firely Query Language](https://simplifier.net/docs/fql), although it has evolved to be more similar to standard SQL. 
 
-HFQL keywords are case-insensitive, although expressions referring to elements within FHIR resources are case-sensitive.
+HFQL keywords are case-insensitive, although expressions referring to elements within FHIR resources are case-sensitive. All examples here use CAPITALIZED SQL keywords for easier readability but this is not required.  
 
 # Selecting Columns
 
@@ -107,7 +107,7 @@ A simple example showing string concatenation is shown below. Note the use of th
 
 ```sql
 SELECT 
-    Patient.name[0].given[0] + ' ' + Patient.name[0].family as FullName
+    Patient.name[0].given[0] + ' ' + Patient.name[0].family AS FullName
 FROM Patient
 ```
 

@@ -118,4 +118,9 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 		return null;
 	}
 
+	public static IHfqlExecutionResult withError(String theErrorMessage) {
+		StaticHfqlExecutionResult retVal = new StaticHfqlExecutionResult(null, List.of("Error"), List.of(HfqlDataTypeEnum.STRING), List.of(List.of(theErrorMessage)));
+		retVal.myNextRowOffset = IHfqlExecutionResult.ROW_OFFSET_ERROR;
+		return retVal;
+	}
 }
