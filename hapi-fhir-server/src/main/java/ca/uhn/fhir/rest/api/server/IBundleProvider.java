@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -195,7 +195,7 @@ public interface IBundleProvider {
 	Integer size();
 
 	/**
-	 * This method returns <code>true</code> if the bundle provider knows that at least
+	 * This method returns <code>false</code> if the bundle provider knows that at least
 	 * one result exists.
 	 */
 	default boolean isEmpty() {

@@ -33,6 +33,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -50,6 +51,10 @@ import static org.apache.commons.lang3.StringUtils.length;
 	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
 	uniqueConstraints = {
 	@UniqueConstraint(name = TermCodeSystemVersion.IDX_CODESYSTEM_AND_VER, columnNames = {"CODESYSTEM_PID", "CS_VERSION_ID"})
+},
+indexes = {
+	@Index(name = "FK_CODESYSVER_RES_ID", columnList = "RES_ID"),
+	@Index(name = "FK_CODESYSVER_CS_ID", columnList = "CODESYSTEM_PID")
 })
 @Entity()
 public class TermCodeSystemVersion implements Serializable {

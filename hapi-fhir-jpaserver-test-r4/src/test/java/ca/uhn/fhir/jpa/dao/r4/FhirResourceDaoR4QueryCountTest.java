@@ -258,6 +258,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */

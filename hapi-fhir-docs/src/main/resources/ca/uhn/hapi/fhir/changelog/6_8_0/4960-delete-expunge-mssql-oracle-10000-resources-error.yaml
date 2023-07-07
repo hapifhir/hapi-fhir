@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4960
+jira: SMILE-5740
+title: "Running a $delete-expunge MSSQL or Oracle with over 10,000 resources results in a error and a stack trace, even though the job ends in status COMPLETE.
+        This has been fixed."

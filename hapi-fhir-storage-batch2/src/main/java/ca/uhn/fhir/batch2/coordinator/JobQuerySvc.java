@@ -53,6 +53,7 @@ class JobQuerySvc {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
+	@Nonnull
 	JobInstance fetchInstance(String theInstanceId) {
 		return myJobPersistence.fetchInstance(theInstanceId)
 			.map(this::massageInstanceForUserAccess)

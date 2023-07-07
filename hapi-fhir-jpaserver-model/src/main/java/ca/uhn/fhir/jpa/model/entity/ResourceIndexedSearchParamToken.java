@@ -42,6 +42,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -369,5 +370,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
+	}
+
+	@PrePersist
+/**
+ * We truncate the fields at the last moment because the tables have limited size.
+ * We don't truncate earlier in the flow because the index hashes MUST be calculated on the full string.
+ */
+	public void truncateFieldsForDB() {
+		mySystem = StringUtils.truncate(mySystem, MAX_LENGTH);
+		myValue = StringUtils.truncate(myValue, MAX_LENGTH);
 	}
 }

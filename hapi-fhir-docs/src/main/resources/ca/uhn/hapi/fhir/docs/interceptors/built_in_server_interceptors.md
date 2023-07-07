@@ -182,6 +182,9 @@ HAPI FHIR provides an interceptor that can be used to automatically generate and
 
 HAPI FHIR provides an interceptor that can be used to implement user- and system-level authorization rules that are aware of FHIR semantics. See [Authorization](/docs/security/authorization_interceptor.html) for more information.
 
+# Security: Binary Resources
+
+HAPI FHIR provides an interceptor that can be used to secure access to Binary resources by using the `Binary.securityContext` element. See [Binary Security Interceptor](/docs/security/binary_security_interceptor.html) for more information.
 
 # Security: Consent
 

@@ -48,7 +48,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_PAGE_SIZE = 20000;
 
-	private static final int MAX_BATCH_OF_IDS = 500;
+	protected static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -63,9 +63,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
-		Integer pageSize = theStepExecutionDetails.getParameters().getBatchSize();
-		if (pageSize == null) {
-			pageSize = DEFAULT_PAGE_SIZE;
+		Integer batchSize = theStepExecutionDetails.getParameters().getBatchSize();
+		int pageSize = DEFAULT_PAGE_SIZE;
+		if (batchSize != null) {
+			pageSize = batchSize.intValue();
 		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
@@ -76,11 +77,23 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
+
+		int maxBatchId = MAX_BATCH_OF_IDS;
+		if (batchSize != null) {
+			// we won't go over MAX_BATCH_OF_IDS
+			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
+		}
 		while (true) {
 			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");
+				break;
+			}
+
+			// If we get the same last time twice in a row, we've clearly reached the end
+			if (nextChunk.getLastDate().getTime() == previousLastTime) {
+				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
 				break;
 			}
 
@@ -96,21 +109,15 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 				idBuffer.add(nextId);
 			}
 
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
-			}
-
 			previousLastTime = nextChunk.getLastDate().getTime();
 			nextStart = nextChunk.getLastDate();
 
-			while (idBuffer.size() > MAX_BATCH_OF_IDS) {
+			while (idBuffer.size() > maxBatchId) {
 				List<TypedPidJson> submissionIds = new ArrayList<>();
 				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
-					if (submissionIds.size() == MAX_BATCH_OF_IDS) {
+					if (submissionIds.size() == maxBatchId) {
 						break;
 					}
 				}

@@ -1,0 +1,6 @@
+---
+type: change
+issue: 5039
+title: "A new interceptor pointcut called `STORAGE_BULK_EXPORT_RESOURCE_INCLUSION` has been added. This
+   pointcut is called for every resource that will be included in a bulk export data file. Hook methods
+   may modify the resources or signal that they should be filtered out."

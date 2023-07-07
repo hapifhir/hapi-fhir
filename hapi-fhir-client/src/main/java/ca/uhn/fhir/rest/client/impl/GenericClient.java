@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
@@ -59,7 +60,7 @@ import ca.uhn.fhir.rest.client.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.client.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.client.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.client.method.HttpGetClientInvocation;
-import ca.uhn.fhir.rest.client.method.HttpSimpleGetClientInvocation;
+import ca.uhn.fhir.rest.client.method.HttpSimpleClientInvocation;
 import ca.uhn.fhir.rest.client.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.client.method.OperationMethodBinding;
@@ -848,6 +849,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myBundleType;
 		private String myUrl;
 
+		private PagingHttpMethodEnum myPagingHttpMethod = PagingHttpMethodEnum.GET;
+
 		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
 			myUrl = theUrl;
 			myBundleType = theBundleType;
@@ -855,13 +858,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public Object execute() {
-			IClientResponseHandler binding;
-			binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
-			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myContext, myUrl);
-			invocation.setUrlSource(UrlSourceEnum.EXPLICIT);
+			IClientResponseHandler binding = new ResourceResponseHandler(myBundleType, getPreferResponseTypes());
+			HttpSimpleClientInvocation invocationGet = new HttpSimpleClientInvocation(myContext, myUrl, myPagingHttpMethod);
+			return invoke(null, binding, invocationGet);
+		}
 
-			Map<String, List<String>> params = null;
-			return invoke(params, binding, invocation);
+		@Override
+		public IGetPageTyped<Object> usingMethod(PagingHttpMethodEnum thePagingHttpMethod) {
+			myPagingHttpMethod = thePagingHttpMethod;
+			return this;
 		}
 
 	}

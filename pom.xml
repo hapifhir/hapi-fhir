@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.3-SNAPSHOT</version>
+	<version>6.7.13-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -893,7 +893,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.10</fhir_core_version>
+		<fhir_core_version>6.0.15</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -982,7 +982,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE2</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE4</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1952,6 +1952,11 @@
 				<version>42.5.1</version>
 			</dependency>
 			<dependency>
+				<groupId>com.oracle.database.jdbc</groupId>
+				<artifactId>ojdbc11</artifactId>
+				<version>21.5.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
@@ -2325,7 +2330,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<trimStackTrace>true</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
 						<runOrder>alphabetical</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 						<forkCount>0.6C</forkCount>
