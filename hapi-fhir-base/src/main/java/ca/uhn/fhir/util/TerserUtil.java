@@ -29,6 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -721,6 +722,20 @@ public final class TerserUtil {
 			FhirContext theFhirContext, String theResourceName, Object theConstructorParam) {
 		RuntimeResourceDefinition def = theFhirContext.getResourceDefinition(theResourceName);
 		return (T) def.newInstance(theConstructorParam);
+	}
+
+	/**
+	 * Creates a new BackboneElement.
+	 *
+	 * @param theFhirContext        Context holding resource definition
+	 * @param theTargetResourceName Name of the resource in the context
+	 * @param theTargetFieldName    Name of the backbone element in the resource
+	 * @return Returns a new instance of the element
+	 */
+	public static IBaseBackboneElement instantiateBackboneElement(FhirContext theFhirContext, String theTargetResourceName, String theTargetFieldName) {
+		BaseRuntimeElementDefinition<?> targetParentElementDefinition = theFhirContext.getResourceDefinition(theTargetResourceName);
+		BaseRuntimeChildDefinition childDefinition = targetParentElementDefinition.getChildByName(theTargetFieldName);
+		return (IBaseBackboneElement) childDefinition.getChildByName(theTargetFieldName).newInstance();
 	}
 
 	private static void clear(List<IBase> values) {

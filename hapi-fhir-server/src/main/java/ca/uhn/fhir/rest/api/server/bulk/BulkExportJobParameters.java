@@ -110,6 +110,10 @@ public class BulkExportJobParameters implements IModelJson {
 	 */
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
+	@JsonProperty("binarySecurityContextIdentifierSystem")
+	private String myBinarySecurityContextIdentifierSystem;
+	@JsonProperty("binarySecurityContextIdentifierValue")
+	private String myBinarySecurityContextIdentifierValue;
 
 	public String getExportIdentifier() {
 		return myExportId;
@@ -229,6 +233,38 @@ public class BulkExportJobParameters implements IModelJson {
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {
 		this.myPartitionId = thePartitionId;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierSystem(String theBinarySecurityContextIdentifierSystem) {
+		myBinarySecurityContextIdentifierSystem = theBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierSystem() {
+		return myBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierValue(String theBinarySecurityContextIdentifierValue) {
+		myBinarySecurityContextIdentifierValue = theBinarySecurityContextIdentifierValue;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierValue() {
+		return myBinarySecurityContextIdentifierValue;
 	}
 
 	public enum ExportStyle {
