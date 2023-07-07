@@ -732,10 +732,13 @@ public final class TerserUtil {
 	 * @param theTargetFieldName    Name of the backbone element in the resource
 	 * @return Returns a new instance of the element
 	 */
-	public static IBaseBackboneElement instantiateBackboneElement(FhirContext theFhirContext, String theTargetResourceName, String theTargetFieldName) {
-		BaseRuntimeElementDefinition<?> targetParentElementDefinition = theFhirContext.getResourceDefinition(theTargetResourceName);
+	public static IBaseBackboneElement instantiateBackboneElement(
+			FhirContext theFhirContext, String theTargetResourceName, String theTargetFieldName) {
+		BaseRuntimeElementDefinition<?> targetParentElementDefinition =
+				theFhirContext.getResourceDefinition(theTargetResourceName);
 		BaseRuntimeChildDefinition childDefinition = targetParentElementDefinition.getChildByName(theTargetFieldName);
-		return (IBaseBackboneElement) childDefinition.getChildByName(theTargetFieldName).newInstance();
+		return (IBaseBackboneElement)
+				childDefinition.getChildByName(theTargetFieldName).newInstance();
 	}
 
 	private static void clear(List<IBase> values) {

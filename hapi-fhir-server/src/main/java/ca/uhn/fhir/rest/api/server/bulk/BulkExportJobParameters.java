@@ -110,8 +110,10 @@ public class BulkExportJobParameters implements IModelJson {
 	 */
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
+
 	@JsonProperty("binarySecurityContextIdentifierSystem")
 	private String myBinarySecurityContextIdentifierSystem;
+
 	@JsonProperty("binarySecurityContextIdentifierValue")
 	private String myBinarySecurityContextIdentifierValue;
 

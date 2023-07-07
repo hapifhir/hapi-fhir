@@ -85,7 +85,8 @@ public class BinarySecurityContextInterceptor {
 	 * Interceptor hook method. Do not call this method directly.
 	 */
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
-	public void preShowResources(IBaseResource theOldValue, IBaseResource theNewValue, RequestDetails theRequestDetails) {
+	public void preShowResources(
+			IBaseResource theOldValue, IBaseResource theNewValue, RequestDetails theRequestDetails) {
 		if (theOldValue instanceof IBaseBinary) {
 			applyAccessControl((IBaseBinary) theOldValue, theRequestDetails);
 		}
@@ -101,8 +102,10 @@ public class BinarySecurityContextInterceptor {
 	 */
 	protected void applyAccessControl(IBaseBinary theBinary, RequestDetails theRequestDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
-		String securityContextSystem = terser.getSinglePrimitiveValueOrNull(theBinary, "securityContext.identifier.system");
-		String securityContextValue = terser.getSinglePrimitiveValueOrNull(theBinary, "securityContext.identifier.value");
+		String securityContextSystem =
+				terser.getSinglePrimitiveValueOrNull(theBinary, "securityContext.identifier.system");
+		String securityContextValue =
+				terser.getSinglePrimitiveValueOrNull(theBinary, "securityContext.identifier.value");
 
 		if (isNotBlank(securityContextSystem) || isNotBlank(securityContextValue)) {
 			applyAccessControl(theBinary, securityContextSystem, securityContextValue, theRequestDetails);
@@ -118,7 +121,11 @@ public class BinarySecurityContextInterceptor {
 	 * @param theSecurityContextValue  The identifier value
 	 * @param theRequestDetails        The request details
 	 */
-	protected void applyAccessControl(IBaseBinary theBinary, String theSecurityContextSystem, String theSecurityContextValue, RequestDetails theRequestDetails) {
+	protected void applyAccessControl(
+			IBaseBinary theBinary,
+			String theSecurityContextSystem,
+			String theSecurityContextValue,
+			RequestDetails theRequestDetails) {
 		if (theRequestDetails instanceof SystemRequestDetails) {
 			return;
 		}
@@ -147,8 +154,8 @@ public class BinarySecurityContextInterceptor {
 	 * @param theRequestDetails        The request details associated with this request
 	 * @return Returns <code>true</code> if the request should be permitted, and <code>false</code> otherwise
 	 */
-	protected boolean securityContextIdentifierAllowed(String theSecurityContextSystem, String theSecurityContextValue, RequestDetails theRequestDetails) {
+	protected boolean securityContextIdentifierAllowed(
+			String theSecurityContextSystem, String theSecurityContextValue, RequestDetails theRequestDetails) {
 		return false;
 	}
-
 }
