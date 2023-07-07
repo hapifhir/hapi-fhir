@@ -19,7 +19,6 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-
 public interface IBaseReference extends ICompositeType {
 
 	IBaseResource getResource();
@@ -37,5 +36,4 @@ public interface IBaseReference extends ICompositeType {
 	default boolean hasIdentifier() {
 		return false;
 	}
-	
 }

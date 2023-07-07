@@ -26,10 +26,13 @@ public class BulkImportJobJson implements IModelJson {
 
 	@JsonProperty("processingMode")
 	private JobFileRowProcessingModeEnum myProcessingMode;
+
 	@JsonProperty("jobDescription")
 	private String myJobDescription;
+
 	@JsonProperty("fileCount")
 	private int myFileCount;
+
 	@JsonProperty("batchSize")
 	private int myBatchSize;
 

@@ -37,7 +37,7 @@ public class HapiFhirDal implements FhirDal {
 	protected final RequestDetails myRequestDetails;
 
 	public HapiFhirDal(DaoRegistry theDaoRegistry) {
-		this(theDaoRegistry,null);
+		this(theDaoRegistry, null);
 	}
 
 	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
@@ -63,23 +63,20 @@ public class HapiFhirDal implements FhirDal {
 	@Override
 	public void delete(IIdType theId) {
 		this.myDaoRegistry.getResourceDao(theId.getResourceType()).delete(theId, myRequestDetails);
-
 	}
 
 	// TODO: the search interfaces need some work
 	@Override
 	public Iterable<IBaseResource> search(String theResourceType) {
-		var b = this.myDaoRegistry.getResourceDao(theResourceType)
-			.search(new SearchParameterMap(), myRequestDetails);
+		var b = this.myDaoRegistry.getResourceDao(theResourceType).search(new SearchParameterMap(), myRequestDetails);
 		return new BundleIterable(myRequestDetails, b);
 	}
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-		var b = this.myDaoRegistry.getResourceDao(theResourceType)
-			.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
+		var b = this.myDaoRegistry
+				.getResourceDao(theResourceType)
+				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
 		return new BundleIterable(myRequestDetails, b);
 	}
-
-
 }

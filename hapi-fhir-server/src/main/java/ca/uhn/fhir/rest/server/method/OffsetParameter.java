@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.Collection;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Offset;
@@ -34,13 +29,19 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 public class OffsetParameter implements IParameter {
 
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 		String[] sinceParams = theRequest.getParameters().get(Constants.PARAM_OFFSET);
 		if (sinceParams != null) {
 			if (sinceParams.length > 0) {
@@ -49,7 +50,8 @@ public class OffsetParameter implements IParameter {
 						IntegerDt since = new IntegerDt(sinceParams[0]);
 						return ParameterUtil.fromInteger(myType, since);
 					} catch (DataFormatException e) {
-						throw new InvalidRequestException(Msg.code(461) + "Invalid " + Constants.PARAM_OFFSET + " value: " + sinceParams[0]);
+						throw new InvalidRequestException(
+								Msg.code(461) + "Invalid " + Constants.PARAM_OFFSET + " value: " + sinceParams[0]);
 					}
 				}
 			}
@@ -58,14 +60,22 @@ public class OffsetParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(462) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(462) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+					+ Offset.class.getName() + " but can not be of collection type");
 		}
 		if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
-			throw new ConfigurationException(Msg.code(463) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(463) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+					+ Offset.class.getName() + " but type '" + theParameterType
+					+ "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}
-
 }

@@ -33,7 +33,6 @@ import java.util.List;
 
 public interface IFulltextSearchSvc {
 
-
 	/**
 	 * Search the Lucene/Elastic index for pids using params supported in theParams,
 	 * consuming entries from theParams when used to query.
@@ -44,7 +43,6 @@ public interface IFulltextSearchSvc {
 	 */
 	<T extends IResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
 
-
 	/**
 	 * Query the index for a plain list (non-scrollable) iterator of results.
 	 *
@@ -53,7 +51,8 @@ public interface IFulltextSearchSvc {
 	 * @param theMaxResultsToFetch maximum results to fetch
 	 * @return Iterator of result PIDs
 	 */
-	ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch);
+	ISearchQueryExecutor searchNotScrolled(
+			String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch);
 
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
@@ -62,11 +61,13 @@ public interface IFulltextSearchSvc {
 	 */
 	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
-	<T extends IResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
+	<T extends IResourcePersistentId> List<T> everything(
+			String theResourceName, SearchParameterMap theParams, T theReferencingPid);
 
 	boolean isDisabled();
 
-	ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+	ExtendedHSearchIndexData extractLuceneIndexData(
+			IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
 	boolean supportsSomeOf(SearchParameterMap myParams);
 
@@ -78,7 +79,7 @@ public interface IFulltextSearchSvc {
 	 *
 	 * @param theEntity the fully populated ResourceTable entity
 	 */
-	 void reindex(ResourceTable theEntity);
+	void reindex(ResourceTable theEntity);
 
 	List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
 

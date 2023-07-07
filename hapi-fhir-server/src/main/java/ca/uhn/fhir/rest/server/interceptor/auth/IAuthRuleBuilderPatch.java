@@ -35,5 +35,4 @@ public interface IAuthRuleBuilderPatch {
 	 * permit write operations.
 	 */
 	IAuthRuleFinished allRequests();
-
 }

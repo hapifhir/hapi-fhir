@@ -53,12 +53,29 @@ public class SubscriptionTestDataHelper {
 
 		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
 		subscription.setCriteria(TEST_TOPIC);
-		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(TEST_FILTER1));
-		subscription.getCriteriaElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(TEST_FILTER2));
-		subscription.getChannel().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL, new UnsignedIntType(86400));
-		subscription.getChannel().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL, new UnsignedIntType(60));
-		subscription.getChannel().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT, new PositiveIntType(20));
-		subscription.getChannel().getPayloadElement().addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT, new CodeType("full-resource"));
+		subscription
+				.getCriteriaElement()
+				.addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(TEST_FILTER1));
+		subscription
+				.getCriteriaElement()
+				.addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_FILTER_URL, new StringType(TEST_FILTER2));
+		subscription
+				.getChannel()
+				.addExtension(
+						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_HEARTBEAT_PERIOD_URL,
+						new UnsignedIntType(86400));
+		subscription
+				.getChannel()
+				.addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_TIMEOUT_URL, new UnsignedIntType(60));
+		subscription
+				.getChannel()
+				.addExtension(SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_MAX_COUNT, new PositiveIntType(20));
+		subscription
+				.getChannel()
+				.getPayloadElement()
+				.addExtension(
+						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT,
+						new CodeType("full-resource"));
 
 		return subscription;
 	}

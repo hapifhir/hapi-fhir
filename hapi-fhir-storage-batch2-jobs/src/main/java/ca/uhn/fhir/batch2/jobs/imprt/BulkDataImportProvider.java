@@ -49,8 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -58,6 +56,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider.validatePreferAsyncHeader;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -75,12 +75,16 @@ public class BulkDataImportProvider {
 
 	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportProvider.class);
+
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
 	@Autowired
 	private FhirContext myFhirCtx;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
 	private volatile List<String> myResourceTypeOrder;
 
 	/**
@@ -102,7 +106,6 @@ public class BulkDataImportProvider {
 		myRequestPartitionHelperService = theRequestPartitionHelperSvc;
 	}
 
-
 	/**
 	 * $import operation (Import by Manifest)
 	 * <p>
@@ -119,35 +122,42 @@ public class BulkDataImportProvider {
 	 */
 	@Operation(name = JpaConstants.OPERATION_IMPORT, idempotent = false, manualResponse = true)
 	public void importByManifest(
-		ServletRequestDetails theRequestDetails,
-		@ResourceParam IBaseParameters theRequest,
-		HttpServletResponse theResponse) throws IOException {
+			ServletRequestDetails theRequestDetails,
+			@ResourceParam IBaseParameters theRequest,
+			HttpServletResponse theResponse)
+			throws IOException {
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_IMPORT);
 
 		BulkImportJobParameters jobParameters = new BulkImportJobParameters();
 
-		String inputFormat = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, theRequest, PARAM_INPUT_FORMAT).orElse("");
+		String inputFormat = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, theRequest, PARAM_INPUT_FORMAT)
+				.orElse("");
 		if (!Constants.CT_FHIR_NDJSON.equals(inputFormat)) {
-			throw new InvalidRequestException(Msg.code(2048) + "Input format must be \"" + Constants.CT_FHIR_NDJSON + "\"");
+			throw new InvalidRequestException(
+					Msg.code(2048) + "Input format must be \"" + Constants.CT_FHIR_NDJSON + "\"");
 		}
 
-		Optional<IBase> storageDetailOpt = ParametersUtil.getNamedParameter(myFhirCtx, theRequest, PARAM_STORAGE_DETAIL);
+		Optional<IBase> storageDetailOpt =
+				ParametersUtil.getNamedParameter(myFhirCtx, theRequest, PARAM_STORAGE_DETAIL);
 		if (storageDetailOpt.isPresent()) {
 			IBase storageDetail = storageDetailOpt.get();
 
-			String httpBasicCredential = ParametersUtil.getParameterPartValueAsString(myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC);
+			String httpBasicCredential = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC);
 			if (isNotBlank(httpBasicCredential)) {
 				jobParameters.setHttpBasicCredentials(httpBasicCredential);
 			}
 
-			String maximumBatchResourceCount = ParametersUtil.getParameterPartValueAsString(myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT);
+			String maximumBatchResourceCount = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, storageDetail, PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT);
 			if (isNotBlank(maximumBatchResourceCount)) {
 				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
 			}
 		}
 
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		RequestPartitionId partitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
 		if (partitionId != null && !partitionId.isAllPartitions()) {
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			jobParameters.setPartitionId(partitionId);
@@ -157,9 +167,12 @@ public class BulkDataImportProvider {
 		// likely to result in conflict (e.g. Patients before Observations
 		// since Observations can reference Patients but not vice versa)
 		List<Pair<String, String>> typeAndUrls = new ArrayList<>();
-		for (IBase input : ParametersUtil.getNamedParameters(myFhirCtx, theRequest, BulkDataImportProvider.PARAM_INPUT)) {
-			String type = ParametersUtil.getParameterPartValueAsString(myFhirCtx, input, BulkDataImportProvider.PARAM_INPUT_TYPE);
-			String url = ParametersUtil.getParameterPartValueAsString(myFhirCtx, input, BulkDataImportProvider.PARAM_INPUT_URL);
+		for (IBase input :
+				ParametersUtil.getNamedParameters(myFhirCtx, theRequest, BulkDataImportProvider.PARAM_INPUT)) {
+			String type = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, input, BulkDataImportProvider.PARAM_INPUT_TYPE);
+			String url = ParametersUtil.getParameterPartValueAsString(
+					myFhirCtx, input, BulkDataImportProvider.PARAM_INPUT_URL);
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(type, "Missing type for input");
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(url, "Missing url for input");
 			Pair<String, String> typeAndUrl = Pair.of(type, url);
@@ -184,21 +197,19 @@ public class BulkDataImportProvider {
 
 		IBaseOperationOutcome response = OperationOutcomeUtil.newInstance(myFhirCtx);
 		OperationOutcomeUtil.addIssue(
-			myFhirCtx,
-			response,
-			"information",
-			"Bulk import job has been submitted with ID: " + jobId,
-			null,
-			"informational"
-		);
+				myFhirCtx,
+				response,
+				"information",
+				"Bulk import job has been submitted with ID: " + jobId,
+				null,
+				"informational");
 		OperationOutcomeUtil.addIssue(
-			myFhirCtx,
-			response,
-			"information",
-			"Use the following URL to poll for job status: " + createPollLocationLink(theRequestDetails, jobId),
-			null,
-			"informational"
-		);
+				myFhirCtx,
+				response,
+				"information",
+				"Use the following URL to poll for job status: " + createPollLocationLink(theRequestDetails, jobId),
+				null,
+				"informational");
 
 		theResponse.setStatus(202);
 		theResponse.setContentType(Constants.CT_FHIR_JSON + Constants.CHARSET_UTF8_CTSUFFIX);
@@ -212,28 +223,30 @@ public class BulkDataImportProvider {
 	 */
 	@Operation(name = JpaConstants.OPERATION_IMPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 	public void importPollStatus(
-		@OperationParam(name = JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
-		ServletRequestDetails theRequestDetails
-	) throws IOException {
+			@OperationParam(name = JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theJobId,
+			ServletRequestDetails theRequestDetails)
+			throws IOException {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 		JobInstance instance = myJobCoordinator.getInstance(theJobId.getValueAsString());
 		BulkImportJobParameters parameters = instance.getParameters(BulkImportJobParameters.class);
 		if (parameters != null && parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
-			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+			RequestPartitionId partitionId =
+					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!partitionId.equals(parameters.getPartitionId())) {
-				throw new InvalidRequestException(Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
+				throw new InvalidRequestException(
+						Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
 		IBaseOperationOutcome oo;
 		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
-					" and is in " + instance.getStatus() +
-					" state.";
+				String msg = "Job was created at " + renderTime(instance.getCreateTime()) + " and is in "
+						+ instance.getStatus() + " state.";
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				streamOperationOutcomeResponse(response, msg, "information");
@@ -242,12 +255,12 @@ public class BulkDataImportProvider {
 			case ERRORED:
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
-					", started at " + renderTime(instance.getStartTime()) +
-					" and is in " + instance.getStatus() +
-					" state. Current completion: " +
-					new DecimalFormat("0.0").format(100.0 * instance.getProgress()) +
-					"% and ETA is " + instance.getEstimatedTimeRemaining();
+				String msg = "Job was created at " + renderTime(instance.getCreateTime()) + ", started at "
+						+ renderTime(instance.getStartTime()) + " and is in "
+						+ instance.getStatus() + " state. Current completion: "
+						+ new DecimalFormat("0.0").format(100.0 * instance.getProgress())
+						+ "% and ETA is "
+						+ instance.getEstimatedTimeRemaining();
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				streamOperationOutcomeResponse(response, msg, "information");
@@ -261,8 +274,8 @@ public class BulkDataImportProvider {
 			}
 			case FAILED: {
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
-				String msg = "Job is in " + instance.getStatus() + " state with " +
-					instance.getErrorCount() + " error count. Last error: " + instance.getErrorMessage();
+				String msg = "Job is in " + instance.getStatus() + " state with " + instance.getErrorCount()
+						+ " error count. Last error: " + instance.getErrorMessage();
 				streamOperationOutcomeResponse(response, msg, "error");
 				break;
 			}
@@ -275,7 +288,8 @@ public class BulkDataImportProvider {
 		}
 	}
 
-	private void streamOperationOutcomeResponse(HttpServletResponse response, String theMessage, String theSeverity) throws IOException {
+	private void streamOperationOutcomeResponse(HttpServletResponse response, String theMessage, String theSeverity)
+			throws IOException {
 		response.setContentType(Constants.CT_FHIR_JSON);
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirCtx);
 		OperationOutcomeUtil.addIssue(myFhirCtx, oo, theSeverity, theMessage, null, null);
@@ -298,7 +312,8 @@ public class BulkDataImportProvider {
 	@Nonnull
 	private String createPollLocationLink(ServletRequestDetails theRequestDetails, String theJobId) {
 		String serverBase = StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
-		return serverBase + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" + JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + theJobId;
+		return serverBase + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?"
+				+ JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + theJobId;
 	}
 
 	private synchronized List<String> getResourceTypeOrder() {
@@ -316,6 +331,4 @@ public class BulkDataImportProvider {
 		}
 		return new InstantType(theTime).getValueAsString();
 	}
-
-
 }

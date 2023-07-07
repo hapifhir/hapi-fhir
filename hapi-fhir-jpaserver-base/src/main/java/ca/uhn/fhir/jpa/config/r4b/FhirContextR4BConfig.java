@@ -36,5 +36,4 @@ public class FhirContextR4BConfig {
 
 		return retVal;
 	}
-
 }

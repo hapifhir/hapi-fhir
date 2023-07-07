@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -49,7 +49,8 @@ import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 
 	static {
 		HashSet<String> set = new HashSet<String>();
@@ -73,7 +74,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	private List<Class<? extends IBaseResource>> myPreferTypesList;
 
 	@SuppressWarnings("unchecked")
-	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public BaseResourceReturningMethodBinding(
+			Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
@@ -83,13 +85,18 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(Msg.code(1458) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(1458) + "Method "
+							+ theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName()
+							+ " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
-			if (Modifier.isAbstract(methodReturnType.getModifiers()) == false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
+			if (Modifier.isAbstract(methodReturnType.getModifiers()) == false
+					&& theContext
+							.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType)
+							.isBundle()) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
@@ -97,12 +104,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
-			throw new ConfigurationException(Msg.code(1459) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(1459) + "Invalid return type '"
+					+ methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
+					+ theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
 			if (IBaseResource.class.isAssignableFrom(theReturnResourceType)) {
-				if (Modifier.isAbstract(theReturnResourceType.getModifiers()) || Modifier.isInterface(theReturnResourceType.getModifiers())) {
+				if (Modifier.isAbstract(theReturnResourceType.getModifiers())
+						|| Modifier.isInterface(theReturnResourceType.getModifiers())) {
 					// If we're returning an abstract type, that's ok
 				} else {
 					myResourceType = (Class<? extends IResource>) theReturnResourceType;
@@ -131,63 +141,76 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public abstract ReturnTypeEnum getReturnType();
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException {
-		
+	public Object invokeClient(
+			String theResponseMimeType,
+			InputStream theResponseInputStream,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders)
+			throws IOException {
+
 		if (Constants.STATUS_HTTP_204_NO_CONTENT == theResponseStatusCode) {
 			return toReturnType(null);
 		}
-		
-		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseInputStream, theResponseStatusCode, myPreferTypesList);
+
+		IParser parser = createAppropriateParserForParsingResponse(
+				theResponseMimeType, theResponseInputStream, theResponseStatusCode, myPreferTypesList);
 
 		switch (getReturnType()) {
-		case BUNDLE: {
+			case BUNDLE: {
+				IBaseBundle bundle;
+				List<? extends IBaseResource> listOfResources;
+				Class<? extends IBaseResource> type =
+						getContext().getResourceDefinition("Bundle").getImplementingClass();
+				bundle = (IBaseBundle) parser.parseResource(type, theResponseInputStream);
+				listOfResources = BundleUtil.toListOfResources(getContext(), bundle);
 
-			IBaseBundle bundle;
-			List<? extends IBaseResource> listOfResources;
-			Class<? extends IBaseResource> type = getContext().getResourceDefinition("Bundle").getImplementingClass();
-			bundle = (IBaseBundle) parser.parseResource(type, theResponseInputStream);
-			listOfResources = BundleUtil.toListOfResources(getContext(), bundle);
-
-			switch (getMethodReturnType()) {
-			case BUNDLE_RESOURCE:
-				return bundle;
-			case LIST_OF_RESOURCES:
-				if (myResourceListCollectionType != null) {
-					for (Iterator<? extends IBaseResource> iter = listOfResources.iterator(); iter.hasNext();) {
-						IBaseResource next = iter.next();
-						if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
-							ourLog.debug("Not returning resource of type {} because it is not a subclass or instance of {}", next.getClass(), myResourceListCollectionType);
-							iter.remove();
+				switch (getMethodReturnType()) {
+					case BUNDLE_RESOURCE:
+						return bundle;
+					case LIST_OF_RESOURCES:
+						if (myResourceListCollectionType != null) {
+							for (Iterator<? extends IBaseResource> iter = listOfResources.iterator();
+									iter.hasNext(); ) {
+								IBaseResource next = iter.next();
+								if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
+									ourLog.debug(
+											"Not returning resource of type {} because it is not a subclass or instance of {}",
+											next.getClass(),
+											myResourceListCollectionType);
+									iter.remove();
+								}
+							}
 						}
-					}
+						return listOfResources;
+					case RESOURCE:
+						List<IBaseResource> list = BundleUtil.toListOfResources(getContext(), bundle);
+						if (list.size() == 0) {
+							return null;
+						} else if (list.size() == 1) {
+							return list.get(0);
+						} else {
+							throw new InvalidResponseException(
+									Msg.code(1460)
+											+ "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.",
+									theResponseStatusCode);
+						}
+					default:
+						break;
 				}
-				return listOfResources;
-			case RESOURCE:
-				List<IBaseResource> list = BundleUtil.toListOfResources(getContext(), bundle);
-				if (list.size() == 0) {
-					return null;
-				} else if (list.size() == 1) {
-					return list.get(0);
-				} else {
-					throw new InvalidResponseException(Msg.code(1460) + "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.", theResponseStatusCode);
-				}
-			default:
 				break;
 			}
-			break;
-		}
-		case RESOURCE: {
-			IBaseResource resource;
-			if (myResourceType != null) {
-				resource = parser.parseResource(myResourceType, theResponseInputStream);
-			} else {
-				resource = parser.parseResource(theResponseInputStream);
+			case RESOURCE: {
+				IBaseResource resource;
+				if (myResourceType != null) {
+					resource = parser.parseResource(myResourceType, theResponseInputStream);
+				} else {
+					resource = parser.parseResource(theResponseInputStream);
+				}
+
+				MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
+
+				return toReturnType(resource);
 			}
-
-			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
-
-			return toReturnType(resource);
-		}
 		}
 
 		throw new IllegalStateException(Msg.code(1461) + "Should not get here!");
@@ -195,25 +218,25 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	private Object toReturnType(IBaseResource resource) {
 		Object retVal = null;
-		
+
 		switch (getMethodReturnType()) {
-		case LIST_OF_RESOURCES:
-			retVal = Collections.emptyList();
-			if (resource != null) {
-				retVal = Collections.singletonList(resource);
-			}
-			break;
-		case RESOURCE:
-			retVal = resource;
-			break;
-		case BUNDLE_RESOURCE:
-			retVal = resource;
-			break;
-		case METHOD_OUTCOME:
-			MethodOutcome outcome = new MethodOutcome();
-			outcome.setOperationOutcome((IBaseOperationOutcome) resource);
-			retVal = outcome;
-			break;
+			case LIST_OF_RESOURCES:
+				retVal = Collections.emptyList();
+				if (resource != null) {
+					retVal = Collections.singletonList(resource);
+				}
+				break;
+			case RESOURCE:
+				retVal = resource;
+				break;
+			case BUNDLE_RESOURCE:
+				retVal = resource;
+				break;
+			case METHOD_OUTCOME:
+				MethodOutcome outcome = new MethodOutcome();
+				outcome.setOperationOutcome((IBaseOperationOutcome) resource);
+				retVal = outcome;
+				break;
 		}
 		return retVal;
 	}
@@ -224,7 +247,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		if (myResourceType != null && !BaseMethodBinding.isResourceInterface(myResourceType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 			preferTypes.add(myResourceType);
-		} else if (myResourceListCollectionType != null && IBaseResource.class.isAssignableFrom(myResourceListCollectionType) && !BaseMethodBinding.isResourceInterface(myResourceListCollectionType)) {
+		} else if (myResourceListCollectionType != null
+				&& IBaseResource.class.isAssignableFrom(myResourceListCollectionType)
+				&& !BaseMethodBinding.isResourceInterface(myResourceListCollectionType)) {
 			preferTypes = new ArrayList<Class<? extends IBaseResource>>(1);
 			preferTypes.add((Class<? extends IBaseResource>) myResourceListCollectionType);
 		}
@@ -260,12 +285,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		public IBaseResource getResource() {
 			return myResource;
 		}
-
 	}
 
 	public enum ReturnTypeEnum {
 		BUNDLE,
 		RESOURCE
 	}
-
 }

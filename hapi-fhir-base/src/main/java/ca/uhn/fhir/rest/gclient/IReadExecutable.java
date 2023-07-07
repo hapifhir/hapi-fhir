@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IReadExecutable<T extends IBaseResource> extends IClientExecutable<IReadExecutable<T>, T>{
+public interface IReadExecutable<T extends IBaseResource> extends IClientExecutable<IReadExecutable<T>, T> {
 
 	/**
 	 * Send an "If-None-Match" header containing <code>theVersion</code>, which requests
@@ -32,5 +32,4 @@ public interface IReadExecutable<T extends IBaseResource> extends IClientExecuta
 	 * @param theVersion The version ID (e.g. "123")
 	 */
 	IReadIfNoneMatch<T> ifVersionMatches(String theVersion);
-
 }

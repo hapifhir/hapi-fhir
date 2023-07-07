@@ -30,7 +30,12 @@ public class ResponsePage {
 	 */
 	public final int numToReturn;
 
-	public ResponsePage(String theSearchId, List<IBaseResource> theResourceList, int thePageSize, int theNumToReturn, Integer theNumTotalResults) {
+	public ResponsePage(
+			String theSearchId,
+			List<IBaseResource> theResourceList,
+			int thePageSize,
+			int theNumToReturn,
+			Integer theNumTotalResults) {
 		searchId = theSearchId;
 		resourceList = theResourceList;
 		pageSize = thePageSize;

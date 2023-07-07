@@ -26,44 +26,64 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
-import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-//@formatter:off
-@Table(name = "TRM_CODESYSTEM", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CS_CODESYSTEM", columnNames = {"CODE_SYSTEM_URI"})
-}, indexes = {
-	@Index(name = "FK_TRMCODESYSTEM_RES", columnList = "RES_ID"),
-	@Index(name = "FK_TRMCODESYSTEM_CURVER", columnList = "CURRENT_VERSION_PID")
-})
+// @formatter:off
+@Table(
+		name = "TRM_CODESYSTEM",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CS_CODESYSTEM",
+					columnNames = {"CODE_SYSTEM_URI"})
+		},
+		indexes = {
+			@Index(name = "FK_TRMCODESYSTEM_RES", columnList = "RES_ID"),
+			@Index(name = "FK_TRMCODESYSTEM_CURVER", columnList = "CURRENT_VERSION_PID")
+		})
 @Entity()
-//@formatter:on
+// @formatter:on
 public class TermCodeSystem implements Serializable {
 	public static final int MAX_URL_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 	private static final int MAX_NAME_LENGTH = 200;
+
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CURRENT_VERSION_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
+	@JoinColumn(
+			name = "CURRENT_VERSION_PID",
+			referencedColumnName = "PID",
+			nullable = true,
+			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_CURVER"))
 	private TermCodeSystemVersion myCurrentVersion;
+
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
 	private Long myCurrentVersionPid;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEM_PID")
 	@Column(name = "PID")
 	private Long myPid;
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = true, foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
+	@JoinColumn(
+			name = "RES_ID",
+			referencedColumnName = "RES_ID",
+			nullable = false,
+			updatable = true,
+			foreignKey = @ForeignKey(name = "FK_TRMCODESYSTEM_RES"))
 	private ResourceTable myResource;
+
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
+
 	@Column(name = "CS_NAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
@@ -104,8 +124,10 @@ public class TermCodeSystem implements Serializable {
 
 	public TermCodeSystem setCodeSystemUri(@Nonnull String theCodeSystemUri) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCodeSystemUri, "theCodeSystemUri must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCodeSystemUri, MAX_URL_LENGTH,
-			"URI exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theCodeSystemUri));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCodeSystemUri,
+				MAX_URL_LENGTH,
+				"URI exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theCodeSystemUri));
 		myCodeSystemUri = theCodeSystemUri;
 		return this;
 	}
@@ -149,7 +171,6 @@ public class TermCodeSystem implements Serializable {
 		b.append("currentVersionPid", myCurrentVersionPid);
 		b.append("resourcePid", myResourcePid);
 		b.append("name", myName);
-		return b
-			.toString();
+		return b.toString();
 	}
 }

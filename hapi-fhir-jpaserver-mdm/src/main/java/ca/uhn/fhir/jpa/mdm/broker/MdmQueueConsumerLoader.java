@@ -41,7 +41,8 @@ public class MdmQueueConsumerLoader {
 
 	protected IChannelReceiver myMdmChannel;
 
-	public MdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+	public MdmQueueConsumerLoader(
+			IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
 		myChannelFactory = theChannelFactory;
 		myMdmSettings = theMdmSettings;
 		myMdmMessageHandler = theMdmMessageHandler;
@@ -49,19 +50,22 @@ public class MdmQueueConsumerLoader {
 		startListeningToMdmChannel();
 	}
 
-
 	private void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
-			
+
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
 
-			myMdmChannel = myChannelFactory.getOrCreateReceiver(IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
+			myMdmChannel = myChannelFactory.getOrCreateReceiver(
+					IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
 			if (myMdmChannel == null) {
 				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
 			} else {
 				myMdmChannel.subscribe(myMdmMessageHandler);
-				ourLog.info("MDM Matching Consumer subscribed to Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
+				ourLog.info(
+						"MDM Matching Consumer subscribed to Matching Channel {} with name {}",
+						myMdmChannel.getClass().getName(),
+						myMdmChannel.getName());
 			}
 		}
 	}
@@ -72,7 +76,10 @@ public class MdmQueueConsumerLoader {
 		if (myMdmChannel != null) {
 			// JMS channel needs to be destroyed to avoid dangling receivers
 			myMdmChannel.destroy();
-			ourLog.info("MDM Matching Consumer unsubscribed from Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
+			ourLog.info(
+					"MDM Matching Consumer unsubscribed from Matching Channel {} with name {}",
+					myMdmChannel.getClass().getName(),
+					myMdmChannel.getName());
 		}
 	}
 
