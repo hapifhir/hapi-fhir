@@ -28,7 +28,10 @@ import ca.uhn.fhir.util.StopWatch;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -53,6 +56,24 @@ public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
 		this.myRequestType = theRequestType;
 		this.myEntity = theEntity;
 	}
+
+	@Override
+	public void setHeaders(Map<String, List<String>> headers) {
+		myHeaders.clear();
+		myHeaders.putAll(headers);
+		MultivaluedMap<String, Object> headersMap = new MultivaluedHashMap<>();
+		headers.forEach((k,v) -> headersMap.put(k, new ArrayList<>(v)));
+		getRequest().headers(headersMap);
+	}
+
+
+	@Override
+	public void setHeader(String theName, String theValue) {
+		myHeaders.put(theName, new LinkedList<>());
+		myHeaders.get(theName).add(theValue);
+		getRequest().header(theName, theValue);
+	}
+
 
 	@Override
 	public void addHeader(String theName, String theValue) {

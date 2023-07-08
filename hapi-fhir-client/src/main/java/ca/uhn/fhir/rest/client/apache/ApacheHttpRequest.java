@@ -32,6 +32,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class
@@ -56,6 +58,24 @@ public class ApacheHttpRequest extends BaseHttpRequest implements IHttpRequest {
 	public ApacheHttpRequest(HttpClient theClient, HttpRequestBase theApacheRequest) {
 		this.myClient = theClient;
 		this.myRequest = theApacheRequest;
+	}
+
+	@Override
+	public void setHeaders(Map<String, List<String>> headers) {
+		myRequest.setHeaders(headers.entrySet().stream()
+			.flatMap(
+				e -> e.getValue().stream()
+					.map(v -> new BasicHeader(e.getKey(), v))
+			)
+			.collect(Collectors.toList())
+			.toArray(Header[]::new)
+		);
+	}
+
+
+	@Override
+	public void setHeader(String theName, String theValue) {
+		myRequest.setHeader(new BasicHeader(theName, theValue));
 	}
 
 	@Override

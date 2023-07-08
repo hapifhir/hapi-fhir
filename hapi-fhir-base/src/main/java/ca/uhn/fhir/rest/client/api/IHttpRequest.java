@@ -29,6 +29,21 @@ import java.util.Map;
 public interface IHttpRequest {
 
 	/**
+	 * Set headers of the request
+	 *
+	 * @param headers  Map of headers
+	 */
+	void setHeaders(Map<String, List<String>> headers);
+
+	/**
+	 * Set header of the request
+	 *
+	 * @param theName  the header name
+	 * @param theValue the header value
+	 */
+	void setHeader(String theName, String theValue);
+
+	/**
 	 * Add a header to the request
 	 *
 	 * @param theName  the header name

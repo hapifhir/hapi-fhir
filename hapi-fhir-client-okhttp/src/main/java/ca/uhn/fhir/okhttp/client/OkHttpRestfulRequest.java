@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
 import okhttp3.Call;
 import okhttp3.Call.Factory;
+import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Adapter for building an OkHttp-specific request.
@@ -60,7 +62,22 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
         return myRequestBuilder;
     }
 
-    @Override
+	@Override
+	public void setHeaders(Map<String, List<String>> headers) {
+		myRequestBuilder.headers(Headers.of(
+			headers.entrySet()
+				.stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> String.join(",", e.getValue())))
+		));
+	}
+
+
+	@Override
+	public void setHeader(String theName, String theValue) {
+		myRequestBuilder.header(theName, theValue);
+	}
+
+	@Override
     public void addHeader(String theName, String theValue) {
         myRequestBuilder.addHeader(theName, theValue);
     }
