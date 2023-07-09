@@ -3,9 +3,7 @@
   "url": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
   "status": "active",
   "copyright": "Licensed under the terms of the Apache Software License 2.0.",
-  "author": [ {
-    "name": "HAPI FHIR"
-  } ],
+  "publisher": "HAPI FHIR",
   "caseSensitive": true,
   "content": "complete",
   "concept": [ {
