@@ -1,0 +1,58 @@
+package ca.uhn.hapi.fhir.cdshooks.api;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Marks a method as a CDS Hooks service.  A method annotated with `@CdsService(value="example-service")` is accessed
+ * at a path like `https://example.com/cds-services/example-service`
+ *
+ * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
+ */
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CdsService {
+	/**
+	 * The {id} portion of the URL to this service which is available at
+	 * {baseUrl}/cds-services/{id}
+	 */
+	String value();
+
+	/**
+	 * The hook this service should be invoked on
+	 */
+	String hook();
+
+	/**
+	 * The human-friendly name of this service.
+	 */
+
+	String title() default "";
+
+	/**
+	 * The description of this service.
+	 */
+	String description();
+
+	/**
+	 * An object containing key/value pairs of FHIR queries that this service is requesting that the CDS Client prefetch
+	 * and provide on each service call. The key is a string that describes the type of data being requested and the value
+	 * is a string representing the FHIR query.
+	 */
+
+	CdsServicePrefetch[] prefetch();
+
+	/**
+	 * @return true if Smile CDR CDS Hooks can populate missing prefetch elements using the Fhir Server specified in the
+	 * request before calling the method.  If false, then it is expected that the service will use the FHIR Server details and retrieve missing
+	 * prefetch elements itself.
+	 */
+	boolean allowAutoFhirClientPrefetch() default false;
+
+	/**
+	 * An arbitrary string which will be used to store stringify JSON
+	 */
+	String extension() default "";
+}
