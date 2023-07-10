@@ -11,7 +11,6 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksServiceCacheBuilder;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -36,19 +35,19 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 
 	private CdsServiceCache myServiceCache;
 
-	private final ICdsHooksServiceCacheBuilder myCdsHooksServiceCacheBuilder;
+	private final CdsHooksContextBooter myCdsHooksContextBooter;
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
 
-	public CdsServiceRegistryImpl(ICdsHooksServiceCacheBuilder theCdsHooksServiceCacheBuilder, CdsPrefetchSvc theCdsPrefetchSvc, ObjectMapper theObjectMapper) {
-		myCdsHooksServiceCacheBuilder = theCdsHooksServiceCacheBuilder;
+	public CdsServiceRegistryImpl(CdsHooksContextBooter theCdsHooksContextBooter, CdsPrefetchSvc theCdsPrefetchSvc, ObjectMapper theObjectMapper) {
+		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
 	}
 
 	@PostConstruct
 	public void init() {
-		myServiceCache = myCdsHooksServiceCacheBuilder.buildCdsServiceCache();
+		myServiceCache = myCdsHooksContextBooter.buildCdsServiceCache();
 	}
 
 	@Override
