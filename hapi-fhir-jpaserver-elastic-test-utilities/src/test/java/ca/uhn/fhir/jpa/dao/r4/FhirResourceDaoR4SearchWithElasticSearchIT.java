@@ -271,7 +271,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@Hook(Pointcut.JPA_PERFTRACE_INFO)
 		public void logPerformance(StorageProcessingMessage theMessage) {
-			// do nothing
 			messages.add(theMessage);
 		}
 

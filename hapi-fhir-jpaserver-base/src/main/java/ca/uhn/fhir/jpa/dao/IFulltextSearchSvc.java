@@ -41,7 +41,7 @@ public interface IFulltextSearchSvc {
 	 *
 	 * @param theResourceName   the resource name to restrict the query.
 	 * @param theParams         the full query - modified to return only params unused by the index.
-	 * @param theRequestDetails
+	 * @param theRequestDetails The request details
 	 * @return the pid list for the matchign resources.
 	 */
 	<T extends IResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails);
@@ -53,7 +53,7 @@ public interface IFulltextSearchSvc {
 	 * @param theResourceName      e.g. Patient
 	 * @param theParams            The search query
 	 * @param theMaxResultsToFetch maximum results to fetch
-	 * @param theRequestDetails
+	 * @param theRequestDetails The request details
 	 * @return Iterator of result PIDs
 	 */
 	ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch, RequestDetails theRequestDetails);
