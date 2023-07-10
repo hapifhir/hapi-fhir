@@ -165,31 +165,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		// perform an offset search instead of a scroll one, which doesn't allow for offset
 		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
-		List<Long> queryFetchResult = logQueryAndFetchHits(searchQueryOptionsStep, offset, count, theRequestDetails);
+		logQuery(searchQueryOptionsStep, theRequestDetails);
+		List<Long> longs = searchQueryOptionsStep.fetchHits(offset, count);
 
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
-		return SearchQueryExecutors.from(queryFetchResult);
+		return SearchQueryExecutors.from(longs);
 	}
-
-	/**
-	 * Any queries to elasticsearch/lucene should have their query bodies logged via the performance tracing interceptor.
-	 */
-	private List<Long> logQueryAndFetchHits(SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep, int offset, int count, RequestDetails theRequestDetails) {
-		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
-			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
-			storageProcessingMessage.setMessage(searchQueryOptionsStep.toQuery().queryString());
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(StorageProcessingMessage.class, storageProcessingMessage);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
-
-		}
-		return searchQueryOptionsStep.fetchHits(offset, count);
-	}
-
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
 		if (theMax != null) {
@@ -440,7 +423,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
+	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		int offset = 0;
 		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 
@@ -461,9 +444,29 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
 		}
 
+		logQuery(query, theRequestDetails);
 		List<ExtendedHSearchResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
 
 		return resourceProjectionsToResources(extendedLuceneResourceProjections);
+	}
+
+	/**
+	 * Fire the JPA_PERFTRACE_INFO hook if it is enabled
+	 * @param theQuery the query to log
+	 * @param theRequestDetails the request details
+	 */
+	@SuppressWarnings("rawtypes")
+	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
+			String queryString = theQuery.toQuery().queryString();
+			storageProcessingMessage.setMessage(queryString);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(StorageProcessingMessage.class, storageProcessingMessage);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+		}
 	}
 
 
