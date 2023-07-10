@@ -75,6 +75,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
@@ -109,6 +110,7 @@ public class FhirContext {
 	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
+	private final Set<String> myCustomResourceNames = new HashSet<>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile boolean myInitialized;
 	private volatile boolean myInitializing = false;
@@ -617,6 +619,20 @@ public class FhirContext {
 		return resourceNames;
 	}
 
+	/**
+	 * We maintain a separate Collection here because if we add the custom resource names in myResourceNames then cdr
+	 * will fail to start with this error when trying to process SearchParameters, as it will not recognize the resource type.
+	 *
+	 * @return Combination of getResourceTypes and myCustomResourceNames.
+	 */
+	public Set<String> getResourceTypesIncludingCustomResources() {
+		final Set<String> resourceTypesIncludingCustomResources = new HashSet<>(getResourceTypes());
+
+		resourceTypesIncludingCustomResources.addAll(myCustomResourceNames);
+
+		return resourceTypesIncludingCustomResources;
+	}
+
 	@Nonnull
 	private Set<String> buildResourceNames() {
 		Set<String> retVal = new HashSet<>();
@@ -633,6 +649,7 @@ public class FhirContext {
 				retVal.add(next.substring("resource.".length()).trim());
 			}
 		}
+		retVal.addAll(myCustomResourceNames);
 		return retVal;
 	}
 
@@ -1012,6 +1029,9 @@ public class FhirContext {
 		}
 		if (myCustomTypes != null) {
 			typesToScan.addAll(myCustomTypes);
+			myCustomResourceNames.addAll(myCustomTypes.stream()
+				.map(Class::getSimpleName)
+				.collect(Collectors.toUnmodifiableSet()));
 			myCustomTypes = null;
 		}
 
