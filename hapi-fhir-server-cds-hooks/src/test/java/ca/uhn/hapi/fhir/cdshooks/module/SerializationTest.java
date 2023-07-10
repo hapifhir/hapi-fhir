@@ -53,9 +53,9 @@ public class SerializationTest {
 	private final FhirContext ourFhirContext = FhirContext.forR4();
 	private final ObjectMapper ourObjectMapper = new CdsHooksObjectMapperFactory(ourFhirContext).newMapper();
 	public String myResponseJson;
-	@Value("classpath:ca/cdr/endpoint/cdshooks/module/CdsServiceRequestJson.json")
+	@Value("classpath:CdsServiceRequestJson.json")
 	Resource myRequestJsonResource;
-	@Value("classpath:ca/cdr/endpoint/cdshooks/module/CdsServiceResponseJson.json")
+	@Value("classpath:CdsServiceResponseJson.json")
 	Resource myResponseJsonResource;
 	private String myRequestJson;
 
