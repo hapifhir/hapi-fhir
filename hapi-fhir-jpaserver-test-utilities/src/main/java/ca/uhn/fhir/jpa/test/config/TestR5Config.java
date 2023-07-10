@@ -219,16 +219,6 @@ public class TestR5Config {
 		return new MemoryBinaryStorageSvcImpl();
 	}
 
-	@Bean
-	public IResourceModifiedConsumer resourceModifiedConsumer(IHapiTransactionService theHapiTransactionService,
-																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
-																				 StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
-	}
-
 	public static int getMaxThreads() {
 		return ourMaxThreads;
 	}

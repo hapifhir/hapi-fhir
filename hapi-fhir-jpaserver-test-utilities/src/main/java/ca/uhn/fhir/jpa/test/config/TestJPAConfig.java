@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -50,7 +51,7 @@ import javax.persistence.EntityManagerFactory;
 
 @Configuration
 @Import({
-	TestSubscriptionMatcherInterceptorConfig.class,
+	SubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
 	SubscriptionChannelConfig.class,
 	SearchParamSubmitterConfig.class,

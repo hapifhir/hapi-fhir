@@ -52,16 +52,6 @@ import org.springframework.context.annotation.Lazy;
 public class SubscriptionSubmitterConfig {
 
 	@Bean
-	public ResourceModifiedSubmitterSvc resourceModifiedSvc(IHapiTransactionService theHapiTransactionService,
-																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
-																			  StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
-	}
-
-	@Bean
 	public SubscriptionValidatingInterceptor subscriptionValidatingInterceptor() {
 		return new SubscriptionValidatingInterceptor();
 	}
@@ -80,6 +70,16 @@ public class SubscriptionSubmitterConfig {
 	@Lazy
 	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
 		return new SubscriptionTriggeringSvcImpl();
+	}
+
+	@Bean
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(IHapiTransactionService theHapiTransactionService,
+																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
+																			  StorageSettings theStorageSettings){
+
+		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
+
 	}
 
 	@Bean

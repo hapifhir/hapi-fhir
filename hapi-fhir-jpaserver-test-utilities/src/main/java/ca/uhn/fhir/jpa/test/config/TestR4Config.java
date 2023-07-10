@@ -262,16 +262,6 @@ public class TestR4Config {
 		return new MemoryBinaryStorageSvcImpl();
 	}
 
-	@Bean
-	public IResourceModifiedConsumer resourceModifiedConsumer(IHapiTransactionService theHapiTransactionService,
-																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
-																				 StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
-	}
-
 	public static String crunchifyGenerateThreadDump() {
 		final StringBuilder dump = new StringBuilder();
 		final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
