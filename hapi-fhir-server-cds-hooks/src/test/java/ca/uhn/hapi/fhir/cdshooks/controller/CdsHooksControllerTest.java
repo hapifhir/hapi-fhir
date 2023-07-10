@@ -8,24 +8,39 @@ package ca.uhn.hapi.fhir.cdshooks.controller;/*-
  * #L%
  */
 
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeebackOutcomeEnum;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
+import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,15 +49,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CdsHooksConfig.class, TestCdsHooksConfig.class})
 public class CdsHooksControllerTest {
+	public static final String TEST_FHIR_SERVER = "http://localhost:9999/";
+	public static final String TEST_PATIENT_ID = "P2401";
+	public static final String TEST_USER_ID = "Practitioner/FREDDY";
+
 	public static final String TEST_HOOK_INSTANCE = UUID.randomUUID().toString();
 	public static final String OUTCOME_TIMESTAMP = "2020-12-16";
-	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksControllerTest.class);
 	private static final String TEST_KEY = "CdsServiceRegistryImplTest.testKey";
 	private static final String TEST_SERVICE_ID = "CdsServiceRegistryImplTest.testServiceId";
 	private final String MODULE_ID = "moduleId";
 
 	@Autowired
 	ICdsServiceRegistry myCdsHooksRegistry;
+	@Autowired
+	ICdsServiceRegistry myCdsServiceRegistry;
+	@Autowired
+	@Qualifier(CdsHooksConfig.CDS_HOOKS_OBJECT_MAPPER_FACTORY)
+	protected ObjectMapper myObjectMapper;
+
+	@MockBean
+	CdsPrefetchFhirClientSvc myCdsPrefetchFhirClientSvc;
+
 
 	MockMvc myMockMvc;
 
@@ -66,85 +93,7 @@ public class CdsHooksControllerTest {
 			.andExpect(jsonPath("services[2].prefetch." + GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_KEY).value(GreeterCdsService.TEST_HOOK_PREFETCH_PATIENT_QUERY));
 	}
 
-	/**
 	@Test
-	@WithUserDetails(HAPPY_USER)
-	void testCallWithString() throws Exception {
-
-		String hookInstance = UUID.randomUUID().toString();
-
-		String requestBody = getRequestBodyWithPrefetch(hookInstance);
-
-		TestServerAppCtx.ourGreeterCdsService.setExpectedCount(1);
-		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + GreeterCdsService.TEST_HOOK_STRING_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
-			.andDo(print())
-			.andExpect(status().is2xxSuccessful())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("cards[0].summary").value("Hello Billy Idol and Freddy Mercury"))
-			.andExpect(jsonPath("cards[0].indicator").value(GreeterCdsService.TEST_HOOK_RESPONSE_INDICATOR.toString().toLowerCase()))
-			.andExpect(jsonPath("cards[0].source.label").value(GreeterCdsService.TEST_HOOK_RESPONSE_SOURCE_LABEL))
-			.andExpect(jsonPath("cards[0].detail").value(GreeterCdsService.TEST_HOOK_RESPONSE_DETAIL))
-		;
-		Object calledWithObject = PointcutLatch.getLatchInvocationParameter(TestServerAppCtx.ourGreeterCdsService.awaitExpected());
-		assertThat(calledWithObject, instanceOf(String.class));
-		String json = (String) calledWithObject;
-
-		ourLog.debug(json);
-		CdsServiceRequestJson calledWith = myObjectMapper.readValue(json, CdsServiceRequestJson.class);
-		assertEquals(hookInstance, calledWith.getHookInstance());
-		assertEquals(GreeterCdsService.TEST_HOOK, calledWith.getHook());
-		assertEquals(TEST_FHIR_SERVER, calledWith.getFhirServer());
-		assertEquals(TEST_PATIENT_ID, calledWith.getContext().getString(GreeterCdsService.TEST_HOOK_CONTEXT_PATIENTID_KEY));
-		assertEquals(TEST_USER_ID, calledWith.getContext().getString(GreeterCdsService.TEST_HOOK_CONTEXT_USERID_KEY));
-	}
-
-
-	@Test
-	@WithUserDetails(HAPPY_USER)
-	void testCallWithJson() throws Exception {
-		String hookInstance = UUID.randomUUID().toString();
-		String requestBody = getRequestBodyWithPrefetch(hookInstance);
-
-		TestServerAppCtx.ourGreeterCdsService.setExpectedCount(1);
-		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + GreeterCdsService.TEST_HOOK_OBJECT_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
-			.andDo(print())
-			.andExpect(status().is2xxSuccessful())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("cards[0].summary").value("Hello Billy Idol and Freddy Mercury"))
-			.andExpect(jsonPath("cards[0].indicator").value(GreeterCdsService.TEST_HOOK_RESPONSE_INDICATOR.toString().toLowerCase()))
-			.andExpect(jsonPath("cards[0].source.label").value(GreeterCdsService.TEST_HOOK_RESPONSE_SOURCE_LABEL))
-		;
-		Object calledWithObject = PointcutLatch.getLatchInvocationParameter(TestServerAppCtx.ourGreeterCdsService.awaitExpected());
-		assertThat(calledWithObject, instanceOf(CdsServiceRequestJson.class));
-		CdsServiceRequestJson calledWith = (CdsServiceRequestJson) calledWithObject;
-		assertEquals(hookInstance, calledWith.getHookInstance());
-		assertEquals(GreeterCdsService.TEST_HOOK, calledWith.getHook());
-		assertEquals(TEST_FHIR_SERVER, calledWith.getFhirServer());
-		assertEquals(TEST_PATIENT_ID, calledWith.getContext().getString(GreeterCdsService.TEST_HOOK_CONTEXT_PATIENTID_KEY));
-		assertEquals(TEST_USER_ID, calledWith.getContext().getString(GreeterCdsService.TEST_HOOK_CONTEXT_USERID_KEY));
-	}
-
-	@Test
-	@WithUserDetails(HAPPY_USER)
-	void testExampleService() throws Exception {
-		String hookInstance = UUID.randomUUID().toString();
-		String requestBody = getRequestBodyWithPrefetch(hookInstance);
-
-		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/example-service").contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
-			.andDo(print())
-			.andExpect(status().is2xxSuccessful())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("cards[0].summary").value("Hello Billy Idol"))
-			.andExpect(jsonPath("cards[0].indicator").value(CdsServiceIndicatorEnum.INFO.toString().toLowerCase()))
-			.andExpect(jsonPath("cards[0].source.label").value("Smile CDR"))
-		;
-	}
-
-	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testExampleFeedback() throws Exception {
 		CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
 		request.setCard(TEST_HOOK_INSTANCE);
@@ -154,7 +103,7 @@ public class CdsHooksControllerTest {
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/example-service/feedback").contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/example-service/feedback").contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -163,7 +112,6 @@ public class CdsHooksControllerTest {
 	}
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testCallHelloWorld() throws Exception {
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.setHookInstance(TEST_HOOK_INSTANCE);
@@ -173,7 +121,7 @@ public class CdsHooksControllerTest {
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_WORLD_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_WORLD_ID).contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -186,7 +134,6 @@ public class CdsHooksControllerTest {
 
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testCallHelloUniverse() throws Exception {
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.setFhirServer(TEST_FHIR_SERVER);
@@ -194,7 +141,7 @@ public class CdsHooksControllerTest {
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_UNIVERSE_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_UNIVERSE_ID).contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -204,7 +151,6 @@ public class CdsHooksControllerTest {
 	}
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testCallPlayback() throws Exception {
 		CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.setHookInstance(TEST_HOOK_INSTANCE);
@@ -214,7 +160,7 @@ public class CdsHooksControllerTest {
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_PLAYBACK_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_PLAYBACK_ID).contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -224,7 +170,6 @@ public class CdsHooksControllerTest {
 	}
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testHelloWorldFeedback() throws Exception {
 		CdsServiceFeedbackJson request = new CdsServiceFeedbackJson();
 		request.setCard(TEST_HOOK_INSTANCE);
@@ -235,7 +180,7 @@ public class CdsHooksControllerTest {
 
 		TestServerAppCtx.ourHelloWorldService.setExpectedCount(1);
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_WORLD_ID + "/feedback").contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/" + HelloWorldService.TEST_HOOK_WORLD_ID + "/feedback").contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -245,47 +190,6 @@ public class CdsHooksControllerTest {
 	}
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
-	void testGreeterServiceWithFhirClientPrefetch() throws Exception {
-		String hookInstance = UUID.randomUUID().toString();
-		CdsServiceRequestJson request = buildRequest(hookInstance, true, false);
-		String requestBody = myObjectMapper.writeValueAsString(request);
-
-		when(myCdsPrefetchFhirClientSvc.resourceFromUrl(any(), eq("Patient/" + TEST_PATIENT_ID))).thenReturn(buildTestPatient());
-		when(myCdsPrefetchFhirClientSvc.resourceFromUrl(any(), eq(TEST_USER_ID))).thenReturn(buildTestPractitioner());
-
-		TestServerAppCtx.ourGreeterCdsService.setExpectedCount(1);
-		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + GreeterCdsService.TEST_HOOK_OBJECT_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
-			.andDo(print())
-			.andExpect(status().is2xxSuccessful())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("cards[0].summary").value("Hello Billy Idol and Freddy Mercury"))
-			.andExpect(jsonPath("cards[0].indicator").value(CdsServiceIndicatorEnum.INFO.toString().toLowerCase()))
-			.andExpect(jsonPath("cards[0].source.label").value(GreeterCdsService.TEST_HOOK_RESPONSE_SOURCE_LABEL))
-		;
-		TestServerAppCtx.ourGreeterCdsService.awaitExpected();
-	}
-
-	@Test
-	@WithUserDetails(HAPPY_USER)
-	void testParsingRequestBody_withMalformedCdsServiceRequestJson_returns400() throws Exception {
-		// given
-		String hookInstance = UUID.randomUUID().toString();
-		CdsServiceRequestJson request = buildRequest(hookInstance, false, true);
-		String badParamRequestBody = badRequestObjectMapper().writeValueAsString(request);
-
-		// when
-		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + GreeterCdsService.TEST_HOOK_OBJECT_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(badParamRequestBody))
-			.andDo(print())
-			// then
-			.andExpect(status().is4xxClientError());
-
-	}
-
-	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testCallDynamicallyRegisteredService() throws Exception {
 		// Register cds hook
 		Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = (CdsServiceRequestJson theCdsServiceRequestJson) -> {
@@ -303,11 +207,11 @@ public class CdsHooksControllerTest {
 
 		// Call hook
 		String hookInstance = UUID.randomUUID().toString();
-		CdsServiceRequestJson request = buildRequest(hookInstance, true, false);
+		CdsServiceRequestJson request = buildRequest(hookInstance);
 		String requestBody = myObjectMapper.writeValueAsString(request);
 
 		myMockMvc
-			.perform(post(CdsHooksController.BASE + "/" + TEST_SERVICE_ID).contentType(MediaType.APPLICATION_JSON_UTF8).content(requestBody))
+			.perform(post(CdsHooksController.BASE + "/" + TEST_SERVICE_ID).contentType(MediaType.APPLICATION_JSON).content(requestBody))
 			.andDo(print())
 			.andExpect(status().is2xxSuccessful())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -317,14 +221,13 @@ public class CdsHooksControllerTest {
 
 
 	@Test
-	@WithUserDetails(HAPPY_USER)
 	void testEmptyCardsResponse() throws Exception {
 		//setup
 		final String expected = "{ \"cards\" : [ ]}";
 		final Function<CdsServiceRequestJson, CdsServiceResponseJson> serviceFunction = (CdsServiceRequestJson theCdsServiceRequestJson) -> new CdsServiceResponseJson();
 		myCdsServiceRegistry.unregisterService(TEST_SERVICE_ID, MODULE_ID);
 		myCdsServiceRegistry.registerService(TEST_SERVICE_ID, serviceFunction, new CdsServiceJson().setId(TEST_SERVICE_ID), false, MODULE_ID);
-		final CdsServiceRequestJson request = buildRequest(UUID.randomUUID().toString(), true, false);
+		final CdsServiceRequestJson request = buildRequest(UUID.randomUUID().toString());
 		final String requestBody = myObjectMapper.writeValueAsString(request);
 		//execute
 		final MvcResult result = myMockMvc
@@ -335,29 +238,24 @@ public class CdsHooksControllerTest {
 			.andReturn();
 		//validate
 		final String actual = result.getResponse().getContentAsString();
-		assertEquals(prettyJson(expected),prettyJson(actual));
+		assertEquals(prettyJson(expected), prettyJson(actual));
 	}
 
-	private ObjectMapper badRequestObjectMapper(){
 
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(CdsServiceRequestJson.class, new StdSerializer<>(CdsServiceRequestJson.class) {
-			@Override
-			public void serialize(CdsServiceRequestJson theCdsServiceRequestJson, JsonGenerator theJsonGenerator, SerializerProvider theSerializerProvider) throws IOException {
-				theJsonGenerator.writeStartObject();
-				theJsonGenerator.writeStringField("hookInstance", theCdsServiceRequestJson.getHookInstance());
-				theJsonGenerator.writeStringField("hook", theCdsServiceRequestJson.getHookInstance());
-				theJsonGenerator.writeFieldName("prefetch");
-				theJsonGenerator.writeStartObject();
-				theJsonGenerator.writeFieldName("patient");
-				theJsonGenerator.writeStartObject();
-				theJsonGenerator.writeEndObject();
-				theJsonGenerator.writeEndObject();
-				theJsonGenerator.writeEndObject();
-			}
-		});
-
-		return new ObjectMapper().registerModule(module);
+	@Nonnull
+	protected CdsServiceRequestJson buildRequest(String hookInstance) {
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.setHookInstance(hookInstance);
+		request.setHook(GreeterCdsService.TEST_HOOK);
+		request.addContext(GreeterCdsService.TEST_HOOK_CONTEXT_PATIENTID_KEY, TEST_PATIENT_ID);
+		request.addContext(GreeterCdsService.TEST_HOOK_CONTEXT_USERID_KEY, TEST_USER_ID);
+		request.setFhirServer(TEST_FHIR_SERVER);
+		return request;
 	}
-**/
+
+	public static String prettyJson(String theInput) {
+		JsonNode input = JsonUtil.deserialize(theInput, JsonNode.class);
+		return JsonUtil.serialize(input, true);
+	}
+
 }

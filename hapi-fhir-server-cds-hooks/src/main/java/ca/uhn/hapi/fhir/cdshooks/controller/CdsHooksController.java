@@ -59,7 +59,7 @@ public class CdsHooksController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(path = "{cds_hook}", method = {RequestMethod.POST}, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<CdsServiceResponseJson> cdsServiceRequest(@PathVariable("cds_hook") String theCdsHook,
-																						 @RequestBody(required = true) CdsServiceRequestJson theCdsServiceRequestJson
+																						 @RequestBody CdsServiceRequestJson theCdsServiceRequestJson
 	) {
 		CdsServiceResponseJson response = myCdsServiceRegistry.callService(theCdsHook, theCdsServiceRequestJson);
 		return ResponseEntity
@@ -80,7 +80,7 @@ public class CdsHooksController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(path = "{cds_hook}/feedback", method = {RequestMethod.POST}, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> cdsServiceFeedback(@PathVariable("cds_hook") String theCdsHook,
-																	 @RequestBody(required = true) CdsServiceFeedbackJson theCdsServiceFeedbackJson
+																	 @RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson
 	) {
 		String json = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
 

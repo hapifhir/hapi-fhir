@@ -37,8 +37,8 @@ public class PrefetchTemplateUtil {
 	}
 
 	/**
-	 * The below DaVinci Prefetch template support is implemented based on IG specifications described here
-	 * http://hl7.org/fhir/us/davinci-crd/hooks.html#additional-prefetch-capabilities version 1.0.0 - STU 1
+	 * The below DaVinci Prefetch template support is implemented based on IG specifications described
+	 * <a href="http://hl7.org/fhir/us/davinci-crd/hooks.html#additional-prefetch-capabilities">here</a> version 1.0.0 - STU 1
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
 	private static String handleDaVinciPrefetchTemplate(String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {

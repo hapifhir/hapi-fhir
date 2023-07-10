@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as a CDS Hooks feedback service.  A method annotated with `@CdsServiceFeedback(value="my-service")` is
- * accessed at a path like `https://example.com/cds-services/example-service/feedback`.
+ * accessed at a path like `<a href="https://example.com/cds-services/example-service/feedback">Example Feedback Service</a>`.
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */

@@ -74,11 +74,7 @@ public class HasGetterOrSetterForAllJsonFields extends TypeSafeMatcher<Class<? e
 		if (apiModelProperty != null && apiModelProperty.accessMode() == Schema.AccessMode.READ_ONLY) {
 			return false;
 		}
-		if (apiModelProperty != null && apiModelProperty.hidden()) {
-			return false;
-		}
-
-		return true;
+		return apiModelProperty == null || !apiModelProperty.hidden();
 	}
 
 	private String stripPrefix(String theFieldName) {

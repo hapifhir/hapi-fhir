@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as a CDS Hooks service.  A method annotated with `@CdsService(value="example-service")` is accessed
- * at a path like `https://example.com/cds-services/example-service`
+ * at a path like `<a href="https://example.com/cds-services/example-service">Example Service</a>`
  *
  * @see <a href="https://cds-hooks.hl7.org/ballots/2020Sep/">Version 1.1 of the CDS Hooks Specification</a>
  */
