@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5075
+title: "When POSTing a bundle with a custom resource, as opposed to the non-bundled resource, there is a HAPI-2006 error.  This has been fixed."
