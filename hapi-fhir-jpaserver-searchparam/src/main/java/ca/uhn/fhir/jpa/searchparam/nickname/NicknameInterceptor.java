@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.nickname.NicknameSvc;
+import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -37,9 +37,9 @@ import java.util.Map;
 public class NicknameInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(NicknameInterceptor.class);
 
-	private final NicknameSvc myNicknameSvc;
+	private final INicknameSvc myNicknameSvc;
 
-	public NicknameInterceptor(NicknameSvc theNicknameSvc) {
+	public NicknameInterceptor(INicknameSvc theNicknameSvc) {
 		myNicknameSvc = theNicknameSvc;
 	}
 

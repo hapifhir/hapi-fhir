@@ -120,10 +120,36 @@ public class StorageSettings {
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
+	 * @since 6.8.0
+	 * Prevents any non IN-MEMORY Search params from being created by users.
+	 */
+	private boolean myAllowOnlyInMemorySubscriptions = false;
+
+	/**
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
 
+	/**
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
+	 * overall server performance.
+	 *
+	 * @since 6.8.0
+	 */
+	public void setOnlyAllowInMemorySubscriptions(boolean theAllowOnlyInMemorySearchParams) {
+		myAllowOnlyInMemorySubscriptions = theAllowOnlyInMemorySearchParams;
+	}
+
+	/**
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
+	 * overall server performance.
+	 *
+	 * @since 6.8.0
+	 * @return Returns the value of {@link #setOnlyAllowInMemorySubscriptions(boolean)}
+	 */
+	public boolean isOnlyAllowInMemorySubscriptions() {
+		return myAllowOnlyInMemorySubscriptions;
+	}
 	/**
 	 * Constructor
 	 */

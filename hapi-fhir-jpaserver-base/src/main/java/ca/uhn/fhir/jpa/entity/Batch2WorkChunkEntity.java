@@ -53,6 +53,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 public class Batch2WorkChunkEntity implements Serializable {
 
 	public static final int ERROR_MSG_MAX_LENGTH = 500;
+	public static final int WARNING_MSG_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = -6202771941965780558L;
 	@Id
 	@Column(name = "ID", length = ID_MAX_LENGTH)
@@ -96,8 +97,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myErrorMessage;
 	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
-	@Lob
-	@Column(name = "WARNING_MSG", nullable = true)
+	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessage;
 
 	/**

@@ -19,15 +19,27 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.GetPage;
+import ca.uhn.fhir.rest.annotation.GraphQL;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,7 +49,6 @@ import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -243,17 +254,9 @@ public abstract class BaseMethodBinding {
 			populateRequestDetailsForInterceptor(theRequest, theMethodParams);
 
 			// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
-			HookParams preHandledParams = new HookParams();
-			preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
-			preHandledParams.add(RequestDetails.class, theRequest);
-			preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			if (theRequest.getInterceptorBroadcaster() != null) {
-				theRequest
-					.getInterceptorBroadcaster()
-					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
-			}
+            PageMethodBinding.callPreHandledHooks(theRequest);
 
-		}
+        }
 
 		// Actually invoke the method
 		try {

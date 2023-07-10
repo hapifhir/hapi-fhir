@@ -71,6 +71,7 @@ import javax.xml.stream.events.EntityReference;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -137,6 +138,22 @@ public class XmlParser extends BaseParser {
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException(Msg.code(1850) + "Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+		XMLStreamWriter eventWriter;
+		try {
+			eventWriter = createXmlWriter(theWriter);
+
+			eventWriter.writeStartElement("element");
+			encodeCompositeElementToStreamWriter(null, theElement, eventWriter, false, new CompositeChildElement(null, theEncodeContext), theEncodeContext);
+			eventWriter.writeEndElement();
+
+			eventWriter.flush();
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException(Msg.code(2365) + "Failed to initialize STaX event factory", e);
 		}
 	}
 

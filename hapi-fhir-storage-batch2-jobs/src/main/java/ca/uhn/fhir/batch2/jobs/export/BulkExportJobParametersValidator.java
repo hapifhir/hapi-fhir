@@ -20,15 +20,13 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +81,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		// validate for group
-		BulkDataExportOptions.ExportStyle style = theParameters.getExportStyle();
+		BulkExportJobParameters.ExportStyle style = theParameters.getExportStyle();
 		if (style == null) {
 			errorMsgs.add("Export style is required");
 		}

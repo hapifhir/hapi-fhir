@@ -32,25 +32,25 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
@@ -80,7 +80,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		return myTransactionService
 			.withSystemRequest()
 			.withRequestPartitionId(theRequestPartitionId)
- 			.execute(()->{
+			.execute(() -> {
 				if (theUrl == null) {
 					return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
 				} else {
