@@ -27,11 +27,12 @@ public final class FhirTypeUtil {
 			case "positiveInt":
 			case "decimal":
 			case "integer64":
+			case "integer":
 			case "date":
 			case "dateTime":
 			case "time":
 			case "instant":
-			case "base6Binary":
+			case "base64Binary":
 				return true;
 		}
 	}

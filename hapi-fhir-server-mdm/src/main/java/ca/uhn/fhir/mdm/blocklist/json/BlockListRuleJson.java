@@ -34,10 +34,6 @@ public class BlockListRuleJson implements IModelJson {
 		return myBlockedFields;
 	}
 
-	public void setBlockedFields(List<BlockedFieldJson> theBlockedFields) {
-		myBlockedFields = theBlockedFields;
-	}
-
 	public BlockedFieldJson addBlockListField() {
 		BlockedFieldJson rule = new BlockedFieldJson();
 		getBlockedFields().add(rule);

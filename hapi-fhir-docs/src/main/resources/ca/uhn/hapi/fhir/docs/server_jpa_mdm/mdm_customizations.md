@@ -35,7 +35,7 @@ Blocking rules are provided in a list of rule-sets,
 with each one applicable to a specified resource type.
 
 Within each rule-set, a collection of fields specify the
-`fhirPath` and `value` on which to test an input resource for blocking.
+`fhirPath` and `value` (case insensitive) on which to test an input resource for blocking.
 
 If a resource matches on all blocked fields in a rule-set,
 MDM matching will be blocked for the entire resource.
