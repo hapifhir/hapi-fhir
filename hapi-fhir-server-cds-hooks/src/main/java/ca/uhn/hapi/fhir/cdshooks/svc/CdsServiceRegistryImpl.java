@@ -1,0 +1,147 @@
+/*-
+ * #%L
+ * Smile CDR - CDR
+ * %%
+ * Copyright (C) 2016 - 2023 Smile CDR, Inc.
+ * %%
+ * All rights reserved.
+ * #L%
+ */
+package ca.uhn.hapi.fhir.cdshooks.svc;
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksServiceCacheBuilder;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
+import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServicesJson;
+import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
+import java.util.function.Function;
+
+public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(CdsServiceRegistryImpl.class);
+
+	private CdsServiceCache myServiceCache;
+
+	private final ICdsHooksServiceCacheBuilder myCdsHooksServiceCacheBuilder;
+	private final CdsPrefetchSvc myCdsPrefetchSvc;
+	private final ObjectMapper myObjectMapper;
+
+	public CdsServiceRegistryImpl(ICdsHooksServiceCacheBuilder theCdsHooksServiceCacheBuilder, CdsPrefetchSvc theCdsPrefetchSvc, ObjectMapper theObjectMapper) {
+		myCdsHooksServiceCacheBuilder = theCdsHooksServiceCacheBuilder;
+		myCdsPrefetchSvc = theCdsPrefetchSvc;
+		myObjectMapper = theObjectMapper;
+	}
+
+	@PostConstruct
+	public void init() {
+		myServiceCache = myCdsHooksServiceCacheBuilder.buildCdsServiceCache();
+	}
+
+	@Override
+	public CdsServicesJson getCdsServicesJson() {
+		return myServiceCache.getCdsServicesJson();
+	}
+
+	@Override
+	public CdsServiceResponseJson callService(String theServiceId, CdsServiceRequestJson theCdsServiceRequestJson) {
+		ICdsServiceMethod serviceMethod = (ICdsServiceMethod) getCdsServiceMethodOrThrowException(theServiceId);
+		myCdsPrefetchSvc.augmentRequest(theCdsServiceRequestJson, serviceMethod);
+		Object response = serviceMethod.invoke(myObjectMapper, theCdsServiceRequestJson, theServiceId);
+
+		return encodeServiceResponse(theServiceId, response);
+	}
+
+	private CdsServiceResponseJson encodeServiceResponse(String theServiceId, Object result) {
+		String json;
+		if (result instanceof String) {
+			json = (String) result;
+		} else {
+			try {
+				json = myObjectMapper.writeValueAsString(result);
+			} catch (JsonProcessingException e) {
+				throw new ConfigurationException("Failed to json serialize Cds service response of type " + result.getClass().getName() + " when calling CDS Hook Service " + theServiceId, e);
+			}
+		}
+		try {
+			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
+		} catch (JsonProcessingException e) {
+			throw new ConfigurationException("Failed to json deserialize Cds service response of type " + result.getClass().getName() + " when calling CDS Hook Service " + theServiceId + ".  Json: " + json, e);
+		}
+	}
+
+	@Nonnull
+	private ICdsMethod getCdsServiceMethodOrThrowException(String theId) {
+		ICdsMethod retval = myServiceCache.getServiceMethod(theId);
+		if (retval == null) {
+			throw new ResourceNotFoundException("No service with id " + theId + " is registered on this server");
+		}
+		return retval;
+	}
+
+	@Nonnull
+	private ICdsMethod getCdsFeedbackMethodOrThrowException(String theId) {
+		ICdsMethod retval = myServiceCache.getFeedbackMethod(theId);
+		if (retval == null) {
+			throw new ResourceNotFoundException("No feedback service with id " + theId + " is registered on this server");
+		}
+		return retval;
+	}
+
+	@Override
+	public String callFeedback(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
+		ICdsMethod feedbackMethod = getCdsFeedbackMethodOrThrowException(theServiceId);
+		Object response = feedbackMethod.invoke(myObjectMapper, theCdsServiceFeedbackJson, theServiceId);
+
+		return encodeFeedbackResponse(theServiceId, theCdsServiceFeedbackJson, response);
+	}
+
+	@Override
+	public void registerService(String theServiceId, Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction, CdsServiceJson theCdsServiceJson, boolean theAllowAutoFhirClientPrefetch, String theModuleId) {
+		myServiceCache.registerDynamicService(theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
+	}
+
+	@Override
+	public void unregisterService(String theServiceId, String theModuleId) {
+		Validate.notNull(theServiceId);
+
+		ICdsMethod activeService = myServiceCache.unregisterServiceMethod(theServiceId, theModuleId);
+		if (activeService != null) {
+			ourLog.info("Unregistered active service {}", theServiceId);
+		}
+	}
+
+	private String encodeFeedbackResponse(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson, Object response) {
+		if (response instanceof String) {
+			return (String) response;
+		} else {
+			try {
+				// Try to json encode the response
+				return myObjectMapper.writeValueAsString(response);
+			} catch (JsonProcessingException e) {
+				try {
+					ourLog.warn("Failed to deserialize response from {} feedback method", theServiceId, e);
+					// Just send back what we received
+					return myObjectMapper.writeValueAsString(theCdsServiceFeedbackJson);
+				} catch (JsonProcessingException f) {
+					ourLog.error("Failed to deserialize request parameter to {} feedback method", theServiceId, e);
+					// Okay then...
+					return "{}";
+				}
+			}
+		}
+	}
+}
