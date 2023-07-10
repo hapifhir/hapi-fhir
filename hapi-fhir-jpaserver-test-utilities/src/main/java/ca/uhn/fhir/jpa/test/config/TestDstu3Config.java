@@ -226,14 +226,4 @@ public class TestDstu3Config {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-	@Bean
-	public IResourceModifiedConsumer resourceModifiedConsumer(IHapiTransactionService theHapiTransactionService,
-																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
-																				 StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
-	}
-
 }

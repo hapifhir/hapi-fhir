@@ -212,13 +212,4 @@ public class TestDstu2Config {
 		return requestValidator;
 	}
 
-	@Bean
-	public IResourceModifiedConsumer resourceModifiedConsumer(IHapiTransactionService theHapiTransactionService,
-																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
-																				 StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
-	}
 }
