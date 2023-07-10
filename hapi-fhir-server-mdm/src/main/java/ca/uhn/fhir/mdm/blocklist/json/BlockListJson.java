@@ -24,10 +24,6 @@ public class BlockListJson implements IModelJson {
 		return myBlockListItemJsonList;
 	}
 
-	public void setBlockListItemJsonList(List<BlockListRuleJson> theBlockListItemJsonList) {
-		myBlockListItemJsonList = theBlockListItemJsonList;
-	}
-
 	public BlockListJson addBlockListRule(BlockListRuleJson theRule) {
 		getBlockListItemJsonList().add(theRule);
 		return this;
