@@ -121,8 +121,11 @@ import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToCompressingWhiteSpace;
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -297,14 +300,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
-		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam("systolic"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
-
-		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
-		assertThat(elasticPerformanceTracingInterceptor.getMessages().size(), is(greaterThan(0)));
+		//Then: The Elasticsearch Query should be logged.
+		assertThat(elasticPerformanceTracingInterceptor.getMessages().size(), is(equalTo(3)));
+		StorageProcessingMessage storageProcessingMessage = elasticPerformanceTracingInterceptor.getMessages().get(2);
+		assertThat(storageProcessingMessage.getMessage(), containsString("\"query\":\"( blood* )\""));
+
 		myInterceptorRegistry.unregisterInterceptor(elasticPerformanceTracingInterceptor);
 
 	}
