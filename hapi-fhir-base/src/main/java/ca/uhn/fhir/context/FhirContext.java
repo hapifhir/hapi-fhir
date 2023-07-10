@@ -619,20 +619,6 @@ public class FhirContext {
 		return resourceNames;
 	}
 
-	/**
-	 * We maintain a separate Collection here because if we add the custom resource names in myResourceNames then cdr
-	 * will fail to start with this error when trying to process SearchParameters, as it will not recognize the resource type.
-	 *
-	 * @return Combination of getResourceTypes and myCustomResourceNames.
-	 */
-	public Set<String> getResourceTypesIncludingCustomResources() {
-		final Set<String> resourceTypesIncludingCustomResources = new HashSet<>(getResourceTypes());
-
-		resourceTypesIncludingCustomResources.addAll(myCustomResourceNames);
-
-		return resourceTypesIncludingCustomResources;
-	}
-
 	@Nonnull
 	private Set<String> buildResourceNames() {
 		Set<String> retVal = new HashSet<>();
