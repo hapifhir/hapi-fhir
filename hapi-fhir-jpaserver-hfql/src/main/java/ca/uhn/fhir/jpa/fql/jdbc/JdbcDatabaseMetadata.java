@@ -644,7 +644,7 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_TABLES));
-		IHfqlExecutionResult outcome = myRestClient.execute(input, false);
+		IHfqlExecutionResult outcome = myRestClient.execute(input, false, null);
 		return new JdbcResultSet(outcome);
 	}
 
@@ -669,7 +669,7 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws UnsupportedOperationException, SQLException {
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_COLUMNS));
-		IHfqlExecutionResult outcome = myRestClient.execute(input, false);
+		IHfqlExecutionResult outcome = myRestClient.execute(input, false, null);
 		return new JdbcResultSet(outcome);
 	}
 

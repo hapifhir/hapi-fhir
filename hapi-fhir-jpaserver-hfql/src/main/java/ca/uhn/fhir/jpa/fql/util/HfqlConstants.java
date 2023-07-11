@@ -35,12 +35,17 @@ public class HfqlConstants {
 	public static final String PARAM_ACTION_INTROSPECT_TABLES = "introspectTables";
 	public static final String PARAM_ACTION_INTROSPECT_COLUMNS = "introspectColumns";
 	public static final int MIN_FETCH_SIZE = 1;
+	public static final int DEFAULT_FETCH_SIZE = 1000;
 	public static final int MAX_FETCH_SIZE = 10000;
 	public static final String PARAM_INTROSPECT_TABLE_NAME = "introspectTableName";
 	public static final String PARAM_INTROSPECT_COLUMN_NAME = "introspectColumnName";
+	/**
+	 * This is the maximum number of results that can be sorted or grouped on
+	 */
+	public static final int ORDER_AND_GROUP_LIMIT = 10000;
 
-	private HfqlConstants() {}
-
+	private HfqlConstants() {
+	}
 
 
 }

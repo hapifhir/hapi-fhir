@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.HfqlFhirPathParser;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatementParser;
+import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -73,10 +74,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 	public static final int BATCH_SIZE = 1000;
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 	public static final Set<GroupByKey> NULL_GROUP_BY_KEY = Set.of(new GroupByKey(List.of()));
-	/**
-	 * This is the maximum number of results that can be sorted or grouped on
-	 */
-	public static final int ORDER_AND_GROUP_LIMIT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(HfqlExecutor.class);
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -99,8 +96,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 		try {
 			return doExecuteInitialSearch(theStatement, theLimit, theRequestDetails);
 		} catch (Exception e) {
-			ourLog.warn("Failed to execute HFFQL statement. Error: {}", e.toString());
-			return StaticHfqlExecutionResult.withError(e.getMessage());
+			ourLog.warn("Failed to execute HFFQL statement", e);
+			return StaticHfqlExecutionResult.withError(defaultIfNull(e.getMessage(), "(no message)"));
 		}
 	}
 
@@ -148,8 +145,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 			}
 		}
 
+		boolean haveOrderingClause = !statement.getOrderByClauses().isEmpty();
+
 		Integer limit = theLimit;
-		if (statement.getLimit() != null) {
+		if (haveOrderingClause) {
+			limit = null;
+		} else if (statement.getLimit() != null) {
 			limit = limit == null ? statement.getLimit() : Math.min(limit, statement.getLimit());
 		}
 
@@ -165,7 +166,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 			executionResult = new LocalSearchHfqlExecutionResult(statement, outcome, executionContext, limit, 0, columnDataTypes, whereClausePredicate, myFhirContext);
 		}
 
-		if (!statement.getOrderByClauses().isEmpty()) {
+		if (haveOrderingClause) {
 			executionResult = createOrderedResult(statement, executionResult);
 		}
 
@@ -177,7 +178,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		while (theExecutionResult.hasNext()) {
 			IHfqlExecutionResult.Row nextRow = theExecutionResult.getNextRow();
 			rows.add(nextRow);
-			Validate.isTrue(rows.size() <= ORDER_AND_GROUP_LIMIT, "Can not ORDER BY result sets over 10000 results");
+			Validate.isTrue(rows.size() <= HfqlConstants.ORDER_AND_GROUP_LIMIT, "Can not ORDER BY result sets over 10000 results");
 		}
 
 		List<Integer> orderColumnIndexes = theStatement
@@ -212,6 +213,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		rows.sort(comparator);
+		for (int i = 0; i < rows.size(); i++) {
+			rows.set(i, rows.get(i).toRowOffset(i));
+		}
 
 		List<List<Object>> rowData = rows
 			.stream()
@@ -277,9 +281,9 @@ public class HfqlExecutor implements IHfqlExecutor {
 					for (GroupByKey nextKey : allKeys) {
 
 						Map<String, AtomicLong> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
-						if (keyCounter.size() >= ORDER_AND_GROUP_LIMIT) {
+						if (keyCounter.size() >= HfqlConstants.ORDER_AND_GROUP_LIMIT) {
 							// FIXME: add code
-							throw new InvalidRequestException("Can not group on > " + ORDER_AND_GROUP_LIMIT + " terms");
+							throw new InvalidRequestException("Can not group on > " + HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
 						}
 						for (String nextCountClause : countClauses) {
 							if (!nextCountClause.equals("*")) {
@@ -789,10 +793,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 					break;
 				case DATE:
 				case TIMESTAMP:
+					if (retVal != null) {
+						retVal = new DateTimeType((String) retVal).getValue();
+					}
 					if (retVal == null) {
 						retVal = new Date(Long.MIN_VALUE);
-					} else {
-						retVal = new DateTimeType((String) retVal).getValue();
 					}
 					break;
 				case DECIMAL:

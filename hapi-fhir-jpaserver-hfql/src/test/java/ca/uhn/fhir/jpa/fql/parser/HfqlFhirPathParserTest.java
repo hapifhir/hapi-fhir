@@ -21,6 +21,7 @@ public class HfqlFhirPathParserTest {
 		"Patient     , identifier.where(system='foo').system             ,   STRING",
 		"Patient     , identifier[0].where(system='foo').system          ,   STRING",
 		"Observation , value.ofType(Quantity).value                      ,   DECIMAL",
+		"Patient     , Patient.meta.versionId.toInteger()                ,   INTEGER",
 		// Bad
 		"Patient     , Patient.identifier                                ,   ",
 		"Patient     , foo                                               ,   ",

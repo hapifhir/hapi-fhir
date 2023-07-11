@@ -32,6 +32,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.DEFAULT_FETCH_SIZE;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HfqlRestClient {
@@ -41,7 +43,6 @@ public class HfqlRestClient {
 	private final String myUsername;
 	private final String myPassword;
 	private final CloseableHttpClient myClient;
-	private int myFetchSize = 1000;
 
 	public HfqlRestClient(String theBaseUrl, String theUsername, String thePassword) {
 		myBaseUrl = theBaseUrl;
@@ -62,18 +63,11 @@ public class HfqlRestClient {
 
 	}
 
-	/**
-	 * Sets the number of results to fetch in a single page
-	 *
-	 * @param theFetchSize Must be a positive integer
-	 */
-	public void setFetchSize(int theFetchSize) {
-		Validate.isTrue(theFetchSize > 0, "theFetchSize must be a positive integer");
-		myFetchSize = theFetchSize;
-	}
-
-	public IHfqlExecutionResult execute(Parameters theRequestParameters, boolean theSupportsContinuations) throws SQLException {
-		return new RemoteHfqlExecutionResult(theRequestParameters, myBaseUrl, myClient, myFetchSize, theSupportsContinuations);
+	public IHfqlExecutionResult execute(Parameters theRequestParameters, boolean theSupportsContinuations, Integer theFetchSize) throws SQLException {
+		Integer fetchSize = theFetchSize;
+		fetchSize = defaultIfNull(fetchSize, DEFAULT_FETCH_SIZE);
+		Validate.isTrue(fetchSize > 0, "theFetchSize must be a positive integer, got: %s", fetchSize);
+		return new RemoteHfqlExecutionResult(theRequestParameters, myBaseUrl, myClient, fetchSize, theSupportsContinuations);
 	}
 
 	public void close() {

@@ -5,9 +5,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
-import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
-import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
@@ -40,18 +40,21 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.in;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class HfqlRestClientTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final String USERNAME = "some-username";
 	private static final String PASSWORD = "some-password";
-	private final HeaderCaptureInterceptor myHeaderCaptureInterceptor = new HeaderCaptureInterceptor();
+	private static final HeaderCaptureInterceptor ourHeaderCaptureInterceptor = new HeaderCaptureInterceptor();
 	@Mock
 	private IHfqlExecutor myFqlExecutor;
 	@Mock
@@ -59,11 +62,11 @@ public class HfqlRestClientTest {
 	@Mock
 	private IHfqlExecutionResult myMockFqlResult1;
 	@InjectMocks
-	private HfqlRestProvider myProvider = new HfqlRestProvider();
+	private static final HfqlRestProvider ourProvider = new HfqlRestProvider();
 	@RegisterExtension
-	public RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
-		.registerProvider(myProvider)
-		.registerInterceptor(myHeaderCaptureInterceptor);
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(ourProvider)
+		.registerInterceptor(ourHeaderCaptureInterceptor);
 	@Captor
 	private ArgumentCaptor<String> myStatementCaptor;
 	@Captor
@@ -74,8 +77,8 @@ public class HfqlRestClientTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		myHeaderCaptureInterceptor.clear();
-		myClient = new HfqlRestClient(myServer.getBaseUrl(), USERNAME, PASSWORD);
+		ourHeaderCaptureInterceptor.clear();
+		myClient = new HfqlRestClient(ourServer.getBaseUrl(), USERNAME, PASSWORD);
 	}
 
 	@AfterEach
@@ -114,14 +117,13 @@ public class HfqlRestClientTest {
 		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(4), eq(123), any())).thenReturn(myMockFqlResult1);
 		when(myFqlExecutor.executeContinuation(any(), eq(searchId), eq(8), eq(123), any())).thenReturn(new StaticHfqlExecutionResult(searchId));
 
-		myClient.setFetchSize(2);
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
 		input.addParameter(HfqlConstants.PARAM_QUERY, new StringType(sql));
 		input.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(123));
 		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(2));
 
-		IHfqlExecutionResult result = myClient.execute(input, true);
+		IHfqlExecutionResult result = myClient.execute(input, true, 2);
 		IHfqlExecutionResult.Row nextRow;
 		assertThat(result.getColumnNames().toString(), result.getColumnNames(), contains("name.family", "name.given"));
 		assertTrue(result.hasNext());
@@ -147,7 +149,7 @@ public class HfqlRestClientTest {
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
 
-		String actual = myHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
+		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
 		assertEquals(expectedAuthHeader, actual);
 		assertEquals(123, myLimitCaptor.getValue().intValue());
 	}

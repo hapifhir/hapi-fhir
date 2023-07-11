@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -15,7 +14,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
@@ -41,20 +39,17 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.fql.executor.HfqlExecutor.ORDER_AND_GROUP_LIMIT;
+import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.ORDER_AND_GROUP_LIMIT;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -109,6 +104,95 @@ public class HfqlExecutorTest {
 		assertFalse(result.hasNext());
 
 	}
+
+	@Test
+	public void testSelect_OrderBy_ManyValues() {
+
+		// Setup
+
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		List<Patient> patients = new ArrayList<>();
+		for (int i = 0; i < 5000; i++) {
+			Patient patient = new Patient();
+			patient.getMeta().setVersionId(Integer.toString(i));
+			patient.addName().setFamily("PT" + i);
+			patients.add(patient);
+		}
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(patients));
+		String statement = """
+					FROM Patient
+					SELECT
+						meta.versionId.toInteger() AS versionId,
+						name.family AS family
+					ORDER BY versionId DESC
+			""";
+
+		// Test
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		// Verify
+		IHfqlExecutionResult.Row nextRow;
+		assertThat(result.getColumnNames(), contains(
+			"versionId", "family"
+		));
+		for (int i = 4999; i >= 0; i--) {
+			assertTrue(result.hasNext());
+			nextRow = result.getNextRow();
+			assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(String.valueOf(i), "PT" + i));
+		}
+	}
+
+
+	@Test
+	public void testSelect_OrderBy_SparseValues_Date() {
+
+		// Setup
+
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		List<Patient> patients = new ArrayList<>();
+		Patient patient;
+
+		patient = new Patient();
+		patient.setId("PT0");
+		patient.setBirthDateElement(new DateType("2023-01-01"));
+		patients.add(patient);
+
+		patient = new Patient();
+		patient.setId("PT1");
+		patient.setBirthDateElement(new DateType("2022-01-01"));
+		patients.add(patient);
+
+		patient = new Patient();
+		patient.setId("PT2");
+		patient.getBirthDateElement().addExtension("http://foo", new StringType("123"));
+		patients.add(patient);
+
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(patients));
+		String statement = """
+					FROM Patient
+					SELECT id, birthDate
+					ORDER BY birthDate DESC
+			""";
+
+		// Test
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		// Verify
+		IHfqlExecutionResult.Row nextRow;
+		assertTrue(result.hasNext());
+		nextRow = result.getNextRow();
+		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT0", "2023-01-01"));
+		assertTrue(result.hasNext());
+		nextRow = result.getNextRow();
+		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT1", "2022-01-01"));
+		assertTrue(result.hasNext());
+		nextRow = result.getNextRow();
+		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains("PT2", ""));
+		assertFalse(result.hasNext());
+	}
+
 
 
 	@Test

@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import org.apache.commons.text.WordUtils;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -151,10 +152,31 @@ public class HfqlFhirPathParser {
 		}
 
 		if (leafDefinition != null) {
+			String finalToken = getNextFhirPathPartTokenOrNull(lexer);
+			if ("toInteger()".equals(finalToken)) {
+				return HfqlDataTypeEnum.INTEGER;
+			}
+
 			return FHIR_DATATYPE_TO_FQL_DATATYPE.get(leafDefinition.getName());
 		}
 
 		return null;
+	}
+
+	@Nullable
+	private static String getNextFhirPathPartTokenOrNull(HfqlLexer lexer) {
+		String finalToken = null;
+		if (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
+			finalToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART).getToken();
+		}
+
+		if (".".equals(finalToken)) {
+			if (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
+				finalToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART).getToken();
+			}
+		}
+
+		return finalToken;
 	}
 
 }

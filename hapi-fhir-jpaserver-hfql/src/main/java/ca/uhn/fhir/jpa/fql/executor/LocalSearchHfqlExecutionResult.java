@@ -27,7 +27,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.utils.FHIRLexer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
+	private static final Logger ourLog = LoggerFactory.getLogger(LocalSearchHfqlExecutionResult.class);
 
 	private final IBundleProvider mySearchResult;
 	private final HfqlExecutor.HfqlExecutionContext myExecutionContext;
@@ -93,7 +95,10 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		try {
 			while (myNextResource == null && !myExhausted) {
 				if (myNextBatch == null) {
-					myNextBatch = mySearchResult.getResources(myNextSearchResultRow, myNextSearchResultRow + HfqlExecutor.BATCH_SIZE);
+					int from = myNextSearchResultRow;
+					int to = myNextSearchResultRow + HfqlExecutor.BATCH_SIZE;
+					myNextBatch = mySearchResult.getResources(from, to);
+					ourLog.info("HFQL fetching resources {}-{} - Total {} fetched, {} retained and limit {}", from, to, myNextSearchResultRow, myTotalRowsFetched, myLimit);
 					myNextBatchRow = 0;
 					myNextSearchResultRow += HfqlExecutor.BATCH_SIZE;
 				}
@@ -135,7 +140,8 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		Validate.isTrue(myNextResource != null, "No more results");
 
 		List<Object> values = new ArrayList<>();
-		for (HfqlStatement.SelectClause nextColumn : myStatement.getSelectClauses()) {
+		for (int columnIndex = 0; columnIndex < myStatement.getSelectClauses().size(); columnIndex++) {
+			HfqlStatement.SelectClause nextColumn = myStatement.getSelectClauses().get(columnIndex);
 			String clause = nextColumn.getClause();
 			List<IBase> columnValues;
 			try {
@@ -153,6 +159,20 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 					value = myParser.encodeToString(firstColumnValue);
 				}
 			}
+
+			// FIXME: remove
+//			if (value != null) {
+//				if (columnDataType.equals(HfqlDataTypeEnum.INTEGER)) {
+//					try {
+//						values.add(Integer.parseInt(value));
+//						continue;
+//					} catch (NumberFormatException e) {
+//						String errorMessage = "Failed to evaluate result of FHIRPath expression \"" + clause + "\" as INTEGER. Error: " + e.getMessage();
+//						return createAndStoreErrorRow(errorMessage);
+//					}
+//				}
+//			}
+
 			values.add(value);
 		}
 

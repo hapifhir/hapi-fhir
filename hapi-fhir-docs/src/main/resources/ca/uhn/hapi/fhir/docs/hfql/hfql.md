@@ -16,7 +16,7 @@ A simple example query is shown below:
 SELECT
     name.family as family, 
     name.given as given, 
-    birthDate as birthDate, 
+    birthDate,
     identifier.where(system='http://hl7.org/fhir/sid/us-ssn').value as SSN
 FROM
     Patient
@@ -24,7 +24,7 @@ WHERE
     active = true
 ```
 
-See [SQL Syntax](sql_syntax.html) for details on this syntax.
+See [SQL Syntax](https://smilecdr.com/docs/hfql/sql_syntax.html) for details on this syntax.
 
 # JDBC Driver
 
@@ -47,6 +47,10 @@ To import this driver into your database tool, import the JDBC JAR and use the f
 <td>Class Name</td><td>ca.uhn.fhir.jpa.fql.jdbc.JdbcDriver</td>
 </tr><tr>
 <td>URL</td><td>jdbc:hapifhir:[server_base_url]</td>
+</tr><tr>
+<td>Username</td><td rowspan="2">If provided, the username/password will be added as an HTTP Basic Authorization header on all requests to the server.</td>
+</tr><tr>
+<td>Password</td>
 </tr>
 </tbody>
 </table>

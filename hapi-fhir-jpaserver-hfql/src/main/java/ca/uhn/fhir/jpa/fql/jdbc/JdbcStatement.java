@@ -36,7 +36,7 @@ class JdbcStatement implements Statement {
 	private int myMaxRows;
 	private final JdbcConnection myConnection;
 
-	private int myFetchSize;
+	private int myFetchSize = HfqlConstants.DEFAULT_FETCH_SIZE;
 	private JdbcResultSet myResultSet;
 
 	public JdbcStatement(JdbcConnection theConnection) {
@@ -116,11 +116,6 @@ class JdbcStatement implements Statement {
 
 	@Override
 	public boolean execute(String sql) throws SQLException {
-		if (getFetchSize() > 0) {
-			// FIXME: move to client#execute method
-			myConnection.getClient().setFetchSize(getFetchSize());
-		}
-
 		Integer limit = null;
 		if (getMaxRows() > 0) {
 			limit = getMaxRows();
@@ -134,7 +129,7 @@ class JdbcStatement implements Statement {
 		}
 		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(myFetchSize));
 
-		IHfqlExecutionResult result = myConnection.getClient().execute(input, true);
+		IHfqlExecutionResult result = myConnection.getClient().execute(input, true, getFetchSize());
 
 		myResultSet = new JdbcResultSet(result, this);
 		return true;
@@ -171,7 +166,7 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int getFetchSize() throws SQLException {
+	public int getFetchSize() {
 		return myFetchSize;
 	}
 

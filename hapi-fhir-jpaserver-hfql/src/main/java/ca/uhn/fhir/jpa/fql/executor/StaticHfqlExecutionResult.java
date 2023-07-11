@@ -53,24 +53,6 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 		myDataTypes = theDataTypes;
 		myRowsIterator = theRows.iterator();
 		myNextRowOffset = 0;
-
-		for (List<Object> next : theRows) {
-			assert next.size() == theColumnNames.size();
-			assert next.size() == theDataTypes.size() : "Row has " + next.size() + " columns but datatypes has " + theDataTypes.size();
-			for (int i = 0; i < next.size(); i++) {
-				Object value = next.get(i);
-				if (value != null) {
-					switch (theDataTypes.get(i)) {
-						case STRING:
-							assert value instanceof String : "Column " + i + " has value of type " + value.getClass().getSimpleName() + " but expected " + theDataTypes.get(i) + ": " + value;
-							break;
-						case INTEGER:
-							assert value instanceof Integer : "Column " + i + " has value of type " + value.getClass().getSimpleName() + " but expected " + theDataTypes.get(i) + ": " + value;
-							break;
-					}
-				}
-			}
-		}
 	}
 
 	@Override
