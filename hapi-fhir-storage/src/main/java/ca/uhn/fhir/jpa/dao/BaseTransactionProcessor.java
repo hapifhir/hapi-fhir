@@ -1696,7 +1696,7 @@ public abstract class BaseTransactionProcessor {
 			} else {
 				parts = url.split("/");
 			}
-			final Set<String> allResourceTypes = myContext.getResourceTypes();
+			Set<String> allResourceTypes = myContext.getResourceTypes();
 
 			return allResourceTypes.contains(parts[0]);
 		}
