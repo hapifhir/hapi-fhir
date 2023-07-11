@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.asynch;
+package ca.uhn.fhir.subscription;
 
 /*-
  * #%L
@@ -24,10 +24,8 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * This service is responsible for scheduling a job that will submit messages
