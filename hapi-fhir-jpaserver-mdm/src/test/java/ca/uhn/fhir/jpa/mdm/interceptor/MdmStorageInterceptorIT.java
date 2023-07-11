@@ -132,6 +132,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButPossibleMatchExists() throws InterruptedException {
+		// Given
 		Patient paulPatient = buildPaulPatient();
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
@@ -141,8 +142,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch);
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 
+		// When
 		myPatientDao.delete(paulPatient.getIdElement());
 
+		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(2, resources.size());
 
@@ -151,6 +154,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testGoldenResourceDeleted_andNewGoldenCreated_whenOnlyMatchDeletedButMultiplePossibleMatchesExist() throws InterruptedException {
+		// Given
 		Patient paulPatient = buildPaulPatient();
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
@@ -167,8 +171,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 
+		// When
 		myPatientDao.delete(paulPatient.getIdElement());
 
+		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(3, resources.size());
 
@@ -177,6 +183,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testDeleteSourceResource_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
 		Patient paulPatient = buildPaulPatient();
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
@@ -193,22 +200,18 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
 
-		// Paul 1 MATCH to GR1
-		// Paul 2 NO_MATCH to GR1
-		// Paul 2 MATCH to GR2
-		// Paul 3 POSSIBLE_MATCH to GR1
-		// Paul 3 POSSIBLE_MATCH to GR2
-		// GR1 POSSIBLE_DUPLICATE GR2
 		assertLinkCount(6);
 
-		// Paul 1 MATCH to GR1 --> DELETED
-		// Paul 2 NO_MATCH to GR1 --> DELETED
-		// Paul 2 MATCH to GR2 --> KEPT
-		// Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
-		// Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
-		// GR1 POSSIBLE_DUPLICATE GR2 --> DELETED
+		// When
 		myPatientDao.delete(paulPatient.getIdElement());
 
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(3, resources.size());
 
@@ -217,6 +220,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testDeleteSourceResource_withNoMatchLink_whereGoldenResourceIsPossibleDuplicate() throws InterruptedException {
+		// Given
 		Patient paulPatient = buildPaulPatient();
 		paulPatient.setActive(true);
 		myMdmHelper.createWithLatch(paulPatient);
@@ -233,22 +237,18 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		paulPatientPossibleMatch2.getNameFirstRep().setFamily("AnotherPerson");
 		myMdmHelper.createWithLatch(paulPatientPossibleMatch2);
 
-		// Paul 1 MATCH to GR1
-		// Paul 2 NO_MATCH to GR1
-		// Paul 2 MATCH to GR2
-		// Paul 3 POSSIBLE_MATCH to GR1
-		// Paul 3 POSSIBLE_MATCH to GR2
-		// GR1 POSSIBLE_DUPLICATE GR2
 		assertLinkCount(6);
 
-		// Paul 1 MATCH to GR1 --> DELETED
-		// Paul 2 NO_MATCH to GR1 --> DELETED
-		// Paul 2 MATCH to GR2 --> KEPT
-		// Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
-		// Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
-		// GR1 POSSIBLE_DUPLICATE GR2 --> DELETED
+		// When
 		myPatientDao.delete(paulPatientPossibleMatch.getIdElement());
 
+		// Then
+		/* Paul 1 MATCH to GR1 --> DELETED
+		   Paul 2 NO_MATCH to GR1 --> DELETED
+		   Paul 2 MATCH to GR2 --> KEPT
+		   Paul 3 POSSIBLE_MATCH to GR1 --> DELETED
+		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
+		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
 		assertEquals(3, resources.size());
 
