@@ -303,7 +303,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 		//Then: The Elasticsearch Query should be logged.
-		assertThat(elasticPerformanceTracingInterceptor.getMessages().size(), is(equalTo(3)));
+		assertThat(elasticPerformanceTracingInterceptor.getMessages(), hasSize(3));
 		StorageProcessingMessage storageProcessingMessage = elasticPerformanceTracingInterceptor.getMessages().get(2);
 		assertThat(storageProcessingMessage.getMessage(), containsString("\"query\":\"( blood* )\""));
 
