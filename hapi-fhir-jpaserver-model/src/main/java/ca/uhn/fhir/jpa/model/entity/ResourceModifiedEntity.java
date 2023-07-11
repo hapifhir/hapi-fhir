@@ -45,8 +45,9 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 	@EmbeddedId
 	private PersistedResourceModifiedMessageEntityPK myResourceModifiedEntityPK;
 
-	@Column(name = "PARTIAL_MESSAGE", length = MESSAGE_LENGTH)
+	@Column(name = "PARTIAL_MESSAGE", length = MESSAGE_LENGTH, nullable = false)
 	private String myPartialResourceModifiedMessage;
+
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
