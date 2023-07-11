@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FhirContextR4Test {
 
 	@Test
-	void customResourceTypes() {
+	void customResourceTypeClassNameAndResourceDefSame() {
 		final FhirContext fhirContext = FhirContext.forR4();
 
 		fhirContext.registerCustomType(Clock.class);
@@ -21,6 +21,20 @@ public class FhirContextR4Test {
 		final Set<String> resourceTypes = fhirContext.getResourceTypes();
 
 		assertTrue(resourceTypes.contains("Clock"));
+	}
+
+	@Test
+	void customResourceTypeClassNameAndResourceDefDifferent() {
+		final FhirContext fhirContext = FhirContext.forR4();
+
+		fhirContext.registerCustomType(CustomResourceClassName.class);
+
+		// This is needed in order to trigger scanResourceTypes() which in turn populates the custom resource types in fhirContext.getResourceTypes()
+		fhirContext.getAllResourceDefinitions();
+
+		final Set<String> resourceTypes = fhirContext.getResourceTypes();
+
+		assertTrue(resourceTypes.contains("CustomResourceResourceDef"));
 	}
 
 	@Test
