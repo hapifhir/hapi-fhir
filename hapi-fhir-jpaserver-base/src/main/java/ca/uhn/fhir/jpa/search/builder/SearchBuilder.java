@@ -391,7 +391,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
 				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(myResourceName, myParams, myMaxResultsToFetch, theRequest);
+				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(
+						myResourceName, myParams, myMaxResultsToFetch, theRequest);
 			}
 
 			if (fulltextExecutor == null) {
