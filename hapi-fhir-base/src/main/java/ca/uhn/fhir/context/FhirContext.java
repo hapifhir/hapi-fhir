@@ -28,6 +28,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -73,6 +74,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1015,9 +1018,14 @@ public class FhirContext {
 		}
 		if (myCustomTypes != null) {
 			typesToScan.addAll(myCustomTypes);
+
 			myCustomResourceNames.addAll(myCustomTypes.stream()
-				.map(Class::getSimpleName)
+				.map(customType -> Optional.ofNullable(customType.getAnnotation(ResourceDef.class))
+					.map(ResourceDef::name)
+					.orElse(null)) // This will be caught by the call to ModelScanner
+				.filter(Objects::nonNull)
 				.collect(Collectors.toUnmodifiableSet()));
+
 			myCustomTypes = null;
 		}
 
