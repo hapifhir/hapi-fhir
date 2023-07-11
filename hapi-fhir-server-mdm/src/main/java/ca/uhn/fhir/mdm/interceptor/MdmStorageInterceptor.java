@@ -187,6 +187,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				IResourcePersistentId goldenPid = extractGoldenPid(theResource, matches.get(0));
 
 				cleanUpPossibleMatches(possibleMatches, dao, goldenPid);
+
+				IAnyResource goldenResource = (IAnyResource) dao.readByPid(goldenPid);
+				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(goldenResource);
+
 				deleteGoldenResource(goldenPid, sourceId, dao, theRequest);
 			}
 			myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
