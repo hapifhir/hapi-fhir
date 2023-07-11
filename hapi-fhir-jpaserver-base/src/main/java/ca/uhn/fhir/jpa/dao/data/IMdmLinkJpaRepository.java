@@ -81,8 +81,9 @@ public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long,
 		"FROM MdmLink ml " +
 		"INNER JOIN MdmLink ml2 " +
 		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
-		"WHERE ml2.mySourcePid=:sourcePid")
-	List<MdmLink> expandPidsAndMatchResultBySourcePid(@Param("sourcePid") Long theSourcePid);
+		"WHERE ml2.mySourcePid=:sourcePid " +
+		"AND ml2.myMatchResult!=:matchResult")
+	List<MdmLink> expandPidsAndMatchResultBySourcePid(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);

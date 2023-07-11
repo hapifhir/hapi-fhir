@@ -62,5 +62,7 @@ public interface IMdmSettings {
 
 	void setSearchAllPartitionForMatch(boolean theSearchAllPartitionForMatch);
 
-	boolean isMyAutoDeleteGoldenResources();
+	boolean isAutoExpungeGoldenResources();
+
+	void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge);
 }

@@ -23,7 +23,6 @@ import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,7 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
-	private boolean myAutoDeleteGoldenResources = true;
+	private boolean myShouldAutoDeleteGoldenResources = true;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -162,12 +161,12 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public boolean isMyAutoDeleteGoldenResources() {
-		return myAutoDeleteGoldenResources;
+	public boolean isAutoExpungeGoldenResources() {
+		return myShouldAutoDeleteGoldenResources;
 	}
 
-	@VisibleForTesting
-	public void setMyAutoDeleteGoldenResources(boolean theAutoDelete) {
-		myAutoDeleteGoldenResources = theAutoDelete;
+	@Override
+	public void setAutoExpungeGoldenResources(boolean theShouldAutoExpunge) {
+		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
 	}
 }

@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
@@ -46,6 +48,7 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -61,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -97,6 +101,8 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 //	private MdmMatchLinkSvc
 	@Autowired
 	private IMdmLinkUpdaterSvc mdmLinkUpdaterSvc;
+//	@Autowired
+//	private MdmLinkFactory<IMdmLink<IResourcePersistentId>> k;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
@@ -169,58 +175,67 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 
 		if (myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
-			if (myMdmSettings.isMyAutoDeleteGoldenResources()) {
-				IIdType sourceId = theResource.getIdElement().toVersionless();
-				IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
-				//todo jdjd make this one sql query maybe
-//			List<MdmPidTuple> matches = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(sourcePid, MdmMatchResultEnum.MATCH);
-				List<? extends IMdmLink> allLinks = myMdmLinkDao.expandPidsAndMatchResultBySourcePid(sourcePid);
+			System.out.println("JDJD " + myMdmSettings.isAutoExpungeGoldenResources());
+			System.out.println("JDJD " + myMdmSettings.isPreventMultipleEids());
+			System.out.println("JDJD " + theResource.getIdElement());
+			System.out.println("JDJD " + myMdmSettings.getSearchAllPartitionForMatch());
 
-				Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult = allLinks.stream()
-					.collect(Collectors.groupingBy(IMdmLink::getMatchResult));
-				List<IMdmLink> matches2 = linksByMatchResult.get(MdmMatchResultEnum.MATCH);
-				List<IMdmLink> possibleMatches2 = linksByMatchResult.get(MdmMatchResultEnum.POSSIBLE_MATCH);
 
-				if (matches2 == null || matches2.size() == 1) {
-					// TODO JDJD handle the case where matches.size == 0, then the next statement is going to be out of bounds
-//				List<MdmPidTuple> possibleMatches = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(matches.get(0).getGoldenPid(), MdmMatchResultEnum.POSSIBLE_MATCH);
-//				myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
-					// We are attempting to delete the only source resource left linked to the golden resource
-					// In this case, we should automatically delete the golden resource to prevent orphaning
-//				setLinksDeletedBeforehand();
-//				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-//				dao.deletePidList("",Collections.singleton(matches.get(0).getGoldenPid()),new DeleteConflictList(),theRequest);
-//				IIdType id = myIdHelperSvc.translatePidIdToForcedId(myFhirContext,theResource.fhirType(),matches.get(0).getGoldenPid());
-//				dao.delete(id);
-//				resetLinksDeletedBeforehand();
+			IIdType sourceId = theResource.getIdElement().toVersionless();
+			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
+			List<? extends IMdmLink> allLinks = myMdmLinkDao.expandPidsAndMatchResultBySourcePid(sourcePid);
 
-					IResourcePersistentId grPid = matches2 == null ? null : matches2.get(0).getGoldenResourcePersistenceId();
+			// this invalid bc it only finds links the source is in. eg: 1 --> gr <-- 2 it will not find 2 --> gr
+//			IMdmLink<IResourcePersistentId> exampleLink = k.newMdmLinkVersionless();
+//			exampleLink.setGoldenResourcePersistenceId(sourcePid);
+//			Example<IMdmLink<IResourcePersistentId>> example = Example.of(exampleLink);
+//			List<IMdmLink> allLinks = myMdmLinkDao.findAll(example);
 
-					// case to handle: we are deleting a possible match source resource
-					if (possibleMatches2 != null && possibleMatches2.size() >= 1) {
-						if (grPid == null) {
-							grPid = possibleMatches2.get(0).getGoldenResourcePersistenceId();
-						}
-						for (IMdmLink possibleMatch : possibleMatches2) {
-							IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
-							IBaseResource resource = dao.readByPid(possibleMatch.getSourcePersistenceId());
-//						myMdmChannelSubmitterSvc.submitResourceToMdmChannel(resource);
+			Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult = allLinks.stream()
+				.collect(Collectors.groupingBy(IMdmLink::getMatchResult));
+			List<IMdmLink> matches = linksByMatchResult.containsKey(MdmMatchResultEnum.MATCH) ? linksByMatchResult.get(MdmMatchResultEnum.MATCH) : new ArrayList<>();
+			List<IMdmLink> possibleMatches = linksByMatchResult.containsKey(MdmMatchResultEnum.POSSIBLE_MATCH) ? linksByMatchResult.get(MdmMatchResultEnum.POSSIBLE_MATCH) : new ArrayList<>();
 
-							IBaseResource gr = dao.readByPid(possibleMatch.getGoldenResourcePersistenceId());//todo jdjd u don't realy need to call this every loop
+			// case to handle: we are deleting a possible match source resource
 
-							//todo jdjd consider taking parts of updatelink and just doing it here - so it goes through less code?
-							mdmLinkUpdaterSvc.updateLink((IAnyResource) gr, (IAnyResource) resource, MdmMatchResultEnum.NO_MATCH,
-								createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, theResource.fhirType()));
-						}
+			if (matches.size() == 1 && matches.get(0).getSourcePersistenceId().equals(sourcePid)) {
+				// We are attempting to delete the only source resource left linked to the golden resource
+				// In this case, we should automatically delete the golden resource to prevent orphaning
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResource);
+				IResourcePersistentId grPid = matches.get(0).getGoldenResourcePersistenceId();
+				IBaseResource gr = dao.readByPid(grPid); //todo jdjd do i need to call this in the loop?
+
+				// Clean up possible matches, since they are no longer "real matches"
+				for (IMdmLink possibleMatch : possibleMatches) {
+					IBaseResource resource = dao.readByPid(possibleMatch.getSourcePersistenceId());
+
+					mdmLinkUpdaterSvc.updateLink((IAnyResource) gr, (IAnyResource) resource, MdmMatchResultEnum.NO_MATCH,
+						createMdmContext(MdmTransactionContext.OperationType.UPDATE_LINK, theResource.fhirType()));
+				}
+
+				int numDeleted;
+				if (myMdmSettings.isAutoExpungeGoldenResources()) {
+					System.out.println("JDJD exp");
+					numDeleted = deleteLinkedGoldenResource(grPid);
+				} else {
+					System.out.println("JDJD del");
+					setLinksDeletedBeforehand();
+					DeleteMethodOutcome deleteOutcome = dao.deletePidList(theRequest.getCompleteUrl(), Collections.singleton(grPid), new DeleteConflictList(), theRequest, new TransactionDetails());
+					numDeleted = deleteOutcome.getDeletedEntities().size();
+					resetLinksDeletedBeforehand();
+				}
+
+				if (numDeleted > 0) {
+					ourLog.info("Removed {} golden resource(s) with references to {}", numDeleted, sourceId);
+				}
+			} else if (possibleMatches.size() >= 1) {
+				//todo jdjd do i need this part
+				Set<IResourcePersistentId> gridset = possibleMatches.stream().map(IMdmLink::getGoldenResourcePersistenceId).collect(Collectors.toSet());
+				for (IResourcePersistentId grid : gridset) {
+					long count = allLinks.stream().filter(IMdmLink::isMatch).filter(t->t.getGoldenResourcePersistenceId().equals(grid)).count();
+					if (count == 0) {
+						 deleteLinkedGoldenResource(grid);
 					}
-
-					if (grPid != null) {
-						int numDeleted = deleteLinkedGoldenResource(grPid);
-						if (numDeleted > 0) {
-							ourLog.info("Removed {} golden resource(s) with references to {}", numDeleted, sourceId);
-						}
-					}
-
 				}
 			}
 

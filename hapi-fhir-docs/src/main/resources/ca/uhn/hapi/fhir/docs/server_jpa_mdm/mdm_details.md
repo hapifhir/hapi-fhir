@@ -94,6 +94,17 @@ When a new source resource is compared with all other resources of the same type
 
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual reassignment to either NO_MATCH or MATCH.
 
+### MDM and Resource Deletion
+By default, when the last source resource in a `MATCH` relationship with a golden resource is deleted, the associated golden resource is permanently (hard) deleted. This prevents orphaned golden resources that remain in the database. Note that this will also delete the respective MDM link history. Here are several scenarios and their associated behaviour, we will define SR as a source resource and GR as a golden resource:
+
+* There is a 1 to 1 `MATCH` relationship between SR/1 and GR/1 -> when SR/1 is deleted, GR/1 is also deleted. 
+
+* GR/1 has a `MATCH` link with SR/1, and a `POSSIBLE_MATCH` link with SR/2 -> when SR/1 is deleted, all links are deleted and GR/1 is deleted. Additionally, SR/2 is re-submitted for matching, meaning a new GR could be created or it could match with another GR. 
+
+* GR/1 has a `MATCH` link with SR/1, a `POSSIBLE_MATCH` link with SR/2, and a `POSSIBLE_DUPLICATE` with GR/2. Additionally, GR/2 has a `MATCH` with SR/3, a `POSSIBLE_MACH` with SR/2 -> when SR/1 is deleted, all links associated with GR/1, including the `POSSIBLE_DUPLICATE` link, are deleted. SR/2 maintains its `POSSIBLE_MATCH` relation with GR/2. Finally, GR/1 is deleted.
+
+This behaviour can be changed from the default of hard deleting to soft deleting by setting [setAutoExpungeGoldenResources(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setAutoExpungeGoldenResources(boolean)) to false. Soft deleting the golden resource means the golden resource will continue to persist in the database, but the MDM link history for the affected link(s) will still be accessible, which may be useful for auditing.
+
 # HAPI MDM Technical Details
 
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:
