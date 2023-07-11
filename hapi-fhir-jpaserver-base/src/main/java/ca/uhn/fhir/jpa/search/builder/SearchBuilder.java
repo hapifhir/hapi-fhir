@@ -357,10 +357,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
 				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
-				fulltextMatchIds = queryHibernateSearchForEverythingPids();
+				fulltextMatchIds = queryHibernateSearchForEverythingPids(theRequest);
 				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(myResourceName, myParams, myMaxResultsToFetch);
+				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(myResourceName, myParams, myMaxResultsToFetch, theRequest);
 			}
 
 			if (fulltextExecutor == null) {
@@ -460,7 +460,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private List<JpaPid> queryHibernateSearchForEverythingPids() {
+	private List<JpaPid> queryHibernateSearchForEverythingPids(RequestDetails theRequestDetails) {
 		JpaPid pid = null;
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
@@ -475,7 +475,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
 		}
-		List<JpaPid> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid);
+		List<JpaPid> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid, theRequestDetails);
 		return pids;
 	}
 

@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
@@ -32,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
@@ -42,7 +46,10 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.collect.Ordering;
@@ -101,6 +108,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private IHSearchSortHelper myExtendedFulltextSortHelper;
 	@Autowired(required = false)
 	private IHSearchEventListener myHSearchEventListener;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private Boolean ourDisabled;
 
@@ -140,28 +149,30 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch) {
+	public ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
 
-		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch);
+		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch, theRequestDetails);
 	}
 
 
 	// keep this in sync with supportsSomeOf();
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams,
-													  IResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch) {
+													  IResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch, RequestDetails theRequestDetails) {
 
 		int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
 
 		// perform an offset search instead of a scroll one, which doesn't allow for offset
-		List<Long> queryFetchResult = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).fetchHits(offset, count);
+		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> searchQueryOptionsStep = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid);
+		logQuery(searchQueryOptionsStep, theRequestDetails);
+		List<Long> longs = searchQueryOptionsStep.fetchHits(offset, count);
+
 
 		// indicate param was already processed, otherwise queries DB to process it
 		theParams.setOffset(null);
-		return SearchQueryExecutors.from(queryFetchResult);
+		return SearchQueryExecutors.from(longs);
 	}
-
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
 		if (theMax != null) {
@@ -261,11 +272,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<IResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
+	public List<IResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, IResourcePersistentId theReferencingPid, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
 
 		// todo mb what about max results here?
-		List<IResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
+		List<IResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000,theRequestDetails), 10_000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
 		}
@@ -303,9 +314,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<IResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
+	public List<IResourcePersistentId> search(String theResourceName, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		validateHibernateSearchIsEnabled();
-		return toList(doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE), DEFAULT_MAX_NON_PAGED_SIZE);
+		return toList(doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE, theRequestDetails ), DEFAULT_MAX_NON_PAGED_SIZE);
 	}
 
 	/**
@@ -412,7 +423,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
+	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		int offset = 0;
 		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 
@@ -433,9 +444,29 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType));
 		}
 
+		logQuery(query, theRequestDetails);
 		List<ExtendedHSearchResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
 
 		return resourceProjectionsToResources(extendedLuceneResourceProjections);
+	}
+
+	/**
+	 * Fire the JPA_PERFTRACE_INFO hook if it is enabled
+	 * @param theQuery the query to log
+	 * @param theRequestDetails the request details
+	 */
+	@SuppressWarnings("rawtypes")
+	private void logQuery(SearchQueryOptionsStep theQuery, RequestDetails theRequestDetails) {
+		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+			StorageProcessingMessage storageProcessingMessage = new StorageProcessingMessage();
+			String queryString = theQuery.toQuery().queryString();
+			storageProcessingMessage.setMessage(queryString);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(StorageProcessingMessage.class, storageProcessingMessage);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+		}
 	}
 
 
