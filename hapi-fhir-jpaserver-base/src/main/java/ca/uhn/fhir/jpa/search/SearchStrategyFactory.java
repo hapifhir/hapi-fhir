@@ -72,7 +72,7 @@ public class SearchStrategyFactory {
 				return new SimpleBundleProvider(Collections.emptyList(), theSearchUUID);
 			}
 
-			List<IBaseResource> resources = myFulltextSearchSvc.searchForResources(theResourceType, theParams);
+			List<IBaseResource> resources = myFulltextSearchSvc.searchForResources(theResourceType, theParams, theRequestDetails);
 			SimpleBundleProvider result = new SimpleBundleProvider(resources, theSearchUUID);
 			result.setSize(resources.size());
 			return result;
