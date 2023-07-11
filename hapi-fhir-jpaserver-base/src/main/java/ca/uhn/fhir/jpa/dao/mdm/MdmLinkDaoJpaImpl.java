@@ -126,8 +126,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public List<MdmLink> expandPidsAndMatchResultBySourcePid(JpaPid theSourcePid) {
-		return new ArrayList<>(myMdmLinkDao.expandPidsAndMatchResultBySourcePid((theSourcePid).getId(), MdmMatchResultEnum.NO_MATCH));
+	public List<MdmLink> findLinksAssociatedWithGoldenResourceOfSourceResource(JpaPid theSourcePid) {
+		return new ArrayList<>(myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResource((theSourcePid).getId(), MdmMatchResultEnum.NO_MATCH));
 	}
 
 	@Override
