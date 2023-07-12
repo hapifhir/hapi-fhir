@@ -26,5 +26,4 @@ package ca.uhn.fhir.cli;
 public class RunServerCommand {
 
 	public static final String RUN_SERVER_COMMAND = "run-server";
-
 }

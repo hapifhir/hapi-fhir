@@ -29,10 +29,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IJobCoordinator {
 
@@ -45,7 +45,8 @@ public interface IJobCoordinator {
 	 * @deprecated Use {@link #startInstance(RequestDetails, JobInstanceStartRequest)}
 	 */
 	@Deprecated(since = "6.8.0", forRemoval = true)
-	default Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) throws InvalidRequestException {
+	default Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest)
+			throws InvalidRequestException {
 		return startInstance(null, theStartRequest);
 	}
 
@@ -59,7 +60,8 @@ public interface IJobCoordinator {
 	 * @return Returns a unique ID for this job execution
 	 * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
 	 */
-	Batch2JobStartResponse startInstance(RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) throws InvalidRequestException;
+	Batch2JobStartResponse startInstance(RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest)
+			throws InvalidRequestException;
 
 	/**
 	 * Fetch details about a job instance
@@ -83,7 +85,8 @@ public interface IJobCoordinator {
 
 	JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
-	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
+	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(
+			String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
 
 	/**
 	 * Fetches all job instances tht meet the FetchRequest criteria
@@ -95,7 +98,8 @@ public interface IJobCoordinator {
 	/**
 	 * Fetches all job instances by job definition id and statuses
 	 */
-	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
+	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(
+			String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
 
 	/**
 	 * Fetches all jobs by job definition id

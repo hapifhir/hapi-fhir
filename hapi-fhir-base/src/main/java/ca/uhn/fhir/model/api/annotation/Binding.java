@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * Field annotation for fields which are bound to a given valueset
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD })
+@Target(value = {ElementType.FIELD})
 public @interface Binding {
 
 	/**

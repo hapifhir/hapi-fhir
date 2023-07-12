@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.model.api.annotation;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-@Target(value=ElementType.FIELD)
+@Target(value = ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SearchParamDefinition {
 
@@ -34,24 +34,24 @@ public @interface SearchParamDefinition {
 	 * The name for this parameter
 	 */
 	String name();
-	
+
 	/**
 	 * The path for this parameter
 	 */
 	String path();
-	
+
 	/**
 	 * A description of this parameter
 	 */
 	String description() default "";
-	
+
 	/**
 	 * The type for this parameter, e.g. "string", or "token"
 	 */
 	String type() default "string";
-	
+
 	/**
-	 * If the parameter is of type "composite", this parameter lists the names of the parameters 
+	 * If the parameter is of type "composite", this parameter lists the names of the parameters
 	 * which this parameter is a composite of. E.g. "name-value-token" is a composite of "name" and "value-token".
 	 * <p>
 	 * If the parameter is not a composite, this parameter must be empty
@@ -64,11 +64,10 @@ public @interface SearchParamDefinition {
 	 * specify the resource type(s) that this parameter applies to.
 	 */
 	Class<? extends IBaseResource>[] target() default {};
-	
+
 	/**
 	 * Indicates that this field indicates that resources linked to by this parameter
 	 * (must be a reference parameter) place the resource in the given compartment.
 	 */
 	Compartment[] providesMembershipIn() default {};
-
 }

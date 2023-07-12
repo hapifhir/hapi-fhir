@@ -33,6 +33,15 @@ import org.hibernate.annotations.OptimisticLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -54,25 +63,17 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = Search.HFJ_SEARCH, uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
-}, indexes = {
-	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
-	@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
-})
+@Table(
+		name = Search.HFJ_SEARCH,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")},
+		indexes = {
+			@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED"),
+			@Index(name = "IDX_SEARCH_CREATED", columnList = "CREATED")
+		})
 public class Search implements ICachedSearchDetails, Serializable {
 
 	/**
@@ -81,46 +82,61 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
+
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
 	public static final String SEARCH_UUID = "SEARCH_UUID";
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
+
 	@OptimisticLock(excluded = true)
 	@Column(name = "SEARCH_DELETED", nullable = true)
 	private Boolean myDeleted;
+
 	@Column(name = "FAILURE_CODE", nullable = true)
 	private Integer myFailureCode;
+
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPIRY_OR_NULL", nullable = true)
 	private Date myExpiryOrNull;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
+
 	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
+
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
+
 	@Column(name = "NUM_BLOCKED", nullable = true)
 	private Integer myNumBlocked;
+
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
+
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
+
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
 	/**
@@ -130,22 +146,29 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
+
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	private SearchTypeEnum mySearchType;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
+
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
+
 	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
+
 	@SuppressWarnings("unused")
 	@Version
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
+
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
@@ -187,15 +210,15 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myLastUpdatedHigh", myLastUpdatedHigh)
-			.append("myLastUpdatedLow", myLastUpdatedLow)
-			.append("myNumFound", myNumFound)
-			.append("myNumBlocked", myNumBlocked)
-			.append("myStatus", myStatus)
-			.append("myTotalCount", myTotalCount)
-			.append("myUuid", myUuid)
-			.append("myVersion", myVersion)
-			.toString();
+				.append("myLastUpdatedHigh", myLastUpdatedHigh)
+				.append("myLastUpdatedLow", myLastUpdatedLow)
+				.append("myNumFound", myNumFound)
+				.append("myNumBlocked", myNumBlocked)
+				.append("myStatus", myStatus)
+				.append("myTotalCount", myTotalCount)
+				.append("myUuid", myUuid)
+				.append("myVersion", myVersion)
+				.toString();
 	}
 
 	public int getNumBlocked() {
@@ -456,7 +479,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	@Nonnull
-	public static String createSearchQueryStringForStorage(@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public static String createSearchQueryStringForStorage(
+			@Nonnull String theSearchQueryString, @Nonnull RequestPartitionId theRequestPartitionId) {
 		String searchQueryString = theSearchQueryString;
 		if (!theRequestPartitionId.isAllPartitions()) {
 			searchQueryString = RequestPartitionId.stringifyForKey(theRequestPartitionId) + " " + searchQueryString;

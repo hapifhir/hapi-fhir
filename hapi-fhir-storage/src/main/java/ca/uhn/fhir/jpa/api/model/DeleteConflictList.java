@@ -53,11 +53,11 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 		myResourceIdsToIgnoreConflict = theParentList.myResourceIdsToIgnoreConflict;
 	}
 
-
 	public boolean isResourceIdMarkedForDeletion(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsMarkedForDeletion.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsMarkedForDeletion.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdMarkedForDeletion(IIdType theIdType) {
@@ -69,7 +69,8 @@ public class DeleteConflictList implements Iterable<DeleteConflict> {
 	public boolean isResourceIdToIgnoreConflict(IIdType theIdType) {
 		Validate.notNull(theIdType);
 		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
-		return myResourceIdsToIgnoreConflict.contains(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsToIgnoreConflict.contains(
+				theIdType.toUnqualifiedVersionless().getValue());
 	}
 
 	public void setResourceIdToIgnoreConflict(IIdType theIdType) {

@@ -48,32 +48,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
+
 	@Autowired
 	private FhirContext myCtx;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+
 	@Autowired
 	private IIdHelperService myIdHelperService;
+
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink) {
 
 		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
 		String sourceName = theStepExecutionDetails.getData().getSourceName();
@@ -109,10 +116,16 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 			requestDetails.setRequestPartitionId(thePartitionId);
 		}
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
+		myHapiTransactionService.execute(
+				requestDetails,
+				transactionDetails,
+				tx -> storeResourcesInsideTransaction(resources, requestDetails, transactionDetails));
 	}
 
-	private Void storeResourcesInsideTransaction(List<IBaseResource> theResources, SystemRequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	private Void storeResourcesInsideTransaction(
+			List<IBaseResource> theResources,
+			SystemRequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		Map<IIdType, IBaseResource> ids = new HashMap<>();
 		for (IBaseResource next : theResources) {
 			if (!next.getIdElement().hasIdPart()) {
@@ -127,7 +140,8 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		}
 
 		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(theRequestDetails.getRequestPartitionId(), idsList, true);
+		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(
+				theRequestDetails.getRequestPartitionId(), idsList, true);
 		for (IResourcePersistentId next : resolvedIds) {
 			IIdType resId = next.getAssociatedResourceId();
 			theTransactionDetails.addResolvedResourceId(resId, next);
@@ -146,7 +160,8 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		return null;
 	}
 
-	private <T extends IBaseResource> void updateResource(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
+	private <T extends IBaseResource> void updateResource(
+			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, T theResource) {
 		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theResource);
 		try {
 			dao.update(theResource, null, true, false, theRequestDetails, theTransactionDetails);

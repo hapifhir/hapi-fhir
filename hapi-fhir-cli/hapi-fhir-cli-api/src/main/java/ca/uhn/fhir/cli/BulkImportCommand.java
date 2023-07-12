@@ -45,14 +45,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,6 +67,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+import javax.annotation.Nonnull;
 
 public class BulkImportCommand extends BaseCommand {
 
@@ -84,10 +84,10 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Override
 	public String getCommandDescription() {
-		return "Initiates a bulk import against a FHIR server using the $import " +
-			"operation, and creates a local HTTP server to serve the contents. " +
-			"This command does not currently support HTTPS so it is only intended " +
-			"for testing scenarios.";
+		return "Initiates a bulk import against a FHIR server using the $import "
+				+ "operation, and creates a local HTTP server to serve the contents. "
+				+ "This command does not currently support HTTPS so it is only intended "
+				+ "for testing scenarios.";
 	}
 
 	@Override
@@ -99,9 +99,24 @@ public class BulkImportCommand extends BaseCommand {
 	public Options getOptions() {
 		Options options = new Options();
 		addFhirVersionOption(options);
-		addRequiredOption(options, null, PORT, PORT, "The port to listen on. If set to 0, an available free port will be selected.");
-		addOptionalOption(options, null, SOURCE_BASE, "base url", "The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
-		addRequiredOption(options, null, SOURCE_DIRECTORY, "directory", "The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
+		addRequiredOption(
+				options,
+				null,
+				PORT,
+				PORT,
+				"The port to listen on. If set to 0, an available free port will be selected.");
+		addOptionalOption(
+				options,
+				null,
+				SOURCE_BASE,
+				"base url",
+				"The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
+		addRequiredOption(
+				options,
+				null,
+				SOURCE_DIRECTORY,
+				"directory",
+				"The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;
@@ -130,20 +145,23 @@ public class BulkImportCommand extends BaseCommand {
 
 		String targetBaseUrl = theCommandLine.getOptionValue(TARGET_BASE);
 		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
-		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
+		IGenericClient client = newClient(
+				theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 		client.registerInterceptor(new LoggingInterceptor(false));
 
 		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);
-		IBaseResource outcome = client
-			.operation()
-			.onServer()
-			.named(JpaConstants.OPERATION_IMPORT)
-			.withParameters(request)
-			.returnResourceType(myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
-			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.execute();
+		IBaseResource outcome = client.operation()
+				.onServer()
+				.named(JpaConstants.OPERATION_IMPORT)
+				.withParameters(request)
+				.returnResourceType(
+						myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.execute();
 
-		ourLog.debug("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(
+				"Got response: {}",
+				myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		checkJobComplete(outcome.getIdElement().toString(), client);
@@ -161,14 +179,13 @@ public class BulkImportCommand extends BaseCommand {
 			}
 
 			try {
-				response = client
-					.operation()
-					.onServer()
-					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
-					.returnMethodOutcome()
-					.execute();
-			} catch (InternalErrorException e){
+				response = client.operation()
+						.onServer()
+						.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+						.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+						.returnMethodOutcome()
+						.execute();
+			} catch (InternalErrorException e) {
 				// handle ERRORED status
 				ourLog.error(e.getMessage());
 				break;
@@ -176,12 +193,12 @@ public class BulkImportCommand extends BaseCommand {
 
 			if (response.getResponseStatusCode() == 200) {
 				break;
-			} else if (response.getResponseStatusCode() == 202){
+			} else if (response.getResponseStatusCode() == 202) {
 				// still in progress
 				continue;
-			}
-			else {
-				throw new InternalErrorException(Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
+			} else {
+				throw new InternalErrorException(
+						Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
 			}
 		}
 	}
@@ -192,11 +209,18 @@ public class BulkImportCommand extends BaseCommand {
 		FhirContext ctx = getFhirContext();
 		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
 
-		ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT_FORMAT, "code", Constants.CT_FHIR_NDJSON);
-		ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT_SOURCE, "code", theBaseUrl);
+		ParametersUtil.addParameterToParameters(
+				ctx, retVal, BulkDataImportProvider.PARAM_INPUT_FORMAT, "code", Constants.CT_FHIR_NDJSON);
+		ParametersUtil.addParameterToParameters(
+				ctx, retVal, BulkDataImportProvider.PARAM_INPUT_SOURCE, "code", theBaseUrl);
 
-		IBase storageDetail = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_STORAGE_DETAIL);
-		ParametersUtil.addPartString(ctx, storageDetail, BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE, BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
+		IBase storageDetail =
+				ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_STORAGE_DETAIL);
+		ParametersUtil.addPartString(
+				ctx,
+				storageDetail,
+				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE,
+				BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
 
 		for (int i = 0; i < theIndexes.size(); i++) {
 			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT);
@@ -251,16 +275,17 @@ public class BulkImportCommand extends BaseCommand {
 	private void scanDirectoryForJsonFiles(String baseDirectory, List<String> types, List<File> files) {
 		try {
 			File directory = new File(baseDirectory);
-			final String[] extensions = new String[]{".json", ".ndjson", ".json.gz", ".ndjson.gz"};
-			final IOFileFilter filter = FileFileFilter.INSTANCE.and(new SuffixFileFilter(extensions, IOCase.INSENSITIVE));
-			PathUtils
-				.walk(directory.toPath(), filter, 1, false, FileVisitOption.FOLLOW_LINKS)
-				.map(Path::toFile)
-				.filter(t -> t.isFile())
-				.filter(t -> t.exists())
-				.forEach(t -> files.add(t));
+			final String[] extensions = new String[] {".json", ".ndjson", ".json.gz", ".ndjson.gz"};
+			final IOFileFilter filter =
+					FileFileFilter.INSTANCE.and(new SuffixFileFilter(extensions, IOCase.INSENSITIVE));
+			PathUtils.walk(directory.toPath(), filter, 1, false, FileVisitOption.FOLLOW_LINKS)
+					.map(Path::toFile)
+					.filter(t -> t.isFile())
+					.filter(t -> t.exists())
+					.forEach(t -> files.add(t));
 			if (files.isEmpty()) {
-				throw new CommandFailureException(Msg.code(2058) + "No files found in directory \"" + directory.getAbsolutePath() + "\". Allowed extensions: " + Arrays.asList(extensions));
+				throw new CommandFailureException(Msg.code(2058) + "No files found in directory \""
+						+ directory.getAbsolutePath() + "\". Allowed extensions: " + Arrays.asList(extensions));
 			}
 
 			FhirContext ctx = getFhirContext();
@@ -284,6 +309,4 @@ public class BulkImportCommand extends BaseCommand {
 			throw new CommandFailureException(Msg.code(2059) + e.getMessage(), e);
 		}
 	}
-
 }
-

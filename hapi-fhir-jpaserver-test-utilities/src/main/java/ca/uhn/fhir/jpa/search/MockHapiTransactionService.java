@@ -32,5 +32,4 @@ public class MockHapiTransactionService extends HapiTransactionService {
 	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		return theCallback.doInTransaction(new SimpleTransactionStatus());
 	}
-
 }

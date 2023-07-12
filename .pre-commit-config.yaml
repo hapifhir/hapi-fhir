@@ -1,0 +1,10 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# If you wish to automatically format your code on every commit,  please install this pre-commit hook by using the pre-commit framework, and running `pre-commit install`
+
+repos:
+-   repo: https://github.com/ejba/pre-commit-maven
+    rev: v0.3.3
+    hooks:
+    -   id: maven-spotless-apply
+        stages: [pre-push]

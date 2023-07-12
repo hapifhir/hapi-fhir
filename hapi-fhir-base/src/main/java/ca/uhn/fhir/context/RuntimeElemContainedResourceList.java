@@ -22,7 +22,7 @@ package ca.uhn.fhir.context;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * HL7org structures use a List for contained instead of a distinct datatype  
+ * HL7org structures use a List for contained instead of a distinct datatype
  */
 public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefinition<IBaseResource> {
 
@@ -34,5 +34,4 @@ public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefiniti
 	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
 		return ChildTypeEnum.CONTAINED_RESOURCE_LIST;
 	}
-
 }

@@ -61,7 +61,6 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		return next;
 	}
 
-
 	@Override
 	public void close() {
 		if (myScroll != null) {
@@ -69,5 +68,4 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 			myScroll = null;
 		}
 	}
-
 }

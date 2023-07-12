@@ -52,10 +52,10 @@ public class LoincPartHandler implements IZipContentsHandlerCsv {
 		String partDisplayName = trim(theRecord.get("PartDisplayName"));
 
 		// Per Dan's note, we include deprecated parts
-//		String status = trim(theRecord.get("Status"));
-//		if (!"ACTIVE".equals(status)) {
-//			return;
-//		}
+		//		String status = trim(theRecord.get("Status"));
+		//		if (!"ACTIVE".equals(status)) {
+		//			return;
+		//		}
 
 		PartTypeAndPartName partTypeAndPartName = new PartTypeAndPartName(partTypeName, partName);
 		String previousValue = myPartTypeAndPartNameToPartNumber.put(partTypeAndPartName, partNumber);
@@ -70,16 +70,13 @@ public class LoincPartHandler implements IZipContentsHandlerCsv {
 
 		if (isNotBlank(partDisplayName)) {
 			concept.addDesignation()
-				.setConcept(concept)
-				.setUseDisplay("PartDisplayName")
-				.setValue(partDisplayName);
+					.setConcept(concept)
+					.setUseDisplay("PartDisplayName")
+					.setValue(partDisplayName);
 		}
-
 	}
 
 	public Map<PartTypeAndPartName, String> getPartTypeAndPartNameToPartNumber() {
 		return myPartTypeAndPartNameToPartNumber;
 	}
-
-
 }

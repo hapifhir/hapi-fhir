@@ -30,11 +30,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * For now, this is a simple marker interface indicating that a class is a resource type. 
+ * For now, this is a simple marker interface indicating that a class is a resource type.
  * There are two concrete types of implementations of this interrface. The first are
- * HL7.org's Resource structures (e.g. 
+ * HL7.org's Resource structures (e.g.
  * <code>org.hl7.fhir.instance.model.Patient</code>) and
- * the second are HAPI's Resource structures, e.g. 
+ * the second are HAPI's Resource structures, e.g.
  * <code>ca.uhn.fhir.model.dstu.resource.Patient</code>)
  */
 public interface IBaseResource extends IBase, IElement {
@@ -52,7 +52,7 @@ public interface IBaseResource extends IBase, IElement {
 	Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(INCLUDE_ALL)));
 
 	IIdType getIdElement();
-	
+
 	IBaseResource setId(String theId);
 
 	IBaseResource setId(IIdType theId);

@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 
 public class HapiMigrationDao {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationDao.class);
@@ -62,10 +62,10 @@ public class HapiMigrationDao {
 	public Set<MigrationVersion> fetchSuccessfulMigrationVersions() {
 		List<HapiMigrationEntity> allEntries = findAll();
 		return allEntries.stream()
-			.filter(HapiMigrationEntity::getSuccess)
-			.map(HapiMigrationEntity::getVersion)
-			.map(MigrationVersion::fromVersion)
-			.collect(Collectors.toSet());
+				.filter(HapiMigrationEntity::getSuccess)
+				.map(HapiMigrationEntity::getVersion)
+				.map(MigrationVersion::fromVersion)
+				.collect(Collectors.toSet());
 	}
 
 	public void deleteAll() {
@@ -127,7 +127,8 @@ public class HapiMigrationDao {
 	private boolean migrationTableExists() {
 		try {
 			try (Connection connection = myDataSource.getConnection()) {
-				ResultSet tables = connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(), null, null);
+				ResultSet tables =
+						connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(), null, null);
 
 				while (tables.next()) {
 					String tableName = tables.getString("TABLE_NAME");
@@ -153,13 +154,16 @@ public class HapiMigrationDao {
 	 * @return true if the record was successfully deleted
 	 */
 	public boolean deleteLockRecord(Integer theLockPid, String theLockDescription) {
-		int recordsChanged = myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
+		int recordsChanged = myJdbcTemplate.update(
+				myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
 		return recordsChanged > 0;
 	}
 
-	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(
+			Integer theLockPid, String theLockDescription) {
 		String query = myMigrationQueryBuilder.findByPidAndNotDescriptionQuery(theLockPid, theLockDescription);
 
-		return myJdbcTemplate.query(query, HapiMigrationEntity.rowMapper()).stream().findFirst();
+		return myJdbcTemplate.query(query, HapiMigrationEntity.rowMapper()).stream()
+				.findFirst();
 	}
 }

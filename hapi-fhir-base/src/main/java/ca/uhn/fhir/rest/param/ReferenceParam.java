@@ -91,7 +91,6 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 	}
 
-
 	private String defaultGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myChain)) {
@@ -107,6 +106,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		}
 		return null;
 	}
+
 	@Override
 	String doGetQueryParameterQualifier() {
 		return this.myMdmExpand != null ? ":mdm" : defaultGetQueryParameterQualifier();
@@ -167,9 +167,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 			myIdPart = id.getIdPart();
 			myBaseUrl = id.getBaseUrl();
 		}
-
 	}
-
 
 	@CoverageIgnore
 	public String getBaseUrl() {
