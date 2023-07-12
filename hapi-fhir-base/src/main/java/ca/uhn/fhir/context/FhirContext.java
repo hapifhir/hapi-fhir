@@ -28,6 +28,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -71,8 +72,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -111,6 +115,7 @@ public class FhirContext {
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition =
 			Collections.emptyMap();
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
+	private final Set<String> myCustomResourceNames = new HashSet<>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile boolean myInitialized;
 	private volatile boolean myInitializing = false;
@@ -648,6 +653,7 @@ public class FhirContext {
 				retVal.add(next.substring("resource.".length()).trim());
 			}
 		}
+		retVal.addAll(myCustomResourceNames);
 		return retVal;
 	}
 
@@ -1043,6 +1049,14 @@ public class FhirContext {
 		}
 		if (myCustomTypes != null) {
 			typesToScan.addAll(myCustomTypes);
+
+			myCustomResourceNames.addAll(myCustomTypes.stream()
+					.map(customType -> Optional.ofNullable(customType.getAnnotation(ResourceDef.class))
+							.map(ResourceDef::name)
+							.orElse(null)) // This will be caught by the call to ModelScanner
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet()));
+
 			myCustomTypes = null;
 		}
 
