@@ -97,6 +97,21 @@ public interface IFhirPath {
 	 */
 	void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext);
 
+	/**
+	 * This interface is a marker interface representing a parsed FHIRPath expression.
+	 * Instances of this class will be returned by {@link #parse(String)} and can be
+	 * passed to {@link #evaluate(IBase, IParsedExpression, Class)} and
+	 * {@link #evaluateFirst(IBase, IParsedExpression, Class)}. Using a pre-parsed
+	 * FHIRPath expression can perform much faster in some situations where an
+	 * identical expression will be evaluated many times against different targets,
+	 * since the parsing step doesn't need to be repeated.
+	 * <p>
+	 * Instances of this interface should be treated as a "black box". There are no
+	 * methods that can be used to manipulate parsed FHIRPath expressions.
+	 * </p>
+	 *
+	 * @since 6.8.0
+	 */
 	interface IParsedExpression {
 		// no methods
 	}
