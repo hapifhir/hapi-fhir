@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -83,7 +85,11 @@ public class MdmMatchLinkSvc {
 	}
 
 	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		CandidateList candidateList = null;
+		// we initialize to an empty list
+		// we require a candidatestrategy, but it doesn't matter
+		// because empty lists are effectively no matches
+		// (and so the candidate strategy doesn't matter)
+		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.LINK);
 
 		/*
 		 * If a resource is blocked, we will not conduct
@@ -96,7 +102,7 @@ public class MdmMatchLinkSvc {
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(theResource);
 		}
 
-		if (isResourceBlocked || candidateList == null || candidateList.isEmpty()) {
+		if (isResourceBlocked || candidateList.isEmpty()) {
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
 			handleMdmWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);

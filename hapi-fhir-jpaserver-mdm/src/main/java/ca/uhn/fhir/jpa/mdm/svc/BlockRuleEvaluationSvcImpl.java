@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -57,19 +56,11 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 		String resourceType = theResource.fhirType();
 
 		// gather only applicable rules
-		List<BlockListRuleJson> rulesForResource = blockListJson.getBlockListItemJsonList()
+		// these rules are 'or''d, so if any match,
+		// mdm matching is blocked
+		return blockListJson.getBlockListItemJsonList()
 			.stream().filter(r -> r.getResourceType().equals(resourceType))
-			.collect(Collectors.toList());
-
-		for (BlockListRuleJson rule : rulesForResource) {
-			// these rules are 'or''d, so if any match,
-			// mdm matching is blocked
-			if (isMdmBlockedForFhirPath(theResource, rule)) {
-				return true;
-			}
-		}
-		// otherwise, do not block
-		return false;
+			.anyMatch(rule -> isMdmBlockedForFhirPath(theResource, rule));
 	}
 
 	private boolean isMdmBlockedForFhirPath(IAnyResource theResource, BlockListRuleJson theRule) {
