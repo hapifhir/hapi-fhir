@@ -124,7 +124,8 @@
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-    </modules>
+		<module>hapi-fhir-server-cds-hooks</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -835,7 +836,7 @@
 			<id>XcrigX</id>
 			<name>Craig McClendon</name>
 		</developer>
-    <developer>
+		<developer>
 			<id>dyoung-work</id>
 		</developer>
 		<developer>
@@ -944,7 +945,7 @@
 		<hibernate_version>5.6.15.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
 		<logback_version>1.4.4</logback_version>
-	 	<!-- Update lucene version when you update hibernate-search version -->
+		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
@@ -961,6 +962,7 @@
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
+		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_version>2.1.12</swagger_version>
@@ -998,7 +1000,7 @@
 
 		<!-- Jacoco -->
 		<argLine></argLine>
-	 </properties>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -1186,21 +1188,21 @@
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
 			</dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-ext-tables</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-profile-pegdown</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-ext-tables</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-profile-pegdown</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
@@ -2628,9 +2630,9 @@
 								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
-                                <copy todir="target/site/apidocs-server-openapi">
-                                    <fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
-                                </copy>
+								<copy todir="target/site/apidocs-server-openapi">
+									<fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
@@ -2982,7 +2984,10 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:ReservedCodeCacheSize=220M</surefire_jvm_args>
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m
+					-XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M
+					-XX:ReservedCodeCacheSize=220M
+				</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>
@@ -3088,14 +3093,20 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<executions>
-							<execution><id>integration-test</id><phase>none</phase></execution>
+							<execution>
+								<id>integration-test</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<executions>
-							<execution><id>validate</id><phase>none</phase></execution>
+							<execution>
+								<id>validate</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
