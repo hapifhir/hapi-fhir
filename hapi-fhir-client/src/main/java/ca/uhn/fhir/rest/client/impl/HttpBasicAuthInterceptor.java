@@ -19,8 +19,9 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
-import java.io.IOException;
-
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -31,10 +32,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HttpContext;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-
+import java.io.IOException;
 
 /**
  * Apache HTTPClient interceptor which adds basic auth
@@ -45,8 +43,8 @@ public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 
 	private String myUsername;
 	private String myPassword;
-	
-    public HttpBasicAuthInterceptor(String theUsername, String thePassword) {
+
+	public HttpBasicAuthInterceptor(String theUsername, String thePassword) {
 		super();
 		myUsername = theUsername;
 		myPassword = thePassword;
@@ -54,13 +52,11 @@ public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 
 	@Override
 	public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-        AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+		AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
 
-        if (authState.getAuthScheme() == null) {
-            Credentials creds = new UsernamePasswordCredentials(myUsername, myPassword);
-            authState.update(new BasicScheme(), creds);
-        }
-
-    }
-
+		if (authState.getAuthScheme() == null) {
+			Credentials creds = new UsernamePasswordCredentials(myUsername, myPassword);
+			authState.update(new BasicScheme(), creds);
+		}
+	}
 }

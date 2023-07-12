@@ -36,16 +36,22 @@ import javax.annotation.PreDestroy;
 public class MdmProviderLoader {
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
+
 	@Autowired
 	private MdmControllerHelper myMdmControllerHelper;
+
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
+
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+
 	@Autowired
 	private IMdmSettings myMdmSettings;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
@@ -55,18 +61,16 @@ public class MdmProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myResourceProviderFactory.addSupplier(() ->  new MdmProviderDstu3Plus(myFhirContext,
-						myMdmControllerSvc,
-						myMdmControllerHelper,
-						myMdmSubmitSvc,
-						myMdmSettings
-						));
+				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
+						myFhirContext, myMdmControllerSvc, myMdmControllerHelper, myMdmSubmitSvc, myMdmSettings));
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
-					myResourceProviderFactory.addSupplier(() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
+					myResourceProviderFactory.addSupplier(
+							() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
 				}
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version "
+						+ myFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -75,4 +79,3 @@ public class MdmProviderLoader {
 		myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
 	}
 }
-

@@ -33,53 +33,83 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChunkEntity, String>, IHapiFhirJpaRepository {
+public interface IBatch2WorkChunkRepository
+		extends JpaRepository<Batch2WorkChunkEntity, String>, IHapiFhirJpaRepository {
 
 	// NOTE we need a stable sort so paging is reliable.
 	// Warning: mySequence is not unique - it is reset for every chunk.  So we also sort by myId.
-	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
+	@Query(
+			"SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunks(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
 	/**
 	 * A projection query to avoid fetching the CLOB over the wire.
 	 * Otherwise, the same as fetchChunks.
 	 */
-	@Query("SELECT new Batch2WorkChunkEntity(" +
-		"e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus," +
-		"e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime," +
-		"e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage" +
-		") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
+	@Query("SELECT new Batch2WorkChunkEntity("
+			+ "e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus,"
+			+ "e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime,"
+			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage"
+			+ ") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
-	@Query("SELECT DISTINCT e.myStatus from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
-	Set<WorkChunkStatusEnum> getDistinctStatusesForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
+	@Query(
+			"SELECT DISTINCT e.myStatus from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
+	Set<WorkChunkStatusEnum> getDistinctStatusesForStep(
+			@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
 
-	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :targetStepId ORDER BY e.mySequence ASC")
-	Stream<Batch2WorkChunkEntity> fetchChunksForStep(@Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
-
-	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, " +
-		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, " +
-		"e.myWarningMessage = :warningMessage WHERE e.myId = :id")
-	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime,
-		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress, @Param("warningMessage") String theWarningMessage);
+	@Query(
+			"SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :targetStepId ORDER BY e.mySequence ASC")
+	Stream<Batch2WorkChunkEntity> fetchChunksForStep(
+			@Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
 
 	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
-	void updateAllChunksForInstanceStatusClearDataAndSetError(@Param("ids") List<String> theChunkIds, @Param("et") Date theEndTime, @Param("status") WorkChunkStatusEnum theInProgress, @Param("em") String theError);
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
+			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, "
+			+ "e.myWarningMessage = :warningMessage WHERE e.myId = :id")
+	void updateChunkStatusAndClearDataForEndSuccess(
+			@Param("id") String theChunkId,
+			@Param("et") Date theEndTime,
+			@Param("rp") int theRecordsProcessed,
+			@Param("errorRetries") int theErrorRetries,
+			@Param("status") WorkChunkStatusEnum theInProgress,
+			@Param("warningMessage") String theWarningMessage);
 
 	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.myErrorMessage = :em, e.myErrorCount = e.myErrorCount + 1 WHERE e.myId = :id")
-	int updateChunkStatusAndIncrementErrorCountForEndError(@Param("id") String theChunkId, @Param("et") Date theEndTime, @Param("em") String theErrorMessage, @Param("status") WorkChunkStatusEnum theInProgress);
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
+	void updateAllChunksForInstanceStatusClearDataAndSetError(
+			@Param("ids") List<String> theChunkIds,
+			@Param("et") Date theEndTime,
+			@Param("status") WorkChunkStatusEnum theInProgress,
+			@Param("em") String theError);
 
 	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myStartTime = :st WHERE e.myId = :id AND e.myStatus IN :startStatuses")
-	int updateChunkStatusForStart(@Param("id") String theChunkId, @Param("st") Date theStartedTime, @Param("status") WorkChunkStatusEnum theInProgress, @Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.myErrorMessage = :em, e.myErrorCount = e.myErrorCount + 1 WHERE e.myId = :id")
+	int updateChunkStatusAndIncrementErrorCountForEndError(
+			@Param("id") String theChunkId,
+			@Param("et") Date theEndTime,
+			@Param("em") String theErrorMessage,
+			@Param("status") WorkChunkStatusEnum theInProgress);
+
+	@Modifying
+	@Query(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myStartTime = :st WHERE e.myId = :id AND e.myStatus IN :startStatuses")
+	int updateChunkStatusForStart(
+			@Param("id") String theChunkId,
+			@Param("st") Date theStartedTime,
+			@Param("status") WorkChunkStatusEnum theInProgress,
+			@Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
 	int deleteAllForInstance(@Param("instanceId") String theInstanceId);
 
-	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
-	List<String> fetchAllChunkIdsForStepWithStatus(@Param("instanceId")String theInstanceId, @Param("stepId")String theStepId, @Param("status") WorkChunkStatusEnum theStatus);
+	@Query(
+			"SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
+	List<String> fetchAllChunkIdsForStepWithStatus(
+			@Param("instanceId") String theInstanceId,
+			@Param("stepId") String theStepId,
+			@Param("status") WorkChunkStatusEnum theStatus);
 }

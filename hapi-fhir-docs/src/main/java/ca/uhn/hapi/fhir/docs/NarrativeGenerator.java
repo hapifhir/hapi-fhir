@@ -28,18 +28,17 @@ public class NarrativeGenerator {
 
 	public void testGenerator() {
 
-//START SNIPPET: gen
-FhirContext ctx = FhirContext.forDstu2();
-String propFile = "classpath:/com/foo/customnarrative.properties";
-CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(propFile);
+		// START SNIPPET: gen
+		FhirContext ctx = FhirContext.forDstu2();
+		String propFile = "classpath:/com/foo/customnarrative.properties";
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(propFile);
 
-Patient patient = new Patient();
+		Patient patient = new Patient();
 
-ctx.setNarrativeGenerator(gen);
-String output = ctx.newJsonParser().encodeResourceToString(patient);
-System.out.println(output);
-//END SNIPPET: gen
+		ctx.setNarrativeGenerator(gen);
+		String output = ctx.newJsonParser().encodeResourceToString(patient);
+		System.out.println(output);
+		// END SNIPPET: gen
 
-	
 	}
 }

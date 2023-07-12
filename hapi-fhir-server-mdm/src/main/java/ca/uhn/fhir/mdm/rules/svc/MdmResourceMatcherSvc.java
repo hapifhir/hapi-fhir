@@ -44,7 +44,6 @@ import java.util.List;
  * It does so by calling individual comparators, and returning a vector based on the combination of
  * field comparators that matched.
  */
-
 @Service
 public class MdmResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -56,10 +55,7 @@ public class MdmResourceMatcherSvc {
 	private MdmRulesJson myMdmRulesJson;
 
 	public MdmResourceMatcherSvc(
-		FhirContext theFhirContext,
-		IMatcherFactory theIMatcherFactory,
-		IMdmSettings theMdmSettings
-	) {
+			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
 		myMatcherFactory = theIMatcherFactory;
 		myMdmRulesJson = theMdmSettings.getMdmRules();
@@ -69,11 +65,13 @@ public class MdmResourceMatcherSvc {
 
 	private void addFieldMatchers() {
 		if (myMdmRulesJson == null) {
-			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
+			throw new ConfigurationException(Msg.code(1521)
+					+ "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
-			myFieldMatchers.add(new MdmResourceFieldMatcher(myFhirContext, myMatcherFactory, matchFieldJson, myMdmRulesJson));
+			myFieldMatchers.add(
+					new MdmResourceFieldMatcher(myFhirContext, myMatcherFactory, matchFieldJson, myMdmRulesJson));
 		}
 	}
 
@@ -94,9 +92,15 @@ public class MdmResourceMatcherSvc {
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
+			ourLog.debug(
+					"{} {}: {}",
+					matchResult.getMatchResultEnum(),
+					theRightResource.getIdElement().toUnqualifiedVersionless(),
+					matchResult);
 			if (ourLog.isTraceEnabled()) {
-				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
+				ourLog.trace(
+						"Field matcher results:\n{}",
+						myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
 			}
 		}
 		return matchResult;
@@ -122,23 +126,36 @@ public class MdmResourceMatcherSvc {
 		double score = 0.0;
 		int appliedRuleCount = 0;
 
-		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
+		// TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
 		String resourceType = myFhirContext.getResourceType(theLeftResource);
 
 		for (int i = 0; i < myFieldMatchers.size(); ++i) {
-			//any that are not for the resourceType in question.
+			// any that are not for the resourceType in question.
 			MdmResourceFieldMatcher fieldComparator = myFieldMatchers.get(i);
 			if (!isValidResourceType(resourceType, fieldComparator.getResourceType())) {
-				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
+				ourLog.debug(
+						"Matcher {} is not valid for resource type: {}. Skipping it.",
+						fieldComparator.getName(),
+						resourceType);
 				continue;
 			}
-			ourLog.trace("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
+			ourLog.trace(
+					"Matcher {} is valid for resource type: {}. Evaluating match.",
+					fieldComparator.getName(),
+					resourceType);
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1L << i);
-				ourLog.trace("Match: Successfully matched matcher {} with score {}. New vector: {}", fieldComparator.getName(), matchEvaluation.score, vector);
+				ourLog.trace(
+						"Match: Successfully matched matcher {} with score {}. New vector: {}",
+						fieldComparator.getName(),
+						matchEvaluation.score,
+						vector);
 			} else {
-				ourLog.trace("No match: Matcher {} did not match (score: {}).", fieldComparator.getName(), matchEvaluation.score);
+				ourLog.trace(
+						"No match: Matcher {} did not match (score: {}).",
+						fieldComparator.getName(),
+						matchEvaluation.score);
 			}
 			score += matchEvaluation.score;
 			appliedRuleCount += 1;
@@ -150,10 +167,8 @@ public class MdmResourceMatcherSvc {
 	}
 
 	private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
-		return (
-			theFieldComparatorType.equalsIgnoreCase(MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
-				|| theFieldComparatorType.equalsIgnoreCase(theResourceType)
-		);
+		return (theFieldComparatorType.equalsIgnoreCase(MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
+				|| theFieldComparatorType.equalsIgnoreCase(theResourceType));
 	}
 
 	@VisibleForTesting

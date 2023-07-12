@@ -67,7 +67,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +78,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -157,7 +157,8 @@ public abstract class BaseClient implements IRestfulClient {
 	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
 		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theResourceType);
-		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null, null);
+		return invokeClient(
+				getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null, null);
 	}
 
 	void forceConformanceCheck() {
@@ -229,17 +230,42 @@ public abstract class BaseClient implements IRestfulClient {
 		myRequestFormatParamStyle = theRequestFormatParamStyle;
 	}
 
-	protected <T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
+	protected <T> T invokeClient(
+			FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
 		return invokeClient(theContext, binding, clientInvocation, false);
 	}
 
-	protected <T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null, null, null, null);
+	protected <T> T invokeClient(
+			FhirContext theContext,
+			IClientResponseHandler<T> binding,
+			BaseHttpClientInvocation clientInvocation,
+			boolean theLogRequestAndResponse) {
+		return invokeClient(
+				theContext,
+				binding,
+				clientInvocation,
+				null,
+				null,
+				theLogRequestAndResponse,
+				null,
+				null,
+				null,
+				null,
+				null);
 	}
 
-	protected <T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-							 boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective, String theCustomAcceptHeader,
-							 Map<String, List<String>> theCustomHeaders) {
+	protected <T> T invokeClient(
+			FhirContext theContext,
+			IClientResponseHandler<T> binding,
+			BaseHttpClientInvocation clientInvocation,
+			EncodingEnum theEncoding,
+			Boolean thePrettyPrint,
+			boolean theLogRequestAndResponse,
+			SummaryEnum theSummaryMode,
+			Set<String> theSubsetElements,
+			CacheControlDirective theCacheControlDirective,
+			String theCustomAcceptHeader,
+			Map<String, List<String>> theCustomHeaders) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -273,7 +299,8 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			if (theSubsetElements != null && theSubsetElements.isEmpty() == false) {
-				params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
+				params.put(
+						Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
 			}
 
 			EncodingEnum encoding = getEncoding();
@@ -293,7 +320,11 @@ public abstract class BaseClient implements IRestfulClient {
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_CACHE, theCacheControlDirective.isNoCache());
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_STORE, theCacheControlDirective.isNoStore());
 				if (theCacheControlDirective.getMaxResults() != null) {
-					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS + "=" + theCacheControlDirective.getMaxResults().intValue(), true);
+					addToCacheControlHeader(
+							b,
+							Constants.CACHE_CONTROL_MAX_RESULTS + "="
+									+ theCacheControlDirective.getMaxResults().intValue(),
+							true);
 				}
 				if (b.length() > 0) {
 					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
@@ -309,7 +340,8 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			if (theCustomHeaders != null) {
-				AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor(theCustomHeaders);
+				AdditionalRequestHeadersInterceptor interceptor =
+						new AdditionalRequestHeadersInterceptor(theCustomHeaders);
 				interceptor.interceptRequest(httpRequest);
 			}
 
@@ -366,7 +398,8 @@ public abstract class BaseClient implements IRestfulClient {
 
 				keepResponseAndLogIt(theLogRequestAndResponse, response, body);
 
-				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatus(), message);
+				BaseServerResponseException exception =
+						BaseServerResponseException.newInstance(response.getStatus(), message);
 				exception.setOperationOutcome(oo);
 
 				if (body != null) {
@@ -396,7 +429,7 @@ public abstract class BaseClient implements IRestfulClient {
 				}
 
 				if (inputStreamToReturn == null) {
-					inputStreamToReturn = new ByteArrayInputStream(new byte[]{});
+					inputStreamToReturn = new ByteArrayInputStream(new byte[] {});
 				}
 
 				return binding.invokeClient(mimeType, inputStreamToReturn, response.getStatus(), headers);
@@ -405,16 +438,32 @@ public abstract class BaseClient implements IRestfulClient {
 		} catch (DataFormatException e) {
 			String msg;
 			if (httpRequest != null) {
-				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+				msg = getFhirContext()
+						.getLocalizer()
+						.getMessage(
+								BaseClient.class,
+								"failedToParseResponse",
+								httpRequest.getHttpVerbName(),
+								httpRequest.getUri(),
+								e.toString());
 			} else {
-				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
+				msg = getFhirContext()
+						.getLocalizer()
+						.getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
 			}
 			throw new FhirClientConnectionException(Msg.code(1359) + msg, e);
 		} catch (IllegalStateException e) {
 			throw new FhirClientConnectionException(Msg.code(1360) + e);
 		} catch (IOException e) {
 			String msg;
-			msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
+			msg = getFhirContext()
+					.getLocalizer()
+					.getMessage(
+							BaseClient.class,
+							"failedToParseResponse",
+							httpRequest.getHttpVerbName(),
+							httpRequest.getUri(),
+							e.toString());
 			throw new FhirClientConnectionException(Msg.code(1361) + msg, e);
 		} catch (RuntimeException e) {
 			throw e;
@@ -510,9 +559,13 @@ public abstract class BaseClient implements IRestfulClient {
 
 	protected final class ResourceOrBinaryResponseHandler extends ResourceResponseHandler<IBaseResource> {
 
-
 		@Override
-		public IBaseResource invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public IBaseResource invokeClient(
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 
 			/*
 			 * For operation responses, if the response content type is a FHIR content-type
@@ -523,7 +576,8 @@ public abstract class BaseClient implements IRestfulClient {
 			 */
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType != null || theResponseStatusCode < 200 || theResponseStatusCode >= 300) {
-				return super.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
+				return super.invokeClient(
+						theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 			}
 
 			// Create a Binary resource to return
@@ -546,7 +600,6 @@ public abstract class BaseClient implements IRestfulClient {
 
 			return responseBinary;
 		}
-
 	}
 
 	protected class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
@@ -564,11 +617,16 @@ public abstract class BaseClient implements IRestfulClient {
 			this(theReturnType, null, null);
 		}
 
-		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId) {
+		public ResourceResponseHandler(
+				Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId) {
 			this(theReturnType, thePreferResponseType, theId, false);
 		}
 
-		public ResourceResponseHandler(Class<T> theReturnType, Class<? extends IBaseResource> thePreferResponseType, IIdType theId, boolean theAllowHtmlResponse) {
+		public ResourceResponseHandler(
+				Class<T> theReturnType,
+				Class<? extends IBaseResource> thePreferResponseType,
+				IIdType theId,
+				boolean theAllowHtmlResponse) {
 			this(theReturnType, toTypeList(thePreferResponseType), theId, theAllowHtmlResponse);
 		}
 
@@ -576,7 +634,11 @@ public abstract class BaseClient implements IRestfulClient {
 			this(theClass, thePreferResponseTypes, null, false);
 		}
 
-		public ResourceResponseHandler(Class<T> theReturnType, List<Class<? extends IBaseResource>> thePreferResponseTypes, IIdType theId, boolean theAllowHtmlResponse) {
+		public ResourceResponseHandler(
+				Class<T> theReturnType,
+				List<Class<? extends IBaseResource>> thePreferResponseTypes,
+				IIdType theId,
+				boolean theAllowHtmlResponse) {
 			myReturnType = theReturnType;
 			myId = theId;
 			myPreferResponseTypes = thePreferResponseTypes;
@@ -584,17 +646,25 @@ public abstract class BaseClient implements IRestfulClient {
 		}
 
 		@Override
-		public T invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public T invokeClient(
+				String theResponseMimeType,
+				InputStream theResponseInputStream,
+				int theResponseStatusCode,
+				Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			if (theResponseStatusCode == Constants.STATUS_HTTP_204_NO_CONTENT) {
 				return null;
 			}
 
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
-				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myReturnType != null) {
+				if (myAllowHtmlResponse
+						&& theResponseMimeType.toLowerCase().contains(Constants.CT_HTML)
+						&& myReturnType != null) {
 					return readHtmlResponse(theResponseInputStream);
 				}
-				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
+				throw NonFhirResponseException.newInstance(
+						theResponseStatusCode, theResponseMimeType, theResponseInputStream);
 			}
 			IParser parser = respType.newParser(getFhirContext());
 			parser.setServerBaseUrl(getUrlBase());
@@ -613,7 +683,8 @@ public abstract class BaseClient implements IRestfulClient {
 			RuntimeResourceDefinition resDef = getFhirContext().getResourceDefinition(myReturnType);
 			IBaseResource instance = resDef.newInstance();
 			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
-			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
+			BaseRuntimeElementCompositeDefinition<?> textElement =
+					(BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
 			IBase textInstance = textElement.newInstance();
 			textChild.getMutator().addValue(instance, textInstance);
 
@@ -623,13 +694,15 @@ public abstract class BaseClient implements IRestfulClient {
 			try {
 				divInstance.setValueAsString(IOUtils.toString(theResponseInputStream, Charsets.UTF_8));
 			} catch (Exception e) {
-				throw new InvalidResponseException(Msg.code(1364) + "Failed to process HTML response from server: " + e.getMessage(), 400, e);
+				throw new InvalidResponseException(
+						Msg.code(1364) + "Failed to process HTML response from server: " + e.getMessage(), 400, e);
 			}
 			divChild.getMutator().addValue(textInstance, divInstance);
 			return (T) instance;
 		}
 
-		public ResourceResponseHandler<T> setPreferResponseTypes(List<Class<? extends IBaseResource>> thePreferResponseTypes) {
+		public ResourceResponseHandler<T> setPreferResponseTypes(
+				List<Class<? extends IBaseResource>> thePreferResponseTypes) {
 			myPreferResponseTypes = thePreferResponseTypes;
 			return this;
 		}
@@ -643,5 +716,4 @@ public abstract class BaseClient implements IRestfulClient {
 		}
 		return preferResponseTypes;
 	}
-
 }

@@ -43,7 +43,6 @@ public class LogicalReferenceHelper {
 					}
 				}
 			}
-
 		}
 
 		/*
@@ -56,6 +55,4 @@ public class LogicalReferenceHelper {
 
 		return false;
 	}
-
-
 }

@@ -21,9 +21,9 @@ package ca.uhn.fhir.fhirpath;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 public interface IFhirPath {
 
@@ -31,8 +31,8 @@ public interface IFhirPath {
 	 * Apply the given FhirPath expression against the given input and return
 	 * all results in a list
 	 *
-	 * @param theInput      The input object (generally a resource or datatype)
-	 * @param thePath       The fluent path expression
+	 * @param theInput The input object (generally a resource or datatype)
+	 * @param thePath The fluent path expression
 	 * @param theReturnType The type to return (in order to avoid casting)
 	 */
 	<T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType);
@@ -86,7 +86,6 @@ public interface IFhirPath {
 	 * instance. Any other use will produce unspecified results.
 	 */
 	IParsedExpression parse(String theExpression) throws Exception;
-
 
 	/**
 	 * This method can be used optionally to supply an evaluation context for the

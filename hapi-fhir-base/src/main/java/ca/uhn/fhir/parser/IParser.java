@@ -231,7 +231,8 @@ public interface IParser {
 	 * @return A parsed resource
 	 * @throws DataFormatException If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	<T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException;
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream)
+			throws DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -426,5 +427,4 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
-
 }

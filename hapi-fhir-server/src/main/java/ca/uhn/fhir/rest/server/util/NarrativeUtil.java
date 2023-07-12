@@ -70,22 +70,18 @@ public class NarrativeUtil {
 	public static XhtmlNode sanitize(XhtmlNode theNode) {
 		String html = theNode.getValueAsString();
 
-		PolicyFactory idPolicy = new HtmlPolicyBuilder()
-			.allowAttributes("id").globally()
-			.toFactory();
+		PolicyFactory idPolicy =
+				new HtmlPolicyBuilder().allowAttributes("id").globally().toFactory();
 
 		PolicyFactory policy = Sanitizers.FORMATTING
-			.and(Sanitizers.BLOCKS)
-			.and(Sanitizers.TABLES)
-			.and(Sanitizers.STYLES)
-			.and(idPolicy);
+				.and(Sanitizers.BLOCKS)
+				.and(Sanitizers.TABLES)
+				.and(Sanitizers.STYLES)
+				.and(idPolicy);
 		String safeHTML = policy.sanitize(html);
 
 		XhtmlNode retVal = new XhtmlNode();
 		retVal.setValueAsString(safeHTML);
 		return retVal;
 	}
-
 }
-
-

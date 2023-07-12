@@ -52,19 +52,21 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	public JobInstanceProcessor(IJobPersistence theJobPersistence,
-								BatchJobSender theBatchJobSender,
-								String theInstanceId,
-								JobChunkProgressAccumulator theProgressAccumulator,
-								IReductionStepExecutorService theReductionStepExecutorService,
-								JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobInstanceProcessor(
+			IJobPersistence theJobPersistence,
+			BatchJobSender theBatchJobSender,
+			String theInstanceId,
+			JobChunkProgressAccumulator theProgressAccumulator,
+			IReductionStepExecutorService theReductionStepExecutorService,
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
 		myProgressAccumulator = theProgressAccumulator;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobDefinitionegistry = theJobDefinitionRegistry;
-		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
+		myJobInstanceProgressCalculator =
+				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
@@ -84,7 +86,7 @@ public class JobInstanceProcessor {
 		}
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
-		
+
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
 
@@ -132,7 +134,8 @@ public class JobInstanceProcessor {
 				break;
 			case CANCELLED:
 				purgeExpiredInstance(theInstance);
-				//wipmb For 6.8 - Are we deliberately not purging chunks for cancelled jobs?  This is a very complicated way to say that.
+				// wipmb For 6.8 - Are we deliberately not purging chunks for cancelled jobs?  This is a very
+				// complicated way to say that.
 				return;
 		}
 
@@ -155,8 +158,10 @@ public class JobInstanceProcessor {
 
 	private void triggerGatedExecutions(JobInstance theInstance) {
 		if (!theInstance.isRunning()) {
-			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
-				theInstance.getInstanceId(), theInstance.getStatus());
+			ourLog.debug(
+					"JobInstance {} is not in a \"running\" state. Status {}",
+					theInstance.getInstanceId(),
+					theInstance.getStatus());
 			return;
 		}
 
@@ -164,8 +169,10 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		JobDefinition<? extends IModelJson> jobDefinition = myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
-		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, theInstance.getCurrentGatedStepId());
+		JobDefinition<? extends IModelJson> jobDefinition =
+				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+		JobWorkCursor<?, ?, ?> jobWorkCursor =
+				JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, theInstance.getCurrentGatedStepId());
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
@@ -178,31 +185,46 @@ public class JobInstanceProcessor {
 		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
 		if (shouldAdvance) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
-			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
+			ourLog.info(
+					"All processing is complete for gated execution of instance {} step {}. Proceeding to step {}",
+					instanceId,
+					currentStepId,
+					nextStepId);
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
-				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, jobWorkCursor.nextStep.getStepId());
+				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
+						jobDefinition, jobWorkCursor.nextStep.getStepId());
 				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
 				processChunksForNextSteps(theInstance, nextStepId);
 			}
 		} else {
-			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {}.",
-				instanceId, currentStepId, jobWorkCursor.nextStep.getStepId());
+			ourLog.debug(
+					"Not ready to advance gated execution of instance {} from step {} to {}.",
+					instanceId,
+					currentStepId,
+					jobWorkCursor.nextStep.getStepId());
 		}
 	}
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		List<String> queuedChunksForNextStep =
+				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
-			ourLog.debug("Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
+			ourLog.debug(
+					"Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
+					instanceId,
+					nextStepId,
+					totalChunksForNextStep,
+					queuedChunksForNextStep.size());
 		}
 		// Note on sequence: we don't have XA transactions, and are talking to two stores (JPA + Queue)
 		// Sequence: 1 - So we run the query to minimize the work overlapping.
-		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		List<String> chunksToSubmit =
+				myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		// Sequence: 2 - update the job step so the workers will process them.
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 			if (instance.getCurrentGatedStepId().equals(nextStepId)) {
@@ -226,7 +248,10 @@ public class JobInstanceProcessor {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
-		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksToSubmit.size(), instanceId, nextStepId);
+		ourLog.debug(
+				"Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]",
+				chunksToSubmit.size(),
+				instanceId,
+				nextStepId);
 	}
-
 }

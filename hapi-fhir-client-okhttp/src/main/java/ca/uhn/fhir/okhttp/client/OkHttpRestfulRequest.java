@@ -41,53 +41,54 @@ import java.util.Map;
  */
 public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpRequest {
 
-    private final Request.Builder myRequestBuilder;
-    private Factory myClient;
-    private String myUrl;
-    private RequestTypeEnum myRequestTypeEnum;
-    private RequestBody myRequestBody;
+	private final Request.Builder myRequestBuilder;
+	private Factory myClient;
+	private String myUrl;
+	private RequestTypeEnum myRequestTypeEnum;
+	private RequestBody myRequestBody;
 
-    public OkHttpRestfulRequest(Call.Factory theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
-        myClient = theClient;
-        myUrl = theUrl;
-        myRequestTypeEnum = theRequestTypeEnum;
-        myRequestBody = theRequestBody;
+	public OkHttpRestfulRequest(
+			Call.Factory theClient, String theUrl, RequestTypeEnum theRequestTypeEnum, RequestBody theRequestBody) {
+		myClient = theClient;
+		myUrl = theUrl;
+		myRequestTypeEnum = theRequestTypeEnum;
+		myRequestBody = theRequestBody;
 
-        myRequestBuilder = new Request.Builder().url(theUrl);
-    }
+		myRequestBuilder = new Request.Builder().url(theUrl);
+	}
 
-    public Request.Builder getRequest() {
-        return myRequestBuilder;
-    }
+	public Request.Builder getRequest() {
+		return myRequestBuilder;
+	}
 
-    @Override
-    public void addHeader(String theName, String theValue) {
-        myRequestBuilder.addHeader(theName, theValue);
-    }
+	@Override
+	public void addHeader(String theName, String theValue) {
+		myRequestBuilder.addHeader(theName, theValue);
+	}
 
-    @Override
-    public IHttpResponse execute() throws IOException {
-		 StopWatch responseStopWatch = new StopWatch();
-		 myRequestBuilder.method(getHttpVerbName(), myRequestBody);
-		 Call call = myClient.newCall(myRequestBuilder.build());
-		 return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
-    }
+	@Override
+	public IHttpResponse execute() throws IOException {
+		StopWatch responseStopWatch = new StopWatch();
+		myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+		Call call = myClient.newCall(myRequestBuilder.build());
+		return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
+	}
 
-    @Override
-    public Map<String, List<String>> getAllHeaders() {
-        return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
-    }
+	@Override
+	public Map<String, List<String>> getAllHeaders() {
+		return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
+	}
 
-    @Override
-    public String getRequestBodyFromStream() {
-        // returning null to indicate this is not supported, as documented in IHttpRequest's contract
-        return null;
-    }
+	@Override
+	public String getRequestBodyFromStream() {
+		// returning null to indicate this is not supported, as documented in IHttpRequest's contract
+		return null;
+	}
 
-    @Override
-    public String getUri() {
-        return myUrl;
-    }
+	@Override
+	public String getUri() {
+		return myUrl;
+	}
 
 	@Override
 	public void setUri(String theUrl) {
@@ -95,13 +96,13 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
 	}
 
 	@Override
-    public String getHttpVerbName() {
-        return myRequestTypeEnum.name();
-    }
+	public String getHttpVerbName() {
+		return myRequestTypeEnum.name();
+	}
 
 	@Override
 	public void removeHeaders(String theHeaderName) {
-    	myRequestBuilder.removeHeader(theHeaderName);
+		myRequestBuilder.removeHeader(theHeaderName);
 	}
 
 	@Override

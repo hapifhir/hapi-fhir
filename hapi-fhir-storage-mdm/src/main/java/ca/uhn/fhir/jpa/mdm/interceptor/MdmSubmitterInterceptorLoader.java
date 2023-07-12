@@ -37,14 +37,19 @@ public class MdmSubmitterInterceptorLoader {
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
+
 	@Autowired
 	JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private IMdmStorageInterceptor myIMdmStorageInterceptor;
+
 	@Autowired
 	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
+
 	@Autowired
 	private IInterceptorService myInterceptorService;
+
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
@@ -58,7 +63,8 @@ public class MdmSubmitterInterceptorLoader {
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptor registered");
-		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types the first time it was called.
+		// We need to call SubscriptionSubmitInterceptorLoader.start() again in case there were no subscription types
+		// the first time it was called.
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 }

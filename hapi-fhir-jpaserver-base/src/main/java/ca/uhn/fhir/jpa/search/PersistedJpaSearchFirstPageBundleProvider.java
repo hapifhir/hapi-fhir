@@ -34,10 +34,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
@@ -47,7 +47,12 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	/**
 	 * Constructor
 	 */
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public PersistedJpaSearchFirstPageBundleProvider(
+			Search theSearch,
+			SearchTask theSearchTask,
+			ISearchBuilder theSearchBuilder,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
 		super(theRequest, theSearch.getUuid());
 
 		assert theSearch.getSearchType() != SearchTypeEnum.HISTORY;
@@ -73,29 +78,26 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		RequestPartitionId requestPartitionId = getRequestPartitionId();
 
 		List<IBaseResource> retVal = myTxService
-			.withRequest(myRequest)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> toResourceList(mySearchBuilder, pids));
+				.withRequest(myRequest)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> toResourceList(mySearchBuilder, pids));
 
 		long totalCountWanted = theToIndex - theFromIndex;
-		long totalCountMatch = (int) retVal
-			.stream()
-			.filter(t -> !isInclude(t))
-			.count();
+		long totalCountMatch = (int) retVal.stream().filter(t -> !isInclude(t)).count();
 
 		if (totalCountMatch < totalCountWanted) {
 			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
-				|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED && getSearchEntity().getNumFound() >= theToIndex))) {
+					|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED
+							&& getSearchEntity().getNumFound() >= theToIndex))) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
 				 * the consent service has filtered some results.
 				 */
-				Set<String> existingIds = retVal
-					.stream()
-					.map(t -> t.getIdElement().getValue())
-					.filter(t -> t != null)
-					.collect(Collectors.toSet());
+				Set<String> existingIds = retVal.stream()
+						.map(t -> t.getIdElement().getValue())
+						.filter(t -> t != null)
+						.collect(Collectors.toSet());
 
 				long remainingWanted = totalCountWanted - totalCountMatch;
 				long fromIndex = theToIndex - remainingWanted;
@@ -130,5 +132,4 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		}
 		return super.size();
 	}
-
 }

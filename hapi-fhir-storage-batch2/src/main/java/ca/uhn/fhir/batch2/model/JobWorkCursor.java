@@ -21,9 +21,9 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -44,7 +44,11 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 	public final JobDefinitionStep<PT, IT, OT> currentStep;
 	public final JobDefinitionStep<PT, OT, ?> nextStep;
 
-	public JobWorkCursor(JobDefinition<PT> theJobDefinition, boolean theIsFirstStep, JobDefinitionStep<PT, IT, OT> theCurrentStep, JobDefinitionStep<PT, OT, ?> theNextStep) {
+	public JobWorkCursor(
+			JobDefinition<PT> theJobDefinition,
+			boolean theIsFirstStep,
+			JobDefinitionStep<PT, IT, OT> theCurrentStep,
+			JobDefinitionStep<PT, OT, ?> theNextStep) {
 		jobDefinition = theJobDefinition;
 		isFirstStep = theIsFirstStep;
 		currentStep = theCurrentStep;
@@ -56,17 +60,19 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		if (isFirstStep) {
 			Validate.isTrue(currentStep.getInputType() == VoidModel.class);
 		}
-		// Note that if it is not the first step, it can have VoidModel as it's input type--not all steps require input from
+		// Note that if it is not the first step, it can have VoidModel as it's input type--not all steps require input
+		// from
 		// the previous step
 		if (nextStep != null) {
 			Validate.isTrue(currentStep.getOutputType() == nextStep.getInputType());
 		}
 	}
 
-	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndRequestedStepId(JobDefinition<PT> theJobDefinition, String theRequestedStepId) {
+	public static <PT extends IModelJson> JobWorkCursor<PT, ?, ?> fromJobDefinitionAndRequestedStepId(
+			JobDefinition<PT> theJobDefinition, String theRequestedStepId) {
 		boolean isFirstStep = false;
-		JobDefinitionStep<PT,?,?> currentStep = null;
-		JobDefinitionStep<PT,?,?> nextStep = null;
+		JobDefinitionStep<PT, ?, ?> currentStep = null;
+		JobDefinitionStep<PT, ?, ?> nextStep = null;
 
 		List<JobDefinitionStep<PT, ?, ?>> steps = theJobDefinition.getSteps();
 		for (int i = 0; i < steps.size(); i++) {
@@ -84,7 +90,9 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 
 		if (currentStep == null) {
-			String msg = "Unknown step[" + theRequestedStepId + "] for job definition ID[" + theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion() + "]";
+			String msg = "Unknown step[" + theRequestedStepId + "] for job definition ID["
+					+ theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion()
+					+ "]";
 			ourLog.warn(msg);
 			throw new InternalErrorException(Msg.code(2042) + msg);
 		}
@@ -101,9 +109,9 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 	}
 
 	@SuppressWarnings("unchecked")
-	public JobWorkCursor<PT,IT, VoidModel> asFinalCursor() {
+	public JobWorkCursor<PT, IT, VoidModel> asFinalCursor() {
 		Validate.isTrue(isFinalStep());
-		return (JobWorkCursor<PT,IT, VoidModel>)this;
+		return (JobWorkCursor<PT, IT, VoidModel>) this;
 	}
 
 	public JobDefinition<PT> getJobDefinition() {

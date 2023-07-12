@@ -19,6 +19,4 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-public interface IPatchWithQueryTyped extends IPatchWithBody, IPatchWithQuery {
-
-}
+public interface IPatchWithQueryTyped extends IPatchWithBody, IPatchWithQuery {}

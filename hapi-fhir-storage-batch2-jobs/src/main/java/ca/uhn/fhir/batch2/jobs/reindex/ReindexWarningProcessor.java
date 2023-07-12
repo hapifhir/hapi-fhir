@@ -27,10 +27,14 @@ public class ReindexWarningProcessor implements IWarningProcessor {
 
 	@Override
 	public void recoverWarningMessage(String theErrorMessage) {
-		// save non-fatal error as warning, current only support unique search param reindexing error on existing duplicates
-		if (theErrorMessage.contains("Can not create resource") && theErrorMessage.contains("it would create a duplicate unique index matching query")) {
-			String searchParamName = theErrorMessage.substring(theErrorMessage.indexOf("SearchParameter"), theErrorMessage.length() - 1);
-			myRecoveredWarning = "Failed to reindex resource because unique search parameter " + searchParamName + " could not be enforced.";
+		// save non-fatal error as warning, current only support unique search param reindexing error on existing
+		// duplicates
+		if (theErrorMessage.contains("Can not create resource")
+				&& theErrorMessage.contains("it would create a duplicate unique index matching query")) {
+			String searchParamName =
+					theErrorMessage.substring(theErrorMessage.indexOf("SearchParameter"), theErrorMessage.length() - 1);
+			myRecoveredWarning = "Failed to reindex resource because unique search parameter " + searchParamName
+					+ " could not be enforced.";
 		}
 	}
 

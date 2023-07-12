@@ -39,6 +39,7 @@ public class MdmCommonConfig {
 	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
 		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
 	}
+
 	@Bean
 	@Lazy
 	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
@@ -53,24 +54,14 @@ public class MdmCommonConfig {
 	@Bean
 	@Lazy
 	MdmResourceMatcherSvc mdmResourceComparatorSvc(
-		FhirContext theFhirContext,
-		IMatcherFactory theIMatcherFactory,
-		IMdmSettings theMdmSettings
-	) {
+			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
 		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
 	}
 
 	@Bean
 	@Lazy
 	public IMatcherFactory matcherFactory(
-		FhirContext theFhirContext,
-		IMdmSettings theSettings,
-		INicknameSvc theNicknameSvc
-	) {
-		return new MdmMatcherFactory(
-			theFhirContext,
-			theSettings,
-			theNicknameSvc
-		);
+			FhirContext theFhirContext, IMdmSettings theSettings, INicknameSvc theNicknameSvc) {
+		return new MdmMatcherFactory(theFhirContext, theSettings, theNicknameSvc);
 	}
 }
