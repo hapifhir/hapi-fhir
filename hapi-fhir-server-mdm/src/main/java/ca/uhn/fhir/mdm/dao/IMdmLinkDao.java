@@ -49,7 +49,7 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<M> findLinksAssociatedWithGoldenResourceOfSourceResource(P theSourcePid);
+	List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid);
 
 	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 

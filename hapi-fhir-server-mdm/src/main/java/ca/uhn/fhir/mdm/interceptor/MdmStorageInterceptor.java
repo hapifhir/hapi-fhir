@@ -173,7 +173,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 			IIdType sourceId = theResource.getIdElement().toVersionless();
 			IResourcePersistentId sourcePid = myIdHelperSvc.getPidOrThrowException(RequestPartitionId.allPartitions(), sourceId);
-			List<IMdmLink> allLinks = myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResource(sourcePid);
+			List<IMdmLink> allLinks = myMdmLinkDao.findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(sourcePid);
 
 			Map<MdmMatchResultEnum, List<IMdmLink>> linksByMatchResult = allLinks.stream()
 				.collect(Collectors.groupingBy(IMdmLink::getMatchResult));
