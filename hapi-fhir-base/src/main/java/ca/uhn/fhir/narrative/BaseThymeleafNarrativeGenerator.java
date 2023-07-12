@@ -96,7 +96,6 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 				retVal.add(new NarrativeAttributeProcessor(theDialectPrefix, theFhirContext));
 				return retVal;
 			}
-
 		};
 		engine.setDialect(dialect);
 
@@ -110,18 +109,19 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		Context context = new Context();
 		context.setVariable("resource", theTargetContext);
 		context.setVariable("context", theTargetContext);
-		context.setVariable("fhirVersion", theFhirContext.getVersion().getVersion().name());
+		context.setVariable(
+				"fhirVersion", theFhirContext.getVersion().getVersion().name());
 
 		return getTemplateEngine(theFhirContext).process(theTemplate.getTemplateName(), context);
 	}
-
 
 	@Override
 	protected EnumSet<TemplateTypeEnum> getStyle() {
 		return EnumSet.of(TemplateTypeEnum.THYMELEAF);
 	}
 
-	private String applyTemplateWithinTag(FhirContext theFhirContext, ITemplateContext theTemplateContext, String theName, String theElement) {
+	private String applyTemplateWithinTag(
+			FhirContext theFhirContext, ITemplateContext theTemplateContext, String theName, String theElement) {
 		IEngineConfiguration configuration = theTemplateContext.getConfiguration();
 		IStandardExpressionParser expressionParser = StandardExpressions.getExpressionParser(configuration);
 		final IStandardExpression expression = expressionParser.parseExpression(theTemplateContext, theElement);
@@ -151,7 +151,6 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		myMessageResolver = theMessageResolver;
 	}
 
-
 	private class NarrativeTemplateResolver extends DefaultTemplateResolver {
 		private final FhirContext myFhirContext;
 
@@ -160,40 +159,58 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		}
 
 		@Override
-		protected boolean computeResolvable(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+		protected boolean computeResolvable(
+				IEngineConfiguration theConfiguration,
+				String theOwnerTemplate,
+				String theTemplate,
+				Map<String, Object> theTemplateResolutionAttributes) {
 			if (theOwnerTemplate == null) {
-				return getManifest().getTemplateByName(myFhirContext, getStyle(), theTemplate).size() > 0;
+				return getManifest()
+								.getTemplateByName(myFhirContext, getStyle(), theTemplate)
+								.size()
+						> 0;
 			} else {
-				return getManifest().getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate).size() > 0;
+				return getManifest()
+								.getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate)
+								.size()
+						> 0;
 			}
 		}
 
 		@Override
-		protected TemplateMode computeTemplateMode(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+		protected TemplateMode computeTemplateMode(
+				IEngineConfiguration theConfiguration,
+				String theOwnerTemplate,
+				String theTemplate,
+				Map<String, Object> theTemplateResolutionAttributes) {
 			return TemplateMode.XML;
 		}
 
 		@Override
-		protected ITemplateResource computeTemplateResource(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+		protected ITemplateResource computeTemplateResource(
+				IEngineConfiguration theConfiguration,
+				String theOwnerTemplate,
+				String theTemplate,
+				Map<String, Object> theTemplateResolutionAttributes) {
 			if (theOwnerTemplate == null) {
-				return getManifest()
-					.getTemplateByName(myFhirContext, getStyle(), theTemplate)
-					.stream()
-					.findFirst()
-					.map(t -> new StringTemplateResource(t.getTemplateText()))
-					.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
+				return getManifest().getTemplateByName(myFhirContext, getStyle(), theTemplate).stream()
+						.findFirst()
+						.map(t -> new StringTemplateResource(t.getTemplateText()))
+						.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
 			} else {
-				return getManifest()
-					.getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate)
-					.stream()
-					.findFirst()
-					.map(t -> new StringTemplateResource(t.getTemplateText()))
-					.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
+				return getManifest().getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate).stream()
+						.findFirst()
+						.map(t -> new StringTemplateResource(t.getTemplateText()))
+						.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
 			}
 		}
 
 		@Override
-		protected ICacheEntryValidity computeValidity(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
+		protected ICacheEntryValidity computeValidity(
+				IEngineConfiguration theConfiguration,
+				String theOwnerTemplate,
+				String theTemplate,
+				Map<String, Object> theTemplateResolutionAttributes) {
 			return AlwaysValidCacheEntryValidity.INSTANCE;
 		}
 	}
@@ -208,7 +225,10 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		}
 
 		@Override
-		protected void doProcess(ITemplateContext theTemplateContext, IProcessableElementTag theTag, IElementTagStructureHandler theStructureHandler) {
+		protected void doProcess(
+				ITemplateContext theTemplateContext,
+				IProcessableElementTag theTag,
+				IElementTagStructureHandler theStructureHandler) {
 			String name = theTag.getAttributeValue("th:name");
 			String element = theTag.getAttributeValue("th:element");
 
@@ -231,13 +251,16 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		}
 
 		@Override
-		protected void doProcess(ITemplateContext theContext, IProcessableElementTag theTag, AttributeName theAttributeName, String theAttributeValue, IElementTagStructureHandler theStructureHandler) {
+		protected void doProcess(
+				ITemplateContext theContext,
+				IProcessableElementTag theTag,
+				AttributeName theAttributeName,
+				String theAttributeValue,
+				IElementTagStructureHandler theStructureHandler) {
 			String text = applyTemplateWithinTag(myFhirContext, theContext, null, theAttributeValue);
 			theStructureHandler.setBody(text, false);
 		}
-
 	}
-
 
 	private class NarrativeGeneratorDialect implements IDialect, IExpressionObjectDialect {
 
@@ -251,7 +274,6 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		public String getName() {
 			return "NarrativeGeneratorDialect";
 		}
-
 
 		@Override
 		public IExpressionObjectFactory getExpressionObjectFactory() {
@@ -286,7 +308,6 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		}
 	}
 
-
 	private class NarrativeGeneratorFhirPathExpressionObject {
 
 		private final FhirContext myFhirContext;
@@ -313,8 +334,5 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 			}
 			return fhirPath;
 		}
-
-
 	}
-
 }

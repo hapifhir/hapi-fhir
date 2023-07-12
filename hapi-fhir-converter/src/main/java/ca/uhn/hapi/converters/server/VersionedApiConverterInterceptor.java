@@ -40,9 +40,9 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.StringTokenizer;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -57,7 +57,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Versioned API features.
  * </p>
  */
-
 @Interceptor(order = AuthorizationConstants.ORDER_CONVERTER_INTERCEPTOR)
 public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	private final FhirContext myCtxDstu2;
@@ -74,7 +73,12 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+	public boolean outgoingResponse(
+			RequestDetails theRequestDetails,
+			ResponseDetails theResponseDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws AuthenticationException {
 		IBaseResource responseResource = theResponseDetails.getResponseResource();
 		if (responseResource == null) {
 			return true;
@@ -133,7 +137,9 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 
 	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
 		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
+			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org
+					.newJsonParser()
+					.parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
 		}
 		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
 	}

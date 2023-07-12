@@ -22,11 +22,9 @@ package ca.uhn.fhir.rest.gclient;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public interface IGetPageUntyped {
-	
+
 	/**
 	 * Return a Bundle resource of the given type
 	 */
 	<T extends IBaseBundle> IGetPageTyped<T> andReturnBundle(Class<T> theBundleType);
-	
-	
 }

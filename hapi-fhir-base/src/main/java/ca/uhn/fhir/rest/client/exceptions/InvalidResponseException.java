@@ -56,5 +56,4 @@ public class InvalidResponseException extends BaseServerResponseException {
 	public InvalidResponseException(Throwable theCause, int theStatusCode) {
 		super(theStatusCode, theCause.toString(), theCause);
 	}
-
 }

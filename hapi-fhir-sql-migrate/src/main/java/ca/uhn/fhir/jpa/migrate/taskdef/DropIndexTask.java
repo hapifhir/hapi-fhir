@@ -31,14 +31,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
-import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 
 public class DropIndexTask extends BaseTableTask {
 
@@ -83,14 +83,16 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("alter table " + getTableName() + " drop constraint " + myIndexName);
 					break;
 				case ORACLE_12C:
-					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
+					sql.add("drop index " + myIndexName + (myOnline ? " ONLINE" : ""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + myIndexName + " on " + getTableName() + (myOnline?" WITH (ONLINE = ON)":""));
+					sql.add("drop index " + myIndexName + " on " + getTableName()
+							+ (myOnline ? " WITH (ONLINE = ON)" : ""));
 					break;
 				case POSTGRES_9_4:
 					sql.add("alter table " + getTableName() + " drop constraint if exists " + myIndexName + " cascade");
-					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + "if exists " + myIndexName + " cascade");
+					sql.add("drop index " + (myOnline ? "CONCURRENTLY " : "") + "if exists " + myIndexName
+							+ " cascade");
 					setTransactional(!myOnline);
 					break;
 				case COCKROACHDB_21_1:
@@ -105,7 +107,7 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("alter table " + getTableName() + " drop index " + myIndexName);
 					break;
 				case POSTGRES_9_4:
-					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + myIndexName);
+					sql.add("drop index " + (myOnline ? "CONCURRENTLY " : "") + myIndexName);
 					setTransactional(!myOnline);
 					break;
 				case DERBY_EMBEDDED:
@@ -113,10 +115,10 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + myIndexName);
 					break;
 				case ORACLE_12C:
-					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
+					sql.add("drop index " + myIndexName + (myOnline ? " ONLINE" : ""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + getTableName() + "." + myIndexName );
+					sql.add("drop index " + getTableName() + "." + myIndexName);
 					break;
 				case COCKROACHDB_21_1:
 					sql.add("drop index " + getTableName() + "@" + myIndexName);
@@ -152,21 +154,33 @@ public class DropIndexTask extends BaseTableTask {
 		 */
 
 		if (getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
-			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_name = ? AND table_name = ?";
-			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			@Language("SQL")
+			String findConstraintSql =
+					"SELECT DISTINCT constraint_name FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL")
+			String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
-			@Language("SQL") String findConstraintSql = "SELECT c.constraintname FROM sys.sysconstraints c, sys.systables t WHERE c.tableid = t.tableid AND c.constraintname = ? AND t.tablename = ?";
-			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			@Language("SQL")
+			String findConstraintSql =
+					"SELECT c.constraintname FROM sys.sysconstraints c, sys.systables t WHERE c.tableid = t.tableid AND c.constraintname = ? AND t.tablename = ?";
+			@Language("SQL")
+			String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.ORACLE_12C) {
-			@Language("SQL") String findConstraintSql = "SELECT constraint_name FROM user_constraints WHERE constraint_name = ? AND table_name = ?";
-			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			@Language("SQL")
+			String findConstraintSql =
+					"SELECT constraint_name FROM user_constraints WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL")
+			String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			// Legacy deletion for SQL Server unique indexes
-			@Language("SQL") String findConstraintSql = "SELECT tc.CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS tc WHERE tc.CONSTRAINT_NAME = ? AND tc.TABLE_NAME = ?";
-			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
+			@Language("SQL")
+			String findConstraintSql =
+					"SELECT tc.CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS tc WHERE tc.CONSTRAINT_NAME = ? AND tc.TABLE_NAME = ?";
+			@Language("SQL")
+			String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		}
 
@@ -193,8 +207,10 @@ public class DropIndexTask extends BaseTableTask {
 		DataSource dataSource = Objects.requireNonNull(getConnectionProperties().getDataSource());
 		getConnectionProperties().getTxTemplate().executeWithoutResult(t -> {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-			RowMapperResultSetExtractor<String> resultSetExtractor = new RowMapperResultSetExtractor<>(new SingleColumnRowMapper<>(String.class));
-			List<String> outcome = jdbcTemplate.query(theFindConstraintSql, new Object[]{myIndexName, getTableName()}, resultSetExtractor);
+			RowMapperResultSetExtractor<String> resultSetExtractor =
+					new RowMapperResultSetExtractor<>(new SingleColumnRowMapper<>(String.class));
+			List<String> outcome = jdbcTemplate.query(
+					theFindConstraintSql, new Object[] {myIndexName, getTableName()}, resultSetExtractor);
 			assert outcome != null;
 			for (String next : outcome) {
 				String sql = theDropConstraintSql.replace("?", next);

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,8 +33,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.io.Serializable;
-
 
 /*
  * These classes are no longer needed.
@@ -54,7 +53,11 @@ public class BulkExportCollectionFileEntity implements Serializable {
 	private Long myId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "COLLECTION_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name="FK_BLKEXCOLFILE_COLLECT"))
+	@JoinColumn(
+			name = "COLLECTION_PID",
+			referencedColumnName = "PID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_BLKEXCOLFILE_COLLECT"))
 	private BulkExportCollectionEntity myCollection;
 
 	@Column(name = "RES_ID", length = ForcedId.MAX_FORCED_ID_LENGTH, nullable = false)

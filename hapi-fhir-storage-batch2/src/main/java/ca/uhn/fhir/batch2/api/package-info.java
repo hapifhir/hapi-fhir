@@ -48,4 +48,3 @@
  * @since 6.0.0
  */
 package ca.uhn.fhir.batch2.api;
-

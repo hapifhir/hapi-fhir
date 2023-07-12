@@ -19,22 +19,19 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import java.util.Collection;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
-	@Query("" + 
-			   "SELECT t FROM ResourceTag t " + 
-			   "INNER JOIN FETCH t.myTag td " +
-			   "WHERE t.myResourceId in (:pids)")
+	@Query("" + "SELECT t FROM ResourceTag t " + "INNER JOIN FETCH t.myTag td " + "WHERE t.myResourceId in (:pids)")
 	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<Long> pids);
 
 	@Modifying
 	@Query("delete from ResourceTag t WHERE t.myResourceId = :resId")
-	void deleteByResourceId(@Param("resId") Long theResourcePid);}
+	void deleteByResourceId(@Param("resId") Long theResourcePid);
+}

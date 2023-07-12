@@ -67,8 +67,8 @@ public class BundleUtil {
 	private static final String PREV = "prev";
 	private static final Set<String> previousOrPrev = Sets.newHashSet(PREVIOUS, PREV);
 
-	public static final String DIFFERENT_LINK_ERROR_MSG = "Mismatching 'previous' and 'prev' links exist. 'previous' " +
-		"is: '$PREVIOUS' and 'prev' is: '$PREV'.";
+	public static final String DIFFERENT_LINK_ERROR_MSG =
+			"Mismatching 'previous' and 'prev' links exist. 'previous' " + "is: '$PREVIOUS' and 'prev' is: '$PREV'.";
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -77,19 +77,22 @@ public class BundleUtil {
 		return getLinkUrlOfType(theContext, theBundle, theLinkRelation, true);
 	}
 
-	private static String getLinkUrlOfType(FhirContext theContext, IBaseBundle theBundle, String theLinkRelation, boolean isPreviousCheck) {
+	private static String getLinkUrlOfType(
+			FhirContext theContext, IBaseBundle theBundle, String theLinkRelation, boolean isPreviousCheck) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("link");
 		List<IBase> links = entryChild.getAccessor().getValues(theBundle);
 		for (IBase nextLink : links) {
 
 			boolean isRightRel = false;
-			BaseRuntimeElementCompositeDefinition<?> relDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeElementCompositeDefinition<?> relDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
 			BaseRuntimeChildDefinition relChild = relDef.getChildByName("relation");
 			List<IBase> relValues = relChild.getAccessor().getValues(nextLink);
 			for (IBase next : relValues) {
 				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) next;
-				if (isRelationMatch(theContext, theBundle,theLinkRelation, nextValue.getValueAsString(), isPreviousCheck)) {
+				if (isRelationMatch(
+						theContext, theBundle, theLinkRelation, nextValue.getValueAsString(), isPreviousCheck)) {
 					isRightRel = true;
 				}
 			}
@@ -98,7 +101,8 @@ public class BundleUtil {
 				continue;
 			}
 
-			BaseRuntimeElementCompositeDefinition<?> linkDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeElementCompositeDefinition<?> linkDef =
+					(BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(nextLink.getClass());
 			BaseRuntimeChildDefinition urlChild = linkDef.getChildByName("url");
 			List<IBase> values = urlChild.getAccessor().getValues(nextLink);
 			for (IBase nextUrl : values) {
@@ -112,14 +116,15 @@ public class BundleUtil {
 		return null;
 	}
 
-	private static boolean isRelationMatch(FhirContext theContext, IBaseBundle theBundle, String value, String matching, boolean theIsPreviousCheck) {
-		if ( ! theIsPreviousCheck) {
+	private static boolean isRelationMatch(
+			FhirContext theContext, IBaseBundle theBundle, String value, String matching, boolean theIsPreviousCheck) {
+		if (!theIsPreviousCheck) {
 			return value.equals(matching);
 		}
 
-		if ( previousOrPrev.contains(value)  ) {
+		if (previousOrPrev.contains(value)) {
 			validateUniqueOrMatchingPreviousValues(theContext, theBundle);
-			if ( previousOrPrev.contains(matching) ) {
+			if (previousOrPrev.contains(matching)) {
 				return true;
 			}
 		}
@@ -130,8 +135,10 @@ public class BundleUtil {
 		String previousLink = getLinkNoCheck(theContext, theBundle, PREVIOUS);
 		String prevLink = getLinkNoCheck(theContext, theBundle, PREV);
 		if (prevLink != null && previousLink != null) {
-			if ( ! previousLink.equals(prevLink)) {
-				String msg = DIFFERENT_LINK_ERROR_MSG.replace("$PREVIOUS", previousLink).replace("$PREV", prevLink);
+			if (!previousLink.equals(prevLink)) {
+				String msg = DIFFERENT_LINK_ERROR_MSG
+						.replace("$PREVIOUS", previousLink)
+						.replace("$PREV", prevLink);
 				throw new InternalErrorException(Msg.code(2368) + msg);
 			}
 		}
@@ -142,16 +149,19 @@ public class BundleUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(FhirContext theContext, IBaseBundle theBundle) {
+	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(
+			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
 		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 
 		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
-		BaseRuntimeElementCompositeDefinition<?> requestDef = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestDef =
+				(BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
 
 		BaseRuntimeChildDefinition urlChild = requestDef.getChildByName("url");
 
@@ -193,7 +203,8 @@ public class BundleUtil {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
 		BaseRuntimeElementDefinition<?> element = entryChild.getChildByName("type");
-		IPrimitiveType<?> typeInstance = (IPrimitiveType<?>) element.newInstance(entryChild.getInstanceConstructorArguments());
+		IPrimitiveType<?> typeInstance =
+				(IPrimitiveType<?>) element.newInstance(entryChild.getInstanceConstructorArguments());
 		typeInstance.setValueAsString(theType);
 
 		entryChild.getMutator().setValue(theBundle, typeInstance);
@@ -217,7 +228,8 @@ public class BundleUtil {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
 		@SuppressWarnings("unchecked")
-		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) entryChild.getChildByName("total").newInstance();
+		IPrimitiveType<Integer> value =
+				(IPrimitiveType<Integer>) entryChild.getChildByName("total").newInstance();
 		value.setValue(theTotal);
 		entryChild.getMutator().setValue(theBundle, value);
 	}
@@ -251,45 +263,55 @@ public class BundleUtil {
 	 * @param theContext The FhirContext.
 	 * @param theBundle The {@link IBaseBundle} which contains the entries you would like sorted into processing order.
 	 */
-	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle) throws IllegalStateException {
+	public static void sortEntriesIntoProcessingOrder(FhirContext theContext, IBaseBundle theBundle)
+			throws IllegalStateException {
 		Map<BundleEntryParts, IBase> partsToIBaseMap = getPartsToIBaseMap(theContext, theBundle);
 
-		//Get all deletions.
-		LinkedHashSet<IBase> deleteParts = sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
+		// Get all deletions.
+		LinkedHashSet<IBase> deleteParts =
+				sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.DELETE, partsToIBaseMap);
 		validatePartsNotNull(deleteParts);
 		LinkedHashSet<IBase> retVal = new LinkedHashSet<>(deleteParts);
 
-		//Get all Creations
-		LinkedHashSet<IBase> createParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
+		// Get all Creations
+		LinkedHashSet<IBase> createParts =
+				sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.POST, partsToIBaseMap);
 		validatePartsNotNull(createParts);
 		retVal.addAll(createParts);
 
 		// Get all Updates
-		LinkedHashSet<IBase> updateParts= sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.PUT, partsToIBaseMap);
+		LinkedHashSet<IBase> updateParts =
+				sortEntriesOfTypeIntoProcessingOrder(theContext, RequestTypeEnum.PUT, partsToIBaseMap);
 		validatePartsNotNull(updateParts);
 		retVal.addAll(updateParts);
 
-		//Once we are done adding all DELETE, POST, PUT operations, add everything else.
-		//Since this is a set, it will just fail to add already-added operations.
+		// Once we are done adding all DELETE, POST, PUT operations, add everything else.
+		// Since this is a set, it will just fail to add already-added operations.
 		retVal.addAll(partsToIBaseMap.values());
 
-		//Blow away the entries and reset them in the right order.
+		// Blow away the entries and reset them in the right order.
 		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
 	}
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
 		if (theDeleteParts == null) {
-			throw new IllegalStateException(Msg.code(1745) + "This transaction contains a cycle, so it cannot be sorted.");
+			throw new IllegalStateException(
+					Msg.code(1745) + "This transaction contains a cycle, so it cannot be sorted.");
 		}
 	}
 
-	private static LinkedHashSet<IBase> sortEntriesOfTypeIntoProcessingOrder(FhirContext theContext, RequestTypeEnum theRequestTypeEnum, Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
+	private static LinkedHashSet<IBase> sortEntriesOfTypeIntoProcessingOrder(
+			FhirContext theContext,
+			RequestTypeEnum theRequestTypeEnum,
+			Map<BundleEntryParts, IBase> thePartsToIBaseMap) {
 		SortLegality legality = new SortLegality();
 		HashMap<String, Integer> color = new HashMap<>();
 		HashMap<String, List<String>> adjList = new HashMap<>();
 		List<String> topologicalOrder = new ArrayList<>();
-		Set<BundleEntryParts> bundleEntryParts = thePartsToIBaseMap.keySet().stream().filter(part -> part.getRequestType().equals(theRequestTypeEnum)).collect(Collectors.toSet());
+		Set<BundleEntryParts> bundleEntryParts = thePartsToIBaseMap.keySet().stream()
+				.filter(part -> part.getRequestType().equals(theRequestTypeEnum))
+				.collect(Collectors.toSet());
 		HashMap<String, BundleEntryParts> resourceIdToBundleEntryMap = new HashMap<>();
 
 		for (BundleEntryParts bundleEntryPart : bundleEntryParts) {
@@ -317,22 +339,25 @@ public class BundleUtil {
 						resourceId = bundleEntryPart.getFullUrl();
 					}
 				}
-				List<ResourceReferenceInfo> allResourceReferences = theContext.newTerser().getAllResourceReferences(resource);
+				List<ResourceReferenceInfo> allResourceReferences =
+						theContext.newTerser().getAllResourceReferences(resource);
 				String finalResourceId = resourceId;
-				allResourceReferences
-					.forEach(refInfo -> {
-						String referencedResourceId = refInfo.getResourceReference().getReferenceElement().toVersionless().getValue();
-						if (color.containsKey(referencedResourceId)) {
-							if (!adjList.containsKey(finalResourceId)) {
-								adjList.put(finalResourceId, new ArrayList<>());
-							}
-							adjList.get(finalResourceId).add(referencedResourceId);
+				allResourceReferences.forEach(refInfo -> {
+					String referencedResourceId = refInfo.getResourceReference()
+							.getReferenceElement()
+							.toVersionless()
+							.getValue();
+					if (color.containsKey(referencedResourceId)) {
+						if (!adjList.containsKey(finalResourceId)) {
+							adjList.put(finalResourceId, new ArrayList<>());
 						}
-					});
+						adjList.get(finalResourceId).add(referencedResourceId);
+					}
+				});
 			}
 		}
 
-		for (Map.Entry<String, Integer> entry:color.entrySet()) {
+		for (Map.Entry<String, Integer> entry : color.entrySet()) {
 			if (entry.getValue() == WHITE) {
 				depthFirstSearch(entry.getKey(), color, adjList, topologicalOrder, legality);
 			}
@@ -363,25 +388,31 @@ public class BundleUtil {
 		}
 	}
 
-	private static void depthFirstSearch(String theResourceId, HashMap<String, Integer> theResourceIdToColor, HashMap<String, List<String>> theAdjList, List<String> theTopologicalOrder, SortLegality theLegality) {
+	private static void depthFirstSearch(
+			String theResourceId,
+			HashMap<String, Integer> theResourceIdToColor,
+			HashMap<String, List<String>> theAdjList,
+			List<String> theTopologicalOrder,
+			SortLegality theLegality) {
 
 		if (!theLegality.isLegal()) {
 			ourLog.debug("Found a cycle while trying to sort bundle entries. This bundle is not sortable.");
 			return;
 		}
 
-		//We are currently recursing over this node (gray)
+		// We are currently recursing over this node (gray)
 		theResourceIdToColor.put(theResourceId, GRAY);
 
-		for (String neighbourResourceId: theAdjList.getOrDefault(theResourceId, new ArrayList<>())) {
+		for (String neighbourResourceId : theAdjList.getOrDefault(theResourceId, new ArrayList<>())) {
 			if (theResourceIdToColor.get(neighbourResourceId) == WHITE) {
-				depthFirstSearch(neighbourResourceId, theResourceIdToColor, theAdjList, theTopologicalOrder, theLegality);
+				depthFirstSearch(
+						neighbourResourceId, theResourceIdToColor, theAdjList, theTopologicalOrder, theLegality);
 			} else if (theResourceIdToColor.get(neighbourResourceId) == GRAY) {
 				theLegality.setLegal(false);
 				return;
 			}
 		}
-		//Mark the node as black
+		// Mark the node as black
 		theResourceIdToColor.put(theResourceId, BLACK);
 		theTopologicalOrder.add(theResourceId);
 	}
@@ -391,17 +422,26 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
 		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
 		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
-		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
 		BaseRuntimeChildDefinition requestUrlChildDef = requestChildContentsDef.getChildByName("url");
 		BaseRuntimeChildDefinition requestIfNoneExistChildDef = requestChildContentsDef.getChildByName("ifNoneExist");
 		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
 		Map<BundleEntryParts, IBase> map = new HashMap<>();
 		for (IBase nextEntry : entries) {
-			BundleEntryParts parts = getBundleEntryParts(fullUrlChildDef, resourceChildDef, requestChildDef, requestUrlChildDef, requestIfNoneExistChildDef, methodChildDef, nextEntry);
+			BundleEntryParts parts = getBundleEntryParts(
+					fullUrlChildDef,
+					resourceChildDef,
+					requestChildDef,
+					requestUrlChildDef,
+					requestIfNoneExistChildDef,
+					methodChildDef,
+					nextEntry);
 			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
@@ -411,37 +451,44 @@ public class BundleUtil {
 		return map;
 	}
 
-
-	public static List<SearchBundleEntryParts> getSearchBundleEntryParts(FhirContext theContext, IBaseBundle theBundle) {
+	public static List<SearchBundleEntryParts> getSearchBundleEntryParts(
+			FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
 		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
 		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
 		BaseRuntimeChildDefinition searchChildDef = entryChildContentsDef.getChildByName("search");
-		BaseRuntimeElementCompositeDefinition<?> searchChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) searchChildDef.getChildByName("search");
+		BaseRuntimeElementCompositeDefinition<?> searchChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) searchChildDef.getChildByName("search");
 		BaseRuntimeChildDefinition searchModeChildDef = searchChildContentsDef.getChildByName("mode");
 
 		List<SearchBundleEntryParts> retVal = new ArrayList<>();
 		for (IBase nextEntry : entries) {
-			SearchBundleEntryParts parts = getSearchBundleEntryParts(fullUrlChildDef, resourceChildDef, searchChildDef, searchModeChildDef, nextEntry);
+			SearchBundleEntryParts parts = getSearchBundleEntryParts(
+					fullUrlChildDef, resourceChildDef, searchChildDef, searchModeChildDef, nextEntry);
 			retVal.add(parts);
 		}
 		return retVal;
-
 	}
 
-	private static SearchBundleEntryParts getSearchBundleEntryParts( BaseRuntimeChildDefinition fullUrlChildDef, BaseRuntimeChildDefinition resourceChildDef, BaseRuntimeChildDefinition searchChildDef, BaseRuntimeChildDefinition searchModeChildDef, IBase entry) {
+	private static SearchBundleEntryParts getSearchBundleEntryParts(
+			BaseRuntimeChildDefinition fullUrlChildDef,
+			BaseRuntimeChildDefinition resourceChildDef,
+			BaseRuntimeChildDefinition searchChildDef,
+			BaseRuntimeChildDefinition searchModeChildDef,
+			IBase entry) {
 		IBaseResource resource = null;
 		String matchMode = null;
 
 		String fullUrl = fullUrlChildDef
-			.getAccessor()
-			.getFirstValueOrNull(entry)
-			.map(t->((IPrimitiveType<?>)t).getValueAsString())
-			.orElse(null);
+				.getAccessor()
+				.getFirstValueOrNull(entry)
+				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+				.orElse(null);
 
 		for (IBase nextResource : resourceChildDef.getAccessor().getValues(entry)) {
 			resource = (IBaseResource) nextResource;
@@ -462,42 +509,60 @@ public class BundleUtil {
 	 * @param theBundle The bundle to have its entries processed.
 	 * @param theProcessor a {@link Consumer} which will operate on all the entries of a bundle.
 	 */
-	public static void processEntries(FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
+	public static void processEntries(
+			FhirContext theContext, IBaseBundle theBundle, Consumer<ModifiableBundleEntry> theProcessor) {
 		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
 		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
 		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChildDef = entryChildContentsDef.getChildByName("request");
-		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestChildContentsDef =
+				(BaseRuntimeElementCompositeDefinition<?>) requestChildDef.getChildByName("request");
 		BaseRuntimeChildDefinition requestUrlChildDef = requestChildContentsDef.getChildByName("url");
 		BaseRuntimeChildDefinition requestIfNoneExistChildDef = requestChildContentsDef.getChildByName("ifNoneExist");
 		BaseRuntimeChildDefinition methodChildDef = requestChildContentsDef.getChildByName("method");
 
 		for (IBase nextEntry : entries) {
-			BundleEntryParts parts = getBundleEntryParts(fullUrlChildDef, resourceChildDef, requestChildDef, requestUrlChildDef, requestIfNoneExistChildDef, methodChildDef, nextEntry);
+			BundleEntryParts parts = getBundleEntryParts(
+					fullUrlChildDef,
+					resourceChildDef,
+					requestChildDef,
+					requestUrlChildDef,
+					requestIfNoneExistChildDef,
+					methodChildDef,
+					nextEntry);
 			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
-			BundleEntryMutator mutator = new BundleEntryMutator(theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
+			BundleEntryMutator mutator = new BundleEntryMutator(
+					theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
 			ModifiableBundleEntry entry = new ModifiableBundleEntry(parts, mutator);
 			theProcessor.accept(entry);
 		}
 	}
 
-	private static BundleEntryParts getBundleEntryParts(BaseRuntimeChildDefinition fullUrlChildDef, BaseRuntimeChildDefinition resourceChildDef, BaseRuntimeChildDefinition requestChildDef, BaseRuntimeChildDefinition requestUrlChildDef, BaseRuntimeChildDefinition requestIfNoneExistChildDef, BaseRuntimeChildDefinition methodChildDef, IBase nextEntry) {
+	private static BundleEntryParts getBundleEntryParts(
+			BaseRuntimeChildDefinition fullUrlChildDef,
+			BaseRuntimeChildDefinition resourceChildDef,
+			BaseRuntimeChildDefinition requestChildDef,
+			BaseRuntimeChildDefinition requestUrlChildDef,
+			BaseRuntimeChildDefinition requestIfNoneExistChildDef,
+			BaseRuntimeChildDefinition methodChildDef,
+			IBase nextEntry) {
 		IBaseResource resource = null;
 		String url = null;
 		RequestTypeEnum requestType = null;
 		String conditionalUrl = null;
 		String fullUrl = fullUrlChildDef
-			.getAccessor()
-			.getFirstValueOrNull(nextEntry)
-			.map(t->((IPrimitiveType<?>)t).getValueAsString())
-			.orElse(null);
+				.getAccessor()
+				.getFirstValueOrNull(nextEntry)
+				.map(t -> ((IPrimitiveType<?>) t).getValueAsString())
+				.orElse(null);
 
 		for (IBase nextResource : resourceChildDef.getAccessor().getValues(nextEntry)) {
 			resource = (IBaseResource) nextResource;
@@ -520,7 +585,8 @@ public class BundleUtil {
 						conditionalUrl = url != null && url.contains("?") ? url : null;
 						break;
 					case POST:
-						List<IBase> ifNoneExistReps = requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
+						List<IBase> ifNoneExistReps =
+								requestIfNoneExistChildDef.getAccessor().getValues(nextRequest);
 						if (ifNoneExistReps.size() > 0) {
 							IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
 							conditionalUrl = ifNoneExist.getValueAsString();
@@ -544,15 +610,16 @@ public class BundleUtil {
 	 */
 	public static List<String> toListOfResourceIds(FhirContext theContext, IBaseBundle theBundle) {
 		return toListOfResourcesOfType(theContext, theBundle, IBaseResource.class).stream()
-			.map(resource -> resource.getIdElement().getIdPart())
-			.collect(Collectors.toList());
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * Extract all of the resources of a given type from a given bundle
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
+	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(
+			FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
 		Objects.requireNonNull(theTypeToInclude, "ResourceType must not be null");
 		List<T> retVal = new ArrayList<>();
 
@@ -560,7 +627,8 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
 		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		for (IBase nextEntry : entries) {
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
@@ -593,7 +661,6 @@ public class BundleUtil {
 		return isPatch;
 	}
 
-
 	/**
 	 * create a new bundle entry and set a value for a single field
 	 * @param theContext     Context holding resource definition
@@ -601,18 +668,24 @@ public class BundleUtil {
 	 * @param theValues      The values to set on the bundle entry child field name
 	 * @return the new bundle entry
 	 */
-	public static IBase createNewBundleEntryWithSingleField(FhirContext theContext, String theFieldName, IBase... theValues) {
+	public static IBase createNewBundleEntryWithSingleField(
+			FhirContext theContext, String theFieldName, IBase... theValues) {
 		IBaseBundle newBundle = TerserUtil.newResource(theContext, "Bundle");
-		BaseRuntimeChildDefinition entryChildDef = theContext.getResourceDefinition(newBundle).getChildByName("entry");
+		BaseRuntimeChildDefinition entryChildDef =
+				theContext.getResourceDefinition(newBundle).getChildByName("entry");
 
-		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem =
+				(BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName(theFieldName);
 		IBase bundleEntry = entryChildElem.newInstance();
 		for (IBase value : theValues) {
 			try {
 				resourceChild.getMutator().addValue(bundleEntry, value);
 			} catch (UnsupportedOperationException e) {
-				ourLog.warn("Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only", bundleEntry, theValues);
+				ourLog.warn(
+						"Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only",
+						bundleEntry,
+						theValues);
 				resourceChild.getMutator().setValue(bundleEntry, value);
 				break;
 			}
@@ -626,6 +699,7 @@ public class BundleUtil {
 		SortLegality() {
 			this.myIsLegal = true;
 		}
+
 		private void setLegal(boolean theLegal) {
 			myIsLegal = theLegal;
 		}
@@ -634,5 +708,4 @@ public class BundleUtil {
 			return myIsLegal;
 		}
 	}
-
 }

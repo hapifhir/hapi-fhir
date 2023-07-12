@@ -44,19 +44,22 @@ public abstract class BaseLastNProvider {
 
 	@Operation(name = Constants.OPERATION_LASTN, typeName = "Observation", idempotent = true)
 	public IBaseBundle lastN(
-		ServletRequestDetails theRequestDetails,
-		@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
-		@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCategories,
-		@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED) List<IBaseCoding> theCodes,
-		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax
-	) {
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = "subject", typeName = "reference", min = 0, max = 1) IBaseReference theSubject,
+			@OperationParam(name = "category", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBaseCoding> theCategories,
+			@OperationParam(name = "code", typeName = "coding", min = 0, max = OperationParam.MAX_UNLIMITED)
+					List<IBaseCoding> theCodes,
+			@OperationParam(name = "max", typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theMax) {
 		return processLastN(theSubject, theCategories, theCodes, theMax);
 	}
 
 	/**
 	 * Subclasses should implement this method
 	 */
-	protected abstract IBaseBundle processLastN(IBaseReference theSubject, List<IBaseCoding> theCategories, List<IBaseCoding> theCodes, IPrimitiveType<Integer> theMax);
-
-
+	protected abstract IBaseBundle processLastN(
+			IBaseReference theSubject,
+			List<IBaseCoding> theCategories,
+			List<IBaseCoding> theCodes,
+			IPrimitiveType<Integer> theMax);
 }

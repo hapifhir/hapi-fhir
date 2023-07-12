@@ -35,8 +35,10 @@ public class R4BNotificationStatusBuilder implements INotificationStatusBuilder<
 	}
 
 	@Override
-	public SubscriptionStatus buildNotificationStatus(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
-		org.hl7.fhir.r5.model.SubscriptionStatus subscriptionStatus = myR5NotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
+	public SubscriptionStatus buildNotificationStatus(
+			List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl) {
+		org.hl7.fhir.r5.model.SubscriptionStatus subscriptionStatus =
+				myR5NotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		return (SubscriptionStatus) VersionConvertorFactory_43_50.convertResource(subscriptionStatus);
 	}
 }

@@ -25,12 +25,12 @@ import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,15 +55,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class HapiForeignKeyIndexHelper {
 
 	@Language("SQL")
-	private static final String FK_QUERY = """
+	private static final String FK_QUERY =
+			"""
 		SELECT c.conrelid::regclass AS "table",
-				 /* list of key column names in order */
-				 string_agg(a.attname, ',' ORDER BY x.n) AS columns,
-				 pg_catalog.pg_size_pretty(
-					 pg_catalog.pg_relation_size(c.conrelid)
-				 ) AS size,
-				 c.conname AS constraint,
-				 c.confrelid::regclass AS referenced_table
+				/* list of key column names in order */
+				string_agg(a.attname, ',' ORDER BY x.n) AS columns,
+				pg_catalog.pg_size_pretty(
+					pg_catalog.pg_relation_size(c.conrelid)
+				) AS size,
+				c.conname AS constraint,
+				c.confrelid::regclass AS referenced_table
 		FROM pg_catalog.pg_constraint c
 			/* enumerated key column numbers per foreign key */
 			CROSS JOIN LATERAL
@@ -73,16 +74,16 @@ public class HapiForeignKeyIndexHelper {
 				ON a.attnum = x.attnum
 					AND a.attrelid = c.conrelid
 		WHERE NOT EXISTS
-				  /* is there a matching index for the constraint? */
-				  (SELECT 1 FROM pg_catalog.pg_index i
+				/* is there a matching index for the constraint? */
+				(SELECT 1 FROM pg_catalog.pg_index i
 					WHERE i.indrelid = c.conrelid
-					  /* it must not be a partial index */
-					  AND i.indpred IS NULL
-					  /* the first index columns must be the same as the
-						  key columns, but order doesn't matter */
-					  AND (i.indkey::smallint[])[0:cardinality(c.conkey)-1]
+					/* it must not be a partial index */
+					AND i.indpred IS NULL
+					/* the first index columns must be the same as the
+						key columns, but order doesn't matter */
+					AND (i.indkey::smallint[])[0:cardinality(c.conkey)-1]
 							OPERATOR(pg_catalog.@>) c.conkey)
-		  AND c.contype = 'f'
+		AND c.contype = 'f'
 		GROUP BY c.conrelid, c.conname, c.confrelid
 		ORDER BY pg_catalog.pg_relation_size(c.conrelid) DESC;
 	""";
@@ -126,20 +127,23 @@ public class HapiForeignKeyIndexHelper {
 					String tableName = results.getString("table").toUpperCase();
 					String columns = results.getString("columns").toUpperCase();
 					String constraint = results.getString("constraint").toUpperCase();
-					String referenced_table = results.getString("referenced_table").toUpperCase();
+					String referenced_table =
+							results.getString("referenced_table").toUpperCase();
 
-					ourLog.warn(String.format("Table %s, Columns %s, Constraint %s, Referenced Table %s", tableName, columns, constraint, referenced_table));
+					ourLog.warn(String.format(
+							"Table %s, Columns %s, Constraint %s, Referenced Table %s",
+							tableName, columns, constraint, referenced_table));
 
 					Collection<String> whiteListColumns = ourTableToColumnsWhitelist.get(tableName);
 					boolean isWhiteListed = whiteListColumns.contains(columns);
 
-					assertTrue(isWhiteListed,
-							String.format("Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s", tableName, columns, constraint)
-					);
+					assertTrue(
+							isWhiteListed,
+							String.format(
+									"Unindexed foreign key detected! Table.column: %s.%s. Constraint: %s",
+									tableName, columns, constraint));
 				}
 			}
 		}
-
 	}
-
 }

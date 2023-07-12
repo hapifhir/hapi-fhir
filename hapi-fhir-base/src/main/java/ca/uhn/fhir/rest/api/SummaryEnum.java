@@ -51,7 +51,7 @@ public enum SummaryEnum {
 	 * Return all parts of the resource(s)
 	 */
 	FALSE("false");
-	
+
 	private String myCode;
 	private static Map<String, SummaryEnum> ourCodeToSummary = null;
 
@@ -74,5 +74,4 @@ public enum SummaryEnum {
 		}
 		return c2s.get(theCode);
 	}
-	
 }

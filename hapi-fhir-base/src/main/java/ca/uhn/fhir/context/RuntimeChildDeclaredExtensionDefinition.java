@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.context;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -29,13 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.util.ReflectionUtil;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceDefinition {
 
@@ -56,8 +55,15 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	 * @param theDefinedLocally
 	 *           See {@link Extension#definedLocally()}
 	 */
-	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl,
-			Class<? extends IBase> theChildType, Object theBoundTypeBinder)
+	RuntimeChildDeclaredExtensionDefinition(
+			Field theField,
+			Child theChild,
+			Description theDescriptionAnnotation,
+			Extension theExtension,
+			String theElementName,
+			String theExtensionUrl,
+			Class<? extends IBase> theChildType,
+			Object theBoundTypeBinder)
 			throws ConfigurationException {
 		super(theField, theElementName, theChild, theDescriptionAnnotation);
 		assert isNotBlank(theExtensionUrl);
@@ -116,7 +122,6 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 				return "modifierExtension";
 			}
 			return "extension";
-
 		}
 		return retVal;
 	}
@@ -124,7 +129,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
 		String name = theName;
-		if ("extension".equals(name)||"modifierExtension".equals(name)) {
+		if ("extension".equals(name) || "modifierExtension".equals(name)) {
 			if (myChildResourceBlock != null) {
 				return myChildResourceBlock;
 			}
@@ -136,7 +141,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 		if (getValidChildNames().contains(name) == false) {
 			return null;
 		}
-		
+
 		return super.getChildByName(name);
 	}
 
@@ -169,7 +174,9 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myUrlToChildExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 
 		BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(myChildType);
@@ -184,17 +191,19 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 			}
 		}
 
-		if (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
-//			myDatatypeChildName = "value" + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);
-//			if ("valueResourceReference".equals(myDatatypeChildName)) {
-				// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension
-//				myDatatypeChildName = "valueResource";
-//				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
-//				types.add(IBaseResource.class);
-//				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
-//			} else {
-				myChildDef = elementDef;
-//			}
+		if (elementDef instanceof RuntimePrimitiveDatatypeDefinition
+				|| elementDef instanceof RuntimeCompositeDatatypeDefinition) {
+			//			myDatatypeChildName = "value" + elementDef.getName().substring(0, 1).toUpperCase() +
+			// elementDef.getName().substring(1);
+			//			if ("valueResourceReference".equals(myDatatypeChildName)) {
+			// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension
+			//				myDatatypeChildName = "valueResource";
+			//				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+			//				types.add(IBaseResource.class);
+			//				myChildDef = findResourceReferenceDefinition(theClassToElementDefinitions);
+			//			} else {
+			myChildDef = elementDef;
+			//			}
 		} else if (elementDef instanceof RuntimeResourceBlockDefinition) {
 			RuntimeResourceBlockDefinition extDef = ((RuntimeResourceBlockDefinition) elementDef);
 			for (RuntimeChildDeclaredExtensionDefinition next : extDef.getExtensions()) {
@@ -215,5 +224,4 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 	public Class<? extends IBase> getChildType() {
 		return myChildType;
 	}
-
 }

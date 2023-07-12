@@ -42,24 +42,21 @@ public class ResourceForeignKey {
 		ResourceForeignKey that = (ResourceForeignKey) theO;
 
 		return new EqualsBuilder()
-			.append(table, that.table)
-			.append(key, that.key)
-			.isEquals();
+				.append(table, that.table)
+				.append(key, that.key)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(table)
-			.append(key)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(table).append(key).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("table", table)
-			.append("key", key)
-			.toString();
+				.append("table", table)
+				.append("key", key)
+				.toString();
 	}
 }

@@ -26,5 +26,4 @@ public interface IUpdate {
 	IUpdateTyped resource(IBaseResource theResource);
 
 	IUpdateTyped resource(String theResourceBody);
-
 }

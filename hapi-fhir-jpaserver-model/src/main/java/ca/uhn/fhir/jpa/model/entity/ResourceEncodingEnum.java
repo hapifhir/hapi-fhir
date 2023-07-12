@@ -54,5 +54,4 @@ public enum ResourceEncodingEnum {
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();
 	}
-
 }

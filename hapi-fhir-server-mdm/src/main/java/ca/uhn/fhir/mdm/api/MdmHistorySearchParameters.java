@@ -25,12 +25,12 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class MdmHistorySearchParameters {
 	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
@@ -61,7 +61,8 @@ public class MdmHistorySearchParameters {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
 		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
-		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds) && Objects.equals(mySourceIds, that.mySourceIds);
+		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds)
+				&& Objects.equals(mySourceIds, that.mySourceIds);
 	}
 
 	@Override
@@ -72,20 +73,21 @@ public class MdmHistorySearchParameters {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("myMdmGoldenResourceIds", myGoldenResourceIds)
-			.append("myMdmTargetResourceIds", mySourceIds)
-			.toString();
+				.append("myMdmGoldenResourceIds", myGoldenResourceIds)
+				.append("myMdmTargetResourceIds", mySourceIds)
+				.toString();
 	}
 
 	@Nonnull
 	private static List<IIdType> extractId(List<String> theTheGoldenResourceIds) {
 		return theTheGoldenResourceIds.stream()
-			.map(MdmHistorySearchParameters::extractId)
-			.collect(Collectors.toUnmodifiableList());
+				.map(MdmHistorySearchParameters::extractId)
+				.collect(Collectors.toUnmodifiableList());
 	}
 
 	@Nullable
 	private static IIdType extractId(String theTheGoldenResourceId) {
-		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
+		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(
+				ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
 	}
 }

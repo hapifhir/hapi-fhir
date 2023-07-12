@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,12 +41,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
 	private FhirContext myContext;
+
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
 	private Set<String> mySupportedResourceTypes;
@@ -74,7 +75,6 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		}
 		mySupportedResourceTypes = supportedResourceTypes;
 		myResourceNameToResourceDao = null;
-
 	}
 
 	@Override
@@ -97,12 +97,11 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	public IFhirResourceDao getResourceDao(String theResourceName) {
 		IFhirResourceDao<IBaseResource> retVal = getResourceDaoOrNull(theResourceName);
 		if (retVal == null) {
-			List<String> supportedResourceTypes = myResourceNameToResourceDao
-				.keySet()
-				.stream()
-				.sorted()
-				.collect(Collectors.toList());
-			throw new InvalidRequestException(Msg.code(572) + "Unable to process request, this server does not know how to handle resources of type " + theResourceName + " - Can handle: " + supportedResourceTypes);
+			List<String> supportedResourceTypes =
+					myResourceNameToResourceDao.keySet().stream().sorted().collect(Collectors.toList());
+			throw new InvalidRequestException(Msg.code(572)
+					+ "Unable to process request, this server does not know how to handle resources of type "
+					+ theResourceName + " - Can handle: " + supportedResourceTypes);
 		}
 		return retVal;
 	}
@@ -114,7 +113,8 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
 		IFhirResourceDao<R> retVal = getResourceDaoIfExists(theResourceType);
-		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
+		Validate.notNull(
+				retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
 		return retVal;
 	}
 
@@ -191,13 +191,13 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
 		IFhirResourceDao retVal = getResourceDao(theClass);
 		if (retVal == null) {
-			List<String> supportedResourceNames = myResourceNameToResourceDao
-				.keySet()
-				.stream()
-				.map(t -> myContext.getResourceType(t))
-				.sorted()
-				.collect(Collectors.toList());
-			throw new InvalidRequestException(Msg.code(573) + "Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
+			List<String> supportedResourceNames = myResourceNameToResourceDao.keySet().stream()
+					.map(t -> myContext.getResourceType(t))
+					.sorted()
+					.collect(Collectors.toList());
+			throw new InvalidRequestException(Msg.code(573)
+					+ "Unable to process request, this server does not know how to handle resources of type "
+					+ myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}

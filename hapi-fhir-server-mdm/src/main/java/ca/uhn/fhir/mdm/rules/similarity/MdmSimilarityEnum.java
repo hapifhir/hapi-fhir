@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import javax.annotation.Nullable;
 
 public enum MdmSimilarityEnum {
-
 	JARO_WINKLER(new HapiStringSimilarity(new JaroWinkler())),
 	COSINE(new HapiStringSimilarity(new Cosine())),
 	JACCARD(new HapiStringSimilarity(new Jaccard())),
@@ -44,11 +43,23 @@ public enum MdmSimilarityEnum {
 		myMdmFieldSimilarity = theMdmFieldSimilarity;
 	}
 
-	public MdmMatchEvaluation match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, @Nullable Double theThreshold) {
-		return matchBySimilarity(myMdmFieldSimilarity, theFhirContext, theLeftBase, theRightBase, theExact, theThreshold);
+	public MdmMatchEvaluation match(
+			FhirContext theFhirContext,
+			IBase theLeftBase,
+			IBase theRightBase,
+			boolean theExact,
+			@Nullable Double theThreshold) {
+		return matchBySimilarity(
+				myMdmFieldSimilarity, theFhirContext, theLeftBase, theRightBase, theExact, theThreshold);
 	}
 
-	private MdmMatchEvaluation matchBySimilarity(IMdmFieldSimilarity theSimilarity, FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, Double theThreshold) {
+	private MdmMatchEvaluation matchBySimilarity(
+			IMdmFieldSimilarity theSimilarity,
+			FhirContext theFhirContext,
+			IBase theLeftBase,
+			IBase theRightBase,
+			boolean theExact,
+			Double theThreshold) {
 		double similarityResult = theSimilarity.similarity(theFhirContext, theLeftBase, theRightBase, theExact);
 		return new MdmMatchEvaluation(similarityResult >= theThreshold, similarityResult);
 	}
