@@ -32,8 +32,10 @@ import org.springframework.stereotype.Service;
 public class SearchParamMatcher {
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
+
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
@@ -45,8 +47,10 @@ public class SearchParamMatcher {
 		if (theSearchParameterMap.isEmpty()) {
 			return InMemoryMatchResult.successfulMatch();
 		}
-		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null);
+		ResourceIndexedSearchParams resourceIndexedSearchParams =
+				myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource);
-		return myInMemoryResourceMatcher.match(theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(
+				theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
 	}
 }

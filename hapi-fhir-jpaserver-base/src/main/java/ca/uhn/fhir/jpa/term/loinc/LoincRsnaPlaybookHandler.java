@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -53,7 +53,8 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 	 * -ja
 	 */
 	public static final String RPID_CS_URI = RID_CS_URI;
-	private static final String CM_COPYRIGHT = "The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
+	private static final String CM_COPYRIGHT =
+			"The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
@@ -62,8 +63,12 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 	/**
 	 * Constructor
 	 */
-	public LoincRsnaPlaybookHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
-			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+	public LoincRsnaPlaybookHandler(
+			Map<String, TermConcept> theCode2concept,
+			List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties,
+			String theCopyrightStatement) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCode2Concept = theCode2concept;
 		myValueSets = theValueSets;
@@ -89,11 +94,11 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion;
 		if (codeSystemVersionId != null) {
-			loincRsnaCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
+			loincRsnaCmVersion =
+					myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
 		} else {
 			loincRsnaCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
 		}
-
 
 		// RSNA Codes VS
 		ValueSet vs;
@@ -117,14 +122,13 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 		}
 
 		if (!myCodesInRsnaPlaybookValueSet.contains(loincNumber)) {
-			vs
-				.getCompose()
-				.getIncludeFirstRep()
-				.setSystem(ITermLoaderSvc.LOINC_URI)
-				.setVersion(codeSystemVersionId)
-				.addConcept()
-				.setCode(loincNumber)
-				.setDisplay(longCommonName);
+			vs.getCompose()
+					.getIncludeFirstRep()
+					.setSystem(ITermLoaderSvc.LOINC_URI)
+					.setVersion(codeSystemVersionId)
+					.addConcept()
+					.setCode(loincNumber)
+					.setDisplay(longCommonName);
 			myCodesInRsnaPlaybookValueSet.add(loincNumber);
 		}
 
@@ -196,8 +200,10 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 		String partConceptMapId;
 		String termConceptMapId;
 		if (codeSystemVersionId != null) {
-			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
-			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
+			partConceptMapId =
+					LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
+			termConceptMapId =
+					LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
 		} else {
 			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID;
 			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID;
@@ -206,42 +212,39 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 		// LOINC Part -> Radlex RID code mappings
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
-				new ConceptMapping()
-					.setConceptMapId(partConceptMapId)
-					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
-					.setConceptMapVersion(loincRsnaCmVersion)
-					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
-					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
-					.setSourceCodeSystemVersion(codeSystemVersionId)
-					.setSourceCode(partNumber)
-					.setSourceDisplay(partName)
-					.setTargetCodeSystem(RID_CS_URI)
-					.setTargetCode(rid)
-					.setTargetDisplay(preferredName)
-					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
-			,myLoincCopyrightStatement + " " + CM_COPYRIGHT);
+					new ConceptMapping()
+							.setConceptMapId(partConceptMapId)
+							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
+							.setConceptMapVersion(loincRsnaCmVersion)
+							.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
+							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+							.setSourceCodeSystemVersion(codeSystemVersionId)
+							.setSourceCode(partNumber)
+							.setSourceDisplay(partName)
+							.setTargetCodeSystem(RID_CS_URI)
+							.setTargetCode(rid)
+							.setTargetDisplay(preferredName)
+							.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
+					myLoincCopyrightStatement + " " + CM_COPYRIGHT);
 		}
 
 		// LOINC Term -> Radlex RPID code mappings
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
-				new ConceptMapping()
-					.setConceptMapId(termConceptMapId)
-					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
-					.setConceptMapVersion(loincRsnaCmVersion)
-					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
-					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
-					.setSourceCodeSystemVersion(codeSystemVersionId)
-					.setSourceCode(loincNumber)
-					.setSourceDisplay(longCommonName)
-					.setTargetCodeSystem(RPID_CS_URI)
-					.setTargetCode(rpid)
-					.setTargetDisplay(longName)
-					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
-				myLoincCopyrightStatement + " " + CM_COPYRIGHT);
+					new ConceptMapping()
+							.setConceptMapId(termConceptMapId)
+							.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
+							.setConceptMapVersion(loincRsnaCmVersion)
+							.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
+							.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+							.setSourceCodeSystemVersion(codeSystemVersionId)
+							.setSourceCode(loincNumber)
+							.setSourceDisplay(longCommonName)
+							.setTargetCodeSystem(RPID_CS_URI)
+							.setTargetCode(rpid)
+							.setTargetDisplay(longName)
+							.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
+					myLoincCopyrightStatement + " " + CM_COPYRIGHT);
 		}
-
 	}
-
-
 }

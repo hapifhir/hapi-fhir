@@ -38,7 +38,7 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Autowired
-    StorageSettings myStorageSettings;
+	StorageSettings myStorageSettings;
 
 	@Bean
 	public WebsocketConnectionValidator websocketConnectionValidator() {
@@ -47,7 +47,9 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), myStorageSettings.getWebsocketContextPath()).setAllowedOrigins("*");
+		theRegistry
+				.addHandler(subscriptionWebSocketHandler(), myStorageSettings.getWebsocketContextPath())
+				.setAllowedOrigins("*");
 	}
 
 	@Bean
@@ -55,5 +57,4 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
 		return retVal;
 	}
-
 }

@@ -50,14 +50,14 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
@@ -66,7 +66,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	private String myResourceName;
 
 	@SuppressWarnings("unchecked")
-	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public BaseResourceReturningMethodBinding(
+			Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
@@ -74,7 +75,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		Set<Class<?>> expectedReturnTypes = provideExpectedReturnTypes();
 		if (expectedReturnTypes != null) {
 
-			Validate.isTrue(expectedReturnTypes.contains(methodReturnType), "Unexpected method return type on %s - Allowed: %s", theMethod, expectedReturnTypes);
+			Validate.isTrue(
+					expectedReturnTypes.contains(methodReturnType),
+					"Unexpected method return type on %s - Allowed: %s",
+					theMethod,
+					expectedReturnTypes);
 
 		} else if (Collection.class.isAssignableFrom(methodReturnType)) {
 
@@ -82,13 +87,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(Msg.code(433) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(433) + "Method "
+							+ theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName()
+							+ " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
 
-			if ( IBaseBundle.class.isAssignableFrom(methodReturnType)) {
+			if (IBaseBundle.class.isAssignableFrom(methodReturnType)) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
@@ -100,7 +107,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (void.class.equals(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.VOID;
 		} else {
-			throw new ConfigurationException(Msg.code(434) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(434) + "Invalid return type '"
+					+ methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
+					+ theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -108,7 +117,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 				// If we're returning an abstract type, that's ok, but if we know the resource
 				// type let's grab it
-				if (!Modifier.isAbstract(theReturnResourceType.getModifiers()) && !Modifier.isInterface(theReturnResourceType.getModifiers())) {
+				if (!Modifier.isAbstract(theReturnResourceType.getModifiers())
+						&& !Modifier.isInterface(theReturnResourceType.getModifiers())) {
 					Class<? extends IBaseResource> resourceType = (Class<? extends IResource>) theReturnResourceType;
 					RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resourceType);
 					myResourceName = resourceDefinition.getName();
@@ -150,7 +160,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				 */
 
 				BundleTypeEnum responseBundleType = getResponseBundleType();
-				BundleLinks bundleLinks = new BundleLinks(theRequest.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), responseBundleType);
+				BundleLinks bundleLinks = new BundleLinks(
+						theRequest.getServerBaseForRequest(),
+						null,
+						RestfulServerUtils.prettyPrintResponse(theServer, theRequest),
+						responseBundleType);
 				String linkSelf = RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest);
 				bundleLinks.setSelf(linkSelf);
 
@@ -169,13 +183,21 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					/*
 					 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
 					 */
-					IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+					IVersionSpecificBundleFactory bundleFactory =
+							theServer.getFhirContext().newBundleFactory();
 					bundleFactory.initializeWithBundleResource(resource);
 					bundleFactory.addRootPropertiesToBundle(null, bundleLinks, count, lastUpdated);
 
 					responseObject = resource;
 				} else {
-					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(theServer, theRequest, params, (IBundleProvider) resultObj, count, responseBundleType, linkSelf);
+					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(
+							theServer,
+							theRequest,
+							params,
+							(IBundleProvider) resultObj,
+							count,
+							responseBundleType,
+							linkSelf);
 					responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
 				}
 				break;
@@ -184,7 +206,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				IBundleProvider result = (IBundleProvider) resultObj;
 				Integer size = result.size();
 				if (size == null || size == 0) {
-					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
+					throw new ResourceNotFoundException(
+							Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
 				} else if (size > 1) {
 					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
@@ -198,7 +221,14 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return responseObject;
 	}
 
-	private ResponseBundleRequest buildResponseBundleRequest(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theParams, IBundleProvider theBundleProvider, Integer theCount, BundleTypeEnum theBundleTypeEnum, String theLinkSelf) {
+	private ResponseBundleRequest buildResponseBundleRequest(
+			IRestfulServer<?> theServer,
+			RequestDetails theRequest,
+			Object[] theParams,
+			IBundleProvider theBundleProvider,
+			Integer theCount,
+			BundleTypeEnum theBundleTypeEnum,
+			String theLinkSelf) {
 		Set<Include> includes = getRequestIncludesFromParams(theParams);
 
 		if (theCount == null) {
@@ -207,7 +237,16 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		int offset = OffsetCalculator.calculateOffset(theRequest, theBundleProvider);
 
-		return new ResponseBundleRequest(theServer, theBundleProvider, theRequest, offset, theCount, theLinkSelf, includes, theBundleTypeEnum, null);
+		return new ResponseBundleRequest(
+				theServer,
+				theBundleProvider,
+				theRequest,
+				offset,
+				theCount,
+				theLinkSelf,
+				includes,
+				theBundleTypeEnum,
+				null);
 	}
 
 	public MethodReturnTypeEnum getMethodReturnType() {
@@ -231,11 +270,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public abstract ReturnTypeEnum getReturnType();
 
 	@Override
-	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+			throws BaseServerResponseException, IOException {
 		IBaseResource response = doInvokeServer(theServer, theRequest);
 		/*
-		 When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
-		 the SERVER_OUTGOING_RESPONSE pointcut.
+		When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
+		the SERVER_OUTGOING_RESPONSE pointcut.
 		*/
 		if (response == null) {
 			ResponseDetails responseDetails = new ResponseDetails();
@@ -251,11 +291,22 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				return null;
 			}
 
-			return RestfulServerUtils.streamResponseAsResource(theServer, responseDetails.getResponseResource(), summaryMode, responseDetails.getResponseCode(), isAddContentLocationHeader(), theRequest.isRespondGzip(), theRequest, null, null);
+			return RestfulServerUtils.streamResponseAsResource(
+					theServer,
+					responseDetails.getResponseResource(),
+					summaryMode,
+					responseDetails.getResponseCode(),
+					isAddContentLocationHeader(),
+					theRequest.isRespondGzip(),
+					theRequest,
+					null,
+					null);
 		}
 	}
 
-	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract Object invokeServer(
+			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws InvalidRequestException, InternalErrorException;
 
 	/**
 	 * Should the response include a Content-Location header. Search method bunding (and any others?) may override this to disable the content-location, since it doesn't make sense
@@ -300,14 +351,17 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
-	public static void callOutgoingFailureOperationOutcomeHook(RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
+	public static void callOutgoingFailureOperationOutcomeHook(
+			RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
 		HookParams responseParams = new HookParams();
 		responseParams.add(RequestDetails.class, theRequestDetails);
 		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
 
 		if (theRequestDetails.getInterceptorBroadcaster() != null) {
-			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+			theRequestDetails
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 	}
 }

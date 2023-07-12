@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
@@ -32,15 +33,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.io.Serializable;
 
 @Embeddable
 @Entity
-@Table(name = "HFJ_HISTORY_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"}),
-}, indexes = {
-	@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")
-})
+@Table(
+		name = "HFJ_HISTORY_TAG",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_RESHISTTAG_TAGID",
+					columnNames = {"RES_VER_PID", "TAG_ID"}),
+		},
+		indexes = {@Index(name = "IDX_RESHISTTAG_RESID", columnList = "RES_ID")})
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -52,7 +55,11 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	private Long myId;
 
 	@ManyToOne()
-	@JoinColumn(name = "RES_VER_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
+	@JoinColumn(
+			name = "RES_VER_PID",
+			referencedColumnName = "PID",
+			nullable = false,
+			foreignKey = @ForeignKey(name = "FK_HISTORYTAG_HISTORY"))
 	private ResourceHistoryTable myResourceHistory;
 
 	@Column(name = "RES_VER_PID", insertable = false, updatable = false, nullable = false)
@@ -64,11 +71,12 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
-	public ResourceHistoryTag() {
-	}
+	public ResourceHistoryTag() {}
 
-
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
+	public ResourceHistoryTag(
+			ResourceHistoryTable theResourceHistoryTable,
+			TagDefinition theTag,
+			PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());

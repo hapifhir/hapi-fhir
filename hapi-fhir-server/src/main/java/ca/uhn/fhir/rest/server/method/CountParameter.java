@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -39,7 +39,9 @@ public class CountParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(
+			RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException {
 		String[] countParam = theRequest.getParameters().get(Constants.PARAM_COUNT);
 		if (countParam != null) {
 			if (countParam.length > 0) {
@@ -48,7 +50,8 @@ public class CountParameter implements IParameter {
 						IntegerDt count = new IntegerDt(countParam[0]);
 						return ParameterUtil.fromInteger(myType, count);
 					} catch (DataFormatException e) {
-						throw new InvalidRequestException(Msg.code(375) + "Invalid " + Constants.PARAM_COUNT + " value: " + countParam[0]);
+						throw new InvalidRequestException(
+								Msg.code(375) + "Invalid " + Constants.PARAM_COUNT + " value: " + countParam[0]);
 					}
 				}
 			}
@@ -57,14 +60,21 @@ public class CountParameter implements IParameter {
 	}
 
 	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+	public void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException(Msg.code(376) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(376) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
+					+ " but can not be of collection type");
 		}
 		if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
-			throw new ConfigurationException(Msg.code(377) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(377) + "Method '" + theMethod.getName() + "' in type '"
+					+ theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
+					+ " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}
-
 }

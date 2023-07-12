@@ -34,33 +34,38 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long, Long>,JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
+public interface IMdmLinkJpaRepository
+		extends RevisionRepository<MdmLink, Long, Long>, JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
 
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
-	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
+	@Query(
+			"DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
+	int deleteWithAnyReferenceToPidAndMatchResultNot(
+			@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) OR mySourcePid IN (:goldenPids)")
 	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
-	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
-		"WHERE ml2.myMatchResult=:matchResult " +
-		"AND ml2.myGoldenResourcePid IN (" +
-		"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
-		"INNER JOIN ResourceLink hrl " +
-		"ON hrl.myTargetResourcePid=ml.mySourcePid " +
-		"AND hrl.mySourceResourcePid=:groupPid " +
-		"AND hrl.mySourcePath='Group.member.entity' " +
-		"AND hrl.myTargetResourceType='Patient'" +
-		")")
-	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 "
+			+ "WHERE ml2.myMatchResult=:matchResult "
+			+ "AND ml2.myGoldenResourcePid IN ("
+			+ "SELECT ml.myGoldenResourcePid FROM MdmLink ml "
+			+ "INNER JOIN ResourceLink hrl "
+			+ "ON hrl.myTargetResourcePid=ml.mySourcePid "
+			+ "AND hrl.mySourceResourcePid=:groupPid "
+			+ "AND hrl.mySourcePath='Group.member.entity' "
+			+ "AND hrl.myTargetResourceType='Patient'"
+			+ ")")
+	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(
+			@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query("SELECT ml FROM MdmLink ml WHERE ml.mySourcePid = :sourcePid AND ml.myMatchResult = :matchResult")
-	Optional<MdmLink> findBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMatch);
+	Optional<MdmLink> findBySourcePidAndMatchResult(
+			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMatch);
 
 	interface MdmPidTuple {
 		Long getGoldenPid();
@@ -68,14 +73,14 @@ public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long,
 		Long getSourcePid();
 	}
 
-	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " +
-		"FROM MdmLink ml " +
-		"INNER JOIN MdmLink ml2 " +
-		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
-		"WHERE ml2.mySourcePid=:sourcePid " +
-		"AND ml2.myMatchResult=:matchResult " +
-		"AND ml.myMatchResult=:matchResult")
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " + "FROM MdmLink ml "
+			+ "INNER JOIN MdmLink ml2 "
+			+ "on ml.myGoldenResourcePid=ml2.myGoldenResourcePid "
+			+ "WHERE ml2.mySourcePid=:sourcePid "
+			+ "AND ml2.myMatchResult=:matchResult "
+			+ "AND ml.myMatchResult=:matchResult")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(
+			@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
 	@Query("SELECT ml " +
 		"FROM MdmLink ml " +
@@ -87,10 +92,23 @@ public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long,
 
 	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
 	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+	@Query(
+			"SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(
+			@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
-	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
-	List<Long> findPidByResourceNameAndThreshold(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, Pageable thePageable);
+	@Query(
+			"SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThreshold(
+			@Param("resourceName") String theResourceName,
+			@Param("highThreshold") Date theHighThreshold,
+			Pageable thePageable);
 
-	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold AND ml.myPartitionIdValue IN :partitionId ORDER BY ml.myCreated DESC")
-	List<Long> findPidByResourceNameAndThresholdAndPartitionId(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, @Param("partitionId") List<Integer> thePartitionIds, Pageable thePageable);
+	@Query(
+			"SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold AND ml.myPartitionIdValue IN :partitionId ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThresholdAndPartitionId(
+			@Param("resourceName") String theResourceName,
+			@Param("highThreshold") Date theHighThreshold,
+			@Param("partitionId") List<Integer> thePartitionIds,
+			Pageable thePageable);
 }

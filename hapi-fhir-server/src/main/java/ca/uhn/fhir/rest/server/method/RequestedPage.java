@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-
 /**
  * This is an intermediate record object that holds the offset and limit (count) the user requested for the page of results.
  */

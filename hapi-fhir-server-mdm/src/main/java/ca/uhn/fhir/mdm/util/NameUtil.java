@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.util;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.HumanName;
@@ -31,34 +31,39 @@ import java.util.stream.Collectors;
 
 public final class NameUtil {
 
-	private NameUtil() {
-	}
+	private NameUtil() {}
 
 	public static List<String> extractGivenNames(FhirContext theFhirContext, IBase theBase) {
-		switch(theFhirContext.getVersion().getVersion()) {
+		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
-				HumanName humanNameR4 = (HumanName)theBase;
-				return humanNameR4.getGiven().stream().map(PrimitiveType::getValueAsString).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
+				HumanName humanNameR4 = (HumanName) theBase;
+				return humanNameR4.getGiven().stream()
+						.map(PrimitiveType::getValueAsString)
+						.filter(s -> !StringUtils.isEmpty(s))
+						.collect(Collectors.toList());
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName) theBase;
-				return humanNameDSTU3.getGiven().stream().map(given -> given.toString()).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
+				return humanNameDSTU3.getGiven().stream()
+						.map(given -> given.toString())
+						.filter(s -> !StringUtils.isEmpty(s))
+						.collect(Collectors.toList());
 			default:
-				throw new UnsupportedOperationException(Msg.code(1491) + "Version not supported: " + theFhirContext.getVersion().getVersion());
-
+				throw new UnsupportedOperationException(Msg.code(1491) + "Version not supported: "
+						+ theFhirContext.getVersion().getVersion());
 		}
 	}
 
 	public static String extractFamilyName(FhirContext theFhirContext, IBase theBase) {
-		switch(theFhirContext.getVersion().getVersion()) {
+		switch (theFhirContext.getVersion().getVersion()) {
 			case R4:
-				HumanName humanNameR4 = (HumanName)theBase;
+				HumanName humanNameR4 = (HumanName) theBase;
 				return humanNameR4.getFamily();
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName)theBase;
+				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName) theBase;
 				return humanNameDSTU3.getFamily();
 			default:
-				throw new UnsupportedOperationException(Msg.code(1492) + "Version not supported: " + theFhirContext.getVersion().getVersion());
-
+				throw new UnsupportedOperationException(Msg.code(1492) + "Version not supported: "
+						+ theFhirContext.getVersion().getVersion());
 		}
 	}
 }

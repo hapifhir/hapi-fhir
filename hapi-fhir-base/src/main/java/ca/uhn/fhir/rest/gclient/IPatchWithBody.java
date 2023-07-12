@@ -20,7 +20,6 @@
 package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IPatchWithBody extends IPatchExecutable {
@@ -35,7 +34,7 @@ public interface IPatchWithBody extends IPatchExecutable {
 
 	/**
 	 * Build a conditional URL using fluent constants on resource types
-	 * 
+	 *
 	 * @param theResourceType
 	 *           The resource type to patch (e.g. "Patient")
 	 */
@@ -60,5 +59,4 @@ public interface IPatchWithBody extends IPatchExecutable {
 	 * The resource ID to patch (must include both a resource type and an ID, e.g. <code>Patient/123</code>)
 	 */
 	IPatchExecutable withId(String theId);
-
 }

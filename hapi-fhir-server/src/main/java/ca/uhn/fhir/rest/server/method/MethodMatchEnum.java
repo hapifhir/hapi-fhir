@@ -25,7 +25,7 @@ public enum MethodMatchEnum {
 
 	NONE,
 	APPROXIMATE,
-    EXACT;
+	EXACT;
 
 	public MethodMatchEnum weakerOf(MethodMatchEnum theOther) {
 		if (this.ordinal() < theOther.ordinal()) {
@@ -34,5 +34,4 @@ public enum MethodMatchEnum {
 			return theOther;
 		}
 	}
-
 }

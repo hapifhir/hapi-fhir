@@ -34,8 +34,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -50,6 +48,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -67,8 +67,7 @@ public class UrlUtil {
 	/**
 	 * Non instantiable
 	 */
-	private UrlUtil() {
-	}
+	private UrlUtil() {}
 
 	/**
 	 * Cleans up a value that will be serialized as an HTTP header. This method:
@@ -102,7 +101,8 @@ public class UrlUtil {
 		try {
 			return new URL(new URL(theBase), theEndpoint).toString();
 		} catch (MalformedURLException e) {
-			ourLog.warn("Failed to resolve relative URL[" + theEndpoint + "] against absolute base[" + theBase + "]", e);
+			ourLog.warn(
+					"Failed to resolve relative URL[" + theEndpoint + "] against absolute base[" + theBase + "]", e);
 			return theEndpoint;
 		}
 	}
@@ -126,7 +126,9 @@ public class UrlUtil {
 			return theExtensionUrl;
 		}
 
-		if (!theParentExtensionUrl.substring(0, parentLastSlashIdx).equals(theExtensionUrl.substring(0, parentLastSlashIdx))) {
+		if (!theParentExtensionUrl
+				.substring(0, parentLastSlashIdx)
+				.equals(theExtensionUrl.substring(0, parentLastSlashIdx))) {
 			return theExtensionUrl;
 		}
 
@@ -188,7 +190,6 @@ public class UrlUtil {
 			if (slashIdx != -1) {
 				resourceType = new IdDt(resourceType).getResourceType();
 			}
-
 		}
 
 		try {
@@ -201,7 +202,6 @@ public class UrlUtil {
 
 		return resourceType;
 	}
-
 
 	/**
 	 * URL encode a value according to RFC 3986
@@ -226,10 +226,7 @@ public class UrlUtil {
 	 * values in a collection
 	 */
 	public static List<String> escapeUrlParams(@Nonnull Collection<String> theUnescaped) {
-		return theUnescaped
-			.stream()
-			.map(t -> PARAMETER_ESCAPER.escape(t))
-			.collect(Collectors.toList());
+		return theUnescaped.stream().map(t -> PARAMETER_ESCAPER.escape(t)).collect(Collectors.toList());
 	}
 
 	public static boolean isAbsolute(String theValue) {
@@ -298,7 +295,8 @@ public class UrlUtil {
 		return true;
 	}
 
-	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
+	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl)
+			throws DataFormatException {
 		String url = theUrl;
 		int paramIndex = url.indexOf('?');
 
@@ -326,7 +324,6 @@ public class UrlUtil {
 		if (query.startsWith("?")) {
 			query = query.substring(1);
 		}
-
 
 		StringTokenizer tok = new StringTokenizer(query, "&");
 		while (tok.hasMoreTokens()) {
@@ -450,7 +447,6 @@ public class UrlUtil {
 		}
 
 		return retVal;
-
 	}
 
 	/**
@@ -492,10 +488,10 @@ public class UrlUtil {
 
 				char nextChar = theString.charAt(j);
 				switch (nextChar) {
-					/*
-					 * NB: If you add a constant here, you also need to add it
-					 * to isNeedsSanitization()!!
-					 */
+						/*
+						 * NB: If you add a constant here, you also need to add it
+						 * to isNeedsSanitization()!!
+						 */
 					case '\'':
 						buffer.append("&apos;");
 						break;
@@ -520,7 +516,6 @@ public class UrlUtil {
 						}
 						break;
 				}
-
 			} // for build escaped string
 
 			return buffer.toString();
@@ -582,25 +577,12 @@ public class UrlUtil {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
 
-		final String[] searchList = new String[]{
-			"+",
-			"|",
-			"=>=",
-			"=<=",
-			"=>",
-			"=<"
-		};
-		final String[] replacementList = new String[]{
-			"%2B",
-			"%7C",
-			"=%3E%3D",
-			"=%3C%3D",
-			"=%3E",
-			"=%3C"
-		};
+		final String[] searchList = new String[] {"+", "|", "=>=", "=<=", "=>", "=<"};
+		final String[] replacementList = new String[] {"%2B", "%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
 		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
+			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl
+					+ "] - URL is invalid (must not contain spaces)");
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
@@ -611,7 +593,8 @@ public class UrlUtil {
 		for (int i = 0; i < parameters.size(); i++) {
 			NameValuePair next = parameters.get(i);
 			if (next.getName().equals("email") && next.getValue().contains(" ")) {
-				BasicNameValuePair newPair = new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
+				BasicNameValuePair newPair =
+						new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
 				parameters.set(i, newPair);
 			}
 		}

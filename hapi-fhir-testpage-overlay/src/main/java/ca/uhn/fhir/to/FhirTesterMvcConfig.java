@@ -57,7 +57,8 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
+	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(
+			@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
 		return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
 	}
 
@@ -76,5 +77,4 @@ public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 		return templateEngine;
 	}
-
 }

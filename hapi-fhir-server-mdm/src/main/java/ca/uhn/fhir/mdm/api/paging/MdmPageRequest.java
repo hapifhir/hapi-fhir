@@ -20,19 +20,15 @@
 package ca.uhn.fhir.mdm.api.paging;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This class is essentially just a data clump of offset + count, as well as the ability to convert itself into a standard
@@ -45,7 +41,11 @@ public class MdmPageRequest {
 	private final int myOffset;
 	private final int myCount;
 
-	public MdmPageRequest(@Nullable IPrimitiveType<Integer> theOffset, @Nullable IPrimitiveType<Integer> theCount, int theDefaultPageSize, int theMaximumPageSize) {
+	public MdmPageRequest(
+			@Nullable IPrimitiveType<Integer> theOffset,
+			@Nullable IPrimitiveType<Integer> theCount,
+			int theDefaultPageSize,
+			int theMaximumPageSize) {
 		myOffset = theOffset == null ? 0 : theOffset.getValue();
 		myCount = theCount == null ? theDefaultPageSize : Math.min(theCount.getValue(), theMaximumPageSize);
 		validatePagingParameters(myOffset, myCount);
@@ -53,7 +53,8 @@ public class MdmPageRequest {
 		this.myPage = myOffset / myCount;
 	}
 
-	public MdmPageRequest(@Nullable Integer theOffset, @Nullable Integer theCount, int theDefaultPageSize, int theMaximumPageSize) {
+	public MdmPageRequest(
+			@Nullable Integer theOffset, @Nullable Integer theCount, int theDefaultPageSize, int theMaximumPageSize) {
 		myOffset = theOffset == null ? 0 : theOffset;
 		myCount = theCount == null ? theDefaultPageSize : Math.min(theCount, theMaximumPageSize);
 		validatePagingParameters(myOffset, myCount);
@@ -67,7 +68,7 @@ public class MdmPageRequest {
 		if (theOffset < 0) {
 			errorMessage += PARAM_OFFSET + " must be greater than or equal to 0. ";
 		}
-		if (theCount <= 0 ) {
+		if (theCount <= 0) {
 			errorMessage += PARAM_COUNT + " must be greater than 0.";
 		}
 		if (StringUtils.isNotEmpty(errorMessage)) {

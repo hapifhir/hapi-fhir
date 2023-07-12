@@ -33,10 +33,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ServletRequestTracing {
 	private static final Logger ourLog = LoggerFactory.getLogger(ServletRequestTracing.class);
-	public static final String ATTRIBUTE_REQUEST_ID = ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
+	public static final String ATTRIBUTE_REQUEST_ID =
+			ServletRequestTracing.class.getName() + '.' + Constants.HEADER_REQUEST_ID;
 
-	ServletRequestTracing() { }
-	
+	ServletRequestTracing() {}
+
 	/**
 	 * Assign a tracing id to this request, using
 	 * the X-Request-ID if present and compatible.
@@ -82,5 +83,4 @@ public class ServletRequestTracing {
 		}
 		return requestId;
 	}
-
 }

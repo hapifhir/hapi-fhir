@@ -1,11 +1,11 @@
 package ca.uhn.fhir.tinder.model;
 
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class Extension extends Child {
 
@@ -26,7 +26,7 @@ public class Extension extends Child {
 		}
 		return retVal;
 	}
-	
+
 	public Extension(String theName, String theUrl, Extension... theChildExtensions) {
 		setName(theName);
 		setUrl(theUrl);
@@ -65,8 +65,11 @@ public class Extension extends Child {
 	}
 
 	public void setChildExtensions(List<Extension> theChildExtensions) {
-		if (theChildExtensions != null && theChildExtensions.size() > 0 && getType().size() > 0) {
-			throw new IllegalArgumentException(Msg.code(186) + "Extension may not have a datatype AND child extensions");
+		if (theChildExtensions != null
+				&& theChildExtensions.size() > 0
+				&& getType().size() > 0) {
+			throw new IllegalArgumentException(
+					Msg.code(186) + "Extension may not have a datatype AND child extensions");
 		}
 		myChildExtensions = theChildExtensions;
 	}
@@ -90,7 +93,8 @@ public class Extension extends Child {
 	@Override
 	public void setTypeFromString(String theType) {
 		if (myChildExtensions != null && myChildExtensions.size() > 0 && StringUtils.isNotBlank(theType)) {
-			throw new IllegalArgumentException(Msg.code(187) + "Extension may not have a datatype AND child extensions");
+			throw new IllegalArgumentException(
+					Msg.code(187) + "Extension may not have a datatype AND child extensions");
 		}
 		super.setTypeFromString(theType);
 	}

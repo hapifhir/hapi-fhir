@@ -29,27 +29,27 @@ import java.util.Map;
 public enum UriParamQualifierEnum {
 
 	/**
-	 * The search parameter is a concept with the form <code>[system]|[code]</code>, 
-	 * and the search parameter tests whether the coding in a resource subsumes the 
-	 * specified search code. For example, the search concept has an is-a relationship 
+	 * The search parameter is a concept with the form <code>[system]|[code]</code>,
+	 * and the search parameter tests whether the coding in a resource subsumes the
+	 * specified search code. For example, the search concept has an is-a relationship
 	 * with the coding in the resource, and this includes the coding itself.
 	 * <p>
 	 * Value <code>:above</code>
-	 * </p> 
+	 * </p>
 	 */
 	ABOVE(":above"),
-	
+
 	/**
-	 * The search parameter is a concept with the form <code>[system]|[code]</code>, 
-	 * and the search parameter tests whether the coding in a resource subsumes the 
-	 * specified search code. For example, the search concept has an is-a relationship 
+	 * The search parameter is a concept with the form <code>[system]|[code]</code>,
+	 * and the search parameter tests whether the coding in a resource subsumes the
+	 * specified search code. For example, the search concept has an is-a relationship
 	 * with the coding in the resource, and this includes the coding itself.
 	 * <p>
 	 * Value <code>:below</code>
-	 * </p> 
+	 * </p>
 	 */
 	BELOW(":below");
-	
+
 	private static final Map<String, UriParamQualifierEnum> KEY_TO_VALUE;
 
 	static {
@@ -61,17 +61,18 @@ public enum UriParamQualifierEnum {
 	}
 
 	private final String myValue;
+
 	private UriParamQualifierEnum(String theValue) {
 		myValue = theValue;
 	}
-	
+
 	/**
 	 * Returns the qualifier value, e.g. <code>:below</code>
 	 */
 	public String getValue() {
 		return myValue;
 	}
-	
+
 	/**
 	 * Returns the {@link UriParamQualifierEnum} matching the given qualifier value, such as <code>:below</code>,
 	 * or <code>null</code>
@@ -79,5 +80,4 @@ public enum UriParamQualifierEnum {
 	public static UriParamQualifierEnum forValue(String theValue) {
 		return KEY_TO_VALUE.get(theValue);
 	}
-	
 }

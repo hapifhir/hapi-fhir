@@ -39,6 +39,14 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hl7.fhir.r4.model.Coding;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,26 +67,23 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Indexed(routingBinder=@RoutingBinderRef(type =  DeferConceptIndexingRoutingBinder.class))
-@Table(name = "TRM_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
-}, indexes = {
-	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
-	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
-})
+@Indexed(routingBinder = @RoutingBinderRef(type = DeferConceptIndexingRoutingBinder.class))
+@Table(
+		name = "TRM_CONCEPT",
+		uniqueConstraints = {
+			@UniqueConstraint(
+					name = "IDX_CONCEPT_CS_CODE",
+					columnNames = {"CODESYSTEM_PID", "CODEVAL"})
+		},
+		indexes = {
+			@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
+			@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
+		})
 public class TermConcept implements Serializable {
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
@@ -86,11 +91,18 @@ public class TermConcept implements Serializable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
+	@OneToMany(
+			fetch = FetchType.LAZY,
+			mappedBy = "myParent",
+			cascade = {})
 	private List<TermConceptParentChildLink> myChildren;
 
 	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
-	@FullTextField(name = "myCode", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "exactAnalyzer")
+	@FullTextField(
+			name = "myCode",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "exactAnalyzer")
 	private String myCode;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -98,7 +110,10 @@ public class TermConcept implements Serializable {
 	private Date myUpdated;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
+	@JoinColumn(
+			name = "CODESYSTEM_PID",
+			referencedColumnName = "PID",
+			foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
@@ -106,11 +121,31 @@ public class TermConcept implements Serializable {
 	private long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
-	@FullTextField(name = "myDisplay", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myDisplayEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myDisplayWordEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteWordEdgeAnalyzer")
-	@FullTextField(name = "myDisplayNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myDisplayPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
+	@FullTextField(
+			name = "myDisplay",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "standardAnalyzer")
+	@FullTextField(
+			name = "myDisplayEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(
+			name = "myDisplayWordEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteWordEdgeAnalyzer")
+	@FullTextField(
+			name = "myDisplayNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(
+			name = "myDisplayPhonetic",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompletePhoneticAnalyzer")
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
@@ -132,10 +167,17 @@ public class TermConcept implements Serializable {
 
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
-	@FullTextField(name = "myParentPids", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "conceptParentPidsAnalyzer")
+	@FullTextField(
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
 	private String myParentPids;
 
-	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
+	@OneToMany(
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myChild")
 	private List<TermConceptParentChildLink> myParents;
 
 	@Column(name = "CODE_SEQUENCE", nullable = true)
@@ -183,7 +225,10 @@ public class TermConcept implements Serializable {
 		return designation;
 	}
 
-	private TermConceptProperty addProperty(@Nonnull TermConceptPropertyTypeEnum thePropertyType, @Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
+	private TermConceptProperty addProperty(
+			@Nonnull TermConceptPropertyTypeEnum thePropertyType,
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyValue) {
 		Validate.notBlank(thePropertyName);
 
 		TermConceptProperty property = new TermConceptProperty();
@@ -199,10 +244,14 @@ public class TermConcept implements Serializable {
 		return property;
 	}
 
-	public TermConceptProperty addPropertyCoding(@Nonnull String thePropertyName, @Nonnull String thePropertyCodeSystem, @Nonnull String thePropertyCode, String theDisplayName) {
+	public TermConceptProperty addPropertyCoding(
+			@Nonnull String thePropertyName,
+			@Nonnull String thePropertyCodeSystem,
+			@Nonnull String thePropertyCode,
+			String theDisplayName) {
 		return addProperty(TermConceptPropertyTypeEnum.CODING, thePropertyName, thePropertyCode)
-			.setCodeSystem(thePropertyCodeSystem)
-			.setDisplay(theDisplayName);
+				.setCodeSystem(thePropertyCodeSystem)
+				.setDisplay(theDisplayName);
 	}
 
 	public TermConceptProperty addPropertyString(@Nonnull String thePropertyName, @Nonnull String thePropertyValue) {
@@ -239,8 +288,8 @@ public class TermConcept implements Serializable {
 
 	public TermConcept setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+				theCode, MAX_CODE_LENGTH, "Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
 		return this;
 	}
@@ -440,7 +489,8 @@ public class TermConcept implements Serializable {
 					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
 					break;
 				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
+					retVal.add(new IValidationSupport.CodingConceptProperty(
+							next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
 					break;
 				default:
 					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
@@ -455,5 +505,4 @@ public class TermConcept implements Serializable {
 	public List<TermConcept> getChildCodes() {
 		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
 	}
-
 }

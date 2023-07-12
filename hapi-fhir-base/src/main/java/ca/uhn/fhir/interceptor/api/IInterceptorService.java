@@ -24,5 +24,4 @@ public interface IInterceptorService extends IBaseInterceptorService<Pointcut>, 
 	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 
 	void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
-
 }

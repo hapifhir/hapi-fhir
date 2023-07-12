@@ -50,6 +50,13 @@ import org.hibernate.tuple.ValueGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -67,23 +74,20 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Indexed(routingBinder = @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
-@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {}, indexes = {
-	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
-	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
-	@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
-})
+@Table(
+		name = ResourceTable.HFJ_RESOURCE,
+		uniqueConstraints = {},
+		indexes = {
+			// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
+			@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
+			@Index(
+					name = "IDX_RES_TYPE_DEL_UPDATED",
+					columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
+			@Index(name = "IDX_RES_RESID_UPDATED", columnList = "RES_ID,RES_UPDATED,PARTITION_ID"),
+		})
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
@@ -99,10 +103,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Note that we depend on `myVersion` updated for this field to be indexed.
 	 */
 	@Transient
-	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myContentTextEdgeNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myContentTextNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myContentTextPhonetic", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
+	@FullTextField(
+			name = "myContentText",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "standardAnalyzer")
+	@FullTextField(
+			name = "myContentTextEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(
+			name = "myContentTextNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(
+			name = "myContentTextPhonetic",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
@@ -135,10 +155,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
 	@Transient()
-	@FullTextField(name = "myNarrativeText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myNarrativeTextEdgeNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myNarrativeTextNGram", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myNarrativeTextPhonetic", searchable = Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
+	@FullTextField(
+			name = "myNarrativeText",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "standardAnalyzer")
+	@FullTextField(
+			name = "myNarrativeTextEdgeNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(
+			name = "myNarrativeTextNGram",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(
+			name = "myNarrativeTextPhonetic",
+			searchable = Searchable.YES,
+			projectable = Projectable.NO,
+			analyzer = "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
@@ -148,7 +184,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
 	private ExtendedHSearchIndexData myLuceneIndexData;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
@@ -156,7 +196,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private boolean myParamsCoordsPopulated;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
@@ -165,14 +209,22 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private boolean myParamsDatePopulated;
 
 	@OptimisticLock(excluded = true)
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
 	@Column(name = "SP_NUMBER_PRESENT")
 	@OptimisticLock(excluded = true)
 	private boolean myParamsNumberPopulated;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
@@ -184,7 +236,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Added to support UCUM conversion
 	 * since 5.3.0
 	 */
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
 
@@ -197,7 +253,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
@@ -205,7 +265,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private boolean myParamsStringPopulated;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
@@ -213,7 +277,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
@@ -226,7 +294,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
 	private Boolean myParamsComboStringUniquePresent = false;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedComboStringUnique> myParamsComboStringUnique;
 
@@ -235,11 +307,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_CMPTOKS_PRESENT")
 	private Boolean myParamsComboTokensNonUniquePresent = false;
 
-	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedComboTokenNonUnique> myParamsComboTokensNonUnique;
 
-	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "mySourceResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
 
@@ -261,7 +341,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myResourceLinks")))
 	private String myResourceLinksField;
 
-	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OneToMany(
+			mappedBy = "myTargetResource",
+			cascade = {},
+			fetch = FetchType.LAZY,
+			orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
 
@@ -286,11 +370,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Will contain either the client-assigned id, or the sequence value.
 	 * Will be null during insert time until the first read.
 	 */
-	@Column(name = "FHIR_ID",
-		// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
-		length = 64,
-		// we never update this after insert, and the Generator will otherwise "dirty" the object.
-		updatable = false)
+	@Column(
+			name = "FHIR_ID",
+			// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
+			length = 64,
+			// we never update this after insert, and the Generator will otherwise "dirty" the object.
+			updatable = false)
 
 	// inject the pk for server-assigned sequence ids.
 	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
@@ -310,6 +395,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
 
@@ -322,7 +408,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
 
-	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	@OneToOne(
+			optional = true,
+			fetch = FetchType.EAGER,
+			cascade = {},
+			orphanRemoval = false,
+			mappedBy = "myResource")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
 
@@ -487,7 +578,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myParamsQuantityNormalized;
 	}
 
-	public void setParamsQuantityNormalized(Collection<ResourceIndexedSearchParamQuantityNormalized> theQuantityNormalizedParams) {
+	public void setParamsQuantityNormalized(
+			Collection<ResourceIndexedSearchParamQuantityNormalized> theQuantityNormalizedParams) {
 		if (!isParamsQuantityNormalizedPopulated() && theQuantityNormalizedParams.isEmpty()) {
 			return;
 		}
@@ -602,7 +694,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myVersion = theVersion;
 	}
 
-
 	@Override
 	public boolean isDeleted() {
 		return getDeleted() != null;
@@ -693,17 +784,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	public Boolean isParamsQuantityNormalizedPopulated() {
-		if (myParamsQuantityNormalizedPopulated == null)
-			return Boolean.FALSE;
-		else
-			return myParamsQuantityNormalizedPopulated;
+		if (myParamsQuantityNormalizedPopulated == null) return Boolean.FALSE;
+		else return myParamsQuantityNormalizedPopulated;
 	}
 
 	public void setParamsQuantityNormalizedPopulated(Boolean theParamsQuantityNormalizedPopulated) {
-		if (theParamsQuantityNormalizedPopulated == null)
-			myParamsQuantityNormalizedPopulated = Boolean.FALSE;
-		else
-			myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
+		if (theParamsQuantityNormalizedPopulated == null) myParamsQuantityNormalizedPopulated = Boolean.FALSE;
+		else myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {
@@ -828,12 +915,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@PreUpdate
 	public void preSave() {
 		if (myHasLinks && myResourceLinks != null) {
-			myResourceLinksField = getResourceLinks()
-				.stream()
-				.map(ResourceLink::getTargetResourcePid)
-				.filter(Objects::nonNull)
-				.map(Object::toString)
-				.collect(Collectors.joining(" "));
+			myResourceLinksField = getResourceLinks().stream()
+					.map(ResourceLink::getTargetResourcePid)
+					.filter(Objects::nonNull)
+					.map(Object::toString)
+					.collect(Collectors.joining(" "));
 		} else {
 			myResourceLinksField = null;
 		}
@@ -888,7 +974,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
-			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType()
+					+ '/'
+					+ getTransientForcedId()
+					+ '/'
+					+ Constants.PARAM_HISTORY
+					+ '/'
+					+ getVersion());
 		} else if (getForcedId() == null) {
 			Long id = this.getResourceId();
 			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());

@@ -79,7 +79,15 @@ class OperationRule extends BaseRule implements IAuthRule {
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+	public Verdict applyRule(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Set<AuthorizationFlagsEnum> theFlags,
+			Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		// Operation rules apply to the execution of the operation itself, not to side effects like
@@ -131,7 +139,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 					if (requestResourceId != null) {
 						if (myAppliesToIds != null) {
-							String instanceId = requestResourceId.toUnqualifiedVersionless().getValue();
+							String instanceId =
+									requestResourceId.toUnqualifiedVersionless().getValue();
 							for (IIdType next : myAppliesToIds) {
 								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
 									applies = true;
@@ -143,7 +152,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 							// TODO: Convert to a map of strings and keep the result
 							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
 								String resName = ctx.getResourceType(next);
-								if (resName.equals(requestResourceId .getResourceType())) {
+								if (resName.equals(requestResourceId.getResourceType())) {
 									applies = true;
 									break;
 								}
@@ -198,7 +207,13 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+		return newVerdict(
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier);
 	}
 
 	/**

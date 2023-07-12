@@ -33,7 +33,9 @@ public class InMemoryTopicFilterMatcher implements ISubscriptionTopicFilterMatch
 	}
 
 	@Override
-	public InMemoryMatchResult match(CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter, IBaseResource theResource) {
-		return mySearchParamMatcher.match(theCanonicalTopicSubscriptionFilter.asCriteriaString(), theResource, new SystemRequestDetails());
+	public InMemoryMatchResult match(
+			CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter, IBaseResource theResource) {
+		return mySearchParamMatcher.match(
+				theCanonicalTopicSubscriptionFilter.asCriteriaString(), theResource, new SystemRequestDetails());
 	}
 }

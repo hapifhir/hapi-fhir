@@ -19,20 +19,20 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 public interface IParameter {
 
 	/**
 	 * This <b>server method</b> method takes the data received by the server in an incoming request, and translates that data into a single argument for a server method invocation. Note that all
 	 * received data is passed to this method, but the expectation is that not necessarily that all data is used by every parameter.
-	 * 
+	 *
 	 * @param theRequest
 	 *            The incoming request object
 	 * @param theRequestContents
@@ -40,8 +40,12 @@ public interface IParameter {
 	 * @param theMethodBinding TODO
 	 * @return Returns the argument object as it will be passed to the IResourceProvider method.
 	 */
-	Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException;
+	Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding)
+			throws InternalErrorException, InvalidRequestException;
 
-	void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType);
-
+	void initializeTypes(
+			Method theMethod,
+			Class<? extends Collection<?>> theOuterCollectionType,
+			Class<? extends Collection<?>> theInnerCollectionType,
+			Class<?> theParameterType);
 }

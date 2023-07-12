@@ -200,5 +200,4 @@ public class TerserUtilHelper {
 	public FhirContext getContext() {
 		return myContext;
 	}
-
 }

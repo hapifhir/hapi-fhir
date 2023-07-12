@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private final Integer myIdParamIndex;
@@ -45,7 +44,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private int myConditionalUrlIndex = -1;
 
 	@SuppressWarnings("unchecked")
-	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
+	public BaseOutcomeReturningMethodBindingWithResourceParam(
+			Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
 
 		ResourceParameter resourceParameter = null;
@@ -58,7 +58,9 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					continue;
 				}
 				if (myResourceType != null) {
-					throw new ConfigurationException(Msg.code(454) + "Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
+					throw new ConfigurationException(Msg.code(454) + "Method " + theMethod.getName() + " on type "
+							+ theMethod.getDeclaringClass()
+							+ " has more than one @ResourceParam. Only one is allowed.");
 				}
 
 				myResourceType = resourceParameter.getResourceType();
@@ -70,11 +72,13 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			index++;
 		}
 
-		if ((myResourceType == null || Modifier.isAbstract(myResourceType.getModifiers())) && (theProvider instanceof IResourceProvider)) {
+		if ((myResourceType == null || Modifier.isAbstract(myResourceType.getModifiers()))
+				&& (theProvider instanceof IResourceProvider)) {
 			myResourceType = ((IResourceProvider) theProvider).getResourceType();
 		}
 		if (myResourceType == null) {
-			throw new ConfigurationException(Msg.code(455) + "Unable to determine resource type for method: " + theMethod);
+			throw new ConfigurationException(
+					Msg.code(455) + "Unable to determine resource type for method: " + theMethod);
 		}
 
 		myResourceName = theContext.getResourceType(myResourceType);
@@ -84,10 +88,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		if (resourceParameter == null) {
-			throw new ConfigurationException(Msg.code(456) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @"
-					+ ResourceParam.class.getSimpleName());
+			throw new ConfigurationException(Msg.code(456) + "Method " + theMethod.getName() + " in type "
+					+ theMethod.getDeclaringClass().getCanonicalName()
+					+ " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
-
 	}
 
 	@Override
@@ -139,8 +143,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	/**
 	 * Subclasses may override
 	 */
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
+	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		return;
 	}
-
 }
