@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
@@ -66,7 +67,7 @@ public class CdsPrefetchSvc {
 			fetchMissingPrefetchElements(theCdsServiceRequestJson, serviceSpec, missingPrefetch, strategies);
 		} catch (BaseServerResponseException e) {
 			// Per the CDS Hooks specification
-			throw new PreconditionFailedException("Unable to fetch missing resource(s) with key(s) " + missingPrefetch
+			throw new PreconditionFailedException(Msg.code(2385) + "Unable to fetch missing resource(s) with key(s) " + missingPrefetch
 					+ " for CDS Hooks service " + serviceId + ": " + e.getMessage());
 		}
 	}
@@ -80,7 +81,7 @@ public class CdsPrefetchSvc {
 			String template = theServiceSpec.getPrefetch().get(key);
 			CdsResolutionStrategyEnum source = theServiceSpec.getSource().get(key);
 			if (!theStrategies.contains(source)) {
-				throw new PreconditionFailedException("Unable to fetch missing resource(s) with source " + source);
+				throw new PreconditionFailedException(Msg.code(2386) + "Unable to fetch missing resource(s) with source " + source);
 			}
 			if (source == CdsResolutionStrategyEnum.NONE) {
 				if (theStrategies.contains(CdsResolutionStrategyEnum.FHIR_CLIENT)) {
@@ -91,7 +92,7 @@ public class CdsPrefetchSvc {
 					source = CdsResolutionStrategyEnum.DAO;
 				} else {
 					// Per the CDS Hooks specification
-					throw new PreconditionFailedException("Unable to fetch missing resource(s) with source " + source);
+					throw new PreconditionFailedException(Msg.code(2387) + "Unable to fetch missing resource(s) with source " + source);
 				}
 			}
 
@@ -109,7 +110,7 @@ public class CdsPrefetchSvc {
 				resource = getResourceFromDaoWithPermissionCheck(url);
 			} else {
 				// should never happen
-				throw new IllegalStateException("Unexpected strategy " + theStrategies);
+				throw new IllegalStateException(Msg.code(2388) + "Unexpected strategy " + theStrategies);
 			}
 
 			theCdsServiceRequestJson.addPrefetch(key, resource);

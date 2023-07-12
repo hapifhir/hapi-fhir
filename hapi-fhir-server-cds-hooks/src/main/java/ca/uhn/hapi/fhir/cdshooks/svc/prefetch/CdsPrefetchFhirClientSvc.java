@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
@@ -45,7 +46,7 @@ public class CdsPrefetchFhirClientSvc {
 		String resourceType = parts.getResourceType();
 		if (StringUtils.isEmpty(resourceType)) {
 			throw new InvalidRequestException(
-					"Failed to resolve " + theUrl + ". Url does not start with a resource type.");
+				Msg.code(2383) + "Failed to resolve " + theUrl + ". Url does not start with a resource type.");
 		}
 
 		String resourceId = parts.getResourceId();
@@ -55,7 +56,7 @@ public class CdsPrefetchFhirClientSvc {
 		} else if (matchUrl != null) {
 			return client.search().byUrl(theUrl).execute();
 		} else {
-			throw new InvalidRequestException("Unable to translate url " + theUrl + " into a resource or a bundle.");
+			throw new InvalidRequestException(Msg.code(2384) + "Unable to translate url " + theUrl + " into a resource or a bundle.");
 		}
 	}
 

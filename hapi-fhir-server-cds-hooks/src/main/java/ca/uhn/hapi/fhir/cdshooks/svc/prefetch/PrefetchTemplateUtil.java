@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
@@ -57,7 +58,7 @@ public class PrefetchTemplateUtil {
 		while (matcher.find()) {
 			String key = matcher.group(GROUP_WITH_KEY);
 			if (!theContext.containsKey(key)) {
-				throw new InvalidRequestException("Request context did not provide a value for key <" + key + ">"
+				throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <" + key + ">"
 						+ ".  Available keys in context are: " + theContext.getKeys());
 			}
 			try {
@@ -68,14 +69,14 @@ public class PrefetchTemplateUtil {
 						.map(x -> x.getIdElement().getIdPart())
 						.collect(Collectors.joining(","));
 				if (StringUtils.isEmpty(resourceIds)) {
-					throw new InvalidRequestException(
-							"Request context did not provide for resource(s) matching template. ResourceType missing is: "
+					throw new InvalidRequestException(Msg.code(2373) +
+						"Request context did not provide for resource(s) matching template. ResourceType missing is: "
 									+ resourceType);
 				}
 				String keyToReplace = key + "." + resourceType + "\\.(id)";
 				returnValue = substitute(returnValue, keyToReplace, resourceIds);
 			} catch (ClassCastException e) {
-				throw new InvalidRequestException("Request context did not provide valid "
+				throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
 						+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
 			}
 		}
@@ -91,8 +92,8 @@ public class PrefetchTemplateUtil {
 			// Note we cannot return the keyset as for cases where the map is empty this will throw a
 			// NullPointerException.
 			if (theContext.getString(key) == null) {
-				throw new InvalidRequestException(
-						"Either request context was empty or it did not provide a value for key <" + key
+				throw new InvalidRequestException(Msg.code(2375) +
+					"Either request context was empty or it did not provide a value for key <" + key
 								+ ">.  Please make sure you are including a context with valid keys.");
 			}
 			String value = theContext.getString(key);

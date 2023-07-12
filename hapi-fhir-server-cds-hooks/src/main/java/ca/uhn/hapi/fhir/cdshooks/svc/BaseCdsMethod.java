@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -53,8 +54,8 @@ abstract class BaseCdsMethod implements ICdsMethod {
 			if (e.getCause() != null && e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
-			throw new ConfigurationException(
-					"Failed to invoke " + myMethod.getName() + " method on "
+			throw new ConfigurationException(Msg.code(2376) +
+				"Failed to invoke " + myMethod.getName() + " method on "
 							+ myServiceBean.getClass().getName(),
 					e);
 		}
@@ -69,7 +70,7 @@ abstract class BaseCdsMethod implements ICdsMethod {
 		try {
 			return theObjectMapper.writeValueAsString(theCdsServiceRequestJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException(
+			throw new InvalidRequestException(Msg.code(2377) +
 					"Failed to deserialize CDS Hooks service request json instance when calling CDS Hooks Service "
 							+ theServiceId,
 					e);

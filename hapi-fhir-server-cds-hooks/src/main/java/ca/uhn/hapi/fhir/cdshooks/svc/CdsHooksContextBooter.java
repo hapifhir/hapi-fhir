@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsService;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsServiceFeedback;
@@ -114,7 +115,7 @@ public class CdsHooksContextBooter {
 		} catch (JsonProcessingException e) {
 			final String message = String.format("Invalid JSON: %s", e.getMessage());
 			ourLog.debug(message);
-			throw new UnprocessableEntityException(message);
+			throw new UnprocessableEntityException(Msg.code(2378) + message);
 		}
 	}
 
@@ -137,8 +138,8 @@ public class CdsHooksContextBooter {
 			}
 
 			if (myCdsServiceBeans.isEmpty()) {
-				throw new ConfigurationException(
-						"No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
+				throw new ConfigurationException(Msg.code(2379) +
+					"No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
 			}
 
 		} catch (ConfigurationException e) {
@@ -146,7 +147,7 @@ public class CdsHooksContextBooter {
 			throw e;
 		} catch (Exception e) {
 			stop();
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(2393) + e.getMessage(), e);
 		}
 	}
 

@@ -22,6 +22,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -53,12 +54,12 @@ public class CdsPrefetchDaoSvc {
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(theUrl);
 		String resourceType = parts.getResourceType();
 		if (resourceType == null) {
-			throw new InvalidRequestException(
-					"Failed to resolve " + theUrl + ". Url does not start with resource type");
+			throw new InvalidRequestException(Msg.code(2380) +
+				"Failed to resolve " + theUrl + ". Url does not start with resource type");
 		}
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {
-			throw new ConfigurationException("No dao registered for resource type " + resourceType);
+			throw new ConfigurationException(Msg.code(2381) + "No dao registered for resource type " + resourceType);
 		}
 
 		String resourceId = parts.getResourceId();
@@ -72,7 +73,7 @@ public class CdsPrefetchDaoSvc {
 			return getBundleFromUrl(resourceType, dao, matchUrl);
 		}
 
-		throw new InvalidRequestException("Unable to translate url " + theUrl + " into a resource or a bundle");
+		throw new InvalidRequestException(Msg.code(2382) + "Unable to translate url " + theUrl + " into a resource or a bundle");
 	}
 
 	private IBaseResource getBundleFromUrl(String resourceType, IFhirResourceDao<?> dao, String matchUrl) {

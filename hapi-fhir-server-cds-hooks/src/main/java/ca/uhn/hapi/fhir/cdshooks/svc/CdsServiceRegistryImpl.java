@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
@@ -85,8 +86,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			try {
 				json = myObjectMapper.writeValueAsString(result);
 			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(
-						"Failed to json serialize Cds service response of type "
+				throw new ConfigurationException(Msg.code(2389) +
+					"Failed to json serialize Cds service response of type "
 								+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
 						e);
 			}
@@ -94,8 +95,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException(
-					"Failed to json deserialize Cds service response of type "
+			throw new ConfigurationException(Msg.code(2390) +
+				"Failed to json deserialize Cds service response of type "
 							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
 							+ ".  Json: " + json,
 					e);
@@ -106,7 +107,7 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private ICdsMethod getCdsServiceMethodOrThrowException(String theId) {
 		ICdsMethod retval = myServiceCache.getServiceMethod(theId);
 		if (retval == null) {
-			throw new ResourceNotFoundException("No service with id " + theId + " is registered on this server");
+			throw new ResourceNotFoundException(Msg.code(2391) + "No service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
@@ -115,8 +116,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private ICdsMethod getCdsFeedbackMethodOrThrowException(String theId) {
 		ICdsMethod retval = myServiceCache.getFeedbackMethod(theId);
 		if (retval == null) {
-			throw new ResourceNotFoundException(
-					"No feedback service with id " + theId + " is registered on this server");
+			throw new ResourceNotFoundException(Msg.code(2392) +
+				"No feedback service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
