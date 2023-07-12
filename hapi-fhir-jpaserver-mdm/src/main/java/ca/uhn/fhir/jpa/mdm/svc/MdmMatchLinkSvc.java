@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -88,7 +87,8 @@ public class MdmMatchLinkSvc {
 		}
 	}
 
-	private MdmTransactionContext doMdmUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+	private MdmTransactionContext doMdmUpdate(
+			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		// we initialize to an empty list
 		// we require a candidatestrategy, but it doesn't matter
 		// because empty lists are effectively no matches

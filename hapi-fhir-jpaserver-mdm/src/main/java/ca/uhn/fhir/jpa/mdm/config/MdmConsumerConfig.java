@@ -120,9 +120,7 @@ public class MdmConsumerConfig {
 
 	@Bean
 	IBlockRuleEvaluationSvc blockRuleEvaluationSvc(
-		@Autowired FhirContext theContext,
-		@Autowired(required = false) IBlockListRuleProvider theProvider
-	) {
+			@Autowired FhirContext theContext, @Autowired(required = false) IBlockListRuleProvider theProvider) {
 		return new BlockRuleEvaluationSvcImpl(theContext, theProvider);
 	}
 

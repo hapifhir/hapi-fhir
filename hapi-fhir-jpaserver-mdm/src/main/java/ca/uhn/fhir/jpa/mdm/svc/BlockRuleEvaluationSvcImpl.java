@@ -14,8 +14,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import javax.annotation.Nullable;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -32,9 +32,7 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 	private final IBlockListRuleProvider myBlockListRuleProvider;
 
 	public BlockRuleEvaluationSvcImpl(
-		FhirContext theContext,
-		@Nullable IBlockListRuleProvider theIBlockListRuleProvider
-	) {
+			FhirContext theContext, @Nullable IBlockListRuleProvider theIBlockListRuleProvider) {
 		myFhirPath = theContext.newFhirPath();
 		myBlockListRuleProvider = theIBlockListRuleProvider;
 	}
@@ -58,9 +56,9 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 		// gather only applicable rules
 		// these rules are 'or''d, so if any match,
 		// mdm matching is blocked
-		return blockListJson.getBlockListItemJsonList()
-			.stream().filter(r -> r.getResourceType().equals(resourceType))
-			.anyMatch(rule -> isMdmBlockedForFhirPath(theResource, rule));
+		return blockListJson.getBlockListItemJsonList().stream()
+				.filter(r -> r.getResourceType().equals(resourceType))
+				.anyMatch(rule -> isMdmBlockedForFhirPath(theResource, rule));
 	}
 
 	private boolean isMdmBlockedForFhirPath(IAnyResource theResource, BlockListRuleJson theRule) {
@@ -81,8 +79,10 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 				// so we'll catch and not block if this fails
 				results = myFhirPath.evaluate(theResource, path, IBase.class);
 			} catch (FhirPathExecutionException ex) {
-				ourLog.warn("FhirPath evaluation failed with an exception."
-					+ " No blocking will be applied and mdm matching will continue as before.", ex);
+				ourLog.warn(
+						"FhirPath evaluation failed with an exception."
+								+ " No blocking will be applied and mdm matching will continue as before.",
+						ex);
 				return false;
 			}
 
@@ -107,7 +107,9 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 			} else {
 				// blocking can only be done by evaluating primitive types
 				// additional fhirpath values required
-				ourLog.warn("FhirPath {} yields a non-primitive value; blocking is only supported on primitive field types.", path);
+				ourLog.warn(
+						"FhirPath {} yields a non-primitive value; blocking is only supported on primitive field types.",
+						path);
 				return false;
 			}
 		}
@@ -115,5 +117,4 @@ public class BlockRuleEvaluationSvcImpl implements IBlockRuleEvaluationSvc {
 		// if we got here, all blocking rules evaluated to true
 		return true;
 	}
-
 }
