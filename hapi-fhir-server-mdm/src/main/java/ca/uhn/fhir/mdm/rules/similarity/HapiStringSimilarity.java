@@ -29,7 +29,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
  * Similarity measure for two IBase fields whose similarity can be measured by their String representations.
  */
 public class HapiStringSimilarity implements IMdmFieldSimilarity {
-	private final NormalizedStringSimilarity myStringSimilarity;
+	protected final NormalizedStringSimilarity myStringSimilarity;
 
 	public HapiStringSimilarity(NormalizedStringSimilarity theStringSimilarity) {
 		myStringSimilarity = theStringSimilarity;
