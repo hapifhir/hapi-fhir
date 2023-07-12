@@ -71,27 +71,34 @@ public class HapiSchemaMigrationTest {
 		VersionEnum[] allVersions = {
 			VersionEnum.V5_1_0,
 			VersionEnum.V5_2_0,
-			VersionEnum.V5_3_0,
+			//VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
-			VersionEnum.V5_5_0,
+			//VersionEnum.V5_5_0,
+			//VersionEnum.V6_0_0
+		};
+
+		//int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
+		int fromVersion = 0;
+		VersionEnum from = allVersions[fromVersion];
+		VersionEnum toVersion;
+
+		for (int i = 1; i < allVersions.length; i++) {
+			toVersion = allVersions[i];
+			System.out.println("here" + toVersion.name());
+			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
+			myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
 		}
 
-		int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
-		VersionEnum from = allVersions[fromVersion];
-
-		VersionEnum toVersion = VersionEnum.V5_5_0;
-
-		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
-		myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
 
 //		FIXME ND - make sure all migrations are run at the end
-//		int lastVersion = allVersions.length - 1;
-//		VersionEnum to = allVersions[lastVersion];
+		int lastVersion = allVersions.length - 1;
+		toVersion = allVersions[lastVersion];
+//		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
 //
 //		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, to);
 	}
 
-	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) {
+	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
 		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
 		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(theDriverType);
@@ -104,8 +111,8 @@ public class HapiSchemaMigrationTest {
 			// 2 H2 automatically adds indexes to foreign keys automatically (and so cannot be used)
 			// 3 Oracle doesn't run on everyone's machine (and is difficult to do so)
 			// 4 Postgres is generally the fastest/least terrible relational db supported
-//			new HapiForeignKeyIndexHelper()
-//				.ensureAllForeignKeysAreIndexed(dataSource);
+			new HapiForeignKeyIndexHelper()
+				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
 	}
 

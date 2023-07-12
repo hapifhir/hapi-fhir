@@ -22,10 +22,10 @@ INSERT INTO HFJ_RESOURCE (
    VALUES (
    1656,
    'R4',
-   'false',
+   0,
    '2023-06-15 09:58:42.92',
    '2023-06-15 09:58:42.92',
-   'false',
+   0,
    '6beed652b77f6c65d776e57341a0b5b0596ac9cfb0e8345a5a5cfbfaa59e2b62',
    1,
    0,
