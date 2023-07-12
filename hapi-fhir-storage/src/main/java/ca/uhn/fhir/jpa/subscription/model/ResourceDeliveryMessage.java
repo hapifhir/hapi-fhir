@@ -41,12 +41,16 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 
 	@JsonProperty("canonicalSubscription")
 	private CanonicalSubscription mySubscription;
+
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
+
 	@JsonProperty("payload")
 	private String myPayloadString;
+
 	@JsonProperty("payloadId")
 	private String myPayloadId;
+
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
@@ -127,14 +131,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("mySubscription", mySubscription == null ? "null" : mySubscription.getIdElementString())
-			// it isn't safe to log payloads
-			.append("myPayloadString", "[Not Logged]")
-			.append("myPayload", myPayloadDecoded)
-			.append("myPayloadId", myPayloadId)
-			.append("myPartitionId", myPartitionId)
-			.append("myOperationType", getOperationType())
-			.toString();
+				.append("mySubscription", mySubscription == null ? "null" : mySubscription.getIdElementString())
+				// it isn't safe to log payloads
+				.append("myPayloadString", "[Not Logged]")
+				.append("myPayload", myPayloadDecoded)
+				.append("myPayloadId", myPayloadId)
+				.append("myPartitionId", myPartitionId)
+				.append("myOperationType", getOperationType())
+				.toString();
 	}
 
 	/**

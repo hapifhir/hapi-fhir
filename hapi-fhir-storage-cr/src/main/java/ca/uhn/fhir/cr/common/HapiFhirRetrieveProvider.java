@@ -48,13 +48,12 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 
-
 	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
 		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails());
 	}
 
-	public HapiFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver,
-											  RequestDetails requestDetails) {
+	public HapiFhirRetrieveProvider(
+			DaoRegistry registry, SearchParameterResolver searchParameterResolver, RequestDetails requestDetails) {
 		super(searchParameterResolver);
 		this.myDaoRegistry = registry;
 		this.myRequestDetails = requestDetails;
@@ -70,7 +69,10 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 		private final BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc;
 
-		public QueryIterable(String dataType, List<SearchParameterMap> queries, BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
+		public QueryIterable(
+				String dataType,
+				List<SearchParameterMap> queries,
+				BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
 			this.dataType = dataType;
 			this.queries = queries;
 			this.queryFunc = queryFunc;
@@ -85,7 +87,10 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 			Iterator<IBaseResource> currentResult = null;
 
-			public QueryIterator(String dataType, List<SearchParameterMap> queries, BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
+			public QueryIterator(
+					String dataType,
+					List<SearchParameterMap> queries,
+					BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
 				this.dataType = dataType;
 				this.queries = queries;
 				this.queryFunc = queryFunc;
@@ -117,7 +122,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 				if (index >= queries.size()) {
 					return null;
 				}
-				//extract next query result
+				// extract next query result
 				var result = this.queryFunc.apply(dataType, queries.get(index)).iterator();
 				index++;
 				return result;
@@ -144,7 +149,6 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 			for (Map.Entry<String, List<List<IQueryParameterType>>> entry : map.entrySet()) {
 				hapiMap.put(entry.getKey(), entry.getValue());
-
 			}
 
 		} catch (Exception e) {

@@ -54,14 +54,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+
 	@Autowired
 	private StorageSettings myStorageSettings;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -77,11 +82,14 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
 		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
-			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			ourLog.debug(
+					"Subscriptions are disabled on this server.  Skipping {} channel creation.",
+					SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(
+					SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}
 
@@ -117,15 +125,21 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 * This is an internal API - Use with caution!
 	 */
 	@Override
-	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		// Even though the resource is being written, the subscription will be interacting with it by effectively "reading" it so we set the RequestPartitionId as a read request
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
+	public void submitResourceModified(
+			IBaseResource theNewResource,
+			ResourceModifiedMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
+		// Even though the resource is being written, the subscription will be interacting with it by effectively
+		// "reading" it so we set the RequestPartitionId as a read request
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+				theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(
+				myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		HookParams params = new HookParams()
-			.add(ResourceModifiedMessage.class, msg);
-		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 		if (!outcome) {
 			return;
 		}
@@ -162,7 +176,9 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		Validate.notNull(
+				myMatchingChannel,
+				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 

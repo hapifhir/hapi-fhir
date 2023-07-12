@@ -39,5 +39,4 @@ public interface IAuthRuleBuilderAppliesTo<T> {
 	 * @param theType E.g. "Patient"
 	 */
 	T resourcesOfType(String theType);
-
 }

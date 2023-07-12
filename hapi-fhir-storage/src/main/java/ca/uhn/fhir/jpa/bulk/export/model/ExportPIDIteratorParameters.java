@@ -55,6 +55,7 @@ public class ExportPIDIteratorParameters {
 	 * of results/status).
 	 */
 	private String myInstanceId;
+
 	private String myChunkId;
 	/**
 	 * The export style
@@ -185,5 +186,4 @@ public class ExportPIDIteratorParameters {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
-
 }

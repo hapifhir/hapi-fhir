@@ -58,11 +58,10 @@ public class MdmResourceFieldMatcher {
 	private final IMatcherFactory myIMatcherFactory;
 
 	public MdmResourceFieldMatcher(
-		FhirContext theFhirContext,
-		IMatcherFactory theIMatcherFactory,
-		MdmFieldMatchJson theMdmFieldMatchJson,
-		MdmRulesJson theMdmRulesJson
-	) {
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			MdmFieldMatchJson theMdmFieldMatchJson,
+			MdmRulesJson theMdmRulesJson) {
 		myIMatcherFactory = theIMatcherFactory;
 
 		myFhirContext = theFhirContext;
@@ -136,7 +135,8 @@ public class MdmResourceFieldMatcher {
 			return similarity.match(myFhirContext, theLeftValue, theRightValue);
 		}
 
-		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
+		throw new InternalErrorException(
+				Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
 	}
 
 	private void validate(IBaseResource theResource) {
@@ -144,10 +144,19 @@ public class MdmResourceFieldMatcher {
 		Validate.notNull(resourceType, "Resource type may not be null");
 
 		if (ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(myResourceType)) {
-			boolean isMdmType = myMdmRulesJson.getMdmTypes().stream().anyMatch(mdmType -> mdmType.equalsIgnoreCase(resourceType));
-			Validate.isTrue(isMdmType, "Expecting resource type %s, got resource type %s", myMdmRulesJson.getMdmTypes().stream().collect(Collectors.joining(",")), resourceType);
+			boolean isMdmType =
+					myMdmRulesJson.getMdmTypes().stream().anyMatch(mdmType -> mdmType.equalsIgnoreCase(resourceType));
+			Validate.isTrue(
+					isMdmType,
+					"Expecting resource type %s, got resource type %s",
+					myMdmRulesJson.getMdmTypes().stream().collect(Collectors.joining(",")),
+					resourceType);
 		} else {
-			Validate.isTrue(myResourceType.equals(resourceType), "Expecting resource type %s got resource type %s", myResourceType, resourceType);
+			Validate.isTrue(
+					myResourceType.equals(resourceType),
+					"Expecting resource type %s got resource type %s",
+					myResourceType,
+					resourceType);
 		}
 	}
 

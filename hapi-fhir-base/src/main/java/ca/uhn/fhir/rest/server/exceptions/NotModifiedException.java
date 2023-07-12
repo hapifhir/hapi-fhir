@@ -19,16 +19,15 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 301 Not Modified</b> response, which means the resource has not
  * changed since the last version the client retrieved. This exception should only be used
- * as a part of the ETag workflow. 
- * 
+ * as a part of the ETag workflow.
+ *
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
@@ -46,7 +45,7 @@ public class NotModifiedException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 * @param theOperationOutcome
@@ -55,5 +54,4 @@ public class NotModifiedException extends BaseServerResponseException {
 	public NotModifiedException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
 }

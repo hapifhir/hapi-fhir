@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -39,11 +39,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -84,7 +84,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		} else {
 			myResourceName = null;
 		}
-
 	}
 
 	@Override
@@ -142,9 +141,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return MethodMatchEnum.EXACT;
 	}
 
-
 	@Override
-	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(
+			IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams)
+			throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -185,14 +185,17 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {
-					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
-						throw new InternalErrorException(Msg.code(410) + "Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
+					if (nextResource.getIdElement() == null
+							|| isBlank(nextResource.getIdElement().getIdPart())) {
+						throw new InternalErrorException(Msg.code(410) + "Server provided resource at index " + index
+								+ " with no ID set (using IResource#setId(IdDt))");
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
-						//TODO: Use of a deprecated method should be resolved.
+						// TODO: Use of a deprecated method should be resolved.
 						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
 						if (versionId == null || versionId.isEmpty()) {
-							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
+							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index "
+									+ index + " with no Version ID set (using IResource#setId(IdDt))");
 						}
 					}
 					index++;
@@ -228,5 +231,4 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		return null;
 	}
-
 }

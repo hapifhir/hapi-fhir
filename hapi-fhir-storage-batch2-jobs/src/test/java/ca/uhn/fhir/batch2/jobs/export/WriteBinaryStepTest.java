@@ -144,8 +144,9 @@ public class WriteBinaryStepTest {
 		// when
 		when(myDaoRegistry.getResourceDao(eq("Binary")))
 			.thenReturn(binaryDao);
-		when(binaryDao.create(any(IBaseBinary.class), any(RequestDetails.class)))
+		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
 			.thenReturn(methodOutcome);
+
 
 		// test
 		RunOutcome outcome = myFinalStep.run(input, sink);
@@ -156,7 +157,7 @@ public class WriteBinaryStepTest {
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(binaryDao)
-			.create(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
+			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
 		// post-pending a \n (as this is what the binary does)
 		String expected = String.join("\n", stringified) + "\n";

@@ -19,11 +19,9 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-
 import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 
 public interface IGetPageTyped<T> extends IClientExecutable<IGetPageTyped<T>, T> {
 
 	IGetPageTyped<T> usingMethod(PagingHttpMethodEnum thePagingHttpMethod);
-
 }

@@ -52,7 +52,8 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	default ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+	default ConsentOutcome startOperation(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
 	}
 
@@ -76,7 +77,8 @@ public interface IConsentService {
 	 * @return Returns {@literal false} to avoid calling {@link #canSeeResource(RequestDetails, IBaseResource, IConsentContextServices)}
 	 * @since 6.0.0
 	 */
-	default boolean shouldProcessCanSeeResource(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+	default boolean shouldProcessCanSeeResource(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 		return true;
 	}
 
@@ -130,7 +132,8 @@ public interface IConsentService {
 	 * to modify the response object, so an error will be thrown if {@link ConsentOutcome#getResource()}
 	 * returns a non-null response.
 	 */
-	default ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	default ConsentOutcome canSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
 	}
 
@@ -168,7 +171,8 @@ public interface IConsentService {
 	 * @return An outcome object. See method documentation for a description.
 	 * @see #canSeeResource(RequestDetails, IBaseResource, IConsentContextServices) for a description of the difference between these two methods.
 	 */
-	default ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+	default ConsentOutcome willSeeResource(
+			RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
 	}
 
@@ -191,8 +195,8 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException, IConsentContextServices)
 	 */
-	default void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
-	}
+	default void completeOperationSuccess(
+			RequestDetails theRequestDetails, IConsentContextServices theContextServices) {}
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
@@ -214,6 +218,8 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @see #completeOperationSuccess(RequestDetails, IConsentContextServices)
 	 */
-	default void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
-	}
+	default void completeOperationFailure(
+			RequestDetails theRequestDetails,
+			BaseServerResponseException theException,
+			IConsentContextServices theContextServices) {}
 }

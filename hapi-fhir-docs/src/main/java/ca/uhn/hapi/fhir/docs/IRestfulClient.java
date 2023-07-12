@@ -31,7 +31,7 @@ import org.hl7.fhir.r4.model.StringType;
 
 import java.util.List;
 
-//START SNIPPET: provider
+// START SNIPPET: provider
 /**
  * All RESTful clients must be an interface which extends IBasicClient
  */
@@ -40,12 +40,12 @@ public interface IRestfulClient extends IBasicClient {
 	/**
 	 * The "@Read" annotation indicates that this method supports the
 	 * read operation. Read operations should return a single resource
-	 * instance. 
-	 * 
+	 * instance.
+	 *
 	 * @param theId
 	 *    The read operation takes one parameter, which must be of type
 	 *    IdType and must be annotated with the "@Read.IdParam" annotation.
-	 * @return 
+	 * @return
 	 *    Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
@@ -66,11 +66,11 @@ public interface IRestfulClient extends IBasicClient {
 	Organization getOrganizationById(@IdParam IIdType theId);
 
 	/**
-	 * The "@Search" annotation indicates that this method supports the 
+	 * The "@Search" annotation indicates that this method supports the
 	 * search operation. You may have many different methods annotated with
 	 * this annotation, to support many different search criteria. This
 	 * example searches by family name.
-	 * 
+	 *
 	 * @param theFamilyName
 	 *    This operation takes one parameter which is the search criteria. It is
 	 *    annotated with the "@Required" annotation. This annotation takes one argument,
@@ -83,8 +83,5 @@ public interface IRestfulClient extends IBasicClient {
 	 */
 	@Search()
 	List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringType theFamilyName);
-
 }
-//END SNIPPET: provider
-
-
+// END SNIPPET: provider

@@ -62,16 +62,22 @@ public class SubscriptionTopicPayloadBuilder {
 		}
 	}
 
-	public IBaseBundle buildPayload(List<IBaseResource> theResources, ActiveSubscription theActiveSubscription, String theTopicUrl, RestOperationTypeEnum theRestOperationType) {
+	public IBaseBundle buildPayload(
+			List<IBaseResource> theResources,
+			ActiveSubscription theActiveSubscription,
+			String theTopicUrl,
+			RestOperationTypeEnum theRestOperationType) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		IBaseResource notificationStatus = myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
+		IBaseResource notificationStatus =
+				myNotificationStatusBuilder.buildNotificationStatus(theResources, theActiveSubscription, theTopicUrl);
 		bundleBuilder.addCollectionEntry(notificationStatus);
 
 		addResources(bundleBuilder, theResources, theRestOperationType);
 		// WIP STR5 add support for notificationShape include, revinclude
 
-		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets the bundle type
+		// Note we need to set the bundle type after we add the resources since adding the resources automatically sets
+		// the bundle type
 		setBundleType(bundleBuilder);
 		IBaseBundle retval = bundleBuilder.getBundle();
 		if (ourLog.isDebugEnabled()) {
@@ -81,7 +87,8 @@ public class SubscriptionTopicPayloadBuilder {
 		return retval;
 	}
 
-	private static void addResources(BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
+	private static void addResources(
+			BundleBuilder bundleBuilder, List<IBaseResource> theResources, RestOperationTypeEnum theRestOperationType) {
 		for (IBaseResource resource : theResources) {
 			switch (theRestOperationType) {
 				case CREATE:
@@ -112,6 +119,7 @@ public class SubscriptionTopicPayloadBuilder {
 	}
 
 	private IllegalStateException unsupportedFhirVersionException() {
-		return new IllegalStateException(Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + myFhirVersion);
+		return new IllegalStateException(
+				Msg.code(2331) + "SubscriptionTopic subscriptions are not supported on FHIR version: " + myFhirVersion);
 	}
 }

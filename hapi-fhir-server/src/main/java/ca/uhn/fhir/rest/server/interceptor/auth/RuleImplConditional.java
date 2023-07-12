@@ -39,8 +39,15 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+	public Verdict applyRule(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Set<AuthorizationFlagsEnum> theFlags,
+			Pointcut thePointcut) {
 		assert !(theInputResource != null && theOutputResource != null);
 
 		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
@@ -66,7 +73,8 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 							return null;
 						}
 					} else {
-						String inputResourceName = theRequestDetails.getFhirContext().getResourceType(theInputResource);
+						String inputResourceName =
+								theRequestDetails.getFhirContext().getResourceType(theInputResource);
 						if (!myAppliesToTypes.contains(inputResourceName)) {
 							return null;
 						}
@@ -74,7 +82,13 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 					break;
 			}
 
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+			return newVerdict(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					theRuleApplier);
 		}
 
 		return null;
@@ -91,5 +105,4 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	void setOperationType(RestOperationTypeEnum theOperationType) {
 		myOperationType = theOperationType;
 	}
-
 }

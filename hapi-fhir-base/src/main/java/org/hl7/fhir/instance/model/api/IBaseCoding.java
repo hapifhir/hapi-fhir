@@ -40,6 +40,4 @@ public interface IBaseCoding extends IBase {
 	IBaseCoding setVersion(String theVersion);
 
 	IBaseCoding setUserSelected(boolean theUserSelected);
-
-
 }

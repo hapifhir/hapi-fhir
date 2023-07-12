@@ -83,16 +83,13 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 		CanonicalIdentifier that = (CanonicalIdentifier) theO;
 
 		return new EqualsBuilder()
-			.append(mySystem, that.mySystem)
-			.append(myValue, that.myValue)
-			.isEquals();
+				.append(mySystem, that.mySystem)
+				.append(myValue, that.myValue)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(mySystem)
-			.append(myValue)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(mySystem).append(myValue).toHashCode();
 	}
 }

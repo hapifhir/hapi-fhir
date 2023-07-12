@@ -64,7 +64,7 @@ public class ActiveSubscriptionTopicCache {
 		return myCache.values();
 	}
 
-    public void remove(String theSubscriptionTopicId) {
+	public void remove(String theSubscriptionTopicId) {
 		myCache.remove(theSubscriptionTopicId);
-    }
+	}
 }

@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.model.primitive;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @DatatypeDef(name = "uri")
 public class UriDt extends BasePrimitive<String> {
@@ -55,12 +54,9 @@ public class UriDt extends BasePrimitive<String> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 
 		UriDt other = (UriDt) obj;
 		if (getValue() == null && other.getValue() == null) {
@@ -122,7 +118,7 @@ public class UriDt extends BasePrimitive<String> {
 	/**
 	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
 	 * in the value of the newly created UriDt, per the FHIR specification).
-	 * 
+	 *
 	 * @param theOid
 	 *           The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
 	 *           <code>null</code> value)
@@ -134,5 +130,4 @@ public class UriDt extends BasePrimitive<String> {
 		}
 		return new UriDt("urn:oid:" + theOid);
 	}
-
 }
