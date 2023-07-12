@@ -40,7 +40,8 @@ public interface IElasticsearchSvc {
 	 * @param theMaxResultsToFetch  The maximum number of results to return for the purpose of paging.
 	 * @return
 	 */
-	List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch);
+	List<String> executeLastN(
+			SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch);
 
 	/**
 	 * Returns index document for a single Observation
@@ -96,5 +97,4 @@ public interface IElasticsearchSvc {
 	 * @return Resources list or empty if nothing found
 	 */
 	List<IBaseResource> getObservationResources(Collection<? extends IResourcePersistentId> thePids);
-
 }

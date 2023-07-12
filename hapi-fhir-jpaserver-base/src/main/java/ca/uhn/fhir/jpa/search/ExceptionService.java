@@ -30,14 +30,14 @@ public class ExceptionService {
 
 	private final FhirContext myContext;
 
-    public ExceptionService(FhirContext theContext) {
-			myContext = theContext;
-    }
+	public ExceptionService(FhirContext theContext) {
+		myContext = theContext;
+	}
 
-    @Nonnull
-    public ResourceGoneException newUnknownSearchException(String theUuid) {
-        ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
-        String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
-        return new ResourceGoneException(msg);
-    }
+	@Nonnull
+	public ResourceGoneException newUnknownSearchException(String theUuid) {
+		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
+		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
+		return new ResourceGoneException(msg);
+	}
 }

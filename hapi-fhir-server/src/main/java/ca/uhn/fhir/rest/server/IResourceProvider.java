@@ -25,9 +25,8 @@ public interface IResourceProvider {
 
 	/**
 	 * Returns the type of resource returned by this provider
-	 * 
+	 *
 	 * @return Returns the type of resource returned by this provider
 	 */
 	Class<? extends IBaseResource> getResourceType();
-
 }

@@ -28,38 +28,38 @@ public final class OperationRuleTestUtil {
 	private OperationRuleTestUtil() {}
 
 	public static String getOperationName(IAuthRule theRule) {
-		return ((OperationRule)theRule).getOperationName();
+		return ((OperationRule) theRule).getOperationName();
 	}
 
 	public static boolean isAppliesToServer(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToServer();
+		return ((OperationRule) theRule).isAppliesToServer();
 	}
 
 	public static boolean isAppliesToAnyType(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToAnyType();
+		return ((OperationRule) theRule).isAppliesToAnyType();
 	}
 
 	public static boolean isAppliesToAnyInstance(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAppliesToAnyInstance();
+		return ((OperationRule) theRule).isAppliesToAnyInstance();
 	}
 
 	public static HashSet<Class<? extends IBaseResource>> getAppliesToTypes(IAuthRule theRule) {
-		return ((OperationRule)theRule).getAppliesToTypes();
+		return ((OperationRule) theRule).getAppliesToTypes();
 	}
 
 	public static HashSet<Class<? extends IBaseResource>> getAppliesToInstancesOfType(IAuthRule theRule) {
-		return ((OperationRule)theRule).getAppliesToInstancesOfType();
+		return ((OperationRule) theRule).getAppliesToInstancesOfType();
 	}
 
 	public static boolean isAllowAllResponses(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAllowAllResponses();
+		return ((OperationRule) theRule).isAllowAllResponses();
 	}
 
 	public static String getGroupId(IAuthRule theRule) {
-		return ((RuleBulkExportImpl)theRule).getGroupId();
+		return ((RuleBulkExportImpl) theRule).getGroupId();
 	}
 
 	public static BulkExportJobParameters.ExportStyle getWantExportStyle(IAuthRule theRule) {
-		return ((RuleBulkExportImpl)theRule).getWantExportStyle();
+		return ((RuleBulkExportImpl) theRule).getWantExportStyle();
 	}
 }

@@ -26,9 +26,9 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class FhirClientBalpSink implements IBalpAuditEventSink {
 
@@ -61,7 +61,10 @@ public class FhirClientBalpSink implements IBalpAuditEventSink {
 	 * @param theClientInterceptors An optional list of interceptors to register against
 	 *                              the client. May be {@literal null}.
 	 */
-	public FhirClientBalpSink(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
+	public FhirClientBalpSink(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull String theTargetBaseUrl,
+			@Nullable List<Object> theClientInterceptors) {
 		this(createClient(theFhirContext, theTargetBaseUrl, theClientInterceptors));
 	}
 
@@ -86,13 +89,13 @@ public class FhirClientBalpSink implements IBalpAuditEventSink {
 	}
 
 	protected void transmitEventToClient(IBaseResource auditEvent) {
-		myClient
-			.create()
-			.resource(auditEvent)
-			.execute();
+		myClient.create().resource(auditEvent).execute();
 	}
 
-	static IGenericClient createClient(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
+	static IGenericClient createClient(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull String theTargetBaseUrl,
+			@Nullable List<Object> theClientInterceptors) {
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notBlank(theTargetBaseUrl, "theTargetBaseUrl must not be null or blank");
 		IGenericClient client = theFhirContext.newRestfulGenericClient(theTargetBaseUrl);

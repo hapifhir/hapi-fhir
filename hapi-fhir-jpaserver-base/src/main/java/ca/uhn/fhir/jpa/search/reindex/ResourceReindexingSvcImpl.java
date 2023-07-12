@@ -57,12 +57,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -76,6 +70,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -90,27 +90,39 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexingSvcImpl.class);
 	private static final int PASS_SIZE = 25000;
 	private final ReentrantLock myIndexingLock = new ReentrantLock();
+
 	@Autowired
 	private IResourceReindexJobDao myReindexJobDao;
+
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+
 	private TransactionTemplate myTxTemplate;
-	private final ThreadFactory myReindexingThreadFactory = new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
+	private final ThreadFactory myReindexingThreadFactory =
+			new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
 	private ThreadPoolExecutor myTaskExecutor;
+
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+
 	@Autowired
 	private FhirContext myContext;
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	private ResourceReindexer myResourceReindexer;
 
@@ -134,12 +146,14 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		// Create the threadpool executor used for reindex jobs
 		int reindexThreadCount = myStorageSettings.getReindexThreadCount();
 		RejectedExecutionHandler rejectHandler = new BlockPolicy();
-		myTaskExecutor = new ThreadPoolExecutor(0, reindexThreadCount,
-			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<>(100),
-			myReindexingThreadFactory,
-			rejectHandler
-		);
+		myTaskExecutor = new ThreadPoolExecutor(
+				0,
+				reindexThreadCount,
+				0L,
+				TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<>(100),
+				myReindexingThreadFactory,
+				rejectHandler);
 	}
 
 	@Override
@@ -261,7 +275,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		int count = 0;
 		for (ResourceReindexJobEntity next : jobs) {
 
-			if (next.getThresholdLow() != null && next.getThresholdLow().getTime() >= next.getThresholdHigh().getTime()) {
+			if (next.getThresholdLow() != null
+					&& next.getThresholdLow().getTime()
+							>= next.getThresholdHigh().getTime()) {
 				markJobAsDeleted(next);
 				continue;
 			}
@@ -277,7 +293,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 	}
 
 	private Collection<ResourceReindexJobEntity> getResourceReindexJobEntities() {
-		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
+		Collection<ResourceReindexJobEntity> jobs =
+				myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
 		assert jobs != null;
 		return jobs;
 	}
@@ -325,7 +342,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		Slice<Long> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);
 			if (isNotBlank(theJob.getResourceType())) {
-				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theJob.getResourceType(), low, high);
+				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(
+						page, theJob.getResourceType(), low, high);
 			} else {
 				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, low, high);
 			}
@@ -341,10 +359,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		}
 
 		// Submit each resource requiring reindexing
-		List<Future<Date>> futures = range
-			.stream()
-			.map(t -> myTaskExecutor.submit(new ResourceReindexingTask(t, counter)))
-			.collect(Collectors.toList());
+		List<Future<Date>> futures = range.stream()
+				.map(t -> myTaskExecutor.submit(new ResourceReindexingTask(t, counter)))
+				.collect(Collectors.toList());
 
 		Date latestDate = null;
 		for (Future<Date> next : futures) {
@@ -375,7 +392,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 				// Just in case we end up in some sort of infinite loop. This shouldn't happen, and couldn't really
 				// happen unless there were 10000 resources with the exact same update time down to the
 				// millisecond.
-				ourLog.error("Final pass time for reindex JOB[{}] has same ending low value: {}", theJob.getId(), latestDate);
+				ourLog.error(
+						"Final pass time for reindex JOB[{}] has same ending low value: {}",
+						theJob.getId(),
+						latestDate);
 			}
 
 			newLow = new Date(latestDate.getTime() + 1);
@@ -385,13 +405,20 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 
 		myTxTemplate.execute(t -> {
 			myReindexJobDao.setThresholdLow(theJob.getId(), newLow);
-			Integer existingCount = myReindexJobDao.getReindexCount(theJob.getId()).orElse(0);
+			Integer existingCount =
+					myReindexJobDao.getReindexCount(theJob.getId()).orElse(0);
 			int newCount = existingCount + counter.get();
 			myReindexJobDao.setReindexCount(theJob.getId(), newCount);
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw, sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
+		ourLog.info(
+				"Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}",
+				theJob.getId(),
+				count,
+				sw,
+				sw.formatThroughput(count, TimeUnit.SECONDS),
+				new InstantType(newLow));
 		return counter.get();
 	}
 
@@ -418,7 +445,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
@@ -426,23 +454,28 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamNumber t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamQuantity t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
-			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :id");
+			q = myEntityManager.createQuery(
+					"DELETE FROM ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
@@ -486,7 +519,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 				 * not get this error, so we'll let the other one fail and try
 				 * again later.
 				 */
-				ourLog.info("Failed to reindex because of a version conflict. Leaving in unindexed state: {}", e.getMessage());
+				ourLog.info(
+						"Failed to reindex because of a version conflict. Leaving in unindexed state: {}",
+						e.getMessage());
 				reindexFailure = null;
 			}
 
@@ -502,7 +537,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasSc
 		private Throwable readResourceAndReindex() {
 			Throwable reindexFailure;
 			reindexFailure = myTxTemplate.execute(t -> {
-				ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
+				ResourceTable resourceTable =
+						myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
 				myUpdated = resourceTable.getUpdatedDate();
 
 				try {

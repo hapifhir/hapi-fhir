@@ -20,7 +20,6 @@
 package ca.uhn.fhir.tls;
 
 public enum PathType {
-
 	FILE("file://"),
 	RESOURCE("classpath:");
 
@@ -30,7 +29,7 @@ public enum PathType {
 		myPrefix = thePrefix;
 	}
 
-	public String getPrefix(){
+	public String getPrefix() {
 		return myPrefix;
 	}
 }

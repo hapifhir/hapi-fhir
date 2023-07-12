@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.util;
 
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -36,5 +35,4 @@ public class JsonDateSerializer extends JsonSerializer<Date> {
 			theGen.writeString(new InstantDt(theValue).getValueAsString());
 		}
 	}
-
 }

@@ -30,5 +30,6 @@ public interface ISubscriptionTopicFilterMatcher {
 	 * @param theIBaseResource
 	 * @return
 	 */
-	InMemoryMatchResult match(CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter, IBaseResource theIBaseResource);
+	InMemoryMatchResult match(
+			CanonicalTopicSubscriptionFilter theCanonicalTopicSubscriptionFilter, IBaseResource theIBaseResource);
 }

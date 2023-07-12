@@ -23,10 +23,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -39,15 +41,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 
 import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
-
 
 /*
  * These classes are no longer needed.
@@ -57,11 +54,10 @@ import static org.apache.commons.lang3.StringUtils.left;
  * See the BulkExportAppCtx for job details
  */
 @Entity
-@Table(name = BulkExportJobEntity.HFJ_BLK_EXPORT_JOB, uniqueConstraints = {
-		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
-}, indexes = {
-		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
-})
+@Table(
+		name = BulkExportJobEntity.HFJ_BLK_EXPORT_JOB,
+		uniqueConstraints = {@UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")},
+		indexes = {@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")})
 @Deprecated
 public class BulkExportJobEntity implements Serializable {
 
@@ -69,6 +65,7 @@ public class BulkExportJobEntity implements Serializable {
 	public static final int STATUS_MESSAGE_LEN = 500;
 	public static final String JOB_ID = "JOB_ID";
 	public static final String HFJ_BLK_EXPORT_JOB = "HFJ_BLK_EXPORT_JOB";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKEXJOB_PID", sequenceName = "SEQ_BLKEXJOB_PID")
@@ -80,25 +77,33 @@ public class BulkExportJobEntity implements Serializable {
 
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private String myStatus;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
+
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob", orphanRemoval = false)
 	private Collection<BulkExportCollectionEntity> myCollections;
+
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_SINCE", nullable = true)
 	private Date mySince;
+
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
 

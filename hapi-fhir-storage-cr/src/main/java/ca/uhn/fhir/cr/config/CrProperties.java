@@ -30,10 +30,10 @@ public class CrProperties {
 	private MeasureProperties myMeasureProperties;
 	private CqlProperties myCqlProperties = new CqlProperties();
 
-	public CrProperties () {
+	public CrProperties() {
 		this.myMeasureProperties = new MeasureProperties();
-	};
-
+	}
+	;
 
 	public boolean isCqlEnabled() {
 		return myCqlEnabled;
@@ -67,10 +67,10 @@ public class CrProperties {
 
 		public MeasureProperties() {
 			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
-		};
+		}
+		;
 
-
-		//care gaps
+		// care gaps
 		public boolean getThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
@@ -78,11 +78,12 @@ public class CrProperties {
 		public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
 			myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
 		}
+
 		public boolean isThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
 
-		//report configuration
+		// report configuration
 		public MeasureReportConfiguration getMeasureReportConfiguration() {
 			return myMeasureReportConfiguration;
 		}
@@ -91,8 +92,7 @@ public class CrProperties {
 			myMeasureReportConfiguration = theMeasureReport;
 		}
 
-
-		//measure evaluations
+		// measure evaluations
 		public void setMeasureEvaluationOptions(MeasureEvaluationOptions theMeasureEvaluation) {
 			myMeasureEvaluationOptions = theMeasureEvaluation;
 		}
@@ -141,9 +141,7 @@ public class CrProperties {
 				myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
 			}
 		}
-
 	}
-
 
 	public static class CqlProperties {
 
@@ -151,7 +149,6 @@ public class CrProperties {
 
 		private CqlEngineOptions myCqlRuntimeOptions = CqlEngineOptions.defaultOptions();
 		private CqlTranslatorOptions myCqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
-
 
 		public boolean isCqlUseOfEmbeddedLibraries() {
 			return myCqlUseOfEmbeddedLibraries;

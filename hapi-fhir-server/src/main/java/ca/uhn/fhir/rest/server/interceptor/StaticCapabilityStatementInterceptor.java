@@ -70,15 +70,13 @@ public class StaticCapabilityStatementInterceptor {
 
 			FhirContext ctx = theRequestDetails.getFhirContext();
 			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(output);
-			Validate.notNull(encoding, "Could not determine FHIR encoding for resource: %s", myCapabilityStatementResource);
+			Validate.notNull(
+					encoding, "Could not determine FHIR encoding for resource: %s", myCapabilityStatementResource);
 
-			retVal = (IBaseConformance) encoding
-				.newParser(ctx)
-				.parseResource(output);
+			retVal = (IBaseConformance) encoding.newParser(ctx).parseResource(output);
 			myCapabilityStatement = retVal;
 		}
 
 		return retVal;
 	}
-
 }

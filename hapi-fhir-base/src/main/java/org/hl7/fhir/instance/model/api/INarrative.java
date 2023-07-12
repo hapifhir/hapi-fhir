@@ -19,7 +19,6 @@
  */
 package org.hl7.fhir.instance.model.api;
 
-
 public interface INarrative extends ICompositeType {
 
 	@Override
@@ -34,5 +33,4 @@ public interface INarrative extends ICompositeType {
 	public INarrative setStatusAsString(String theString);
 
 	public String getStatusAsString();
-
 }
