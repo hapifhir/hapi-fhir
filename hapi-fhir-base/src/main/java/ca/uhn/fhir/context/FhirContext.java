@@ -1051,11 +1051,11 @@ public class FhirContext {
 			typesToScan.addAll(myCustomTypes);
 
 			myCustomResourceNames.addAll(myCustomTypes.stream()
-				.map(customType -> Optional.ofNullable(customType.getAnnotation(ResourceDef.class))
-					.map(ResourceDef::name)
-					.orElse(null)) // This will be caught by the call to ModelScanner
-				.filter(Objects::nonNull)
-				.collect(Collectors.toUnmodifiableSet()));
+					.map(customType -> Optional.ofNullable(customType.getAnnotation(ResourceDef.class))
+							.map(ResourceDef::name)
+							.orElse(null)) // This will be caught by the call to ModelScanner
+					.filter(Objects::nonNull)
+					.collect(Collectors.toUnmodifiableSet()));
 
 			myCustomTypes = null;
 		}
