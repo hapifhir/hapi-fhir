@@ -54,8 +54,8 @@ public class CdsPrefetchDaoSvc {
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(theUrl);
 		String resourceType = parts.getResourceType();
 		if (resourceType == null) {
-			throw new InvalidRequestException(Msg.code(2380) +
-				"Failed to resolve " + theUrl + ". Url does not start with resource type");
+			throw new InvalidRequestException(
+					Msg.code(2380) + "Failed to resolve " + theUrl + ". Url does not start with resource type");
 		}
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {
@@ -73,7 +73,8 @@ public class CdsPrefetchDaoSvc {
 			return getBundleFromUrl(resourceType, dao, matchUrl);
 		}
 
-		throw new InvalidRequestException(Msg.code(2382) + "Unable to translate url " + theUrl + " into a resource or a bundle");
+		throw new InvalidRequestException(
+				Msg.code(2382) + "Unable to translate url " + theUrl + " into a resource or a bundle");
 	}
 
 	private IBaseResource getBundleFromUrl(String resourceType, IFhirResourceDao<?> dao, String matchUrl) {

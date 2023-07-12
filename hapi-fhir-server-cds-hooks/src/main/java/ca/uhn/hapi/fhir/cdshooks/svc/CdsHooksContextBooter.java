@@ -33,13 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.PreDestroy;
 
 /**
  * This bean creates a customer-defined spring context which will
@@ -138,8 +138,8 @@ public class CdsHooksContextBooter {
 			}
 
 			if (myCdsServiceBeans.isEmpty()) {
-				throw new ConfigurationException(Msg.code(2379) +
-					"No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
+				throw new ConfigurationException(Msg.code(2379)
+						+ "No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
 			}
 
 		} catch (ConfigurationException e) {

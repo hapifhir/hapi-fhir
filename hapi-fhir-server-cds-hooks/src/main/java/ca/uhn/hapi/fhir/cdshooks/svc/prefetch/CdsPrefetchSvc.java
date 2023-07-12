@@ -67,8 +67,8 @@ public class CdsPrefetchSvc {
 			fetchMissingPrefetchElements(theCdsServiceRequestJson, serviceSpec, missingPrefetch, strategies);
 		} catch (BaseServerResponseException e) {
 			// Per the CDS Hooks specification
-			throw new PreconditionFailedException(Msg.code(2385) + "Unable to fetch missing resource(s) with key(s) " + missingPrefetch
-					+ " for CDS Hooks service " + serviceId + ": " + e.getMessage());
+			throw new PreconditionFailedException(Msg.code(2385) + "Unable to fetch missing resource(s) with key(s) "
+					+ missingPrefetch + " for CDS Hooks service " + serviceId + ": " + e.getMessage());
 		}
 	}
 
@@ -81,7 +81,8 @@ public class CdsPrefetchSvc {
 			String template = theServiceSpec.getPrefetch().get(key);
 			CdsResolutionStrategyEnum source = theServiceSpec.getSource().get(key);
 			if (!theStrategies.contains(source)) {
-				throw new PreconditionFailedException(Msg.code(2386) + "Unable to fetch missing resource(s) with source " + source);
+				throw new PreconditionFailedException(
+						Msg.code(2386) + "Unable to fetch missing resource(s) with source " + source);
 			}
 			if (source == CdsResolutionStrategyEnum.NONE) {
 				if (theStrategies.contains(CdsResolutionStrategyEnum.FHIR_CLIENT)) {
@@ -92,7 +93,8 @@ public class CdsPrefetchSvc {
 					source = CdsResolutionStrategyEnum.DAO;
 				} else {
 					// Per the CDS Hooks specification
-					throw new PreconditionFailedException(Msg.code(2387) + "Unable to fetch missing resource(s) with source " + source);
+					throw new PreconditionFailedException(
+							Msg.code(2387) + "Unable to fetch missing resource(s) with source " + source);
 				}
 			}
 

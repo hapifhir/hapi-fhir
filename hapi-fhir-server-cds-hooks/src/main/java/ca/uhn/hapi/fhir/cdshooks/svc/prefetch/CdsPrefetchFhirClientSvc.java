@@ -46,7 +46,7 @@ public class CdsPrefetchFhirClientSvc {
 		String resourceType = parts.getResourceType();
 		if (StringUtils.isEmpty(resourceType)) {
 			throw new InvalidRequestException(
-				Msg.code(2383) + "Failed to resolve " + theUrl + ". Url does not start with a resource type.");
+					Msg.code(2383) + "Failed to resolve " + theUrl + ". Url does not start with a resource type.");
 		}
 
 		String resourceId = parts.getResourceId();
@@ -56,7 +56,8 @@ public class CdsPrefetchFhirClientSvc {
 		} else if (matchUrl != null) {
 			return client.search().byUrl(theUrl).execute();
 		} else {
-			throw new InvalidRequestException(Msg.code(2384) + "Unable to translate url " + theUrl + " into a resource or a bundle.");
+			throw new InvalidRequestException(
+					Msg.code(2384) + "Unable to translate url " + theUrl + " into a resource or a bundle.");
 		}
 	}
 

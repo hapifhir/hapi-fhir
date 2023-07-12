@@ -37,9 +37,9 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import java.util.function.Function;
 
 public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(CdsServiceRegistryImpl.class);
@@ -86,8 +86,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			try {
 				json = myObjectMapper.writeValueAsString(result);
 			} catch (JsonProcessingException e) {
-				throw new ConfigurationException(Msg.code(2389) +
-					"Failed to json serialize Cds service response of type "
+				throw new ConfigurationException(
+						Msg.code(2389) + "Failed to json serialize Cds service response of type "
 								+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
 						e);
 			}
@@ -95,8 +95,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		try {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException(Msg.code(2390) +
-				"Failed to json deserialize Cds service response of type "
+			throw new ConfigurationException(
+					Msg.code(2390) + "Failed to json deserialize Cds service response of type "
 							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
 							+ ".  Json: " + json,
 					e);
@@ -107,7 +107,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private ICdsMethod getCdsServiceMethodOrThrowException(String theId) {
 		ICdsMethod retval = myServiceCache.getServiceMethod(theId);
 		if (retval == null) {
-			throw new ResourceNotFoundException(Msg.code(2391) + "No service with id " + theId + " is registered on this server");
+			throw new ResourceNotFoundException(
+					Msg.code(2391) + "No service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
@@ -116,8 +117,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private ICdsMethod getCdsFeedbackMethodOrThrowException(String theId) {
 		ICdsMethod retval = myServiceCache.getFeedbackMethod(theId);
 		if (retval == null) {
-			throw new ResourceNotFoundException(Msg.code(2392) +
-				"No feedback service with id " + theId + " is registered on this server");
+			throw new ResourceNotFoundException(
+					Msg.code(2392) + "No feedback service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}

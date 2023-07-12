@@ -25,8 +25,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.annotation.Nonnull;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
 
 abstract class BaseDynamicCdsServiceMethod implements ICdsMethod {
 	private final Function<CdsServiceRequestJson, CdsServiceResponseJson> myFunction;
