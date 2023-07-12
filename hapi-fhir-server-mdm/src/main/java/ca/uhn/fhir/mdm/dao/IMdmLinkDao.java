@@ -52,9 +52,8 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(
 			P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
-	List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid);
 
-	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<M> findLinksAssociatedWithGoldenResourceOfSourceResourceExcludingNoMatch(P theSourcePid);
 
 	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
