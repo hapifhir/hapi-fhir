@@ -29,7 +29,11 @@ import java.util.function.Function;
 public class CdsDynamicPrefetchableServiceMethod extends BaseDynamicCdsServiceMethod implements ICdsServiceMethod {
 	private final CdsServiceJson myCdsServiceJson;
 	private final boolean myAllowAutoFhirClientPrefetch;
-	public CdsDynamicPrefetchableServiceMethod(CdsServiceJson theCdsServiceJson, Function<CdsServiceRequestJson, CdsServiceResponseJson> theFunction, boolean theAllowAutoFhirClientPrefetch) {
+
+	public CdsDynamicPrefetchableServiceMethod(
+			CdsServiceJson theCdsServiceJson,
+			Function<CdsServiceRequestJson, CdsServiceResponseJson> theFunction,
+			boolean theAllowAutoFhirClientPrefetch) {
 		super(theFunction);
 		myAllowAutoFhirClientPrefetch = theAllowAutoFhirClientPrefetch;
 		myCdsServiceJson = theCdsServiceJson;

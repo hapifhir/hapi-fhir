@@ -28,7 +28,11 @@ public class CdsServiceMethod extends BaseCdsMethod implements ICdsServiceMethod
 	private final CdsServiceJson myCdsServiceJson;
 	private final boolean myAllowAutoFhirClientPrefetch;
 
-	public CdsServiceMethod(CdsServiceJson theCdsServiceJson, Object theServiceBean, Method theMethod, boolean theAllowAutoFhirClientPrefetch) {
+	public CdsServiceMethod(
+			CdsServiceJson theCdsServiceJson,
+			Object theServiceBean,
+			Method theMethod,
+			boolean theAllowAutoFhirClientPrefetch) {
 		super(theServiceBean, theMethod);
 		myCdsServiceJson = theCdsServiceJson;
 		myAllowAutoFhirClientPrefetch = theAllowAutoFhirClientPrefetch;

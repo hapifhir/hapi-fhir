@@ -41,7 +41,9 @@ public class CdsServiceRequestContextSerializer extends StdSerializer<CdsService
 	}
 
 	@Override
-	public void serialize(CdsServiceRequestContextJson theContext, JsonGenerator theJsonGenerator, SerializerProvider theProvider) throws IOException {
+	public void serialize(
+			CdsServiceRequestContextJson theContext, JsonGenerator theJsonGenerator, SerializerProvider theProvider)
+			throws IOException {
 		theJsonGenerator.writeStartObject();
 		for (String key : theContext.getKeys()) {
 			theJsonGenerator.writeFieldName(key);

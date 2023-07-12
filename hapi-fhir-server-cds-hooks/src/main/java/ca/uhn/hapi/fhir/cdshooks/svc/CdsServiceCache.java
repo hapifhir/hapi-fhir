@@ -39,15 +39,28 @@ public class CdsServiceCache {
 	final Map<String, ICdsMethod> myFeedbackMap = new LinkedHashMap<>();
 	final CdsServicesJson myCdsServiceJson = new CdsServicesJson();
 
-	public void registerService(String theServiceId, Object theServiceBean, Method theMethod, CdsServiceJson theCdsServiceJson, boolean theAllowAutoFhirClientPrefetch) {
-		final CdsServiceMethod cdsServiceMethod = new CdsServiceMethod(theCdsServiceJson, theServiceBean, theMethod, theAllowAutoFhirClientPrefetch);
+	public void registerService(
+			String theServiceId,
+			Object theServiceBean,
+			Method theMethod,
+			CdsServiceJson theCdsServiceJson,
+			boolean theAllowAutoFhirClientPrefetch) {
+		final CdsServiceMethod cdsServiceMethod =
+				new CdsServiceMethod(theCdsServiceJson, theServiceBean, theMethod, theAllowAutoFhirClientPrefetch);
 		myServiceMap.put(theServiceId, cdsServiceMethod);
 		myCdsServiceJson.addService(theCdsServiceJson);
 	}
 
-	public void registerDynamicService(String theServiceId, Function<CdsServiceRequestJson, CdsServiceResponseJson> theMethod, CdsServiceJson theCdsServiceJson, boolean theAllowAutoFhirClientPrefetch, String theModuleId) {
+	public void registerDynamicService(
+			String theServiceId,
+			Function<CdsServiceRequestJson, CdsServiceResponseJson> theMethod,
+			CdsServiceJson theCdsServiceJson,
+			boolean theAllowAutoFhirClientPrefetch,
+			String theModuleId) {
 		if (!isCdsServiceAlreadyRegistered(theServiceId, theModuleId)) {
-			final CdsDynamicPrefetchableServiceMethod cdsDynamicPrefetchableServiceMethod = new CdsDynamicPrefetchableServiceMethod(theCdsServiceJson, theMethod, theAllowAutoFhirClientPrefetch);
+			final CdsDynamicPrefetchableServiceMethod cdsDynamicPrefetchableServiceMethod =
+					new CdsDynamicPrefetchableServiceMethod(
+							theCdsServiceJson, theMethod, theAllowAutoFhirClientPrefetch);
 			myServiceMap.put(theServiceId, cdsDynamicPrefetchableServiceMethod);
 			myCdsServiceJson.addService(theCdsServiceJson);
 		}
@@ -79,7 +92,10 @@ public class CdsServiceCache {
 			}
 			return serviceMethod;
 		} else {
-			ourLog.error("CDS service with serviceId: {} for moduleId: {}, is not registered. Nothing to remove!", theServiceId, theModuleId);
+			ourLog.error(
+					"CDS service with serviceId: {} for moduleId: {}, is not registered. Nothing to remove!",
+					theServiceId,
+					theModuleId);
 			return null;
 		}
 	}
@@ -87,7 +103,10 @@ public class CdsServiceCache {
 	private boolean isCdsServiceAlreadyRegistered(String theServiceId, String theModuleId) {
 		boolean result = myServiceMap.containsKey(theServiceId);
 		if (result) {
-			ourLog.error("CDS service with serviceId: {} for moduleId: {}, already exists. It will not be overwritten!", theServiceId, theModuleId);
+			ourLog.error(
+					"CDS service with serviceId: {} for moduleId: {}, already exists. It will not be overwritten!",
+					theServiceId,
+					theModuleId);
 		}
 		return result;
 	}

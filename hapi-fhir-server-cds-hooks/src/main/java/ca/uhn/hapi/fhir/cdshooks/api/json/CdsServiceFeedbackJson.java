@@ -67,7 +67,8 @@ public class CdsServiceFeedbackJson implements IModelJson {
 		return myAcceptedSuggestions;
 	}
 
-	public CdsServiceFeedbackJson setAcceptedSuggestions(List<CdsServiceAcceptedSuggestionJson> theAcceptedSuggestions) {
+	public CdsServiceFeedbackJson setAcceptedSuggestions(
+			List<CdsServiceAcceptedSuggestionJson> theAcceptedSuggestions) {
 		myAcceptedSuggestions = theAcceptedSuggestions;
 		return this;
 	}

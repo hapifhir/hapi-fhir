@@ -45,5 +45,4 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 	public ObjectMapper getObjectMapper() {
 		return myObjectMapper;
 	}
-
 }

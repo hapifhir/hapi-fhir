@@ -42,7 +42,8 @@ public class CdsPrefetchDaoSvc {
 	private final MatchUrlService myMatchUrlService;
 	private final FhirContext myFhirContext;
 
-	public CdsPrefetchDaoSvc(DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+	public CdsPrefetchDaoSvc(
+			DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
 		myDaoRegistry = theDaoRegistry;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
@@ -52,7 +53,8 @@ public class CdsPrefetchDaoSvc {
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(theUrl);
 		String resourceType = parts.getResourceType();
 		if (resourceType == null) {
-			throw new InvalidRequestException("Failed to resolve " + theUrl + ". Url does not start with resource type");
+			throw new InvalidRequestException(
+					"Failed to resolve " + theUrl + ". Url does not start with resource type");
 		}
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {
@@ -80,7 +82,8 @@ public class CdsPrefetchDaoSvc {
 		// TODO KHS get a RequestDetails down here
 		IBundleProvider bundleProvider = dao.search(searchParams);
 		IVersionSpecificBundleFactory bundleFactory = myFhirContext.newBundleFactory();
-		bundleFactory.addResourcesToBundle(bundleProvider.getResources(0, MAX_RESOURCES_IN_BUNDLE), BundleTypeEnum.SEARCHSET, null, null, null);
+		bundleFactory.addResourcesToBundle(
+				bundleProvider.getResources(0, MAX_RESOURCES_IN_BUNDLE), BundleTypeEnum.SEARCHSET, null, null, null);
 		return bundleFactory.getResourceBundle();
 	}
 

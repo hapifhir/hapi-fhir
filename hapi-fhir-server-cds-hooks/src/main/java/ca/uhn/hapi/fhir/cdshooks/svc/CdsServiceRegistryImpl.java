@@ -49,7 +49,10 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private final CdsPrefetchSvc myCdsPrefetchSvc;
 	private final ObjectMapper myObjectMapper;
 
-	public CdsServiceRegistryImpl(CdsHooksContextBooter theCdsHooksContextBooter, CdsPrefetchSvc theCdsPrefetchSvc, ObjectMapper theObjectMapper) {
+	public CdsServiceRegistryImpl(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			ObjectMapper theObjectMapper) {
 		myCdsHooksContextBooter = theCdsHooksContextBooter;
 		myCdsPrefetchSvc = theCdsPrefetchSvc;
 		myObjectMapper = theObjectMapper;
@@ -82,13 +85,20 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 			try {
 				json = myObjectMapper.writeValueAsString(result);
 			} catch (JsonProcessingException e) {
-				throw new ConfigurationException("Failed to json serialize Cds service response of type " + result.getClass().getName() + " when calling CDS Hook Service " + theServiceId, e);
+				throw new ConfigurationException(
+						"Failed to json serialize Cds service response of type "
+								+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId,
+						e);
 			}
 		}
 		try {
 			return myObjectMapper.readValue(json, CdsServiceResponseJson.class);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException("Failed to json deserialize Cds service response of type " + result.getClass().getName() + " when calling CDS Hook Service " + theServiceId + ".  Json: " + json, e);
+			throw new ConfigurationException(
+					"Failed to json deserialize Cds service response of type "
+							+ result.getClass().getName() + " when calling CDS Hook Service " + theServiceId
+							+ ".  Json: " + json,
+					e);
 		}
 	}
 
@@ -105,7 +115,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	private ICdsMethod getCdsFeedbackMethodOrThrowException(String theId) {
 		ICdsMethod retval = myServiceCache.getFeedbackMethod(theId);
 		if (retval == null) {
-			throw new ResourceNotFoundException("No feedback service with id " + theId + " is registered on this server");
+			throw new ResourceNotFoundException(
+					"No feedback service with id " + theId + " is registered on this server");
 		}
 		return retval;
 	}
@@ -119,8 +130,14 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	}
 
 	@Override
-	public void registerService(String theServiceId, Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction, CdsServiceJson theCdsServiceJson, boolean theAllowAutoFhirClientPrefetch, String theModuleId) {
-		myServiceCache.registerDynamicService(theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
+	public void registerService(
+			String theServiceId,
+			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
+			CdsServiceJson theCdsServiceJson,
+			boolean theAllowAutoFhirClientPrefetch,
+			String theModuleId) {
+		myServiceCache.registerDynamicService(
+				theServiceId, theServiceFunction, theCdsServiceJson, theAllowAutoFhirClientPrefetch, theModuleId);
 	}
 
 	@Override
@@ -133,7 +150,8 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 		}
 	}
 
-	private String encodeFeedbackResponse(String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson, Object response) {
+	private String encodeFeedbackResponse(
+			String theServiceId, CdsServiceFeedbackJson theCdsServiceFeedbackJson, Object response) {
 		if (response instanceof String) {
 			return (String) response;
 		} else {

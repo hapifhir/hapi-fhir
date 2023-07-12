@@ -42,7 +42,7 @@ public class CdsServicesJson implements IModelJson {
 		return this;
 	}
 
-	public CdsServicesJson removeService(CdsServiceJson theCdsServiceJson){
+	public CdsServicesJson removeService(CdsServiceJson theCdsServiceJson) {
 		if (myServices == null) {
 			myServices = new ArrayList<>();
 		}

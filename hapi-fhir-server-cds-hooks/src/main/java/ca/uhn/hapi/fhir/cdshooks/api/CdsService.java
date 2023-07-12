@@ -47,7 +47,6 @@ public @interface CdsService {
 	/**
 	 * The human-friendly name of this service.
 	 */
-
 	String title() default "";
 
 	/**
@@ -60,7 +59,6 @@ public @interface CdsService {
 	 * and provide on each service call. The key is a string that describes the type of data being requested and the value
 	 * is a string representing the FHIR query.
 	 */
-
 	CdsServicePrefetch[] prefetch();
 
 	/**

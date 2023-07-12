@@ -35,7 +35,8 @@ public class CdsResolutionStrategySvc {
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	public Set<CdsResolutionStrategyEnum> determineResolutionStrategy(ICdsServiceMethod theMethod, CdsServiceRequestJson theRequest) {
+	public Set<CdsResolutionStrategyEnum> determineResolutionStrategy(
+			ICdsServiceMethod theMethod, CdsServiceRequestJson theRequest) {
 		Set<CdsResolutionStrategyEnum> strategies = new HashSet<>();
 		strategies.add(CdsResolutionStrategyEnum.NONE);
 		if (theRequest.getFhirServer() != null) {

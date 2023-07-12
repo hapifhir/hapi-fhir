@@ -37,11 +37,10 @@ public class PrefetchTemplateUtil {
 	private static final int GROUP_WITH_KEY = 1;
 	private static final int DAVINCI_RESOURCETYPE_KEY = 2;
 
+	private PrefetchTemplateUtil() {}
 
-	private PrefetchTemplateUtil() {
-	}
-
-	public static String substituteTemplate(String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
+	public static String substituteTemplate(
+			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
 		String parsedDaVinciPrefetchTemplate = handleDaVinciPrefetchTemplate(theTemplate, theContext, theFhirContext);
 		return handleDefaultPrefetchTemplate(parsedDaVinciPrefetchTemplate, theContext);
 	}
@@ -51,31 +50,36 @@ public class PrefetchTemplateUtil {
 	 * <a href="http://hl7.org/fhir/us/davinci-crd/hooks.html#additional-prefetch-capabilities">here</a> version 1.0.0 - STU 1
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
-	private static String handleDaVinciPrefetchTemplate(String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
+	private static String handleDaVinciPrefetchTemplate(
+			String theTemplate, CdsServiceRequestContextJson theContext, FhirContext theFhirContext) {
 		Matcher matcher = daVinciPreFetch.matcher(theTemplate);
 		String returnValue = theTemplate;
 		while (matcher.find()) {
 			String key = matcher.group(GROUP_WITH_KEY);
 			if (!theContext.containsKey(key)) {
-				throw new InvalidRequestException("Request context did not provide a value for key <" + key + ">" + ".  Available keys in context are: " + theContext.getKeys());
+				throw new InvalidRequestException("Request context did not provide a value for key <" + key + ">"
+						+ ".  Available keys in context are: " + theContext.getKeys());
 			}
 			try {
 				IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
 				String resourceType = matcher.group(DAVINCI_RESOURCETYPE_KEY);
-				String resourceIds = BundleUtil.toListOfResources(theFhirContext, bundle)
-					.stream()
-					.filter(x -> x.fhirType().equals(resourceType))
-					.map(x -> x.getIdElement().getIdPart()).collect(Collectors.joining(","));
-				if(StringUtils.isEmpty(resourceIds)) {
-					throw new InvalidRequestException("Request context did not provide for resource(s) matching template. ResourceType missing is: " + resourceType);
+				String resourceIds = BundleUtil.toListOfResources(theFhirContext, bundle).stream()
+						.filter(x -> x.fhirType().equals(resourceType))
+						.map(x -> x.getIdElement().getIdPart())
+						.collect(Collectors.joining(","));
+				if (StringUtils.isEmpty(resourceIds)) {
+					throw new InvalidRequestException(
+							"Request context did not provide for resource(s) matching template. ResourceType missing is: "
+									+ resourceType);
 				}
 				String keyToReplace = key + "." + resourceType + "\\.(id)";
 				returnValue = substitute(returnValue, keyToReplace, resourceIds);
 			} catch (ClassCastException e) {
-				throw new InvalidRequestException("Request context did not provide valid " + theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">" );
+				throw new InvalidRequestException("Request context did not provide valid "
+						+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
 			}
 		}
-		return  returnValue;
+		return returnValue;
 	}
 
 	private static String handleDefaultPrefetchTemplate(String theTemplate, CdsServiceRequestContextJson theContext) {
@@ -84,9 +88,12 @@ public class PrefetchTemplateUtil {
 		while (matcher.find()) {
 			String key = matcher.group(GROUP_WITH_KEY);
 			// Check to see if the context map is empty, or doesn't contain the key.
-			// Note we cannot return the keyset as for cases where the map is empty this will throw a NullPointerException.
+			// Note we cannot return the keyset as for cases where the map is empty this will throw a
+			// NullPointerException.
 			if (theContext.getString(key) == null) {
-				throw new InvalidRequestException("Either request context was empty or it did not provide a value for key <" + key + ">.  Please make sure you are including a context with valid keys.");
+				throw new InvalidRequestException(
+						"Either request context was empty or it did not provide a value for key <" + key
+								+ ">.  Please make sure you are including a context with valid keys.");
 			}
 			String value = theContext.getString(key);
 			returnValue = substitute(returnValue, key, value);

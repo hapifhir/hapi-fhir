@@ -42,9 +42,11 @@ public class CdsServiceRequestContextDeserializer extends StdDeserializer<CdsSer
 	}
 
 	@Override
-	public CdsServiceRequestContextJson deserialize(JsonParser theJsonParser, DeserializationContext theContext) throws IOException {
+	public CdsServiceRequestContextJson deserialize(JsonParser theJsonParser, DeserializationContext theContext)
+			throws IOException {
 		// First deserialize the context as a LinkedHashMap
-		LinkedHashMap<String, Object> map = myObjectMapper.readValue(theJsonParser.getCodec().readTree(theJsonParser).toString(), LinkedHashMap.class);
+		LinkedHashMap<String, Object> map = myObjectMapper.readValue(
+				theJsonParser.getCodec().readTree(theJsonParser).toString(), LinkedHashMap.class);
 		CdsServiceRequestContextJson retval = new CdsServiceRequestContextJson();
 
 		for (String key : map.keySet()) {

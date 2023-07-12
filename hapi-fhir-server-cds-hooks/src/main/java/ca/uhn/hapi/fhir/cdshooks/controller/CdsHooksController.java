@@ -53,29 +53,31 @@ public class CdsHooksController {
 	 * This method is idempotent.
 	 */
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(path = "", method = {RequestMethod.GET}, produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<CdsServicesJson> cdsServices(
-	) {
+	@RequestMapping(
+			path = "",
+			method = {RequestMethod.GET},
+			produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<CdsServicesJson> cdsServices() {
 		CdsServicesJson response = myCdsServiceRegistry.getCdsServicesJson();
-		return ResponseEntity
-			.status(200)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(response);
+		return ResponseEntity.status(200)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(response);
 	}
 
 	/**
 	 * Call a specific CDS-Hook service
 	 */
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(path = "{cds_hook}", method = {RequestMethod.POST}, consumes = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<CdsServiceResponseJson> cdsServiceRequest(@PathVariable("cds_hook") String theCdsHook,
-																						 @RequestBody CdsServiceRequestJson theCdsServiceRequestJson
-	) {
+	@RequestMapping(
+			path = "{cds_hook}",
+			method = {RequestMethod.POST},
+			consumes = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<CdsServiceResponseJson> cdsServiceRequest(
+			@PathVariable("cds_hook") String theCdsHook, @RequestBody CdsServiceRequestJson theCdsServiceRequestJson) {
 		CdsServiceResponseJson response = myCdsServiceRegistry.callService(theCdsHook, theCdsServiceRequestJson);
-		return ResponseEntity
-			.status(200)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(response);
+		return ResponseEntity.status(200)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(response);
 	}
 
 	/**
@@ -88,15 +90,17 @@ public class CdsHooksController {
 	 * Typically, an end user may only accept (a suggestion), or override a card once; however, a card once ignored could later be acted upon. CDS Hooks does not specify the UI behavior of CDS clients, including the persistence of cards. CDS clients should faithfully report each of these distinct end-user interactions as feedback.
 	 */
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(path = "{cds_hook}/feedback", method = {RequestMethod.POST}, consumes = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<String> cdsServiceFeedback(@PathVariable("cds_hook") String theCdsHook,
-																	 @RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson
-	) {
+	@RequestMapping(
+			path = "{cds_hook}/feedback",
+			method = {RequestMethod.POST},
+			consumes = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<String> cdsServiceFeedback(
+			@PathVariable("cds_hook") String theCdsHook,
+			@RequestBody CdsServiceFeedbackJson theCdsServiceFeedbackJson) {
 		String json = myCdsServiceRegistry.callFeedback(theCdsHook, theCdsServiceFeedbackJson);
 
-		return ResponseEntity
-			.status(200)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(json);
+		return ResponseEntity.status(200)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(json);
 	}
 }

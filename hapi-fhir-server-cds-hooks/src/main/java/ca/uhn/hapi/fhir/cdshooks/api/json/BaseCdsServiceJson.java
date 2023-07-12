@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @see <a href=" https://cds-hooks.hl7.org/1.0/#extensions">For reading more about Extension support in CDS hooks</a>
  */
-
 public class BaseCdsServiceJson implements IModelJson {
 
 	@JsonProperty(value = "extension", required = true)
@@ -39,5 +38,4 @@ public class BaseCdsServiceJson implements IModelJson {
 		this.myExtension = theExtension;
 		return this;
 	}
-
 }

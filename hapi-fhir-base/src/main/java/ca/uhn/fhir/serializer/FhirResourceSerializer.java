@@ -37,7 +37,8 @@ public class FhirResourceSerializer extends StdSerializer<IBaseResource> {
 	}
 
 	@Override
-	public void serialize(IBaseResource theResource, JsonGenerator theJsonGenerator, SerializerProvider theProvider) throws IOException {
+	public void serialize(IBaseResource theResource, JsonGenerator theJsonGenerator, SerializerProvider theProvider)
+			throws IOException {
 		String resourceJson = myParser.encodeResourceToString(theResource);
 		theJsonGenerator.writeRawValue(resourceJson);
 	}

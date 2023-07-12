@@ -71,8 +71,11 @@ public class CdsHooksContextBooter {
 
 	private void extractCdsServices(Object theServiceBean) {
 		Method[] methods = theServiceBean.getClass().getMethods();
-		// Sort alphabetically so service list output is deterministic (to ensure GET /cds-services is idempotent).  This also simplifies testing :-)
-		List<Method> sortedMethods = Arrays.stream(methods).sorted(Comparator.comparing(Method::getName)).collect(Collectors.toList());
+		// Sort alphabetically so service list output is deterministic (to ensure GET /cds-services is idempotent).
+		// This also simplifies testing :-)
+		List<Method> sortedMethods = Arrays.stream(methods)
+				.sorted(Comparator.comparing(Method::getName))
+				.collect(Collectors.toList());
 		for (Method method : sortedMethods) {
 			if (method.isAnnotationPresent(CdsService.class)) {
 				CdsService annotation = method.getAnnotation(CdsService.class);
@@ -86,7 +89,12 @@ public class CdsHooksContextBooter {
 					cdsServiceJson.addPrefetch(prefetch.value(), prefetch.query());
 					cdsServiceJson.addSource(prefetch.value(), prefetch.source());
 				}
-				myCdsServiceCache.registerService(cdsServiceJson.getId(), theServiceBean, method, cdsServiceJson, annotation.allowAutoFhirClientPrefetch());
+				myCdsServiceCache.registerService(
+						cdsServiceJson.getId(),
+						theServiceBean,
+						method,
+						cdsServiceJson,
+						annotation.allowAutoFhirClientPrefetch());
 			}
 			if (method.isAnnotationPresent(CdsServiceFeedback.class)) {
 				CdsServiceFeedback annotation = method.getAnnotation(CdsServiceFeedback.class);
@@ -129,7 +137,8 @@ public class CdsHooksContextBooter {
 			}
 
 			if (myCdsServiceBeans.isEmpty()) {
-				throw new ConfigurationException("No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
+				throw new ConfigurationException(
+						"No CDS Services found in the context (need bean called " + CDS_SERVICES_BEAN_NAME + ")");
 			}
 
 		} catch (ConfigurationException e) {
@@ -150,4 +159,3 @@ public class CdsHooksContextBooter {
 		}
 	}
 }
-

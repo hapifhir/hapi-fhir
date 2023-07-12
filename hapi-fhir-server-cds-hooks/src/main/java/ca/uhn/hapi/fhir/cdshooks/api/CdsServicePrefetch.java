@@ -45,5 +45,4 @@ public @interface CdsServicePrefetch {
 	 * The strategy used for this query, defaults to the service-wide strategy
 	 */
 	CdsResolutionStrategyEnum source() default CdsResolutionStrategyEnum.NONE;
-
 }

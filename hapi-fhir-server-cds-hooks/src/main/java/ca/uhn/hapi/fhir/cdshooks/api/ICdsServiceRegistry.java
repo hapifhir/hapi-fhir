@@ -65,8 +65,12 @@ public interface ICdsServiceRegistry {
 	 * @param theAllowAutoFhirClientPrefetch Whether to allow the server to automatically prefetch resources
 	 * @param theModuleId                    the moduleId where the service is registered
 	 */
-
-	void registerService(String theServiceId, Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction, CdsServiceJson theCdsServiceJson, boolean theAllowAutoFhirClientPrefetch, String theModuleId);
+	void registerService(
+			String theServiceId,
+			Function<CdsServiceRequestJson, CdsServiceResponseJson> theServiceFunction,
+			CdsServiceJson theCdsServiceJson,
+			boolean theAllowAutoFhirClientPrefetch,
+			String theModuleId);
 
 	/**
 	 * Remove registered CDS service with the service ID, only removes dynamically registered service

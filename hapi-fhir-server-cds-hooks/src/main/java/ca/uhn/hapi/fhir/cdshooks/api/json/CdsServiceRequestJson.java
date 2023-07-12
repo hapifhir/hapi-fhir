@@ -100,7 +100,8 @@ public class CdsServiceRequestJson extends BaseCdsServiceJson implements IModelJ
 		return myServiceRequestAuthorizationJson;
 	}
 
-	public CdsServiceRequestJson setServiceRequestAuthorizationJson(CdsServiceRequestAuthorizationJson theServiceRequestAuthorizationJson) {
+	public CdsServiceRequestJson setServiceRequestAuthorizationJson(
+			CdsServiceRequestAuthorizationJson theServiceRequestAuthorizationJson) {
 		myServiceRequestAuthorizationJson = theServiceRequestAuthorizationJson;
 		return this;
 	}

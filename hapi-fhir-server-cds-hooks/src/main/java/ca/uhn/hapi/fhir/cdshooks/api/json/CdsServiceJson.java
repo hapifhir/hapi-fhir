@@ -119,5 +119,4 @@ public class CdsServiceJson extends BaseCdsServiceJson implements IModelJson {
 		}
 		return Collections.unmodifiableMap(mySource);
 	}
-
 }

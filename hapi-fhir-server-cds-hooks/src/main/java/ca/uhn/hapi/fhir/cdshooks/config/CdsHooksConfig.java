@@ -46,6 +46,7 @@ public class CdsHooksConfig {
 
 	@Autowired(required = false)
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired(required = false)
 	private MatchUrlService myMatchUrlService;
 
@@ -55,24 +56,30 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	public ICdsServiceRegistry cdsServiceRegistry(CdsHooksContextBooter theCdsHooksContextBooter,
-																 CdsPrefetchSvc theCdsPrefetchSvc,
-																 @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
+	public ICdsServiceRegistry cdsServiceRegistry(
+			CdsHooksContextBooter theCdsHooksContextBooter,
+			CdsPrefetchSvc theCdsPrefetchSvc,
+			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
 		return new CdsServiceRegistryImpl(theCdsHooksContextBooter, theCdsPrefetchSvc, theObjectMapper);
 	}
 
 	@Bean
-	public ICdsConfigService cdsConfigService(FhirContext theFhirContext,
-															@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
+	public ICdsConfigService cdsConfigService(
+			FhirContext theFhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
 		return new CdsConfigServiceImpl(theFhirContext, theObjectMapper);
 	}
 
 	@Bean
-	CdsPrefetchSvc cdsPrefetchSvc(CdsResolutionStrategySvc theCdsResolutionStrategySvc,
-											CdsPrefetchDaoSvc theResourcePrefetchDao,
-											CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
-											ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
-		return new CdsPrefetchSvc(theCdsResolutionStrategySvc, theResourcePrefetchDao, theResourcePrefetchFhirClient, theCdsHooksDaoAuthorizationSvc);
+	CdsPrefetchSvc cdsPrefetchSvc(
+			CdsResolutionStrategySvc theCdsResolutionStrategySvc,
+			CdsPrefetchDaoSvc theResourcePrefetchDao,
+			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
+			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
+		return new CdsPrefetchSvc(
+				theCdsResolutionStrategySvc,
+				theResourcePrefetchDao,
+				theResourcePrefetchFhirClient,
+				theCdsHooksDaoAuthorizationSvc);
 	}
 
 	@Bean

@@ -53,7 +53,10 @@ abstract class BaseCdsMethod implements ICdsMethod {
 			if (e.getCause() != null && e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
-			throw new ConfigurationException("Failed to invoke " + myMethod.getName() + " method on " + myServiceBean.getClass().getName(), e);
+			throw new ConfigurationException(
+					"Failed to invoke " + myMethod.getName() + " method on "
+							+ myServiceBean.getClass().getName(),
+					e);
 		}
 	}
 
@@ -61,11 +64,15 @@ abstract class BaseCdsMethod implements ICdsMethod {
 		return String.class.isAssignableFrom(myMethod.getParameterTypes()[0]);
 	}
 
-	private String encodeRequest(ObjectMapper theObjectMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
+	private String encodeRequest(
+			ObjectMapper theObjectMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
 		try {
 			return theObjectMapper.writeValueAsString(theCdsServiceRequestJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException("Failed to deserialize CDS Hooks service request json instance when calling CDS Hooks Service " + theServiceId, e);
+			throw new InvalidRequestException(
+					"Failed to deserialize CDS Hooks service request json instance when calling CDS Hooks Service "
+							+ theServiceId,
+					e);
 		}
 	}
 }

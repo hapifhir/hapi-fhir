@@ -45,9 +45,9 @@ public class CdsHooksObjectMapperFactory extends ObjectMapper {
 		module.addSerializer(new FhirResourceSerializer(myFhirContext));
 		module.addSerializer(new CdsServiceRequestContextSerializer(myFhirContext, retval));
 		module.addDeserializer(IBaseResource.class, new FhirResourceDeserializer(myFhirContext));
-		module.addDeserializer(CdsServiceRequestContextJson.class, new CdsServiceRequestContextDeserializer(myFhirContext, retval));
+		module.addDeserializer(
+				CdsServiceRequestContextJson.class, new CdsServiceRequestContextDeserializer(myFhirContext, retval));
 		retval.registerModule(module);
 		return retval;
-
 	}
 }

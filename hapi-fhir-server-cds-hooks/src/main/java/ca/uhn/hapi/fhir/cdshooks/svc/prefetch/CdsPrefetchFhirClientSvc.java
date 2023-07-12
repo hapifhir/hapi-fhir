@@ -44,7 +44,8 @@ public class CdsPrefetchFhirClientSvc {
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(theUrl);
 		String resourceType = parts.getResourceType();
 		if (StringUtils.isEmpty(resourceType)) {
-			throw new InvalidRequestException("Failed to resolve " + theUrl + ". Url does not start with a resource type.");
+			throw new InvalidRequestException(
+					"Failed to resolve " + theUrl + ". Url does not start with a resource type.");
 		}
 
 		String resourceId = parts.getResourceId();
@@ -60,11 +61,13 @@ public class CdsPrefetchFhirClientSvc {
 
 	private IGenericClient buildClient(CdsServiceRequestJson theCdsServiceRequestJson) {
 		String fhirServerBase = theCdsServiceRequestJson.getFhirServer();
-		CdsServiceRequestAuthorizationJson serviceRequestAuthorization = theCdsServiceRequestJson.getServiceRequestAuthorizationJson();
+		CdsServiceRequestAuthorizationJson serviceRequestAuthorization =
+				theCdsServiceRequestJson.getServiceRequestAuthorizationJson();
 
 		IGenericClient client = myFhirContext.newRestfulGenericClient(fhirServerBase);
 		if (serviceRequestAuthorization != null && serviceRequestAuthorization.getAccessToken() != null) {
-			IClientInterceptor authInterceptor = new BearerTokenAuthInterceptor(serviceRequestAuthorization.getAccessToken());
+			IClientInterceptor authInterceptor =
+					new BearerTokenAuthInterceptor(serviceRequestAuthorization.getAccessToken());
 			client.registerInterceptor(authInterceptor);
 		}
 		return client;

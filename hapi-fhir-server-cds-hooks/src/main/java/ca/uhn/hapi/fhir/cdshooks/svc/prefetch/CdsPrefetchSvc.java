@@ -42,10 +42,11 @@ public class CdsPrefetchSvc {
 	private final CdsPrefetchFhirClientSvc myResourcePrefetchFhirClient;
 	private final ICdsHooksDaoAuthorizationSvc myCdsHooksDaoAuthorizationSvc;
 
-	public CdsPrefetchSvc(CdsResolutionStrategySvc theCdsResolutionStrategySvc,
-								 CdsPrefetchDaoSvc theResourcePrefetchDao,
-								 CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
-								 ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
+	public CdsPrefetchSvc(
+			CdsResolutionStrategySvc theCdsResolutionStrategySvc,
+			CdsPrefetchDaoSvc theResourcePrefetchDao,
+			CdsPrefetchFhirClientSvc theResourcePrefetchFhirClient,
+			ICdsHooksDaoAuthorizationSvc theCdsHooksDaoAuthorizationSvc) {
 		myCdsResolutionStrategySvc = theCdsResolutionStrategySvc;
 		myResourcePrefetchDao = theResourcePrefetchDao;
 		myResourcePrefetchFhirClient = theResourcePrefetchFhirClient;
@@ -58,17 +59,23 @@ public class CdsPrefetchSvc {
 		if (missingPrefetch.isEmpty()) {
 			return;
 		}
-		Set<CdsResolutionStrategyEnum> strategies = myCdsResolutionStrategySvc.determineResolutionStrategy(theServiceMethod, theCdsServiceRequestJson);
+		Set<CdsResolutionStrategyEnum> strategies =
+				myCdsResolutionStrategySvc.determineResolutionStrategy(theServiceMethod, theCdsServiceRequestJson);
 		String serviceId = theServiceMethod.getCdsServiceJson().getId();
 		try {
 			fetchMissingPrefetchElements(theCdsServiceRequestJson, serviceSpec, missingPrefetch, strategies);
 		} catch (BaseServerResponseException e) {
 			// Per the CDS Hooks specification
-			throw new PreconditionFailedException("Unable to fetch missing resource(s) with key(s) " + missingPrefetch + " for CDS Hooks service " + serviceId + ": " + e.getMessage());
+			throw new PreconditionFailedException("Unable to fetch missing resource(s) with key(s) " + missingPrefetch
+					+ " for CDS Hooks service " + serviceId + ": " + e.getMessage());
 		}
 	}
 
-	private void fetchMissingPrefetchElements(CdsServiceRequestJson theCdsServiceRequestJson, CdsServiceJson theServiceSpec, Set<String> theMissingPrefetch, Set<CdsResolutionStrategyEnum> theStrategies) {
+	private void fetchMissingPrefetchElements(
+			CdsServiceRequestJson theCdsServiceRequestJson,
+			CdsServiceJson theServiceSpec,
+			Set<String> theMissingPrefetch,
+			Set<CdsResolutionStrategyEnum> theStrategies) {
 		for (String key : theMissingPrefetch) {
 			String template = theServiceSpec.getPrefetch().get(key);
 			CdsResolutionStrategyEnum source = theServiceSpec.getSource().get(key);
@@ -92,7 +99,8 @@ public class CdsPrefetchSvc {
 				// The service will manage missing prefetch elements
 				continue;
 			}
-			String url = PrefetchTemplateUtil.substituteTemplate(template, theCdsServiceRequestJson.getContext(), myResourcePrefetchDao.getFhirContext());
+			String url = PrefetchTemplateUtil.substituteTemplate(
+					template, theCdsServiceRequestJson.getContext(), myResourcePrefetchDao.getFhirContext());
 			ourLog.info("missing: {}.  Fetching with {}", theMissingPrefetch, url);
 			IBaseResource resource;
 			if (source == CdsResolutionStrategyEnum.FHIR_CLIENT) {
@@ -115,7 +123,8 @@ public class CdsPrefetchSvc {
 		return resource;
 	}
 
-	public Set<String> findMissingPrefetch(CdsServiceJson theServiceSpec, CdsServiceRequestJson theCdsServiceRequestJson) {
+	public Set<String> findMissingPrefetch(
+			CdsServiceJson theServiceSpec, CdsServiceRequestJson theCdsServiceRequestJson) {
 		Set<String> expectedPrefetchKeys = theServiceSpec.getPrefetch().keySet();
 		Set<String> actualPrefetchKeys = theCdsServiceRequestJson.getPrefetchKeys();
 		Set<String> retval = new HashSet<>(expectedPrefetchKeys);
@@ -123,4 +132,3 @@ public class CdsPrefetchSvc {
 		return retval;
 	}
 }
-
