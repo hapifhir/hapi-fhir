@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Firely Query Language
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -47,7 +47,6 @@ class JdbcConnection implements Connection {
 
 	public JdbcConnection(String theServerUrl) {
 		myServerUrl = theServerUrl;
-		myClient = new HfqlRestClient(myServerUrl, myUsername, myPassword);
 	}
 
 	@Override
@@ -102,7 +101,7 @@ class JdbcConnection implements Connection {
 
 	@Override
 	public DatabaseMetaData getMetaData() {
-		return new JdbcDatabaseMetadata(this, myClient);
+		return new JdbcDatabaseMetadata(this, getClient());
 	}
 
 	@Override
@@ -325,6 +324,9 @@ class JdbcConnection implements Connection {
 	}
 
 	public HfqlRestClient getClient() {
+		if (myClient == null) {
+			myClient = new HfqlRestClient(myServerUrl, myUsername, myPassword);
+		}
 		return myClient;
 	}
 

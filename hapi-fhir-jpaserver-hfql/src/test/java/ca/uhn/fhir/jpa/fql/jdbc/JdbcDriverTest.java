@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.Lists;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -22,8 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Base64Utils;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -52,6 +55,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class JdbcDriverTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final HfqlRestClientTest.HeaderCaptureInterceptor ourHeaderCaptureInterceptor = new HfqlRestClientTest.HeaderCaptureInterceptor();
+	public static final String SOME_USERNAME = "some-username";
+	public static final String SOME_PASSWORD = "some-password";
 
 	@Mock
 	private IHfqlExecutor myFqlExecutor;
@@ -61,7 +67,8 @@ public class JdbcDriverTest {
 	private HfqlRestProvider myProvider = new HfqlRestProvider();
 	@RegisterExtension
 	public RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
-		.registerProvider(myProvider);
+		.registerProvider(myProvider)
+		.registerInterceptor(ourHeaderCaptureInterceptor);
 
 	private BasicDataSource myDs;
 
@@ -71,9 +78,11 @@ public class JdbcDriverTest {
 
 		myDs = new BasicDataSource();
 		myDs.setUrl(JdbcDriver.URL_PREFIX + myServer.getBaseUrl());
-		myDs.setUsername("some-username");
-		myDs.setPassword("some-password");
+		myDs.setUsername(SOME_USERNAME);
+		myDs.setPassword(SOME_PASSWORD);
 		myDs.start();
+
+		ourHeaderCaptureInterceptor.clear();
 	}
 
 	@AfterEach
@@ -103,6 +112,10 @@ public class JdbcDriverTest {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDs);
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
 		assertEquals(2, outcome.size());
+
+		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
+		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
+		assertEquals(expectedAuthHeader, actual);
 	}
 
 	@Test

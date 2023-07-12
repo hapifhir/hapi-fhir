@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Firely Query Language
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%

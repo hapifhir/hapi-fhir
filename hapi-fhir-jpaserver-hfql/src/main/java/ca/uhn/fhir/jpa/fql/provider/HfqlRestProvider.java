@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Firely Query Language
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -57,7 +57,7 @@ public class HfqlRestProvider {
 		super();
 	}
 
-	@Operation(name = HfqlConstants.FQL_EXECUTE, manualResponse = true)
+	@Operation(name = HfqlConstants.HFQL_EXECUTE, manualResponse = true)
 	public void executeFql(
 		@OperationParam(name = HfqlConstants.PARAM_ACTION, typeName = "code", min = 0, max = 1) IPrimitiveType<String> theAction,
 		@OperationParam(name = HfqlConstants.PARAM_QUERY, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theQuery,

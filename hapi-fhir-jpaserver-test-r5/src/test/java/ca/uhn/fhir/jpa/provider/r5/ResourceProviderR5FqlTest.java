@@ -34,7 +34,7 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 		request.addParameter(HfqlConstants.PARAM_QUERY, new StringType(select));
 		request.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(100));
 		request.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(5));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.HFQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(myFhirContext, request));
 
 		// Test

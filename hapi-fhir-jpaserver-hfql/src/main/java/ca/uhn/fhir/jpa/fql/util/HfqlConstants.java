@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Firely Query Language
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.fql.util;
 
 public class HfqlConstants {
 
-	public static final String FQL_EXECUTE = "$hapifhir-fql-execute";
+	public static final String HFQL_EXECUTE = "$hfql-execute";
 	public static final String PARAM_QUERY = "query";
 	public static final String PARAM_STATEMENT = "statement";
 	public static final String PARAM_CONTINUATION = "continuation";

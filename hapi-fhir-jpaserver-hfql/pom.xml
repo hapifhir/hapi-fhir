@@ -3,14 +3,14 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.7.12-SNAPSHOT</version>
+		<version>6.7.13-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-jpaserver-hfql</artifactId>
 	<packaging>jar</packaging>
-	<name>HAPI FHIR JPA Server - Firely Query Language</name>
+	<name>HAPI FHIR JPA Server - HFQL Driver</name>
 
 	<dependencies>
 		<dependency>
@@ -57,7 +57,7 @@
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
 							<attach>false</attach>
-							<finalName>hapi-fhir-jpaserver-fql-jdbc-${project.version}</finalName>
+							<finalName>hapi-fhir-hfql-jdbc-${project.version}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</plugin>

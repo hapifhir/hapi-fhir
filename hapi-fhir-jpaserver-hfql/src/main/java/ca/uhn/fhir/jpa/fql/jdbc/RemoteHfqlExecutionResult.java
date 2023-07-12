@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Firely Query Language
+ * HAPI FHIR JPA Server - HFQL Driver
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -77,7 +77,7 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 		myFetchSize = theFetchSize;
 		mySupportsContinuations = theSupportsContinuations;
 
-		HttpPost post = new HttpPost(myBaseUrl + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost post = new HttpPost(myBaseUrl + "/" + HfqlConstants.HFQL_EXECUTE);
 		post.setEntity(new ResourceEntity(FhirContext.forR4Cached(), theRequestParameters));
 		try {
 			myRequest = myClient.execute(post);
@@ -238,7 +238,7 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 
 	private boolean executeContinuationSearch() {
 		boolean hasNext;
-		HttpPost post = new HttpPost(myBaseUrl + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost post = new HttpPost(myBaseUrl + "/" + HfqlConstants.HFQL_EXECUTE);
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH_CONTINUATION));
 		input.addParameter(HfqlConstants.PARAM_CONTINUATION, new StringType(mySearchId));

@@ -90,7 +90,7 @@ public class HfqlRestProviderTest {
 		request.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
 		request.addParameter(HfqlConstants.PARAM_QUERY, new StringType(select));
 		request.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(100));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.HFQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(ourCtx, request));
 
 		// Test
@@ -135,7 +135,7 @@ public class HfqlRestProviderTest {
 		request.addParameter(HfqlConstants.PARAM_STATEMENT, new StringType(JsonUtil.serialize(createFakeStatement())));
 		request.addParameter(HfqlConstants.PARAM_OFFSET, new IntegerType(99));
 		ourLog.info("Request: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(request));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.HFQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(ourCtx, request));
 
 		// Test
@@ -179,7 +179,7 @@ public class HfqlRestProviderTest {
 
 		Parameters request = new Parameters();
 		request.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_TABLES));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.HFQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(ourCtx, request));
 
 		// Test
@@ -221,7 +221,7 @@ public class HfqlRestProviderTest {
 		request.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_COLUMNS));
 		request.addParameter(HfqlConstants.PARAM_INTROSPECT_TABLE_NAME, new StringType("FOO"));
 		request.addParameter(HfqlConstants.PARAM_INTROSPECT_COLUMN_NAME, new StringType("BAR"));
-		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.FQL_EXECUTE);
+		HttpPost fetch = new HttpPost(myServer.getBaseUrl() + "/" + HfqlConstants.HFQL_EXECUTE);
 		fetch.setEntity(new ResourceEntity(ourCtx, request));
 
 		// Test
