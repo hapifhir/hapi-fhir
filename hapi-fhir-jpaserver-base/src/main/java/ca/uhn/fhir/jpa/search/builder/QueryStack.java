@@ -2558,10 +2558,9 @@ public class QueryStack {
 				RuntimeSearchParam fullChainParam =
 						mySearchParamRegistry.getActiveSearchParam(theResourceName, fullName);
 				if (fullChainParam != null) {
-					List<IQueryParameterType> swappedParamTypes = nextAnd
-						.stream()
-						.map(t -> newParameterInstance(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
-						.collect(Collectors.toList());
+					List<IQueryParameterType> swappedParamTypes = nextAnd.stream()
+							.map(t -> newParameterInstance(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
+							.collect(Collectors.toList());
 					List<List<IQueryParameterType>> params = List.of(swappedParamTypes);
 					Condition predicate = createPredicateSearchParameter(
 							theSourceJoinColumn, theResourceName, fullName, params, theRequest, theRequestPartitionId);
@@ -2661,7 +2660,8 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public IQueryParameterType newParameterInstance(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
+	public IQueryParameterType newParameterInstance(
+			RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
 		IQueryParameterType qp = newParameterInstance(theParam);
 
 		qp.setValueAsQueryToken(myFhirContext, theParam.getName(), theQualifier, theValueAsQueryToken);

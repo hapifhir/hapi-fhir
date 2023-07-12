@@ -21,13 +21,14 @@ package ca.uhn.fhir.jpa.fql.parser;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nonnull;
 import java.util.Locale;
+import javax.annotation.Nonnull;
 
 class HfqlLexerToken {
 
 	@Nonnull
 	public final String myToken;
+
 	private final int myLine;
 	private final int myColumn;
 

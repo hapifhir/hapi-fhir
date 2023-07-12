@@ -150,7 +150,8 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+			throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -200,17 +201,20 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+			throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public PreparedStatement prepareStatement(
+			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+	public CallableStatement prepareCall(
+			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 

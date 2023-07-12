@@ -631,17 +631,21 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws UnsupportedOperationException {
+	public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws UnsupportedOperationException {
+	public ResultSet getProcedureColumns(
+			String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
+			throws SQLException {
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_TABLES));
 		IHfqlExecutionResult outcome = myRestClient.execute(input, false, null);
@@ -666,7 +670,8 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws UnsupportedOperationException, SQLException {
+	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+			throws UnsupportedOperationException, SQLException {
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_COLUMNS));
 		IHfqlExecutionResult outcome = myRestClient.execute(input, false, null);
@@ -674,22 +679,26 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws UnsupportedOperationException {
+	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws UnsupportedOperationException {
+	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws UnsupportedOperationException {
+	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getVersionColumns(String catalog, String schema, String table) throws UnsupportedOperationException {
+	public ResultSet getVersionColumns(String catalog, String schema, String table)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -709,7 +718,14 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable) throws UnsupportedOperationException {
+	public ResultSet getCrossReference(
+			String parentCatalog,
+			String parentSchema,
+			String parentTable,
+			String foreignCatalog,
+			String foreignSchema,
+			String foreignTable)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -719,7 +735,8 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws UnsupportedOperationException {
+	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -784,7 +801,8 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types) throws UnsupportedOperationException {
+	public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -814,17 +832,21 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws UnsupportedOperationException {
+	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws UnsupportedOperationException {
+	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern) throws UnsupportedOperationException {
+	public ResultSet getAttributes(
+			String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -899,17 +921,22 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws UnsupportedOperationException {
+	public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws UnsupportedOperationException {
+	public ResultSet getFunctionColumns(
+			String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws UnsupportedOperationException {
+	public ResultSet getPseudoColumns(
+			String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+			throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -928,5 +955,3 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 		throw new UnsupportedOperationException();
 	}
 }
-
-

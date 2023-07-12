@@ -24,11 +24,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class HfqlStatementParser {
 
@@ -43,14 +43,7 @@ public class HfqlStatementParser {
 	public static final String KEYWORD_TRUE = "TRUE";
 	public static final String KEYWORD_FALSE = "FALSE";
 	private static final Set<String> DIRECTIVE_KEYWORDS = Set.of(
-		KEYWORD_FROM,
-		KEYWORD_GROUP,
-		KEYWORD_LIMIT,
-		KEYWORD_ORDER,
-		KEYWORD_WHERE,
-		KEYWORD_SELECT,
-		KEYWORD_HAVING
-	);
+			KEYWORD_FROM, KEYWORD_GROUP, KEYWORD_LIMIT, KEYWORD_ORDER, KEYWORD_WHERE, KEYWORD_SELECT, KEYWORD_HAVING);
 	private final HfqlLexer myLexer;
 	private final FhirContext myFhirContext;
 	private BaseState myState;
@@ -84,7 +77,6 @@ public class HfqlStatementParser {
 		}
 
 		return myStatement;
-
 	}
 
 	@Nonnull
@@ -101,12 +93,14 @@ public class HfqlStatementParser {
 	}
 
 	@Nonnull
-	private static DataFormatException newExceptionUnexpectedTokenExpectToken(@Nullable HfqlLexerToken theToken, @Nonnull String theExpectedToken) {
+	private static DataFormatException newExceptionUnexpectedTokenExpectToken(
+			@Nullable HfqlLexerToken theToken, @Nonnull String theExpectedToken) {
 		return newExceptionUnexpectedTokenExpectDescription(theToken, "\"" + theExpectedToken + "\"");
 	}
 
 	@Nonnull
-	private static DataFormatException newExceptionUnexpectedTokenExpectDescription(@Nullable HfqlLexerToken theToken, @Nullable String theExpectedDescription) {
+	private static DataFormatException newExceptionUnexpectedTokenExpectDescription(
+			@Nullable HfqlLexerToken theToken, @Nullable String theExpectedDescription) {
 		StringBuilder b = new StringBuilder();
 		b.append("Unexpected ");
 		if (theToken != null) {
@@ -131,7 +125,8 @@ public class HfqlStatementParser {
 
 	@Nonnull
 	private static DataFormatException newExceptionUnknownResourceType(HfqlLexerToken theToken, String resourceType) {
-		return new DataFormatException("Invalid FROM statement. Unknown resource type '" + resourceType + "' at position: " + theToken.describePosition());
+		return new DataFormatException("Invalid FROM statement. Unknown resource type '" + resourceType
+				+ "' at position: " + theToken.describePosition());
 	}
 
 	private static void validateNotPresent(List<?> theClauses, HfqlLexerToken theKeyword) {
@@ -255,7 +250,6 @@ public class HfqlStatementParser {
 				super.consume(theToken);
 			}
 		}
-
 	}
 
 	private class StateInWhereInitial extends BaseState {
@@ -336,7 +330,6 @@ public class HfqlStatementParser {
 				throw newExceptionUnexpectedTokenExpectToken(theToken, "=");
 			}
 		}
-
 	}
 
 	private class StateInWhereAfterOperatorEquals extends BaseState {
@@ -360,7 +353,6 @@ public class HfqlStatementParser {
 			myHavingClause.addRight(token);
 			myState = new StateAfterWhere(myWhereMode);
 		}
-
 	}
 
 	private class StateInWhereAfterOperatorIn extends BaseState {
@@ -429,10 +421,10 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			String keyword = theToken.asKeyword();
 			switch (keyword) {
-				/*
-				 * Update DIRECTIVE_KEYWORDS if you add new
-				 * keywords here!
-				 */
+					/*
+					 * Update DIRECTIVE_KEYWORDS if you add new
+					 * keywords here!
+					 */
 				case KEYWORD_HAVING:
 					validateNotPresent(myStatement.getHavingClauses(), theToken);
 					myState = new StateInWhereInitial(WhereModeEnum.HAVING);
@@ -469,7 +461,6 @@ public class HfqlStatementParser {
 					}
 			}
 		}
-
 	}
 
 	private class StateGroup extends BaseState {
@@ -487,8 +478,10 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			myStatement.addGroupByClause(theToken.asString());
 
-			if (myLexer.hasNextToken(HfqlLexerOptions.DEFAULT) &&
-				",".equals(myLexer.peekNextToken(HfqlLexerOptions.DEFAULT).getToken())) {
+			if (myLexer.hasNextToken(HfqlLexerOptions.DEFAULT)
+					&& ","
+							.equals(myLexer.peekNextToken(HfqlLexerOptions.DEFAULT)
+									.getToken())) {
 				myLexer.consumeNextToken();
 			} else {
 				myState = new StateAfterGroupBy();
@@ -555,5 +548,4 @@ public class HfqlStatementParser {
 			return HfqlLexerOptions.DEFAULT;
 		}
 	}
-
 }

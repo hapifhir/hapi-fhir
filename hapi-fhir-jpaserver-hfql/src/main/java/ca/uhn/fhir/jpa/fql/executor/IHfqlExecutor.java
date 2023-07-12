@@ -45,7 +45,12 @@ public interface IHfqlExecutor {
 	 * @param theRequestDetails The request details associated with the request
 	 * @param theStartingOffset The row offset count for the first result to return. This should be set to one higher than the last value returned by {@link IHfqlExecutionResult.Row#getRowOffset()}.
 	 */
-	IHfqlExecutionResult executeContinuation(HfqlStatement theStatement, String theSearchId, int theStartingOffset, Integer theLimit, RequestDetails theRequestDetails);
+	IHfqlExecutionResult executeContinuation(
+			HfqlStatement theStatement,
+			String theSearchId,
+			int theStartingOffset,
+			Integer theLimit,
+			RequestDetails theRequestDetails);
 
 	/**
 	 * Provides a list of "tables", which are actually resource types, in order to

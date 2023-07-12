@@ -100,7 +100,5 @@ public class JdbcDriver implements Driver {
 		} catch (SQLException e) {
 			logException(e);
 		}
-
 	}
-
 }

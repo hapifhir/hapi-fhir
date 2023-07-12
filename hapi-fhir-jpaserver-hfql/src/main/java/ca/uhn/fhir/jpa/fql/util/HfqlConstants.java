@@ -44,8 +44,5 @@ public class HfqlConstants {
 	 */
 	public static final int ORDER_AND_GROUP_LIMIT = 10000;
 
-	private HfqlConstants() {
-	}
-
-
+	private HfqlConstants() {}
 }

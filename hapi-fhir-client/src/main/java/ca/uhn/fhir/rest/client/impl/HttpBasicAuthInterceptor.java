@@ -19,9 +19,6 @@
  */
 package ca.uhn.fhir.rest.client.impl;
 
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -39,7 +36,7 @@ import java.io.IOException;
  *
  * @see ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor A HAPI FHIR interceptor that is generally easier to use
  */
-public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
+public class HttpBasicAuthInterceptor implements HttpRequestInterceptor {
 
 	private String myUsername;
 	private String myPassword;

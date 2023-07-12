@@ -37,8 +37,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HfqlRestClient {
-	public static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT
-		.withRecordSeparator('\n');
+	public static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withRecordSeparator('\n');
 	private final String myBaseUrl;
 	private final String myUsername;
 	private final String myPassword;
@@ -49,25 +48,27 @@ public class HfqlRestClient {
 		myUsername = theUsername;
 		myPassword = thePassword;
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager =
+				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(99);
 		connectionManager.setDefaultMaxPerRoute(99);
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder
-			.create()
-			.setConnectionManager(connectionManager)
-			.setMaxConnPerRoute(99);
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
+				.setConnectionManager(connectionManager)
+				.setMaxConnPerRoute(99);
 		if (isNotBlank(myUsername) && isNotBlank(myPassword)) {
 			httpClientBuilder.addInterceptorLast(new HttpBasicAuthInterceptor(myUsername, myPassword));
 		}
 		myClient = httpClientBuilder.build();
-
 	}
 
-	public IHfqlExecutionResult execute(Parameters theRequestParameters, boolean theSupportsContinuations, Integer theFetchSize) throws SQLException {
+	public IHfqlExecutionResult execute(
+			Parameters theRequestParameters, boolean theSupportsContinuations, Integer theFetchSize)
+			throws SQLException {
 		Integer fetchSize = theFetchSize;
 		fetchSize = defaultIfNull(fetchSize, DEFAULT_FETCH_SIZE);
 		Validate.isTrue(fetchSize > 0, "theFetchSize must be a positive integer, got: %s", fetchSize);
-		return new RemoteHfqlExecutionResult(theRequestParameters, myBaseUrl, myClient, fetchSize, theSupportsContinuations);
+		return new RemoteHfqlExecutionResult(
+				theRequestParameters, myBaseUrl, myClient, fetchSize, theSupportsContinuations);
 	}
 
 	public void close() {

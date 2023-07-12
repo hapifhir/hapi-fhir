@@ -24,31 +24,37 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class HfqlStatement implements IModelJson {
 
 	@JsonProperty("select")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<SelectClause> mySelectClauses = new ArrayList<>();
+
 	@JsonProperty("where")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<HavingClause> myWhereClauses = new ArrayList<>();
+
 	@JsonProperty("having")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<HavingClause> myHavingClauses = new ArrayList<>();
+
 	@JsonProperty("groupBy")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> myGroupByClauses = new ArrayList<>();
+
 	@JsonProperty("orderBy")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<OrderByClause> myOrderByClauses = new ArrayList<>();
+
 	@JsonProperty("fromResourceName")
 	private String myFromResourceName;
+
 	@JsonProperty("limit")
 	private Integer myLimit;
 
@@ -157,7 +163,8 @@ public class HfqlStatement implements IModelJson {
 
 	public int findSelectClauseIndex(String theClause) {
 		for (int i = 0; i < getSelectClauses().size(); i++) {
-			if (theClause.equals(getSelectClauses().get(i).getClause()) || theClause.equals(getSelectClauses().get(i).getAlias())) {
+			if (theClause.equals(getSelectClauses().get(i).getClause())
+					|| theClause.equals(getSelectClauses().get(i).getAlias())) {
 				return i;
 			}
 		}
@@ -166,20 +173,20 @@ public class HfqlStatement implements IModelJson {
 
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
-		UNARY_BOOLEAN, IN
+		UNARY_BOOLEAN,
+		IN
 	}
 
 	public enum SelectClauseOperator {
-
 		SELECT,
 		COUNT
-
 	}
 
 	public class OrderByClause implements IModelJson {
 
 		@JsonProperty("clause")
 		private String myClause;
+
 		@JsonProperty("ascending")
 		private boolean myAscending;
 
@@ -198,14 +205,15 @@ public class HfqlStatement implements IModelJson {
 		public void setAscending(boolean theAscending) {
 			myAscending = theAscending;
 		}
-
 	}
 
 	public static class SelectClause implements IModelJson {
 		@JsonProperty("clause")
 		private String myClause;
+
 		@JsonProperty("alias")
 		private String myAlias;
+
 		@JsonProperty("operator")
 		private SelectClauseOperator myOperator;
 
@@ -256,8 +264,10 @@ public class HfqlStatement implements IModelJson {
 
 		@JsonProperty("left")
 		private String myLeft;
+
 		@JsonProperty("operator")
 		private WhereClauseOperatorEnum myOperator;
+
 		@JsonProperty("right")
 		private List<String> myRight = new ArrayList<>();
 
@@ -299,8 +309,5 @@ public class HfqlStatement implements IModelJson {
 			}
 			return retVal;
 		}
-
 	}
-
-
 }

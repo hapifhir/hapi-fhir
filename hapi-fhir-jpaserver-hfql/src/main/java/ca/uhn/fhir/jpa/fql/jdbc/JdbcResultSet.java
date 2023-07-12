@@ -56,6 +56,7 @@ class JdbcResultSet implements ResultSet {
 	 * @see <a href="https://en.wikipedia.org/wiki/SQLSTATE">https://en.wikipedia.org/wiki/SQLSTATE</a>
 	 */
 	public static final String SQL_STATE_CODE_0F001_LOCATOR_EXCEPTION = "0F001";
+
 	private final IHfqlExecutionResult myResult;
 	private final Statement myStatement;
 	private List<Object> myNextRow;
@@ -198,7 +199,7 @@ class JdbcResultSet implements ResultSet {
 		validateColumnIndex(columnIndex);
 		Object retVal = myNextRow.get(columnIndex - 1);
 		if (retVal != null) {
-			retVal = new Date(((java.util.Date)retVal).getTime());
+			retVal = new Date(((java.util.Date) retVal).getTime());
 		}
 		myLastValue = retVal;
 		return (Date) retVal;
@@ -228,7 +229,7 @@ class JdbcResultSet implements ResultSet {
 		validateColumnIndex(columnIndex);
 		Object retVal = myNextRow.get(columnIndex - 1);
 		if (retVal != null) {
-			retVal = new Timestamp(((java.util.Date)retVal).getTime());
+			retVal = new Timestamp(((java.util.Date) retVal).getTime());
 		}
 		myLastValue = retVal;
 		return (Timestamp) retVal;

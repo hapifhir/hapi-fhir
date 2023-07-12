@@ -55,7 +55,15 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private int myNextResourceSearchRow;
 	private Row myErrorRow;
 
-	public LocalSearchHfqlExecutionResult(HfqlStatement theStatement, IBundleProvider theSearchResult, HfqlExecutor.HfqlExecutionContext theExecutionContext, Integer theLimit, int theInitialOffset, List<HfqlDataTypeEnum> theColumnDataTypes, Predicate<IBaseResource> theWhereClausePredicate, FhirContext theFhirContext) {
+	public LocalSearchHfqlExecutionResult(
+			HfqlStatement theStatement,
+			IBundleProvider theSearchResult,
+			HfqlExecutor.HfqlExecutionContext theExecutionContext,
+			Integer theLimit,
+			int theInitialOffset,
+			List<HfqlDataTypeEnum> theColumnDataTypes,
+			Predicate<IBaseResource> theWhereClausePredicate,
+			FhirContext theFhirContext) {
 		myStatement = theStatement;
 		mySearchResult = theSearchResult;
 		myExecutionContext = theExecutionContext;
@@ -63,14 +71,11 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		myNextSearchResultRow = theInitialOffset;
 		myColumnDataTypes = theColumnDataTypes;
 		myWhereClausePredicate = theWhereClausePredicate;
-		myColumnNames = myStatement
-			.getSelectClauses()
-			.stream()
-			.map(HfqlStatement.SelectClause::getAlias)
-			.collect(Collectors.toUnmodifiableList());
+		myColumnNames = myStatement.getSelectClauses().stream()
+				.map(HfqlStatement.SelectClause::getAlias)
+				.collect(Collectors.toUnmodifiableList());
 		myParser = theFhirContext.newJsonParser();
 	}
-
 
 	@Override
 	public List<String> getColumnNames() {
@@ -98,7 +103,13 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 					int from = myNextSearchResultRow;
 					int to = myNextSearchResultRow + HfqlExecutor.BATCH_SIZE;
 					myNextBatch = mySearchResult.getResources(from, to);
-					ourLog.info("HFQL fetching resources {}-{} - Total {} fetched, {} retained and limit {}", from, to, myNextSearchResultRow, myTotalRowsFetched, myLimit);
+					ourLog.info(
+							"HFQL fetching resources {}-{} - Total {} fetched, {} retained and limit {}",
+							from,
+							to,
+							myNextSearchResultRow,
+							myTotalRowsFetched,
+							myLimit);
 					myNextBatchRow = 0;
 					myNextSearchResultRow += HfqlExecutor.BATCH_SIZE;
 				}
@@ -141,13 +152,15 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 
 		List<Object> values = new ArrayList<>();
 		for (int columnIndex = 0; columnIndex < myStatement.getSelectClauses().size(); columnIndex++) {
-			HfqlStatement.SelectClause nextColumn = myStatement.getSelectClauses().get(columnIndex);
+			HfqlStatement.SelectClause nextColumn =
+					myStatement.getSelectClauses().get(columnIndex);
 			String clause = nextColumn.getClause();
 			List<IBase> columnValues;
 			try {
 				columnValues = myExecutionContext.evaluate(myNextResource, clause, IBase.class);
 			} catch (Exception e) {
-				String errorMessage = "Failed to evaluate FHIRPath expression \"" + clause + "\". Error: " + e.getMessage();
+				String errorMessage =
+						"Failed to evaluate FHIRPath expression \"" + clause + "\". Error: " + e.getMessage();
 				return createAndStoreErrorRow(errorMessage);
 			}
 			String value = null;
@@ -161,17 +174,18 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 			}
 
 			// FIXME: remove
-//			if (value != null) {
-//				if (columnDataType.equals(HfqlDataTypeEnum.INTEGER)) {
-//					try {
-//						values.add(Integer.parseInt(value));
-//						continue;
-//					} catch (NumberFormatException e) {
-//						String errorMessage = "Failed to evaluate result of FHIRPath expression \"" + clause + "\" as INTEGER. Error: " + e.getMessage();
-//						return createAndStoreErrorRow(errorMessage);
-//					}
-//				}
-//			}
+			//			if (value != null) {
+			//				if (columnDataType.equals(HfqlDataTypeEnum.INTEGER)) {
+			//					try {
+			//						values.add(Integer.parseInt(value));
+			//						continue;
+			//					} catch (NumberFormatException e) {
+			//						String errorMessage = "Failed to evaluate result of FHIRPath expression \"" + clause + "\" as
+			// INTEGER. Error: " + e.getMessage();
+			//						return createAndStoreErrorRow(errorMessage);
+			//					}
+			//				}
+			//			}
 
 			values.add(value);
 		}
@@ -211,6 +225,4 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	public HfqlStatement getStatement() {
 		return myStatement;
 	}
-
-
 }

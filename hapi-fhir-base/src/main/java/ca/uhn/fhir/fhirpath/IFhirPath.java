@@ -75,8 +75,8 @@ public interface IFhirPath {
 	 * @param theReturnType       The type to return (in order to avoid casting)
 	 * @since 6.8.0
 	 */
-	<T extends IBase> Optional<T> evaluateFirst(IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType);
-
+	<T extends IBase> Optional<T> evaluateFirst(
+			IBase theInput, IParsedExpression theParsedExpression, Class<T> theReturnType);
 
 	/**
 	 * Parses the expression and throws an exception if it can not parse correctly.
@@ -97,9 +97,7 @@ public interface IFhirPath {
 	 */
 	void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext);
 
-
 	interface IParsedExpression {
 		// no methods
 	}
-
 }

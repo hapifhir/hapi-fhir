@@ -34,11 +34,11 @@ import org.apache.commons.csv.CSVPrinter;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClient.CSV_FORMAT;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8_CTSUFFIX;
@@ -59,18 +59,27 @@ public class HfqlRestProvider {
 
 	@Operation(name = HfqlConstants.HFQL_EXECUTE, manualResponse = true)
 	public void executeFql(
-		@OperationParam(name = HfqlConstants.PARAM_ACTION, typeName = "code", min = 0, max = 1) IPrimitiveType<String> theAction,
-		@OperationParam(name = HfqlConstants.PARAM_QUERY, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theQuery,
-		@OperationParam(name = HfqlConstants.PARAM_STATEMENT, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theStatement,
-		@OperationParam(name = HfqlConstants.PARAM_CONTINUATION, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theContinuation,
-		@OperationParam(name = HfqlConstants.PARAM_LIMIT, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theLimit,
-		@OperationParam(name = HfqlConstants.PARAM_OFFSET, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theOffset,
-		@OperationParam(name = HfqlConstants.PARAM_FETCH_SIZE, typeName = "integer", min = 0, max = 1) IPrimitiveType<Integer> theFetchSize,
-		@OperationParam(name = HfqlConstants.PARAM_INTROSPECT_TABLE_NAME, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theIntrospectTableName,
-		@OperationParam(name = HfqlConstants.PARAM_INTROSPECT_COLUMN_NAME, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theIntrospectColumnName,
-		RequestDetails theRequestDetails,
-		HttpServletResponse theServletResponse
-	) throws IOException {
+			@OperationParam(name = HfqlConstants.PARAM_ACTION, typeName = "code", min = 0, max = 1)
+					IPrimitiveType<String> theAction,
+			@OperationParam(name = HfqlConstants.PARAM_QUERY, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theQuery,
+			@OperationParam(name = HfqlConstants.PARAM_STATEMENT, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theStatement,
+			@OperationParam(name = HfqlConstants.PARAM_CONTINUATION, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theContinuation,
+			@OperationParam(name = HfqlConstants.PARAM_LIMIT, typeName = "integer", min = 0, max = 1)
+					IPrimitiveType<Integer> theLimit,
+			@OperationParam(name = HfqlConstants.PARAM_OFFSET, typeName = "integer", min = 0, max = 1)
+					IPrimitiveType<Integer> theOffset,
+			@OperationParam(name = HfqlConstants.PARAM_FETCH_SIZE, typeName = "integer", min = 0, max = 1)
+					IPrimitiveType<Integer> theFetchSize,
+			@OperationParam(name = HfqlConstants.PARAM_INTROSPECT_TABLE_NAME, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theIntrospectTableName,
+			@OperationParam(name = HfqlConstants.PARAM_INTROSPECT_COLUMN_NAME, typeName = "string", min = 0, max = 1)
+					IPrimitiveType<String> theIntrospectColumnName,
+			RequestDetails theRequestDetails,
+			HttpServletResponse theServletResponse)
+			throws IOException {
 		String action = toStringValue(theAction);
 
 		int fetchSize = parseFetchSize(theFetchSize);
@@ -84,14 +93,16 @@ public class HfqlRestProvider {
 			}
 			case HfqlConstants.PARAM_ACTION_SEARCH_CONTINUATION: {
 				String continuation = toStringValue(theContinuation);
-				ValidateUtil.isTrueOrThrowInvalidRequest(theOffset != null && theOffset.hasValue(), "No offset supplied");
+				ValidateUtil.isTrueOrThrowInvalidRequest(
+						theOffset != null && theOffset.hasValue(), "No offset supplied");
 				int startingOffset = theOffset.getValue();
 
 				String statement = DatatypeUtil.toStringValue(theStatement);
 				ValidateUtil.isNotBlankOrThrowIllegalArgument(statement, "No statement provided");
 				HfqlStatement statementJson = JsonUtil.deserialize(statement, HfqlStatement.class);
 
-				IHfqlExecutionResult outcome = myFqlExecutor.executeContinuation(statementJson, continuation, startingOffset, limit, theRequestDetails);
+				IHfqlExecutionResult outcome = myFqlExecutor.executeContinuation(
+						statementJson, continuation, startingOffset, limit, theRequestDetails);
 				streamResponseCsv(theServletResponse, fetchSize, outcome, false, outcome.getStatement());
 				break;
 			}
@@ -108,7 +119,6 @@ public class HfqlRestProvider {
 				break;
 			}
 		}
-
 	}
 
 	@Nullable
@@ -128,11 +138,21 @@ public class HfqlRestProvider {
 		if (fetchSize == 0) {
 			fetchSize = HfqlConstants.MAX_FETCH_SIZE;
 		}
-		ValidateUtil.isTrueOrThrowInvalidRequest(fetchSize >= HfqlConstants.MIN_FETCH_SIZE && fetchSize <= HfqlConstants.MAX_FETCH_SIZE, "Fetch size must be between %d and %d", HfqlConstants.MIN_FETCH_SIZE, HfqlConstants.MAX_FETCH_SIZE);
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				fetchSize >= HfqlConstants.MIN_FETCH_SIZE && fetchSize <= HfqlConstants.MAX_FETCH_SIZE,
+				"Fetch size must be between %d and %d",
+				HfqlConstants.MIN_FETCH_SIZE,
+				HfqlConstants.MAX_FETCH_SIZE);
 		return fetchSize;
 	}
 
-	private static void streamResponseCsv(HttpServletResponse theServletResponse, int theFetchSize, IHfqlExecutionResult theResult, boolean theInitialPage, HfqlStatement theStatement) throws IOException {
+	private static void streamResponseCsv(
+			HttpServletResponse theServletResponse,
+			int theFetchSize,
+			IHfqlExecutionResult theResult,
+			boolean theInitialPage,
+			HfqlStatement theStatement)
+			throws IOException {
 		theServletResponse.setStatus(200);
 		theServletResponse.setContentType(CT_TEXT_CSV + CHARSET_UTF8_CTSUFFIX);
 		try (ServletOutputStream outputStream = theServletResponse.getOutputStream()) {
@@ -178,6 +198,4 @@ public class HfqlRestProvider {
 			csvWriter.close(true);
 		}
 	}
-
-
 }

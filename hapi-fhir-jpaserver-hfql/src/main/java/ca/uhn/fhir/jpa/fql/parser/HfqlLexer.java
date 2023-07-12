@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.fql.parser;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 import static java.lang.Character.isWhitespace;
 
@@ -191,10 +191,10 @@ class HfqlLexer {
 				myBuffer.append(theNextChar);
 				return;
 			}
-
 		}
 
-		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + theNextChar + "' (" + (int) theNextChar + ")");
+		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + theNextChar
+				+ "' (" + (int) theNextChar + ")");
 	}
 
 	private String describePosition() {
@@ -237,11 +237,8 @@ class HfqlLexer {
 	}
 
 	private enum LexerState {
-
 		INITIAL,
-		IN_QUOTED_STRING, IN_TOKEN
-
+		IN_QUOTED_STRING,
+		IN_TOKEN
 	}
-
-
 }

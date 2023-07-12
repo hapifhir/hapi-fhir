@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	private final String mySearchId;
@@ -47,7 +47,11 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	 *
 	 * @param theSearchId The search ID associated with this result
 	 */
-	public StaticHfqlExecutionResult(@Nullable String theSearchId, List<String> theColumnNames, List<HfqlDataTypeEnum> theDataTypes, List<List<Object>> theRows) {
+	public StaticHfqlExecutionResult(
+			@Nullable String theSearchId,
+			List<String> theColumnNames,
+			List<HfqlDataTypeEnum> theDataTypes,
+			List<List<Object>> theRows) {
 		mySearchId = theSearchId;
 		myColumnNames = theColumnNames;
 		myDataTypes = theDataTypes;
@@ -101,7 +105,8 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	}
 
 	public static IHfqlExecutionResult withError(String theErrorMessage) {
-		StaticHfqlExecutionResult retVal = new StaticHfqlExecutionResult(null, List.of("Error"), List.of(HfqlDataTypeEnum.STRING), List.of(List.of(theErrorMessage)));
+		StaticHfqlExecutionResult retVal = new StaticHfqlExecutionResult(
+				null, List.of("Error"), List.of(HfqlDataTypeEnum.STRING), List.of(List.of(theErrorMessage)));
 		retVal.myNextRowOffset = IHfqlExecutionResult.ROW_OFFSET_ERROR;
 		return retVal;
 	}

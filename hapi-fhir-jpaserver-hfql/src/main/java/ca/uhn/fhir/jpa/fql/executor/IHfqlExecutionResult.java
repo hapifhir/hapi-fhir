@@ -63,11 +63,8 @@ public interface IHfqlExecutionResult {
 			return myRowValues;
 		}
 
-
 		public Row toRowOffset(int theRowOffset) {
 			return new Row(theRowOffset, myRowValues);
 		}
 	}
-
-
 }

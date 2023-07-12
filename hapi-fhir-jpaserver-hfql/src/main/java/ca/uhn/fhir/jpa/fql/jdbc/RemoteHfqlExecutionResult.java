@@ -71,7 +71,13 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 	private boolean myExhausted;
 	private HfqlStatement myStatement;
 
-	public RemoteHfqlExecutionResult(Parameters theRequestParameters, String theBaseUrl, CloseableHttpClient theClient, int theFetchSize, boolean theSupportsContinuations) throws SQLException {
+	public RemoteHfqlExecutionResult(
+			Parameters theRequestParameters,
+			String theBaseUrl,
+			CloseableHttpClient theClient,
+			int theFetchSize,
+			boolean theSupportsContinuations)
+			throws SQLException {
 		myBaseUrl = theBaseUrl;
 		myClient = theClient;
 		myFetchSize = theFetchSize;
@@ -92,14 +98,21 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 	}
 
 	private void validateResponse() {
-		Validate.isTrue(myRequest.getStatusLine().getStatusCode() == 200, "Server returned wrong status: %d", myRequest.getStatusLine().getStatusCode());
+		Validate.isTrue(
+				myRequest.getStatusLine().getStatusCode() == 200,
+				"Server returned wrong status: %d",
+				myRequest.getStatusLine().getStatusCode());
 	}
 
 	private void readHeaderRows(boolean theFirstPage) {
 		// Protocol version
 		CSVRecord protocolVersionRow = myIterator.next();
 		String protocolVersion = protocolVersionRow.get(0);
-		ValidateUtil.isTrueOrThrowInvalidRequest(PROTOCOL_VERSION.equals(protocolVersion), "Wrong protocol version, expected %s but got %s", PROTOCOL_VERSION, protocolVersion);
+		ValidateUtil.isTrueOrThrowInvalidRequest(
+				PROTOCOL_VERSION.equals(protocolVersion),
+				"Wrong protocol version, expected %s but got %s",
+				PROTOCOL_VERSION,
+				protocolVersion);
 
 		// Search ID, Limit, Parsed Statement
 		CSVRecord searchIdRow = myIterator.next();
@@ -140,7 +153,6 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 				myColumnTypes.add(HfqlDataTypeEnum.valueOf(next));
 			}
 		}
-
 	}
 
 	@Override
