@@ -18,8 +18,10 @@ public class HapiNumericSimilarity extends HapiStringSimilarity {
 	public double similarity(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact) {
 
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact));
-			String rightString = encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact));
+			String leftString =
+					encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExact));
+			String rightString =
+					encoder.encode(StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExact));
 
 			return myStringSimilarity.similarity(leftString, rightString);
 		}
