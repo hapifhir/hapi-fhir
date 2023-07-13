@@ -24,7 +24,9 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class BaseCandidateFinder {
 	@Autowired
@@ -34,11 +36,21 @@ public abstract class BaseCandidateFinder {
 
 	CandidateList findCandidates(IAnyResource theTarget) {
 		CandidateList candidateList = new CandidateList(getStrategy());
-		candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
+		candidateList.addAll(findUniqueMatchGoldenResourceCandidates(theTarget));
 		return candidateList;
 	}
 
+	/**
+	 * Deprecated:
+	 * prefer overriding findUniqueMatchGoldenResourceCandidates and implementing that.
+	 */
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget);
+
+	protected Set<MatchedGoldenResourceCandidate> findUniqueMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		// implementing to not break current api
+		return new HashSet<>(findMatchGoldenResourceCandidates(theTarget));
+	}
 
 	protected abstract CandidateStrategyEnum getStrategy();
 }

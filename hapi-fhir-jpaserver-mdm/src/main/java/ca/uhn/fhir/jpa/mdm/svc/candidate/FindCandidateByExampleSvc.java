@@ -57,6 +57,11 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
+	@Deprecated
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		return new ArrayList<>(findUniqueMatchGoldenResourceCandidates(theTarget));
+	}
+
 	/**
 	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources. Runs MDM logic
 	 * over the existing target resources, then finds their entries in the MdmLink table, and returns all the matches
@@ -66,8 +71,8 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
-		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+	protected Set<MatchedGoldenResourceCandidate> findUniqueMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		Set<MatchedGoldenResourceCandidate> retval = new HashSet<>();
 
 		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
@@ -81,9 +86,6 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 		List<String> skippedLogMessages = new ArrayList<>();
 		List<String> matchedLogMessages = new ArrayList<>();
 
-		// we'll track the added ids so we don't add the same resources twice
-		// note, all these resources are the same type, so we only need the Long value
-		Set<Long> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
@@ -106,10 +108,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResourcePersistenceId().toString()));
 			}
 
-			//only add if it's not already in the list
-			if (currentIds.add((Long)candidate.getCandidateGoldenResourcePid().getId())) {
-				retval.add(candidate);
-			}
+			retval.add(candidate);
 		}
 
 		if (ourLog.isDebugEnabled()) {

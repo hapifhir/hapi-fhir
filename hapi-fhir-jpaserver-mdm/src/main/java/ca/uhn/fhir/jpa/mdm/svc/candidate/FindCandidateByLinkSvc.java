@@ -28,12 +28,20 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+
+	@Deprecated
+	@Override
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		return new ArrayList<>(findUniqueMatchGoldenResourceCandidates(theTarget));
+	}
 
 	/**
 	 * Attempt to find a currently matching Golden Resource, based on the presence of an {@link IMdmLink} entity.
@@ -42,8 +50,8 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
-		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+	protected Set<MatchedGoldenResourceCandidate> findUniqueMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		Set<MatchedGoldenResourceCandidate> retval = new HashSet<>();
 
 		IResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
 		if (targetPid != null) {

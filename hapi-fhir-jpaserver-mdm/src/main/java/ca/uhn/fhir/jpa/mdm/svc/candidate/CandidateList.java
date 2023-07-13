@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -40,7 +41,7 @@ public class CandidateList {
 		return myList.isEmpty();
 	}
 
-	public void addAll(List<MatchedGoldenResourceCandidate> theList) { myList.addAll(theList); }
+	public void addAll(Collection<MatchedGoldenResourceCandidate> theList) { myList.addAll(theList); }
 
 	public MatchedGoldenResourceCandidate getOnlyMatch() {
 		assert myList.size() == 1;

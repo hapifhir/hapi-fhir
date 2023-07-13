@@ -35,8 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class FindCandidateByEidSvc extends BaseCandidateFinder {
@@ -52,9 +54,15 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
+	@Deprecated
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
-		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		return new ArrayList<>(findUniqueMatchGoldenResourceCandidates(theTarget));
+	}
+
+	@Override
+	protected Set<MatchedGoldenResourceCandidate> findUniqueMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
+		Set<MatchedGoldenResourceCandidate> retval = new HashSet<>();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
 		if (!eidFromResource.isEmpty()) {
