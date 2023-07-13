@@ -31,17 +31,21 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.batch2.util.Batch2Constants.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters> implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
+public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
+		implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink)
+			throws JobExecutionFailedException {
 		PT params = theStepExecutionDetails.getParameters();
 
 		Date start = BATCH_START_DATE;
@@ -66,5 +70,4 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
 
 		return RunOutcome.SUCCESS;
 	}
-
 }

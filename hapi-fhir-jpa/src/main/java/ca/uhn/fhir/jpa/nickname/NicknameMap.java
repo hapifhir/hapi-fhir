@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.nickname;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -28,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();

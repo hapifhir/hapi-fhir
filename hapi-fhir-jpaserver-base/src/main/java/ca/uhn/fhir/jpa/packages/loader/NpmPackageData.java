@@ -56,13 +56,12 @@ public class NpmPackageData {
 	private final InputStream myInputStream;
 
 	public NpmPackageData(
-		String thePackageId,
-		String thePackageVersionId,
-		String theSourceDesc,
-		byte[] theBytes,
-		NpmPackage thePackage,
-		InputStream theStream
-	) {
+			String thePackageId,
+			String thePackageVersionId,
+			String theSourceDesc,
+			byte[] theBytes,
+			NpmPackage thePackage,
+			InputStream theStream) {
 		myPackageId = thePackageId;
 		myPackageVersionId = thePackageVersionId;
 		mySourceDesc = theSourceDesc;
@@ -80,7 +79,7 @@ public class NpmPackageData {
 	}
 
 	public InputStream getInputStream() {
-		 return myInputStream;
+		return myInputStream;
 	}
 
 	public String getPackageId() {

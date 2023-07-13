@@ -19,28 +19,32 @@
  */
 package ca.uhn.fhir.jpa.binary.api;
 
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
+import javax.annotation.Nonnull;
 
 public class StoredDetails implements IModelJson {
 
 	@JsonProperty("blobId")
 	private String myBlobId;
+
 	@JsonProperty("bytes")
 	private long myBytes;
+
 	@JsonProperty("contentType")
 	private String myContentType;
+
 	@JsonProperty("hash")
 	private String myHash;
+
 	@JsonProperty("published")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
@@ -57,7 +61,12 @@ public class StoredDetails implements IModelJson {
 	/**
 	 * Constructor
 	 */
-	public StoredDetails(@Nonnull String theBlobId, long theBytes, @Nonnull String theContentType, HashingInputStream theIs, Date thePublished) {
+	public StoredDetails(
+			@Nonnull String theBlobId,
+			long theBytes,
+			@Nonnull String theContentType,
+			HashingInputStream theIs,
+			Date thePublished) {
 		myBlobId = theBlobId;
 		myBytes = theBytes;
 		myContentType = theContentType;
@@ -68,12 +77,12 @@ public class StoredDetails implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("blobId", myBlobId)
-			.append("bytes", myBytes)
-			.append("contentType", myContentType)
-			.append("hash", myHash)
-			.append("published", myPublished)
-			.toString();
+				.append("blobId", myBlobId)
+				.append("bytes", myBytes)
+				.append("contentType", myContentType)
+				.append("hash", myHash)
+				.append("published", myPublished)
+				.toString();
 	}
 
 	public String getHash() {
@@ -122,5 +131,4 @@ public class StoredDetails implements IModelJson {
 		myBytes = theBytes;
 		return this;
 	}
-
 }

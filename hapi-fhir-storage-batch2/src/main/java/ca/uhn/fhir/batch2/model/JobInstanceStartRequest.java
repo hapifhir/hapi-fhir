@@ -20,7 +20,6 @@
 package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -99,17 +98,15 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myUseCache;
 	}
 
-
 	public void setUseCache(boolean theUseCache) {
 		myUseCache = theUseCache;
 	}
 
 	@Override
 	public String toString() {
-		return "JobInstanceStartRequest{" +
-			"myJobDefinitionId='" + myJobDefinitionId + '\'' +
-			", myParameters='" + myParameters + '\'' +
-			", myUseCache=" + myUseCache +
-			'}';
+		return "JobInstanceStartRequest{" + "myJobDefinitionId='"
+				+ myJobDefinitionId + '\'' + ", myParameters='"
+				+ myParameters + '\'' + ", myUseCache="
+				+ myUseCache + '}';
 	}
 }

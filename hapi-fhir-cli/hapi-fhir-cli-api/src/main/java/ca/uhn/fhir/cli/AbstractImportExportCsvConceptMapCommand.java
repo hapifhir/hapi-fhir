@@ -48,27 +48,28 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class AbstractImportExportCsvConceptMapCommand extends BaseRequestGeneratingCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractImportExportCsvConceptMapCommand.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(AbstractImportExportCsvConceptMapCommand.class);
 
 	protected static final String CONCEPTMAP_URL_PARAM = "u";
 	protected static final String CONCEPTMAP_URL_PARAM_LONGOPT = "url";
 	protected static final String CONCEPTMAP_URL_PARAM_NAME = "url";
-	protected static final String CONCEPTMAP_URL_PARAM_DESC = "The URL of the ConceptMap resource to be imported/exported (i.e. ConceptMap.url).";
+	protected static final String CONCEPTMAP_URL_PARAM_DESC =
+			"The URL of the ConceptMap resource to be imported/exported (i.e. ConceptMap.url).";
 	protected static final String FILE_PARAM = "f";
 	protected static final String FILE_PARAM_LONGOPT = "filename";
 	protected static final String FILE_PARAM_NAME = "filename";
-	protected static final String FILE_PARAM_DESC = "The path and filename of the CSV file to be imported/exported (e.g. ./input.csv, ./output.csv, etc.).";
+	protected static final String FILE_PARAM_DESC =
+			"The path and filename of the CSV file to be imported/exported (e.g. ./input.csv, ./output.csv, etc.).";
 
 	protected IGenericClient client;
 	protected String conceptMapUrl;
 	protected FhirVersionEnum fhirVersion;
 	protected String file;
 
-
 	@Override
 	protected Collection<Object> getFilterOutVersions() {
-		return Sets.newHashSet(FhirVersionEnum.DSTU2_1,
-			FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2);
+		return Sets.newHashSet(FhirVersionEnum.DSTU2_1, FhirVersionEnum.DSTU2_HL7ORG, FhirVersionEnum.DSTU2);
 	}
 
 	protected BufferedReader getBufferedReader() throws IOException {
@@ -81,13 +82,13 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 
 	protected BOMInputStream getBOMInputStream() throws IOException {
 		return new BOMInputStream(
-			getInputStream(),
-			false,
-			ByteOrderMark.UTF_8,
-			ByteOrderMark.UTF_16BE,
-			ByteOrderMark.UTF_16LE,
-			ByteOrderMark.UTF_32BE,
-			ByteOrderMark.UTF_32LE);
+				getInputStream(),
+				false,
+				ByteOrderMark.UTF_8,
+				ByteOrderMark.UTF_16BE,
+				ByteOrderMark.UTF_16LE,
+				ByteOrderMark.UTF_32BE,
+				ByteOrderMark.UTF_32LE);
 	}
 
 	protected InputStream getInputStream() throws IOException {
@@ -103,7 +104,8 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		if (isBlank(targetServer)) {
 			throw new ParseException(Msg.code(1583) + "No target server (-" + BASE_URL_PARAM + ") specified.");
 		} else if (!targetServer.startsWith("http") && !targetServer.startsWith("file")) {
-			throw new ParseException(Msg.code(1584) + "Invalid target server specified, must begin with 'http' or 'file'.");
+			throw new ParseException(
+					Msg.code(1584) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
 		conceptMapUrl = theCommandLine.getOptionValue(CONCEPTMAP_URL_PARAM);
@@ -125,9 +127,9 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 
 		client = super.newClient(theCommandLine);
 		fhirVersion = ctx.getVersion().getVersion();
-		if (fhirVersion != FhirVersionEnum.DSTU3
-			&& fhirVersion != FhirVersionEnum.R4) {
-			throw new ParseException(Msg.code(1587) + "This command does not support FHIR version " + fhirVersion + ".");
+		if (fhirVersion != FhirVersionEnum.DSTU3 && fhirVersion != FhirVersionEnum.R4) {
+			throw new ParseException(
+					Msg.code(1587) + "This command does not support FHIR version " + fhirVersion + ".");
 		}
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
@@ -160,10 +162,10 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		private String target;
 		private String targetVersion;
 
-		public TemporaryConceptMapGroup() {
-		}
+		public TemporaryConceptMapGroup() {}
 
-		public TemporaryConceptMapGroup(String theSource, String theSourceVersion, String theTarget, String theTargetVersion) {
+		public TemporaryConceptMapGroup(
+				String theSource, String theSourceVersion, String theTarget, String theTargetVersion) {
 			this.source = theSource;
 			this.sourceVersion = theSourceVersion;
 			this.target = theTarget;
@@ -235,21 +237,21 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 			TemporaryConceptMapGroup that = (TemporaryConceptMapGroup) o;
 
 			return new EqualsBuilder()
-				.append(getSource(), that.getSource())
-				.append(getSourceVersion(), that.getSourceVersion())
-				.append(getTarget(), that.getTarget())
-				.append(getTargetVersion(), that.getTargetVersion())
-				.isEquals();
+					.append(getSource(), that.getSource())
+					.append(getSourceVersion(), that.getSourceVersion())
+					.append(getTarget(), that.getTarget())
+					.append(getTargetVersion(), that.getTargetVersion())
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(getSource())
-				.append(getSourceVersion())
-				.append(getTarget())
-				.append(getTargetVersion())
-				.toHashCode();
+					.append(getSource())
+					.append(getSourceVersion())
+					.append(getTarget())
+					.append(getTargetVersion())
+					.toHashCode();
 		}
 	}
 
@@ -257,8 +259,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		private String code;
 		private String display;
 
-		public TemporaryConceptMapGroupElement() {
-		}
+		public TemporaryConceptMapGroupElement() {}
 
 		public TemporaryConceptMapGroupElement(String theCode, String theDisplay) {
 			this.code = theCode;
@@ -304,17 +305,17 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 			TemporaryConceptMapGroupElement that = (TemporaryConceptMapGroupElement) o;
 
 			return new EqualsBuilder()
-				.append(getCode(), that.getCode())
-				.append(getDisplay(), that.getDisplay())
-				.isEquals();
+					.append(getCode(), that.getCode())
+					.append(getDisplay(), that.getDisplay())
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(getCode())
-				.append(getDisplay())
-				.toHashCode();
+					.append(getCode())
+					.append(getDisplay())
+					.toHashCode();
 		}
 	}
 
@@ -324,10 +325,10 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		private String equivalence;
 		private String comment;
 
-		public TemporaryConceptMapGroupElementTarget() {
-		}
+		public TemporaryConceptMapGroupElementTarget() {}
 
-		public TemporaryConceptMapGroupElementTarget(String theCode, String theDisplay, String theEquivalence, String theComment) {
+		public TemporaryConceptMapGroupElementTarget(
+				String theCode, String theDisplay, String theEquivalence, String theComment) {
 			this.code = theCode;
 			this.display = theDisplay;
 			this.equivalence = theEquivalence;
@@ -399,21 +400,21 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 			TemporaryConceptMapGroupElementTarget that = (TemporaryConceptMapGroupElementTarget) o;
 
 			return new EqualsBuilder()
-				.append(getCode(), that.getCode())
-				.append(getDisplay(), that.getDisplay())
-				.append(getEquivalence(), that.getEquivalence())
-				.append(getComment(), that.getComment())
-				.isEquals();
+					.append(getCode(), that.getCode())
+					.append(getDisplay(), that.getDisplay())
+					.append(getEquivalence(), that.getEquivalence())
+					.append(getComment(), that.getComment())
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(getCode())
-				.append(getDisplay())
-				.append(getEquivalence())
-				.append(getComment())
-				.toHashCode();
+					.append(getCode())
+					.append(getDisplay())
+					.append(getEquivalence())
+					.append(getComment())
+					.toHashCode();
 		}
 	}
 }

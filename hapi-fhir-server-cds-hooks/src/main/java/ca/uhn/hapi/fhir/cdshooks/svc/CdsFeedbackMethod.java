@@ -1,6 +1,6 @@
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,3 +17,12 @@
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.cdshooks.svc;
+
+import java.lang.reflect.Method;
+
+public class CdsFeedbackMethod extends BaseCdsMethod {
+	public CdsFeedbackMethod(Object theServiceBean, Method theMethod) {
+		super(theServiceBean, theMethod);
+	}
+}

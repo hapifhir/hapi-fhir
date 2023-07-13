@@ -28,11 +28,13 @@ public interface IResourceModifiedConsumer {
 	/**
 	 * This is an internal API - Use with caution!
 	 */
-	void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest);
+	void submitResourceModified(
+			IBaseResource theNewResource,
+			ResourceModifiedMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest);
 
 	/**
 	 * This is an internal API - Use with caution!
 	 */
 	void submitResourceModified(ResourceModifiedMessage theMsg);
-
 }

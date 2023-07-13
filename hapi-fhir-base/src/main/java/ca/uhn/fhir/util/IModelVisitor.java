@@ -19,13 +19,12 @@
  */
 package ca.uhn.fhir.util;
 
-import java.util.List;
-
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import java.util.List;
 
 /**
  * @see FhirTerser#visit(IBaseResource, IModelVisitor)
@@ -42,6 +41,10 @@ public interface IModelVisitor {
 	 *           May be null if this is a root element
 	 * @param theDefinition
 	 */
-	void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
-
+	void acceptElement(
+			IBaseResource theResource,
+			IBase theElement,
+			List<String> thePathToElement,
+			BaseRuntimeChildDefinition theChildDefinition,
+			BaseRuntimeElementDefinition<?> theDefinition);
 }

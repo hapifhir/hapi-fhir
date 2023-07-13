@@ -27,11 +27,13 @@ public class SqlCaptureInterceptor {
 				sql = UrlUtil.sanitizeUrlPart(sql);
 
 				theRequestDetails.getResponse().addHeader("X-Executed-SQL", sql);
-				theRequestDetails.getResponse().addHeader("X-Executed-SQL-Outcome", "Returned " + nextQuery.getSize() + " in " + StopWatch.formatMillis(nextQuery.getElapsedTime()));
-
+				theRequestDetails
+						.getResponse()
+						.addHeader(
+								"X-Executed-SQL-Outcome",
+								"Returned " + nextQuery.getSize() + " in "
+										+ StopWatch.formatMillis(nextQuery.getElapsedTime()));
 			}
 		}
-
 	}
-
 }

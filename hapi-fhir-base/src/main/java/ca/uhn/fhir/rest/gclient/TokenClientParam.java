@@ -19,14 +19,13 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import java.util.*;
-
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * Token parameter type for use in fluent client interfaces
@@ -65,7 +64,10 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 
 			@Override
 			public ICriterion<TokenClientParam> identifier(BaseIdentifierDt theIdentifier) {
-				return new TokenCriterion(getParamName(), theIdentifier.getSystemElement().getValueAsString(), theIdentifier.getValueElement().getValue());
+				return new TokenCriterion(
+						getParamName(),
+						theIdentifier.getSystemElement().getValueAsString(),
+						theIdentifier.getValueElement().getValue());
 			}
 
 			@Override
@@ -130,7 +132,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 	public interface IMatches {
 		/**
 		 * Creates a search criterion that matches against the given code, with no code system specified
-		 * 
+		 *
 		 * @param theIdentifier
 		 *           The identifier
 		 * @return A criterion
@@ -142,7 +144,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		 * codes (this will be used to form a comma-separated OR query) with any system value.
 		 * The URL form of this method will create a parameter like
 		 * <code>parameter=code1,code2</code>
-		 * 
+		 *
 		 * @param theCodes
 		 *           The codes
 		 */
@@ -153,7 +155,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		 * codes (this will be used to form a comma-separated OR query) with any system value.
 		 * The URL form of this method will create a parameter like
 		 * <code>parameter=code1,code2</code>
-		 * 
+		 *
 		 * @param theCodes
 		 *           The codes
 		 */
@@ -167,7 +169,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		 * The URL form of this method will create a parameter like
 		 * <code>parameter=system1|code1,system2|code2</code>
 		 * </p>
-		 * 
+		 *
 		 * @param theCodings
 		 *           The codings
 		 */
@@ -175,7 +177,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given identifier (system and code if both are present, or whatever is present)
-		 * 
+		 *
 		 * @param theIdentifier
 		 *           The identifier
 		 * @return A criterion
@@ -184,7 +186,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given identifier, with no system specified
-		 * 
+		 *
 		 * @param theIdentifier
 		 *           The identifier
 		 * @return A criterion
@@ -194,7 +196,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		/**
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
 		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
-		 * 
+		 *
 		 * @param theIdentifiers
 		 *           The identifier
 		 * @return A criterion
@@ -204,7 +206,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		/**
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
 		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
-		 * 
+		 *
 		 * @param theIdentifiers
 		 *           The identifier
 		 * @return A criterion
@@ -213,7 +215,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given code system and code
-		 * 
+		 *
 		 * @param theSystem
 		 *           The code system (should be a URI)
 		 * @param theCode
@@ -224,7 +226,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 
 		/**
 		 * Creates a search criterion that matches against the given system and identifier
-		 * 
+		 *
 		 * @param theSystem
 		 *           The code system (should be a URI)
 		 * @param theIdentifier
@@ -236,7 +238,7 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		/**
 		 * Creates a search criterion that matches a given system with a collection of possible
 		 * values (this will be used to form a comma-separated OR query)
-		 * 
+		 *
 		 * @param theSystem
 		 *           The system, which will be used with each value
 		 * @param theValues
@@ -247,14 +249,12 @@ public class TokenClientParam extends BaseClientParam implements IParam {
 		/**
 		 * Creates a search criterion that matches a given system with a collection of possible
 		 * values (this will be used to form a comma-separated OR query)
-		 * 
+		 *
 		 * @param theSystem
 		 *           The system, which will be used with each value
 		 * @param theValues
 		 *           The values
 		 */
 		ICriterion<?> systemAndValues(String theSystem, String... theValues);
-
 	}
-
 }

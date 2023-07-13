@@ -21,19 +21,17 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
-
 public class DateAndListParam extends BaseAndListParam<DateOrListParam> {
 
 	@Override
 	DateOrListParam newInstance() {
 		return new DateOrListParam();
 	}
-	
+
 	@CoverageIgnore
 	@Override
 	public DateAndListParam addAnd(DateOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
-
 }

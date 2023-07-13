@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,3 +17,17 @@
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.cdshooks.api.json;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public enum CdsServiceIndicatorEnum {
+	@JsonProperty("info")
+	INFO,
+
+	@JsonProperty("warning")
+	WARNING,
+
+	@JsonProperty("critical")
+	CRITICAL
+}

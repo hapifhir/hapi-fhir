@@ -74,5 +74,4 @@ public interface IJobDataSink<OT extends IModelJson> {
 	 * @param theWarningProcessor The processor for the warning.
 	 */
 	void setWarningProcessor(IWarningProcessor theWarningProcessor);
-
 }

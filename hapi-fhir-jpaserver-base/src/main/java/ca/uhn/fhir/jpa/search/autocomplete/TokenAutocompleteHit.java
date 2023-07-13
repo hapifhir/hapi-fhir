@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 class TokenAutocompleteHit {
 	@Nonnull
 	final String mySystemCode;
+
 	final String myDisplayText;
 
 	TokenAutocompleteHit(@Nonnull String theSystemCode, String theDisplayText) {
@@ -46,8 +47,8 @@ class TokenAutocompleteHit {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("mySystemCode", mySystemCode)
-			.append("myDisplayText", myDisplayText)
-			.toString();
+				.append("mySystemCode", mySystemCode)
+				.append("myDisplayText", myDisplayText)
+				.toString();
 	}
 }

@@ -35,90 +35,89 @@ import java.util.List;
 
 public class ExtensionsDstu2 {
 
-@SuppressWarnings("unused")
-public static void main(String[] args) throws DataFormatException, IOException {
+	@SuppressWarnings("unused")
+	public static void main(String[] args) throws DataFormatException, IOException {
 
-   {   
-   Questionnaire q= new Questionnaire();
-   Questionnaire.GroupQuestion item = q.getGroup().addQuestion();
-   item.setText("Hello");
-   
-   ExtensionDt extension = new ExtensionDt(false, "http://hl7.org/fhir/StructureDefinition/translation");
-   item.getTextElement().addUndeclaredExtension(extension);
-   
-   extension.addUndeclaredExtension(new ExtensionDt(false, "lang", new CodeDt("es")));
-   extension.addUndeclaredExtension(new ExtensionDt(false, "cont", new StringDt("hola")));
-   
-   System.out.println(FhirContext.forDstu2().newJsonParser().setPrettyPrint(true).encodeResourceToString(q));
-   }
+		{
+			Questionnaire q = new Questionnaire();
+			Questionnaire.GroupQuestion item = q.getGroup().addQuestion();
+			item.setText("Hello");
 
-   
-// START SNIPPET: resourceExtension
-// Create an example patient
-Patient patient = new Patient();
-patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
+			ExtensionDt extension = new ExtensionDt(false, "http://hl7.org/fhir/StructureDefinition/translation");
+			item.getTextElement().addUndeclaredExtension(extension);
 
-// Create an extension
-ExtensionDt ext = new ExtensionDt();
-ext.setModifier(false);
-ext.setUrl("http://example.com/extensions#someext");
-ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
+			extension.addUndeclaredExtension(new ExtensionDt(false, "lang", new CodeDt("es")));
+			extension.addUndeclaredExtension(new ExtensionDt(false, "cont", new StringDt("hola")));
 
-// Add the extension to the resource
-patient.addUndeclaredExtension(ext);
-//END SNIPPET: resourceExtension
+			System.out.println(
+					FhirContext.forDstu2().newJsonParser().setPrettyPrint(true).encodeResourceToString(q));
+		}
 
+		// START SNIPPET: resourceExtension
+		// Create an example patient
+		Patient patient = new Patient();
+		patient.addIdentifier()
+				.setUse(IdentifierUseEnum.OFFICIAL)
+				.setSystem("urn:example")
+				.setValue("7000135");
 
-//START SNIPPET: resourceStringExtension
-// Continuing the example from above, we will add a name to the patient, and then
-// add an extension to part of that name
-HumanNameDt name = patient.addName();
-name.addFamily().setValue("Shmoe");
+		// Create an extension
+		ExtensionDt ext = new ExtensionDt();
+		ext.setModifier(false);
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
 
-// Add a new "given name", which is of type StringDt 
-StringDt given = name.addGiven();
-given.setValue("Joe");
+		// Add the extension to the resource
+		patient.addUndeclaredExtension(ext);
+		// END SNIPPET: resourceExtension
 
-// Create an extension and add it to the StringDt
-ExtensionDt givenExt = new ExtensionDt(false, "http://examples.com#moreext", new StringDt("Hello"));
-given.addUndeclaredExtension(givenExt);
-//END SNIPPET: resourceStringExtension
+		// START SNIPPET: resourceStringExtension
+		// Continuing the example from above, we will add a name to the patient, and then
+		// add an extension to part of that name
+		HumanNameDt name = patient.addName();
+		name.addFamily().setValue("Shmoe");
 
-FhirContext ctx = FhirContext.forDstu2();
-String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-System.out.println(output);
+		// Add a new "given name", which is of type StringDt
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
 
+		// Create an extension and add it to the StringDt
+		ExtensionDt givenExt = new ExtensionDt(false, "http://examples.com#moreext", new StringDt("Hello"));
+		given.addUndeclaredExtension(givenExt);
+		// END SNIPPET: resourceStringExtension
 
-//START SNIPPET: parseExtension
-// Get all extensions (modifier or not) for a given URL
-List<ExtensionDt> resourceExts = patient.getUndeclaredExtensionsByUrl("http://fooextensions.com#exts");
+		FhirContext ctx = FhirContext.forDstu2();
+		String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		System.out.println(output);
 
-// Get all non-modifier extensions regardless of URL
-List<ExtensionDt> nonModExts = patient.getUndeclaredExtensions();
+		// START SNIPPET: parseExtension
+		// Get all extensions (modifier or not) for a given URL
+		List<ExtensionDt> resourceExts = patient.getUndeclaredExtensionsByUrl("http://fooextensions.com#exts");
 
-// Get all modifier extensions regardless of URL
-List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
-//END SNIPPET: parseExtension
+		// Get all non-modifier extensions regardless of URL
+		List<ExtensionDt> nonModExts = patient.getUndeclaredExtensions();
 
-}
+		// Get all modifier extensions regardless of URL
+		List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
+		// END SNIPPET: parseExtension
 
+	}
 
-public void foo() {
-//START SNIPPET: subExtension
-Patient patient = new Patient();
+	public void foo() {
+		// START SNIPPET: subExtension
+		Patient patient = new Patient();
 
-// Add an extension (initially with no contents) to the resource 
-ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
-patient.addUndeclaredExtension(parent);
+		// Add an extension (initially with no contents) to the resource
+		ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
 
-// Add two extensions as children to the parent extension
-ExtensionDt child1 = new ExtensionDt(false, "http://example.com#childOne", new StringDt("value1"));
-parent.addUndeclaredExtension(child1);
+		// Add two extensions as children to the parent extension
+		ExtensionDt child1 = new ExtensionDt(false, "http://example.com#childOne", new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
 
-ExtensionDt child2 = new ExtensionDt(false, "http://example.com#childTwo", new StringDt("value1"));
-parent.addUndeclaredExtension(child2);
-//END SNIPPET: subExtension
-	
-}
+		ExtensionDt child2 = new ExtensionDt(false, "http://example.com#childTwo", new StringDt("value1"));
+		parent.addUndeclaredExtension(child2);
+		// END SNIPPET: subExtension
 
+	}
 }

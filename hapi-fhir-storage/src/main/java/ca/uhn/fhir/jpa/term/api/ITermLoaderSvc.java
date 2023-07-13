@@ -62,7 +62,6 @@ public interface ITermLoaderSvc {
 		String getFilename();
 
 		InputStream getInputStream();
-
 	}
 
 	class ByteArrayFileDescriptor implements FileDescriptor {
@@ -85,5 +84,4 @@ public interface ITermLoaderSvc {
 			return new ByteArrayInputStream(myNextData);
 		}
 	}
-
 }

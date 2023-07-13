@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 
+import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.Callable;
 
 /**
  * This class is used to execute code within the context of a database transaction,
@@ -66,16 +66,19 @@ public interface IHapiTransactionService {
 	 * @since 6.6.0
 	 */
 	default IExecutionBuilder withSystemRequestOnPartition(RequestPartitionId theRequestPartitionId) {
-		return withSystemRequest()
-			.withRequestPartitionId(theRequestPartitionId);
+		return withSystemRequest().withRequestPartitionId(theRequestPartitionId);
 	}
 
 	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
 	@Deprecated
-	<T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
-
+	<T> T withRequest(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull Propagation thePropagation,
+			@Nonnull Isolation theIsolation,
+			@Nonnull ICallable<T> theCallback);
 
 	interface IExecutionBuilder {
 

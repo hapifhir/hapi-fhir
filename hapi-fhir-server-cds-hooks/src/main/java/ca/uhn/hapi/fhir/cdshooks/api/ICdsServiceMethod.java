@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,3 +17,12 @@
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.cdshooks.api;
+
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+
+public interface ICdsServiceMethod extends ICdsMethod {
+	CdsServiceJson getCdsServiceJson();
+
+	boolean isAllowAutoFhirClientPrefetch();
+}

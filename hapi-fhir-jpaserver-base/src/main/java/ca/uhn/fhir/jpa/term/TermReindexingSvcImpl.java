@@ -53,15 +53,21 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
+
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+
 	private ArrayListMultimap<Long, Long> myChildToParentPidCache;
+
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
+
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
+
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
+
 	@Autowired
 	private TermConceptDaoSvc myTermConceptDaoSvc;
 
@@ -83,14 +89,23 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 					Collection<Long> parentLinks = myConceptParentChildLinkDao.findAllWithChild(theConceptPid);
 					if (parentLinks.isEmpty()) {
 						myChildToParentPidCache.put(theConceptPid, -1L);
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", 0, theConceptPid, myChildToParentPidCache.size());
+						ourLog.info(
+								"Found {} parent concepts of concept {} (cache has {})",
+								0,
+								theConceptPid,
+								myChildToParentPidCache.size());
 						return;
 					} else {
 						for (Long next : parentLinks) {
 							myChildToParentPidCache.put(theConceptPid, next);
 						}
-						int parentCount = myChildToParentPidCache.get(theConceptPid).size();
-						ourLog.info("Found {} parent concepts of concept {} (cache has {})", parentCount, theConceptPid, myChildToParentPidCache.size());
+						int parentCount =
+								myChildToParentPidCache.get(theConceptPid).size();
+						ourLog.info(
+								"Found {} parent concepts of concept {} (cache has {})",
+								parentCount,
+								theConceptPid,
+								myChildToParentPidCache.size());
 					}
 				}
 
@@ -101,14 +116,13 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 					theParentsBuilder.append(nextParent);
 					createParentsString(theParentsBuilder, nextParent);
 				}
-
 			}
-
 
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				int maxResult = 1000;
-				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
+				Page<TermConcept> concepts =
+						myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
 				if (!concepts.hasContent()) {
 					if (myChildToParentPidCache != null) {
 						ourLog.info("Clearing parent concept cache");
@@ -138,10 +152,14 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 					count++;
 				}
 
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count));
+				ourLog.info(
+						"Indexed {} / {} concepts in {}ms - Avg {}ms / resource",
+						count,
+						concepts.getContent().size(),
+						stopwatch.getMillis(),
+						stopwatch.getMillisPerOperation(count));
 			}
 		});
-
 	}
 
 	@Override
@@ -172,6 +190,4 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
-
-
 }

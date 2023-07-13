@@ -52,10 +52,12 @@ public class MatchUrlService {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
-	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
+	public SearchParameterMap translateMatchUrl(
+			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = UrlUtil.translateMatchUrl(theMatchUrl);
 
@@ -78,7 +80,8 @@ public class MatchUrlService {
 				}
 			}
 
-			QualifiedParamList paramList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, next.getValue());
+			QualifiedParamList paramList =
+					QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, next.getValue());
 			nameToParamLists.put(paramName, paramList);
 		}
 
@@ -94,7 +97,9 @@ public class MatchUrlService {
 			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0) {
 					if (paramList.size() > 2) {
-						throw new InvalidRequestException(Msg.code(484) + "Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
+						throw new InvalidRequestException(Msg.code(484) + "Failed to parse match URL[" + theMatchUrl
+								+ "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED
+								+ " parameter repetitions");
 					} else {
 						DateRangeParam p1 = new DateRangeParam();
 						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
@@ -102,59 +107,75 @@ public class MatchUrlService {
 					}
 				}
 			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						myFhirContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
-				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
+				if (paramList != null
+						&& paramList.size() > 0
+						&& paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setCount(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
-						throw new InvalidRequestException(Msg.code(485) + "Invalid " + Constants.PARAM_COUNT + " value: " + intString);
+						throw new InvalidRequestException(
+								Msg.code(485) + "Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
 			} else if (Constants.PARAM_SEARCH_TOTAL_MODE.equals(nextParamName)) {
-				if (paramList != null && ! paramList.isEmpty() && ! paramList.get(0).isEmpty()) {
+				if (paramList != null
+						&& !paramList.isEmpty()
+						&& !paramList.get(0).isEmpty()) {
 					String totalModeEnumStr = paramList.get(0).get(0);
 					try {
 						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
 					} catch (IllegalArgumentException e) {
-						throw new InvalidRequestException(Msg.code(2078) + "Invalid " + Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+						throw new InvalidRequestException(Msg.code(2078) + "Invalid "
+								+ Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
 					}
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
-				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
+				if (paramList != null
+						&& paramList.size() > 0
+						&& paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setOffset(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
-						throw new InvalidRequestException(Msg.code(486) + "Invalid " + Constants.PARAM_OFFSET + " value: " + intString);
+						throw new InvalidRequestException(
+								Msg.code(486) + "Invalid " + Constants.PARAM_OFFSET + " value: " + intString);
 					}
 				}
 			} else if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
-				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
-					throw new InvalidRequestException(Msg.code(487) + "Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
+				if (isNotBlank(paramList.get(0).getQualifier())
+						&& paramList.get(0).getQualifier().startsWith(".")) {
+					throw new InvalidRequestException(Msg.code(487) + "Invalid parameter chain: " + nextParamName
+							+ paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens(myFhirContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.URI, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						myFhirContext, RestSearchParameterTypeEnum.URI, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (JpaConstants.PARAM_DELETE_EXPUNGE.equals(nextParamName)) {
 				paramMap.setDeleteExpunge(true);
 			} else if (Constants.PARAM_LIST.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
+				RuntimeSearchParam paramDef =
+						mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
 				if (paramDef == null) {
 					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}
 
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						mySearchParamRegistry, myFhirContext, paramDef, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			}
 		}
@@ -180,8 +201,14 @@ public class MatchUrlService {
 			return myParamName;
 		}
 	}
-	private InvalidRequestException throwUnrecognizedParamException(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, String nextParamName) {
-		return new UnrecognizedSearchParameterException(Msg.code(488) + "Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName, theResourceDefinition.getName(), nextParamName);
+
+	private InvalidRequestException throwUnrecognizedParamException(
+			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, String nextParamName) {
+		return new UnrecognizedSearchParameterException(
+				Msg.code(488) + "Failed to parse match URL[" + theMatchUrl + "] - Resource type "
+						+ theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName,
+				theResourceDefinition.getName(),
+				nextParamName);
 	}
 
 	private IQueryParameterAnd<?> newInstanceAnd(String theParamType) {
@@ -214,8 +241,8 @@ public class MatchUrlService {
 			// nothing
 		}
 
-		abstract void process(String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate);
-
+		abstract void process(
+				String theParamName, List<QualifiedParamList> theValues, SearchParameterMap theMapToPopulate);
 	}
 
 	/**
@@ -229,19 +256,19 @@ public class MatchUrlService {
 				if (Constants.PARAM_INCLUDE.equals(theParamName)) {
 					for (QualifiedParamList nextQualifiedList : theValues) {
 						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+							theMapToPopulate.addInclude(new Include(
+									nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 						}
 					}
 				} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
 					for (QualifiedParamList nextQualifiedList : theValues) {
 						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addRevInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+							theMapToPopulate.addRevInclude(new Include(
+									nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 						}
 					}
 				}
-
 			}
 		};
 	}
-
 }

@@ -23,8 +23,8 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public interface IPartitionLookupSvc {
 

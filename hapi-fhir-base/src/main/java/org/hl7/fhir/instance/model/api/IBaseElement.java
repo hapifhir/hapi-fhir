@@ -28,5 +28,4 @@ public interface IBaseElement {
 	Object getUserData(String theName);
 
 	void setUserData(String theName, Object theValue);
-
 }

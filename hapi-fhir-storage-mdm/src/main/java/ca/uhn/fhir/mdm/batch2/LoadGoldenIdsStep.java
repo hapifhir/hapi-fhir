@@ -32,7 +32,8 @@ import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 
 import javax.annotation.Nonnull;
 
-public class LoadGoldenIdsStep implements IJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {
+public class LoadGoldenIdsStep
+		implements IJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private final ResourceIdListStep<MdmClearJobParameters, MdmChunkRangeJson> myResourceIdListStep;
 
 	public LoadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
@@ -43,7 +44,10 @@ public class LoadGoldenIdsStep implements IJobStepWorker<MdmClearJobParameters, 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, MdmChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<MdmClearJobParameters, MdmChunkRangeJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
 	}
 }

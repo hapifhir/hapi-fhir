@@ -31,5 +31,4 @@ import com.google.common.annotations.VisibleForTesting;
 public interface IAnonymousInterceptor {
 
 	void invoke(IPointcut thePointcut, HookParams theArgs);
-
 }
