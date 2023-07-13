@@ -55,7 +55,7 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void close()  {
+	public void close() {
 		// ignored
 	}
 
@@ -95,7 +95,7 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void cancel()  {
+	public void cancel() {
 		// ignored
 	}
 
@@ -146,22 +146,22 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public boolean getMoreResults()  {
+	public boolean getMoreResults() {
 		return false;
 	}
 
 	@Override
-	public void setFetchDirection(int direction)  {
+	public void setFetchDirection(int direction) {
 		// ignored
 	}
 
 	@Override
-	public int getFetchDirection()  {
+	public int getFetchDirection() {
 		return ResultSet.FETCH_FORWARD;
 	}
 
 	@Override
-	public void setFetchSize(int theFetchSize)  {
+	public void setFetchSize(int theFetchSize) {
 		myFetchSize = theFetchSize;
 	}
 
@@ -171,12 +171,12 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int getResultSetConcurrency()  {
+	public int getResultSetConcurrency() {
 		return ResultSet.CONCUR_READ_ONLY;
 	}
 
 	@Override
-	public int getResultSetType()  {
+	public int getResultSetType() {
 		return ResultSet.TYPE_FORWARD_ONLY;
 	}
 
@@ -191,12 +191,12 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int[] executeBatch()  {
+	public int[] executeBatch() {
 		return new int[0];
 	}
 
 	@Override
-	public Connection getConnection()  {
+	public Connection getConnection() {
 		return myConnection;
 	}
 
@@ -241,42 +241,42 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int getResultSetHoldability()  {
+	public int getResultSetHoldability() {
 		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 
 	@Override
-	public boolean isClosed()  {
+	public boolean isClosed() {
 		return false;
 	}
 
 	@Override
-	public void setPoolable(boolean thePoolable)  {
+	public void setPoolable(boolean thePoolable) {
 		// ignored
 	}
 
 	@Override
-	public boolean isPoolable()  {
+	public boolean isPoolable() {
 		return false;
 	}
 
 	@Override
-	public void closeOnCompletion()  {
+	public void closeOnCompletion() {
 		// ignored
 	}
 
 	@Override
-	public boolean isCloseOnCompletion()  {
+	public boolean isCloseOnCompletion() {
 		return false;
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> theInterface)  {
+	public <T> T unwrap(Class<T> theInterface) {
 		return null;
 	}
 
 	@Override
-	public boolean isWrapperFor(Class<?> theInterface)  {
+	public boolean isWrapperFor(Class<?> theInterface) {
 		return false;
 	}
 }

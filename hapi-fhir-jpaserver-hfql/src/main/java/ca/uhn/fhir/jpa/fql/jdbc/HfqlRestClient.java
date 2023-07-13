@@ -43,19 +43,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * FHIR data. Instead, we just use the Apache HTTPClient.
  * <p>
  * Ideally in the future I'd like to explore using JDK primitives instead of even
- * using the Apache client
+ * using the Apache client or HAPI FHIR in order to reduce the dependencies required
+ * in the JDBC driver, but that can be a problem for the future.
  */
 public class HfqlRestClient {
 	public static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withRecordSeparator('\n');
 	private final String myBaseUrl;
-	private final String myUsername;
-	private final String myPassword;
 	private final CloseableHttpClient myClient;
 
 	public HfqlRestClient(String theBaseUrl, String theUsername, String thePassword) {
 		myBaseUrl = theBaseUrl;
-		myUsername = theUsername;
-		myPassword = thePassword;
 
 		PoolingHttpClientConnectionManager connectionManager =
 				new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
@@ -64,8 +61,8 @@ public class HfqlRestClient {
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
 				.setConnectionManager(connectionManager)
 				.setMaxConnPerRoute(99);
-		if (isNotBlank(myUsername) && isNotBlank(myPassword)) {
-			httpClientBuilder.addInterceptorLast(new HttpBasicAuthInterceptor(myUsername, myPassword));
+		if (isNotBlank(theUsername) && isNotBlank(thePassword)) {
+			httpClientBuilder.addInterceptorLast(new HttpBasicAuthInterceptor(theUsername, thePassword));
 		}
 		myClient = httpClientBuilder.build();
 	}

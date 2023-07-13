@@ -23,10 +23,10 @@ import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import org.apache.commons.text.WordUtils;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class HfqlFhirPathParser {
 
@@ -77,14 +77,14 @@ public class HfqlFhirPathParser {
 	public HfqlDataTypeEnum determineDatatypeForPath(String theResourceType, String theFhirPath) {
 
 		BaseRuntimeElementCompositeDefinition<?> currentElementDefinition =
-			myFhirContext.getResourceDefinition(theResourceType);
+				myFhirContext.getResourceDefinition(theResourceType);
 		RuntimePrimitiveDatatypeDefinition leafDefinition = null;
 
 		HfqlLexer lexer = new HfqlLexer(theFhirPath);
 		boolean firstToken = true;
 		while (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
 			String nextToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-				.getToken();
+					.getToken();
 
 			// If the first token is the resource type, we can ignore that
 			if (firstToken) {
@@ -126,13 +126,13 @@ public class HfqlFhirPathParser {
 				childDefForNode = currentElementDefinition.getChildByName(nextToken + "[x]");
 				if (childDefForNode != null) {
 					if (lexer.peekNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-						.getToken()
-						.equals(".")) {
+							.getToken()
+							.equals(".")) {
 						lexer.consumeNextToken();
 					}
 					if (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
 						String token = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-							.getToken();
+								.getToken();
 						if (token.startsWith("ofType(") && token.endsWith(")")) {
 							String type = token.substring(7, token.length() - 1);
 							nextToken = nextToken + WordUtils.capitalize(type);
@@ -181,13 +181,13 @@ public class HfqlFhirPathParser {
 		String finalToken = null;
 		if (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
 			finalToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-				.getToken();
+					.getToken();
 		}
 
 		if (".".equals(finalToken)) {
 			if (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
 				finalToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-					.getToken();
+						.getToken();
 			}
 		}
 

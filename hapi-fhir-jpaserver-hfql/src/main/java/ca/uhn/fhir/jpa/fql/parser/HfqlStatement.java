@@ -168,6 +168,10 @@ public class HfqlStatement implements IModelJson {
 		return -1;
 	}
 
+	public boolean hasOrderClause() {
+		return !getOrderByClauses().isEmpty();
+	}
+
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
 		UNARY_BOOLEAN,

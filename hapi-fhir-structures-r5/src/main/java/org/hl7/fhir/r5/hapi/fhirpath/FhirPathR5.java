@@ -48,7 +48,7 @@ public class FhirPathR5 implements IFhirPath {
 
 	@Nonnull
 	private <T extends IBase> List<Base> evaluate(
-		IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
+			IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
 		List<Base> result;
 		try {
 			result = myEngine.evaluate((Base) theInput, expressionNode);

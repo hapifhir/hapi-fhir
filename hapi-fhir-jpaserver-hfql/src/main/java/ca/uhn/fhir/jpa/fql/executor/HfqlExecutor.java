@@ -146,7 +146,50 @@ public class HfqlExecutor implements IHfqlExecutor {
 		massageSelectColumnNames(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
+		addHfqlWhereClausesToSearchParameterMap(statement, map);
 
+		Integer limit = theLimit;
+		if (statement.hasOrderClause()) {
+			/*
+			 * If we're ordering search results, we need to load all available data in order
+			 * to sort it because we handle ordering in application code currently. A good
+			 * future optimization would be to handle ordering in the database when possible,
+			 * but we can't always do that because the query can specify an order on any
+			 * arbitrary FHIRPath expression.
+			 */
+			limit = null;
+		} else if (statement.getLimit() != null) {
+			limit = limit == null ? statement.getLimit() : Math.min(limit, statement.getLimit());
+		}
+
+		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
+		List<HfqlDataTypeEnum> columnDataTypes = determineColumnDataTypes(statement);
+		IBundleProvider outcome = dao.search(map, theRequestDetails);
+		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, statement);
+
+		IHfqlExecutionResult executionResult;
+		if (statement.hasCountClauses()) {
+			executionResult = executeCountClause(statement, executionContext, outcome, whereClausePredicate);
+		} else {
+			executionResult = new LocalSearchHfqlExecutionResult(
+					statement,
+					outcome,
+					executionContext,
+					limit,
+					0,
+					columnDataTypes,
+					whereClausePredicate,
+					myFhirContext);
+		}
+
+		if (statement.hasOrderClause()) {
+			executionResult = createOrderedResult(statement, executionResult);
+		}
+
+		return executionResult;
+	}
+
+	private void addHfqlWhereClausesToSearchParameterMap(HfqlStatement statement, SearchParameterMap map) {
 		List<HfqlStatement.HavingClause> searchClauses = statement.getWhereClauses();
 		for (HfqlStatement.HavingClause nextSearchClause : searchClauses) {
 			if (nextSearchClause.getLeft().equals(Constants.PARAM_ID)) {
@@ -181,41 +224,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 				map.add(qualifiedParamName.getParamName(), andParam);
 			}
 		}
-
-		boolean haveOrderingClause = !statement.getOrderByClauses().isEmpty();
-
-		Integer limit = theLimit;
-		if (haveOrderingClause) {
-			limit = null;
-		} else if (statement.getLimit() != null) {
-			limit = limit == null ? statement.getLimit() : Math.min(limit, statement.getLimit());
-		}
-
-		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
-		List<HfqlDataTypeEnum> columnDataTypes = determineColumnDataTypes(statement);
-		IBundleProvider outcome = dao.search(map, theRequestDetails);
-		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, statement);
-
-		IHfqlExecutionResult executionResult;
-		if (statement.hasCountClauses()) {
-			executionResult = executeCountClause(statement, executionContext, outcome, whereClausePredicate);
-		} else {
-			executionResult = new LocalSearchHfqlExecutionResult(
-					statement,
-					outcome,
-					executionContext,
-					limit,
-					0,
-					columnDataTypes,
-					whereClausePredicate,
-					myFhirContext);
-		}
-
-		if (haveOrderingClause) {
-			executionResult = createOrderedResult(statement, executionResult);
-		}
-
-		return executionResult;
 	}
 
 	private IHfqlExecutionResult createOrderedResult(
@@ -226,7 +234,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 			rows.add(nextRow);
 			Validate.isTrue(
 					rows.size() <= HfqlConstants.ORDER_AND_GROUP_LIMIT,
-					"Can not ORDER BY result sets over 10000 results");
+					"Can not ORDER BY result sets over %d results",
+					HfqlConstants.ORDER_AND_GROUP_LIMIT);
 		}
 
 		List<Integer> orderColumnIndexes = theStatement.getOrderByClauses().stream()
@@ -482,6 +491,10 @@ public class HfqlExecutor implements IHfqlExecutor {
 		return columnDataTypes;
 	}
 
+	/**
+	 * This method replaces a SELECT-ed column named "*" with a collection of
+	 * available column names for the given resource type.
+	 */
 	private void massageSelectColumnNames(HfqlStatement theHfqlStatement) {
 
 		List<HfqlStatement.SelectClause> selectClauses = theHfqlStatement.getSelectClauses();
