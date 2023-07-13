@@ -22,7 +22,8 @@ package ca.uhn.fhir.cr.constant;
 import java.sql.Date;
 import java.time.LocalDate;
 
-public class MeasureReportConstants {
+public class
+MeasureReportConstants {
 
 	private MeasureReportConstants() {}
 

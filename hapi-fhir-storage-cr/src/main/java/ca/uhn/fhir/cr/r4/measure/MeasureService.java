@@ -19,22 +19,11 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.cr.common.IDataProviderFactory;
-import ca.uhn.fhir.cr.common.IFhirDalFactory;
-import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.constant.MeasureReportConstants;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -44,23 +33,24 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
+
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.cql.evaluator.measure.r4.R4RepositorySubjectProvider;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,12 +62,122 @@ import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPL
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
-public class MeasureService implements IDaoRegistryUser {
+public class MeasureService {
 
 	private Logger ourLogger = LoggerFactory.getLogger(MeasureService.class);
 
+<<<<<<< HEAD
 	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(new ContactDetail()
 			.addTelecom(new ContactPoint()
+=======
+	@Autowired
+	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
+
+	@Autowired
+	protected Repository myRepository;
+
+
+	/**
+	 * Implements the <a href=
+	 * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
+	 * operation found in the
+	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
+	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
+	 * IG.
+	 *
+	 * @param theId                  the Id of the Measure to evaluate
+	 * @param thePeriodStart         The start of the reporting period
+	 * @param thePeriodEnd           The end of the reporting period
+	 * @param theReportType          The type of MeasureReport to generate
+	 * @param thePractitioner        the thePractitioner to use for the evaluation
+	 * @param theLastReceivedOn      the date the results of this measure were last
+	 *                               received.
+	 * @param theProductLine         the theProductLine (e.g. Medicare, Medicaid, etc) to use
+	 *                               for the evaluation. This is a non-standard parameter.
+	 * @param theAdditionalData      the data bundle containing additional data
+	 * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
+	 * @return the calculated MeasureReport
+	 */
+	public MeasureReport evaluateMeasure(IdType theId,
+													 String thePeriodStart,
+													 String thePeriodEnd,
+													 String theReportType,
+													 String theSubject,
+													 String thePractitioner,
+													 String theLastReceivedOn,
+													 String theProductLine,
+													 Bundle theAdditionalData,
+													 Endpoint theTerminologyEndpoint) {
+
+		ensureSupplementalDataElementSearchParameter();
+
+		var r4MeasureProcessor = new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
+
+		MeasureReport measureReport = null;
+
+		// SUBJECT LIST SETTERS
+		if (StringUtils.isBlank(theSubject) && StringUtils.isNotBlank(thePractitioner)) {
+			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRepository);
+
+			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, subjectIds, theAdditionalData);
+
+		} else if (StringUtils.isNotBlank(theSubject)) {
+			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, Collections.singletonList(theSubject), theAdditionalData);
+
+		} else if (StringUtils.isBlank(theSubject) && StringUtils.isBlank(thePractitioner)) {
+			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, null, theAdditionalData);
+		}
+		// add ProductLine after report is generated
+		addProductLineExtension(measureReport, theProductLine);
+
+		return measureReport;
+	}
+
+	private List<String> getPractitionerPatients(String thePractitioner, Repository theRepository) {
+		List<String> patients = new ArrayList<>();
+
+		Map<String, List< IQueryParameterType>> map = new HashMap<>();
+		map.put(
+			"general-practitioner", Collections.singletonList(
+			new ReferenceParam(
+				thePractitioner.startsWith("Practitioner/")
+					? thePractitioner
+					: "Practitioner/" + thePractitioner)));
+
+		var bundle = theRepository.search(Bundle.class, Patient.class, map);
+		var iterator = new BundleIterator<>(theRepository, Bundle.class, bundle);
+
+		while (iterator.hasNext()) {
+			var patient = iterator.next().getResource();
+			var refString = patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart();
+			patients.add(refString);
+		}
+		return patients;
+	}
+
+	private void addProductLineExtension(MeasureReport theMeasureReport, String theProductLine) {
+		if (theProductLine != null) {
+			Extension ext = new Extension();
+			ext.setUrl(MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+			ext.setValue(new StringType(theProductLine));
+			theMeasureReport.addExtension(ext);
+		}
+	}
+
+	protected void ensureSupplementalDataElementSearchParameter() {
+		//create a transaction bundle
+		BundleBuilder builder = new BundleBuilder(myRepository.fhirContext());
+
+		//set the request to be condition on code == supplemental data
+		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
+		myRepository.transaction(builder.getBundle());
+	}
+
+	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
+		new ContactDetail()
+			.addTelecom(
+				new ContactPoint()
+>>>>>>> hapi-fhir-cr-measure-repository-api-updates
 					.setSystem(ContactPoint.ContactPointSystem.URL)
 					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
@@ -85,6 +185,7 @@ public class MeasureService implements IDaoRegistryUser {
 			.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
 
 	public static final SearchParameter SUPPLEMENTAL_DATA_SEARCHPARAMETER = (SearchParameter) new SearchParameter()
+<<<<<<< HEAD
 			.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
 			.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
 			.setName("DEQMMeasureReportSupplementalData")
@@ -302,4 +403,30 @@ public class MeasureService implements IDaoRegistryUser {
 		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
 		transaction(builder.getBundle(), this.myRequestDetails);
 	}
+=======
+		.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
+		.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
+		.setName("DEQMMeasureReportSupplementalData")
+		.setStatus(Enumerations.PublicationStatus.ACTIVE)
+		.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
+		.setPublisher("HL7 International - Clinical Quality Information Work Group")
+		.setContact(CQI_CONTACTDETAIL)
+		.setDescription(
+			String.format(
+				"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setJurisdiction(US_JURISDICTION_CODING)
+		.addBase("MeasureReport")
+		.setCode("supplemental-data")
+		.setType(Enumerations.SearchParamType.REFERENCE)
+		.setExpression(
+			String.format("MeasureReport.extension('%s').value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpath(
+			String.format("f:MeasureReport/f:extension[@url='%s'].value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+		.setTitle("Supplemental Data")
+		.setId("deqm-measurereport-supplemental-data");
+>>>>>>> hapi-fhir-cr-measure-repository-api-updates
 }
