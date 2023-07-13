@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
@@ -104,7 +105,7 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 			myIterator = csvParser.iterator();
 			readHeaderRows(true);
 		} catch (IOException e) {
-			throw new SQLException(e);
+			throw new SQLException(Msg.code(2400) + e.getMessage(), e);
 		}
 	}
 
@@ -278,7 +279,7 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 			myIterator = csvParser.iterator();
 			readHeaderRows(false);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2399) + e.getMessage(), e);
 		}
 		hasNext = myIterator.hasNext();
 		return hasNext;

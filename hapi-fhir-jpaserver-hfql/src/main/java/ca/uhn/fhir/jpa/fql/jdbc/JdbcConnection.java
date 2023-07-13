@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import ca.uhn.fhir.i18n.Msg;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -27,6 +29,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
@@ -35,6 +39,7 @@ import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import javax.annotation.Nonnull;
 
 class JdbcConnection implements Connection {
 	private final String myServerUrl;
@@ -53,28 +58,28 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql) {
-		throw new UnsupportedOperationException();
+	public PreparedStatement prepareStatement(String sql) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql) {
-		throw new UnsupportedOperationException();
+	public CallableStatement prepareCall(String sql) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String nativeSQL(String sql) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setAutoCommit(boolean autoCommit) {
-		// nothing
+	public String nativeSQL(String sql) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public boolean getAutoCommit() {
 		return false;
+	}
+
+	@Override
+	public void setAutoCommit(boolean autoCommit) {
+		// nothing
 	}
 
 	@Override
@@ -103,33 +108,33 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public void setReadOnly(boolean readOnly) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public boolean isReadOnly() {
 		return true;
 	}
 
 	@Override
-	public void setCatalog(String catalog) {
-		throw new UnsupportedOperationException();
+	public void setReadOnly(boolean readOnly) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getCatalog() {
-		throw new UnsupportedOperationException();
+	public String getCatalog() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void setTransactionIsolation(int level) {
-		throw new UnsupportedOperationException();
+	public void setCatalog(String catalog) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public int getTransactionIsolation() {
 		return Connection.TRANSACTION_READ_COMMITTED;
+	}
+
+	@Override
+	public void setTransactionIsolation(int level) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
@@ -143,110 +148,112 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency) {
-		throw new UnsupportedOperationException();
+	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) {
-		throw new UnsupportedOperationException();
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) {
-		throw new UnsupportedOperationException();
+	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Map<String, Class<?>> getTypeMap() {
-		throw new UnsupportedOperationException();
+	public Map<String, Class<?>> getTypeMap() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void setTypeMap(Map<String, Class<?>> map) {
-		throw new UnsupportedOperationException();
+	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void setHoldability(int holdability) {
-		throw new UnsupportedOperationException();
+	public int getHoldability() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getHoldability() {
-		throw new UnsupportedOperationException();
+	public void setHoldability(int holdability) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Savepoint setSavepoint() {
-		throw new UnsupportedOperationException();
+	public Savepoint setSavepoint() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Savepoint setSavepoint(String name) {
-		throw new UnsupportedOperationException();
+	public Savepoint setSavepoint(String name) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void rollback(Savepoint savepoint) {
-		throw new UnsupportedOperationException();
+	public void rollback(Savepoint savepoint) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void releaseSavepoint(Savepoint savepoint) {
-		throw new UnsupportedOperationException();
+	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
-		throw new UnsupportedOperationException();
+	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public PreparedStatement prepareStatement(
-			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
-		throw new UnsupportedOperationException();
+			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public CallableStatement prepareCall(
-			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
-		throw new UnsupportedOperationException();
+			String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) {
-		throw new UnsupportedOperationException();
+	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int[] columnIndexes) {
-		throw new UnsupportedOperationException();
+	public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, String[] columnNames) {
-		throw new UnsupportedOperationException();
+	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Clob createClob() {
-		throw new UnsupportedOperationException();
+	public Clob createClob() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Blob createBlob() {
-		throw new UnsupportedOperationException();
+	public Blob createBlob() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public NClob createNClob() {
-		throw new UnsupportedOperationException();
+	public NClob createNClob() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public SQLXML createSQLXML() {
-		throw new UnsupportedOperationException();
+	public SQLXML createSQLXML() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
@@ -256,67 +263,67 @@ class JdbcConnection implements Connection {
 
 	@Override
 	public void setClientInfo(String name, String value) {
-		throw new UnsupportedOperationException();
+		// ignore
+	}
+
+	@Override
+	public String getClientInfo(String name) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
+	}
+
+	@Override
+	public Properties getClientInfo() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public void setClientInfo(Properties properties) {
-		throw new UnsupportedOperationException();
+		// ignore
 	}
 
 	@Override
-	public String getClientInfo(String name) {
-		throw new UnsupportedOperationException();
+	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Properties getClientInfo() {
-		throw new UnsupportedOperationException();
+	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Array createArrayOf(String typeName, Object[] elements) {
-		throw new UnsupportedOperationException();
+	public String getSchema() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Struct createStruct(String typeName, Object[] attributes) {
-		throw new UnsupportedOperationException();
+	public void setSchema(String schema) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void setSchema(String schema) {
-		throw new UnsupportedOperationException();
+	public void abort(Executor executor) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getSchema() {
-		throw new UnsupportedOperationException();
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void abort(Executor executor) {
-		throw new UnsupportedOperationException();
+	public int getNetworkTimeout() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public void setNetworkTimeout(Executor executor, int milliseconds) {
-		throw new UnsupportedOperationException();
+	public <T> T unwrap(Class<T> theInterface) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getNetworkTimeout() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T> T unwrap(Class<T> theInterface) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean isWrapperFor(Class<?> theInterface) {
-		throw new UnsupportedOperationException();
+	public boolean isWrapperFor(Class<?> theInterface) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	public HfqlRestClient getClient() {
@@ -332,5 +339,16 @@ class JdbcConnection implements Connection {
 
 	public void setPassword(String thePassword) {
 		myPassword = thePassword;
+	}
+
+	@Nonnull
+	static SQLException newSqlExceptionForUnsupportedOperation() {
+		return new SQLException(Msg.code(2394) + "This JDBC method is not yet supported by the HFQL JDBC Driver");
+	}
+
+	@Nonnull
+	static SQLFeatureNotSupportedException newSqlExceptionForFeatureNotSupported() {
+		return new SQLFeatureNotSupportedException(
+				Msg.code(2398) + "This JDBC method is not yet supported by the HFQL JDBC Driver");
 	}
 }

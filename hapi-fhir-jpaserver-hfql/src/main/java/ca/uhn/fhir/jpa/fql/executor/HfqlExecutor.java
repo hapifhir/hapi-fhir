@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.HfqlFhirPathParser;
@@ -140,7 +141,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 		HfqlStatement statement = parser.parse();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(statement.getFromResourceName());
 		if (dao == null) {
-			throw new DataFormatException("Unknown or unsupported FROM type: " + statement.getFromResourceName());
+			throw new DataFormatException(
+					Msg.code(2406) + "Unknown or unsupported FROM type: " + statement.getFromResourceName());
 		}
 
 		massageSelectColumnNames(statement);
@@ -242,7 +244,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 				.map(t -> {
 					int index = theStatement.findSelectClauseIndex(t.getClause());
 					if (index == -1) {
-						throw new InvalidRequestException("Invalid/unknown ORDER BY clause: " + t.getClause());
+						throw new InvalidRequestException(
+								Msg.code(2407) + "Invalid/unknown ORDER BY clause: " + t.getClause());
 					}
 					return index;
 				})
@@ -347,9 +350,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 						Map<String, AtomicLong> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
 						if (keyCounter.size() >= HfqlConstants.ORDER_AND_GROUP_LIMIT) {
-							// FIXME: add code
-							throw new InvalidRequestException(
-									"Can not group on > " + HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
+							throw new InvalidRequestException(Msg.code(2402) + "Can not group on > "
+									+ HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
 						}
 						for (String nextCountClause : countClauses) {
 							if (!nextCountClause.equals("*")) {
@@ -457,8 +459,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 						}
 					}
 				} catch (FhirPathExecutionException e) {
-					// FIXME: add code
-					throw new InvalidRequestException("Unable to evaluate FHIRPath expression \""
+					throw new InvalidRequestException(Msg.code(2403) + "Unable to evaluate FHIRPath expression \""
 							+ nextHavingClause.getLeft() + "\". Error: " + e.getMessage());
 				}
 
@@ -942,8 +943,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 				try {
 					parsedExpression = myFhirPath.parse(thePath);
 				} catch (Exception e) {
-					// FIXME: add code
-					throw new InvalidRequestException(e);
+					throw new InvalidRequestException(Msg.code(2404) + e.getMessage(), e);
 				}
 				myFhirPathExpressionMap.put(thePath, parsedExpression);
 			}

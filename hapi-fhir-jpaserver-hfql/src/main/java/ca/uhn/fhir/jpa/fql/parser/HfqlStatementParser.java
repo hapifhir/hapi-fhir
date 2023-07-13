@@ -415,7 +415,7 @@ public class HfqlStatementParser {
 		}
 	}
 
-	private class BaseRootState extends BaseState {
+	private abstract class BaseRootState extends BaseState {
 
 		@Override
 		void consume(HfqlLexerToken theToken) {

@@ -31,6 +31,8 @@ import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 
+import static ca.uhn.fhir.jpa.fql.jdbc.JdbcConnection.newSqlExceptionForUnsupportedOperation;
+
 public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	private final Connection myConnection;
 	private final HfqlRestClient myRestClient;
@@ -41,67 +43,67 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean allProceduresAreCallable() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean allProceduresAreCallable() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean allTablesAreSelectable() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean allTablesAreSelectable() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getURL() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getURL() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getUserName() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getUserName() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean isReadOnly() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean isReadOnly() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean nullsAreSortedHigh() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean nullsAreSortedHigh() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean nullsAreSortedLow() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean nullsAreSortedLow() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean nullsAreSortedAtStart() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean nullsAreSortedAtStart() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean nullsAreSortedAtEnd() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean nullsAreSortedAtEnd() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getDatabaseProductName() throws UnsupportedOperationException {
+	public String getDatabaseProductName() throws SQLException {
 		return "HAPI FHIR";
 	}
 
 	@Override
-	public String getDatabaseProductVersion() throws UnsupportedOperationException {
+	public String getDatabaseProductVersion() throws SQLException {
 		return VersionUtil.getVersion();
 	}
 
 	@Override
-	public String getDriverName() throws UnsupportedOperationException {
+	public String getDriverName() throws SQLException {
 		return "HAPI FHIR FQL JDBC";
 	}
 
 	@Override
-	public String getDriverVersion() throws UnsupportedOperationException {
+	public String getDriverVersion() throws SQLException {
 		return VersionUtil.getVersion();
 	}
 
@@ -116,531 +118,531 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public boolean usesLocalFiles() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean usesLocalFiles() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean usesLocalFilePerTable() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean usesLocalFilePerTable() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMixedCaseIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMixedCaseIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesUpperCaseIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesUpperCaseIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesLowerCaseIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesLowerCaseIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesMixedCaseIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesMixedCaseIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMixedCaseQuotedIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesUpperCaseQuotedIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesLowerCaseQuotedIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean storesMixedCaseQuotedIdentifiers() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getIdentifierQuoteString() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getIdentifierQuoteString() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getSQLKeywords() throws UnsupportedOperationException {
+	public String getSQLKeywords() throws SQLException {
 		return "";
 	}
 
 	@Override
-	public String getNumericFunctions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getNumericFunctions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getStringFunctions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getStringFunctions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getSystemFunctions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getSystemFunctions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getTimeDateFunctions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getTimeDateFunctions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getSearchStringEscape() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getSearchStringEscape() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getExtraNameCharacters() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getExtraNameCharacters() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsAlterTableWithAddColumn() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsAlterTableWithAddColumn() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsAlterTableWithDropColumn() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsAlterTableWithDropColumn() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsColumnAliasing() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsColumnAliasing() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean nullPlusNonNullIsNull() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean nullPlusNonNullIsNull() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsConvert() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsConvert() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsConvert(int fromType, int toType) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsConvert(int fromType, int toType) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsTableCorrelationNames() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsTableCorrelationNames() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsDifferentTableCorrelationNames() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsDifferentTableCorrelationNames() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsExpressionsInOrderBy() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsExpressionsInOrderBy() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOrderByUnrelated() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOrderByUnrelated() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsGroupBy() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsGroupBy() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsGroupByUnrelated() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsGroupByUnrelated() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsGroupByBeyondSelect() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsGroupByBeyondSelect() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsLikeEscapeClause() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsLikeEscapeClause() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMultipleResultSets() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMultipleResultSets() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMultipleTransactions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMultipleTransactions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsNonNullableColumns() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsNonNullableColumns() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMinimumSQLGrammar() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMinimumSQLGrammar() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCoreSQLGrammar() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCoreSQLGrammar() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsExtendedSQLGrammar() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsExtendedSQLGrammar() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsANSI92EntryLevelSQL() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsANSI92EntryLevelSQL() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsANSI92IntermediateSQL() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsANSI92IntermediateSQL() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsANSI92FullSQL() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsANSI92FullSQL() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsIntegrityEnhancementFacility() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsIntegrityEnhancementFacility() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOuterJoins() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOuterJoins() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsFullOuterJoins() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsFullOuterJoins() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsLimitedOuterJoins() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsLimitedOuterJoins() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getSchemaTerm() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getSchemaTerm() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getProcedureTerm() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getProcedureTerm() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getCatalogTerm() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getCatalogTerm() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean isCatalogAtStart() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean isCatalogAtStart() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public String getCatalogSeparator() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public String getCatalogSeparator() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSchemasInDataManipulation() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSchemasInDataManipulation() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSchemasInProcedureCalls() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSchemasInProcedureCalls() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSchemasInTableDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSchemasInTableDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSchemasInIndexDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSchemasInIndexDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSchemasInPrivilegeDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSchemasInPrivilegeDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCatalogsInDataManipulation() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCatalogsInDataManipulation() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCatalogsInProcedureCalls() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCatalogsInProcedureCalls() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCatalogsInTableDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCatalogsInTableDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCatalogsInIndexDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCatalogsInIndexDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCatalogsInPrivilegeDefinitions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsPositionedDelete() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsPositionedDelete() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsPositionedUpdate() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsPositionedUpdate() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSelectForUpdate() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSelectForUpdate() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsStoredProcedures() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsStoredProcedures() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSubqueriesInComparisons() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSubqueriesInComparisons() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSubqueriesInExists() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSubqueriesInExists() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSubqueriesInIns() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSubqueriesInIns() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsSubqueriesInQuantifieds() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSubqueriesInQuantifieds() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsCorrelatedSubqueries() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsCorrelatedSubqueries() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsUnion() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsUnion() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsUnionAll() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsUnionAll() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOpenCursorsAcrossCommit() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOpenCursorsAcrossCommit() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOpenCursorsAcrossRollback() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOpenCursorsAcrossRollback() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOpenStatementsAcrossCommit() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOpenStatementsAcrossCommit() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsOpenStatementsAcrossRollback() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsOpenStatementsAcrossRollback() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxBinaryLiteralLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxBinaryLiteralLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxCharLiteralLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxCharLiteralLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnsInGroupBy() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnsInGroupBy() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnsInIndex() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnsInIndex() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnsInOrderBy() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnsInOrderBy() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnsInSelect() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnsInSelect() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxColumnsInTable() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxColumnsInTable() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxConnections() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxConnections() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxCursorNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxCursorNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxIndexLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxIndexLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxSchemaNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxSchemaNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxProcedureNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxProcedureNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxCatalogNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxCatalogNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxRowSize() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxRowSize() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean doesMaxRowSizeIncludeBlobs() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean doesMaxRowSizeIncludeBlobs() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxStatementLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxStatementLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxStatements() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxStatements() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxTableNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxTableNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxTablesInSelect() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxTablesInSelect() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getMaxUserNameLength() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getMaxUserNameLength() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getDefaultTransactionIsolation() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getDefaultTransactionIsolation() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsTransactions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsTransactions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsTransactionIsolationLevel(int level) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsDataDefinitionAndDataManipulationTransactions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsDataManipulationTransactionsOnly() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsDataManipulationTransactionsOnly() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean dataDefinitionCausesTransactionCommit() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean dataDefinitionCausesTransactionCommit() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean dataDefinitionIgnoredInTransactions() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean dataDefinitionIgnoredInTransactions() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getProcedureColumns(
 			String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
@@ -653,25 +655,25 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public ResultSet getSchemas() throws UnsupportedOperationException {
+	public ResultSet getSchemas() throws SQLException {
 		// Empty result set
 		return new JdbcResultSet();
 	}
 
 	@Override
-	public ResultSet getCatalogs() throws UnsupportedOperationException {
+	public ResultSet getCatalogs() throws SQLException {
 		// Empty result set
 		return new JdbcResultSet();
 	}
 
 	@Override
-	public ResultSet getTableTypes() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getTableTypes() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-			throws UnsupportedOperationException, SQLException {
+			throws SQLException, SQLException {
 		Parameters input = new Parameters();
 		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_INTROSPECT_COLUMNS));
 		IHfqlExecutionResult outcome = myRestClient.execute(input, false, null);
@@ -680,40 +682,39 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 
 	@Override
 	public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getVersionColumns(String catalog, String schema, String table)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getImportedKeys(String catalog, String schema, String table) throws UnsupportedOperationException {
+	public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
 		return new JdbcResultSet();
 	}
 
 	@Override
-	public ResultSet getExportedKeys(String catalog, String schema, String table) throws UnsupportedOperationException {
+	public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
 		return new JdbcResultSet();
 	}
 
@@ -725,233 +726,231 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 			String foreignCatalog,
 			String foreignSchema,
 			String foreignTable)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getTypeInfo() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getTypeInfo() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsResultSetType(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsResultSetType(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsResultSetConcurrency(int type, int concurrency) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean ownUpdatesAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean ownUpdatesAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean ownDeletesAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean ownDeletesAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean ownInsertsAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean ownInsertsAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean othersUpdatesAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean othersUpdatesAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean othersDeletesAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean othersDeletesAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean othersInsertsAreVisible(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean othersInsertsAreVisible(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean updatesAreDetected(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean updatesAreDetected(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean deletesAreDetected(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean deletesAreDetected(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean insertsAreDetected(int type) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean insertsAreDetected(int type) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsBatchUpdates() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsBatchUpdates() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public Connection getConnection() throws UnsupportedOperationException {
+	public Connection getConnection() throws SQLException {
 		return myConnection;
 	}
 
 	@Override
-	public boolean supportsSavepoints() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsSavepoints() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsNamedParameters() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsNamedParameters() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsMultipleOpenResults() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsMultipleOpenResults() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsGetGeneratedKeys() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsGetGeneratedKeys() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getAttributes(
 			String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsResultSetHoldability(int holdability) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsResultSetHoldability(int holdability) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getResultSetHoldability() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getResultSetHoldability() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public int getDatabaseMajorVersion() throws UnsupportedOperationException {
+	public int getDatabaseMajorVersion() throws SQLException {
 		return Integer.parseInt(VersionUtil.getVersion().split("\\.")[0]);
 	}
 
 	@Override
-	public int getDatabaseMinorVersion() throws UnsupportedOperationException {
+	public int getDatabaseMinorVersion() throws SQLException {
 		return Integer.parseInt(VersionUtil.getVersion().split("\\.")[1]);
 	}
 
 	@Override
-	public int getJDBCMajorVersion() throws UnsupportedOperationException {
+	public int getJDBCMajorVersion() throws SQLException {
 		return Integer.parseInt(VersionUtil.getVersion().split("\\.")[0]);
 	}
 
 	@Override
-	public int getJDBCMinorVersion() throws UnsupportedOperationException {
+	public int getJDBCMinorVersion() throws SQLException {
 		return Integer.parseInt(VersionUtil.getVersion().split("\\.")[1]);
 	}
 
 	@Override
-	public int getSQLStateType() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public int getSQLStateType() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean locatorsUpdateCopy() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean locatorsUpdateCopy() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsStatementPooling() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsStatementPooling() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public RowIdLifetime getRowIdLifetime() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public RowIdLifetime getRowIdLifetime() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getSchemas(String catalog, String schemaPattern) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean supportsStoredFunctionsUsingCallSyntax() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean autoCommitFailureClosesAllResultSets() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public ResultSet getClientInfoProperties() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public ResultSet getClientInfoProperties() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getFunctionColumns(
 			String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
 	public ResultSet getPseudoColumns(
 			String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-			throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+			throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean generatedKeyAlwaysReturned() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean generatedKeyAlwaysReturned() throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> theInterface) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public <T> T unwrap(Class<T> theInterface) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 
 	@Override
-	public boolean isWrapperFor(Class<?> theInterface) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
+	public boolean isWrapperFor(Class<?> theInterface) throws SQLException {
+		throw newSqlExceptionForUnsupportedOperation();
 	}
 }

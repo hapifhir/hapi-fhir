@@ -82,8 +82,8 @@ public class JdbcDriver implements Driver {
 	}
 
 	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		throw new SQLFeatureNotSupportedException();
+	public Logger getParentLogger() {
+		return Logger.getLogger(getClass().getPackageName());
 	}
 
 	public static synchronized Driver load() {

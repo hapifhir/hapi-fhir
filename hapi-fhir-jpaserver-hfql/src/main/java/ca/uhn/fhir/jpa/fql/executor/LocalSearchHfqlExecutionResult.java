@@ -176,20 +176,6 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 				}
 			}
 
-			// FIXME: remove
-			//			if (value != null) {
-			//				if (columnDataType.equals(HfqlDataTypeEnum.INTEGER)) {
-			//					try {
-			//						values.add(Integer.parseInt(value));
-			//						continue;
-			//					} catch (NumberFormatException e) {
-			//						String errorMessage = "Failed to evaluate result of FHIRPath expression \"" + clause + "\" as
-			// INTEGER. Error: " + e.getMessage();
-			//						return createAndStoreErrorRow(errorMessage);
-			//					}
-			//				}
-			//			}
-
 			values.add(value);
 		}
 

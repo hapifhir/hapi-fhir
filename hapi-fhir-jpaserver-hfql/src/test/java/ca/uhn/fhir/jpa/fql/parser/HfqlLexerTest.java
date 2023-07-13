@@ -1,17 +1,22 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HfqlLexerTest {
 
 	@Test
-	public void testSimpleStatement() {
+	void testSimpleStatement() {
 		String input = """
 					from Patient
 					select
@@ -25,7 +30,7 @@ public class HfqlLexerTest {
 	}
 
 	@Test
-	public void testSelectStar() {
+	void testSelectStar() {
 		String input = """
 					from Patient
 					select
@@ -38,7 +43,7 @@ public class HfqlLexerTest {
 	}
 
 	@Test
-	public void testQuotedString() {
+	void testQuotedString() {
 		String input = """
 			from
 			  Patient
@@ -59,7 +64,7 @@ public class HfqlLexerTest {
 	}
 
 	@Test
-	public void testSearchParamWithQualifiers() {
+	void testSearchParamWithQualifiers() {
 		String input = """
 			from
 			  Patient
@@ -82,7 +87,7 @@ public class HfqlLexerTest {
 	}
 
 	@Test
-	public void testInList() {
+	void testInList() {
 		String input = """
 			from StructureDefinition
 			    where url in ('foo' | 'bar')
@@ -101,7 +106,7 @@ public class HfqlLexerTest {
 	}
 
 	@Test
-	public void testFhirPathSelector() {
+	void testFhirPathSelector() {
 		String input = """
 					from Patient
 					select 
@@ -119,7 +124,7 @@ public class HfqlLexerTest {
 
 
 	@Test
-	public void testOptionChangeIsRespected() {
+	void testOptionChangeIsRespected() {
 		// Setup
 		String input = """
 					from Patient
@@ -138,5 +143,24 @@ public class HfqlLexerTest {
 		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
 	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"token1 token2 'token3, HFQL_TOKEN",
+		"foo.bar(blah, FHIRPATH_EXPRESSION",
+		"foo.bar((blah.baz), FHIRPATH_EXPRESSION",
+	})
+	void testIncompleteFragment_String(String theInput, HfqlLexerOptions theOptions) {
+		HfqlLexer lexer = new HfqlLexer(theInput);
+		try {
+			while (lexer.hasNextToken(theOptions)) {
+				lexer.consumeNextToken();
+			}
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Unexpected end of string"));
+		}
+	}
+
 
 }

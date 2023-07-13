@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.fql.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -87,7 +89,10 @@ class HfqlLexer {
 		while (true) {
 			if (myPosition == myInput.length) {
 				if (myBuffer.length() > 0) {
-					// FIXME: make sure we're in an appropriate state
+					if (myState == LexerState.IN_QUOTED_STRING || myParenDepth > 0) {
+						throw new InvalidRequestException(
+								Msg.code(2401) + "Unexpected end of string at position " + describePosition());
+					}
 					setNextToken(myBuffer.toString());
 				}
 				return;
@@ -198,8 +203,8 @@ class HfqlLexer {
 			}
 		}
 
-		throw new DataFormatException("Unexpected character at position " + describePosition() + ": '" + theNextChar
-				+ "' (" + (int) theNextChar + ")");
+		throw new DataFormatException(Msg.code(2405) + "Unexpected character at position " + describePosition() + ": '"
+				+ theNextChar + "' (" + (int) theNextChar + ")");
 	}
 
 	private String describePosition() {

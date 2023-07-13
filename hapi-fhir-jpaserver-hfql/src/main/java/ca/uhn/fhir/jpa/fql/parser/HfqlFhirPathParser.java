@@ -23,39 +23,38 @@ import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import org.apache.commons.text.WordUtils;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+
+import static java.util.Map.entry;
 
 public class HfqlFhirPathParser {
 
 	private static final Map<String, HfqlDataTypeEnum> FHIR_DATATYPE_TO_FQL_DATATYPE;
 
 	static {
-		Map<String, HfqlDataTypeEnum> fhirDatatypeToFqlDatatype = new HashMap<>();
-		fhirDatatypeToFqlDatatype.put("base64Binary", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("boolean", HfqlDataTypeEnum.BOOLEAN);
-		fhirDatatypeToFqlDatatype.put("canonical", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("code", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("date", HfqlDataTypeEnum.DATE);
-		fhirDatatypeToFqlDatatype.put("dateTime", HfqlDataTypeEnum.TIMESTAMP);
-		fhirDatatypeToFqlDatatype.put("decimal", HfqlDataTypeEnum.DECIMAL);
-		fhirDatatypeToFqlDatatype.put("id", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("instant", HfqlDataTypeEnum.TIMESTAMP);
-		fhirDatatypeToFqlDatatype.put("integer", HfqlDataTypeEnum.INTEGER);
-		fhirDatatypeToFqlDatatype.put("integer64", HfqlDataTypeEnum.LONGINT);
-		fhirDatatypeToFqlDatatype.put("markdown", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("oid", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("positiveInt", HfqlDataTypeEnum.INTEGER);
-		fhirDatatypeToFqlDatatype.put("string", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("time", HfqlDataTypeEnum.TIME);
-		fhirDatatypeToFqlDatatype.put("unsignedInt", HfqlDataTypeEnum.INTEGER);
-		fhirDatatypeToFqlDatatype.put("uri", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("url", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("uuid", HfqlDataTypeEnum.STRING);
-		fhirDatatypeToFqlDatatype.put("xhtml", HfqlDataTypeEnum.STRING);
-		FHIR_DATATYPE_TO_FQL_DATATYPE = Collections.unmodifiableMap(fhirDatatypeToFqlDatatype);
+		FHIR_DATATYPE_TO_FQL_DATATYPE = Map.ofEntries(
+				entry("base64Binary", HfqlDataTypeEnum.STRING),
+				entry("boolean", HfqlDataTypeEnum.BOOLEAN),
+				entry("canonical", HfqlDataTypeEnum.STRING),
+				entry("code", HfqlDataTypeEnum.STRING),
+				entry("date", HfqlDataTypeEnum.DATE),
+				entry("dateTime", HfqlDataTypeEnum.TIMESTAMP),
+				entry("decimal", HfqlDataTypeEnum.DECIMAL),
+				entry("id", HfqlDataTypeEnum.STRING),
+				entry("instant", HfqlDataTypeEnum.TIMESTAMP),
+				entry("integer", HfqlDataTypeEnum.INTEGER),
+				entry("integer64", HfqlDataTypeEnum.LONGINT),
+				entry("markdown", HfqlDataTypeEnum.STRING),
+				entry("oid", HfqlDataTypeEnum.STRING),
+				entry("positiveInt", HfqlDataTypeEnum.INTEGER),
+				entry("string", HfqlDataTypeEnum.STRING),
+				entry("time", HfqlDataTypeEnum.TIME),
+				entry("unsignedInt", HfqlDataTypeEnum.INTEGER),
+				entry("uri", HfqlDataTypeEnum.STRING),
+				entry("url", HfqlDataTypeEnum.STRING),
+				entry("uuid", HfqlDataTypeEnum.STRING),
+				entry("xhtml", HfqlDataTypeEnum.STRING));
 	}
 
 	private final FhirContext myFhirContext;
