@@ -80,17 +80,17 @@ public class HapiFhirDal implements FhirDal {
 			var urlBase = urlSplit[0];
 			var urlVersion = urlSplit[1];
 
-			return this.myDaoRegistry
+			var a = this.myDaoRegistry
 					.getResourceDao(theResourceType)
 					.search(SearchParameterMap.newSynchronous()
 							.add("url", new UriParam(urlBase))
-							.add("version", new TokenParam(urlVersion)))
-					.getAllResources();
+							.add("version", new TokenParam(urlVersion)));
+			return new BundleIterable(myRequestDetails, a);
 		} else {
-			return this.myDaoRegistry
+			var b = this.myDaoRegistry
 					.getResourceDao(theResourceType)
-					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)))
-					.getAllResources();
+					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)));
+			return new BundleIterable(myRequestDetails, b);
 		}
 	}
 }

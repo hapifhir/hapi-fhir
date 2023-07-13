@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This class tests the functionality of HapiFhirDal operations inside the cr module
@@ -46,8 +48,12 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
 		var url = "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1";
 		var result = hapiFhirDal.searchByUrl("Library", url);
-		// assert object was found
-		assertNotNull(result);
-	}
+
+		var resultIter = result.iterator();
+		assertTrue(resultIter.hasNext());
+		var finalResult = resultIter.next();
+		assertNotNull(finalResult);
+		}
+
 
 }
