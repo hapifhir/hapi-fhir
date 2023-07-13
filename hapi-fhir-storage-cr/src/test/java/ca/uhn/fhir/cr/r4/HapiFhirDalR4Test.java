@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
  * This class tests the functionality of HapiFhirDal operations inside the cr module
  */
@@ -35,6 +37,17 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 		}
 		//verify all patient resources captured
 		assertEquals(63, counter, "Patient search results don't match available resources");
+	}
+
+	@Test
+	void canSearchVersionURL(){
+		loadBundle("ca/uhn/fhir/cr/r4/Bundle-HapiFhirDalTestLibrary.json");
+
+		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
+		var url = "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1";
+		var result = hapiFhirDal.searchByUrl("Library", url);
+		// assert object was found
+		assertNotNull(result);
 	}
 
 }

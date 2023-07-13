@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.common;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -74,9 +75,22 @@ public class HapiFhirDal implements FhirDal {
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-		var b = this.myDaoRegistry
-				.getResourceDao(theResourceType)
-				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
-		return new BundleIterable(myRequestDetails, b);
+		if (theUrl.contains("|")) {
+			var urlSplit = theUrl.split("\\|");
+			var urlBase = urlSplit[0];
+			var urlVersion = urlSplit[1];
+
+			return this.myDaoRegistry
+					.getResourceDao(theResourceType)
+					.search(SearchParameterMap.newSynchronous()
+							.add("url", new UriParam(urlBase))
+							.add("version", new TokenParam(urlVersion)))
+					.getAllResources();
+		} else {
+			return this.myDaoRegistry
+					.getResourceDao(theResourceType)
+					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)))
+					.getAllResources();
+		}
 	}
 }
