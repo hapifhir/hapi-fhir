@@ -518,7 +518,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
 
-			String nextPageLink;
+		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -533,6 +533,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
 			if (resource.getIdElement().getIdPart().equals("PTB")) {
 				Patient replacement = new Patient();
 				replacement.setId("PTB");
