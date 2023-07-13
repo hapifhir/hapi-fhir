@@ -88,6 +88,8 @@ public class JdbcDriverTest {
 	@AfterEach
 	public void afterEach() throws SQLException {
 		myDs.close();
+
+		JdbcDriver.unload();
 	}
 
 	@Test

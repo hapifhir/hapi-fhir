@@ -36,6 +36,15 @@ import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.DEFAULT_FETCH_SIZE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This is the HTTP/REST client used by the JDBC driver to talk to the FHIR server.
+ * We don't use the HAPI FHIR REST client even though we're talking to a HAPI FHIR
+ * REST server because the operation we're calling returns CSV data instead of
+ * FHIR data. Instead, we just use the Apache HTTPClient.
+ * <p>
+ * Ideally in the future I'd like to explore using JDK primitives instead of even
+ * using the Apache client
+ */
 public class HfqlRestClient {
 	public static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withRecordSeparator('\n');
 	private final String myBaseUrl;

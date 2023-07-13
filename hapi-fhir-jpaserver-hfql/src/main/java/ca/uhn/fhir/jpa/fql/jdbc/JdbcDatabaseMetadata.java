@@ -946,12 +946,12 @@ public class JdbcDatabaseMetadata implements DatabaseMetaData {
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> iface) throws UnsupportedOperationException {
+	public <T> T unwrap(Class<T> theInterface) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean isWrapperFor(Class<?> iface) throws UnsupportedOperationException {
+	public boolean isWrapperFor(Class<?> theInterface) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}
 }

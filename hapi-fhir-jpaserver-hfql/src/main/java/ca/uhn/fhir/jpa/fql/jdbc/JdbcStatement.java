@@ -55,17 +55,17 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void close() throws SQLException {
+	public void close()  {
 		// ignored
 	}
 
 	@Override
-	public int getMaxFieldSize() throws SQLException {
+	public int getMaxFieldSize() {
 		return 0;
 	}
 
 	@Override
-	public void setMaxFieldSize(int max) throws SQLException {
+	public void setMaxFieldSize(int max) {
 		// ignored
 	}
 
@@ -80,37 +80,37 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void setEscapeProcessing(boolean enable) throws SQLException {
+	public void setEscapeProcessing(boolean enable) {
 		// ignored
 	}
 
 	@Override
-	public int getQueryTimeout() throws SQLException {
+	public int getQueryTimeout() {
 		return 0;
 	}
 
 	@Override
-	public void setQueryTimeout(int seconds) throws SQLException {
+	public void setQueryTimeout(int seconds) {
 		// ignored
 	}
 
 	@Override
-	public void cancel() throws SQLException {
+	public void cancel()  {
 		// ignored
 	}
 
 	@Override
-	public SQLWarning getWarnings() throws SQLException {
+	public SQLWarning getWarnings() {
 		return null;
 	}
 
 	@Override
-	public void clearWarnings() throws SQLException {
+	public void clearWarnings() {
 		// ignored
 	}
 
 	@Override
-	public void setCursorName(String name) throws SQLException {
+	public void setCursorName(String name) {
 		// ignored
 	}
 
@@ -136,32 +136,32 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public ResultSet getResultSet() throws SQLException {
+	public ResultSet getResultSet() {
 		return myResultSet;
 	}
 
 	@Override
-	public int getUpdateCount() throws SQLException {
+	public int getUpdateCount() {
 		return 0;
 	}
 
 	@Override
-	public boolean getMoreResults() throws SQLException {
+	public boolean getMoreResults()  {
 		return false;
 	}
 
 	@Override
-	public void setFetchDirection(int direction) throws SQLException {
+	public void setFetchDirection(int direction)  {
 		// ignored
 	}
 
 	@Override
-	public int getFetchDirection() throws SQLException {
+	public int getFetchDirection()  {
 		return ResultSet.FETCH_FORWARD;
 	}
 
 	@Override
-	public void setFetchSize(int theFetchSize) throws SQLException {
+	public void setFetchSize(int theFetchSize)  {
 		myFetchSize = theFetchSize;
 	}
 
@@ -171,12 +171,12 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int getResultSetConcurrency() throws SQLException {
+	public int getResultSetConcurrency()  {
 		return ResultSet.CONCUR_READ_ONLY;
 	}
 
 	@Override
-	public int getResultSetType() throws SQLException {
+	public int getResultSetType()  {
 		return ResultSet.TYPE_FORWARD_ONLY;
 	}
 
@@ -191,12 +191,12 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int[] executeBatch() throws SQLException {
+	public int[] executeBatch()  {
 		return new int[0];
 	}
 
 	@Override
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection()  {
 		return myConnection;
 	}
 
@@ -241,42 +241,42 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public int getResultSetHoldability() throws SQLException {
+	public int getResultSetHoldability()  {
 		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 
 	@Override
-	public boolean isClosed() throws SQLException {
+	public boolean isClosed()  {
 		return false;
 	}
 
 	@Override
-	public void setPoolable(boolean poolable) throws SQLException {
+	public void setPoolable(boolean thePoolable)  {
 		// ignored
 	}
 
 	@Override
-	public boolean isPoolable() throws SQLException {
+	public boolean isPoolable()  {
 		return false;
 	}
 
 	@Override
-	public void closeOnCompletion() throws SQLException {
+	public void closeOnCompletion()  {
 		// ignored
 	}
 
 	@Override
-	public boolean isCloseOnCompletion() throws SQLException {
+	public boolean isCloseOnCompletion()  {
 		return false;
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
+	public <T> T unwrap(Class<T> theInterface)  {
 		return null;
 	}
 
 	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+	public boolean isWrapperFor(Class<?> theInterface)  {
 		return false;
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
@@ -35,6 +36,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -43,6 +45,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +58,12 @@ import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * @see IHfqlExecutionResult for information about the purpose of this class
+ * This implementation of {@link IHfqlExecutionResult} is intended to be used within
+ * a remote client (ie a JDBC driver). It executes a call to a FHIR server, executing
+ * the {@link ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider#executeFql(IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, IPrimitiveType, RequestDetails, HttpServletResponse)}
+ * operation, parses the response and returns it.
+ *
+ * @see IHfqlExecutionResult for more information about the purpose of this class
  */
 public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 	private final List<String> myColumnNames = new ArrayList<>();

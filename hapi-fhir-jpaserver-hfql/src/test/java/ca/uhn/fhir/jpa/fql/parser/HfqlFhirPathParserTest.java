@@ -1,11 +1,15 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HfqlFhirPathParserTest {
 
@@ -26,9 +30,25 @@ public class HfqlFhirPathParserTest {
 		"Patient     , Patient.identifier                                ,   ",
 		"Patient     , foo                                               ,   ",
 	})
-	public void testDetermineDatatypeForPath(String theResourceType, String theFhirPath, HfqlDataTypeEnum theExpectedType) {
+	void testDetermineDatatypeForPath(String theResourceType, String theFhirPath, HfqlDataTypeEnum theExpectedType) {
 		HfqlFhirPathParser svc = new HfqlFhirPathParser(FhirContext.forR4Cached());
 		HfqlDataTypeEnum actual = svc.determineDatatypeForPath(theResourceType, theFhirPath);
 		assertEquals(theExpectedType, actual);
 	}
+
+
+	@Test
+	void testAllFhirDataTypesHaveMappings() {
+		FhirContext ctx = FhirContext.forR5Cached();
+		int foundCount = 0;
+		for (BaseRuntimeElementDefinition<?> next : ctx.getElementDefinitions()) {
+			if (next instanceof RuntimePrimitiveDatatypeDefinition) {
+				assertNotNull(HfqlFhirPathParser.getHfqlDataTypeForFhirType(next.getName()), () -> "No mapping for type: " + next.getName());
+				foundCount++;
+			}
+		}
+		assertEquals(21, foundCount);
+	}
+
+
 }

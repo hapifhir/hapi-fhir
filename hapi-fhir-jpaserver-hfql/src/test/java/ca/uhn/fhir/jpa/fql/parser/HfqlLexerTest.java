@@ -70,14 +70,14 @@ public class HfqlLexerTest {
 			  """;
 		HfqlLexer hfqlLexer = new HfqlLexer(input);
 
-		assertEquals("from", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
-		assertEquals("Patient", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
-		assertEquals("search", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
+		assertEquals("from", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
+		assertEquals("Patient", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
+		assertEquals("search", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 		assertEquals("_has:Observation:subject:device.identifier", hfqlLexer.getNextToken(HfqlLexerOptions.SEARCH_PARAMETER_NAME).getToken());
-		assertEquals("=", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
-		assertEquals("'1234-5'", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
-		assertEquals("select", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
-		assertEquals("name.family", hfqlLexer.getNextToken(HfqlLexerOptions.DEFAULT).getToken());
+		assertEquals("=", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
+		assertEquals("'1234-5'", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
+		assertEquals("select", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
+		assertEquals("name.family", hfqlLexer.getNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 
 	}
 
@@ -133,9 +133,9 @@ public class HfqlLexerTest {
 		assertEquals("select", lexer.getNextToken().getToken());
 
 		// Test + Verify
-		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.DEFAULT).getToken());
+		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.peekNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
-		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.DEFAULT).getToken());
+		assertEquals("(", lexer.peekNextToken(HfqlLexerOptions.HFQL_TOKEN).getToken());
 		assertEquals("( Observation.value.ofType ( Quantity ) ).unit", lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION).getToken());
 	}
 

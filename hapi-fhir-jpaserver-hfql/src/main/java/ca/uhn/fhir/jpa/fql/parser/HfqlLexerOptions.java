@@ -23,7 +23,11 @@ import java.util.Set;
 
 public class HfqlLexerOptions {
 
-	public static final HfqlLexerOptions DEFAULT = new HfqlLexerOptions(
+	/**
+	 * Standard HFQL tokenization rules for when we're not expecting anything
+	 * more specialized.
+	 */
+	public static final HfqlLexerOptions HFQL_TOKEN = new HfqlLexerOptions(
 			Set.of(
 					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
 					'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -32,6 +36,9 @@ public class HfqlLexerOptions {
 			Set.of(',', '=', '(', ')', '|', ':', '*'),
 			false);
 
+	/**
+	 * A FHIR search parameter name.
+	 */
 	public static final HfqlLexerOptions SEARCH_PARAMETER_NAME = new HfqlLexerOptions(
 			Set.of(
 					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
@@ -41,6 +48,9 @@ public class HfqlLexerOptions {
 			Set.of(),
 			false);
 
+	/**
+	 * A complete FHIRPath expression.
+	 */
 	public static final HfqlLexerOptions FHIRPATH_EXPRESSION = new HfqlLexerOptions(
 			Set.of(
 					'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
@@ -81,14 +91,25 @@ public class HfqlLexerOptions {
 		}
 	}
 
+	/**
+	 * These characters are treated as a single character token if they are found
+	 */
 	public Set<Character> getSingleCharTokenCharacters() {
 		return mySingleCharTokenCharacters;
 	}
 
+	/**
+	 * These characters are valid as a part of a multi-character token
+	 */
 	public Set<Character> getMultiCharTokenCharacters() {
 		return myMultiCharTokenCharacters;
 	}
 
+	/**
+	 * If we encounter a ( character in the token, should we grab everything until we find a
+	 * matching ) character, regardless of which characters and whitespace are found between
+	 * the parens?
+	 */
 	public boolean isSlurpParens() {
 		return mySlurpParens;
 	}

@@ -50,6 +50,11 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+/**
+ * JDBC ResultSet for HFQL which is backed by a {@link IHfqlExecutionResult} instance
+ * (typically a {@link RemoteHfqlExecutionResult} that is streaming results from the
+ * server).
+ */
 class JdbcResultSet implements ResultSet {
 
 	/**

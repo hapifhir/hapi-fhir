@@ -216,7 +216,7 @@ public class HfqlStatementParser {
 				mySelectClause.setClause(clause);
 				myState = new StateSelectAfterClauseFinal(mySelectClause);
 			} else if (theToken.asKeyword().equals("AS")) {
-				HfqlLexerToken nextToken = getNextTokenRequired(HfqlLexerOptions.DEFAULT);
+				HfqlLexerToken nextToken = getNextTokenRequired(HfqlLexerOptions.HFQL_TOKEN);
 				String alias = nextToken.asString();
 				mySelectClause.setAlias(alias);
 				myState = new StateSelectAfterClauseFinal(mySelectClause);
@@ -478,9 +478,9 @@ public class HfqlStatementParser {
 		void consume(HfqlLexerToken theToken) {
 			myStatement.addGroupByClause(theToken.asString());
 
-			if (myLexer.hasNextToken(HfqlLexerOptions.DEFAULT)
+			if (myLexer.hasNextToken(HfqlLexerOptions.HFQL_TOKEN)
 					&& ","
-							.equals(myLexer.peekNextToken(HfqlLexerOptions.DEFAULT)
+							.equals(myLexer.peekNextToken(HfqlLexerOptions.HFQL_TOKEN)
 									.getToken())) {
 				myLexer.consumeNextToken();
 			} else {
@@ -545,7 +545,7 @@ public class HfqlStatementParser {
 
 		@Nonnull
 		public HfqlLexerOptions getLexerOptions() {
-			return HfqlLexerOptions.DEFAULT;
+			return HfqlLexerOptions.HFQL_TOKEN;
 		}
 	}
 }

@@ -11,6 +11,7 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.ExpressionNode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -47,7 +48,7 @@ public class FhirPathR5 implements IFhirPath {
 
 	@Nonnull
 	private <T extends IBase> List<Base> evaluate(
-			IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
+		IBase theInput, ExpressionNode expressionNode, Class<T> theReturnType) {
 		List<Base> result;
 		try {
 			result = myEngine.evaluate((Base) theInput, expressionNode);

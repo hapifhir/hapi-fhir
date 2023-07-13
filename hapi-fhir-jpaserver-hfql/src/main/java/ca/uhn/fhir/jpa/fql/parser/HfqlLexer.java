@@ -57,7 +57,7 @@ class HfqlLexer {
 	 */
 	@Nonnull
 	public HfqlLexerToken getNextToken() {
-		return getNextToken(HfqlLexerOptions.DEFAULT);
+		return getNextToken(HfqlLexerOptions.HFQL_TOKEN);
 	}
 
 	/**
@@ -207,7 +207,7 @@ class HfqlLexer {
 	}
 
 	public List<String> allTokens() {
-		return allTokens(HfqlLexerOptions.DEFAULT);
+		return allTokens(HfqlLexerOptions.HFQL_TOKEN);
 	}
 
 	public List<String> allTokens(@Nonnull HfqlLexerOptions theOptions) {

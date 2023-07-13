@@ -67,7 +67,7 @@ class HfqlLexerToken {
 
 	@Nonnull
 	public String describePosition() {
-		return "[line=" + myLine + ", column=" + myColumn + "]";
+		return "[line=" + getLine() + ", column=" + getColumn() + "]";
 	}
 
 	public boolean isQuotedString() {

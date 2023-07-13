@@ -24,9 +24,22 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+/**
+ * This is the JDBC driver class for the HFQL driver. It is intended to be
+ * imported into a JDBC-compliant database tool, and implements the basic
+ * functionality required to introspect the "database" and execute queries.
+ * <p>
+ * Connections returned by this driver are only semi-stateful. In a normal
+ * JDBC driver, each connection represents an open and persistent TCP
+ * connection to the server with shared state between the client and the
+ * server, but in this driver we keep most of the state in the client. When
+ * a query is executed it is translated into a FHIR search (with further
+ * processing on the search results happening in
+ * {@link ca.uhn.fhir.jpa.fql.executor.HfqlExecutor}).
+ */
 public class JdbcDriver implements Driver {
 	private static final JdbcDriver INSTANCE = new JdbcDriver();
-	public static final String URL_PREFIX = "jdbc:hapifhir:";
+	public static final String URL_PREFIX = "jdbc:hapifhir:hfql:";
 	private static boolean ourRegistered;
 
 	static {
@@ -49,7 +62,7 @@ public class JdbcDriver implements Driver {
 	}
 
 	@Override
-	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+	public DriverPropertyInfo[] getPropertyInfo(String theUrl, Properties theInfo) {
 		return new DriverPropertyInfo[0];
 	}
 

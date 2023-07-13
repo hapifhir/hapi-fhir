@@ -120,18 +120,10 @@ public class HfqlStatement implements IModelJson {
 		myLimit = theLimit;
 	}
 
-	public HavingClause addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator, String theRight) {
-		HavingClause clause = addHavingClause(theLeft, theOperator);
-		clause.addRight(theRight);
-		return clause;
-	}
-
-	@Nonnull
-	public HavingClause addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator) {
+	public void addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator) {
 		HavingClause clause = addHavingClause();
 		clause.setLeft(theLeft);
 		clause.setOperator(theOperator);
-		return clause;
 	}
 
 	public void addGroupByClause(String theGroupByClause) {
@@ -187,7 +179,7 @@ public class HfqlStatement implements IModelJson {
 		COUNT
 	}
 
-	public class OrderByClause implements IModelJson {
+	public static class OrderByClause implements IModelJson {
 
 		@JsonProperty("clause")
 		private String myClause;
