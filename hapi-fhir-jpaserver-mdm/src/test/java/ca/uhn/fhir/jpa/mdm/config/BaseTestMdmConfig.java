@@ -34,7 +34,7 @@ public abstract class BaseTestMdmConfig {
 	@Bean
 	IMdmSettings mdmSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = myRulesFile == null ?
+		Resource resource = (myRulesFile == null || !myRulesFile.exists()) ?
 			resourceLoader.getResource("mdm/mdm-rules.json") : myRulesFile;
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		return new MdmSettings(theMdmRuleValidator)

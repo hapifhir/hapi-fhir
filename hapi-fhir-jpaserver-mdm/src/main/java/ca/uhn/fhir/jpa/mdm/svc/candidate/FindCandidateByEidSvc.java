@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -35,10 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class FindCandidateByEidSvc extends BaseCandidateFinder {
@@ -54,15 +52,9 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
-	@Deprecated
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
-		return new ArrayList<>(findUniqueMatchGoldenResourceCandidates(theTarget));
-	}
-
-	@Override
-	protected Set<MatchedGoldenResourceCandidate> findUniqueMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
-		Set<MatchedGoldenResourceCandidate> retval = new HashSet<>();
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
+		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
 		if (!eidFromResource.isEmpty()) {
