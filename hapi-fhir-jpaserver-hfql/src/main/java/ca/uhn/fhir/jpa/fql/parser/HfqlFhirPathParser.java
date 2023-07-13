@@ -70,6 +70,13 @@ public class HfqlFhirPathParser {
 		myFhirContext = theFhirContext;
 	}
 
+	/**
+	 * Given a FHIRPath expression (and a resource type that it applies to), this
+	 * class tries to determine the {@link HfqlDataTypeEnum HFQL Data Type} that the
+	 * values will be when the expression is resolved. This is not nearly foolproof,
+	 * so it is a best effort determination. If the type is ambiguous or can't be determined,
+	 * this method will return {@link HfqlDataTypeEnum#STRING}.
+	 */
 	public HfqlDataTypeEnum determineDatatypeForPath(String theResourceType, String theFhirPath) {
 
 		BaseRuntimeElementCompositeDefinition<?> currentElementDefinition =
@@ -101,7 +108,7 @@ public class HfqlFhirPathParser {
 			 * function such as in "Patient.identifier.where(system='http://foo').value"
 			 * so that we can just skip the filter function and continue to navigate
 			 * the element names as though the filter wasn't there. This is probably
-			 * not going to hold true always but it should be good enough for our
+			 * not going to hold true always, but it should be good enough for our
 			 * basic type guessing.
 			 */
 			if (nextToken.contains("(")) {

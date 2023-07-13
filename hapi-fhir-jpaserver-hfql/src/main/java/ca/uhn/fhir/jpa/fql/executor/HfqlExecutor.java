@@ -63,8 +63,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.StringUtils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -82,10 +80,23 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * This class could be considered the main entrypoint into the HFQL executor.
+ * It receives a raw HFQL query, parses it, executes it, and returns a result set.
+ * Conceptually the {@link #executeInitialSearch(String, Integer, RequestDetails)}
+ * method can be thought of like the JPA DAO <code>search</code> method, and the
+ * {@link #executeContinuation(HfqlStatement, String, int, Integer, RequestDetails)}
+ * can be thought of like loading a subsequent page of the search results.
+ * <p>
+ * Both of these methods return an {@link IHfqlExecutionResult}, which is essentially
+ * a result row iterator.
+ */
 public class HfqlExecutor implements IHfqlExecutor {
 	public static final int BATCH_SIZE = 1000;
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];

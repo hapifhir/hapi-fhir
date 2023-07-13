@@ -54,6 +54,9 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * @see IHfqlExecutionResult for information about the purpose of this class
+ */
 public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 	private final List<String> myColumnNames = new ArrayList<>();
 	private final List<HfqlDataTypeEnum> myColumnTypes = new ArrayList<>();

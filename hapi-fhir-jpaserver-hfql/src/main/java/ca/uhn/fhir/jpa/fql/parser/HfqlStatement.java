@@ -30,6 +30,11 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/**
+ * This class represents a parsed HFQL expression tree. It is useful for
+ * passing over the wire, but it should not be considered a stable model (in
+ * other words, don't persist these things long-term).
+ */
 public class HfqlStatement implements IModelJson {
 
 	@JsonProperty("select")

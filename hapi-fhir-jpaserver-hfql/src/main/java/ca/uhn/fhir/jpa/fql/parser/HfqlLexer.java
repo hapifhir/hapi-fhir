@@ -28,6 +28,11 @@ import javax.annotation.Nonnull;
 
 import static java.lang.Character.isWhitespace;
 
+/**
+ * Just a simple lexer used to parse HFQL queries and FHIRPath expressions. The lexer
+ * returns a stream of tokens and can use different lexing rules depending on the
+ * {@link HfqlLexerOptions} passed in.
+ */
 class HfqlLexer {
 
 	private final char[] myInput;

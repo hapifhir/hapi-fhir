@@ -57,6 +57,15 @@ public class HfqlRestProvider {
 		super();
 	}
 
+	/**
+	 * This function implements the <code>$hfql-execute</code> operation, which is
+	 * the FHIR operation that the HFQL JDBC client uses to talk to the server. All
+	 * communication between the client and the server goes through this operation. The
+	 * response is not FHIR however: Responses from this operation are in CSV format using
+	 * a custom CSV format that is understood by the client. See
+	 * {@link #streamResponseCsv(HttpServletResponse, int, IHfqlExecutionResult, boolean, HfqlStatement)}
+	 * to see how that format works.
+	 */
 	@Operation(name = HfqlConstants.HFQL_EXECUTE, manualResponse = true)
 	public void executeFql(
 			@OperationParam(name = HfqlConstants.PARAM_ACTION, typeName = "code", min = 0, max = 1)

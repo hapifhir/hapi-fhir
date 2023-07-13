@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * @see IHfqlExecutionResult for information about the purpose of this class
+ */
 public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private static final Logger ourLog = LoggerFactory.getLogger(LocalSearchHfqlExecutionResult.class);
 

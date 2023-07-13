@@ -26,6 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/**
+ * @see IHfqlExecutionResult for information about the purpose of this class
+ */
 public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	private final String mySearchId;
 	private final Iterator<List<Object>> myRowsIterator;
