@@ -107,8 +107,6 @@ public class CareGapsService implements IDaoRegistryUser {
 
 	private Executor myCqlExecutor;
 
-	private DaoRegistry myDaoRegistry;
-
 	private final Map<String, Resource> myConfiguredResources = new HashMap<>();
 
 	public CareGapsService(CrProperties theCrProperties,

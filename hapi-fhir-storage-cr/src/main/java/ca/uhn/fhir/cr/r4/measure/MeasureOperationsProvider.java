@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.r4.IMeasureProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,6 +33,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +41,9 @@ import java.util.function.Function;
 
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	IMeasureProcessorFactory myR4MeasureProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -75,8 +80,8 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "additionalData") Bundle theAdditionalData,
 													 @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
-			.apply(theRequestDetails)
+		return myR4MeasureProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.evaluateMeasure(
 				theId,
 				thePeriodStart,
