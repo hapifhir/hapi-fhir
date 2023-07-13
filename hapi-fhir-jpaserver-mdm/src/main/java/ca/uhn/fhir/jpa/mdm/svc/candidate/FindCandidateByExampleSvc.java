@@ -37,8 +37,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,27 +77,31 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(
-				myFhirContext.getResourceType(theTarget),
-				theTarget,
-				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theTarget));
+			myFhirContext.getResourceType(theTarget),
+			theTarget,
+			myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theTarget));
 
 		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
 		// while ensuring that the matches aren't in our NO_MATCH list.
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream()
-				.filter(mc -> mc.isMatch() || mc.isPossibleMatch())
-				.collect(Collectors.toList());
+			.filter(mc -> mc.isMatch() || mc.isPossibleMatch())
+			.collect(Collectors.toList());
 		List<String> skippedLogMessages = new ArrayList<>();
 		List<String> matchedLogMessages = new ArrayList<>();
+
+		// we'll track the added ids so we don't add the same resources twice
+		// note, all these resources are the same type, so we only need the Long value
+		Set<Long> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
 				if (ourLog.isDebugEnabled()) {
 					skippedLogMessages.add(String.format(
-							"%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.",
-							match.getTarget().getIdElement().toUnqualifiedVersionless()));
+						"%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.",
+						match.getTarget().getIdElement().toUnqualifiedVersionless()));
 				}
 				continue;
 			}
@@ -103,22 +109,26 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 			IMdmLink matchMdmLink = optionalMdmLink.get();
 			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePersistenceId())) {
 				skippedLogMessages.add(String.format(
-						"Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH",
-						matchMdmLink.getGoldenResourcePersistenceId().toString()));
+					"Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH",
+					matchMdmLink.getGoldenResourcePersistenceId().toString()));
 				continue;
 			}
 
 			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(
-					matchMdmLink.getGoldenResourcePersistenceId(), match.getMatchResult());
+				matchMdmLink.getGoldenResourcePersistenceId(), match.getMatchResult());
 
 			if (ourLog.isDebugEnabled()) {
 				matchedLogMessages.add(String.format(
-						"Navigating from matched resource %s to its Golden Resource %s",
-						match.getTarget().getIdElement().toUnqualifiedVersionless(),
-						matchMdmLink.getGoldenResourcePersistenceId().toString()));
+					"Navigating from matched resource %s to its Golden Resource %s",
+					match.getTarget().getIdElement().toUnqualifiedVersionless(),
+					matchMdmLink.getGoldenResourcePersistenceId().toString())
+				);
 			}
 
-			retval.add(candidate);
+			//only add if it's not already in the list
+			if (currentIds.add((Long) candidate.getCandidateGoldenResourcePid().getId())) {
+				retval.add(candidate);
+			}
 		}
 
 		if (ourLog.isDebugEnabled()) {
@@ -135,8 +145,8 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 	private List<P> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
 		P targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH).stream()
-				.map(IMdmLink::getGoldenResourcePersistenceId)
-				.collect(Collectors.toList());
+			.map(IMdmLink::getGoldenResourcePersistenceId)
+			.collect(Collectors.toList());
 	}
 
 	@Override
