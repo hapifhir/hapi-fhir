@@ -148,8 +148,8 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-		throw newSqlExceptionForUnsupportedOperation();
+	public Statement createStatement(int resultSetType, int resultSetConcurrency) {
+		return createStatement();
 	}
 
 	@Override
@@ -204,9 +204,8 @@ class JdbcConnection implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-			throws SQLException {
-		throw newSqlExceptionForUnsupportedOperation();
+	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) {
+		return createStatement(resultSetType, resultSetConcurrency);
 	}
 
 	@Override
