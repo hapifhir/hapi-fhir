@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
@@ -147,7 +148,7 @@ public class JdbcDriverTest {
 			fail();
 		} catch (UncategorizedSQLException e) {
 			assertEquals(SQLException.class, e.getCause().getClass());
-			assertEquals("this is an error!", e.getCause().getMessage());
+			assertEquals(Msg.code(2395) + "this is an error!", e.getCause().getMessage());
 		}
 	}
 

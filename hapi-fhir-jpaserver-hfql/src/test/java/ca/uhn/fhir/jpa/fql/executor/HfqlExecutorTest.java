@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
@@ -238,7 +239,7 @@ public class HfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		IHfqlExecutionResult.Row row = result.getNextRow();
 		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
-		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: Error in ?? at 1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
+		assertEquals("Failed to evaluate FHIRPath expression \"foo()\". Error: HAPI-2404: Error in ?? at 1, 1: The name foo is not a valid function name", row.getRowValues().get(0));
 		assertFalse(result.hasNext());
 	}
 
@@ -255,7 +256,7 @@ public class HfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		IHfqlExecutionResult.Row row = result.getNextRow();
 		assertEquals(IHfqlExecutionResult.ROW_OFFSET_ERROR, row.getRowOffset());
-		assertEquals("Unable to evaluate FHIRPath expression \"meta.versionId > 1\". Error: HAPI-0255: Error evaluating FHIRPath expression: Unable to compare values of type id and integer (@char 3)", row.getRowValues().get(0));
+		assertEquals(Msg.code(2403) + "Unable to evaluate FHIRPath expression \"meta.versionId > 1\". Error: HAPI-0255: Error evaluating FHIRPath expression: Unable to compare values of type id and integer (@char 3)", row.getRowValues().get(0));
 		assertFalse(result.hasNext());
 	}
 
@@ -381,7 +382,7 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertErrorMessage(result, "Can not group on > 10000 terms");
+		assertErrorMessage(result, Msg.code(2402) + "Can not group on > 10000 terms");
 	}
 
 	@Test
