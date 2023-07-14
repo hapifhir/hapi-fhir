@@ -20,11 +20,15 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 
 public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
@@ -51,6 +55,14 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public Condition createPredicateSourceUri(String theSourceUri) {
 		return BinaryCondition.equalTo(myColumnSourceUri, generatePlaceholder(theSourceUri));
+	}
+
+	public Condition createPredicateSourceUriWithModifiers(IQueryParameterType theQueryParameter, String theSourceUri) {
+		if (UriParamQualifierEnum.BELOW.getValue().equals(theQueryParameter.getQueryParameterQualifier())) {
+			return BinaryCondition.like(myColumnSourceUri, generatePlaceholder(createLeftMatchLikeExpression(theSourceUri)));
+		} else {
+			return createPredicateSourceUri(theSourceUri);
+		}
 	}
 
 	public Condition createPredicateRequestId(String theRequestId) {
