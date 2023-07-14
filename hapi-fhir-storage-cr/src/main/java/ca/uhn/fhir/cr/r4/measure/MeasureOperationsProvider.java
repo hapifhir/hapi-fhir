@@ -33,10 +33,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.function.Function;
 
 public class MeasureOperationsProvider {
 	@Autowired
@@ -68,34 +65,6 @@ public class MeasureOperationsProvider {
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-<<<<<<< HEAD
-	public MeasureReport evaluateMeasure(
-			@IdParam IdType theId,
-			@OperationParam(name = "periodStart") String thePeriodStart,
-			@OperationParam(name = "periodEnd") String thePeriodEnd,
-			@OperationParam(name = "reportType") String theReportType,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "practitioner") String thePractitioner,
-			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
-			@OperationParam(name = "productLine") String theProductLine,
-			@OperationParam(name = "additionalData") Bundle theAdditionalData,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails)
-			throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
-				.apply(theRequestDetails)
-				.evaluateMeasure(
-						theId,
-						thePeriodStart,
-						thePeriodEnd,
-						theReportType,
-						theSubject,
-						thePractitioner,
-						theLastReceivedOn,
-						theProductLine,
-						theAdditionalData,
-						theTerminologyEndpoint);
-=======
 	public MeasureReport evaluateMeasure(@IdParam IdType theId,
 													 @OperationParam(name = "periodStart") String thePeriodStart,
 													 @OperationParam(name = "periodEnd") String thePeriodEnd,
@@ -120,6 +89,6 @@ public class MeasureOperationsProvider {
 				theProductLine,
 				theAdditionalData,
 				theTerminologyEndpoint);
->>>>>>> hapi-fhir-cr-measure-repository-api-updates
-	}
+
+}
 }

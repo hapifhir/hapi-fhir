@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrProperties;
 import ca.uhn.fhir.cr.config.CrR4Config;
-import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.CareGapsOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -73,7 +73,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 	private static Server ourServer;
 	private static String ourServerBase;
 	@Autowired
-	CareGapsOperationProvider myCareGapsOperationProvider;
+	CareGapsOperationsProvider myCareGapsOperationProvider;
 
 	@Autowired
 	CrProperties myCrProperties;

@@ -53,11 +53,13 @@ public class CrProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myLogger.info("Registering CQL Provider");
+				myLogger.info("Registering Clinical Reasoning Providers");
 				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getMeasureOperationsProvider());
+				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getCareGapsOperationsProvider());
+				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getSubmitDataOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version "
+				throw new ConfigurationException(Msg.code(1653) + "Clinical Reasoning not supported for FHIR version "
 						+ myFhirContext.getVersion().getVersion());
 		}
 	}
