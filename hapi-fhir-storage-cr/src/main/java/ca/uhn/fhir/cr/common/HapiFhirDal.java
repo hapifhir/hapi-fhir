@@ -85,15 +85,19 @@ public class HapiFhirDal implements FhirDal {
 
 			IBundleProvider versionResource = this.myDaoRegistry
 					.getResourceDao(theResourceType)
-					.search(SearchParameterMap.newSynchronous()
-							.add("url", new UriParam(urlBase))
-							.add("version", new TokenParam(urlVersion)), new SystemRequestDetails());
+					.search(
+							SearchParameterMap.newSynchronous()
+									.add("url", new UriParam(urlBase))
+									.add("version", new TokenParam(urlVersion)),
+							new SystemRequestDetails());
 			return new BundleIterable(myRequestDetails, versionResource);
 		} else {
 			// standard example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine"
 			IBundleProvider standardResource = this.myDaoRegistry
 					.getResourceDao(theResourceType)
-					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), new SystemRequestDetails());
+					.search(
+							SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)),
+							new SystemRequestDetails());
 			return new BundleIterable(myRequestDetails, standardResource);
 		}
 	}
