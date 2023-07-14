@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Iterator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,15 +45,20 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 
 	@Test
 	void canSearchVersionURL(){
+		// load measure resource with Library url containing "|", this is the only component of test resource used.
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-HapiFhirDalTestLibrary.json");
-
 		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
-		var url = "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1";
-		var result = hapiFhirDal.searchByUrl("Library", url);
 
-		var resultIter = result.iterator();
+		// library url from loaded measure resource
+		String url = "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1";
+		// search for resource given url
+		Iterable<IBaseResource> result = hapiFhirDal.searchByUrl("Library", url);
+		Iterator<IBaseResource> resultIter = result.iterator();
+		// validate Iterable contains a resource
 		assertTrue(resultIter.hasNext());
-		var finalResult = resultIter.next();
+		// get resource
+		IBaseResource finalResult = resultIter.next();
+		// validate resource exists
 		assertNotNull(finalResult);
 		}
 
