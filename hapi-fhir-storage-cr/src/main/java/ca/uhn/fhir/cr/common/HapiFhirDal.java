@@ -77,6 +77,7 @@ public class HapiFhirDal implements FhirDal {
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
+		// version example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1"
 		if (theUrl.contains("|")) {
 			String[] urlSplit = theUrl.split("\\|");
 			String urlBase = urlSplit[0];
@@ -89,6 +90,7 @@ public class HapiFhirDal implements FhirDal {
 							.add("version", new TokenParam(urlVersion)), new SystemRequestDetails());
 			return new BundleIterable(myRequestDetails, versionResource);
 		} else {
+			// starndard example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine"
 			IBundleProvider standardResource = this.myDaoRegistry
 					.getResourceDao(theResourceType)
 					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), new SystemRequestDetails());
