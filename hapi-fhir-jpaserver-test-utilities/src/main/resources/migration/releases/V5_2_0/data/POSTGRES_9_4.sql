@@ -11,7 +11,9 @@ INSERT INTO MPI_LINK (
    TARGET_PID,
    UPDATED,
    VECTOR,
-   VERSION
+   VERSION,
+   GOLDEN_RESOURCE_PID,
+   RULE_COUNT
 ) VALUES (
    1,
    '2023-04-05 15:16:26.43',
@@ -25,5 +27,7 @@ INSERT INTO MPI_LINK (
    1905,
    '2023-04-05 15:16:26.43',
    NULL,
-   '1'
+   '1',
+   1906,
+   1
 );
