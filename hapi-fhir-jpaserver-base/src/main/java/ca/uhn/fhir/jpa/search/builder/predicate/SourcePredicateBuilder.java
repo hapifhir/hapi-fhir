@@ -59,7 +59,8 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public Condition createPredicateSourceUriWithModifiers(IQueryParameterType theQueryParameter, String theSourceUri) {
 		if (UriParamQualifierEnum.BELOW.getValue().equals(theQueryParameter.getQueryParameterQualifier())) {
-			return BinaryCondition.like(myColumnSourceUri, generatePlaceholder(createLeftMatchLikeExpression(theSourceUri)));
+			return BinaryCondition.like(
+					myColumnSourceUri, generatePlaceholder(createLeftMatchLikeExpression(theSourceUri)));
 		} else {
 			return createPredicateSourceUri(theSourceUri);
 		}
