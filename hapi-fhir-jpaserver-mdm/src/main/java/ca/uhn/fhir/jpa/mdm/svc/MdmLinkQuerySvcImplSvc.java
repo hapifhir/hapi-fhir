@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,6 +132,13 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 		return mdmLinkHistoryFromDao.stream()
 				.map(myMdmModelConverterSvc::toJson)
+				.sorted(createResultSortingComparator())
 				.collect(Collectors.toUnmodifiableList());
+	}
+
+	private Comparator<MdmLinkWithRevisionJson> createResultSortingComparator() {
+		return Comparator.comparing((MdmLinkWithRevisionJson l)->l.getMdmLink().getGoldenResourceId())
+			.thenComparing((MdmLinkWithRevisionJson l)->l.getMdmLink().getSourceId())
+			.thenComparing(MdmLinkWithRevisionJson::getRevisionTimestamp, Comparator.reverseOrder());
 	}
 }
