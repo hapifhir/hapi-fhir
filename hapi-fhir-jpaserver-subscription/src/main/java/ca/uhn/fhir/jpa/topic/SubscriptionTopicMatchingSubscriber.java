@@ -24,8 +24,6 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.filter.InMemoryTopicFilterMatcher;
@@ -39,10 +37,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
@@ -54,15 +52,6 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 	@Autowired
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
-
-	@Autowired
-	SubscriptionRegistry mySubscriptionRegistry;
-
-	@Autowired
-	SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
-
-	@Autowired
-	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
