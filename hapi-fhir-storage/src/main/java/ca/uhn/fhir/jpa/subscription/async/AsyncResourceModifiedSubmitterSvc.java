@@ -1,4 +1,4 @@
-package ca.uhn.fhir.subscription;
+package ca.uhn.fhir.jpa.subscription.async;
 
 /*-
  * #%L

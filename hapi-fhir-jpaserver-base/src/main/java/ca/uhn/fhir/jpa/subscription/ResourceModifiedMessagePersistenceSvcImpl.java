@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.subscription.AsyncResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
