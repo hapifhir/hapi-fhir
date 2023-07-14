@@ -10,17 +10,23 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -268,6 +274,30 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			assertEquals(0, result.size());
 		}
 
+	}
+
+	@Test
+	public void testSearchSource_withBelowModifier_returnsSourcesBelow() {
+		IIdType p1Id = createPatientWithSource("http://some-source/v1/123");
+		IIdType p2Id = createPatientWithSource("http://some-source/v1");
+		IIdType p3Id = createPatientWithSource("http://some-source");
+
+		createPatientWithSource("http://another-source");
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(PARAM_SOURCE, new UriParam("http://some-source").setQualifier(UriParamQualifierEnum.BELOW));
+		IBundleProvider results = myPatientDao.search(params);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+
+		assertThat(values.toString(), values, containsInAnyOrder(p1Id.getValue(), p2Id.getValue(), p3Id.getValue()));
+	}
+
+	private IIdType createPatientWithSource(String theSource) {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		p1.setMeta(new Meta().setSource(theSource));
+		return myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
