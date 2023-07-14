@@ -32,7 +32,12 @@ public class FhirPathDstu3 implements IFhirPath {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
-		ExpressionNode parsed = myEngine.parse(thePath);
+		ExpressionNode parsed;
+		try {
+			parsed = myEngine.parse(thePath);
+		} catch (FHIRException e) {
+			throw new FhirPathExecutionException(Msg.code(2408) + e);
+		}
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}
 
@@ -79,15 +84,6 @@ public class FhirPathDstu3 implements IFhirPath {
 		return new ParsedExpression(myEngine.parse(theExpression));
 	}
 
-	private static class ParsedExpression implements IParsedExpression {
-
-		private final ExpressionNode myParsedExpression;
-
-		public ParsedExpression(ExpressionNode theParsedExpression) {
-			myParsedExpression = theParsedExpression;
-		}
-	}
-
 	@Override
 	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
 		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext() {
@@ -128,5 +124,14 @@ public class FhirPathDstu3 implements IFhirPath {
 				return (Base) theEvaluationContext.resolveReference(new IdType(theUrl), null);
 			}
 		});
+	}
+
+	private static class ParsedExpression implements IParsedExpression {
+
+		private final ExpressionNode myParsedExpression;
+
+		public ParsedExpression(ExpressionNode theParsedExpression) {
+			myParsedExpression = theParsedExpression;
+		}
 	}
 }

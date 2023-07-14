@@ -36,7 +36,12 @@ public class FhirPathR4 implements IFhirPath {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
-		ExpressionNode parsed = myEngine.parse(thePath);
+		ExpressionNode parsed;
+		try {
+			parsed = myEngine.parse(thePath);
+		} catch (FHIRException e) {
+			throw new FhirPathExecutionException(Msg.code(2409) + e);
+		}
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}
 
@@ -81,15 +86,6 @@ public class FhirPathR4 implements IFhirPath {
 	@Override
 	public IParsedExpression parse(String theExpression) {
 		return new ParsedExpression(myEngine.parse(theExpression));
-	}
-
-	private static class ParsedExpression implements IParsedExpression {
-
-		private final ExpressionNode myParsedExpression;
-
-		public ParsedExpression(ExpressionNode theParsedExpression) {
-			myParsedExpression = theParsedExpression;
-		}
 	}
 
 	@Override
@@ -144,5 +140,14 @@ public class FhirPathR4 implements IFhirPath {
 				return null;
 			}
 		});
+	}
+
+	private static class ParsedExpression implements IParsedExpression {
+
+		private final ExpressionNode myParsedExpression;
+
+		public ParsedExpression(ExpressionNode theParsedExpression) {
+			myParsedExpression = theParsedExpression;
+		}
 	}
 }

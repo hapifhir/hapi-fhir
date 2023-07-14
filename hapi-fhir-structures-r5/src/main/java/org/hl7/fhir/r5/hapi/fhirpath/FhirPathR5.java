@@ -34,7 +34,12 @@ public class FhirPathR5 implements IFhirPath {
 	@SuppressWarnings({"unchecked", "unchecked"})
 	@Override
 	public <T extends IBase> List<T> evaluate(IBase theInput, String thePath, Class<T> theReturnType) {
-		ExpressionNode parsed = myEngine.parse(thePath);
+		ExpressionNode parsed;
+		try {
+			parsed = myEngine.parse(thePath);
+		} catch (FHIRException e) {
+			throw new FhirPathExecutionException(Msg.code(2411) + e);
+		}
 		return (List<T>) evaluate(theInput, parsed, theReturnType);
 	}
 
