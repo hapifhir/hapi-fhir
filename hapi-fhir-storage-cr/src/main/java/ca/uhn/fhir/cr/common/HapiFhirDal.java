@@ -90,7 +90,7 @@ public class HapiFhirDal implements FhirDal {
 							.add("version", new TokenParam(urlVersion)), new SystemRequestDetails());
 			return new BundleIterable(myRequestDetails, versionResource);
 		} else {
-			// starndard example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine"
+			// standard example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine"
 			IBundleProvider standardResource = this.myDaoRegistry
 					.getResourceDao(theResourceType)
 					.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), new SystemRequestDetails());
