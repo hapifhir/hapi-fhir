@@ -18,8 +18,9 @@ INSERT INTO HFJ_RESOURCE (
    SP_URI_PRESENT,
    RES_TYPE,
    RES_VER
-) VALUES (
-   1678,
+)
+   VALUES (
+   1655,
    'R4',
    false,
    '2023-06-15 09:58:42.92',
@@ -38,33 +39,4 @@ INSERT INTO HFJ_RESOURCE (
    true,
    'Observation',
    1
-);
-
-INSERT INTO HFJ_TAG_DEF (
-   TAG_ID,
-   TAG_CODE,
-   TAG_DISPLAY,
-   TAG_SYSTEM,
-   TAG_TYPE,
-   TAG_USER_SELECTED,
-   TAG_VERSION
-) VALUES (
-   10,
-   'code2',
-   'Test1',
-   'http://foo',
-   0,
-   TRUE,
-   'testVersion1'
-);
-
-
-INSERT INTO HFJ_RES_SEARCH_URL (
-   RES_SEARCH_URL,
-   CREATED_TIME,
-   RES_ID
-) VALUES (
-   'https://example.com',
-   '2023-06-29 10:14:39.69',
-   1678
 );

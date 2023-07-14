@@ -20,7 +20,7 @@ INSERT INTO HFJ_RESOURCE (
    RES_VER
 )
    VALUES (
-   1655,
+   1678,
    'R4',
    0,
    '2023-06-15 09:58:42.92',
@@ -41,166 +41,31 @@ INSERT INTO HFJ_RESOURCE (
    1
 );
 
-INSERT INTO HFJ_SPIDX_TOKEN (
-   SP_ID,
-   SP_MISSING,
-   SP_NAME,
-   RES_ID,
-   RES_TYPE,
-   SP_UPDATED,
-   HASH_IDENTITY,
-   HASH_SYS,
-   HASH_SYS_AND_VALUE,
-   HASH_VALUE,
-   SP_SYSTEM,
-   SP_VALUE
-)
-   VALUES (
-   17,
-   0,
-   'type',
-   1655,
-   'SearchParameter',
-   '2023-06-29 09:56:02.418',
-   -505122241748101416,
-   4662843418098322756,
-   -1363967415116769274,
-   -6590269416174612528,
-   'http://hl7.org/fhir/search-param-type',
-   'reference'
-);
-
-
-INSERT INTO HFJ_SPIDX_DATE (
-   SP_ID,
-   SP_MISSING,
-   SP_NAME,
-   RES_ID,
-   RES_TYPE,
-   SP_UPDATED,
-   HASH_IDENTITY,
-   SP_VALUE_HIGH,
-   SP_VALUE_HIGH_DATE_ORDINAL,
-   SP_VALUE_LOW,
-   SP_VALUE_LOW_DATE_ORDINAL
-
-) VALUES (
-   1,
-   0,
-   'birthdate',
-   1655,
-   'Patient',
-   '2023-06-29 10:14:39.69',
-   5247847184787287691,
-   '1974-12-25 00:00:00',
-   19741225,
-   '1974-12-25 00:00:00',
-   19741225
-);
-
-
-INSERT INTO HFJ_SPIDX_STRING (
-   SP_ID,
-   SP_MISSING,
-   SP_NAME,
-   RES_ID,
-   RES_TYPE,
-   SP_UPDATED,
-   HASH_EXACT,
-   HASH_IDENTITY,
-   HASH_NORM_PREFIX,
-   SP_VALUE_EXACT,
-   SP_VALUE_NORMALIZED
-) VALUES (
-   1929,
-   0,
-   'description',
-   1655,
-   'SearchParameter',
-   '2023-07-05 15:32:57.469',
-   '2770485372932524289',
-   -2891289766040777762,
-   -4164313612790526467,
-   '',
-   ''
-);
-
-INSERT INTO BT2_JOB_INSTANCE (
-   ID,
-   JOB_CANCELLED,
-   CMB_RECS_PROCESSED,
-   CMB_RECS_PER_SEC,
-   CREATE_TIME,
-   CUR_GATED_STEP_ID,
-   DEFINITION_ID,
-   DEFINITION_VER,
-   END_TIME,
-   ERROR_COUNT,
-   EST_REMAINING,
-   PARAMS_JSON,
-   PROGRESS_PCT,
-   START_TIME,
-   STAT,
-   WORK_CHUNKS_PURGED
-) VALUES (
-   '00161699-bcfe-428e-9ca2-caceb9645f8a',
-   0,
-   0,
-   0,
-   '2023-07-06 14:24:10.845',
-   'WriteBundleForImportStep',
-   'bulkImportJob',
-   1,
-   '2023-07-06 14:25:11.098',
-   0,
-   '0ms',
-   '{"jobId":"42bfa0dd-ab7b-4991-8284-e4b2902c696b","batchSize":100}',
-   1,
-   '2023-07-06 14:24:10.875',
-   'COMPLETED',
-   1
-);
-
-INSERT INTO BT2_WORK_CHUNK (
-   ID,
-   CREATE_TIME,
-   END_TIME,
-   ERROR_COUNT,
-   INSTANCE_ID,
-   DEFINITION_ID,
-   DEFINITION_VER,
-   RECORDS_PROCESSED,
-   SEQ,
-   START_TIME,
-   STAT,
-   TGT_STEP_ID
-) VALUES (
-   '01d26875-8d1a-4e37-b554-62a3219f009b',
-   '2023-07-06 15:20:20.797',
-   '2023-07-06 15:21:11.142',
-   0,
-   '00161699-bcfe-428e-9ca2-caceb9645f8a',
-   'bulkImportJob',
-   1,
-   0,
-   0,
-   '2023-07-06 15:21:11.14',
-   'COMPLETED',
-   'ReadInResourcesFromFileStep'
-);
-
-INSERT INTO HFJ_RES_TAG (
-   PID,
-   PARTITION_DATE,
-   PARTITION_ID,
+INSERT INTO HFJ_TAG_DEF (
    TAG_ID,
-   RES_ID,
-   RES_TYPE
+   TAG_CODE,
+   TAG_DISPLAY,
+   TAG_SYSTEM,
+   TAG_TYPE,
+   TAG_USER_SELECTED,
+   TAG_VERSION
 ) VALUES (
-   1000,
-   NULL,
-   NULL,
-   2,
-   1655,
-   'SUBSCRIPTION'
+   16,
+   'code1',
+   'Test1',
+   'http://foo',
+   0,
+   1,
+   'testVersion1'
+);
+
+
+INSERT INTO HFJ_RES_SEARCH_URL (
+   RES_SEARCH_URL,
+   CREATED_TIME,
+   RES_ID
+) VALUES (
+   'https://example.com',
+   '2023-06-29 10:14:39.69',
+   1678
 );
