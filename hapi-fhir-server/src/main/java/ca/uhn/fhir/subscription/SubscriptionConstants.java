@@ -58,4 +58,6 @@ public class SubscriptionConstants {
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-payload-content";
 	public static final String SUBSCRIPTION_TOPIC_STATUS =
 			"http://hl7.org/fhir/uv/subscriptions-backport/StructureDefinition/backport-subscription-status-r4";
+	public static final String SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5 =
+		"http://terminology.hl7.org/CodeSystem/subscription-channel-type";
 }

@@ -27,9 +27,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -37,12 +39,19 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.subscription.SubscriptionConstants.SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5;
 
 @Service
 public class MdmSubscriptionLoader {
@@ -65,6 +74,9 @@ public class MdmSubscriptionLoader {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
+	@Autowired
+	private SubscriptionTopicLoader mySubscriptionTopicLoader;
+
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
 
 	public synchronized void daoUpdateMdmSubscriptions() {
@@ -82,6 +94,12 @@ public class MdmSubscriptionLoader {
 						.map(resourceType ->
 								buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType + "?"))
 						.collect(Collectors.toList());
+				break;
+			case R5:
+				SubscriptionTopic subscriptionTopic = buildMdmSubscriptionTopicR5(mdmResourceTypes);
+				mySubscriptionTopicLoader.syncDatabaseToCache();
+				org.hl7.fhir.r5.model.Subscription subscriptionR5 = buildMdmSubscriptionR5(subscriptionTopic);
+				subscriptions = Collections.singletonList(subscriptionR5);
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(736) + "MDM not supported for FHIR version "
@@ -148,4 +166,50 @@ public class MdmSubscriptionLoader {
 		channel.setPayload("application/json");
 		return retval;
 	}
+
+	private SubscriptionTopic buildMdmSubscriptionTopicR5(List<String> theMdmResourceTypes) {
+		SubscriptionTopic subscriptionTopic = new SubscriptionTopic();
+		theMdmResourceTypes.forEach(resourceType -> subscriptionTopic.addResourceTrigger().setResource(resourceType));
+		return subscriptionTopic;
+	}
+
+	private org.hl7.fhir.r5.model.Subscription buildMdmSubscriptionR5(SubscriptionTopic theSubscriptionTopic) {
+		org.hl7.fhir.r5.model.Subscription retVal = new org.hl7.fhir.r5.model.Subscription();
+
+		String resourcesString = theSubscriptionTopic.getResourceTrigger().stream()
+			.map(SubscriptionTopic.SubscriptionTopicResourceTriggerComponent::getResource)
+			.collect(Collectors.joining("-"));
+		String subscriptionId = MDM_SUBSCIPRION_ID_PREFIX + "-" + resourcesString;
+		retVal.setId(subscriptionId);
+		retVal.setReason("MDM");
+		retVal.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
+
+//		fixme jm: this way?
+		retVal.setTopicElement(new CanonicalType(theSubscriptionTopic.getUrl()));
+		retVal.getMeta()
+			.addTag()
+			.setSystem(MdmConstants.SYSTEM_MDM_MANAGED)
+			.setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+		retVal.addExtension()
+			.setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION)
+			.setValue(new org.hl7.fhir.r5.model.BooleanType().setValue(true));
+
+		retVal.setChannelType(new Coding()
+			.setCode(SubscriptionChannelTypeEnum.MESSAGE.getCode())
+			.setSystem(SUBSCRIPTION_CHANNEL_TYPE_SYSTEM_R5));
+
+		retVal.setEndpoint("channel:"
+			+ myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
+
+//		fixme jm: not required anymore. Right?
+//		org.hl7.fhir.r5.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
+//		channel.setPayload("application/json");
+
+		return retVal;
+	}
+
+
+
+
+
 }
