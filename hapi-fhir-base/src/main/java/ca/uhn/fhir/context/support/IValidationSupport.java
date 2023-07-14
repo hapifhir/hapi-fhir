@@ -64,14 +64,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * and calling code is expected to be able to handle this. Generally, a
  * series of implementations of this interface will be joined together using
  * the
- * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/ValidationSupportChain2.html">ValidationSupportChain</a>
+ * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html">ValidationSupportChain</a>
  * class.
  * </p>
  * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
  * for information on how to assemble and configure implementations of this interface. See also
  * the <code>org.hl7.fhir.common.hapi.validation.support</code>
- * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/package-summary.html">package summary</a>
+ * <a href="./package-summary.html">package summary</a>
  * in the <code>hapi-fhir-validation</code> module for many implementations of this interface.
  * </p>
  *
