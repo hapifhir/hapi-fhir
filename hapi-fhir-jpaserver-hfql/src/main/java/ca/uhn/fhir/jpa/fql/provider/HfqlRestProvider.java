@@ -48,13 +48,20 @@ import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 public class HfqlRestProvider {
 
 	@Autowired
-	private IHfqlExecutor myFqlExecutor;
+	private IHfqlExecutor myHfqlExecutor;
 
 	/**
 	 * Constructor
 	 */
 	public HfqlRestProvider() {
-		super();
+		this(null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public HfqlRestProvider(IHfqlExecutor theHfqlExecutor) {
+		myHfqlExecutor = theHfqlExecutor;
 	}
 
 	/**
@@ -96,7 +103,7 @@ public class HfqlRestProvider {
 		switch (action) {
 			case HfqlConstants.PARAM_ACTION_SEARCH: {
 				String query = toStringValue(theQuery);
-				IHfqlExecutionResult outcome = myFqlExecutor.executeInitialSearch(query, limit, theRequestDetails);
+				IHfqlExecutionResult outcome = myHfqlExecutor.executeInitialSearch(query, limit, theRequestDetails);
 				streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 				break;
 			}
@@ -110,20 +117,20 @@ public class HfqlRestProvider {
 				ValidateUtil.isNotBlankOrThrowIllegalArgument(statement, "No statement provided");
 				HfqlStatement statementJson = JsonUtil.deserialize(statement, HfqlStatement.class);
 
-				IHfqlExecutionResult outcome = myFqlExecutor.executeContinuation(
+				IHfqlExecutionResult outcome = myHfqlExecutor.executeContinuation(
 						statementJson, continuation, startingOffset, limit, theRequestDetails);
 				streamResponseCsv(theServletResponse, fetchSize, outcome, false, outcome.getStatement());
 				break;
 			}
 			case HfqlConstants.PARAM_ACTION_INTROSPECT_TABLES: {
-				IHfqlExecutionResult outcome = myFqlExecutor.introspectTables();
+				IHfqlExecutionResult outcome = myHfqlExecutor.introspectTables();
 				streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 				break;
 			}
 			case HfqlConstants.PARAM_ACTION_INTROSPECT_COLUMNS: {
 				String tableName = toStringValue(theIntrospectTableName);
 				String columnName = toStringValue(theIntrospectColumnName);
-				IHfqlExecutionResult outcome = myFqlExecutor.introspectColumns(tableName, columnName);
+				IHfqlExecutionResult outcome = myHfqlExecutor.introspectColumns(tableName, columnName);
 				streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 				break;
 			}

@@ -110,6 +110,10 @@
 		<li th:class="(${notHome} == null and ${resourceName} != null and ${resourceName.empty}) ? 'active' : ''">
 			<a href="#" onclick="doAction(this, 'home', null);">Server Home/Actions</a>
 		</li>
+      <!-- // FIXME: set the attribute below appropriately -->
+      <li th:class="(${notHome} == null and ${resourceName} != null and ${resourceName.empty}) ? 'active' : ''">
+         <a href="#" onclick="doAction(this, 'hfql', null);">HFQL / SQL</a>
+      </li>
 	</ul>
 
 	<h4>Resources</h4>

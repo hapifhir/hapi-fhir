@@ -63,11 +63,11 @@ public class WebTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	@Order(0)
-	private static final RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
+	public static final RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientFakeDocumentController());
 	@RegisterExtension
 	@Order(1)
-	private static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
+	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
 	protected static MockMvc ourMockMvc;
 	private static Server ourOverlayServer;
 	private WebClient myWebClient;

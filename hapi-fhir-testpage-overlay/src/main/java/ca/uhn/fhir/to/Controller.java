@@ -202,7 +202,6 @@ public class Controller extends BaseController {
 			final BindingResult theBindingResult,
 			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
-		ourLog.info(theServletRequest.toString());
 		return "home";
 	}
 
@@ -336,6 +335,17 @@ public class Controller extends BaseController {
 
 		return "resource";
 	}
+
+	@RequestMapping(value = {"/hfql"})
+	public String actionHfql(
+		HttpServletRequest theServletRequest,
+		final HomeRequest theRequest,
+		final BindingResult theBindingResult,
+		final ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
+		return "hfql";
+	}
+
 
 	private void populateModelForResource(
 			HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {

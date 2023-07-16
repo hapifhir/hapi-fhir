@@ -143,6 +143,10 @@
 		<!-- WebJars -->
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
+			<artifactId>ace-builds</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
 			<artifactId>bootstrap</artifactId>
 		</dependency>
 		<dependency>
@@ -227,6 +231,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-hfql</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
