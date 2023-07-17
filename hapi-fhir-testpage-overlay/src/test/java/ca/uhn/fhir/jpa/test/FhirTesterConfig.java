@@ -44,23 +44,28 @@ public class FhirTesterConfig {
 				.withBaseUrl("http://localhost:8888/fhir")
 				.withName("Localhost Server")
 				.allowsApiKey()
+				.enableDebugTemplates()
 			.addServer()
 				.withId("hapi")
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("http://hapi.fhir.org/baseDstu2")
 				.withName("Public HAPI Test Server")
 				.allowsApiKey()
+				.enableDebugTemplates()
 			.addServer()
 				.withId("home3")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
 				.withBaseUrl("http://hapi.fhir.org/baseDstu3")
 				.withName("Public HAPI Test Server (STU3)")
+				.enableDebugTemplates()
 			.addServer()
 				.withId("home")
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("${serverBase}/baseDstu2")
-				.withName("Local Tester");
+				.withName("Local Tester")
+				.enableDebugTemplates();
 		return retVal;
 	}
 
 }
+

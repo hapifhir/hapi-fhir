@@ -202,6 +202,7 @@ public class Controller extends BaseController {
 			final BindingResult theBindingResult,
 			final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
+		theModel.put("page", "home");
 		return "home";
 	}
 
@@ -343,6 +344,8 @@ public class Controller extends BaseController {
 		final BindingResult theBindingResult,
 		final ModelMap theModel) {
 		addCommonParams(theServletRequest, theRequest, theModel);
+
+		theModel.put("page", "hfql");
 		return "hfql";
 	}
 
