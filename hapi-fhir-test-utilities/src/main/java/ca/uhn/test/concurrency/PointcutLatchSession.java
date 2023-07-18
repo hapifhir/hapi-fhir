@@ -67,7 +67,7 @@ public class PointcutLatchSession {
 	List<HookParams> awaitExpectedWithTimeout(int theTimeoutSecond) throws InterruptedException {
 		if (!myCountdownLatch.await(theTimeoutSecond, TimeUnit.SECONDS)) {
 			if (!myFailures.isEmpty()) {
-				ourLog.info(String.join(",\n", myFailures));
+				ourLog.error(String.join(",", myFailures));
 			}
 			throw new LatchTimedOutError(Msg.code(1483) + myName + " timed out waiting " + theTimeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + myCountdownLatch.getCount() + ".");
 		}
