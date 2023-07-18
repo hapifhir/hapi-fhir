@@ -37,8 +37,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,6 +90,10 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 				.collect(Collectors.toList());
 		List<String> skippedLogMessages = new ArrayList<>();
 		List<String> matchedLogMessages = new ArrayList<>();
+
+		// we'll track the added ids so we don't add the same resources twice
+		// note, all these resources are the same type, so we only need the Long value
+		Set<Long> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
 					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
@@ -118,7 +124,10 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends 
 						matchMdmLink.getGoldenResourcePersistenceId().toString()));
 			}
 
-			retval.add(candidate);
+			// only add if it's not already in the list
+			if (currentIds.add((Long) candidate.getCandidateGoldenResourcePid().getId())) {
+				retval.add(candidate);
+			}
 		}
 
 		if (ourLog.isDebugEnabled()) {

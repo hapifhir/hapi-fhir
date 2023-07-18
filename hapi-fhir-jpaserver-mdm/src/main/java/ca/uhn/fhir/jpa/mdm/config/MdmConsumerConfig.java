@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.svc.BlockRuleEvaluationSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
@@ -60,6 +61,8 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
+import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
+import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
@@ -74,6 +77,7 @@ import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -112,6 +116,12 @@ public class MdmConsumerConfig {
 	@Bean
 	MdmMatchLinkSvc mdmMatchLinkSvc() {
 		return new MdmMatchLinkSvc();
+	}
+
+	@Bean
+	IBlockRuleEvaluationSvc blockRuleEvaluationSvc(
+			@Autowired FhirContext theContext, @Autowired(required = false) IBlockListRuleProvider theProvider) {
+		return new BlockRuleEvaluationSvcImpl(theContext, theProvider);
 	}
 
 	@Bean

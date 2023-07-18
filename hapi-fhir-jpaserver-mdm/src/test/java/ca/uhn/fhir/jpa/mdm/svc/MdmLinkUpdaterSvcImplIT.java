@@ -3,12 +3,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -16,8 +18,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ResourceUtils;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,8 +48,6 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
 	@Autowired
 	private MessageHelper myMessageHelper;
-
-
 
 	@Test
 	void testUpdateLinkToMatchWhenAnotherLinkToDifferentGoldenExistsMustFail() throws Exception {
@@ -117,7 +119,6 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		return golden;
 	}
 
-
 	private Patient createPatientFromJsonInputFile(String thePath)  throws Exception {
 		return createPatientFromJsonInputFile(thePath, true);
 	}
@@ -126,7 +127,11 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		File jsonInputUrl = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + thePath);
 		String jsonPatient = Files.readString(Paths.get(jsonInputUrl.toURI()), StandardCharsets.UTF_8);
 
-		Patient patient = (Patient) myFhirContext.newJsonParser().parseResource(jsonPatient);
+		return createPatientFromJsonString(jsonPatient, theCreateGolden);
+	}
+
+	private Patient createPatientFromJsonString(String theStr, boolean theCreateGolden) {
+		Patient patient = (Patient) myFhirContext.newJsonParser().parseResource(theStr);
 		DaoMethodOutcome daoOutcome = myPatientDao.create(patient, new SystemRequestDetails());
 
 		if (theCreateGolden) {
