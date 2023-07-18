@@ -5,9 +5,9 @@ import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 /**
  * A test ResourceId with a non-long implementation of the id
  */
-public class StringResourceId extends BaseResourcePersistentId {
+public class StringResourceId extends BaseResourcePersistentId<String> {
 
-	private String myId;
+	private final String myId;
 
 	public StringResourceId(String theId) {
 		super(null);
@@ -20,7 +20,7 @@ public class StringResourceId extends BaseResourcePersistentId {
 	}
 
 	@Override
-	public Object getId() {
+	public String getId() {
 		return myId;
 	}
 }
