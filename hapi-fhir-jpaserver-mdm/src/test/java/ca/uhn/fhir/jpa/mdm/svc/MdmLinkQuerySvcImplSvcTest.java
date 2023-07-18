@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
@@ -28,7 +29,7 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testHistoryForGoldenResourceIds_withUserProvidedIds_sortsByUserProviderIds() {
-		String goldenResourceId  = createMdmLinksWithLinkedPatientsWithId(List.of("456a", "789a", "123a"));
+		String goldenResourceId  = createMdmLinksWithLinkedPatientsWithId(List.of("456a", "", "789a", "", "123a"));
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters().setGoldenResourceIds(Collections.singletonList(goldenResourceId));
@@ -38,7 +39,8 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 		// links should be ordered by sourceId ascending
 		List<String> patientIdsFormLinks = linksWithRevisionJson.stream().map(l -> l.getMdmLink().getSourceId()).collect(Collectors.toList());
 
-		assertEquals(List.of("Patient/123a", "Patient/456a", "Patient/789a"), patientIdsFormLinks);
+		// Patients with blank client IDs should have been assigned sequential PID
+		assertEquals(List.of("Patient/123a", "Patient/3", "Patient/456a", "Patient/5", "Patient/789a"), patientIdsFormLinks);
 	}
 
 	private String createMdmLinksWithLinkedPatientsWithId(List<String> thePatientIds) {
@@ -46,8 +48,12 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 
 		for (String patientId : thePatientIds) {
 			final Patient patient = new Patient();
-			patient.setId(patientId);
-			myPatientDao.update(patient, new SystemRequestDetails());
+			if (isNotBlank(patientId)) {
+				patient.setId(patientId);
+				myPatientDao.update(patient, new SystemRequestDetails());
+			} else {
+				myPatientDao.create(patient, new SystemRequestDetails());
+			}
 
 			MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 			mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
