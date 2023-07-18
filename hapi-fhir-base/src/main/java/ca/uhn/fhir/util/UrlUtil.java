@@ -34,6 +34,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -48,8 +50,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -577,12 +577,12 @@ public class UrlUtil {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
 
-		final String[] searchList = new String[] {"+", "|", "=>=", "=<=", "=>", "=<"};
-		final String[] replacementList = new String[] {"%2B", "%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
+		final String[] searchList = new String[]{"%2B", "|", "=>=", "=<=", "=>", "=<"};
+		final String[] replacementList = new String[]{"+", "%7C", "=%3E%3D", "=%3C%3D", "=%3E", "=%3C"};
 		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
 			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl
-					+ "] - URL is invalid (must not contain spaces)");
+				+ "] - URL is invalid (must not contain spaces)");
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
