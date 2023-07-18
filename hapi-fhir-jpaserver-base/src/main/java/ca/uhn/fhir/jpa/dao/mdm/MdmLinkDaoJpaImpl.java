@@ -387,6 +387,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			final List<Object[]> mdmLinksWithRevisions = auditQueryCreator
 					.forRevisionsOfEntity(MdmLink.class, false, false)
 					.add(goldenResourceAndOrResourceIdCriterion)
+					.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
+					.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
+					.addOrder(AuditEntity.revisionNumber().desc())
 					.getResultList();
 
 			return mdmLinksWithRevisions.stream()
