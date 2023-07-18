@@ -41,15 +41,17 @@ public class OverlayTestApp {
 
 	@SuppressWarnings({"unchecked"})
 	public static void main(String[] args) throws Exception {
-			IHfqlExecutor hfqlExecutor = mock(IHfqlExecutor.class);
+		IHfqlExecutor hfqlExecutor = mock(IHfqlExecutor.class);
 		List<String> columnNames = List.of("family", "given");
 		List<HfqlDataTypeEnum> columnTypes = List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
 		List<List<Object>> rows = List.of(
 			List.of("Simpson", "Homer"),
 			List.of("Simpson", "Bart")
 		);
-		StaticHfqlExecutionResult hfqlResult = new StaticHfqlExecutionResult("the-search-id", columnNames, columnTypes, rows);
-		when(hfqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(hfqlResult);
+		when(hfqlExecutor.executeInitialSearch(any(), any(), any())).thenAnswer(t-> {
+			Thread.sleep(1000);
+			return new StaticHfqlExecutionResult("the-search-id", columnNames, columnTypes, rows);
+		});
 
 		{
 			int myPort = 8888;

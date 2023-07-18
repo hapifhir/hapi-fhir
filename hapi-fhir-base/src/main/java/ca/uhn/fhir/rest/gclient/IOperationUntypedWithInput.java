@@ -40,6 +40,9 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 * resource, use this method to specify that resource type. This is useful for certain
 	 * operations (e.g. <code>Patient/NNN/$everything</code>) which return a bundle instead of
 	 * a Parameters resource.
+	 * <p>
+	 * Passing in {@literal Binary.class} allows any arbitrary response to be returned. Any payload at
+	 * all will be read as raw bytes into a Binary resource.
 	 */
 	<R extends IBaseResource> IOperationUntypedWithInput<R> returnResourceType(Class<R> theReturnType);
 

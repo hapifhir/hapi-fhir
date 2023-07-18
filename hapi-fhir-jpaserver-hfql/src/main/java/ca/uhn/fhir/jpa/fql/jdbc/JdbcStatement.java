@@ -20,11 +20,9 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.StringType;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -35,9 +33,8 @@ import java.sql.Statement;
 import static ca.uhn.fhir.jpa.fql.jdbc.JdbcConnection.newSqlExceptionForUnsupportedOperation;
 
 class JdbcStatement implements Statement {
-	private int myMaxRows;
 	private final JdbcConnection myConnection;
-
+	private int myMaxRows;
 	private int myFetchSize = HfqlConstants.DEFAULT_FETCH_SIZE;
 	private JdbcResultSet myResultSet;
 
@@ -123,14 +120,9 @@ class JdbcStatement implements Statement {
 			limit = getMaxRows();
 		}
 
-		Parameters input = new Parameters();
-		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
-		input.addParameter(HfqlConstants.PARAM_QUERY, new StringType(sql));
-		if (limit != null) {
-			input.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(limit));
-		}
-		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(myFetchSize));
+		int fetchSize = myFetchSize;
 
+		Parameters input = HfqlRestProvider.newQueryRequestParameters(sql, limit, fetchSize);
 		IHfqlExecutionResult result = myConnection.getClient().execute(input, true, getFetchSize());
 
 		myResultSet = new JdbcResultSet(result, this);
@@ -153,23 +145,23 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void setFetchDirection(int direction) {
-		// ignored
-	}
-
-	@Override
 	public int getFetchDirection() {
 		return ResultSet.FETCH_FORWARD;
 	}
 
 	@Override
-	public void setFetchSize(int theFetchSize) {
-		myFetchSize = theFetchSize;
+	public void setFetchDirection(int direction) {
+		// ignored
 	}
 
 	@Override
 	public int getFetchSize() {
 		return myFetchSize;
+	}
+
+	@Override
+	public void setFetchSize(int theFetchSize) {
+		myFetchSize = theFetchSize;
 	}
 
 	@Override
@@ -253,13 +245,13 @@ class JdbcStatement implements Statement {
 	}
 
 	@Override
-	public void setPoolable(boolean thePoolable) {
-		// ignored
+	public boolean isPoolable() {
+		return false;
 	}
 
 	@Override
-	public boolean isPoolable() {
-		return false;
+	public void setPoolable(boolean thePoolable) {
+		// ignored
 	}
 
 	@Override

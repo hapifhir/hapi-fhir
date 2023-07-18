@@ -9,6 +9,17 @@
          #editor {
             width: 100%;
             height: 150px;
+            border-top: 1px solid #AAAAAA;
+         }
+         #resultsTableCard {
+            padding: 0;
+         }
+         .resultsTable {
+            margin-bottom: 0;
+            width: auto;
+         }
+         .card {
+            margin-bottom: 10px;
          }
       </style>
 
@@ -30,63 +41,95 @@
 
 					<div th:replace="tmpl-banner :: banner"></div>
 
-						<!-- ************************************************ -->
-						<!-- ** SQL Editor                                 ** -->
-						<!-- ************************************************ -->
-
-						<div class="card">
-							<h3 class="card-header">Query</h3>
-							<div class="card-body" style="padding: 0;">
-                        <button type="button" id="execute-btn" class="btn btn-primary" style="margin: 5px;">
-                           <i class="fas fa-play"></i> Execute
-                        </button>
-
-                        <div id="editor">SELECT id, name.family, name.given
-FROM Patient</div>
-
-                        <script th:src="@{/resources/ace-builds/src-min-noconflict/ace.js}"></script>
-                        <script>
-                           const editor = ace.edit("editor");
-                           editor.setTheme("ace/theme/github");
-                           editor.session.setMode("ace/mode/sql");
-                           editor.setShowPrintMargin(false);
-
-                           $('#execute-btn').click(
-                              function() {
-                                 let btn = $(this);
-                                 handleActionButtonClick(btn);
-                                 let value = editor.getValue();
-                                 btn.append($('<input />', { type: 'hidden', name: 'hfql-query', value: value }));
-                                 $("#outerForm").attr("method", "post");
-                                 $("#outerForm").attr("action", "hfql").submit();
-                              });
-
-                        </script>
-							</div>
-						</div>
                <div class="card" style="margin-top: 10px;">
-                  <h3 class="card-header">Results</h3>
+                  <h3 class="card-header">HFQL / SQL Execution</h3>
+                  <div class="card-body">
+                     This page can be used to execute queries using the HAPI FHIR Query Language (HFQL),
+                     which is a SQL-like syntax for querying FHIR repositories. Learn more about
+                     the HFQL syntax at:
+                     <a href="https://smilecdr.com/docs/hfql/">https://smilecdr.com/docs/hfql/</a>.
+                     This UI will display a maximum of [[${rowLimit}]] rows.
+                  </div>
+               </div>
+
+               <!-- ************************************************ -->
+               <!-- ** SQL Editor                                 ** -->
+               <!-- ************************************************ -->
+
+               <div class="card">
+                  <h3 class="card-header">Query</h3>
                   <div class="card-body" style="padding: 0;">
+                     <button type="button" id="execute-btn" class="btn btn-primary" style="margin: 5px;">
+                        <i class="fas fa-play"></i> Execute
+                     </button>
+                     <button type="button" id="copy-link-btn" class="btn btn-info" style="margin: 5px;">
+                        <i class="fas fa-link"></i> Link to Query
+                     </button>
 
-                     <table class="table table-striped table-bordered table-sm">
-                        <thead>
-                           <tr>
-                              <th>Family</th>
-                              <th>Given</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           <tr>
-                              <td>Simpson</td>
-                              <td>Homer</td>
-                           </tr>
-                           <tr>
-                              <td>Simpson</td>
-                              <td>Bart</td>
-                           </tr>
-                        </tbody>
-                     </table>
+                     <div id="editor" th:text="${query}"></div>
 
+                     <script th:src="@{/resources/ace-builds/src-min-noconflict/ace.js}"></script>
+                     <script>
+                        const editor = ace.edit("editor");
+                        editor.setTheme("ace/theme/eclipse");
+                        editor.setTheme("ace/theme/vibrant_ink");
+                        editor.setTheme("ace/theme/cobalt");
+                        editor.session.setMode("ace/mode/sql");
+                        editor.setShowPrintMargin(false);
+
+                        $('#execute-btn').click(
+                           function() {
+                              let btn = $(this);
+                              document.getElementById('execute-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Execute';
+                              handleActionButtonClick(btn);
+                              let value = editor.getValue();
+                              btn.append($('<input />', { type: 'hidden', name: 'hfql-query', value: value }));
+                              $("#outerForm").attr("method", "post");
+                              $("#outerForm").attr("action", "hfql").submit();
+                           }
+                        );
+
+                        $('#copy-link-btn').click(
+                           function() {
+                              let btn = $(this);
+                              handleActionButtonClick(btn);
+                              let value = editor.getValue();
+                              btn.append($('<input />', { type: 'hidden', name: 'hfql-query', value: value }));
+                              $("#outerForm").attr("method", "get");
+                              $("#outerForm").attr("action", "hfql").submit();
+                           }
+                        );
+
+                     </script>
+                  </div>
+               </div>
+
+               <!-- ************************************************ -->
+               <!-- ** Query Results                              ** -->
+               <!-- ************************************************ -->
+
+               <div th:if="${resultRows} != null" class="card">
+                  <h3 class="card-header">Results</h3>
+                  <div class="card-header">
+                     Query executed in [[${executionTime}]].
+                  </div>
+                  <div class="card-body" id="resultsTableCard">
+                     <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-sm resultsTable">
+                           <thead>
+                              <tr>
+                                 <th th:each="columnName : ${columnNames}" th:text="${columnName}"></th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr th:each="row : ${resultRows}">
+                                 <td th:each="col : ${row}">
+                                    [[${col}]]
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
                   </div>
                </div>
 			</div>

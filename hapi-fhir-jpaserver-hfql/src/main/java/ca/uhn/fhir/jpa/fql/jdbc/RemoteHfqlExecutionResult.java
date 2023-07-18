@@ -25,8 +25,10 @@ import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -38,6 +40,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -46,6 +49,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +60,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -107,6 +112,31 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 		} catch (IOException e) {
 			throw new SQLException(Msg.code(2400) + e.getMessage(), e);
 		}
+	}
+
+	public RemoteHfqlExecutionResult(Parameters theRequestParameters, IGenericClient theClient) throws IOException {
+		myBaseUrl = null;
+		myClient = null;
+		myFetchSize = 100;
+		mySupportsContinuations = false;
+		Binary response = theClient
+				.operation()
+				.onServer()
+				.named(HfqlConstants.HFQL_EXECUTE)
+				.withParameters(theRequestParameters)
+				.returnResourceType(Binary.class)
+				.execute();
+		String contentType = defaultIfBlank(response.getContentType(), "");
+		if (contentType.contains(";")) {
+			contentType = contentType.substring(0, contentType.indexOf(';'));
+		}
+		contentType = contentType.trim();
+		Validate.isTrue(Constants.CT_TEXT_CSV.equals(contentType), "Unexpected content-type: %s", contentType);
+
+		myReader = new InputStreamReader(new ByteArrayInputStream(response.getContent()), StandardCharsets.UTF_8);
+		CSVParser csvParser = new CSVParser(myReader, HfqlRestClient.CSV_FORMAT);
+		myIterator = csvParser.iterator();
+		readHeaderRows(true);
 	}
 
 	private void validateResponse() {

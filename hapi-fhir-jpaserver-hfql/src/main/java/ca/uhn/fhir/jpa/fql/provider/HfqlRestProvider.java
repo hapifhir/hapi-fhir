@@ -32,10 +32,15 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.csv.CSVPrinter;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -213,5 +218,17 @@ public class HfqlRestProvider {
 
 			csvWriter.close(true);
 		}
+	}
+
+	@Nonnull
+	public static Parameters newQueryRequestParameters(String sql, Integer limit, int fetchSize) {
+		Parameters input = new Parameters();
+		input.addParameter(HfqlConstants.PARAM_ACTION, new CodeType(HfqlConstants.PARAM_ACTION_SEARCH));
+		input.addParameter(HfqlConstants.PARAM_QUERY, new StringType(sql));
+		if (limit != null) {
+			input.addParameter(HfqlConstants.PARAM_LIMIT, new IntegerType(limit));
+		}
+		input.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(fetchSize));
+		return input;
 	}
 }
