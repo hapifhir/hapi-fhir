@@ -19,16 +19,18 @@
  */
 package ca.uhn.fhir.jpa.fql.parser;
 
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a parsed HFQL expression tree. It is useful for
@@ -161,7 +163,7 @@ public class HfqlStatement implements IModelJson {
 	public int findSelectClauseIndex(String theClause) {
 		for (int i = 0; i < getSelectClauses().size(); i++) {
 			if (theClause.equals(getSelectClauses().get(i).getClause())
-					|| theClause.equals(getSelectClauses().get(i).getAlias())) {
+				|| theClause.equals(getSelectClauses().get(i).getAlias())) {
 				return i;
 			}
 		}
@@ -170,6 +172,20 @@ public class HfqlStatement implements IModelJson {
 
 	public boolean hasOrderClause() {
 		return !getOrderByClauses().isEmpty();
+	}
+
+	public List<String> toSelectedColumnAliases() {
+		return mySelectClauses
+			.stream()
+			.map(SelectClause::getAlias)
+			.collect(Collectors.toList());
+	}
+
+	public List<HfqlDataTypeEnum> toSelectedColumnDataTypes() {
+		return mySelectClauses
+			.stream()
+			.map(SelectClause::getDataType)
+			.collect(Collectors.toList());
 	}
 
 	public enum WhereClauseOperatorEnum {
@@ -217,6 +233,8 @@ public class HfqlStatement implements IModelJson {
 
 		@JsonProperty("operator")
 		private SelectClauseOperator myOperator;
+		@JsonProperty("dataType")
+		private HfqlDataTypeEnum myDataType;
 
 		/**
 		 * Constructor
@@ -234,6 +252,14 @@ public class HfqlStatement implements IModelJson {
 			setOperator(SelectClauseOperator.SELECT);
 			setClause(theClause);
 			setAlias(theClause);
+		}
+
+		public HfqlDataTypeEnum getDataType() {
+			return myDataType;
+		}
+
+		public void setDataType(HfqlDataTypeEnum theDataType) {
+			myDataType = theDataType;
 		}
 
 		public SelectClauseOperator getOperator() {

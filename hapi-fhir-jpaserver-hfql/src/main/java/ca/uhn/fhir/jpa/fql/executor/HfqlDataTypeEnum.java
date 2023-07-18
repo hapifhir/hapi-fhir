@@ -25,6 +25,7 @@ import java.sql.Types;
 
 public enum HfqlDataTypeEnum {
 	STRING(Types.VARCHAR, String.class),
+	JSON(Types.VARCHAR, String.class),
 	INTEGER(Types.INTEGER, Integer.class),
 	BOOLEAN(Types.BOOLEAN, Boolean.class),
 	DATE(Types.DATE, Date.class),

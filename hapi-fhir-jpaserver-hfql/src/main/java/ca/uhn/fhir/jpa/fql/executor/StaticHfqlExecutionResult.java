@@ -32,9 +32,8 @@ import javax.annotation.Nullable;
 public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	private final String mySearchId;
 	private final Iterator<List<Object>> myRowsIterator;
-	private final List<HfqlDataTypeEnum> myDataTypes;
 	private int myNextRowOffset;
-	private List<String> myColumnNames;
+	private HfqlStatement myStatement;
 
 	/**
 	 * Constructor for an empty result
@@ -42,7 +41,7 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	 * @param theSearchId The search ID associated with this result
 	 */
 	public StaticHfqlExecutionResult(@Nullable String theSearchId) {
-		this(theSearchId, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+		this(theSearchId, new HfqlStatement(), Collections.emptyList());
 	}
 
 	/**
@@ -55,22 +54,28 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 			List<String> theColumnNames,
 			List<HfqlDataTypeEnum> theDataTypes,
 			List<List<Object>> theRows) {
+		this(theSearchId, toStatement(theColumnNames, theDataTypes), theRows);
+	}
+
+	private static HfqlStatement toStatement(List<String> theColumnNames, List<HfqlDataTypeEnum> theDataTypes) {
+		assert theColumnNames.size() == theDataTypes.size();
+
+		HfqlStatement retVal = new HfqlStatement();
+		for (int i = 0; i < theColumnNames.size(); i++) {
+			retVal.addSelectClause(theColumnNames.get(i)).setDataType(theDataTypes.get(i));
+		}
+		return retVal;
+	}
+
+	/**
+	 * Constructor
+	 */
+    public StaticHfqlExecutionResult(@Nullable String theSearchId, HfqlStatement theStatement, List<List<Object>> theRows) {
 		mySearchId = theSearchId;
-		myColumnNames = theColumnNames;
-		myDataTypes = theDataTypes;
+		myStatement = theStatement;
 		myRowsIterator = theRows.iterator();
-		myNextRowOffset = 0;
-	}
-
-	@Override
-	public List<String> getColumnNames() {
-		return myColumnNames;
-	}
-
-	@Override
-	public List<HfqlDataTypeEnum> getColumnTypes() {
-		return myDataTypes;
-	}
+		 myNextRowOffset = 0;
+    }
 
 	@Override
 	public boolean hasNext() {
@@ -104,7 +109,7 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 
 	@Override
 	public HfqlStatement getStatement() {
-		return null;
+		return myStatement;
 	}
 
 	public static IHfqlExecutionResult withError(String theErrorMessage) {

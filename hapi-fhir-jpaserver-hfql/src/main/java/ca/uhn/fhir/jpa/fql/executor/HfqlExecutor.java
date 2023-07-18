@@ -21,9 +21,7 @@ package ca.uhn.fhir.jpa.fql.executor;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
@@ -62,12 +60,10 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.thymeleaf.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,7 +73,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -146,6 +142,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		massageSelectColumnNames(statement);
+		populateSelectColumnDataTypes(statement);
 
 		SearchParameterMap map = new SearchParameterMap();
 		addHfqlWhereClausesToSearchParameterMap(statement, map);
@@ -165,7 +162,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 		}
 
 		HfqlExecutionContext executionContext = new HfqlExecutionContext(myFhirContext.newFhirPath());
-		List<HfqlDataTypeEnum> columnDataTypes = determineColumnDataTypes(statement);
 		IBundleProvider outcome = dao.search(map, theRequestDetails);
 		Predicate<IBaseResource> whereClausePredicate = newWhereClausePredicate(executionContext, statement);
 
@@ -179,7 +175,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 					executionContext,
 					limit,
 					0,
-					columnDataTypes,
 					whereClausePredicate,
 					myFhirContext);
 		}
@@ -257,7 +252,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		Comparator<IHfqlExecutionResult.Row> comparator = null;
 		for (int i = 0; i < orderColumnIndexes.size(); i++) {
 			int columnIndex = orderColumnIndexes.get(i);
-			HfqlDataTypeEnum dataType = theExecutionResult.getColumnTypes().get(columnIndex);
+			HfqlDataTypeEnum dataType = theExecutionResult.getStatement().getSelectClauses().get(columnIndex).getDataType();
 			Comparator<IHfqlExecutionResult.Row> nextComparator = newRowComparator(columnIndex, dataType);
 			if (!orderAscending.get(i)) {
 				nextComparator = nextComparator.reversed();
@@ -277,7 +272,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		List<List<Object>> rowData =
 				rows.stream().map(IHfqlExecutionResult.Row::getRowValues).collect(Collectors.toList());
 		return new StaticHfqlExecutionResult(
-				null, theExecutionResult.getColumnNames(), theExecutionResult.getColumnTypes(), rowData);
+				null, theStatement, rowData);
 	}
 
 	@Override
@@ -296,7 +291,6 @@ public class HfqlExecutor implements IHfqlExecutor {
 				executionContext,
 				theLimit,
 				theStartingOffset,
-				Collections.emptyList(),
 				whereClausePredicate,
 				myFhirContext);
 	}
@@ -321,7 +315,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 				.map(HfqlStatement.SelectClause::getClause)
 				.collect(Collectors.toSet());
 
-		Map<GroupByKey, Map<String, AtomicLong>> keyCounter = new HashMap<>();
+		Map<GroupByKey, Map<String, AtomicInteger>> keyCounter = new HashMap<>();
 
 		int offset = 0;
 		int batchSize = 1000;
@@ -348,7 +342,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 
 					for (GroupByKey nextKey : allKeys) {
 
-						Map<String, AtomicLong> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
+						Map<String, AtomicInteger> counts = keyCounter.computeIfAbsent(nextKey, t -> new HashMap<>());
 						if (keyCounter.size() >= HfqlConstants.ORDER_AND_GROUP_LIMIT) {
 							throw new InvalidRequestException(Msg.code(2402) + "Can not group on > "
 									+ HfqlConstants.ORDER_AND_GROUP_LIMIT + " terms");
@@ -361,7 +355,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 									continue;
 								}
 							}
-							counts.computeIfAbsent(nextCountClause, k -> new AtomicLong())
+							counts.computeIfAbsent(nextCountClause, k -> new AtomicInteger())
 									.incrementAndGet();
 						}
 					}
@@ -371,17 +365,8 @@ public class HfqlExecutor implements IHfqlExecutor {
 			offset += batchSize;
 		}
 
-		List<String> columnNames = theStatement.getSelectClauses().stream()
-				.map(HfqlStatement.SelectClause::getAlias)
-				.collect(Collectors.toList());
-		List<HfqlDataTypeEnum> dataTypes = theStatement.getSelectClauses().stream()
-				.map(t -> t.getOperator() == HfqlStatement.SelectClauseOperator.COUNT
-						? HfqlDataTypeEnum.LONGINT
-						: HfqlDataTypeEnum.STRING)
-				.collect(Collectors.toList());
 		List<List<Object>> rows = new ArrayList<>();
-
-		for (Map.Entry<GroupByKey, Map<String, AtomicLong>> nextEntry : keyCounter.entrySet()) {
+		for (Map.Entry<GroupByKey, Map<String, AtomicInteger>> nextEntry : keyCounter.entrySet()) {
 			List<Object> nextRow = new ArrayList<>();
 
 			for (HfqlStatement.SelectClause nextSelectClause : theStatement.getSelectClauses()) {
@@ -389,11 +374,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 					int groupByIndex = theStatement.getGroupByClauses().indexOf(nextSelectClause.getClause());
 					nextRow.add(nextEntry.getKey().getNames().get(groupByIndex));
 				} else {
-					AtomicLong counter = nextEntry.getValue().get(nextSelectClause.getClause());
+					AtomicInteger counter = nextEntry.getValue().get(nextSelectClause.getClause());
 					if (counter != null) {
-						nextRow.add(counter.longValue());
+						nextRow.add(counter.intValue());
 					} else {
-						nextRow.add(0L);
+						nextRow.add(0);
 					}
 				}
 			}
@@ -401,7 +386,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 			rows.add(nextRow);
 		}
 
-		return new StaticHfqlExecutionResult(null, columnNames, dataTypes, rows);
+		return new StaticHfqlExecutionResult(null, theStatement, rows);
 	}
 
 	private Set<GroupByKey> createCrossProduct(List<List<String>> theGroupByClauseValues) {
@@ -472,24 +457,25 @@ public class HfqlExecutor implements IHfqlExecutor {
 		};
 	}
 
-	@Nonnull
-	private List<HfqlDataTypeEnum> determineColumnDataTypes(HfqlStatement statement) {
+	private void populateSelectColumnDataTypes(HfqlStatement statement) {
 		HfqlFhirPathParser fhirPathParser = new HfqlFhirPathParser(myFhirContext);
-		List<HfqlDataTypeEnum> columnDataTypes = new ArrayList<>();
 		for (HfqlStatement.SelectClause nextSelectClause : statement.getSelectClauses()) {
-			String clause = nextSelectClause.getClause();
 			HfqlDataTypeEnum nextType;
-			if (clause.equals("meta.versionId")) {
-				// FHIR's versionId field is a string, but in HAPI FHIR JPA it can only ever be a long so we'll
-				// use that type
-				nextType = HfqlDataTypeEnum.LONGINT;
+			if (nextSelectClause.getOperator() == HfqlStatement.SelectClauseOperator.COUNT) {
+				nextType = HfqlDataTypeEnum.INTEGER;
 			} else {
-				nextType = fhirPathParser.determineDatatypeForPath(statement.getFromResourceName(), clause);
-				nextType = defaultIfNull(nextType, HfqlDataTypeEnum.STRING);
+				String clause = nextSelectClause.getClause();
+				if (clause.equals("meta.versionId")) {
+					// FHIR's versionId field is a string, but in HAPI FHIR JPA it can only ever be a long so we'll
+					// use that type
+					nextType = HfqlDataTypeEnum.LONGINT;
+				} else {
+					nextType = fhirPathParser.determineDatatypeForPath(statement.getFromResourceName(), clause);
+					nextType = defaultIfNull(nextType, HfqlDataTypeEnum.STRING);
+				}
 			}
-			columnDataTypes.add(nextType);
+			nextSelectClause.setDataType(nextType);
 		}
-		return columnDataTypes;
 	}
 
 	/**
@@ -524,41 +510,14 @@ public class HfqlExecutor implements IHfqlExecutor {
 	private TreeSet<String> findLeafPaths(String theResourceName) {
 		TreeSet<String> allLeafPaths = new TreeSet<>();
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(theResourceName);
-		findLeafPaths(def, allLeafPaths, new ArrayList<>());
-		return allLeafPaths;
-	}
-
-	private void findLeafPaths(
-			BaseRuntimeElementCompositeDefinition<?> theCompositeDefinition,
-			TreeSet<String> theAllLeafPaths,
-			List<String> theCurrentPath) {
-		for (BaseRuntimeChildDefinition nextChild : theCompositeDefinition.getChildren()) {
-			for (String nextChildName : nextChild.getValidChildNames()) {
-				if (theCurrentPath.contains(nextChildName)) {
-					continue;
+		for (BaseRuntimeChildDefinition nextChild : def.getChildren()) {
+			for (String next : nextChild.getValidChildNames()) {
+				if (!"extension".equals(next) && !"modifierExtension".equals(next)) {
+					allLeafPaths.add(next);
 				}
-				if (nextChildName.equals("extension") || nextChildName.equals("modifierExtension")) {
-					continue;
-				}
-				if (nextChildName.equals("id") && theCurrentPath.size() > 0) {
-					continue;
-				}
-
-				theCurrentPath.add(nextChildName);
-
-				BaseRuntimeElementDefinition<?> childDef = nextChild.getChildByName(nextChildName);
-				if (childDef instanceof BaseRuntimeElementCompositeDefinition) {
-					if (theCurrentPath.size() < 2) {
-						findLeafPaths(
-								(BaseRuntimeElementCompositeDefinition<?>) childDef, theAllLeafPaths, theCurrentPath);
-					}
-				} else if (childDef instanceof RuntimePrimitiveDatatypeDefinition) {
-					theAllLeafPaths.add(StringUtils.join(theCurrentPath, "."));
-				}
-
-				theCurrentPath.remove(theCurrentPath.size() - 1);
 			}
 		}
+		return allLeafPaths;
 	}
 
 	/**
@@ -843,11 +802,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 			switch (myDataType) {
 				case STRING:
 				case TIME:
+				case JSON:
 					retVal = defaultIfNull(retVal, "");
 					break;
 				case LONGINT:
 				case INTEGER:
-					if (retVal instanceof Long) {
+					if (retVal instanceof Number) {
 						return retVal;
 					} else if (retVal == null) {
 						retVal = Long.MIN_VALUE;

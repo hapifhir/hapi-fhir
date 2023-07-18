@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.fql.jdbc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
@@ -94,8 +95,9 @@ class JdbcResultSet implements ResultSet {
 		myResult = theResult;
 		myMetadata = new JdbcResultSetMetadata();
 		myColumnNameToIndex = new HashMap<>();
-		for (int i = 0; i < myResult.getColumnNames().size(); i++) {
-			myColumnNameToIndex.put(myResult.getColumnNames().get(i), i + 1);
+		List<HfqlStatement.SelectClause> selectClauses = myResult.getStatement().getSelectClauses();
+		for (int i = 0; i < selectClauses.size(); i++) {
+			myColumnNameToIndex.put(selectClauses.get(i).getAlias(), i + 1);
 		}
 	}
 
@@ -129,7 +131,7 @@ class JdbcResultSet implements ResultSet {
 		if (columnIndex <= 0) {
 			throw new SQLException(Msg.code(2396) + "Invalid column index: " + columnIndex);
 		}
-		if (columnIndex > myResult.getColumnTypes().size()) {
+		if (columnIndex > myResult.getStatement().getSelectClauses().size()) {
 			throw new SQLException(Msg.code(2397) + "Invalid column index: " + columnIndex);
 		}
 	}
@@ -359,7 +361,7 @@ class JdbcResultSet implements ResultSet {
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		switch (myResult.getColumnTypes().get(columnIndex - 1)) {
+		switch (myResult.getStatement().getSelectClauses().get(columnIndex - 1).getDataType()) {
 			case INTEGER:
 				return getInt(columnIndex);
 			case BOOLEAN:
@@ -375,6 +377,7 @@ class JdbcResultSet implements ResultSet {
 			case DECIMAL:
 				return getBigDecimal(columnIndex);
 			case STRING:
+			case JSON:
 			default:
 				return getString(columnIndex);
 		}
@@ -1185,12 +1188,12 @@ class JdbcResultSet implements ResultSet {
 
 		@Override
 		public String getColumnLabel(int column) {
-			return myResult.getColumnNames().get(column - 1);
+			return myResult.getStatement().getSelectClauses().get(column - 1).getAlias();
 		}
 
 		@Override
 		public String getColumnName(int column) {
-			return myResult.getColumnNames().get(column - 1);
+			return getColumnLabel(column);
 		}
 
 		@Override
@@ -1220,12 +1223,12 @@ class JdbcResultSet implements ResultSet {
 
 		@Override
 		public int getColumnType(int column) {
-			return myResult.getColumnTypes().get(column - 1).getSqlType();
+			return myResult.getStatement().getSelectClauses().get(column - 1).getDataType().getSqlType();
 		}
 
 		@Override
 		public String getColumnTypeName(int column) {
-			return myResult.getColumnTypes().get(column - 1).name();
+			return myResult.getStatement().getSelectClauses().get(column - 1).getDataType().name();
 		}
 
 		@Override

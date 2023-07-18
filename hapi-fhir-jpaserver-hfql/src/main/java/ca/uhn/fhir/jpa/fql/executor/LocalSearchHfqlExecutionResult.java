@@ -27,13 +27,14 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * @see IHfqlExecutionResult for information about the purpose of this class
@@ -45,8 +46,6 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 	private final HfqlExecutor.HfqlExecutionContext myExecutionContext;
 	private final Integer myLimit;
 	private final HfqlStatement myStatement;
-	private final List<String> myColumnNames;
-	private final List<HfqlDataTypeEnum> myColumnDataTypes;
 	private final Predicate<IBaseResource> myWhereClausePredicate;
 	private final IParser myParser;
 	private int myTotalRowsFetched = 0;
@@ -64,7 +63,6 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 			HfqlExecutor.HfqlExecutionContext theExecutionContext,
 			Integer theLimit,
 			int theInitialOffset,
-			List<HfqlDataTypeEnum> theColumnDataTypes,
 			Predicate<IBaseResource> theWhereClausePredicate,
 			FhirContext theFhirContext) {
 		myStatement = theStatement;
@@ -72,22 +70,8 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		myExecutionContext = theExecutionContext;
 		myLimit = theLimit;
 		myNextSearchResultRow = theInitialOffset;
-		myColumnDataTypes = theColumnDataTypes;
 		myWhereClausePredicate = theWhereClausePredicate;
-		myColumnNames = myStatement.getSelectClauses().stream()
-				.map(HfqlStatement.SelectClause::getAlias)
-				.collect(Collectors.toUnmodifiableList());
 		myParser = theFhirContext.newJsonParser();
-	}
-
-	@Override
-	public List<String> getColumnNames() {
-		return myColumnNames;
-	}
-
-	@Override
-	public List<HfqlDataTypeEnum> getColumnTypes() {
-		return myColumnDataTypes;
 	}
 
 	@Override
@@ -156,8 +140,9 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		List<Object> values = new ArrayList<>();
 		for (int columnIndex = 0; columnIndex < myStatement.getSelectClauses().size(); columnIndex++) {
 			HfqlStatement.SelectClause nextColumn =
-					myStatement.getSelectClauses().get(columnIndex);
+				myStatement.getSelectClauses().get(columnIndex);
 			String clause = nextColumn.getClause();
+			HfqlDataTypeEnum columnDataType = nextColumn.getDataType();
 			List<IBase> columnValues;
 			try {
 				columnValues = myExecutionContext.evaluate(myNextResource, clause, IBase.class);
@@ -167,12 +152,30 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 				return createAndStoreErrorRow(errorMessage);
 			}
 			String value = null;
-			if (!columnValues.isEmpty()) {
-				IBase firstColumnValue = columnValues.get(0);
-				if (firstColumnValue instanceof IIdType) {
-					value = ((IIdType) firstColumnValue).getIdPart();
-				} else if (firstColumnValue != null) {
-					value = myParser.encodeToString(firstColumnValue);
+			if (columnDataType == HfqlDataTypeEnum.JSON) {
+				StringBuilder b = new StringBuilder();
+				b.append("[");
+				for (Iterator<IBase> valueIter = columnValues.iterator(); valueIter.hasNext(); ) {
+					IBase next = valueIter.next();
+					if (next instanceof IPrimitiveType) {
+						b.append('"');
+						String encodedValue = encodeValue(next);
+						encodedValue = encodedValue.replace("\\", "\\\\").replace("\"", "\\\"");
+						b.append(encodedValue);
+						b.append('"');
+					} else {
+						b.append(encodeValue(next));
+					}
+					if (valueIter.hasNext()) {
+						b.append(", ");
+					}
+				}
+				b.append("]");
+				value = b.toString();
+			} else {
+				if (!columnValues.isEmpty()) {
+					IBase firstColumnValue = columnValues.get(0);
+					value = encodeValue(firstColumnValue);
 				}
 			}
 
@@ -181,6 +184,16 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 
 		myNextResource = null;
 		return new Row(myNextResourceSearchRow, values);
+	}
+
+	private String encodeValue(IBase firstColumnValue) {
+		String value = null;
+		if (firstColumnValue instanceof IIdType) {
+			value = ((IIdType) firstColumnValue).getIdPart();
+		} else if (firstColumnValue != null) {
+			value = myParser.encodeToString(firstColumnValue);
+		}
+		return value;
 	}
 
 	private Row createAndStoreErrorRow(String errorMessage) {

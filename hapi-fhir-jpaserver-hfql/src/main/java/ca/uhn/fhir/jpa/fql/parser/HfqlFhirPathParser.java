@@ -81,19 +81,20 @@ public class HfqlFhirPathParser {
 
 		HfqlLexer lexer = new HfqlLexer(theFhirPath);
 		boolean firstToken = true;
+		boolean potentiallyRepeatableAtCurrentPath = false;
 		while (lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
-			String nextToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
-					.getToken();
+			HfqlLexerToken nextToken = lexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART);
+			String nextTokenString = nextToken.getToken();
 
 			// If the first token is the resource type, we can ignore that
 			if (firstToken) {
 				firstToken = false;
-				if (nextToken.equals(theResourceType)) {
+				if (nextTokenString.equals(theResourceType)) {
 					continue;
 				}
 			}
 
-			if (".".equals(nextToken)) {
+			if (".".equals(nextTokenString)) {
 				continue;
 			}
 
@@ -106,8 +107,24 @@ public class HfqlFhirPathParser {
 			 * the element names as though the filter wasn't there. This is probably
 			 * not going to hold true always, but it should be good enough for our
 			 * basic type guessing.
+			 *
+			 * One specific case though that we deal with is the functions that take
+			 * a collection and reduce it to a single element. In that case we assume
+			 * we can't have a collection.
 			 */
-			if (nextToken.contains("(")) {
+			if (nextTokenString.contains("(")) {
+				String keyword = nextToken.asKeyword();
+				switch (keyword) {
+					case "FIRST()":
+					case "LAST()":
+						potentiallyRepeatableAtCurrentPath = false;
+						break;
+					case "TOINTEGER()":
+						if (!lexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)) {
+							return HfqlDataTypeEnum.INTEGER;
+						}
+						break;
+				}
 				continue;
 			}
 
@@ -115,14 +132,16 @@ public class HfqlFhirPathParser {
 			 * If the element has an offset operator (e.g. "name[3]") then
 			 * ignore it since we only care about the elemt name part.
 			 */
-			int leftSquareBracketIndex = nextToken.indexOf('[');
-			if (leftSquareBracketIndex != -1 && nextToken.endsWith("]")) {
-				nextToken = nextToken.substring(0, leftSquareBracketIndex);
+			boolean hasArrayIndex = false;
+			int leftSquareBracketIndex = nextTokenString.indexOf('[');
+			if (leftSquareBracketIndex != -1 && nextTokenString.endsWith("]")) {
+				nextTokenString = nextTokenString.substring(0, leftSquareBracketIndex);
+				hasArrayIndex = true;
 			}
 
-			BaseRuntimeChildDefinition childDefForNode = currentElementDefinition.getChildByName(nextToken);
+			BaseRuntimeChildDefinition childDefForNode = currentElementDefinition.getChildByName(nextTokenString);
 			if (childDefForNode == null) {
-				childDefForNode = currentElementDefinition.getChildByName(nextToken + "[x]");
+				childDefForNode = currentElementDefinition.getChildByName(nextTokenString + "[x]");
 				if (childDefForNode != null) {
 					if (lexer.peekNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION_PART)
 							.getToken()
@@ -134,22 +153,27 @@ public class HfqlFhirPathParser {
 								.getToken();
 						if (token.startsWith("ofType(") && token.endsWith(")")) {
 							String type = token.substring(7, token.length() - 1);
-							nextToken = nextToken + WordUtils.capitalize(type);
+							nextTokenString = nextTokenString + WordUtils.capitalize(type);
 						}
 					}
 				}
 			}
 
 			if (childDefForNode != null) {
-				if (childDefForNode.getValidChildNames().contains(nextToken)) {
-					BaseRuntimeElementDefinition<?> elementDefForNode = childDefForNode.getChildByName(nextToken);
+
+				if (childDefForNode.getMax() != 1 && !hasArrayIndex) {
+					potentiallyRepeatableAtCurrentPath = true;
+				}
+
+				if (childDefForNode.getValidChildNames().contains(nextTokenString)) {
+					BaseRuntimeElementDefinition<?> elementDefForNode = childDefForNode.getChildByName(nextTokenString);
 					if (elementDefForNode != null) {
 						if (elementDefForNode instanceof BaseRuntimeElementCompositeDefinition) {
 							currentElementDefinition = (BaseRuntimeElementCompositeDefinition<?>) elementDefForNode;
 							continue;
 						} else if (elementDefForNode instanceof RuntimePrimitiveDatatypeDefinition) {
 							leafDefinition = (RuntimePrimitiveDatatypeDefinition) elementDefForNode;
-							break;
+							continue;
 						}
 					}
 				}
@@ -158,12 +182,11 @@ public class HfqlFhirPathParser {
 			break;
 		}
 
-		if (leafDefinition != null) {
-			String finalToken = getNextFhirPathPartTokenOrNull(lexer);
-			if ("toInteger()".equals(finalToken)) {
-				return HfqlDataTypeEnum.INTEGER;
-			}
+		if (potentiallyRepeatableAtCurrentPath) {
+			return HfqlDataTypeEnum.JSON;
+		}
 
+		if (leafDefinition != null) {
 			String typeName = leafDefinition.getName();
 			return getHfqlDataTypeForFhirType(typeName);
 		}

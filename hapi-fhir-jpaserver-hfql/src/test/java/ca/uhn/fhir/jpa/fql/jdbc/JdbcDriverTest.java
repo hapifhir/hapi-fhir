@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.fhir.jpa.fql.jdbc.HfqlRestClientTest.createFakeStatement;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,11 +53,10 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 @ExtendWith(MockitoExtension.class)
 public class JdbcDriverTest {
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final HfqlRestClientTest.HeaderCaptureInterceptor ourHeaderCaptureInterceptor = new HfqlRestClientTest.HeaderCaptureInterceptor();
 	public static final String SOME_USERNAME = "some-username";
 	public static final String SOME_PASSWORD = "some-password";
-
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final HfqlRestClientTest.HeaderCaptureInterceptor ourHeaderCaptureInterceptor = new HfqlRestClientTest.HeaderCaptureInterceptor();
 	@Mock
 	private IHfqlExecutor myFqlExecutor;
 	@Mock
@@ -98,8 +95,6 @@ public class JdbcDriverTest {
 		HfqlStatement statement = createFakeStatement();
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -128,8 +123,6 @@ public class JdbcDriverTest {
 		HfqlStatement statement = createFakeStatement();
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(IHfqlExecutionResult.ROW_OFFSET_ERROR, List.of(errorMessage))
@@ -155,10 +148,19 @@ public class JdbcDriverTest {
 	@Test
 	public void testDataTypes() throws SQLException {
 		// Setup
+		HfqlStatement hfqlStatement = new HfqlStatement();
+		hfqlStatement.setFromResourceName("Patient");
+		hfqlStatement.addSelectClause("col.string").setDataType(HfqlDataTypeEnum.STRING);
+		hfqlStatement.addSelectClause("col.date").setDataType(HfqlDataTypeEnum.DATE);
+		hfqlStatement.addSelectClause("col.boolean").setDataType(HfqlDataTypeEnum.BOOLEAN);
+		hfqlStatement.addSelectClause("col.time").setDataType(HfqlDataTypeEnum.TIME);
+		hfqlStatement.addSelectClause("col.decimal").setDataType(HfqlDataTypeEnum.DECIMAL);
+		hfqlStatement.addSelectClause("col.integer").setDataType(HfqlDataTypeEnum.INTEGER);
+		hfqlStatement.addSelectClause("col.longint").setDataType(HfqlDataTypeEnum.LONGINT);
+		hfqlStatement.addSelectClause("col.timestamp").setDataType(HfqlDataTypeEnum.TIMESTAMP);
+		when(myMockFqlResult.getStatement()).thenReturn(hfqlStatement);
+
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
-		when(myMockFqlResult.getStatement()).thenReturn(createFakeStatement());
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.string", "col.date", "col.boolean", "col.time", "col.decimal", "col.integer", "col.longint", "col.timestamp"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DATE, HfqlDataTypeEnum.BOOLEAN, HfqlDataTypeEnum.TIME, HfqlDataTypeEnum.DECIMAL, HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.TIMESTAMP));
 		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("a-string", "2023-02-02", "true", "12:23:22", "100.123", "123", "987", "2023-02-12T10:01:02.234Z"))
@@ -201,18 +203,19 @@ public class JdbcDriverTest {
 		assertEquals(987L, resultSet.getObject("col.longint"));
 		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getObject("col.timestamp"));
 
-		assertThrows(SQLException.class, ()->resultSet.getString(0));
-		assertThrows(SQLException.class, ()->resultSet.getString(999));
-		assertThrows(SQLException.class, ()->resultSet.getString("foo"));
+		assertThrows(SQLException.class, () -> resultSet.getString(0));
+		assertThrows(SQLException.class, () -> resultSet.getString(999));
+		assertThrows(SQLException.class, () -> resultSet.getString("foo"));
 	}
 
 	@Test
 	public void testDatatypes_TimestampPrecision() throws SQLException {
 		// Setup
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
-		when(myMockFqlResult.getStatement()).thenReturn(createFakeStatement());
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("col.time"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.TIME));
+		HfqlStatement fakeStatement = createFakeStatement();
+		fakeStatement.getSelectClauses().clear();
+		fakeStatement.addSelectClause("col.time").setDataType(HfqlDataTypeEnum.TIME);
+		when(myMockFqlResult.getStatement()).thenReturn(fakeStatement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, true, true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("12:23")),
@@ -253,8 +256,9 @@ public class JdbcDriverTest {
 	@Test
 	public void testIntrospectTables() throws SQLException {
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("TABLE_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING));
+		HfqlStatement statement = new HfqlStatement();
+		statement.addSelectClause("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(new IHfqlExecutionResult.Row(0, List.of("Account")));
 
@@ -272,8 +276,10 @@ public class JdbcDriverTest {
 	@Test
 	public void testIntrospectColumns() throws SQLException {
 		when(myFqlExecutor.introspectColumns(any(), any())).thenReturn(myMockFqlResult);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("COLUMN_NAME", "DATA_TYPE"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER));
+		HfqlStatement statement = new HfqlStatement();
+		statement.addSelectClause("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("DATA_TYPE").setDataType(HfqlDataTypeEnum.INTEGER);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, Lists.newArrayList("foo", Types.VARCHAR)),

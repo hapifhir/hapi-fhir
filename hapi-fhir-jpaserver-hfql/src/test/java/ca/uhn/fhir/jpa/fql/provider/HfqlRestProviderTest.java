@@ -75,8 +75,6 @@ public class HfqlRestProviderTest {
 		HfqlStatement statement = createFakeStatement();
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -100,9 +98,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				my-search-id,999,"{""select"":[{""clause"":""name.family"",""alias"":""name.family"",""operator"":""SELECT""}],""fromResourceName"":""Patient""}"
-				"",name.family,name.given
-				"",STRING,STRING
+				my-search-id,999,"{""select"":[{""clause"":""name[0].family"",""alias"":""name[0].family"",""operator"":""SELECT"",""dataType"":""STRING""},{""clause"":""name[0].given[0]"",""alias"":""name[0].given[0]"",""operator"":""SELECT"",""dataType"":""STRING""}],""fromResourceName"":""Patient""}"
 				0,Simpson,Homer
 				3,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
@@ -146,8 +142,6 @@ public class HfqlRestProviderTest {
 			String expected = """
 				1,HAPI FHIR THE-VERSION
 				my-search-id,-1,
-				""
-				""
 				4,Simpson,Homer
 				6,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
@@ -168,8 +162,9 @@ public class HfqlRestProviderTest {
 		// Setup
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("TABLE_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING));
+		HfqlStatement statement = new HfqlStatement();
+		statement.addSelectClause("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("Account")),
 			new IHfqlExecutionResult.Row(6, List.of("Patient"))
@@ -189,9 +184,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				,-1,
-				"",TABLE_NAME
-				"",STRING
+				,-1,"{""select"":[{""clause"":""TABLE_NAME"",""alias"":""TABLE_NAME"",""operator"":""SELECT"",""dataType"":""STRING""}]}"
 				0,Account
 				6,Patient
 				""".replace("THE-VERSION", VersionUtil.getVersion());
@@ -208,8 +201,9 @@ public class HfqlRestProviderTest {
 		// Setup
 		when(myFqlExecutor.introspectColumns(eq("FOO"), eq("BAR"))).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
-		when(myMockFqlResult.getColumnNames()).thenReturn(List.of("COLUMN_NAME"));
-		when(myMockFqlResult.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING));
+		HfqlStatement statement = new HfqlStatement();
+		statement.addSelectClause("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("FOO")),
 			new IHfqlExecutionResult.Row(6, List.of("BAR"))
@@ -231,9 +225,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				,-1,
-				"",COLUMN_NAME
-				"",STRING
+				,-1,"{""select"":[{""clause"":""COLUMN_NAME"",""alias"":""COLUMN_NAME"",""operator"":""SELECT"",""dataType"":""STRING""}]}"
 				0,FOO
 				6,BAR
 				""".replace("THE-VERSION", VersionUtil.getVersion());

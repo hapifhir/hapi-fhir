@@ -80,8 +80,8 @@ public class HfqlExecutorTest {
 		// Setup
 		HfqlStatement statement = new HfqlStatement();
 		statement.setFromResourceName("Patient");
-		statement.addSelectClause("name.given[1]");
-		statement.addSelectClause("name.family");
+		statement.addSelectClause("name[0].given[1]").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
 		statement.addHavingClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
 
 		String searchId = "the-search-id";
@@ -91,8 +91,8 @@ public class HfqlExecutorTest {
 		IHfqlExecutionResult result = myHfqlExecutor.executeContinuation(statement, searchId, 3, 100, mySrd);
 
 		// Verify
-		assertThat(result.getColumnNames(), contains(
-			"name.given[1]", "name.family"
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
+			"name[0].given[1]", "name[0].family"
 		));
 		assertTrue(result.hasNext());
 		IHfqlExecutionResult.Row nextRow = result.getNextRow();
@@ -124,7 +124,7 @@ public class HfqlExecutorTest {
 					FROM Patient
 					SELECT
 						meta.versionId.toInteger() AS versionId,
-						name.family AS family
+						name[0].family AS family
 					ORDER BY versionId DESC
 			""";
 
@@ -134,7 +134,7 @@ public class HfqlExecutorTest {
 
 		// Verify
 		IHfqlExecutionResult.Row nextRow;
-		assertThat(result.getColumnNames(), contains(
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
 			"versionId", "family"
 		));
 		for (int i = 4999; i >= 0; i--) {
@@ -204,22 +204,35 @@ public class HfqlExecutorTest {
 		String statement = """
 					from Patient
 					having name.family = 'Simpson'
-					select name.given[1], name.family
+					select name[0].given[1], name[0].family, name, name.given
 			""";
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames(), contains(
-			"name.given[1]", "name.family"
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
+			"name[0].given[1]", "name[0].family", "name", "name.given"
+		));
+		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(
+			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON
 		));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(0, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("Jay", "Simpson"));
+		assertThat(nextRow.getRowValues(), contains(
+			"Jay",
+			"Simpson",
+			"[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]",
+			"[\"Homer\", \"Jay\"]"
+		));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(2, nextRow.getRowOffset());
-		assertThat(nextRow.getRowValues(), contains("El Barto", "Simpson"));
+		assertThat(nextRow.getRowValues(), contains(
+			"El Barto",
+			"Simpson",
+			"[{\"family\":\"Simpson\",\"given\":[\"Bart\",\"El Barto\"]}]",
+			"[\"Bart\", \"El Barto\"]"
+		));
 		assertTrue(result.hasNext());
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
@@ -272,11 +285,11 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"active", "address.city", "address.country"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"id", "active", "address", "birthDate"
 		));
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), not(hasItem(
-			"address.period.start"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), not(hasItem(
+			"extension"
 		)));
 	}
 
@@ -286,7 +299,7 @@ public class HfqlExecutorTest {
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates());
 
 		String statement = """
-					select name.given
+					select name[0].given[0]
 					from Patient
 					limit 5
 			""";
@@ -319,17 +332,17 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"name"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			HfqlDataTypeEnum.JSON
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList("{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}"),
-			Lists.newArrayList("{\"family\":\"Flanders\",\"given\":[\"Ned\"]}")
+			Lists.newArrayList("[{\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}]"),
+			Lists.newArrayList("[{\"family\":\"Flanders\",\"given\":[\"Ned\"]}]")
 		));
 	}
 
@@ -344,24 +357,25 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"name.family", "name.given", "count(*)"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			// TODO: It'd make more sense if we used STRING instead of JSON here
+			HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.JSON, HfqlDataTypeEnum.INTEGER
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList("Flanders", "Ned", 2L),
-			Lists.newArrayList("Simpson", "Jay", 2L),
-			Lists.newArrayList("Simpson", "Marie", 1L),
-			Lists.newArrayList("Simpson", "Evelyn", 1L),
-			Lists.newArrayList("Simpson", "Homer", 2L),
-			Lists.newArrayList("Simpson", "Lisa", 1L),
-			Lists.newArrayList("Simpson", "Bart", 1L),
-			Lists.newArrayList("Simpson", "El Barto", 1L),
-			Lists.newArrayList("Simpson", "Maggie", 1L)
+			Lists.newArrayList("Flanders", "Ned", 2),
+			Lists.newArrayList("Simpson", "Jay", 2),
+			Lists.newArrayList("Simpson", "Marie", 1),
+			Lists.newArrayList("Simpson", "Evelyn", 1),
+			Lists.newArrayList("Simpson", "Homer", 2),
+			Lists.newArrayList("Simpson", "Lisa", 1),
+			Lists.newArrayList("Simpson", "Bart", 1),
+			Lists.newArrayList("Simpson", "El Barto", 1),
+			Lists.newArrayList("Simpson", "Maggie", 1)
 		));
 	}
 
@@ -404,16 +418,16 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"count(*)", "count(name.family)"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList(3L, 2L)
+			Lists.newArrayList(3, 2)
 		));
 	}
 
@@ -423,30 +437,30 @@ public class HfqlExecutorTest {
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlandersWithSomeDuplicates());
 		String statement = """
 					from Patient
-					select name.family, name.given, count(*)
-					group by name.family, name.given
-					order by count(*) desc, name.family asc, name.given asc
+					select name[0].family, name[0].given, count(*)
+					group by name[0].family, name[0].given
+					order by count(*) desc, name[0].family asc, name[0].given asc
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given", "count(*)"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].family", "name[0].given", "count(*)"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, contains(
-			Lists.newArrayList("Flanders", "Ned", 2L),
-			Lists.newArrayList("Simpson", "Homer", 2L),
-			Lists.newArrayList("Simpson", "Jay", 2L),
-			Lists.newArrayList("Simpson", "Bart", 1L),
-			Lists.newArrayList("Simpson", "El Barto", 1L),
-			Lists.newArrayList("Simpson", "Evelyn", 1L),
-			Lists.newArrayList("Simpson", "Lisa", 1L),
-			Lists.newArrayList("Simpson", "Maggie", 1L),
-			Lists.newArrayList("Simpson", "Marie", 1L)
+			Lists.newArrayList("Flanders", "Ned", 2),
+			Lists.newArrayList("Simpson", "Homer", 2),
+			Lists.newArrayList("Simpson", "Jay", 2),
+			Lists.newArrayList("Simpson", "Bart", 1),
+			Lists.newArrayList("Simpson", "El Barto", 1),
+			Lists.newArrayList("Simpson", "Evelyn", 1),
+			Lists.newArrayList("Simpson", "Lisa", 1),
+			Lists.newArrayList("Simpson", "Maggie", 1),
+			Lists.newArrayList("Simpson", "Marie", 1)
 		));
 	}
 
@@ -460,15 +474,15 @@ public class HfqlExecutorTest {
 		));
 		String statement = """
 					from Patient
-					select name.family, name.given
-					order by name.family desc, name.given desc
+					select name[0].family, name[0].given[0]
+					order by name[0].family desc, name[0].given[0] desc
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].family", "name[0].given[0]"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING
 		));
 
@@ -490,15 +504,15 @@ public class HfqlExecutorTest {
 		));
 		String statement = """
 					from Patient
-					select name.family, name.given, birthDate
+					select name[0].family, name[0].given[0], birthDate
 					order by birthDate desc
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given", "birthDate"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].family", "name[0].given[0]", "birthDate"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DATE
 		));
 
@@ -520,15 +534,15 @@ public class HfqlExecutorTest {
 		));
 		String statement = """
 					from Patient
-					select name.family, name.given, active
-					order by active asc, name.given asc
+					select name[0].family, name[0].given[0], active
+					order by active asc, name[0].given[0] asc
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given", "active"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].family", "name[0].given[0]", "active"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.BOOLEAN
 		));
 
@@ -548,24 +562,24 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					select name.family, name.given, count(*), count(name.family)
-					group by name.family, name.given
+					select name[0].family, name[0].given[0], count(*), count(name[0].family)
+					group by name[0].family, name[0].given[0]
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.family", "name.given", "count(*)", "count(name.family)"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].family", "name[0].given[0]", "count(*)", "count(name[0].family)"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList(null, "Homer", 1L, 0L),
-			Lists.newArrayList("Simpson", "Homer", 1L, 1L),
-			Lists.newArrayList("Simpson", null, 1L, 1L),
-			Lists.newArrayList(null, null, 1L, 0L)
+			Lists.newArrayList(null, "Homer", 1, 0),
+			Lists.newArrayList("Simpson", "Homer", 1, 1),
+			Lists.newArrayList("Simpson", null, 1, 1),
+			Lists.newArrayList(null, null, 1, 0)
 		));
 	}
 
@@ -581,16 +595,16 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"count(*)", "count(name.family)"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
-			HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.LONGINT
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
+			HfqlDataTypeEnum.INTEGER, HfqlDataTypeEnum.INTEGER
 		));
 
 		List<List<Object>> rowValues = readAllRowValues(result);
 		assertThat(rowValues.toString(), rowValues, containsInAnyOrder(
-			Lists.newArrayList(4L, 2L)
+			Lists.newArrayList(4, 2)
 		));
 	}
 
@@ -602,13 +616,13 @@ public class HfqlExecutorTest {
 		String statement = """
 					from Patient
 					having name.family = 'Simpson'
-					select name.given, identifier.where(system = 'http://system' ).value
+					select name[0].given[0], identifier.where(system = 'http://system' ).first().value
 			""";
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.given", "identifier.where(system = 'http://system' ).value"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].given[0]", "identifier.where(system = 'http://system' ).first().value"
 		));
 		nextRow = result.getNextRow();
 
@@ -624,13 +638,13 @@ public class HfqlExecutorTest {
 		String statement = """
 					from Patient
 					having identifier.where(system = 'http://system' ).value = 'value0'
-					select name.given, identifier.value
+					select name[0].given[0], identifier[0].value
 			""";
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
-			"name.given", "identifier.value"
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"name[0].given[0]", "identifier[0].value"
 		));
 		nextRow = result.getNextRow();
 
@@ -660,10 +674,10 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"id"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING
 		));
 
@@ -683,7 +697,7 @@ public class HfqlExecutorTest {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 		String statement = """
-					select name.given
+					select name[0].given[0]
 					from Patient
 					having meta.versionId.toInteger() > 1
 			""";
@@ -717,10 +731,10 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"FullName"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING
 		));
 		nextRow = result.getNextRow();
@@ -754,10 +768,10 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult.Row nextRow;
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
 			"id", "value.ofType(Quantity).value", "value.ofType(Quantity).system", "value.ofType(Quantity).code"
 		));
-		assertThat(result.getColumnTypes().toString(), result.getColumnTypes(), hasItems(
+		assertThat(result.getStatement().toSelectedColumnDataTypes().toString(), result.getStatement().toSelectedColumnDataTypes(), hasItems(
 			HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.DECIMAL, HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING
 		));
 
@@ -775,11 +789,11 @@ public class HfqlExecutorTest {
 		String statement = """
 					from Patient
 					having name.given in ('Foo' | 'Bart')
-					select Given:name.given[1], Family:name.family
+					select Given:name[0].given[1], Family:name[0].family[0]
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames(), contains(
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
@@ -798,11 +812,11 @@ public class HfqlExecutorTest {
 		String statement = """
 					from Patient
 					having name.given = 'Homer'
-					select Given:name.given[1], Family:name.family
+					select Given:name[0].given[1], Family:name[0].family
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
-		assertThat(result.getColumnNames(), contains(
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains(
 			"Given", "Family"
 		));
 		assertTrue(result.hasNext());
@@ -816,7 +830,7 @@ public class HfqlExecutorTest {
 	@Test
 	public void testIntrospectTables() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectTables();
-		assertEquals("TABLE_NAME", tables.getColumnNames().get(2));
+		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2));
 		assertTrue(tables.hasNext());
 		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
 	}
@@ -824,24 +838,24 @@ public class HfqlExecutorTest {
 	@Test
 	public void testIntrospectColumns_NoSelector() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectColumns(null, null);
-		assertEquals("TABLE_NAME", tables.getColumnNames().get(2), tables.getColumnNames().toString());
-		assertEquals("COLUMN_NAME", tables.getColumnNames().get(3), tables.getColumnNames().toString());
-		assertEquals("DATA_TYPE", tables.getColumnNames().get(4), tables.getColumnNames().toString());
+		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2), tables.getStatement().toSelectedColumnAliases().toString());
+		assertEquals("COLUMN_NAME", tables.getStatement().toSelectedColumnAliases().get(3), tables.getStatement().toSelectedColumnAliases().toString());
+		assertEquals("DATA_TYPE", tables.getStatement().toSelectedColumnAliases().get(4), tables.getStatement().toSelectedColumnAliases().toString());
 		assertTrue(tables.hasNext());
 		assertEquals("Account", tables.getNextRow().getRowValues().get(2));
-		assertEquals("description", tables.getNextRow().getRowValues().get(3));
+		assertEquals("coverage", tables.getNextRow().getRowValues().get(3));
 		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
 	}
 
 	@Test
 	public void testIntrospectColumns_TableSelector() {
 		IHfqlExecutionResult tables = myHfqlExecutor.introspectColumns("Patient", null);
-		assertEquals("TABLE_NAME", tables.getColumnNames().get(2), tables.getColumnNames().toString());
-		assertEquals("COLUMN_NAME", tables.getColumnNames().get(3), tables.getColumnNames().toString());
-		assertEquals("DATA_TYPE", tables.getColumnNames().get(4), tables.getColumnNames().toString());
+		assertEquals("TABLE_NAME", tables.getStatement().toSelectedColumnAliases().get(2), tables.getStatement().toSelectedColumnAliases().toString());
+		assertEquals("COLUMN_NAME", tables.getStatement().toSelectedColumnAliases().get(3), tables.getStatement().toSelectedColumnAliases().toString());
+		assertEquals("DATA_TYPE", tables.getStatement().toSelectedColumnAliases().get(4), tables.getStatement().toSelectedColumnAliases().toString());
 		assertTrue(tables.hasNext());
 		assertEquals("Patient", tables.getNextRow().getRowValues().get(2));
-		assertEquals("address.city", tables.getNextRow().getRowValues().get(3));
+		assertEquals("address", tables.getNextRow().getRowValues().get(3));
 		assertEquals(Types.VARCHAR, tables.getNextRow().getRowValues().get(4));
 	}
 
@@ -887,8 +901,8 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertThat(result.getColumnNames(), contains("id", "meta.versionId", "value.ofType(Quantity).value"));
-		assertThat(result.getColumnTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.DECIMAL));
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains("id", "meta.versionId", "value.ofType(Quantity).value"));
+		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.LONGINT, HfqlDataTypeEnum.DECIMAL));
 		assertTrue(result.hasNext());
 		List<Object> nextRow = result.getNextRow().getRowValues();
 		assertEquals("123", nextRow.get(0));
@@ -912,12 +926,37 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					select Patient.name.given
+					select Patient.name[0].given[0]
 			""";
 
 		IHfqlExecutionResult outcome = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 		assertTrue(outcome.hasNext());
 		assertEquals("Homer", outcome.getNextRow().getRowValues().get(0));
+
+	}
+
+	@Test
+	public void testSelect_RepeatingElement_NeedsEscaping() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+		Patient patient = new Patient();
+		patient.addName().addGiven("1\"2").addGiven("1\\,2");
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(patient));
+
+
+		String statement = """
+					SELECT
+						name.given
+					FROM
+						Patient
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains("name.given"));
+		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.JSON));
+		assertTrue(result.hasNext());
+		List<Object> nextRow = result.getNextRow().getRowValues();
+		assertEquals("[\"1\\\"2\", \"1\\\\,2\"]", nextRow.get(0));
 
 	}
 
@@ -929,15 +968,15 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					select
-						name.given, foo
+						name[0].given[0], foo
 					from
 						Patient
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
 
-		assertThat(result.getColumnNames(), contains("name.given", "foo"));
-		assertThat(result.getColumnTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
+		assertThat(result.getStatement().toSelectedColumnAliases(), contains("name[0].given[0]", "foo"));
+		assertThat(result.getStatement().toSelectedColumnDataTypes(), contains(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
 		assertTrue(result.hasNext());
 		List<Object> nextRow = result.getNextRow().getRowValues();
 		assertEquals("Homer", nextRow.get(0));
