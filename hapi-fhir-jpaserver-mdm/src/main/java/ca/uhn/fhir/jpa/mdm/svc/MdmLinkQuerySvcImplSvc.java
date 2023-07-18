@@ -129,16 +129,18 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		@SuppressWarnings("unchecked")
 		final List<MdmLinkWithRevision<? extends IMdmLink<?>>> mdmLinkHistoryFromDao =
-			myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
+				myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
 
 		Comparator<MdmLinkWithRevisionJson> linkHistoryComparator =
-			Comparator.<MdmLinkWithRevisionJson, String>comparing(l -> l.getMdmLink().getGoldenResourceId())
-				.thenComparing(l -> l.getMdmLink().getSourceId())
-				.thenComparing(Comparator.comparingLong(MdmLinkWithRevisionJson::getRevisionNumber).reversed());
+				Comparator.<MdmLinkWithRevisionJson, String>comparing(
+								l -> l.getMdmLink().getGoldenResourceId())
+						.thenComparing(l -> l.getMdmLink().getSourceId())
+						.thenComparing(Comparator.comparingLong(MdmLinkWithRevisionJson::getRevisionNumber)
+								.reversed());
 
 		return mdmLinkHistoryFromDao.stream()
-			.map(myMdmModelConverterSvc::toJson)
-			.sorted(linkHistoryComparator)
-			.collect(Collectors.toUnmodifiableList());
+				.map(myMdmModelConverterSvc::toJson)
+				.sorted(linkHistoryComparator)
+				.collect(Collectors.toUnmodifiableList());
 	}
 }
