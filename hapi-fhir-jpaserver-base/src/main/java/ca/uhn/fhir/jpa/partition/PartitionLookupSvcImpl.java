@@ -274,16 +274,15 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		try {
 			return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
 				String msg = myFhirCtx
-					.getLocalizer()
-					.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
+						.getLocalizer()
+						.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
 				return new ResourceNotFoundException(msg);
 			});
 		} catch (ResourceNotFoundException e) {
 			List<PartitionEntity> allPartitions = executeInTransaction(() -> myPartitionDao.findAll());
-			String allPartitionsString = allPartitions
-				.stream()
-				.map(t -> t.getId() + "/" + t.getName())
-				.collect(Collectors.joining(", "));
+			String allPartitionsString = allPartitions.stream()
+					.map(t -> t.getId() + "/" + t.getName())
+					.collect(Collectors.joining(", "));
 			ourLog.warn("Failed to find partition with ID {}.  Current partitions: {}", theId, allPartitionsString);
 			throw e;
 		}
