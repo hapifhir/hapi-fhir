@@ -976,7 +976,7 @@
 
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>1.17.1</testcontainers_version>
-		<thymeleaf-version>3.1.1.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->

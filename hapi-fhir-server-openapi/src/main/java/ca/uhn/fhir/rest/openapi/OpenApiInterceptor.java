@@ -91,6 +91,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
+import org.thymeleaf.web.IWebExchange;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -335,6 +336,7 @@ public class OpenApiInterceptor {
 
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
+
 		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
