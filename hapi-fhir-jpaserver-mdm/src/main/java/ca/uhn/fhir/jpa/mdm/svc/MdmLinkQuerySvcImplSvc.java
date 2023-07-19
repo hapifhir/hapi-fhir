@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	public Page<MdmLinkJson> queryLinks(
 			MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext) {
 		@SuppressWarnings("unchecked")
-		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
+		Page<? extends IMdmLink<?>> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
 		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
 
@@ -120,17 +121,26 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 				.setResourceType(theRequestResourceType);
 
 		@SuppressWarnings("unchecked")
-		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
+		Page<? extends IMdmLink<?>> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
 
 	@Override
 	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		@SuppressWarnings("unchecked")
 		final List<MdmLinkWithRevision<? extends IMdmLink<?>>> mdmLinkHistoryFromDao =
 				myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
 
+		Comparator<MdmLinkWithRevisionJson> linkHistoryComparator =
+				Comparator.<MdmLinkWithRevisionJson, String>comparing(
+								l -> l.getMdmLink().getGoldenResourceId())
+						.thenComparing(l -> l.getMdmLink().getSourceId())
+						.thenComparing(Comparator.comparingLong(MdmLinkWithRevisionJson::getRevisionNumber)
+								.reversed());
+
 		return mdmLinkHistoryFromDao.stream()
 				.map(myMdmModelConverterSvc::toJson)
+				.sorted(linkHistoryComparator)
 				.collect(Collectors.toUnmodifiableList());
 	}
 }
