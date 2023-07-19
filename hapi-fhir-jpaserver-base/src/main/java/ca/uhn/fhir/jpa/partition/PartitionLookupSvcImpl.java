@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 
@@ -270,12 +271,22 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
-			String msg = myFhirCtx
+		try {
+			return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
+				String msg = myFhirCtx
 					.getLocalizer()
 					.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
-			return new ResourceNotFoundException(msg);
-		});
+				return new ResourceNotFoundException(msg);
+			});
+		} catch (ResourceNotFoundException e) {
+			List<PartitionEntity> allPartitions = executeInTransaction(() -> myPartitionDao.findAll());
+			String allPartitionsString = allPartitions
+				.stream()
+				.map(t -> t.getId() + "/" + t.getName())
+				.collect(Collectors.joining(", "));
+			ourLog.warn("Failed to find partition with ID {}.  Current partitions: {}", theId, allPartitionsString);
+			throw e;
+		}
 	}
 
 	protected <T> T executeInTransaction(ICallable<T> theCallable) {
