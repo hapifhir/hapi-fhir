@@ -78,6 +78,19 @@ For example:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServerOperations.java|searchParamAdvanced}}
 ``` 
 
+If the string value to be searched contains a space character, you should encode it with a `+` sign or with `%20`, as in the following examples with an Organization named "Acme Corporation":
+
+```url
+http://fhir.example.com/Organization?name=Acme+Corporation
+http://fhir.example.com/Organization?name=Acme%20Corporation
+```
+
+If the string value to be searched contains a literal `+` character, you should escape it with `%2B`, as in the following example with an Organization named "H+K":
+
+```url
+http://fhir.example.com/Organization?name=H%2BK
+```
+
 # Returning Multiple OUT Parameters
 
 In all of the Operation examples above, the return type specified for the operation is a single Resource instance. This is a common pattern in FHIR defined operations. However, it is also possible for an extended operation to be defined with multiple and/or repeating OUT parameters. In this case, you can return a [Parameters](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Parameters.html) resource directly.
