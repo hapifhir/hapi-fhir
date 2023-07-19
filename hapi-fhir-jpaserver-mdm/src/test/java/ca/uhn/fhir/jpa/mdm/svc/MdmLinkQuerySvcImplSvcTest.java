@@ -39,8 +39,10 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 		// links should be ordered by sourceId ascending
 		List<String> patientIdsFormLinks = linksWithRevisionJson.stream().map(l -> l.getMdmLink().getSourceId()).collect(Collectors.toList());
 
-		// Patients with blank client IDs should have been assigned sequential PID
-		assertEquals(List.of("Patient/123a", "Patient/3", "Patient/456a", "Patient/5", "Patient/789a"), patientIdsFormLinks);
+		// Patients with blank client IDs should have been assigned sequential PID, which range we don;t know, but we want to make sure
+		// that "123a", "456a" and "789a" are in this order
+		List<String> orderedClientIdsFromLinks = patientIdsFormLinks.stream().filter(id -> id.endsWith("a")).collect(Collectors.toList());
+		assertEquals(List.of("Patient/123a", "Patient/456a", "Patient/789a"), orderedClientIdsFromLinks);
 	}
 
 	private String createMdmLinksWithLinkedPatientsWithId(List<String> thePatientIds) {
