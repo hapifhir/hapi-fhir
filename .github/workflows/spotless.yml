@@ -1,0 +1,33 @@
+name: mvn spotless:check (Formatting)
+
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    permissions:
+       pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: spotless:check
+        run: mvn spotless:check
+      -  uses: mshick/add-pr-comment@v2
+         if: always()
+         with:
+            message-success: |
+               Formatting check succeeded!
+            message-failure: |
+               **This Pull Request has failed the formatting check**
+               
+               Please run `mvn spotless:apply` or `mvn clean install -DskipTests` to fix the formatting issues. 
+               
+               You can automate this auto-formatting process to execute on the git pre-push hook, by installing [pre-commit](https://pre-commit.com/) and then calling `pre-commit install --hook-type pre-push`. This will cause formatting to run automatically whenever you push. 
+               

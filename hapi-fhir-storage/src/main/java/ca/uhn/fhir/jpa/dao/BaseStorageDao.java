@@ -76,8 +76,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -85,6 +83,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -102,12 +102,16 @@ public abstract class BaseStorageDao {
 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+
 	@Autowired
 	protected FhirContext myFhirContext;
+
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
 	@Autowired
 	protected IResourceVersionSvc myResourceVersionSvc;
+
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 
@@ -132,7 +136,11 @@ public abstract class BaseStorageDao {
 	 * @param theResource The resource that is about to be stored
 	 * @since 5.3.0
 	 */
-	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
+	protected void preProcessResourceForStorage(
+			IBaseResource theResource,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			boolean thePerformIndexing) {
 
 		verifyResourceTypeIsAppropriateForDao(theResource);
 
@@ -145,7 +153,6 @@ public abstract class BaseStorageDao {
 		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
-
 	}
 
 	/**
@@ -154,7 +161,11 @@ public abstract class BaseStorageDao {
 	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
-			throw new InvalidRequestException(Msg.code(520) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
+			throw new InvalidRequestException(Msg.code(520)
+					+ getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 	}
 
@@ -164,7 +175,13 @@ public abstract class BaseStorageDao {
 	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
-				throw new InvalidRequestException(Msg.code(521) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+				throw new InvalidRequestException(Msg.code(521)
+						+ getContext()
+								.getLocalizer()
+								.getMessageSanitized(
+										BaseStorageDao.class,
+										"failedToCreateWithInvalidId",
+										theResource.getIdElement().getIdPart()));
 			}
 		}
 	}
@@ -178,7 +195,12 @@ public abstract class BaseStorageDao {
 			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
 			bundleType = defaultString(bundleType);
 			if (!allowedBundleTypes.contains(bundleType)) {
-				String message = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidBundleTypeForStorage", (isNotBlank(bundleType) ? bundleType : "(missing)"));
+				String message = myFhirContext
+						.getLocalizer()
+						.getMessage(
+								BaseStorageDao.class,
+								"invalidBundleTypeForStorage",
+								(isNotBlank(bundleType) ? bundleType : "(missing)"));
 				throw new UnprocessableEntityException(Msg.code(522) + message);
 			}
 		}
@@ -218,14 +240,14 @@ public abstract class BaseStorageDao {
 	 */
 	private void performAutoVersioning(IBaseResource theResource, boolean thePerformIndexing) {
 		if (thePerformIndexing) {
-			Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myStorageSettings, theResource);
+			Set<IBaseReference> referencesToVersion =
+					extractReferencesToAutoVersion(myFhirContext, myStorageSettings, theResource);
 			for (IBaseReference nextReference : referencesToVersion) {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
 
-					ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
-						Collections.singletonList(referenceElement)
-					);
+					ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
+							RequestPartitionId.allPartitions(), Collections.singletonList(referenceElement));
 
 					// 3 cases:
 					// 1) there exists a resource in the db with some version (use this version)
@@ -235,7 +257,9 @@ public abstract class BaseStorageDao {
 					if (resourceVersionMap.containsKey(referenceElement)) {
 						// the resource exists... latest id
 						// will be the value in the IResourcePersistentId
-						version = resourceVersionMap.getResourcePersistentId(referenceElement).getVersion();
+						version = resourceVersionMap
+								.getResourcePersistentId(referenceElement)
+								.getVersion();
 					} else if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 						// if idToPID doesn't contain object
 						// but autcreateplaceholders is on
@@ -247,14 +271,20 @@ public abstract class BaseStorageDao {
 						// we throw
 						throw new ResourceNotFoundException(Msg.code(523) + referenceElement);
 					}
-					String newTargetReference = referenceElement.withVersion(version.toString()).getValue();
+					String newTargetReference =
+							referenceElement.withVersion(version.toString()).getValue();
 					nextReference.setReference(newTargetReference);
 				}
 			}
 		}
 	}
 
-	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource, @Nullable String theMatchUrl, @Nonnull RestOperationTypeEnum theOperationType) {
+	protected DaoMethodOutcome toMethodOutcome(
+			RequestDetails theRequest,
+			@Nonnull final IBasePersistedResource theEntity,
+			@Nonnull IBaseResource theResource,
+			@Nullable String theMatchUrl,
+			@Nonnull RestOperationTypeEnum theOperationType) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IResourcePersistentId persistentId = theEntity.getPersistentId();
@@ -291,10 +321,11 @@ public abstract class BaseStorageDao {
 		if (outcome.getResource() != null) {
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
 			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
 				outcome.setResource(null);
 			}
@@ -308,10 +339,11 @@ public abstract class BaseStorageDao {
 			if (outcome.getResource() != null) {
 				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
 				HookParams params = new HookParams()
-					.add(IPreResourceShowDetails.class, showDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+						.add(IPreResourceShowDetails.class, showDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				CompositeInterceptorBroadcaster.doCallHooks(
+						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 				outcome.setResource(showDetails.getResource(0));
 			}
 		});
@@ -319,7 +351,11 @@ public abstract class BaseStorageDao {
 		return outcome;
 	}
 
-	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, IResourcePersistentId theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
+	protected DaoMethodOutcome toMethodOutcomeLazy(
+			RequestDetails theRequest,
+			IResourcePersistentId theResourcePersistentId,
+			@Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity,
+			Supplier<IIdType> theIdSupplier) {
 		LazyDaoMethodOutcome outcome = new LazyDaoMethodOutcome(theResourcePersistentId);
 
 		outcome.setEntitySupplier(theEntity);
@@ -327,12 +363,14 @@ public abstract class BaseStorageDao {
 		outcome.setEntitySupplierUseCallback(() -> {
 			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 			if (outcome.getResource() != null) {
-				SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
+				SimplePreResourceAccessDetails accessDetails =
+						new SimplePreResourceAccessDetails(outcome.getResource());
 				HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				CompositeInterceptorBroadcaster.doCallHooks(
+						getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 				if (accessDetails.isDontReturnResourceAtIndex(0)) {
 					outcome.setResource(null);
 				}
@@ -346,10 +384,11 @@ public abstract class BaseStorageDao {
 				if (outcome.getResource() != null) {
 					SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
 					HookParams params = new HookParams()
-						.add(IPreResourceShowDetails.class, showDetails)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+							.add(IPreResourceShowDetails.class, showDetails)
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					CompositeInterceptorBroadcaster.doCallHooks(
+							getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 					outcome.setResource(showDetails.getResource(0));
 				}
 			});
@@ -358,11 +397,16 @@ public abstract class BaseStorageDao {
 		return outcome;
 	}
 
-	protected void doCallHooks(TransactionDetails theTransactionDetails, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+	protected void doCallHooks(
+			TransactionDetails theTransactionDetails,
+			RequestDetails theRequestDetails,
+			Pointcut thePointcut,
+			HookParams theParams) {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
-			CompositeInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					getInterceptorBroadcaster(), theRequestDetails, thePointcut, theParams);
 		}
 	}
 
@@ -376,7 +420,8 @@ public abstract class BaseStorageDao {
 		return createInfoOperationOutcome(theMessage, null);
 	}
 
-	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
+	public IBaseOperationOutcome createInfoOperationOutcome(
+			String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational", theStorageResponseCode);
 	}
 
@@ -384,7 +429,11 @@ public abstract class BaseStorageDao {
 		return createOperationOutcome(theSeverity, theMessage, theCode, null);
 	}
 
-	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
+	protected IBaseOperationOutcome createOperationOutcome(
+			String theSeverity,
+			String theMessage,
+			String theCode,
+			@Nullable StorageResponseCodeEnum theStorageResponseCode) {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		String detailSystem = null;
 		String detailCode = null;
@@ -394,7 +443,8 @@ public abstract class BaseStorageDao {
 			detailCode = theStorageResponseCode.getCode();
 			detailDescription = theStorageResponseCode.getDisplay();
 		}
-		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode, detailSystem, detailCode, detailDescription);
+		OperationOutcomeUtil.addIssue(
+				getContext(), oo, theSeverity, theMessage, null, theCode, detailSystem, detailCode, detailDescription);
 		return oo;
 	}
 
@@ -405,7 +455,8 @@ public abstract class BaseStorageDao {
 	 *
 	 * @param theResourceId - the id of the object being deleted. Eg: Patient/123
 	 */
-	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey, StorageResponseCodeEnum theStorageResponseCode) {
+	protected DaoMethodOutcome createMethodOutcomeForResourceId(
+			String theResourceId, String theMessageKey, StorageResponseCodeEnum theStorageResponseCode) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = getContext().getVersion().newIdType();
@@ -460,26 +511,39 @@ public abstract class BaseStorageDao {
 			QualifierDetails qualifiedParamName = QualifierDetails.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), validNames);
+				Collection<String> validNames =
+						mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
+				String msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class,
+								"invalidSearchParameter",
+								qualifiedParamName.getParamName(),
+								getResourceName(),
+								validNames);
 				throw new InvalidRequestException(Msg.code(524) + msg);
 			}
 
 			// Should not be null since the check above would have caught it
-			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef =
+					mySearchParamRegistry.getActiveSearchParam(getResourceName(), qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
-				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
+				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(
+						qualifiedParamName.getWholeQualifier(), nextValue);
 				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, getContext(), paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
+						mySearchParamRegistry, getContext(), paramDef, nextParamName, paramList);
 				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
 			}
-
 		}
 	}
 
-
-	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl, RestOperationTypeEnum theOperationType) {
+	protected void populateOperationOutcomeForUpdate(
+			@Nullable StopWatch theItemStopwatch,
+			DaoMethodOutcome theMethodOutcome,
+			String theMatchUrl,
+			RestOperationTypeEnum theOperationType) {
 		String msg;
 		StorageResponseCodeEnum outcome;
 
@@ -488,18 +552,37 @@ public abstract class BaseStorageDao {
 			if (theMatchUrl != null) {
 				if (theMethodOutcome.isNop()) {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditionalNoChange", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"successfulPatchConditionalNoChange",
+									theMethodOutcome.getId(),
+									UrlUtil.sanitizeUrlPart(theMatchUrl),
+									theMethodOutcome.getId());
 				} else {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditional", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"successfulPatchConditional",
+									theMethodOutcome.getId(),
+									UrlUtil.sanitizeUrlPart(theMatchUrl),
+									theMethodOutcome.getId());
 				}
 			} else {
 				if (theMethodOutcome.isNop()) {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchNoChange", theMethodOutcome.getId());
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class, "successfulPatchNoChange", theMethodOutcome.getId());
 				} else {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
 				}
 			}
 
@@ -507,23 +590,46 @@ public abstract class BaseStorageDao {
 
 			if (theMatchUrl == null) {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", theMethodOutcome.getId());
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(BaseStorageDao.class, "successfulCreate", theMethodOutcome.getId());
 			} else if (theMethodOutcome.isNop()) {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class,
+								"successfulCreateConditionalWithMatch",
+								theMethodOutcome.getId(),
+								UrlUtil.sanitizeUrlPart(theMatchUrl));
 			} else {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class,
+								"successfulCreateConditionalNoMatch",
+								theMethodOutcome.getId(),
+								UrlUtil.sanitizeUrlPart(theMatchUrl));
 			}
 
 		} else if (theMethodOutcome.isNop()) {
 
 			if (theMatchUrl != null) {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theMatchUrl);
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class,
+								"successfulUpdateConditionalNoChangeWithMatch",
+								theMethodOutcome.getId(),
+								theMatchUrl);
 			} else {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId());
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId());
 			}
 
 		} else {
@@ -531,23 +637,40 @@ public abstract class BaseStorageDao {
 			if (theMatchUrl != null) {
 				if (theMethodOutcome.getCreated() == Boolean.TRUE) {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theMethodOutcome.getId());
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"successfulUpdateConditionalNoMatch",
+									theMethodOutcome.getId());
 				} else {
 					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theMatchUrl);
+					msg = getContext()
+							.getLocalizer()
+							.getMessageSanitized(
+									BaseStorageDao.class,
+									"successfulUpdateConditionalWithMatch",
+									theMethodOutcome.getId(),
+									theMatchUrl);
 				}
 			} else if (theMethodOutcome.getCreated() == Boolean.TRUE) {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateAsCreate", theMethodOutcome.getId());
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								BaseStorageDao.class, "successfulUpdateAsCreate", theMethodOutcome.getId());
 			} else {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE;
-				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId());
+				msg = getContext()
+						.getLocalizer()
+						.getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId());
 			}
-
 		}
 
 		if (theItemStopwatch != null) {
-			String msgSuffix = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", theItemStopwatch.getMillis());
+			String msgSuffix = getContext()
+					.getLocalizer()
+					.getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", theItemStopwatch.getMillis());
 			msg = msg + " " + msgSuffix;
 		}
 
@@ -559,12 +682,14 @@ public abstract class BaseStorageDao {
 	 * @see StorageSettings#getAutoVersionReferenceAtPaths()
 	 */
 	@Nonnull
-	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
+	public static Set<IBaseReference> extractReferencesToAutoVersion(
+			FhirContext theFhirContext, StorageSettings theStorageSettings, IBaseResource theResource) {
 		Map<IBaseReference, Object> references = Collections.emptyMap();
 		if (!theStorageSettings.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
 			for (String nextPath : theStorageSettings.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
-				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
+				List<IBaseReference> nextReferences =
+						theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
 				for (IBaseReference next : nextReferences) {
 					if (next.getReferenceElement().hasVersionIdPart()) {
 						continue;
@@ -590,5 +715,4 @@ public abstract class BaseStorageDao {
 			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
 		}
 	}
-
 }

@@ -31,7 +31,8 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 
 import javax.annotation.Nonnull;
 
-public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
+public class DeleteCodeSystemVersionFinalStep
+		implements ILastJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
@@ -42,9 +43,11 @@ public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<Term
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 		long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
 		myTermCodeSystemSvc.deleteCodeSystemVersion(versionPid);

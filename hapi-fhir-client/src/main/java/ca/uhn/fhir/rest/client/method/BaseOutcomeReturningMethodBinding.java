@@ -19,34 +19,36 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.io.InputStream;
-import java.io.Reader;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.*;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
 	private boolean myReturnVoid;
 
-	public BaseOutcomeReturningMethodBinding(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
+	public BaseOutcomeReturningMethodBinding(
+			Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theProvider);
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException(Msg.code(1413) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException(Msg.code(1413) + "Method " + theMethod.getName() + " in type "
+						+ theMethod.getDeclaringClass().getCanonicalName() + " is a @"
+						+ theMethodAnnotation.getSimpleName() + " method but it does not return "
+						+ MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -69,15 +71,22 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected abstract String getMatchingOperation();
 
 	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+	public MethodOutcome invokeClient(
+			String theResponseMimeType,
+			InputStream theResponseInputStream,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders)
+			throws BaseServerResponseException {
 		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
 			if (myReturnVoid) {
 				return null;
 			}
-			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
+			MethodOutcome retVal = MethodUtil.process2xxResponse(
+					getContext(), theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
 			return retVal;
 		}
-		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
+		throw processNon2xxResponseAndReturnExceptionToThrow(
+				theResponseStatusCode, theResponseMimeType, theResponseInputStream);
 	}
 
 	public boolean isReturnVoid() {
@@ -86,9 +95,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
-
-
-	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
+	protected static void parseContentLocation(
+			FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
 		if (StringUtils.isBlank(theLocationHeader)) {
 			return;
 		}
@@ -97,5 +105,4 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		id.setValue(theLocationHeader);
 		theOutcomeToPopulate.setId(id);
 	}
-
 }

@@ -57,7 +57,8 @@ import java.util.function.Function;
 @Interceptor
 public class SubscriptionDebugLogInterceptor {
 
-	private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK = "SubscriptionDebugLogInterceptor_precheck";
+	private static final String SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK =
+			"SubscriptionDebugLogInterceptor_precheck";
 	private final Level myLevel;
 	private final EnumMap<EventCodeEnum, Logger> myLoggers;
 
@@ -88,7 +89,11 @@ public class SubscriptionDebugLogInterceptor {
 			// Delete operations have no payload
 			resourceId = theMessage.getId();
 		}
-		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", resourceId, theMessage.getOperationType());
+		log(
+				EventCodeEnum.SUBS1,
+				"Resource {} was submitted to the processing pipeline (op={})",
+				resourceId,
+				theMessage.getOperationType());
 	}
 
 	/*
@@ -103,12 +108,21 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED)
 	public void step20_beforeChecked(ResourceModifiedMessage theMessage) {
-		log(EventCodeEnum.SUBS2, "Checking resource {} (op={}) for matching subscriptions", theMessage.getPayloadId(), theMessage.getOperationType());
+		log(
+				EventCodeEnum.SUBS2,
+				"Checking resource {} (op={}) for matching subscriptions",
+				theMessage.getPayloadId(),
+				theMessage.getOperationType());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
 	public void step30_subscriptionMatched(ResourceDeliveryMessage theMessage, InMemoryMatchResult theResult) {
-		log(EventCodeEnum.SUBS3, "Resource {} matched by subscription {} (memory match={})", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theResult.isInMemory());
+		log(
+				EventCodeEnum.SUBS3,
+				"Resource {} matched by subscription {} (memory match={})",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theResult.isInMemory());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
@@ -118,7 +132,13 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY)
 	public void step40_beforeDelivery(ResourceDeliveryMessage theMessage) {
-		log(EventCodeEnum.SUBS5, "Delivering resource {} for subscription {} to channel of type {} to endpoint {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), theMessage.getSubscription().getEndpointUrl());
+		log(
+				EventCodeEnum.SUBS5,
+				"Delivering resource {} for subscription {} to channel of type {} to endpoint {}",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theMessage.getSubscription().getChannelType(),
+				theMessage.getSubscription().getEndpointUrl());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED)
@@ -137,19 +157,31 @@ public class SubscriptionDebugLogInterceptor {
 		if (theFailure != null) {
 			failureString = theFailure.toString();
 		}
-		log(EventCodeEnum.SUBS6, "Delivery of resource {} for subscription {} to channel of type {} - Failure: {}", payloadId, subscriptionId, channelType, failureString);
+		log(
+				EventCodeEnum.SUBS6,
+				"Delivery of resource {} for subscription {} to channel of type {} - Failure: {}",
+				payloadId,
+				subscriptionId,
+				channelType,
+				failureString);
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
 	public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
 		String processingTime = theMessage
-			.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
-			.map(Long::parseLong)
-			.map(Date::new)
-			.map(start -> new StopWatch(start).toString())
-			.orElse("(unknown)");
+				.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
+				.map(Long::parseLong)
+				.map(Date::new)
+				.map(start -> new StopWatch(start).toString())
+				.orElse("(unknown)");
 
-		log(EventCodeEnum.SUBS7, "Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), processingTime);
+		log(
+				EventCodeEnum.SUBS7,
+				"Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}",
+				theMessage.getPayloadId(),
+				theMessage.getSubscription().getIdElementString(),
+				theMessage.getSubscription().getChannelType(),
+				processingTime);
 	}
 
 	protected void log(EventCodeEnum theEventCode, String theMessage, Object... theArguments) {
@@ -210,9 +242,7 @@ public class SubscriptionDebugLogInterceptor {
 		SUBS7
 	}
 
-
 	private static Function<EventCodeEnum, Logger> defaultLogFactory() {
 		return code -> LoggerFactory.getLogger(SubscriptionDebugLogInterceptor.class.getName() + "." + code.name());
 	}
-
 }

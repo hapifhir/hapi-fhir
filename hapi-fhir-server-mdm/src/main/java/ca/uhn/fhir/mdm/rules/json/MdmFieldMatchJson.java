@@ -19,21 +19,16 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hl7.fhir.instance.model.api.IBase;
 
 import javax.annotation.Nonnull;
 
 /**
  * Contains all business data for determining if a match exists on a particular field, given:
  * <p></p>
- * 1. A {@link MdmMatcherEnum} which determines the actual similarity values.
+ * 1. A {@link MatchTypeEnum} which determines the actual similarity values.
  * 2. A given resource type (e.g. Patient)
  * 3. A given FHIRPath expression for finding the particular primitive to be used for comparison. (e.g. name.given)
  */
@@ -87,10 +82,6 @@ public class MdmFieldMatchJson implements IModelJson {
 		return myMatcher;
 	}
 
-	public boolean isMatcherSupportingEmptyFields() {
-		return (getMatcher() == null) ? false : getMatcher().isMatchingEmptyFields();
-	}
-
 	public MdmFieldMatchJson setMatcher(MdmMatcherJson theMatcher) {
 		myMatcher = theMatcher;
 		return this;
@@ -103,17 +94,6 @@ public class MdmFieldMatchJson implements IModelJson {
 	public MdmFieldMatchJson setSimilarity(MdmSimilarityJson theSimilarity) {
 		mySimilarity = theSimilarity;
 		return this;
-	}
-
-	public MdmMatchEvaluation match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
-		if (myMatcher != null) {
-			boolean result = myMatcher.match(theFhirContext, theLeftValue, theRightValue);
-			return new MdmMatchEvaluation(result, result ? 1.0 : 0.0);
-		}
-		if (mySimilarity != null) {
-			return mySimilarity.match(theFhirContext, theLeftValue, theRightValue);
-		}
-		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
 	}
 
 	public String getFhirPath() {

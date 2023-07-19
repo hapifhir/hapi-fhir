@@ -40,14 +40,14 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	}
 
 	/**
-		 * Create a new narrative generator
-		 *
-		 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
-		 *                                  <ul>
-		 *                                  <li>file:/path/to/file/file.properties</li>
-		 *                                  <li>classpath:/com/package/file.properties</li>
-		 *                                  </ul>
-		 */
+	 * Create a new narrative generator
+	 *
+	 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
+	 *                                  <ul>
+	 *                                  <li>file:/path/to/file/file.properties</li>
+	 *                                  <li>classpath:/com/package/file.properties</li>
+	 *                                  </ul>
+	 */
 	public CustomThymeleafNarrativeGenerator(String... theNarrativePropertyFiles) {
 		this();
 		setPropertyFile(theNarrativePropertyFiles);

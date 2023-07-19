@@ -46,7 +46,8 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing..
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitSourceResourceTypeToMdm(String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
+	long submitSourceResourceTypeToMdm(
+			String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
@@ -85,5 +86,4 @@ public interface IMdmSubmitSvc {
 	 * @param theBufferSize
 	 */
 	public void setBufferSize(int theBufferSize);
-
 }

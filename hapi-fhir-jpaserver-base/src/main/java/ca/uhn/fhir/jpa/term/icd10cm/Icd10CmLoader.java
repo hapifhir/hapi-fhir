@@ -52,7 +52,6 @@ public class Icd10CmLoader {
 		myCodeSystemVersion = theCodeSystemVersion;
 	}
 
-
 	public void load(Reader theReader) throws IOException, SAXException {
 		myConceptCount = 0;
 
@@ -75,9 +74,7 @@ public class Icd10CmLoader {
 				}
 			}
 		}
-
 	}
-
 
 	private void extractCode(Element theDiagElement, TermConcept theParentConcept) {
 		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
@@ -95,7 +92,7 @@ public class Icd10CmLoader {
 
 		for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
 			extractCode(nextChildDiag, concept);
-			if (XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).size() != 0){
+			if (XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).size() != 0) {
 				extractExtension(theDiagElement, nextChildDiag, concept);
 			}
 		}
@@ -104,9 +101,10 @@ public class Icd10CmLoader {
 	}
 
 	private void extractExtension(Element theDiagElement, Element theChildDiag, TermConcept theParentConcept) {
-		for (Element nextChrNote : XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF)){
-			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)){
-				String baseCode = theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
+		for (Element nextChrNote : XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF)) {
+			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)) {
+				String baseCode =
+						theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
 				String sevenChar = nextExtension.getAttributes().item(0).getNodeValue();
 				String baseDef = theChildDiag.getElementsByTagName(DESC).item(0).getTextContent();
 				String sevenCharDef = nextExtension.getTextContent();
@@ -116,7 +114,6 @@ public class Icd10CmLoader {
 				concept.setCode(getExtendedCode(baseCode, sevenChar));
 				concept.setDisplay(getExtendedDisplay(baseDef, sevenCharDef));
 			}
-
 		}
 	}
 
@@ -131,7 +128,7 @@ public class Icd10CmLoader {
 	private String getExtendedCode(String theBaseCode, String theSevenChar) {
 		String placeholder = "X";
 		String code = theBaseCode;
-		for (int i = code.length(); i < 7; i++){
+		for (int i = code.length(); i < 7; i++) {
 			code += placeholder;
 		}
 		code += theSevenChar;
@@ -141,5 +138,4 @@ public class Icd10CmLoader {
 	public int getConceptCount() {
 		return myConceptCount;
 	}
-
 }

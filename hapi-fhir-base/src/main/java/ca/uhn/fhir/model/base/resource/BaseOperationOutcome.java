@@ -19,15 +19,14 @@
  */
 package ca.uhn.fhir.model.base.resource;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.List;
 
 public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
@@ -37,12 +36,12 @@ public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 	public abstract BaseIssue getIssueFirstRep();
 
-	public static abstract class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
-	
+	public abstract static class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
+
 		private static final long serialVersionUID = 6700020892151450738L;
 
 		public abstract CodeDt getSeverityElement();
-		
+
 		public abstract StringDt getDetailsElement();
 
 		public abstract BaseIssue addLocation(String theString);
@@ -57,7 +56,4 @@ public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 		public abstract StringDt getLocationFirstRep();
 	}
-
-
-	
 }

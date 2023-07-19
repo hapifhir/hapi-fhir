@@ -30,10 +30,10 @@ public class SearchBundleEntryParts {
 	public SearchBundleEntryParts(String theFullUrl, IBaseResource theResource, String theSearchMode) {
 		myFullUrl = theFullUrl;
 		myResource = theResource;
-		if ("match".equalsIgnoreCase(theSearchMode)) {
-			mySearchMode = BundleEntrySearchModeEnum.MATCH;
-		} else {
+		if (BundleEntrySearchModeEnum.INCLUDE.getCode().equalsIgnoreCase(theSearchMode)) {
 			mySearchMode = BundleEntrySearchModeEnum.INCLUDE;
+		} else {
+			mySearchMode = BundleEntrySearchModeEnum.MATCH;
 		}
 	}
 
@@ -48,6 +48,4 @@ public class SearchBundleEntryParts {
 	public BundleEntrySearchModeEnum getSearchMode() {
 		return mySearchMode;
 	}
-
-
 }

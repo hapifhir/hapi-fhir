@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.sql.DataSource;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
@@ -48,6 +48,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();
 
+	private final DatabaseInitializerHelper myDatabaseInitializerHelper = new DatabaseInitializerHelper();
+
 	public HapiEmbeddedDatabasesExtension() {
 		myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 		myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
@@ -55,7 +57,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		if (canUseOracle()) {
 			myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 		} else {
-			String message = "Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
+			String message =
+					"Cannot add OracleEmbeddedDatabase. If you are using a Mac you must configure the TestContainers API to run using Colima (https://www.testcontainers.org/supported_docker_environment#using-colima)";
 			ourLog.warn(message);
 		}
 	}
@@ -68,11 +71,10 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	public JpaEmbeddedDatabase getEmbeddedDatabase(DriverTypeEnum theDriverType) {
-		return getAllEmbeddedDatabases()
-			.stream()
-			.filter(db -> theDriverType.equals(db.getDriverType()))
-			.findFirst()
-			.orElseThrow();
+		return getAllEmbeddedDatabases().stream()
+				.filter(db -> theDriverType.equals(db.getDriverType()))
+				.findFirst()
+				.orElseThrow();
 	}
 
 	public void clearDatabases() {
@@ -90,17 +92,11 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	public void initializePersistenceSchema(DriverTypeEnum theDriverType) {
-		JpaEmbeddedDatabase embeddedDatabase = getEmbeddedDatabase(theDriverType);
-		String fileName = String.format("migration/releases/%s/schema/%s.sql", FIRST_TESTED_VERSION, embeddedDatabase.getDriverType());
-		String sql = getSqlFromResourceFile(fileName);
-		embeddedDatabase.executeSqlAsBatch(sql);
+		myDatabaseInitializerHelper.initializePersistenceSchema(getEmbeddedDatabase(theDriverType));
 	}
 
 	public void insertPersistenceTestData(DriverTypeEnum theDriverType) {
-		JpaEmbeddedDatabase embeddedDatabase = getEmbeddedDatabase(theDriverType);
-		String fileName = String.format("migration/releases/%s/data/%s.sql", FIRST_TESTED_VERSION, embeddedDatabase.getDriverType());
-		String sql = getSqlFromResourceFile(fileName);
-		embeddedDatabase.insertTestData(sql);
+		myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType));
 	}
 
 	public String getSqlFromResourceFile(String theFileName) {
@@ -142,7 +138,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
 	private static boolean isColimaConfigured() {
 		return StringUtils.isNotBlank(System.getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE"))
-			&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
-			&& System.getenv("DOCKER_HOST").contains("colima");
+				&& StringUtils.isNotBlank(System.getenv("DOCKER_HOST"))
+				&& System.getenv("DOCKER_HOST").contains("colima");
 	}
 }

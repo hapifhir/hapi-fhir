@@ -29,12 +29,12 @@ public enum ResultSeverityEnum {
 	 * The issue has no relation to the degree of success of the action
 	 */
 	INFORMATION("information"),
-	
+
 	/**
 	 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired
 	 */
 	WARNING("warning"),
-	
+
 	/**
 	 * The issue is sufficiently important to cause the action to fail
 	 */

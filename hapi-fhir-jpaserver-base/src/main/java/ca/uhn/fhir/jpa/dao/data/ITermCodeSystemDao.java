@@ -19,15 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-
 import java.util.Optional;
 
-public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>, IHapiFhirJpaRepository {
+public interface ITermCodeSystemDao extends JpaRepository<TermCodeSystem, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCodeSystemUri = :code_system_uri")
 	TermCodeSystem findByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);
@@ -37,5 +36,4 @@ public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCurrentVersion.myId = :csv_pid")
 	Optional<TermCodeSystem> findWithCodeSystemVersionAsCurrentVersion(@Param("csv_pid") Long theCodeSystemVersionPid);
-
 }

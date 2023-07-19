@@ -55,15 +55,17 @@ public class PropertyHandler implements IZipContentsHandlerCsv {
 			String type = trim(theRecord.get(TYPE));
 
 			List<TermConceptProperty> conceptProperties = myCode2Properties.get(code);
-			if (conceptProperties == null)
-				conceptProperties = new ArrayList<>();
+			if (conceptProperties == null) conceptProperties = new ArrayList<>();
 
-			TermConceptProperty conceptProperty = TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(conceptProperty, "Concept property %s not found in file", conceptProperty);
+			TermConceptProperty conceptProperty =
+					TermLoaderSvcImpl.getOrCreateConceptProperty(myCode2Properties, code, key);
+			ValidateUtil.isNotNullOrThrowUnprocessableEntity(
+					conceptProperty, "Concept property %s not found in file", conceptProperty);
 
 			conceptProperty.setKey(key);
 			conceptProperty.setValue(value);
-			//TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum contain different types
+			// TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum
+			// contain different types
 			conceptProperty.setType(TermConceptPropertyTypeEnum.STRING);
 			conceptProperties.add(conceptProperty);
 			myCode2Properties.put(code, conceptProperties);

@@ -112,7 +112,9 @@ public class RuntimeChildExt extends BaseRuntimeChildDefinition {
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChild = new HashMap<>();
 		myDatatypeToChild = new HashMap<>();
 		myDatatypeToChildName = new HashMap<>();

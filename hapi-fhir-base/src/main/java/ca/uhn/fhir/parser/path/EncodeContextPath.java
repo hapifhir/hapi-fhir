@@ -155,6 +155,4 @@ public class EncodeContextPath {
 		EncodeContextPath parsedPath = new EncodeContextPath(thePath);
 		return getPath().equals(parsedPath.getPath());
 	}
-
-
 }

@@ -27,7 +27,8 @@ public class TinderSourcesGeneratorMojo extends AbstractGeneratorMojo {
 		File packageDirectoryBase = configuration.getPackageDirectoryBase();
 		packageDirectoryBase.mkdirs();
 
-		ResourceGeneratorUsingModel gen = new ResourceGeneratorUsingModel(configuration.getVersion(), configuration.getBaseDir());
+		ResourceGeneratorUsingModel gen =
+				new ResourceGeneratorUsingModel(configuration.getVersion(), configuration.getBaseDir());
 		gen.setBaseResourceNames(configuration.getResourceNames());
 
 		try {

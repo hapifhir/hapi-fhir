@@ -51,7 +51,6 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
-
 	/**
 	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
 	 *
@@ -89,5 +88,4 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	public UnprocessableEntityException(String... theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
-
 }

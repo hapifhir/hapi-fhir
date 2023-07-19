@@ -27,7 +27,7 @@ public enum CandidateStrategyEnum {
 	/** Find Golden Resource candidates based on other sources that match the incoming source using the MDM Matching rules */
 	SCORE;
 
-    public boolean isEidMatch() {
-    	return this == EID;
-    }
+	public boolean isEidMatch() {
+		return this == EID;
+	}
 }

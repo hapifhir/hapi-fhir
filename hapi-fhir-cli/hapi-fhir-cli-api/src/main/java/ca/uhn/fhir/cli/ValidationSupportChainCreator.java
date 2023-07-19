@@ -34,8 +34,7 @@ public class ValidationSupportChainCreator {
 
 	public static ValidationSupportChain getValidationSupportChainR4(FhirContext ctx, CommandLine commandLine) {
 		ValidationSupportChain chain = new ValidationSupportChain(
-			new DefaultProfileValidationSupport(ctx),
-			new InMemoryTerminologyServerValidationSupport(ctx));
+				new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
 
 		if (commandLine.hasOption("l")) {
 			try {
@@ -59,7 +58,7 @@ public class ValidationSupportChainCreator {
 
 	public static ValidationSupportChain getValidationSupportChainDstu2(FhirContext ctx, CommandLine commandLine) {
 		ValidationSupportChain chain = new ValidationSupportChain(
-			new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
+				new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
 
 		if (commandLine.hasOption("r")) {
 			chain.addValidationSupport(new LoadingValidationSupportDstu2());
