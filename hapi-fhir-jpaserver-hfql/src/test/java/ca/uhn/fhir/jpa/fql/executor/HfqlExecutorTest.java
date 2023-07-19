@@ -82,7 +82,7 @@ public class HfqlExecutorTest {
 		statement.setFromResourceName("Patient");
 		statement.addSelectClause("name[0].given[1]").setDataType(HfqlDataTypeEnum.STRING);
 		statement.addSelectClause("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
-		statement.addHavingClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+		statement.addWhereClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
 
 		String searchId = "the-search-id";
 		when(myPagingProvider.retrieveResultList(any(), eq(searchId))).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
@@ -203,7 +203,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					having name.family = 'Simpson'
+					where name.family = 'Simpson'
 					select name[0].given[1], name[0].family, name, name.given
 			""";
 
@@ -241,7 +241,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testSelect_InvalidWhereClause() {
+	public void testSelect_InvalidSelectClause() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 		String statement = """
@@ -263,7 +263,7 @@ public class HfqlExecutorTest {
 		String statement = """
 					select name
 					from Patient
-					having meta.versionId > 1
+					where meta.versionId > 1
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -281,7 +281,7 @@ public class HfqlExecutorTest {
 		String statement = """
 					select *
 					from Patient
-					having name.family = 'Simpson'
+					where name.family = 'Simpson'
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -615,7 +615,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					having name.family = 'Simpson'
+					where name.family = 'Simpson'
 					select name[0].given[0], identifier.where(system = 'http://system' ).first().value
 			""";
 
@@ -637,7 +637,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					having identifier.where(system = 'http://system' ).value = 'value0'
+					where identifier.where(system = 'http://system' ).value = 'value0'
 					select name[0].given[0], identifier[0].value
 			""";
 
@@ -667,8 +667,9 @@ public class HfqlExecutorTest {
 		String statement = """
 					SELECT id
 					FROM Observation
-					WHERE code = 'http://loinc.org|34752-6'
-					HAVING
+					WHERE
+						id in search_match('code', 'http://loinc.org|34752-6')
+						AND
 					   value.ofType(string).lower().contains('running')
 			""";
 
@@ -690,6 +691,11 @@ public class HfqlExecutorTest {
 			"3"
 		));
 		assertFalse(result.hasNext());
+
+		verify(observationDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
+		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
+		assertEquals(1, map.size());
+		assertEquals("http://loinc.org|34752-6", map.get("code").get(0).get(0).getValueAsQueryToken(myCtx));
 	}
 
 	@Test
@@ -699,7 +705,7 @@ public class HfqlExecutorTest {
 		String statement = """
 					select name[0].given[0]
 					from Patient
-					having meta.versionId.toInteger() > 1
+					where meta.versionId.toInteger() > 1
 			""";
 
 		IHfqlExecutionResult.Row row;
@@ -762,7 +768,7 @@ public class HfqlExecutorTest {
 					   value.ofType(Quantity).system,
 					   value.ofType(Quantity).code
 					from Observation
-					having
+					where
 					   value.ofType(Quantity).value > 100
 			""";
 
@@ -788,7 +794,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					having name.given in ('Foo' | 'Bart')
+					where name.given in ('Foo' | 'Bart')
 					select Given:name[0].given[1], Family:name[0].family[0]
 			""";
 
@@ -811,7 +817,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					having name.given = 'Homer'
+					where name.given = 'Homer'
 					select Given:name[0].given[1], Family:name[0].family
 			""";
 
@@ -867,7 +873,7 @@ public class HfqlExecutorTest {
 		initDao(Patient.class);
 
 		String statement = "from Patient " +
-			"where " + theParamName + " = 'abc' " +
+			"where id in search_match('" + theParamName + "', 'abc') " +
 			"select name.given";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -896,7 +902,7 @@ public class HfqlExecutorTest {
 					from
 						Observation
 					where
-						_id in ('123', 'Patient/456')
+						id in search_match('_id', '123,Patient/456')
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -990,7 +996,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where _lastUpdated in ('lt2021' | 'gt2023')
+					where id in search_match('_lastUpdated', 'lt2021,gt2023')
 					select name.given
 			""";
 
@@ -1013,7 +1019,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where active = true
+					where id in search_match('active', 'true')
 					select name.given
 			""";
 
@@ -1034,7 +1040,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Observation
-					where value-quantity = 'lt500|http://unitsofmeasure.org|kg'
+					where id in search_match('value-quantity', 'lt500|http://unitsofmeasure.org|kg')
 					select id
 			""";
 
@@ -1057,7 +1063,7 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where name = 'abc'
+					where id in search_match('name', 'abc')
 					select name.given
 			""";
 
@@ -1078,7 +1084,7 @@ public class HfqlExecutorTest {
 		String statement = """
 					select name.given
 					from Patient
-					where name:exact = 'abc'
+					where id in search_match('name:exact', 'abc')
 			""";
 
 		myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
@@ -1098,7 +1104,10 @@ public class HfqlExecutorTest {
 
 		String statement = """
 					from Patient
-					where name in ('A' | 'B') and name in ('C' | 'D')
+					where
+						id in search_match('name', 'A,B\\,B')
+					and
+						id in search_match('name', 'C,D')
 					select name.given
 			""";
 
@@ -1109,7 +1118,7 @@ public class HfqlExecutorTest {
 		assertEquals(2, map.get("name").size());
 		assertEquals(2, map.get("name").get(0).size());
 		assertEquals("A", ((StringParam) map.get("name").get(0).get(0)).getValue());
-		assertEquals("B", ((StringParam) map.get("name").get(0).get(1)).getValue());
+		assertEquals("B,B", ((StringParam) map.get("name").get(0).get(1)).getValue());
 		assertEquals("C", ((StringParam) map.get("name").get(1).get(0)).getValue());
 		assertEquals("D", ((StringParam) map.get("name").get(1).get(1)).getValue());
 	}
@@ -1174,17 +1183,6 @@ public class HfqlExecutorTest {
 			.setSystem("http://loinc.org")
 			.setCode("29463-7");
 		obs.setValue(new Quantity(null, kg, "http://unitsofmeasure.org", "kg", "kg"));
-		return obs;
-	}
-
-	@Nonnull
-	private static Observation createWeightObservationWithPounds(String obsId, long thePounds) {
-		Observation obs = new Observation();
-		obs.setId(obsId);
-		obs.getCode().addCoding()
-			.setSystem("http://loinc.org")
-			.setCode("29463-7");
-		obs.setValue(new Quantity(null, thePounds, "http://unitsofmeasure.org", "[lb_av]", "[lb_av]"));
 		return obs;
 	}
 

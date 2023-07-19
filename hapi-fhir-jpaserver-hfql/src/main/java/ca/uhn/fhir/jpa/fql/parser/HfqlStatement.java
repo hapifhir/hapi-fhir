@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,11 +44,7 @@ public class HfqlStatement implements IModelJson {
 
 	@JsonProperty("where")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<HavingClause> myWhereClauses = new ArrayList<>();
-
-	@JsonProperty("having")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<HavingClause> myHavingClauses = new ArrayList<>();
+	private List<WhereClause> myWhereClauses = new ArrayList<>();
 
 	@JsonProperty("groupBy")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -93,23 +88,19 @@ public class HfqlStatement implements IModelJson {
 		return clause;
 	}
 
-	public HavingClause addHavingClause() {
-		HavingClause clause = new HavingClause();
-		myHavingClauses.add(clause);
-		return clause;
-	}
-
-	public List<HavingClause> getHavingClauses() {
-		return myHavingClauses;
-	}
-
-	public HavingClause addWhereClause() {
-		HavingClause clause = new HavingClause();
+	public WhereClause addWhereClause() {
+		WhereClause clause = new WhereClause();
 		myWhereClauses.add(clause);
 		return clause;
 	}
 
-	public List<HavingClause> getWhereClauses() {
+	public void addWhereClause(String theLeft, WhereClauseOperatorEnum theOperator) {
+		WhereClause whereClause = addWhereClause();
+		whereClause.setLeft(theLeft);
+		whereClause.setOperator(theOperator);
+	}
+
+	public List<WhereClause> getWhereClauses() {
 		return myWhereClauses;
 	}
 
@@ -120,12 +111,6 @@ public class HfqlStatement implements IModelJson {
 
 	public void setLimit(Integer theLimit) {
 		myLimit = theLimit;
-	}
-
-	public void addHavingClause(String theLeft, WhereClauseOperatorEnum theOperator) {
-		HavingClause clause = addHavingClause();
-		clause.setLeft(theLeft);
-		clause.setOperator(theOperator);
 	}
 
 	public void addGroupByClause(String theGroupByClause) {
@@ -188,10 +173,12 @@ public class HfqlStatement implements IModelJson {
 			.collect(Collectors.toList());
 	}
 
+
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
+		IN,
 		UNARY_BOOLEAN,
-		IN
+		SEARCH_MATCH
 	}
 
 	public enum SelectClauseOperator {
@@ -287,7 +274,7 @@ public class HfqlStatement implements IModelJson {
 		}
 	}
 
-	public static class HavingClause implements IModelJson {
+	public static class WhereClause implements IModelJson {
 
 		@JsonProperty("left")
 		private String myLeft;
@@ -326,8 +313,8 @@ public class HfqlStatement implements IModelJson {
 		 * Returns the {@link #getRight() right} values as raw strings. That
 		 * means that any surrounding quote marks are stripped.
 		 */
-		public Collection<String> getRightAsStrings() {
-			ArrayList<String> retVal = new ArrayList<>();
+		public List<String> getRightAsStrings() {
+			List<String> retVal = new ArrayList<>();
 			for (String next : getRight()) {
 				if (next.startsWith("'")) {
 					next = next.substring(1, next.length() - 1);
