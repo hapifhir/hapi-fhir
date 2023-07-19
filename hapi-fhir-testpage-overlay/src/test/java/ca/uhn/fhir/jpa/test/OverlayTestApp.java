@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -43,10 +44,10 @@ public class OverlayTestApp {
 	public static void main(String[] args) throws Exception {
 		IHfqlExecutor hfqlExecutor = mock(IHfqlExecutor.class);
 		List<String> columnNames = List.of("family", "given");
-		List<HfqlDataTypeEnum> columnTypes = List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
+		List<HfqlDataTypeEnum> columnTypes = List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.JSON);
 		List<List<Object>> rows = List.of(
-			List.of("Simpson", "Homer"),
-			List.of("Simpson", "Bart")
+			List.of("Simpson", "[\"Homer\", \"Jay\"]"),
+			List.of("Simpson", "[\"Bart\", \"Barto\"]")
 		);
 		when(hfqlExecutor.executeInitialSearch(any(), any(), any())).thenAnswer(t-> {
 			Thread.sleep(1000);
@@ -63,8 +64,10 @@ public class OverlayTestApp {
 			overlayHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
 			overlayHandler.setParentLoaderPriority(true);
 
-			RestfulServer restfulServer = new RestfulServer(FhirContext.forR4Cached());
+			FhirContext ctx = FhirContext.forR4Cached();
+			RestfulServer restfulServer = new RestfulServer(ctx);
 			restfulServer.registerProvider(new ProviderWithRequiredAndOptional());
+			restfulServer.registerProvider(new HashMapResourceProvider<>(ctx, Patient.class));
 			restfulServer.registerProvider(new HfqlRestProvider(hfqlExecutor));
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();

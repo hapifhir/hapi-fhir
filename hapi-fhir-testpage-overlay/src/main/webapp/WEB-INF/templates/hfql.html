@@ -123,8 +123,11 @@
                            </thead>
                            <tbody>
                               <tr th:each="row : ${resultRows}">
-                                 <td th:each="col : ${row}">
-                                    [[${col}]]
+                                 <td th:each="col,colIterStat : ${row}">
+                                    <th:block th:switch="${columnTypes[colIterStat.index]}">
+                                       <th:block th:case="'JSON'" th:utext="${HfqlRenderingUtil.formatAsJson(col)}"/>
+                                       <th:block th:case="*" th:text="${col}"/>
+                                    </th:block>
                                  </td>
                               </tr>
                            </tbody>

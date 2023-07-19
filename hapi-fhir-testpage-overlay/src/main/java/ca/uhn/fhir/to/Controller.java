@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.jdbc.RemoteHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
+import ca.uhn.fhir.to.util.HfqlRenderingUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.gson.stream.JsonWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -345,7 +347,9 @@ public class Controller extends BaseController {
 		String query = theHfqlQuery;
 		if (isBlank(query)) {
 			query = "SELECT\n" +
-				"   id, name.family AS FamilyName, name.given AS GivenName\n" +
+				"   id AS ID, meta.versionId AS Version,\n" +
+				"   name[0].family AS FamilyName, name[0].given[0] AS GivenName,\n" +
+				"   identifier AS Identifiers\n" +
 				"FROM\n" +
 				"   Patient";
 		}
@@ -384,12 +388,16 @@ public class Controller extends BaseController {
 				}
 			}
 
-			theModel.put("columnNames", result.getColumnNames());
+			List<String> columnNames = result.getStatement().getSelectClauses().stream().map(HfqlStatement.SelectClause::getAlias).collect(Collectors.toList());
+			theModel.put("columnNames", columnNames);
+			List<String> columnTypes = result.getStatement().getSelectClauses().stream().map(t -> t.getDataType().name()).collect(Collectors.toList());
+			theModel.put("columnTypes", columnTypes);
 
 		} catch (IOException theE) {
 			// FIXME: handle
 		}
 
+		theModel.put("HfqlRenderingUtil", new HfqlRenderingUtil());
 		theModel.put("query", theHfqlQuery);
 		theModel.put("resultRows", rows);
 		theModel.put("executionTime", sw.toString());

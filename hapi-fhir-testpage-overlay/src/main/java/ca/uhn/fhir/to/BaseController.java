@@ -101,7 +101,7 @@ public class BaseController {
 		return retVal.toArray(new Header[retVal.size()]);
 	}
 
-	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
+	private static String format(String theResultBody, EncodingEnum theEncodingEnum) {
 		String str = StringEscapeUtils.escapeHtml4(theResultBody);
 		if (str == null || theEncodingEnum == null) {
 			return str;
@@ -402,6 +402,14 @@ public class BaseController {
 		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
 
 		theModel.put("conf", capabilityStatement);
+
+		boolean supportsHfql = capabilityStatement
+			.getRestFirstRep()
+			.getOperation()
+			.stream()
+			.anyMatch(t->"hfql-execute".equals(t.getName()));
+		theModel.put("supportsHfql", supportsHfql);
+
 		return capabilityStatement;
 	}
 
@@ -696,4 +704,9 @@ public class BaseController {
 		}
 		return retVal;
 	}
+
+	public static String formatAsJson(String theInput) {
+		return format(defaultString(theInput), EncodingEnum.JSON);
+	}
+
 }
