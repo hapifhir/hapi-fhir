@@ -335,6 +335,7 @@ public class OpenApiInterceptor {
 
 		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
 		ServletContext servletContext = servletRequest.getServletContext();
+
 		WebContext context = new WebContext(servletRequest, theResponse, servletContext);
 		context.setVariable(REQUEST_DETAILS, theRequestDetails);
 		context.setVariable("DESCRIPTION", cs.getImplementation().getDescription());
