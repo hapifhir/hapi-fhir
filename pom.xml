@@ -951,7 +951,7 @@
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.0</jackson_version>
+		<jackson_version>2.15.2</jackson_version>
 		<jackson_databind_version>2.15.2</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -976,7 +976,7 @@
 
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<testcontainers_version>1.17.1</testcontainers_version>
-		<thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.1.1.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -1095,7 +1095,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>19.4</version>
+				<version>21.0</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
