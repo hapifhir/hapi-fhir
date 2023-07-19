@@ -50,10 +50,6 @@ public interface IHfqlExecutionResult {
 
 	int ROW_OFFSET_ERROR = -1;
 
-	List<String> getColumnNames();
-
-	List<HfqlDataTypeEnum> getColumnTypes();
-
 	boolean hasNext();
 
 	Row getNextRow();

@@ -89,11 +89,11 @@ class HfqlLexer {
 		while (true) {
 			if (myPosition == myInput.length) {
 				if (myBuffer.length() > 0) {
-					if (myState == LexerState.IN_QUOTED_STRING || myParenDepth > 0) {
+					if (myState == LexerState.IN_SINGLE_QUOTED_STRING || myParenDepth > 0) {
 						throw new InvalidRequestException(
 								Msg.code(2401) + "Unexpected end of string at position " + describePosition());
 					}
-					setNextToken(myBuffer.toString());
+					setNextToken(theOptions, myBuffer.toString());
 				}
 				return;
 			}
@@ -116,7 +116,8 @@ class HfqlLexer {
 		}
 	}
 
-	private void setNextToken(String theNextToken) {
+	private void setNextToken(@Nonnull HfqlLexerOptions theOptions, String theNextToken) {
+		myNextTokenOptions = theOptions;
 		myNextToken = theNextToken;
 		myBuffer.setLength(0);
 		myState = LexerState.INITIAL;
@@ -141,15 +142,14 @@ class HfqlLexer {
 				if (theNextChar == '\'') {
 					myNextTokenLine = myLine;
 					myNextTokenColumn = myColumn;
-					myState = LexerState.IN_QUOTED_STRING;
+					myState = LexerState.IN_SINGLE_QUOTED_STRING;
 					myBuffer.append(theNextChar);
 					return;
 				}
 
 				if (theOptions.getSingleCharTokenCharacters().contains(theNextChar)) {
 					myNextTokenStartPosition = myPosition;
-					myNextTokenOptions = theOptions;
-					setNextToken(Character.toString(theNextChar));
+					setNextToken(theOptions, Character.toString(theNextChar));
 					myPosition++;
 					return;
 				}
@@ -178,25 +178,26 @@ class HfqlLexer {
 					return;
 				}
 
-				setNextToken(myBuffer.toString());
+				setNextToken(theOptions, myBuffer.toString());
 				return;
 			}
 
-			case IN_QUOTED_STRING: {
+			case IN_SINGLE_QUOTED_STRING: {
 				if (theNextChar == '\'') {
 					myBuffer.append(theNextChar);
 					myPosition++;
-					setNextToken(myBuffer.toString());
+					setNextToken(theOptions, myBuffer.toString());
 					return;
 				}
 				if (theNextChar == '\\') {
 					if (myPosition < myInput.length - 1) {
 						char followingChar = myInput[myPosition + 1];
-						myBuffer.append(followingChar);
-						myPosition++;
-						return;
+						if (followingChar == '\'') {
+							myBuffer.append(followingChar);
+							myPosition++;
+							return;
+						}
 					}
-					break;
 				}
 				myBuffer.append(theNextChar);
 				return;
@@ -248,7 +249,7 @@ class HfqlLexer {
 
 	private enum LexerState {
 		INITIAL,
-		IN_QUOTED_STRING,
+		IN_SINGLE_QUOTED_STRING,
 		IN_TOKEN
 	}
 }

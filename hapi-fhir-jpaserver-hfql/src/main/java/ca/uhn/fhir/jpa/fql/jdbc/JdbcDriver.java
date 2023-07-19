@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class JdbcDriver implements Driver {
 	private static final JdbcDriver INSTANCE = new JdbcDriver();
-	public static final String URL_PREFIX = "jdbc:hapifhir:hfql:";
+	public static final String URL_PREFIX = "jdbc:hapifhirql:";
 	private static boolean ourRegistered;
 
 	static {

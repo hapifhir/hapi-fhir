@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.fql.jdbc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
@@ -50,6 +49,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 
 import java.io.ByteArrayInputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -72,8 +71,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @see IHfqlExecutionResult for more information about the purpose of this class
  */
 public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
-	private final List<String> myColumnNames = new ArrayList<>();
-	private final List<HfqlDataTypeEnum> myColumnTypes = new ArrayList<>();
 	private final boolean mySupportsContinuations;
 	private final String myBaseUrl;
 	private final CloseableHttpClient myClient;
@@ -165,46 +162,6 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 			myStatement = JsonUtil.deserialize(statementJsonString, HfqlStatement.class);
 		}
 		myCurrentFetchCount = 0;
-
-		// Column Names
-		CSVRecord nextRecord = myIterator.next();
-		if (myColumnNames.isEmpty()) {
-			boolean first = true;
-			for (String next : nextRecord) {
-				if (first) {
-					// First column in the CSV is the row number, not
-					// an actual SQL result column
-					first = false;
-					continue;
-				}
-				myColumnNames.add(next);
-			}
-		}
-
-		// Column Types
-		nextRecord = myIterator.next();
-		if (myColumnTypes.isEmpty()) {
-			boolean first = true;
-			for (String next : nextRecord) {
-				if (first) {
-					// First column in the CSV is the row number, not
-					// an actual SQL result column
-					first = false;
-					continue;
-				}
-				myColumnTypes.add(HfqlDataTypeEnum.valueOf(next));
-			}
-		}
-	}
-
-	@Override
-	public List<String> getColumnNames() {
-		return myColumnNames;
-	}
-
-	@Override
-	public List<HfqlDataTypeEnum> getColumnTypes() {
-		return myColumnTypes;
 	}
 
 	@Override
@@ -249,8 +206,9 @@ public class RemoteHfqlExecutionResult implements IHfqlExecutionResult {
 			String existingValue = (String) columnValues.get(i);
 			if (isNotBlank(existingValue)) {
 				Object newValue = null;
-				switch (myColumnTypes.get(i)) {
+				switch (myStatement.getSelectClauses().get(i).getDataType()) {
 					case STRING:
+					case JSON:
 						// No action
 						break;
 					case TIME:

@@ -192,22 +192,6 @@ public class HfqlRestProvider {
 			}
 			csvWriter.printRecord(searchId, theResult.getLimit(), parsedFqlStatement);
 
-			// Column names
-			if (theInitialPage) {
-				csvWriter.print("");
-				csvWriter.printRecord(theResult.getColumnNames());
-			} else {
-				csvWriter.printRecord("");
-			}
-
-			// Column types
-			if (theInitialPage) {
-				csvWriter.print("");
-				csvWriter.printRecord(theResult.getColumnTypes());
-			} else {
-				csvWriter.printRecord("");
-			}
-
 			// Print the rows
 			int recordCount = 0;
 			while (recordCount++ < theFetchSize && theResult.hasNext()) {

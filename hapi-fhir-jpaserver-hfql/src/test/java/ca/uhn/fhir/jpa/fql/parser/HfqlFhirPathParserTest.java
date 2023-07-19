@@ -16,19 +16,25 @@ public class HfqlFhirPathParserTest {
 	@ParameterizedTest
 	@CsvSource(value = {
 		// Good
-		"Patient     , Patient.name.family                               ,   STRING",
-		"Patient     , Patient.name.given.getValue().is(System.string)   ,   STRING",
-		"Patient     , Patient.identifier.where(system='foo').system     ,   STRING",
-		"Observation , Observation.value.ofType(Quantity).value          ,   DECIMAL",
-		"Patient     , name.family                                       ,   STRING",
-		"Patient     , name.given.getValue().is(System.string)           ,   STRING",
-		"Patient     , identifier.where(system='foo').system             ,   STRING",
-		"Patient     , identifier[0].where(system='foo').system          ,   STRING",
-		"Observation , value.ofType(Quantity).value                      ,   DECIMAL",
-		"Patient     , Patient.meta.versionId.toInteger()                ,   INTEGER",
+		"Patient     , Patient.name.family                                       ,   JSON",
+		"Patient     , Patient.name[0].family                                    ,   STRING",
+		"Patient     , Patient.name.family[0]                                    ,   JSON",
+		"Patient     , Patient.name[0].family[0]                                 ,   STRING",
+		"Patient     , Patient.name.given.getValue().is(System.string)           ,   JSON",
+		"Patient     , Patient.name.given.getValue().is(System.string).first()   ,   STRING",
+		"Patient     , Patient.identifier.where(system='foo').system             ,   JSON",
+		"Patient     , Patient.identifier.where(system='foo').first().system     ,   STRING",
+		"Observation , Observation.value.ofType(Quantity).value                  ,   DECIMAL",
+		"Patient     , name.family                                               ,   JSON",
+		"Patient     , name[0].family[0]                                         ,   STRING",
+		"Patient     , name.given.getValue().is(System.string)                   ,   JSON",
+		"Patient     , identifier.where(system='foo').system                     ,   JSON",
+		"Patient     , identifier[0].where(system='foo').system                  ,   STRING",
+		"Observation , value.ofType(Quantity).value                              ,   DECIMAL",
+		"Patient     , Patient.meta.versionId.toInteger()                        ,   INTEGER",
+		"Patient     , Patient.identifier                                        ,   JSON",
 		// Bad
-		"Patient     , Patient.identifier                                ,   ",
-		"Patient     , foo                                               ,   ",
+		"Patient     , foo                                                       ,   ",
 	})
 	void testDetermineDatatypeForPath(String theResourceType, String theFhirPath, HfqlDataTypeEnum theExpectedType) {
 		HfqlFhirPathParser svc = new HfqlFhirPathParser(FhirContext.forR4Cached());

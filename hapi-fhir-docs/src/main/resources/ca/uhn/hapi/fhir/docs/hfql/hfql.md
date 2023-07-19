@@ -46,7 +46,7 @@ To import this driver into your database tool, import the JDBC JAR and use the f
 <tr>
 <td>Class Name</td><td>ca.uhn.fhir.jpa.fql.jdbc.JdbcDriver</td>
 </tr><tr>
-<td>URL</td><td>jdbc:hapifhir:hfql:[server_base_url]</td>
+<td>URL</td><td>jdbc:hapifhirql:[server_base_url]</td>
 </tr><tr>
 <td>Username</td><td rowspan="2">If provided, the username/password will be added as an HTTP Basic Authorization header on all requests to the server.</td>
 </tr><tr>

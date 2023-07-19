@@ -93,8 +93,6 @@ public class HfqlRestClientTest {
 		String searchId = "my-search-id";
 		HfqlStatement statement = createFakeStatement();
 		when(myMockFqlResult0.getStatement()).thenReturn(statement);
-		when(myMockFqlResult0.getColumnNames()).thenReturn(List.of("name.family", "name.given"));
-		when(myMockFqlResult0.getColumnTypes()).thenReturn(List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING));
 		when(myMockFqlResult0.hasNext()).thenReturn(true, true, true);
 		when(myMockFqlResult0.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("Simpson", "Homer")),
@@ -125,7 +123,6 @@ public class HfqlRestClientTest {
 
 		IHfqlExecutionResult result = myClient.execute(input, true, 2);
 		IHfqlExecutionResult.Row nextRow;
-		assertThat(result.getColumnNames().toString(), result.getColumnNames(), contains("name.family", "name.given"));
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertEquals(0, nextRow.getRowOffset());
@@ -158,7 +155,9 @@ public class HfqlRestClientTest {
 	public static HfqlStatement createFakeStatement() {
 		HfqlStatement statement = new HfqlStatement();
 		statement.setFromResourceName("Patient");
-		statement.addSelectClause("name.family");
+		statement.addSelectClause("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].given[0]").setDataType(HfqlDataTypeEnum.STRING);
+
 		return statement;
 	}
 
