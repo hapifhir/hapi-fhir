@@ -134,10 +134,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			ResourceModifiedMessage resourceModifiedMessage = null;
 			try {
 
-				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage = inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
 				// delete the entry to lock the row to ensure unique processing
 				boolean wasDeleted = deletePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
-				
+
+				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage = inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
+
 				if(wasDeleted && optionalResourceModifiedMessage.isPresent()) {
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
 					resourceModifiedMessage = optionalResourceModifiedMessage.get();
@@ -156,28 +157,21 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+		ResourceModifiedMessage resourceModifiedMessage = null;
 
-		ResourceModifiedMessage resourceModifiedMessage = myHapiTransactionService
-			.withSystemRequest()
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> {
-				try {
+		try {
 
-					return myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage);
+			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage);
 
-				} catch (ResourceNotFoundException e) {
-					IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk = thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
+		} catch (ResourceNotFoundException e) {
+			IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk = thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
 
-					IdType idType = new IdType(thePersistedResourceModifiedMessage.getResourceType(),
-						persistedResourceModifiedMessagePk.getResourcePid(),
-						persistedResourceModifiedMessagePk.getResourceVersion());
+			IdType idType = new IdType(thePersistedResourceModifiedMessage.getResourceType(),
+				persistedResourceModifiedMessagePk.getResourcePid(),
+				persistedResourceModifiedMessagePk.getResourceVersion());
 
-					ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
-				}
-
-				return null;
-
-			});
+			ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
+		}
 
 		return Optional.ofNullable(resourceModifiedMessage);
 	}

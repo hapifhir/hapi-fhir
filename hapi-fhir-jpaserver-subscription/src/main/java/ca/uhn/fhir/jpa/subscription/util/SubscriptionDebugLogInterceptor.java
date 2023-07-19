@@ -88,7 +88,7 @@ public class SubscriptionDebugLogInterceptor {
 			// Delete operations have no payload
 			resourceId = theMessage.getId();
 		}
-		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", resourceId, theMessage.getOperationType());
+		log(EventCodeEnum.SUBS1, "Resource {} is starting the processing pipeline (op={})", resourceId, theMessage.getOperationType());
 	}
 
 	/*
