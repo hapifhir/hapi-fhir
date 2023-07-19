@@ -91,7 +91,6 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolution;
 import org.thymeleaf.templateresource.ClassLoaderTemplateResource;
-import org.thymeleaf.web.IWebExchange;
 
 import java.io.IOException;
 import java.io.InputStream;
