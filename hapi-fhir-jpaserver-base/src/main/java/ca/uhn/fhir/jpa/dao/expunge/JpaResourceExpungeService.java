@@ -327,8 +327,10 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			}
 
 			myResourceTableDao.deleteByPid(resource.getId());
-		} catch (Exception e){
-			throw new PreconditionFailedException("The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: " + e);
+		} catch (Exception e) {
+			throw new PreconditionFailedException(
+					"The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
+							+ e);
 		}
 	}
 
