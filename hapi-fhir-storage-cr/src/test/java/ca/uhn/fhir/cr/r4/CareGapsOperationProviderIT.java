@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.IResourceLoader;
+import ca.uhn.fhir.cr.common.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrProperties;
 import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;

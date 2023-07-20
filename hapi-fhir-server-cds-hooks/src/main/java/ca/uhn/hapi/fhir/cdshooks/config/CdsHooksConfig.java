@@ -21,7 +21,9 @@ package ca.uhn.hapi.fhir.cdshooks.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceRegistry;
@@ -29,6 +31,8 @@ import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsServiceInterceptor;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.DiscoveryResolutionR4;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
@@ -36,7 +40,9 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -44,11 +50,17 @@ public class CdsHooksConfig {
 
 	public static final String CDS_HOOKS_OBJECT_MAPPER_FACTORY = "cdsHooksObjectMapperFactory";
 
+	@Autowired
+	private ApplicationContext myAppCtx;
+
 	@Autowired(required = false)
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired(required = false)
 	private MatchUrlService myMatchUrlService;
+
+	@Autowired(required = false)
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
 	public ObjectMapper objectMapper(FhirContext theFhirContext) {
@@ -61,6 +73,15 @@ public class CdsHooksConfig {
 			CdsPrefetchSvc theCdsPrefetchSvc,
 			@Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper theObjectMapper) {
 		return new CdsServiceRegistryImpl(theCdsHooksContextBooter, theCdsPrefetchSvc, theObjectMapper);
+	}
+
+	@Bean
+	@Conditional(ListenerRegistryCondition.class)
+	public CdsServiceInterceptor cdsServiceInterceptor() {
+		var listener = new CdsServiceInterceptor(myDaoRegistry);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+			"PlanDefinition", SearchParameterMap.newSynchronous(), listener, 1000);
+		return listener;
 	}
 
 	@Bean

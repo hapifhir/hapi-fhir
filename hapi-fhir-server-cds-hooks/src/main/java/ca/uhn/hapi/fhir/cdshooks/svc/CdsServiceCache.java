@@ -66,6 +66,15 @@ public class CdsServiceCache {
 		}
 	}
 
+	public void registerCrService(String theServiceId, CdsServiceJson theCdsServiceJson) {
+		if (!isCdsServiceAlreadyRegistered(theServiceId, "CR")) {
+			final CdsCrPrefetchableServiceMethod cdsCrPrefetchableServiceMethod =
+					new CdsCrPrefetchableServiceMethod(theCdsServiceJson);
+			myServiceMap.put(theServiceId, cdsCrPrefetchableServiceMethod);
+			myCdsServiceJson.addService(theCdsServiceJson);
+		}
+	}
+
 	public void registerFeedback(String theServiceId, Object theServiceBean, Method theMethod) {
 		final CdsFeedbackMethod cdsFeedbackMethod = new CdsFeedbackMethod(theServiceBean, theMethod);
 		myFeedbackMap.put(theServiceId, cdsFeedbackMethod);

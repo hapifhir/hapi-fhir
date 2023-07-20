@@ -57,7 +57,7 @@ public class CdsHooksContextBooter {
 	private AnnotationConfigApplicationContext myAppCtx;
 
 	private List<Object> myCdsServiceBeans = new ArrayList<>();
-	private final CdsServiceCache myCdsServiceCache = new CdsServiceCache();
+	private CdsServiceCache myCdsServiceCache = new CdsServiceCache();
 
 	public void setDefinitionsClass(Class<?> theDefinitionsClass) {
 		myDefinitionsClass = theDefinitionsClass;

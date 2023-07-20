@@ -143,6 +143,11 @@ public class CdsServiceRegistryImpl implements ICdsServiceRegistry {
 	}
 
 	@Override
+	public void registerCrService(String theServiceId, CdsServiceJson theCdsServiceJson) {
+		myServiceCache.registerCrService(theServiceId, theCdsServiceJson);
+	}
+
+	@Override
 	public void unregisterService(String theServiceId, String theModuleId) {
 		Validate.notNull(theServiceId);
 

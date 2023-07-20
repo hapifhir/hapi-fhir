@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = CdsHooksController.BASE)
 public class CdsHooksController {
-	static final String BASE = "/cds-services";
+	public static final String BASE = "/cds-services";
 	private final ICdsServiceRegistry myCdsServiceRegistry;
 
 	/**
