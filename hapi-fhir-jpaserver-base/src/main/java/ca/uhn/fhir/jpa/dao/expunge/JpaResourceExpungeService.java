@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -328,9 +329,9 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 			myResourceTableDao.deleteByPid(resource.getId());
 		} catch (Exception e) {
-			throw new PreconditionFailedException(
-					"The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
-							+ e);
+			throw new PreconditionFailedException(Msg.code(2415)
+					+ "The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
+					+ e);
 		}
 	}
 
