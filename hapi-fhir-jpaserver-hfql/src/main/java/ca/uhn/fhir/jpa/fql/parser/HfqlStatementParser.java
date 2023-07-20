@@ -21,14 +21,18 @@ package ca.uhn.fhir.jpa.fql.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HfqlStatementParser {
 
@@ -41,8 +45,8 @@ public class HfqlStatementParser {
 	public static final String KEYWORD_ORDER = "ORDER";
 	public static final String KEYWORD_TRUE = "TRUE";
 	public static final String KEYWORD_FALSE = "FALSE";
-	private static final Set<String> DIRECTIVE_KEYWORDS = Set.of(
-			KEYWORD_FROM, KEYWORD_GROUP, KEYWORD_LIMIT, KEYWORD_ORDER, KEYWORD_WHERE, KEYWORD_SELECT);
+	private static final Set<String> DIRECTIVE_KEYWORDS =
+			Set.of(KEYWORD_FROM, KEYWORD_GROUP, KEYWORD_LIMIT, KEYWORD_ORDER, KEYWORD_WHERE, KEYWORD_SELECT);
 	private final HfqlLexer myLexer;
 	private final FhirContext myFhirContext;
 	private BaseState myState;
@@ -67,12 +71,34 @@ public class HfqlStatementParser {
 			myState.consume(nextToken);
 		}
 
-		if (StringUtils.isBlank(myStatement.getFromResourceName())) {
+		if (isBlank(myStatement.getFromResourceName())) {
 			throw newExceptionUnexpectedTokenExpectToken(null, KEYWORD_FROM);
 		}
 
 		if (myStatement.getSelectClauses().isEmpty()) {
 			throw newExceptionUnexpectedTokenExpectToken(null, KEYWORD_SELECT);
+		}
+
+		Set<String> existingAliases = new HashSet<>();
+		for (HfqlStatement.SelectClause next : myStatement.getSelectClauses()) {
+			if (isNotBlank(next.getAlias())) {
+				if (!existingAliases.add(next.getAlias())) {
+					throw new DataFormatException(
+							"Duplicate SELECT column alias: " + UrlUtil.sanitizeUrlPart(next.getAlias()));
+				}
+			}
+		}
+		for (HfqlStatement.SelectClause next : myStatement.getSelectClauses()) {
+			if (isBlank(next.getAlias())) {
+				String candidateAlias = next.getClause();
+				int nextSuffix = 2;
+				while (existingAliases.contains(candidateAlias)) {
+					candidateAlias = next.getClause() + nextSuffix;
+					nextSuffix++;
+				}
+				existingAliases.add(candidateAlias);
+				next.setAlias(candidateAlias);
+			}
 		}
 
 		return myStatement;
@@ -257,11 +283,11 @@ public class HfqlStatementParser {
 
 		@Override
 		void consume(HfqlLexerToken theToken) {
-				HfqlStatement.WhereClause havingClause = myStatement.addWhereClause();
-				String token = theToken.getToken();
-				havingClause.setLeft(token);
-				havingClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
-				myState = new StateInWhereAfterLeft(havingClause);
+			HfqlStatement.WhereClause havingClause = myStatement.addWhereClause();
+			String token = theToken.getToken();
+			havingClause.setLeft(token);
+			havingClause.setOperator(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+			myState = new StateInWhereAfterLeft(havingClause);
 		}
 	}
 
@@ -313,7 +339,8 @@ public class HfqlStatementParser {
 						if (myLexer.hasNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION)) {
 							nextToken = myLexer.getNextToken(HfqlLexerOptions.FHIRPATH_EXPRESSION);
 							String nextTokenAsKeyword = nextToken.asKeyword();
-							if (KEYWORD_AND.equals(nextTokenAsKeyword) || DIRECTIVE_KEYWORDS.contains(nextTokenAsKeyword)) {
+							if (KEYWORD_AND.equals(nextTokenAsKeyword)
+									|| DIRECTIVE_KEYWORDS.contains(nextTokenAsKeyword)) {
 								break;
 							}
 						} else {

@@ -140,7 +140,7 @@ public class LocalSearchHfqlExecutionResult implements IHfqlExecutionResult {
 		List<Object> values = new ArrayList<>();
 		for (int columnIndex = 0; columnIndex < myStatement.getSelectClauses().size(); columnIndex++) {
 			HfqlStatement.SelectClause nextColumn =
-				myStatement.getSelectClauses().get(columnIndex);
+					myStatement.getSelectClauses().get(columnIndex);
 			String clause = nextColumn.getClause();
 			HfqlDataTypeEnum columnDataType = nextColumn.getDataType();
 			List<IBase> columnValues;

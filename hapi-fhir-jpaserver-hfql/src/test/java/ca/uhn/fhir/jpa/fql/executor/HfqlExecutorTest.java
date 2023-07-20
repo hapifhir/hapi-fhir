@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -631,7 +632,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromHavingComplexFhirPath() {
+	public void testFromSelectComplexFhirPath2() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 
@@ -650,6 +651,41 @@ public class HfqlExecutorTest {
 
 		assertEquals("Homer", nextRow.getRowValues().get(0));
 		assertEquals("value0", nextRow.getRowValues().get(1));
+		assertFalse(result.hasNext());
+	}
+
+	/**
+	 * This should work but the FHIRPath evaluator doesn't seem to be
+	 * doing the right thing
+	 */
+	@Test
+	@Disabled
+	public void testFromSelectComplexFhirPath3() {
+		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("123");
+
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(p));
+
+		String statement = """
+			SELECT
+			   COL1: identifier[0].system + '|' + identifier[0].value,
+			   identifier[0].system + '|' + identifier[0].value AS COL2,
+			   identifier[0].system + '|' + identifier[0].value
+			FROM
+			   Patient
+			""";
+
+		IHfqlExecutionResult.Row nextRow;
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(statement, null, mySrd);
+		assertThat(result.getStatement().toSelectedColumnAliases().toString(), result.getStatement().toSelectedColumnAliases(), hasItems(
+			"COL1", "COL2", "identifier[0].system + '|' + identifier[0].value"
+		));
+		nextRow = result.getNextRow();
+		assertThat(nextRow.getRowValues().toString(), nextRow.getRowValues(), contains(
+			""
+		));
 		assertFalse(result.hasNext());
 	}
 
@@ -699,7 +735,7 @@ public class HfqlExecutorTest {
 	}
 
 	@Test
-	public void testFromHavingComplexFhirPath_Cast() {
+	public void testFromWhereComplexFhirPath_Cast() {
 		IFhirResourceDao<Patient> patientDao = initDao(Patient.class);
 		when(patientDao.search(any(), any())).thenReturn(createProviderWithSomeSimpsonsAndFlanders());
 		String statement = """

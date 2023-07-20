@@ -403,11 +403,8 @@ public class BaseController {
 
 		theModel.put("conf", capabilityStatement);
 
-		boolean supportsHfql = capabilityStatement
-			.getRestFirstRep()
-			.getOperation()
-			.stream()
-			.anyMatch(t->"hfql-execute".equals(t.getName()));
+		boolean supportsHfql = capabilityStatement.getRestFirstRep().getOperation().stream()
+				.anyMatch(t -> "hfql-execute".equals(t.getName()));
 		theModel.put("supportsHfql", supportsHfql);
 
 		return capabilityStatement;
@@ -708,5 +705,4 @@ public class BaseController {
 	public static String formatAsJson(String theInput) {
 		return format(defaultString(theInput), EncodingEnum.JSON);
 	}
-
 }

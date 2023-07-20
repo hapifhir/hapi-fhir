@@ -177,6 +177,50 @@ public class HfqlStatementParserTest {
 	}
 
 	@Test
+	public void testSelectComplexFhirPath_StringConcat2() {
+		String input = """
+			SELECT
+			   COL1: identifier[0].system + '|' + identifier[0].value,
+			   identifier[0].system + '|' + identifier[0].value AS COL2,
+			   identifier[0].system + '|' + identifier[0].value
+			FROM
+			   Patient
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertEquals("Patient", statement.getFromResourceName());
+		assertEquals(3, statement.getSelectClauses().size());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(0).getClause());
+		assertEquals("COL1", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(1).getClause());
+		assertEquals("COL2", statement.getSelectClauses().get(1).getAlias());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(2).getClause());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(2).getAlias());
+
+	}
+
+	@Test
+	public void testSelectDuplicateColumnsWithNoAlias() {
+		String input = """
+			SELECT
+				name, name, name
+			FROM
+			   Patient
+			""";
+
+		HfqlStatement statement = parse(input);
+		assertEquals("Patient", statement.getFromResourceName());
+		assertEquals(3, statement.getSelectClauses().size());
+		assertEquals("name", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("name", statement.getSelectClauses().get(1).getClause());
+		assertEquals("name2", statement.getSelectClauses().get(1).getAlias());
+		assertEquals("name", statement.getSelectClauses().get(2).getClause());
+		assertEquals("name3", statement.getSelectClauses().get(2).getAlias());
+
+	}
+
+	@Test
 	public void testSelectAs() {
 		String input = """
 					SELECT Patient.name.given + ' ' + Patient.name.family as FullName
@@ -417,6 +461,16 @@ public class HfqlStatementParserTest {
 			blah""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
 		assertEquals("Unexpected token (expected \"SELECT\") at position [line=0, column=0]: blah", ex.getMessage());
+	}
+
+	@Test
+	public void testError_DuplicateSelectAliases() {
+		String input = """
+			SELECT id as id, name as id
+			FROM Patient
+			""";
+		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
+		assertEquals("Duplicate SELECT column alias: id", ex.getMessage());
 	}
 
 	@Test

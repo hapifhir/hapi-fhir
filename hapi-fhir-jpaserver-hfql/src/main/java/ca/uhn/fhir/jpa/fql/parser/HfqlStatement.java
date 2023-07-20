@@ -25,11 +25,11 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class represents a parsed HFQL expression tree. It is useful for
@@ -82,7 +82,6 @@ public class HfqlStatement implements IModelJson {
 	public SelectClause addSelectClause(@Nonnull String theClause, @Nonnull SelectClauseOperator operator) {
 		SelectClause clause = new SelectClause();
 		clause.setClause(theClause);
-		clause.setAlias(theClause);
 		clause.setOperator(operator);
 		mySelectClauses.add(clause);
 		return clause;
@@ -148,7 +147,7 @@ public class HfqlStatement implements IModelJson {
 	public int findSelectClauseIndex(String theClause) {
 		for (int i = 0; i < getSelectClauses().size(); i++) {
 			if (theClause.equals(getSelectClauses().get(i).getClause())
-				|| theClause.equals(getSelectClauses().get(i).getAlias())) {
+					|| theClause.equals(getSelectClauses().get(i).getAlias())) {
 				return i;
 			}
 		}
@@ -160,19 +159,12 @@ public class HfqlStatement implements IModelJson {
 	}
 
 	public List<String> toSelectedColumnAliases() {
-		return mySelectClauses
-			.stream()
-			.map(SelectClause::getAlias)
-			.collect(Collectors.toList());
+		return mySelectClauses.stream().map(SelectClause::getAlias).collect(Collectors.toList());
 	}
 
 	public List<HfqlDataTypeEnum> toSelectedColumnDataTypes() {
-		return mySelectClauses
-			.stream()
-			.map(SelectClause::getDataType)
-			.collect(Collectors.toList());
+		return mySelectClauses.stream().map(SelectClause::getDataType).collect(Collectors.toList());
 	}
-
 
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
@@ -220,6 +212,7 @@ public class HfqlStatement implements IModelJson {
 
 		@JsonProperty("operator")
 		private SelectClauseOperator myOperator;
+
 		@JsonProperty("dataType")
 		private HfqlDataTypeEnum myDataType;
 
@@ -238,7 +231,6 @@ public class HfqlStatement implements IModelJson {
 		public SelectClause(String theClause) {
 			setOperator(SelectClauseOperator.SELECT);
 			setClause(theClause);
-			setAlias(theClause);
 		}
 
 		public HfqlDataTypeEnum getDataType() {

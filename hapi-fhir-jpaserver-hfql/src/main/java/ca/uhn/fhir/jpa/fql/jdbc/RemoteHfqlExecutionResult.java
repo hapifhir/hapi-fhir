@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 
 import java.io.ByteArrayInputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.jpa.fql.util.HfqlConstants.PROTOCOL_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;

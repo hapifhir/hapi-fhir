@@ -70,12 +70,13 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 	/**
 	 * Constructor
 	 */
-    public StaticHfqlExecutionResult(@Nullable String theSearchId, HfqlStatement theStatement, List<List<Object>> theRows) {
+	public StaticHfqlExecutionResult(
+			@Nullable String theSearchId, HfqlStatement theStatement, List<List<Object>> theRows) {
 		mySearchId = theSearchId;
 		myStatement = theStatement;
 		myRowsIterator = theRows.iterator();
-		 myNextRowOffset = 0;
-    }
+		myNextRowOffset = 0;
+	}
 
 	@Override
 	public boolean hasNext() {

@@ -1223,12 +1223,20 @@ class JdbcResultSet implements ResultSet {
 
 		@Override
 		public int getColumnType(int column) {
-			return myResult.getStatement().getSelectClauses().get(column - 1).getDataType().getSqlType();
+			return myResult.getStatement()
+					.getSelectClauses()
+					.get(column - 1)
+					.getDataType()
+					.getSqlType();
 		}
 
 		@Override
 		public String getColumnTypeName(int column) {
-			return myResult.getStatement().getSelectClauses().get(column - 1).getDataType().name();
+			return myResult.getStatement()
+					.getSelectClauses()
+					.get(column - 1)
+					.getDataType()
+					.name();
 		}
 
 		@Override
