@@ -916,7 +916,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			// verify
 			assertNotExpunged(myOneVersionCodeSystemId.withVersion("2"));
 			assertThat(e.getMessage(), startsWith(
-				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: The resource could not be ex" +
+				"HAPI-1084: ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException: HAPI-2415: The resource could not be ex" +
 					"punged. It is likely due to unfinished asynchronous deletions, please try again later:"));
 		}
 	}
