@@ -69,6 +69,10 @@ public class HfqlRestProvider {
 		myHfqlExecutor = theHfqlExecutor;
 	}
 
+	public void setHfqlExecutor(IHfqlExecutor theHfqlExecutor) {
+		myHfqlExecutor = theHfqlExecutor;
+	}
+
 	/**
 	 * This function implements the <code>$hfql-execute</code> operation, which is
 	 * the FHIR operation that the HFQL JDBC client uses to talk to the server. All

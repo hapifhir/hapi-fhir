@@ -62,7 +62,9 @@ public class StaticHfqlExecutionResult implements IHfqlExecutionResult {
 
 		HfqlStatement retVal = new HfqlStatement();
 		for (int i = 0; i < theColumnNames.size(); i++) {
-			retVal.addSelectClause(theColumnNames.get(i)).setDataType(theDataTypes.get(i));
+			retVal.addSelectClause(theColumnNames.get(i))
+					.setAlias(theColumnNames.get(i))
+					.setDataType(theDataTypes.get(i));
 		}
 		return retVal;
 	}

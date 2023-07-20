@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
-		<title th:include="window-title :: home" />
+		<title th:include="window-title :: hfql" />
 		<th:block th:include="tmpl-head :: head" />
 		<script th:include="tmpl-buttonclick-handler :: handler" />
 
@@ -115,7 +115,7 @@
                   </div>
                   <div class="card-body" id="resultsTableCard">
                      <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-sm resultsTable">
+                        <table class="table table-striped table-bordered table-sm resultsTable" id="resultsTable">
                            <thead>
                               <tr>
                                  <th th:each="columnName : ${columnNames}" th:text="${columnName}"></th>

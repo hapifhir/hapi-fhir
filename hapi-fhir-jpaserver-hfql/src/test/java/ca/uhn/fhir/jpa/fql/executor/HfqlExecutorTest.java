@@ -81,8 +81,8 @@ public class HfqlExecutorTest {
 		// Setup
 		HfqlStatement statement = new HfqlStatement();
 		statement.setFromResourceName("Patient");
-		statement.addSelectClause("name[0].given[1]").setDataType(HfqlDataTypeEnum.STRING);
-		statement.addSelectClause("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].given[1]").setAlias("name[0].given[1]").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].family").setAlias("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
 		statement.addWhereClause("name.family = 'Simpson'", HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
 
 		String searchId = "the-search-id";
@@ -1181,6 +1181,34 @@ public class HfqlExecutorTest {
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
 		assertErrorMessage(result, "Unable to select on non-grouped column in a count expression: name.family");
+	}
+
+	@Test
+	public void testError_SearchMatchOnNonId() {
+		initDao(Patient.class);
+
+		String input = """
+			select name.family
+			from Patient
+			where name in search_match('identifier', '1|1')
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
+		assertErrorMessage(result, "search_match function can only be applied to the id element");
+	}
+
+	@Test
+	public void testError_SearchMatchNotEnoughArguments() {
+		initDao(Patient.class);
+
+		String input = """
+			select name.family
+			from Patient
+			where id in search_match('identifier')
+			""";
+
+		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
+		assertErrorMessage(result, "search_match function requires 2 arguments");
 	}
 
 	@SuppressWarnings("unchecked")

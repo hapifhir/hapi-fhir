@@ -237,8 +237,9 @@ public class HfqlStatement implements IModelJson {
 			return myDataType;
 		}
 
-		public void setDataType(HfqlDataTypeEnum theDataType) {
+		public SelectClause setDataType(HfqlDataTypeEnum theDataType) {
 			myDataType = theDataType;
+			return this;
 		}
 
 		public SelectClauseOperator getOperator() {
@@ -253,8 +254,9 @@ public class HfqlStatement implements IModelJson {
 			return myAlias;
 		}
 
-		public void setAlias(String theAlias) {
+		public SelectClause setAlias(String theAlias) {
 			myAlias = theAlias;
+			return this;
 		}
 
 		public String getClause() {

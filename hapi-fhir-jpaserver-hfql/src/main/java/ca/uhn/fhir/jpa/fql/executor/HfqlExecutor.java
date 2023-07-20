@@ -187,13 +187,12 @@ public class HfqlExecutor implements IHfqlExecutor {
 			}
 
 			if (!"id".equals(nextSearchClause.getLeft())) {
-				// FIXME: add test and code
-				throw new InvalidRequestException("search_match function can only be applied to the id element");
+				throw new InvalidRequestException(
+						Msg.code(2412) + "search_match function can only be applied to the id element");
 			}
 
 			if (nextSearchClause.getRight().size() != 2) {
-				// FIXME: add test and code
-				throw new InvalidRequestException("search_match function requires 2 arguments");
+				throw new InvalidRequestException(Msg.code(2413) + "search_match function requires 2 arguments");
 			}
 
 			List<String> argumentStrings = nextSearchClause.getRightAsStrings();
@@ -433,29 +432,29 @@ public class HfqlExecutor implements IHfqlExecutor {
 	private Predicate<IBaseResource> newWhereClausePredicate(
 			HfqlExecutionContext theExecutionContext, HfqlStatement theStatement) {
 		return r -> {
-			for (HfqlStatement.WhereClause nextHavingClause : theStatement.getWhereClauses()) {
+			for (HfqlStatement.WhereClause nextWhereClause : theStatement.getWhereClauses()) {
 
 				boolean haveMatch;
 				try {
-					switch (nextHavingClause.getOperator()) {
+					switch (nextWhereClause.getOperator()) {
 						case SEARCH_MATCH:
 							// These are handled earlier so we don't need to test here
 							haveMatch = true;
 							break;
 						case UNARY_BOOLEAN: {
-							haveMatch = evaluateWhereClauseUnaryBoolean(theExecutionContext, r, nextHavingClause);
+							haveMatch = evaluateWhereClauseUnaryBoolean(theExecutionContext, r, nextWhereClause);
 							break;
 						}
 						case EQUALS:
 						case IN:
 						default: {
-							haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theExecutionContext, r, nextHavingClause);
+							haveMatch = evaluateWhereClauseBinaryEqualsOrIn(theExecutionContext, r, nextWhereClause);
 							break;
 						}
 					}
 				} catch (FhirPathExecutionException e) {
 					throw new InvalidRequestException(Msg.code(2403) + "Unable to evaluate FHIRPath expression \""
-							+ nextHavingClause.getLeft() + "\". Error: " + e.getMessage());
+							+ nextWhereClause.getLeft() + "\". Error: " + e.getMessage());
 				}
 
 				if (!haveMatch) {
@@ -513,7 +512,7 @@ public class HfqlExecutor implements IHfqlExecutor {
 		theSelectClauses.remove(theIndex);
 		List<String> reversedLeafPaths = new ArrayList<>(allLeafPaths);
 		reversedLeafPaths = Lists.reverse(reversedLeafPaths);
-		reversedLeafPaths.forEach(t -> theSelectClauses.add(theIndex, new HfqlStatement.SelectClause(t)));
+		reversedLeafPaths.forEach(t -> theSelectClauses.add(theIndex, new HfqlStatement.SelectClause(t).setAlias(t)));
 	}
 
 	@Nonnull
@@ -747,11 +746,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private static boolean evaluateWhereClauseUnaryBoolean(
-			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextHavingClause) {
+			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
 		boolean haveMatch = false;
-		assert theNextHavingClause.getRight().isEmpty();
+		assert theNextWhereClause.getRight().isEmpty();
 		List<IPrimitiveType> values =
-				theExecutionContext.evaluate(r, theNextHavingClause.getLeft(), IPrimitiveType.class);
+				theExecutionContext.evaluate(r, theNextWhereClause.getLeft(), IPrimitiveType.class);
 		for (IPrimitiveType<?> nextValue : values) {
 			if (Boolean.TRUE.equals(nextValue.getValue())) {
 				haveMatch = true;
@@ -762,11 +761,11 @@ public class HfqlExecutor implements IHfqlExecutor {
 	}
 
 	private static boolean evaluateWhereClauseBinaryEqualsOrIn(
-			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextHavingClause) {
+			HfqlExecutionContext theExecutionContext, IBaseResource r, HfqlStatement.WhereClause theNextWhereClause) {
 		boolean haveMatch = false;
-		List<IBase> values = theExecutionContext.evaluate(r, theNextHavingClause.getLeft(), IBase.class);
+		List<IBase> values = theExecutionContext.evaluate(r, theNextWhereClause.getLeft(), IBase.class);
 		for (IBase nextValue : values) {
-			for (String nextRight : theNextHavingClause.getRight()) {
+			for (String nextRight : theNextWhereClause.getRight()) {
 				String expression = "$this = " + nextRight;
 				IPrimitiveType outcome = theExecutionContext
 						.evaluateFirst(nextValue, expression, IPrimitiveType.class)

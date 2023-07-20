@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.jdbc.RemoteHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
@@ -397,8 +398,11 @@ public class Controller extends BaseController {
 					.collect(Collectors.toList());
 			theModel.put("columnTypes", columnTypes);
 
-		} catch (IOException theE) {
-			// FIXME: handle
+		} catch (IOException e) {
+			ourLog.warn("Failed to execute HFQL query: {}", e.toString());
+			theModel.put("columnNames", List.of("Error"));
+			theModel.put("columnTypes", List.of(HfqlDataTypeEnum.STRING));
+			rows = List.of(List.of(e.getMessage()));
 		}
 
 		theModel.put("HfqlRenderingUtil", new HfqlRenderingUtil());

@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
+import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Validate;
@@ -20,6 +24,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
+import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
+import com.gargoylesoftware.htmlunit.html.XHtmlPage;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -39,7 +45,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,23 +66,33 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class WebTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final HfqlRestProvider ourHfqlProvider = new HfqlRestProvider();
+
 	@RegisterExtension
 	@Order(0)
 	public static final RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
-		.registerProvider(new MyPatientFakeDocumentController());
+		.registerProvider(new MyPatientFakeDocumentController())
+		.registerProvider(ourHfqlProvider);
 	@RegisterExtension
 	@Order(1)
 	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
 	protected static MockMvc ourMockMvc;
 	private static Server ourOverlayServer;
 	private WebClient myWebClient;
+	@Mock
+	private IHfqlExecutor myHfqlExecutor;
 
 	@BeforeEach
 	public void before() throws Exception {
+		ourHfqlProvider.setHfqlExecutor(myHfqlExecutor);
+
 		if (ourOverlayServer == null) {
 			AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
 			appCtx.register(WebTestFhirTesterConfig.class);
@@ -218,6 +237,36 @@ public class WebTest {
 		assertThat(diffPage.asNormalizedText(), containsString("\"resourceType\": \"Parameters\""));
 	}
 
+
+	@Test
+	public void testHfqlExecuteQuery() throws IOException {
+		// Load home page
+		HtmlPage page = myWebClient.getPage("http://localhost/");
+		// Navigate to HFQL page
+		HtmlAnchor hfqlNavButton = page.getHtmlElementById("leftHfql");
+		HtmlPage hfqlPage = hfqlNavButton.click();
+		assertEquals("HFQL/SQL - HAPI FHIR", hfqlPage.getTitleText());
+
+		// Prepare response
+		List<String> columnNames = List.of("Family", "Given");
+		List<HfqlDataTypeEnum> columnTypes = List.of(HfqlDataTypeEnum.STRING, HfqlDataTypeEnum.STRING);
+		List<List<Object>> rows = List.of(
+			List.of("Simpson", "Homer"),
+			List.of("Simpson", "Bart")
+		);
+		StaticHfqlExecutionResult result = new StaticHfqlExecutionResult(null, columnNames, columnTypes, rows);
+		when(myHfqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(result);
+
+		// Click execute button
+		HtmlButton executeBtn = (HtmlButton) hfqlPage.getElementById("execute-btn");
+		HtmlPage resultsPage = executeBtn.click();
+
+		HtmlTable table = (HtmlTable) resultsPage.getElementById("resultsTable");
+		ourLog.info(table.asXml());
+		assertThat(table.asNormalizedText(), containsString("Simpson"));
+	}
+
+
 	private void registerAndUpdatePatient() {
 		Patient p = new Patient();
 		Patient p2 = new Patient();
@@ -309,6 +358,5 @@ public class WebTest {
 	public static void afterAll() throws Exception {
 		JettyUtil.closeServer(ourOverlayServer);
 	}
-
 
 }

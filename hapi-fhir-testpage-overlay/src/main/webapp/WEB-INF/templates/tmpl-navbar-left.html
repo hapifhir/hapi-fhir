@@ -111,7 +111,7 @@
 			<a href="#" onclick="doAction(this, 'home', null);">Server Home/Actions</a>
 		</li>
       <li th:if="${supportsHfql}" th:class="${page} == 'hfql' ? 'active' : ''">
-         <a href="#" onclick="doAction(this, 'hfql', null);">HFQL / SQL</a>
+         <a href="#" id="leftHfql" onclick="doAction(this, 'hfql', null);">HFQL / SQL</a>
       </li>
 	</ul>
 
