@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
@@ -315,16 +316,20 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		deleteAllSearchParams(JpaPid.fromId(resource.getResourceId()));
 
-		if (resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(resource.getId());
-		}
+		try {
+			if (resource.isHasTags()) {
+				myResourceTagDao.deleteByResourceId(resource.getId());
+			}
 
-		if (resource.getForcedId() != null) {
-			ForcedId forcedId = resource.getForcedId();
-			myForcedIdDao.deleteByPid(forcedId.getId());
-		}
+			if (resource.getForcedId() != null) {
+				ForcedId forcedId = resource.getForcedId();
+				myForcedIdDao.deleteByPid(forcedId.getId());
+			}
 
-		myResourceTableDao.deleteByPid(resource.getId());
+			myResourceTableDao.deleteByPid(resource.getId());
+		} catch (Exception e){
+			throw new PreconditionFailedException("The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: " + e);
+		}
 	}
 
 	@Override
