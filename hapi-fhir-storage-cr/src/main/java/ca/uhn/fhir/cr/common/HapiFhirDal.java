@@ -21,7 +21,10 @@ package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -74,9 +77,28 @@ public class HapiFhirDal implements FhirDal {
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-		var b = this.myDaoRegistry
-				.getResourceDao(theResourceType)
-				.search(new SearchParameterMap().add("url", new UriParam(theUrl)), myRequestDetails);
-		return new BundleIterable(myRequestDetails, b);
+		// version example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine|2.0.1"
+		if (theUrl.contains("|")) {
+			String[] urlSplit = theUrl.split("\\|");
+			String urlBase = urlSplit[0];
+			String urlVersion = urlSplit[1];
+
+			IBundleProvider versionResource = this.myDaoRegistry
+					.getResourceDao(theResourceType)
+					.search(
+							SearchParameterMap.newSynchronous()
+									.add("url", new UriParam(urlBase))
+									.add("version", new TokenParam(urlVersion)),
+							new SystemRequestDetails());
+			return new BundleIterable(myRequestDetails, versionResource);
+		} else {
+			// standard example "http://content.smilecdr.com/fhir/dqm/Library/ImmunizationStatusRoutine"
+			IBundleProvider standardResource = this.myDaoRegistry
+					.getResourceDao(theResourceType)
+					.search(
+							SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)),
+							new SystemRequestDetails());
+			return new BundleIterable(myRequestDetails, standardResource);
+		}
 	}
 }
