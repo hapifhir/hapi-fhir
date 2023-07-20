@@ -34,10 +34,11 @@ import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.transaction.annotation.Propagation;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -258,7 +259,8 @@ class WorkChannelMessageHandler implements MessageHandler {
 	 * Run theCallback in TX, rolling back if the supplied Optional is empty.
 	 */
 	<T> Optional<T> executeInTxRollbackWhenEmpty(Supplier<Optional<T>> theCallback) {
-		return myHapiTransactionService.withSystemRequest().execute(theTransactionStatus -> {
+		// We use REQUIRES_NEW and not REQUIRES so we don't pick up the ActiveMq Tx
+		return myHapiTransactionService.withSystemRequest().withPropagation(Propagation.REQUIRES_NEW).execute(theTransactionStatus -> {
 
 			// run the processing
 			Optional<T> setupProcessing = theCallback.get();
