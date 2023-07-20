@@ -72,7 +72,6 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testCreateLinkWithMatchResultOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myMdmSettings.setSearchAllPartitionForMatch(false);
