@@ -51,10 +51,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		myLocalizer = theLocalizer;
 	}
 
-
 	public RuntimeException translate(PersistenceException theException, String theMessageToPrepend) {
 		if (theException.getCause() instanceof HibernateException) {
-			return new PersistenceException(convertHibernateAccessException((HibernateException) theException.getCause(), theMessageToPrepend));
+			return new PersistenceException(
+					convertHibernateAccessException((HibernateException) theException.getCause(), theMessageToPrepend));
 		}
 		return theException;
 	}
@@ -64,7 +64,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		return convertHibernateAccessException(theException, null);
 	}
 
-	private DataAccessException convertHibernateAccessException(HibernateException theException, String theMessageToPrepend) {
+	private DataAccessException convertHibernateAccessException(
+			HibernateException theException, String theMessageToPrepend) {
 		String messageToPrepend = "";
 		if (isNotBlank(theMessageToPrepend)) {
 			messageToPrepend = theMessageToPrepend + " - ";
@@ -80,13 +81,22 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			if (isNotBlank(constraintName)) {
 				constraintName = constraintName.toUpperCase();
 				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
-					throw new ResourceVersionConflictException(Msg.code(823) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
+					throw new ResourceVersionConflictException(Msg.code(823)
+							+ messageToPrepend
+							+ myLocalizer.getMessage(
+									HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 				}
 				if (constraintName.contains(ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
-					throw new ResourceVersionConflictException(Msg.code(824) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
+					throw new ResourceVersionConflictException(Msg.code(824)
+							+ messageToPrepend
+							+ myLocalizer.getMessage(
+									HapiFhirHibernateJpaDialect.class,
+									"resourceIndexedCompositeStringUniqueConstraintFailure"));
 				}
 				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
-					throw new ResourceVersionConflictException(Msg.code(825) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
+					throw new ResourceVersionConflictException(Msg.code(825)
+							+ messageToPrepend
+							+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 				}
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
@@ -109,14 +119,16 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		 * StressTestR4Test method testMultiThreadedUpdateSameResourceInTransaction()
 		 */
 		if (theException instanceof org.hibernate.StaleStateException) {
-			String msg = messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+			String msg = messageToPrepend
+					+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
 			throw new ResourceVersionConflictException(Msg.code(826) + msg);
 		}
 		if (theException instanceof org.hibernate.PessimisticLockException) {
 			PessimisticLockException ex = (PessimisticLockException) theException;
 			String sql = defaultString(ex.getSQL()).toUpperCase();
 			if (sql.contains(ResourceHistoryTable.HFJ_RES_VER)) {
-				String msg = messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+				String msg = messageToPrepend
+						+ myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
 				throw new ResourceVersionConflictException(Msg.code(827) + msg);
 			}
 		}
@@ -124,5 +136,4 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		DataAccessException retVal = super.convertHibernateAccessException(theException);
 		return retVal;
 	}
-
 }

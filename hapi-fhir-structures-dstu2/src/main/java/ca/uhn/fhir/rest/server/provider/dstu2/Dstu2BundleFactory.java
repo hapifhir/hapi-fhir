@@ -40,13 +40,13 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -60,7 +60,12 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
+	public void addResourcesToBundle(
+			List<IBaseResource> theResult,
+			BundleTypeEnum theBundleType,
+			String theServerBase,
+			BundleInclusionRule theBundleInclusionRule,
+			Set<Include> theIncludes) {
 		ensureBundle();
 
 		List<IResource> includedResources = new ArrayList<IResource>();
@@ -87,11 +92,13 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+					if (theBundleInclusionRule != null
+							&& !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
 						continue;
 					}
 
-					IResource nextRes = (IResource) nextRefInfo.getResourceReference().getResource();
+					IResource nextRes =
+							(IResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
 							if (containedIds.contains(nextRes.getId().getValue())) {
@@ -109,7 +116,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 								addedResourceIds.add(id);
 								addedResourcesThisPass.add(nextRes);
 							}
-
 						}
 					}
 				}
@@ -119,7 +125,8 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<ResourceReferenceInfo>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
+					List<ResourceReferenceInfo> newReferences =
+							myContext.newTerser().getAllResourceReferences(iResource);
 					references.addAll(newReferences);
 				}
 			} while (references.isEmpty() == false);
@@ -145,12 +152,14 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			entry.setResource(next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
 			populateBundleEntryFullUrl(next, entry);
 		}
-
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
-													  IPrimitiveType<Date> theLastUpdated) {
+	public void addRootPropertiesToBundle(
+			String theId,
+			@Nonnull BundleLinks theBundleLinks,
+			Integer theTotalResults,
+			IPrimitiveType<Date> theLastUpdated) {
 		ensureBundle();
 
 		myBase = theBundleLinks.serverBase;
@@ -240,7 +249,8 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				IdDt id = new IdDt(next.getResponse().getLocation());
 				String resourceType = id.getResourceType();
 				if (isNotBlank(resourceType)) {
-					IResource res = (IResource) myContext.getResourceDefinition(resourceType).newInstance();
+					IResource res = (IResource)
+							myContext.getResourceDefinition(resourceType).newInstance();
 					res.setId(id);
 					retVal.add(res);
 				}
@@ -248,5 +258,4 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		}
 		return retVal;
 	}
-
 }

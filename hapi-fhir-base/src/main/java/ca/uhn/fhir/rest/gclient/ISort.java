@@ -63,5 +63,4 @@ public interface ISort<T> {
 	 * @param theParam The param name, e.g. "address"
 	 */
 	IQuery<T> descending(String theParam);
-
 }

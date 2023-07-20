@@ -38,10 +38,9 @@ public class ArrayUtil {
 	public static Set<String> commaSeparatedListToCleanSet(String theValueAsString) {
 		Set<String> resourceTypes;
 		resourceTypes = Arrays.stream(split(theValueAsString, ","))
-			.map(t->trim(t))
-			.filter(t->isNotBlank(t))
-			.collect(Collectors.toSet());
+				.map(t -> trim(t))
+				.filter(t -> isNotBlank(t))
+				.collect(Collectors.toSet());
 		return resourceTypes;
 	}
-
 }

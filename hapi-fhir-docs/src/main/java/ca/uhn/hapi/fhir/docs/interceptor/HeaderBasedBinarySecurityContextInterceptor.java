@@ -22,7 +22,6 @@ package ca.uhn.hapi.fhir.docs.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.binary.BinarySecurityContextInterceptor;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 /**
  * This class is mostly intended as an example implementation of the
@@ -54,7 +53,8 @@ public class HeaderBasedBinarySecurityContextInterceptor extends BinarySecurityC
 	 * @param theRequestDetails        The request details associated with this request
 	 */
 	@Override
-	protected boolean securityContextIdentifierAllowed(String theSecurityContextSystem, String theSecurityContextValue, RequestDetails theRequestDetails) {
+	protected boolean securityContextIdentifierAllowed(
+			String theSecurityContextSystem, String theSecurityContextValue, RequestDetails theRequestDetails) {
 
 		// In our simple example, we will use an incoming header called X-SecurityContext-Allowed-Identifier
 		// to determine whether the security context is allowed. This is typically not what you

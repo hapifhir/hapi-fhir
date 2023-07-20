@@ -29,9 +29,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.CheckReturnValue;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.CheckReturnValue;
 
 public class ServerInterceptorUtil {
 
@@ -44,7 +44,10 @@ public class ServerInterceptorUtil {
 	 * from the resource list
 	 */
 	@CheckReturnValue
-	public static List<IBaseResource> fireStoragePreshowResource(List<IBaseResource> theResources, RequestDetails theRequest, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public static List<IBaseResource> fireStoragePreshowResource(
+			List<IBaseResource> theResources,
+			RequestDetails theRequest,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		List<IBaseResource> retVal = theResources;
 		retVal.removeIf(Objects::isNull);
 
@@ -54,10 +57,11 @@ public class ServerInterceptorUtil {
 		if (retVal.size() > 0) {
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+					.add(IPreResourceShowDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					theInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 			retVal = accessDetails.toList();
 			retVal.removeIf(Objects::isNull);
@@ -65,5 +69,4 @@ public class ServerInterceptorUtil {
 
 		return retVal;
 	}
-
 }

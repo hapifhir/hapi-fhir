@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.messaging.json;
 
-
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
@@ -33,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
+
 	@JsonProperty("headers")
 	private HapiMessageHeaders myHeaders;
 
@@ -72,9 +72,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	@Nullable
-   public String getMessageKey() {
+	public String getMessageKey() {
 		return null;
-    }
+	}
 
 	/**
 	 * Returns {@link #getMessageKey()} or {@link #getMessageKeyDefaultValue()} when {@link #getMessageKey()} returns null.
@@ -92,7 +92,7 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	 * @return null by default
 	 */
 	@Nullable
-	protected String getMessageKeyDefaultValue(){
+	protected String getMessageKeyDefaultValue() {
 		return null;
 	}
 }

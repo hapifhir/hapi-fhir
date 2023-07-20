@@ -36,7 +36,9 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 
 	private BaseRuntimeElementDefinition<?> myElem;
 
-	RuntimeChildContainedResources(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
+	RuntimeChildContainedResources(
+			Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName)
+			throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
@@ -72,7 +74,9 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Class<?> actualType = theContext.getVersion().getContainedType();
 		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
 			@SuppressWarnings("unchecked")
@@ -81,8 +85,8 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 		} else if (List.class.isAssignableFrom(actualType)) {
 			myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
 		} else {
-			throw new ConfigurationException(Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
+			throw new ConfigurationException(
+					Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
 		}
 	}
-
 }

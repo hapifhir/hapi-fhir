@@ -28,4 +28,3 @@
  * Activated by {@link ca.uhn.fhir.jpa.model.config.PartitionSettings#setPartitioningEnabled(boolean)}
  */
 package ca.uhn.fhir.jpa.subscription;
-

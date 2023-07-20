@@ -44,9 +44,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 @SuppressWarnings("rawtypes")
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
@@ -56,8 +56,10 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
+
 	@Autowired
 	IIdHelperService myIdHelperService;
+
 	@Autowired
 	IMdmLinkDao myMdmLinkSvc;
 
@@ -66,19 +68,28 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(100);
-		requestDetails.setRequestPartitionId(theStepExecutionDetails.getParameters().getRequestPartitionId());
+		requestDetails.setRequestPartitionId(
+				theStepExecutionDetails.getParameters().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService
-			.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
+		myHapiTransactionService.execute(
+				requestDetails,
+				transactionDetails,
+				buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
 
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	MdmClearJob buildJob(
+			RequestDetails requestDetails,
+			TransactionDetails transactionDetails,
+			StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
 	}
 
@@ -89,7 +100,10 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+		public MdmClearJob(
+				RequestDetails theRequestDetails,
+				TransactionDetails theTransactionDetails,
+				StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
@@ -120,7 +134,11 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		private void performWork(List<? extends IResourcePersistentId> thePersistentIds) {
-			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", thePersistentIds.size(), myInstanceId, myChunkId);
+			ourLog.info(
+					"Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]",
+					thePersistentIds.size(),
+					myInstanceId,
+					myChunkId);
 			StopWatch sw = new StopWatch();
 
 			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(thePersistentIds);
@@ -128,15 +146,22 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 			// use the expunge service to delete multiple resources at once efficiently
 			IDeleteExpungeSvc deleteExpungeSvc = myIMdmClearHelperSvc.getDeleteExpungeSvc();
-			int deletedRecords = deleteExpungeSvc.deleteExpunge(
-				thePersistentIds,
-				false,
-				null
-			);
+			int deletedRecords = deleteExpungeSvc.deleteExpunge(thePersistentIds, false, null);
 
-			ourLog.trace("Deleted {} of {} golden resources in {}", deletedRecords, thePersistentIds.size(), StopWatch.formatMillis(sw.getMillis()));
+			ourLog.trace(
+					"Deleted {} of {} golden resources in {}",
+					deletedRecords,
+					thePersistentIds.size(),
+					StopWatch.formatMillis(sw.getMillis()));
 
-			ourLog.info("Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", deletedRecords, thePersistentIds.size(), sw, sw.formatThroughput(thePersistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+			ourLog.info(
+					"Finished removing {} of {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]",
+					deletedRecords,
+					thePersistentIds.size(),
+					sw,
+					sw.formatThroughput(thePersistentIds.size(), TimeUnit.SECONDS),
+					myInstanceId,
+					myChunkId);
 
 			if (ourClearCompletionCallbackForUnitTest != null) {
 				ourClearCompletionCallbackForUnitTest.run();
@@ -144,10 +169,8 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 		}
 	}
 
-
 	@VisibleForTesting
 	public static void setClearCompletionCallbackForUnitTest(Runnable theClearCompletionCallbackForUnitTest) {
 		ourClearCompletionCallbackForUnitTest = theClearCompletionCallbackForUnitTest;
 	}
-
 }

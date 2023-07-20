@@ -36,37 +36,39 @@ import java.util.List;
 
 public class QuickUsage {
 
-@SuppressWarnings("unused")
-public static void main(String[] args) throws DataFormatException, IOException {
+	@SuppressWarnings("unused")
+	public static void main(String[] args) throws DataFormatException, IOException {
 
-Patient patient = new Patient();
-patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
-patient.addIdentifier().setUse(IdentifierUseEnum.SECONDARY).setSystem("urn:fake:otherids").setValue("3287486");
+		Patient patient = new Patient();
+		patient.addIdentifier()
+				.setUse(IdentifierUseEnum.OFFICIAL)
+				.setSystem("urn:fake:mrns")
+				.setValue("7000135");
+		patient.addIdentifier()
+				.setUse(IdentifierUseEnum.SECONDARY)
+				.setSystem("urn:fake:otherids")
+				.setValue("3287486");
 
-patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
+		patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
 
-patient.setGender(AdministrativeGenderEnum.MALE);
+		patient.setGender(AdministrativeGenderEnum.MALE);
 
+		FhirContext ctx = FhirContext.forDstu2();
+		String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
+		String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 
-FhirContext ctx = FhirContext.forDstu2();
-String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
-String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
+		MyClientInterface client = ctx.newRestfulClient(MyClientInterface.class, "http://foo/fhir");
+		IdentifierDt searchParam = new IdentifierDt("urn:someidentifiers", "7000135");
+		List<Patient> clients = client.findPatientsByIdentifier(searchParam);
+	}
 
-MyClientInterface client = ctx.newRestfulClient(MyClientInterface.class, "http://foo/fhir");
-IdentifierDt searchParam = new IdentifierDt("urn:someidentifiers", "7000135");
-List<Patient> clients = client.findPatientsByIdentifier(searchParam);
-}
-	
-public interface MyClientInterface extends IRestfulClient
-{
-  /** A FHIR search */
-  @Search
-  public List<Patient> findPatientsByIdentifier(@RequiredParam(name = "identifier") IdentifierDt theIdentifier);
-	
-  /** A FHIR create */
-  @Create
-  public MethodOutcome createPatient(@ResourceParam Patient thePatient);
-	
-}
+	public interface MyClientInterface extends IRestfulClient {
+		/** A FHIR search */
+		@Search
+		public List<Patient> findPatientsByIdentifier(@RequiredParam(name = "identifier") IdentifierDt theIdentifier);
 
+		/** A FHIR create */
+		@Create
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient);
+	}
 }

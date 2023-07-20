@@ -19,7 +19,4 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-
-public interface IPatchWithQuery extends IBaseQuery<IPatchWithQueryTyped> {
-
-}
+public interface IPatchWithQuery extends IBaseQuery<IPatchWithQueryTyped> {}

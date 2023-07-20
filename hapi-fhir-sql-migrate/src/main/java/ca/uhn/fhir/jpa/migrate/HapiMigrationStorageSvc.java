@@ -47,7 +47,6 @@ public class HapiMigrationStorageSvc {
 	 * @param theTaskList the full list of tasks for this release
 	 * @return a list of tasks that have not yet been successfully run against the database
 	 */
-
 	public MigrationTaskList diff(MigrationTaskList theTaskList) {
 		Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
 
@@ -68,10 +67,10 @@ public class HapiMigrationStorageSvc {
 	 */
 	public String getLatestAppliedVersion() {
 		return fetchAppliedMigrationVersions().stream()
-			.sorted()
-			.map(MigrationVersion::toString)
-			.reduce((first, second) -> second)
-			.orElse(UNKNOWN_VERSION);
+				.sorted()
+				.map(MigrationVersion::toString)
+				.reduce((first, second) -> second)
+				.orElse(UNKNOWN_VERSION);
 	}
 
 	/**
@@ -87,11 +86,9 @@ public class HapiMigrationStorageSvc {
 	/**
 	 * Create the migration table if it does not already exist
 	 */
-
 	public boolean createMigrationTableIfRequired() {
 		return myHapiMigrationDao.createMigrationTableIfRequired();
 	}
-
 
 	/**
 	 *
@@ -106,11 +103,13 @@ public class HapiMigrationStorageSvc {
 	}
 
 	void verifyNoOtherLocksPresent(String theLockDescription) {
-		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(HapiMigrationLock.LOCK_PID, theLockDescription);
+		Optional<HapiMigrationEntity> otherLockFound =
+				myHapiMigrationDao.findFirstByPidAndNotDescription(HapiMigrationLock.LOCK_PID, theLockDescription);
 
 		// Check that there are no other locks in place. This should not happen!
 		if (otherLockFound.isPresent()) {
-			throw new HapiMigrationException(Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
+			throw new HapiMigrationException(
+					Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
 		}
 	}
 
@@ -125,7 +124,8 @@ public class HapiMigrationStorageSvc {
 		return myHapiMigrationDao.save(entity);
 	}
 
-	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(
+			Integer theLockPid, String theLockDescription) {
 		return myHapiMigrationDao.findFirstByPidAndNotDescription(theLockPid, theLockDescription);
 	}
 }

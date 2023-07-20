@@ -21,6 +21,4 @@ package ca.uhn.fhir.model.api;
 
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
-public interface IDatatype extends IElement, IBaseDatatype {
-
-}
+public interface IDatatype extends IElement, IBaseDatatype {}

@@ -43,18 +43,30 @@ public class EmailSenderImpl implements IEmailSender {
 	public void send(EmailDetails theDetails) {
 		StopWatch stopWatch = new StopWatch();
 
-		ourLog.info("Sending email for subscription {} from [{}] to recipients: [{}]", theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo());
+		ourLog.info(
+				"Sending email for subscription {} from [{}] to recipients: [{}]",
+				theDetails.getSubscriptionId(),
+				theDetails.getFrom(),
+				theDetails.getTo());
 
 		Email email = theDetails.toEmail();
 
-		myMailSvc.sendMail(email,
-			() -> ourLog.info("Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-				theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis()),
-			(e) -> {
-				ourLog.error("Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-					theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis());
-				ourLog.error("Error sending email", e);
-			});
+		myMailSvc.sendMail(
+				email,
+				() -> ourLog.info(
+						"Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
+						theDetails.getSubscriptionId(),
+						theDetails.getFrom(),
+						theDetails.getTo(),
+						stopWatch.getMillis()),
+				(e) -> {
+					ourLog.error(
+							"Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
+							theDetails.getSubscriptionId(),
+							theDetails.getFrom(),
+							theDetails.getTo(),
+							stopWatch.getMillis());
+					ourLog.error("Error sending email", e);
+				});
 	}
-
 }

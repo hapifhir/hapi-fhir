@@ -24,11 +24,10 @@ import ca.uhn.fhir.rest.annotation.GetPage;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 public class PageProvider {
-	
+
 	@GetPage()
 	@CoverageIgnore
 	public IResource getPage() {
 		return null;
 	}
-	
 }

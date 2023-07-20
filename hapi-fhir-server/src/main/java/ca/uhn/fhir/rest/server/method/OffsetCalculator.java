@@ -31,7 +31,6 @@ public class OffsetCalculator {
 	 * @param theBundleProvider
 	 * @return
 	 */
-
 	public static int calculateOffset(RequestDetails theRequest, IBundleProvider theBundleProvider) {
 		Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 		if (offset == null || offset < 0) {

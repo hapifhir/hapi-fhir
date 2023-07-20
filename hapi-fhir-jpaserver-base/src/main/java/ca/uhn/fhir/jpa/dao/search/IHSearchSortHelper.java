@@ -29,5 +29,4 @@ import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 public interface IHSearchSortHelper {
 
 	SortFinalStep getSortClauses(SearchSortFactory theSortFactory, SortSpec theSort, String theResourceType);
-
 }

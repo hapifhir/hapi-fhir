@@ -40,7 +40,6 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	@JsonProperty(value = "subscriptionId")
 	private String mySubscriptionId;
 
-
 	/**
 	 * Constructor
 	 */
@@ -48,22 +47,31 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		super();
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
 		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
 		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
-	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public ResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
 	}
 
-
-    public String getSubscriptionId() {
+	public String getSubscriptionId() {
 		return mySubscriptionId;
 	}
 
@@ -71,14 +79,13 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
-
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("subscriptionId", mySubscriptionId)
-			.append("payloadId", myPayloadId)
-			.append("partitionId", myPartitionId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("subscriptionId", mySubscriptionId)
+				.append("payloadId", myPayloadId)
+				.append("partitionId", myPartitionId)
+				.toString();
 	}
 }

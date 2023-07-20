@@ -59,7 +59,8 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	final ITestDataBuilder.Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
 
-	protected CompositeSearchParameterTestCases(ITestDataBuilder.Support theTestDataBuilder, TestDaoSearch theTestDaoSearch) {
+	protected CompositeSearchParameterTestCases(
+			ITestDataBuilder.Support theTestDataBuilder, TestDaoSearch theTestDaoSearch) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
 	}
@@ -68,8 +69,6 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	public Support getTestDataBuilderSupport() {
 		return myTestDataBuilder;
 	}
-
-
 
 	/**
 	 * Should we run test cases that depend on engine support sub-element correlation?
@@ -85,89 +84,88 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	@Test
 	void searchCodeQuantity_onSameComponent_found() {
 		IIdType id1 = createObservation(
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
-				withQuantityAtPath("valueQuantity", 60, null, "mmHg")),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
-				withQuantityAtPath("valueQuantity", 100, null, "mmHg"))
-		);
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+						withQuantityAtPath("valueQuantity", 60, null, "mmHg")),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+						withQuantityAtPath("valueQuantity", 100, null, "mmHg")));
 
-		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
-			"Observation?component-code-value-quantity=8480-6$60", id1);
+		myTestDaoSearch.assertSearchFinds(
+				"search matches both sps in composite", "Observation?component-code-value-quantity=8480-6$60", id1);
 	}
 
 	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeQuantity_differentComponents_notFound() {
 		createObservation(
-			withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6),
-				withQuantityAtPath("valueQuantity", 60, null, "mmHg")),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5),
-				withQuantityAtPath("valueQuantity", 100, null, "mmHg"))
-		);
+				withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6),
+						withQuantityAtPath("valueQuantity", 60, null, "mmHg")),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5),
+						withQuantityAtPath("valueQuantity", 100, null, "mmHg")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=8480-6$100");
-		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
+		assertThat(
+				"Search for the value from one component, but the code from the other, so it shouldn't match",
+				ids,
+				empty());
 	}
-
 
 	@Test
 	void searchCodeCode_onSameComponent_found() {
 		IIdType id1 = createObservation(
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
-		);
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code")));
 
-		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
-			"Observation?component-code-value-concept=8480-6$some-code", id1);
+		myTestDaoSearch.assertSearchFinds(
+				"search matches both sps in composite",
+				"Observation?component-code-value-concept=8480-6$some-code",
+				id1);
 	}
 
 	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeCode_differentComponents_notFound() {
 		createObservation(
-			withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
-		);
+				withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
+				withObservationComponent(
+						withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+						withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code")));
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-concept=8480-6$another-code");
-		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
+		assertThat(
+				"Search for the value from one component, but the code from the other, so it shouldn't match",
+				ids,
+				empty());
 	}
 
 	@Test
 	void searchCodeDate_onSameResource_found() {
 		IIdType id1 = createObservation(
-			withObservationCode( SYSTEM_LOINC_ORG, CODE_8480_6, null),
-			withDateTimeAt("valueDateTime", "2020-01-01T12:34:56")
-		);
+				withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6, null),
+				withDateTimeAt("valueDateTime", "2020-01-01T12:34:56"));
 
-		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
-			"Observation?code-value-date=8480-6$lt2021", id1);
+		myTestDaoSearch.assertSearchFinds(
+				"search matches both sps in composite", "Observation?code-value-date=8480-6$lt2021", id1);
 	}
-
 
 	@Test
 	void searchCodeString_onSameResource_found() {
 		IIdType id1 = createObservation(
-			withObservationCode( SYSTEM_LOINC_ORG, CODE_8480_6, null),
-			withDateTimeAt("valueString", "ABCDEF")
-		);
+				withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6, null), withDateTimeAt("valueString", "ABCDEF"));
 
-		myTestDaoSearch.assertSearchFinds("token code + string prefix matches",
-			"Observation?code-value-string=8480-6$ABC", id1);
+		myTestDaoSearch.assertSearchFinds(
+				"token code + string prefix matches", "Observation?code-value-string=8480-6$ABC", id1);
 	}
 
 	/**
@@ -181,8 +179,10 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	void searchUriNumber_onSameResource_found() {
 		// Combine existing SPs to test uri + number
 		SearchParameter searchParameter = createCompositeSearchParameter("uri-number-compound-test", "RiskAssessment");
-		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Resource-source", "meta.source"));
-		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "prediction.probability"));
+		searchParameter.addComponent(
+				componentFrom("http://hl7.org/fhir/SearchParameter/Resource-source", "meta.source"));
+		searchParameter.addComponent(componentFrom(
+				"http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "prediction.probability"));
 		doCreateResource(searchParameter);
 
 		// enable this sp.
@@ -190,18 +190,30 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 		RiskAssessment riskAssessment = new RiskAssessment();
 		riskAssessment.setMeta(new Meta().setSource("https://example.com/ourSource"));
-		riskAssessment.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
+		riskAssessment.addPrediction(
+				new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
 		IIdType raId = doCreateResource(riskAssessment);
 
 		// verify config
-		myTestDaoSearch.assertSearchFinds("simple uri search works", "RiskAssessment?_source=https://example.com/ourSource", raId);
+		myTestDaoSearch.assertSearchFinds(
+				"simple uri search works", "RiskAssessment?_source=https://example.com/ourSource", raId);
 		myTestDaoSearch.assertSearchFinds("simple number search works", "RiskAssessment?probability=0.02", raId);
 		// verify composite queries
-		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.02", raId);
-		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08", raId);
-		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02", raId);
-		//verify combo query
-		myTestDaoSearch.assertSearchFinds("combo uri + number", "RiskAssessment?_source=https://example.com/ourSource&probability=0.02", raId);
+		myTestDaoSearch.assertSearchFinds(
+				"composite uri + number",
+				"RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.02",
+				raId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match ",
+				"RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08",
+				raId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match ",
+				"RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02",
+				raId);
+		// verify combo query
+		myTestDaoSearch.assertSearchFinds(
+				"combo uri + number", "RiskAssessment?_source=https://example.com/ourSource&probability=0.02", raId);
 	}
 
 	@ParameterizedTest
@@ -209,8 +221,10 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	void testComboSearch_withTokenAndNumber_returnsMatchingResources(Extension theExtension) {
 		// Combine existing SPs to test Token + number
 		SearchParameter searchParameter = createCompositeSearchParameter("token-number-combo-test", "RiskAssessment");
-		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-method", "RiskAssessment"));
-		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "RiskAssessment"));
+		searchParameter.addComponent(
+				componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-method", "RiskAssessment"));
+		searchParameter.addComponent(
+				componentFrom("http://hl7.org/fhir/SearchParameter/RiskAssessment-probability", "RiskAssessment"));
 		searchParameter.setExtension(List.of(theExtension));
 		doCreateResource(searchParameter);
 
@@ -219,24 +233,28 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 		RiskAssessment riskAssessment = new RiskAssessment();
 		riskAssessment.setMethod(new CodeableConcept(new Coding(null, "BRCAPRO", null)));
-		riskAssessment.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
+		riskAssessment.addPrediction(
+				new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.02)));
 		IIdType raId = doCreateResource(riskAssessment);
 
 		RiskAssessment riskAssessmentNonMatch = new RiskAssessment();
 		riskAssessmentNonMatch.setMethod(new CodeableConcept(new Coding(null, "NOT_FOUND_CODE", null)));
-		riskAssessmentNonMatch.addPrediction(new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.03)));
+		riskAssessmentNonMatch.addPrediction(
+				new RiskAssessment.RiskAssessmentPredictionComponent().setProbability(new DecimalType(0.03)));
 		doCreateResource(riskAssessmentNonMatch);
 
 		// verify combo query
 		myTestDaoSearch.assertSearchFinds("combo uri + number", "RiskAssessment?method=BRCAPRO&probability=0.02", raId);
-		myTestDaoSearch.assertSearchNotFound("both params must match", "RiskAssessment?method=CODE&probability=0.02", raId);
-		myTestDaoSearch.assertSearchNotFound("both params must match", "RiskAssessment?method=BRCAPRO&probability=0.09", raId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match", "RiskAssessment?method=CODE&probability=0.02", raId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match", "RiskAssessment?method=BRCAPRO&probability=0.09", raId);
 	}
 
 	@ParameterizedTest
 	@MethodSource("extensionProvider")
 	void testComboSearch_withUriAndString_returnsMatchingResources(Extension theExtension) {
-		//Combine existing SPs to test URI + String
+		// Combine existing SPs to test URI + String
 		SearchParameter searchParameter = createCompositeSearchParameter("uri-string-combo-test", "Device");
 		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Device-url", "Device"));
 		searchParameter.addComponent(componentFrom("http://hl7.org/fhir/SearchParameter/Device-model", "Device"));
@@ -257,9 +275,12 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		deviceNonMatch.setModelNumber("someModelNumber");
 
 		// verify combo query
-		myTestDaoSearch.assertSearchFinds("combo uri + string", "Device?url=http://deviceUrl&model=modelNumber", deviceId);
-		myTestDaoSearch.assertSearchNotFound("both params must match", "Device?url=http://wrongUrl&model=modelNumber", deviceId);
-		myTestDaoSearch.assertSearchNotFound("both params must match", "Device?url=http://deviceUrl&model=wrongModel", deviceId);
+		myTestDaoSearch.assertSearchFinds(
+				"combo uri + string", "Device?url=http://deviceUrl&model=modelNumber", deviceId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match", "Device?url=http://wrongUrl&model=modelNumber", deviceId);
+		myTestDaoSearch.assertSearchNotFound(
+				"both params must match", "Device?url=http://deviceUrl&model=wrongModel", deviceId);
 	}
 
 	private static SearchParameter createCompositeSearchParameter(String theCodeValue, String theBase) {
@@ -275,16 +296,21 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		return retVal;
 	}
 
-	private SearchParameter.SearchParameterComponentComponent componentFrom(String theDefinition, String theExpression) {
-		return new SearchParameter.SearchParameterComponentComponent().setDefinition(theDefinition).setExpression(theExpression);
+	private SearchParameter.SearchParameterComponentComponent componentFrom(
+			String theDefinition, String theExpression) {
+		return new SearchParameter.SearchParameterComponentComponent()
+				.setDefinition(theDefinition)
+				.setExpression(theExpression);
 	}
 
 	static Stream<Arguments> extensionProvider() {
 		return Stream.of(
-			Arguments.of(
-				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(false))), // composite SP of type combo with non-unique index
-			Arguments.of(
-				new Extension(HapiExtensions.EXT_SP_UNIQUE, new BooleanType(true))) // composite SP of type combo with non-unique index
-		);
+				Arguments.of(new Extension(
+						HapiExtensions.EXT_SP_UNIQUE,
+						new BooleanType(false))), // composite SP of type combo with non-unique index
+				Arguments.of(new Extension(
+						HapiExtensions.EXT_SP_UNIQUE,
+						new BooleanType(true))) // composite SP of type combo with non-unique index
+				);
 	}
 }

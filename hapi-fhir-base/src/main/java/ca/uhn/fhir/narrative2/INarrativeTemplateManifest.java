@@ -22,17 +22,28 @@ package ca.uhn.fhir.narrative2;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 public interface INarrativeTemplateManifest {
-	List<INarrativeTemplate> getTemplateByResourceName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theResourceName, @Nonnull Collection<String> theProfiles);
+	List<INarrativeTemplate> getTemplateByResourceName(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theResourceName,
+			@Nonnull Collection<String> theProfiles);
 
-	List<INarrativeTemplate> getTemplateByName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theName);
+	List<INarrativeTemplate> getTemplateByName(
+			@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theName);
 
-	List<INarrativeTemplate> getTemplateByElement(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull IBase theElementValue);
+	List<INarrativeTemplate> getTemplateByElement(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull IBase theElementValue);
 
-	List<INarrativeTemplate> getTemplateByFragmentName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theFragmentName);
+	List<INarrativeTemplate> getTemplateByFragmentName(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull EnumSet<TemplateTypeEnum> theStyles,
+			@Nonnull String theFragmentName);
 }

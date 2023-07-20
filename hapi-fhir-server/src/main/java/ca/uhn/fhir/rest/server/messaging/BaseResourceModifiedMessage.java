@@ -34,9 +34,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -45,12 +45,16 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 
 	@JsonProperty("payload")
 	protected String myPayload;
+
 	@JsonProperty("payloadId")
 	protected String myPayloadId;
+
 	@JsonProperty(value = "partitionId")
 	protected RequestPartitionId myPartitionId;
+
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
+
 	@JsonIgnore
 	protected transient String myPayloadType;
 
@@ -64,21 +68,34 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		super();
 	}
 
-	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
 		setOperationType(theOperationType);
 		setNewPayload(theFhirContext, theResource);
 	}
 
-	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
 			setTransactionId(theRequest.getTransactionGuid());
 		}
 	}
-	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		this(theFhirContext, theNewResource, theOperationType, theRequest);
 
+	public BaseResourceModifiedMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setTransactionId(theRequest.getTransactionGuid());
+		}
 		myPartitionId = theRequestPartitionId;
 	}
 
@@ -208,10 +225,10 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("partitionId", myPartitionId)
-			.append("payloadId", myPayloadId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("partitionId", myPartitionId)
+				.append("payloadId", myPayloadId)
+				.toString();
 	}
 
 	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
@@ -265,4 +282,3 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return retval;
 	}
 }
-

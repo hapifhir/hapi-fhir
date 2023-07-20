@@ -19,23 +19,21 @@
  */
 package ca.uhn.fhir.rest.annotation;
 
-import java.lang.annotation.ElementType;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Parameter annotation which specifies a search parameter for a {@link Search} method.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 public @interface OptionalParam {
 
 	public static final String ALLOW_CHAIN_ANY = "*";
@@ -79,7 +77,7 @@ public @interface OptionalParam {
 	 * this value must not be populated.
 	 * </p>
 	 */
-	String[] chainWhitelist() default { ALLOW_CHAIN_ANY };
+	String[] chainWhitelist() default {ALLOW_CHAIN_ANY};
 
 	/**
 	 * For composite parameters ({@link CompositeParam}) this value may be

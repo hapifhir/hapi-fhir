@@ -19,20 +19,16 @@
  */
 package ca.uhn.fhir.rest.server.messaging;
 
-
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -224,7 +220,8 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 				case DELETE:
 					return DELETE;
 				default:
-					throw new IllegalArgumentException(Msg.code(2348) + "Unsupported operation type: " + theRestOperationType);
+					throw new IllegalArgumentException(
+							Msg.code(2348) + "Unsupported operation type: " + theRestOperationType);
 			}
 		}
 
@@ -232,10 +229,4 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 			return myRestOperationTypeEnum;
 		}
 	}
-
-	@VisibleForTesting
-	public Map<String, String> getAttributes(){
-		return ObjectUtils.defaultIfNull(myAttributes, Collections.emptyMap());
-	}
-
 }
