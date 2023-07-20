@@ -52,10 +52,13 @@ public class SubscriptionMatcherInterceptor {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private StorageSettings myStorageSettings;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -83,7 +86,8 @@ public class SubscriptionMatcherInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		boolean dontTriggerSubscriptionWhenVersionsAreTheSame = !myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
+		boolean dontTriggerSubscriptionWhenVersionsAreTheSame =
+				!myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
 		if (dontTriggerSubscriptionWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
@@ -100,32 +104,41 @@ public class SubscriptionMatcherInterceptor {
 	 * subscription pipeline after the resource was committed.  The message is persisted to provide asynchronous submission
 	 * in the event where submission would fail.
 	 */
-	protected void processResourceModifiedEvent(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	protected void processResourceModifiedEvent(
+			IBaseResource theNewResource,
+			ResourceModifiedMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 
 		ResourceModifiedMessage msg = createResourceModifiedMessage(theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		HookParams params = new HookParams()
-			.add(ResourceModifiedMessage.class, msg);
-		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		HookParams params = new HookParams().add(ResourceModifiedMessage.class, msg);
+		boolean outcome = CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
 
 		if (!outcome) {
 			return;
 		}
 
 		processResourceModifiedMessage(msg);
-
 	}
 
-	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage){
-		//	persist the message for async submission to the processing pipeline. see {@link AsyncResourceModifiedProcessingSchedulerSvc}
+	protected void processResourceModifiedMessage(ResourceModifiedMessage theResourceModifiedMessage) {
+		//	persist the message for async submission to the processing pipeline. see {@link
+		// AsyncResourceModifiedProcessingSchedulerSvc}
 		myResourceModifiedMessagePersistenceSvc.persist(theResourceModifiedMessage);
 	}
 
-	protected ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		// Even though the resource is being written, the subscription will be interacting with it by effectively "reading" it so we set the RequestPartitionId as a read request
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
-		return new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
+	protected ResourceModifiedMessage createResourceModifiedMessage(
+			IBaseResource theNewResource,
+			BaseResourceMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
+		// Even though the resource is being written, the subscription will be interacting with it by effectively
+		// "reading" it so we set the RequestPartitionId as a read request
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+				theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+		return new ResourceModifiedMessage(
+				myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 	}
 
 	private boolean isSameResourceVersion(IBaseResource theOldResource, IBaseResource theNewResource) {
@@ -141,10 +154,9 @@ public class SubscriptionMatcherInterceptor {
 		}
 
 		return oldVersion.equals(newVersion);
-
 	}
+
 	public void setFhirContext(FhirContext theCtx) {
 		myFhirContext = theCtx;
 	}
-
 }

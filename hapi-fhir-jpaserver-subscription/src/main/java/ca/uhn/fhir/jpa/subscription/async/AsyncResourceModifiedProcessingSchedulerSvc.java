@@ -35,7 +35,7 @@ public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasSchedule
 
 	public static final long DEFAULT_SUBMISSION_INTERVAL_IN_MS = 5000;
 
-	public  long mySubmissionIntervalInMilliSeconds;
+	public long mySubmissionIntervalInMilliSeconds;
 
 	public AsyncResourceModifiedProcessingSchedulerSvc() {
 		this(DEFAULT_SUBMISSION_INTERVAL_IN_MS);
@@ -63,6 +63,4 @@ public class AsyncResourceModifiedProcessingSchedulerSvc implements IHasSchedule
 			myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
 		}
 	}
-
-
 }

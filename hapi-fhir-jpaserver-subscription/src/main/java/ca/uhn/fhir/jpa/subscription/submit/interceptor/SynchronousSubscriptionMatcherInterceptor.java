@@ -56,5 +56,4 @@ public class SynchronousSubscriptionMatcherInterceptor extends SubscriptionMatch
 			myResourceModifiedConsumer.submitResourceModified(theResourceModifiedMessage);
 		}
 	}
-
 }

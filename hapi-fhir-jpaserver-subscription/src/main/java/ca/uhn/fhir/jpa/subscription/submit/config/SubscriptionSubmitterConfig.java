@@ -45,9 +45,7 @@ import org.springframework.context.annotation.Lazy;
  * matching queue for processing
  */
 @Configuration
-@Import({
-	SubscriptionModelConfig.class,
-	SubscriptionMatcherInterceptorConfig.class})
+@Import({SubscriptionModelConfig.class, SubscriptionMatcherInterceptorConfig.class})
 public class SubscriptionSubmitterConfig {
 
 	@Bean
@@ -56,7 +54,8 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubscriptionQueryValidator subscriptionQueryValidator(DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+	public SubscriptionQueryValidator subscriptionQueryValidator(
+			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		return new SubscriptionQueryValidator(theDaoRegistry, theSubscriptionStrategyEvaluator);
 	}
 
@@ -72,13 +71,17 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public ResourceModifiedSubmitterSvc resourceModifiedSvc(IHapiTransactionService theHapiTransactionService,
-																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
-																			  StorageSettings theStorageSettings){
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(
+			IHapiTransactionService theHapiTransactionService,
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+			SubscriptionChannelFactory theSubscriptionChannelFactory,
+			StorageSettings theStorageSettings) {
 
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theHapiTransactionService);
-
+		return new ResourceModifiedSubmitterSvc(
+				theStorageSettings,
+				theSubscriptionChannelFactory,
+				theResourceModifiedMessagePersistenceSvc,
+				theHapiTransactionService);
 	}
 
 	@Bean
@@ -87,8 +90,10 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc, IResourceModifiedConsumerWithRetries theResourceModifiedConsumer){
-		return new AsyncResourceModifiedSubmitterSvc(theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(
+			IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc,
+			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+		return new AsyncResourceModifiedSubmitterSvc(
+				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
 	}
-
 }

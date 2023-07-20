@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-
 /**
  * The purpose of this service is to submit messages to the processing pipeline for which previous attempts at
  * submission has failed.  See also {@link AsyncResourceModifiedProcessingSchedulerSvc} and {@link IResourceModifiedMessagePersistenceSvc}.
@@ -40,26 +39,29 @@ public class AsyncResourceModifiedSubmitterSvc {
 	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	private final IResourceModifiedConsumerWithRetries myResourceModifiedConsumer;
 
-
-	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+	public AsyncResourceModifiedSubmitterSvc(
+			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
 		myResourceModifiedMessagePersistenceSvc = theResourceModifiedMessagePersistenceSvc;
 		myResourceModifiedConsumer = theResourceModifiedConsumer;
 	}
 
 	public void runDeliveryPass() {
 
-		List<IPersistedResourceModifiedMessage> AllPersistedResourceModifiedMessages = myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
-		ourLog.info("Attempting to submit {} resources to consumer channel.", AllPersistedResourceModifiedMessages.size());
+		List<IPersistedResourceModifiedMessage> AllPersistedResourceModifiedMessages =
+				myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime();
+		ourLog.info(
+				"Attempting to submit {} resources to consumer channel.", AllPersistedResourceModifiedMessages.size());
 
-		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage : AllPersistedResourceModifiedMessages){
+		for (IPersistedResourceModifiedMessage persistedResourceModifiedMessage :
+				AllPersistedResourceModifiedMessages) {
 
-				boolean wasProcessed = myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);
+			boolean wasProcessed =
+					myResourceModifiedConsumer.submitPersisedResourceModifiedMessage(persistedResourceModifiedMessage);
 
-				if(!wasProcessed){
-					break;
-				}
+			if (!wasProcessed) {
+				break;
+			}
 		}
-
 	}
-
 }

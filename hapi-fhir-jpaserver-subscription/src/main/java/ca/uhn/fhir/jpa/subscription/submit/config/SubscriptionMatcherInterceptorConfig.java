@@ -36,7 +36,7 @@ public class SubscriptionMatcherInterceptorConfig {
 
 	@Bean
 	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
-		if(isSchedulingDisabledForTests()){
+		if (isSchedulingDisabledForTests()) {
 			return new SynchronousSubscriptionMatcherInterceptor();
 		}
 
@@ -47,6 +47,4 @@ public class SubscriptionMatcherInterceptorConfig {
 		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
 		return "true".equals(schedulingDisabled);
 	}
-
-
 }

@@ -30,12 +30,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, PersistedResourceModifiedMessageEntityPK>, IHapiFhirJpaRepository {
+public interface IResourceModifiedDao
+		extends JpaRepository<ResourceModifiedEntity, PersistedResourceModifiedMessageEntityPK>,
+				IHapiFhirJpaRepository {
 	@Query("SELECT r FROM ResourceModifiedEntity r ORDER BY r.myCreatedTime ASC")
 	List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime();
 
 	@Modifying
 	@Query("delete from ResourceModifiedEntity r where r.myResourceModifiedEntityPK =:pk")
 	int removeById(@Param("pk") PersistedResourceModifiedMessageEntityPK thePK);
-
 }

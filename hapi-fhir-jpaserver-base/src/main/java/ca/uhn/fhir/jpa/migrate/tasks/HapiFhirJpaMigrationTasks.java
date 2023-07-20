@@ -433,7 +433,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 
 		{
-			Builder.BuilderAddTableByColumns resourceModifiedTable = version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			Builder.BuilderAddTableByColumns resourceModifiedTable =
+					version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
 			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.STRING, 256);
 			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.STRING, 8);
 			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);

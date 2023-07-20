@@ -896,7 +896,12 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(FhirContext theFhirContext, IResourceModifiedDao theIResourceModifiedDao, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService){
-		return new ResourceModifiedMessagePersistenceSvcImpl(theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
+	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(
+			FhirContext theFhirContext,
+			IResourceModifiedDao theIResourceModifiedDao,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService) {
+		return new ResourceModifiedMessagePersistenceSvcImpl(
+				theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
 	}
 }

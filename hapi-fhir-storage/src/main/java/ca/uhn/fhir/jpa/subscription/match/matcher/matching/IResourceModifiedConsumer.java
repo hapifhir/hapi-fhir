@@ -20,9 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.messaging.MessageDeliveryException;
 
 /**
@@ -30,14 +28,6 @@ import org.springframework.messaging.MessageDeliveryException;
  * to the subscription processing pipeline.
  */
 public interface IResourceModifiedConsumer {
-
-	/**
-	 * This is an internal API - Use with caution!
-	 */
-	void submitResourceModified(
-			IBaseResource theNewResource,
-			ResourceModifiedMessage.OperationTypeEnum theOperationType,
-			RequestDetails theRequest);
 
 	/**
 	 *  Process a message by submitting it to the processing pipeline.  The message is assumed to have been successfully

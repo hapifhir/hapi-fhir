@@ -60,7 +60,6 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
  *
  *
  */
-
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetries {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
@@ -74,15 +73,22 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
 		if (!myStorageSettings.hasSupportedSubscriptionTypes()) {
-			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			ourLog.debug(
+					"Subscriptions are disabled on this server.  Skipping {} channel creation.",
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(
+					SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}
 
-	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc, IHapiTransactionService theHapiTransactionService) {
+	public ResourceModifiedSubmitterSvc(
+			StorageSettings theStorageSettings,
+			SubscriptionChannelFactory theSubscriptionChannelFactory,
+			IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myStorageSettings = theStorageSettings;
 		mySubscriptionChannelFactory = theSubscriptionChannelFactory;
 		myResourceModifiedMessagePersistenceSvc = resourceModifiedMessagePersistenceSvc;
@@ -101,7 +107,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		startIfNeeded();
 
 		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		Validate.notNull(
+				myMatchingChannel,
+				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
 	}
 
@@ -111,13 +119,12 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 * Implementation of {@link IResourceModifiedConsumerWithRetries}
 	 */
 	@Override
-	public boolean submitPersisedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+	public boolean submitPersisedResourceModifiedMessage(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return (boolean) myHapiTransactionService
-			.withSystemRequest()
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(doProcessResourceModifiedInTransaction(thePersistedResourceModifiedMessage));
-		
-		
+				.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(doProcessResourceModifiedInTransaction(thePersistedResourceModifiedMessage));
 	}
 
 	/**
@@ -128,18 +135,21 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 * @param thePersistedResourceModifiedMessage the primary key pointing to the persisted version (IPersistedResourceModifiedMessage) of a ResourceModifiedMessage needing submission
 	 * @return true upon successful submission, false otherwise.
 	 */
-	protected TransactionCallback doProcessResourceModifiedInTransaction(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+	protected TransactionCallback doProcessResourceModifiedInTransaction(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return theStatus -> {
 			boolean processed = true;
 			ResourceModifiedMessage resourceModifiedMessage = null;
 			try {
 
 				// delete the entry to lock the row to ensure unique processing
-				boolean wasDeleted = deletePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
+				boolean wasDeleted = deletePersistedResourceModifiedMessage(
+						thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk());
 
-				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage = inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
+				Optional<ResourceModifiedMessage> optionalResourceModifiedMessage =
+						inflatePersistedResourceMessage(thePersistedResourceModifiedMessage);
 
-				if(wasDeleted && optionalResourceModifiedMessage.isPresent()) {
+				if (wasDeleted && optionalResourceModifiedMessage.isPresent()) {
 					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
 					resourceModifiedMessage = optionalResourceModifiedMessage.get();
 					submitResourceModified(resourceModifiedMessage);
@@ -147,7 +157,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			} catch (MessageDeliveryException exception) {
 				// we encountered an issue when trying to send the message so mark the transaction for rollback
-				ourLog.error("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", resourceModifiedMessage.getPayloadId(), resourceModifiedMessage.getSubscriptionId());
+				ourLog.error(
+						"Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.",
+						resourceModifiedMessage.getPayloadId(),
+						resourceModifiedMessage.getSubscriptionId());
 				processed = false;
 				theStatus.setRollbackOnly();
 			}
@@ -156,26 +169,30 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		};
 	}
 
-	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+	private Optional<ResourceModifiedMessage> inflatePersistedResourceMessage(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		ResourceModifiedMessage resourceModifiedMessage = null;
 
 		try {
 
-			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(thePersistedResourceModifiedMessage);
+			resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessage(
+					thePersistedResourceModifiedMessage);
 
 		} catch (ResourceNotFoundException e) {
-			IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk = thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
+			IPersistedResourceModifiedMessagePK persistedResourceModifiedMessagePk =
+					thePersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk();
 
-			IdType idType = new IdType(thePersistedResourceModifiedMessage.getResourceType(),
-				persistedResourceModifiedMessagePk.getResourcePid(),
-				persistedResourceModifiedMessagePk.getResourceVersion());
+			IdType idType = new IdType(
+					thePersistedResourceModifiedMessage.getResourceType(),
+					persistedResourceModifiedMessagePk.getResourcePid(),
+					persistedResourceModifiedMessagePk.getResourceVersion());
 
-			ourLog.warn("Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
+			ourLog.warn(
+					"Scheduled submission will be ignored since resource {} cannot be found", idType.asStringValue());
 		}
 
 		return Optional.ofNullable(resourceModifiedMessage);
 	}
-
 
 	private boolean deletePersistedResourceModifiedMessage(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
 
@@ -183,19 +200,20 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			// delete the entry to lock the row to ensure unique processing
 			return myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 		} catch (ResourceNotFoundException exception) {
-			ourLog.warn("thePersistedResourceModifiedMessage with {} and version {} could not be deleted as it may have already been deleted.", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion());
-			// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed the message
+			ourLog.warn(
+					"thePersistedResourceModifiedMessage with {} and version {} could not be deleted as it may have already been deleted.",
+					theResourceModifiedPK.getResourcePid(),
+					theResourceModifiedPK.getResourceVersion());
+			// we were not able to delete the pk.  this implies that someone else did read/delete the PK and processed
+			// the message
 			// successfully before we did.
 
 			return false;
 		}
-
 	}
-	
-	
-	
+
 	private ChannelProducerSettings getChannelProducerSettings() {
-		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
+		ChannelProducerSettings channelProducerSettings = new ChannelProducerSettings();
 		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
 		return channelProducerSettings;
 	}
@@ -204,5 +222,4 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		startIfNeeded();
 		return (IChannelProducer) myMatchingChannel;
 	}
-
 }

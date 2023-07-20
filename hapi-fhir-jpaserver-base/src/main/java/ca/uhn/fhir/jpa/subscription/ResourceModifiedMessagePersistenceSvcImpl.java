@@ -67,7 +67,11 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedMessagePersistenceSvcImpl.class);
 
-	public ResourceModifiedMessagePersistenceSvcImpl(FhirContext theFhirContext, IResourceModifiedDao theResourceModifiedDao, DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+	public ResourceModifiedMessagePersistenceSvcImpl(
+			FhirContext theFhirContext,
+			IResourceModifiedDao theResourceModifiedDao,
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService) {
 		myFhirContext = theFhirContext;
 		myResourceModifiedDao = theResourceModifiedDao;
 		myDaoRegistry = theDaoRegistry;
@@ -77,9 +81,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	@Override
 	public List<IPersistedResourceModifiedMessage> findAllOrderedByCreatedTime() {
-		return myHapiTransactionService
-			.withSystemRequest()
-			.execute(myResourceModifiedDao::findAllOrderedByCreatedTime);
+		return myHapiTransactionService.withSystemRequest().execute(myResourceModifiedDao::findAllOrderedByCreatedTime);
 	}
 
 	@Override
@@ -89,7 +91,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
+	public ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 
 		return inflateResourceModifiedMessageFromEntity((ResourceModifiedEntity) thePersistedResourceModifiedMessage);
 	}
@@ -101,17 +104,23 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	@Override
 	public boolean deleteByPK(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {
-		int removedCount = myResourceModifiedDao.removeById((PersistedResourceModifiedMessageEntityPK) theResourceModifiedPK);
+		int removedCount =
+				myResourceModifiedDao.removeById((PersistedResourceModifiedMessageEntityPK) theResourceModifiedPK);
 
 		return removedCount == 1;
 	}
 
-	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(ResourceModifiedEntity theResourceModifiedEntity){
-		String resourcePid = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
-		String resourceVersion = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
+	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(
+			ResourceModifiedEntity theResourceModifiedEntity) {
+		String resourcePid =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
+		String resourceVersion =
+				theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
-		ResourceModifiedMessage retVal = getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
-		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
+		ResourceModifiedMessage retVal =
+				getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
+		SystemRequestDetails systemRequestDetails =
+				new SystemRequestDetails().setRequestPartitionId(retVal.getPartitionId());
 
 		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
@@ -137,7 +146,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		return resourceModifiedEntity;
 	}
 
-	private ResourceModifiedMessage getPayloadLessMessageFromString(String thePayloadLessMessage){
+	private ResourceModifiedMessage getPayloadLessMessageFromString(String thePayloadLessMessage) {
 		try {
 			return myObjectMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
 		} catch (JsonProcessingException e) {
@@ -155,11 +164,11 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		}
 	}
 
-	private static class PayloadLessResourceModifiedMessage extends ResourceModifiedMessage{
+	private static class PayloadLessResourceModifiedMessage extends ResourceModifiedMessage {
 
 		public PayloadLessResourceModifiedMessage(ResourceModifiedMessage theMsg) {
 			this.myPayloadId = theMsg.getPayloadId();
-			this.myPayloadVersion= theMsg.getPayloadVersion();
+			this.myPayloadVersion = theMsg.getPayloadVersion();
 			setSubscriptionId(theMsg.getSubscriptionId());
 			setMediaType(theMsg.getMediaType());
 			setOperationType(theMsg.getOperationType());
@@ -168,8 +177,5 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 			setMessageKey(theMsg.getMessageKeyOrNull());
 			copyAdditionalPropertiesFrom(theMsg);
 		}
-
-
 	}
-
 }
