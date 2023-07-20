@@ -54,9 +54,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
@@ -65,14 +70,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao implements IFhirSystemDao<T, MT> {
+public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao
+		implements IFhirSystemDao<T, MT> {
 
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
@@ -80,22 +80,31 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
+
 	@Autowired
 	private ExpungeService myExpungeService;
+
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
@@ -128,7 +137,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 		List<Map<?, ?>> counts = myResourceTableDao.getResourceCounts();
 		for (Map<?, ?> next : counts) {
-			retVal.put(next.get("type").toString(), Long.parseLong(next.get("count").toString()));
+			retVal.put(
+					next.get("type").toString(),
+					Long.parseLong(next.get("count").toString()));
 		}
 
 		return retVal;
@@ -148,11 +159,13 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(null, null);
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
 		IBundleProvider retVal = myTransactionService
-			.withRequest(theRequestDetails)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> myPersistedJpaBundleProviderFactory.history(theRequestDetails, null, null, theSince, theUntil, theOffset, requestPartitionId));
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(() -> myPersistedJpaBundleProviderFactory.history(
+						theRequestDetails, null, null, theSince, theUntil, theOffset, requestPartitionId));
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}
@@ -170,12 +183,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	@Override
-	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
+	public <P extends IResourcePersistentId> void preFetchResources(
+			List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		HapiTransactionService.requireTransaction();
-		List<Long> pids = theResolvedIds
-			.stream()
-			.map(t -> ((JpaPid) t).getId())
-			.collect(Collectors.toList());
+		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
 
 		new QueryChunker<Long>().chunk(pids, ids -> {
 
@@ -197,82 +208,103 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 				List<Long> entityIds;
 
 				if (thePreFetchIndexes) {
-					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsStringPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(ResourceTable::isParamsStringPopulated)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						preFetchIndexes(entityIds, "string", "myParamsString", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsTokenPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(ResourceTable::isParamsTokenPopulated)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						preFetchIndexes(entityIds, "token", "myParamsToken", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsDatePopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(ResourceTable::isParamsDatePopulated)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						preFetchIndexes(entityIds, "date", "myParamsDate", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isParamsQuantityPopulated).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(ResourceTable::isParamsQuantityPopulated)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().filter(ResourceTable::isHasLinks).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(ResourceTable::isHasLinks)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().filter(BaseHasResource::isHasTags).map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.filter(BaseHasResource::isHasTags)
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (entityIds.size() > 0) {
 						myResourceTagDao.findByResourceIds(entityIds);
 						preFetchIndexes(entityIds, "tags", "myTags", null);
 					}
 
-					entityIds = loadedResourceTableEntries.stream().map(ResourceTable::getId).collect(Collectors.toList());
+					entityIds = loadedResourceTableEntries.stream()
+							.map(ResourceTable::getId)
+							.collect(Collectors.toList());
 					if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
 						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
 					}
 				}
 
-				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
+				new QueryChunker<ResourceTable>()
+						.chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
+							Map<Long, ResourceTable> entities =
+									entries.stream().collect(Collectors.toMap(ResourceTable::getId, t -> t));
 
-					Map<Long, ResourceTable> entities = entries
-						.stream()
-						.collect(Collectors.toMap(ResourceTable::getId, t -> t));
+							CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
+							CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
+							Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
 
-					CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
-					CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
-					Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
+							from.fetch("myProvenance", JoinType.LEFT);
 
-					from.fetch("myProvenance", JoinType.LEFT);
-
-					List<Predicate> orPredicates = new ArrayList<>();
-					for (ResourceTable next : entries) {
-						Predicate resId = b.equal(from.get("myResourceId"), next.getId());
-						Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
-						orPredicates.add(b.and(resId, resVer));
-					}
-					q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-					List<ResourceHistoryTable> resultList = myEntityManager.createQuery(q).getResultList();
-					for (ResourceHistoryTable next : resultList) {
-						ResourceTable nextEntity = entities.get(next.getResourceId());
-						if (nextEntity != null) {
-							nextEntity.setCurrentVersionEntity(next);
-						}
-					}
-
-				});
-
-
+							List<Predicate> orPredicates = new ArrayList<>();
+							for (ResourceTable next : entries) {
+								Predicate resId = b.equal(from.get("myResourceId"), next.getId());
+								Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
+								orPredicates.add(b.and(resId, resVer));
+							}
+							q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+							List<ResourceHistoryTable> resultList =
+									myEntityManager.createQuery(q).getResultList();
+							for (ResourceHistoryTable next : resultList) {
+								ResourceTable nextEntity = entities.get(next.getResourceId());
+								if (nextEntity != null) {
+									nextEntity.setCurrentVersionEntity(next);
+								}
+							}
+						});
 			}
-
-
 		});
 	}
 
-	private void preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName, @Nullable List<ResourceTable> theEntityListToPopulate) {
+	private void preFetchIndexes(
+			List<Long> theIds,
+			String typeDesc,
+			String fieldName,
+			@Nullable List<ResourceTable> theEntityListToPopulate) {
 		new QueryChunker<Long>().chunk(theIds, ids -> {
-			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
+			TypedQuery<ResourceTable> query = myEntityManager.createQuery(
+					"FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )",
+					ResourceTable.class);
 			query.setParameter("IDS", ids);
 			List<ResourceTable> indexFetchOutcome = query.getResultList();
 			ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
@@ -282,13 +314,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		});
 	}
 
-
 	@Nullable
 	@Override
 	protected String getResourceName() {
 		return null;
 	}
-
 
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
@@ -309,5 +339,4 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
 	}
-
 }

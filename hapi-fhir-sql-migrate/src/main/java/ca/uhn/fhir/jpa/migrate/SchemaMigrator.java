@@ -25,12 +25,12 @@ import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import javax.sql.DataSource;
 
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
@@ -47,13 +47,20 @@ public class SchemaMigrator {
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, MigrationTaskList theMigrationTasks, HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
+	public SchemaMigrator(
+			String theSchemaName,
+			String theMigrationTableName,
+			DataSource theDataSource,
+			Properties jpaProperties,
+			MigrationTaskList theMigrationTasks,
+			HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
 		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
 
-		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
+		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO)
+				&& "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
 		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
 	}
 
@@ -68,15 +75,17 @@ public class SchemaMigrator {
 			if (unappliedMigrations.size() > 0) {
 
 				String url = connection.getMetaData().getURL();
-				throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  " +
-					"Current database schema version is " + myHapiMigrationStorageSvc.getLatestAppliedVersion() + ".  Schema version required by application is " +
-					unappliedMigrations.getLastVersion() + ".  Please run the database migrator.");
+				throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  "
+						+ "Current database schema version is "
+						+ myHapiMigrationStorageSvc.getLatestAppliedVersion()
+						+ ".  Schema version required by application is " + unappliedMigrations.getLastVersion()
+						+ ".  Please run the database migrator.");
 			}
-			ourLog.info("Database schema confirmed at expected version " + myHapiMigrationStorageSvc.getLatestAppliedVersion());
+			ourLog.info("Database schema confirmed at expected version "
+					+ myHapiMigrationStorageSvc.getLatestAppliedVersion());
 		} catch (SQLException e) {
 			throw new ConfigurationException(Msg.code(28) + "Unable to connect to " + myDataSource, e);
 		}
-
 	}
 
 	public MigrationResult migrate() {
@@ -111,7 +120,7 @@ public class SchemaMigrator {
 		myCallbacks = theCallbacks;
 	}
 
-	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+	public boolean createMigrationTableIfRequired() {
+		return myHapiMigrationStorageSvc.createMigrationTableIfRequired();
 	}
 }

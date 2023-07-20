@@ -74,4 +74,4 @@ HAPI provides a few ways of accessing extension values in resources which are re
 
 All of the examples on this page show how to work with the existing data model classes.
 
-This is a great way to work with extensions, and most HAPI FHIR applications use the techniques described on this page. However, there is a more advanced technique available as well, involving the creation of custom Java classes that extend the built-in classes to add statically bound extensions (as oppoed to the dynamically bound ones shown on this page). See [Custom Structures](./custom_structures.html) for more information.
+This is a great way to work with extensions, and most HAPI FHIR applications use the techniques described on this page. However, there is a more advanced technique available as well, involving the creation of custom Java classes that extend the built-in classes to add statically bound extensions (as opposed to the dynamically bound ones shown on this page). See [Custom Structures](./custom_structures.html) for more information.

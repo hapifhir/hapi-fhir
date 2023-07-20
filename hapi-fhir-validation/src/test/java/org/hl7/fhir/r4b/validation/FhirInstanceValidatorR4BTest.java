@@ -985,7 +985,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 		assertEquals(28, output.getMessages().get(0).getLocationCol().intValue());
 		assertEquals(4, output.getMessages().get(0).getLocationLine().intValue());
 	}

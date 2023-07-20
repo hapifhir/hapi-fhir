@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nonnull;
 
 /**
  * A resource pid list where the pids can have different resource types
@@ -33,8 +34,12 @@ public class MixedResourcePidList extends BaseResourcePidList {
 	@Nonnull
 	final List<String> myResourceTypes;
 
-	public MixedResourcePidList(List<String> theResourceTypes, Collection<IResourcePersistentId> theIds, Date theLastDate) {
-		super(theIds, theLastDate);
+	public MixedResourcePidList(
+			List<String> theResourceTypes,
+			Collection<IResourcePersistentId> theIds,
+			Date theLastDate,
+			RequestPartitionId theRequestPartitionId) {
+		super(theIds, theLastDate, theRequestPartitionId);
 		myResourceTypes = theResourceTypes;
 	}
 

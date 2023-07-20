@@ -56,7 +56,8 @@ public class ThreadSafeResourceDeleterSvc {
 
 	public static final long RETRY_BACKOFF_PERIOD = 100L;
 	public static final int RETRY_MAX_ATTEMPTS = 4;
-	private static final String REQ_DET_KEY_IN_NEW_TRANSACTION = ThreadSafeResourceDeleterSvc.class.getName() + "REQ_DET_KEY_IN_NEW_TRANSACTION";
+	private static final String REQ_DET_KEY_IN_NEW_TRANSACTION =
+			ThreadSafeResourceDeleterSvc.class.getName() + "REQ_DET_KEY_IN_NEW_TRANSACTION";
 	private static final Logger ourLog = LoggerFactory.getLogger(ThreadSafeResourceDeleterSvc.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -64,7 +65,10 @@ public class ThreadSafeResourceDeleterSvc {
 	private final RetryTemplate myRetryTemplate = getRetryTemplate();
 	private final IHapiTransactionService myTransactionService;
 
-	public ThreadSafeResourceDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, IHapiTransactionService theTransactionService) {
+	public ThreadSafeResourceDeleterSvc(
+			DaoRegistry theDaoRegistry,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			IHapiTransactionService theTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myTransactionService = theTransactionService;
@@ -73,7 +77,8 @@ public class ThreadSafeResourceDeleterSvc {
 	/**
 	 * @return number of resources that were successfully deleted
 	 */
-	public Integer delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
+	public Integer delete(
+			RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
 		Integer retVal = 0;
 
 		List<String> cascadeDeleteIdCache = CascadingDeleteInterceptor.getCascadedDeletesList(theRequest, true);
@@ -83,7 +88,8 @@ public class ThreadSafeResourceDeleterSvc {
 
 			if (!cascadeDeleteIdCache.contains(nextSourceId)) {
 				cascadeDeleteIdCache.add(nextSourceId);
-				retVal += handleNextSource(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId);
+				retVal += handleNextSource(
+						theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId);
 			}
 		}
 
@@ -93,12 +99,17 @@ public class ThreadSafeResourceDeleterSvc {
 	/**
 	 * @return number of resources that were successfully deleted
 	 */
-	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId) {
+	private Integer handleNextSource(
+			RequestDetails theRequest,
+			DeleteConflictList theConflictList,
+			TransactionDetails theTransactionDetails,
+			DeleteConflict next,
+			IdDt nextSource,
+			String nextSourceId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
 		// We will retry deletes on any occurrence of ResourceVersionConflictException up to RETRY_MAX_ATTEMPTS
 		return myRetryTemplate.execute(retryContext -> {
-
 			String previousNewTransactionValue = null;
 			if (theRequest != null) {
 				previousNewTransactionValue = (String) theRequest.getUserData().get(REQ_DET_KEY_IN_NEW_TRANSACTION);
@@ -120,10 +131,10 @@ public class ThreadSafeResourceDeleterSvc {
 				}
 
 				myTransactionService
-					.withRequest(theRequest)
-					.withTransactionDetails(theTransactionDetails)
-					.withPropagation(propagation)
-					.execute(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+						.withRequest(theRequest)
+						.withTransactionDetails(theTransactionDetails)
+						.withPropagation(propagation)
+						.execute(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 
 				return 1;
 			} catch (ResourceGoneException exception) {
@@ -132,25 +143,29 @@ public class ThreadSafeResourceDeleterSvc {
 				if (theRequest != null) {
 					theRequest.getUserData().put(REQ_DET_KEY_IN_NEW_TRANSACTION, previousNewTransactionValue);
 				}
-
 			}
 
 			return 0;
 		});
 	}
 
-	private DaoMethodOutcome doDelete(RequestDetails theRequest, DeleteConflictList
-		theConflictList, TransactionDetails theTransactionDetails, IdDt nextSource, IFhirResourceDao<?> dao) {
+	private DaoMethodOutcome doDelete(
+			RequestDetails theRequest,
+			DeleteConflictList theConflictList,
+			TransactionDetails theTransactionDetails,
+			IdDt nextSource,
+			IFhirResourceDao<?> dao) {
 		// Interceptor call: STORAGE_CASCADE_DELETE
 
 		// Remove the version so we grab the latest version to delete
 		IBaseResource resource = dao.read(nextSource.toVersionless(), theRequest);
 		HookParams params = new HookParams()
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(DeleteConflictList.class, theConflictList)
-			.add(IBaseResource.class, resource);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(DeleteConflictList.class, theConflictList)
+				.add(IBaseResource.class, resource);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
 
 		return dao.delete(resource.getIdElement(), theConflictList, theRequest, theTransactionDetails);
 	}
@@ -162,7 +177,8 @@ public class ThreadSafeResourceDeleterSvc {
 		fixedBackOffPolicy.setBackOffPeriod(RETRY_BACKOFF_PERIOD);
 		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
 
-		final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(RETRY_MAX_ATTEMPTS, Collections.singletonMap(ResourceVersionConflictException.class, true));
+		final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(
+				RETRY_MAX_ATTEMPTS, Collections.singletonMap(ResourceVersionConflictException.class, true));
 		retryTemplate.setRetryPolicy(retryPolicy);
 
 		return retryTemplate;

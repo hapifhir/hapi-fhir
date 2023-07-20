@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -20,6 +22,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -85,6 +88,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.aop.support.Pointcuts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -117,8 +121,13 @@ import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToCompressingWhiteSpace;
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
@@ -255,8 +264,55 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		myStorageSettings.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 	}
 
+
+
+	class ElasticPerformanceTracingInterceptor {
+		private List<StorageProcessingMessage> messages = new ArrayList<>();
+
+		@Hook(Pointcut.JPA_PERFTRACE_INFO)
+		public void logPerformance(StorageProcessingMessage theMessage) {
+			messages.add(theMessage);
+		}
+
+		public List<StorageProcessingMessage> getMessages() {
+			return messages;
+		}
+	}
+	@Test
+	public void testFullTextSearchesArePerformanceLogged() {
+
+		ElasticPerformanceTracingInterceptor elasticPerformanceTracingInterceptor = new ElasticPerformanceTracingInterceptor();
+		myInterceptorRegistry.registerInterceptor(elasticPerformanceTracingInterceptor);
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+
+		//Then: The Elasticsearch Query should be logged.
+		assertThat(elasticPerformanceTracingInterceptor.getMessages(), hasSize(3));
+		StorageProcessingMessage storageProcessingMessage = elasticPerformanceTracingInterceptor.getMessages().get(2);
+		assertThat(storageProcessingMessage.getMessage(), containsString("\"query\":\"( blood* )\""));
+
+		myInterceptorRegistry.unregisterInterceptor(elasticPerformanceTracingInterceptor);
+
+	}
 	@Test
 	public void testResourceTextSearch() {
+
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -949,12 +1005,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
-	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
-		@SuppressWarnings("unchecked")
-		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
-		return array;
-	}
-
 	private List<String> getResultIds(IBundleProvider theResult) {
 		return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
 	}
@@ -1005,7 +1055,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@Test
 		void secondWordFound() {
 			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Cloudy, yellow"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Cloudy, yellow"))).getIdPart();
 
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=yellow");
 			assertThat(resourceIds, hasItem(id1));
@@ -1016,9 +1066,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// smit - matches "smit" and "smith"
 
 			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
 
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=smit");
 			assertThat(resourceIds, hasItems(id1, id2));
@@ -1030,9 +1080,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// smit* - matches "smit" and "smith"
 
 			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
 
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?_elements=valueString&value-string:text=smit*");
 			assertThat(resourceIds, hasItems(id1, id2));
@@ -1044,9 +1094,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// "smit"- matches "smit", but not "smith"
 
 			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
 
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=\"smit\"");
 			assertThat(resourceIds, contains(id2));
@@ -1056,9 +1106,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@Test
 		void stringTokensAreAnded() {
 			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+				myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
 
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=car%20smit");
 			assertThat(resourceIds, hasItems(id2));
@@ -1072,9 +1122,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				// | Fhir Query String | Executed Query  | Matches     | No Match
 				// | Smit             | Smit*            | John Smith  | John Smi
 				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smi"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smi"))).getIdPart();
 
 				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Smit");
 				assertThat(resourceIds, hasItems(id1));
@@ -1085,9 +1135,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				// | Fhir Query String | Executed Query  | Matches     | No Match      | Note
 				// | Jo Smit           | Jo* Smit*       | John Smith  | John Frank    | Multiple bare terms are `AND`
 				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Smith"))).getIdPart();
 				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Frank"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "John Frank"))).getIdPart();
 
 				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Jo%20Smit");
 				assertThat(resourceIds, hasItems(id1));
@@ -1098,9 +1148,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				// | Fhir Query String | Executed Query    | Matches     | No Match       | Note
 				// | frank &vert; john | frank &vert; john | Frank Smith | Franklin Smith | SQS characters disable prefix wildcard
 				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
 				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
 
 				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=frank|john");
 				assertThat(resourceIds, hasItems(id1));
@@ -1111,9 +1161,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				// | Fhir Query String | Executed Query  | Matches     | No Match       | Note
 				// | 'frank'           | 'frank'         | Frank Smith | Franklin Smith | Quoted terms are exact match
 				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
 				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
 
 				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text='frank'");
 				assertThat(resourceIds, hasItems(id1));
@@ -1805,10 +1855,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				@Test
 				public void byValueString() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
+						myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-1")
 					)).getIdPart();
 					String id2 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+						myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-2")
 					)).getIdPart();
 
 					myCaptureQueriesListener.clear();
@@ -1950,7 +2000,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
 					)).getIdPart();
 					String id2 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+						myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-2")
 					)).getIdPart();
 
 					myCaptureQueriesListener.clear();
@@ -2065,13 +2115,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
 					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
 					myTestDataBuilder.withTag("http://example.org", "aTag"),
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-1")
 				)).getIdPart();
 				String id2 = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
 					myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
 					myTestDataBuilder.withTag("http://example.org", "aTag"),
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+					myTestDataBuilder.withResourcePrimitiveAttribute("valueString", "a-string-value-2")
 				)).getIdPart();
 
 				myCaptureQueriesListener.clear();

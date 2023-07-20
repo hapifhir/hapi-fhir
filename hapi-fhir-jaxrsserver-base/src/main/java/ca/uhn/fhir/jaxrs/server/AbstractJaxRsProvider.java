@@ -19,28 +19,26 @@
  */
 package ca.uhn.fhir.jaxrs.server;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.*;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.util.Map.Entry;
+import java.util.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -95,7 +93,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	/**
 	 * This method returns the server base, including the resource path.
 	 * {@link UriInfo#getBaseUri() UriInfo#getBaseUri()}
-	 * 
+	 *
 	 * @return the ascii string for the base resource provider path
 	 */
 	public String getBaseForRequest() {
@@ -104,7 +102,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * This method returns the server base, independent of the request or resource.
-	 * 
+	 *
 	 * @see javax.ws.rs.core.UriInfo#getBaseUri()
 	 * @return the ascii string for the server base
 	 */
@@ -144,7 +142,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Get the headers
-	 * 
+	 *
 	 * @return the headers
 	 */
 	public HttpHeaders getHeaders() {
@@ -154,7 +152,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	/**
 	 * Default: an empty list of interceptors (Interceptors are not yet supported
 	 * in the JAX-RS server). Please get in touch if you'd like to help!
-	 * 
+	 *
 	 * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
 	 */
 	@Override
@@ -172,21 +170,25 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * This method returns the query parameters
-	 * 
+	 *
 	 * @return the query parameters
 	 */
 	public Map<String, String[]> getParameters() {
 		final MultivaluedMap<String, String> queryParameters = getUriInfo().getQueryParameters();
 		final HashMap<String, String[]> params = new HashMap<String, String[]>();
 		for (final Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
-			params.put(paramEntry.getKey(), paramEntry.getValue().toArray(new String[paramEntry.getValue().size()]));
+			params.put(
+					paramEntry.getKey(),
+					paramEntry
+							.getValue()
+							.toArray(new String[paramEntry.getValue().size()]));
 		}
 		return params;
 	}
 
 	/**
 	 * Return the requestbuilder for the server
-	 * 
+	 *
 	 * @param requestType
 	 *           the type of the request
 	 * @param restOperation
@@ -199,7 +201,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Return the requestbuilder for the server
-	 * 
+	 *
 	 * @param requestType
 	 *           the type of the request
 	 * @param restOperation
@@ -208,14 +210,18 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 *           the resource name
 	 * @return the requestbuilder
 	 */
-	public Builder getRequest(final RequestTypeEnum requestType, final RestOperationTypeEnum restOperation, final String theResourceName) {
-		return new JaxRsRequest.Builder(this, requestType, restOperation, myUriInfo.getRequestUri().toString(), theResourceName);
+	public Builder getRequest(
+			final RequestTypeEnum requestType,
+			final RestOperationTypeEnum restOperation,
+			final String theResourceName) {
+		return new JaxRsRequest.Builder(
+				this, requestType, restOperation, myUriInfo.getRequestUri().toString(), theResourceName);
 	}
 
 	/**
 	 * This method returns the default server address strategy. The default strategy return the
 	 * base uri for the request {@link AbstractJaxRsProvider#getBaseForRequest() getBaseForRequest()}
-	 * 
+	 *
 	 * @return
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
@@ -226,7 +232,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Get the uriInfo
-	 * 
+	 *
 	 * @return the uri info
 	 */
 	public UriInfo getUriInfo() {
@@ -235,7 +241,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Convert an exception to a response
-	 * 
+	 *
 	 * @param theRequest
 	 *           the incoming request
 	 * @param theException
@@ -243,13 +249,14 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * @return response
 	 * @throws IOException
 	 */
-	public Response handleException(final JaxRsRequest theRequest, final Throwable theException)
-			throws IOException {
+	public Response handleException(final JaxRsRequest theRequest, final Throwable theException) throws IOException {
 		if (theException instanceof JaxRsResponseException) {
-			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
+			return new JaxRsExceptionInterceptor()
+					.convertExceptionIntoResponse(theRequest, (JaxRsResponseException) theException);
 		} else {
-			return new JaxRsExceptionInterceptor().convertExceptionIntoResponse(theRequest,
-					new JaxRsExceptionInterceptor().convertException(this, theException));
+			return new JaxRsExceptionInterceptor()
+					.convertExceptionIntoResponse(
+							theRequest, new JaxRsExceptionInterceptor().convertException(this, theException));
 		}
 	}
 
@@ -263,7 +270,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Set the headers
-	 * 
+	 *
 	 * @param headers
 	 *           the headers to set
 	 */
@@ -273,7 +280,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * Set the Uri Info
-	 * 
+	 *
 	 * @param uriInfo
 	 *           the uri info
 	 */

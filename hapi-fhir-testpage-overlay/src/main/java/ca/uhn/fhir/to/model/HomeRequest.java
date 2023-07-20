@@ -1,11 +1,5 @@
 package ca.uhn.fhir.to.model;
 
-import static org.apache.commons.lang3.StringUtils.*;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.web.bind.annotation.ModelAttribute;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -17,6 +11,11 @@ import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class HomeRequest {
 
@@ -119,20 +118,22 @@ public class HomeRequest {
 		myServerId = theServerId;
 	}
 
-	public GenericClient newClient(HttpServletRequest theRequest, FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
+	public GenericClient newClient(
+			HttpServletRequest theRequest,
+			FhirContext theContext,
+			TesterConfig theConfig,
+			Controller.CaptureInterceptor theInterceptor) {
 		theContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		GenericClient retVal;
 		ITestingUiClientFactory clientFactory = theConfig.getClientFactory();
 		if (clientFactory != null) {
-			retVal = (GenericClient) clientFactory.newClient(
-					theContext,
-					theRequest,
-					getServerBase(theRequest, theConfig));
+			retVal = (GenericClient)
+					clientFactory.newClient(theContext, theRequest, getServerBase(theRequest, theConfig));
 		} else {
 			retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
 		}
-		
+
 		retVal.registerInterceptor(new BufferResponseInterceptor());
 
 		retVal.setKeepResponses(true);
@@ -155,7 +156,7 @@ public class HomeRequest {
 				retVal.setSummary(summary);
 			}
 		}
-		
+
 		retVal.registerInterceptor(theInterceptor);
 
 		final String remoteAddr = org.slf4j.MDC.get("req.remoteAddr");
@@ -187,15 +188,15 @@ public class HomeRequest {
 	public String getApiKey(HttpServletRequest theServletRequest, TesterConfig theConfig) {
 		Boolean allowsApiKey;
 		if (isBlank(myServerId) && !theConfig.getIdToFhirVersion().containsKey(myServerId)) {
-			allowsApiKey = theConfig.getIdToAllowsApiKey().entrySet().iterator().next().getValue();
+			allowsApiKey =
+					theConfig.getIdToAllowsApiKey().entrySet().iterator().next().getValue();
 		} else {
 			allowsApiKey = theConfig.getIdToAllowsApiKey().get(myServerId);
 		}
 		if (!Boolean.TRUE.equals(allowsApiKey)) {
 			return null;
 		}
-		
+
 		return defaultString(theServletRequest.getParameter("apiKey"));
 	}
-
 }

@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,11 +39,16 @@ public class ResourcePidListBuilder {
 		}
 
 		Set<IResourcePersistentId> ids = new LinkedHashSet<>();
+		RequestPartitionId requestPartitionId = null;
 
 		Date endDate = null;
 		Set<String> resourceTypes = new HashSet<>();
 		boolean containsMixed = false;
 		for (IResourcePidList chunk : theChunks) {
+
+			Validate.isTrue(requestPartitionId == null || requestPartitionId == chunk.getRequestPartitionId());
+			requestPartitionId = chunk.getRequestPartitionId();
+
 			if (chunk.isEmpty()) {
 				continue;
 			}
@@ -61,11 +68,11 @@ public class ResourcePidListBuilder {
 					types.add(chunk.getResourceType(i));
 				}
 			}
-			return new MixedResourcePidList(types, ids, endDate);
+			return new MixedResourcePidList(types, ids, endDate, requestPartitionId);
 		} else {
 			IResourcePidList firstChunk = theChunks.get(0);
 			String onlyResourceType = firstChunk.getResourceType(0);
-			return new HomogeneousResourcePidList(onlyResourceType, ids, endDate);
+			return new HomogeneousResourcePidList(onlyResourceType, ids, endDate, requestPartitionId);
 		}
 	}
 
@@ -74,7 +81,7 @@ public class ResourcePidListBuilder {
 		if (theCurrentEndDate == null) {
 			endDate = theChunk.getLastDate();
 		} else if (theChunk.getLastDate().after(endDate)
-			&& theChunk.getLastDate().before(thePassedInEndDate)) {
+				&& theChunk.getLastDate().before(thePassedInEndDate)) {
 			endDate = theChunk.getLastDate();
 		}
 		return endDate;

@@ -37,7 +37,7 @@ public class ResourceTableTest {
 		forcedId.setForcedId(theForcedId);
 		t.setForcedId(forcedId);
 		t.setResourceType(new Patient().getResourceType().name());
-		t.setVersion(1);
+		t.setVersionForUnitTest(1);
 
 		// When
 		IdDt actual = t.getIdDt();

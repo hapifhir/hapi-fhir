@@ -96,5 +96,4 @@ public abstract class BaseJsonLikeWriter {
 	public abstract BaseJsonLikeWriter endArray() throws IOException;
 
 	public abstract BaseJsonLikeWriter endBlock() throws IOException;
-
 }

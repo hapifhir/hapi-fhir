@@ -22,183 +22,171 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.*;
-
 public class FhirDataModel {
 
-   public static void datatypes() {
-      // START SNIPPET: datatypes
-      Observation obs = new Observation();
+	public static void datatypes() {
+		// START SNIPPET: datatypes
+		Observation obs = new Observation();
 
-      // These are all equivalent
-      obs.setIssuedElement(new InstantType(new Date()));
+		// These are all equivalent
+		obs.setIssuedElement(new InstantType(new Date()));
 		obs.setIssuedElement(new InstantType(new Date(), TemporalPrecisionEnum.MILLI));
 		obs.setIssued(new Date());
 
-      // The InstantType also lets you work with the instant as a Java Date
-      // object or as a FHIR String.
-      Date date = obs.getIssuedElement().getValue(); // A date object
-      String dateString = obs.getIssuedElement().getValueAsString(); // "2014-03-08T12:59:58.068-05:00"
-      // END SNIPPET: datatypes
+		// The InstantType also lets you work with the instant as a Java Date
+		// object or as a FHIR String.
+		Date date = obs.getIssuedElement().getValue(); // A date object
+		String dateString = obs.getIssuedElement().getValueAsString(); // "2014-03-08T12:59:58.068-05:00"
+		// END SNIPPET: datatypes
 
-      System.out.println(date);
-      System.out.println(dateString);
+		System.out.println(date);
+		System.out.println(dateString);
+	}
 
-   }
+	@SuppressWarnings("unused")
+	public void nonNull() {
+		// START SNIPPET: nonNull
+		Observation observation = new Observation();
 
-   @SuppressWarnings("unused")
-   public void nonNull() {
-      // START SNIPPET: nonNull
-      Observation observation = new Observation();
+		// None of these calls will not return null, but instead create their
+		// respective
+		// child elements.
+		List<Identifier> identifierList = observation.getIdentifier();
+		CodeableConcept code = observation.getCode();
+		StringType textElement = observation.getCode().getTextElement();
 
-      // None of these calls will not return null, but instead create their
-      // respective
-      // child elements.
-      List<Identifier> identifierList = observation.getIdentifier();
-      CodeableConcept code = observation.getCode();
-      StringType textElement = observation.getCode().getTextElement();
+		// DateTimeDt is a FHIR primitive however, so the following will return
+		// null
+		// unless a value has been placed there.
+		Date active = observation.addIdentifier().getPeriod().getStartElement().getValue();
+		// END SNIPPET: nonNull
 
-      // DateTimeDt is a FHIR primitive however, so the following will return
-      // null
-      // unless a value has been placed there.
-      Date active = observation.addIdentifier().getPeriod().getStartElement().getValue();
-      // END SNIPPET: nonNull
+	}
 
-   }
+	@SuppressWarnings("unused")
+	public static void codes() {
+		// START SNIPPET: codes
+		Patient patient = new Patient();
 
-   @SuppressWarnings("unused")
-   public static void codes() {
-      // START SNIPPET: codes
-      Patient patient = new Patient();
+		// You can set this code using a String if you want. Note that
+		// for "closed" valuesets (such as the one used for Patient.gender)
+		// you must use one of the strings defined by the FHIR specification.
+		// You must not define your own.
+		patient.getGenderElement().setValueAsString("male");
 
-      // You can set this code using a String if you want. Note that
-      // for "closed" valuesets (such as the one used for Patient.gender)
-      // you must use one of the strings defined by the FHIR specification.
-      // You must not define your own.
-      patient.getGenderElement().setValueAsString("male");
-      
-      // HAPI also provides Java enumerated types which make it easier to
-      // deal with coded values. This code achieves the exact same result
-      // as the code above.
-      patient.setGender(Enumerations.AdministrativeGender.MALE);
-      
-      // You can also retrieve coded values the same way
-      String genderString = patient.getGenderElement().getValueAsString();
-      Enumerations.AdministrativeGender genderEnum = patient.getGenderElement().getValue();
-      
-      // END SNIPPET: codes
+		// HAPI also provides Java enumerated types which make it easier to
+		// deal with coded values. This code achieves the exact same result
+		// as the code above.
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
 
-   }
+		// You can also retrieve coded values the same way
+		String genderString = patient.getGenderElement().getValueAsString();
+		Enumerations.AdministrativeGender genderEnum =
+				patient.getGenderElement().getValue();
 
-   
-   @SuppressWarnings("unused")
-   public static void codeableConcepts() {
-      // START SNIPPET: codeableConcepts
-      Patient patient = new Patient();
+		// END SNIPPET: codes
 
-      // Coded types can naturally be set using plain strings
-      Coding statusCoding = patient.getMaritalStatus().addCoding();
-      statusCoding.setSystem("http://hl7.org/fhir/v3/MaritalStatus");
-      statusCoding.setCode("M");
-      statusCoding.setDisplay("Married");
+	}
 
-      // You could add a second coding to the field if needed too. This
-      // can be useful if you want to convey the concept using different
-      // codesystems.
-      Coding secondStatus = patient.getMaritalStatus().addCoding();
-      secondStatus.setCode("H");
-      secondStatus.setSystem("http://example.com#maritalStatus");
-      secondStatus.setDisplay("Happily Married");
-      
-      // CodeableConcept also has a text field meant to convey 
-      // a user readable version of the concepts it conveys.
-      patient.getMaritalStatus().setText("Happily Married");
-      
-      // There are also accessors for retrieving values
-      String firstCode  = patient.getMaritalStatus().getCoding().get(0).getCode();
-      String secondCode = patient.getMaritalStatus().getCoding().get(1).getCode();
-      // END SNIPPET: codeableConcepts
+	@SuppressWarnings("unused")
+	public static void codeableConcepts() {
+		// START SNIPPET: codeableConcepts
+		Patient patient = new Patient();
 
-   }
+		// Coded types can naturally be set using plain strings
+		Coding statusCoding = patient.getMaritalStatus().addCoding();
+		statusCoding.setSystem("http://hl7.org/fhir/v3/MaritalStatus");
+		statusCoding.setCode("M");
+		statusCoding.setDisplay("Married");
 
+		// You could add a second coding to the field if needed too. This
+		// can be useful if you want to convey the concept using different
+		// codesystems.
+		Coding secondStatus = patient.getMaritalStatus().addCoding();
+		secondStatus.setCode("H");
+		secondStatus.setSystem("http://example.com#maritalStatus");
+		secondStatus.setDisplay("Happily Married");
 
-   
-   public static void main(String[] args) {
-      tmp();
-      
-      
-      datatypes();
+		// CodeableConcept also has a text field meant to convey
+		// a user readable version of the concepts it conveys.
+		patient.getMaritalStatus().setText("Happily Married");
 
-      // START SNIPPET: observation
-      // Create an Observation instance
-      Observation observation = new Observation();
-      
-      // Give the observation a status
-      observation.setStatus(Observation.ObservationStatus.FINAL);
-      
-      // Give the observation a code (what kind of observation is this)
-      Coding coding = observation.getCode().addCoding();
-      coding.setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
-      
-      // Create a quantity datatype
-      Quantity value = new Quantity();
-      value.setValue(83.9).setSystem("http://unitsofmeasure.org").setCode("kg");
-      observation.setValue(value);
-      
-      // Set the reference range
-      SimpleQuantity low = new SimpleQuantity();
-      low.setValue(45).setSystem("http://unitsofmeasure.org").setCode("kg");
-      observation.getReferenceRangeFirstRep().setLow(low);
-      SimpleQuantity high = new SimpleQuantity();
-      low.setValue(90).setSystem("http://unitsofmeasure.org").setCode("kg");
-      observation.getReferenceRangeFirstRep().setHigh(high);
-      
-      // END SNIPPET: observation
-      
-      
-   }
+		// There are also accessors for retrieving values
+		String firstCode = patient.getMaritalStatus().getCoding().get(0).getCode();
+		String secondCode = patient.getMaritalStatus().getCoding().get(1).getCode();
+		// END SNIPPET: codeableConcepts
 
-   private static void tmp() {
-// Create a FHIR Context
-FhirContext ctx = FhirContext.forR4();
+	}
 
-// Create a client
-IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseR4");
+	public static void main(String[] args) {
+		tmp();
 
-// Read a patient with the given ID
-Patient patient = client
-   .read()
-   .resource(Patient.class)
-   .withId("952975")
-   .execute();
+		datatypes();
 
-// Print the patient's name
-String string = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-System.out.println(string);
+		// START SNIPPET: observation
+		// Create an Observation instance
+		Observation observation = new Observation();
 
-   }
+		// Give the observation a status
+		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-   public void namesHard() {
-      // START SNIPPET: namesHard
-      Patient patient = new Patient();
-      HumanName name = patient.addName();
-      name.setFamily("Smith");
-      StringType firstName = name.addGivenElement();
-      firstName.setValue("Rob");
-      StringType secondName = name.addGivenElement();
-      secondName.setValue("Bruce");
-      // END SNIPPET: namesHard
-   }
+		// Give the observation a code (what kind of observation is this)
+		Coding coding = observation.getCode().addCoding();
+		coding.setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
 
-   public void namesEasy() {
-      // START SNIPPET: namesEasy
-      Patient patient = new Patient();
-      patient.addName().setFamily("Smith").addGiven("Rob").addGiven("Bruce");
-      // END SNIPPET: namesEasy
-   }
+		// Create a quantity datatype
+		Quantity value = new Quantity();
+		value.setValue(83.9).setSystem("http://unitsofmeasure.org").setCode("kg");
+		observation.setValue(value);
 
+		// Set the reference range
+		SimpleQuantity low = new SimpleQuantity();
+		low.setValue(45).setSystem("http://unitsofmeasure.org").setCode("kg");
+		observation.getReferenceRangeFirstRep().setLow(low);
+		SimpleQuantity high = new SimpleQuantity();
+		low.setValue(90).setSystem("http://unitsofmeasure.org").setCode("kg");
+		observation.getReferenceRangeFirstRep().setHigh(high);
+
+		// END SNIPPET: observation
+
+	}
+
+	private static void tmp() {
+		// Create a FHIR Context
+		FhirContext ctx = FhirContext.forR4();
+
+		// Create a client
+		IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseR4");
+
+		// Read a patient with the given ID
+		Patient patient = client.read().resource(Patient.class).withId("952975").execute();
+
+		// Print the patient's name
+		String string = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		System.out.println(string);
+	}
+
+	public void namesHard() {
+		// START SNIPPET: namesHard
+		Patient patient = new Patient();
+		HumanName name = patient.addName();
+		name.setFamily("Smith");
+		StringType firstName = name.addGivenElement();
+		firstName.setValue("Rob");
+		StringType secondName = name.addGivenElement();
+		secondName.setValue("Bruce");
+		// END SNIPPET: namesHard
+	}
+
+	public void namesEasy() {
+		// START SNIPPET: namesEasy
+		Patient patient = new Patient();
+		patient.addName().setFamily("Smith").addGiven("Rob").addGiven("Bruce");
+		// END SNIPPET: namesEasy
+	}
 }

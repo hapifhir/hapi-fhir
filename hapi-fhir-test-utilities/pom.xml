@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.6.2</version>
+		<version>6.7.14-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -14,6 +14,13 @@
 	<packaging>jar</packaging>
 	<name>HAPI FHIR Test Utilities</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
+
+	<properties>
+		<!-- this is a test jar, so use our test settings -->
+		<maven.compiler.source>${maven.compiler.testSource}</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.testTarget}</maven.compiler.target>
+		<maven.compiler.release>${maven.compiler.testRelease}</maven.compiler.release>
+	</properties>
 
 	<dependencies>
 
@@ -123,6 +130,11 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger_version}</version>
+		</dependency>
 
         <!-- Jetty -->
 		<dependency>
@@ -200,9 +212,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

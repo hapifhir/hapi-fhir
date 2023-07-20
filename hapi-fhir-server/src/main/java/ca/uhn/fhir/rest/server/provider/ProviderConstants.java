@@ -56,6 +56,7 @@ public class ProviderConstants {
 	 * Operation name: diff
 	 */
 	public static final String DIFF_OPERATION_NAME = "$diff";
+
 	public static final String DIFF_FROM_VERSION_PARAMETER = "fromVersion";
 
 	public static final String DIFF_FROM_PARAMETER = "from";
@@ -66,6 +67,7 @@ public class ProviderConstants {
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";
+
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
 	public static final String MDM_RESOURCE_TYPE = "resourceType";
@@ -110,6 +112,7 @@ public class ProviderConstants {
 	 * Clinical Reasoning Operations
 	 */
 	public static final String CR_OPERATION_APPLY = "$apply";
+
 	public static final String CR_OPERATION_R5_APPLY = "$r5.apply";
 	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
 	public static final String CR_OPERATION_POPULATE = "$populate";
@@ -161,6 +164,14 @@ public class ProviderConstants {
 	 * Number of resources to delete at a time for the $delete-expunge operation
 	 */
 	public static final String OPERATION_DELETE_BATCH_SIZE = "batchSize";
+	/**
+	 * Should we cascade the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE = "cascade";
+	/**
+	 * How many rounds for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_CASCADE_MAX_ROUNDS = "cascadeMaxRounds";
 
 	/**
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation

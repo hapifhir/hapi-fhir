@@ -15,7 +15,11 @@ import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -103,6 +107,36 @@ public class ReindexTestHelper {
 		return daoMethodOutcome;
 	}
 
+	public DaoMethodOutcome createUniqueCodeSearchParameter() {
+		createCodeSearchParameter();
+		SearchParameter uniqueCodeSp = new SearchParameter();
+		uniqueCodeSp.setId("SearchParameter/unique-code");
+		uniqueCodeSp.addExtension(new Extension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(true)));
+		uniqueCodeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		uniqueCodeSp.setCode("observation-code");
+		uniqueCodeSp.addBase("Observation");
+		uniqueCodeSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		uniqueCodeSp.setExpression("Observation");
+		uniqueCodeSp.addComponent(new SearchParameter.SearchParameterComponentComponent().setDefinition("SearchParameter/clinical-code").setExpression("Observation"));
+
+		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(uniqueCodeSp);
+		mySearchParamRegistry.forceRefresh();
+		return daoMethodOutcome;
+	}
+
+	public DaoMethodOutcome createCodeSearchParameter() {
+		SearchParameter codeSp = new SearchParameter();
+		codeSp.setId("SearchParameter/clinical-code");
+		codeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSp.setCode("code");
+		codeSp.addBase("Observation");
+		codeSp.setType(Enumerations.SearchParamType.TOKEN);
+		codeSp.setExpression("Observation.code");
+
+		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.update(codeSp);
+		mySearchParamRegistry.forceRefresh();
+		return daoMethodOutcome;
+	}
 
 	public IIdType createObservationWithAlleleExtension(Observation.ObservationStatus theStatus) {
 		Observation observation = buildObservationWithAlleleExtension(theStatus);
@@ -114,6 +148,19 @@ public class ReindexTestHelper {
 		Observation observation = new Observation();
 		observation.addExtension(ALLELE_EXTENSION_URL, new StringType(TEST_ALLELE_VALUE));
 		observation.setStatus(theStatus);
+		return observation;
+	}
+
+	public IIdType createObservationWithCode() {
+		Observation observation = buildObservationWithCode();
+		return myObservationDao.create(observation).getId();
+	}
+
+	public Observation buildObservationWithCode() {
+		Observation observation = new Observation();
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight"));
+		observation.setCode(codeableConcept);
 		return observation;
 	}
 

@@ -521,7 +521,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
-		IJobParametersValidator<TestJobParameters> v = p -> {
+		IJobParametersValidator<TestJobParameters> v = (theRequestDetails, p) -> {
 			if (p.getParam1().equals("bad")) {
 				return Lists.newArrayList("Bad Parameter Value", "Bad Parameter Value 2");
 			}

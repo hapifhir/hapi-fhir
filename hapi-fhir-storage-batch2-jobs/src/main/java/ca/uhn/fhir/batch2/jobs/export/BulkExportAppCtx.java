@@ -23,10 +23,10 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,39 +44,32 @@ public class BulkExportAppCtx {
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(1);
 
-		JobDefinition def =  builder.setParametersType(BulkExportJobParameters.class)
-			// validator
-			.setParametersValidator(bulkExportJobParametersValidator())
-			.gatedExecution()
-			// first step - load in (all) ids and create id chunks of 1000 each
-			.addFirstStep(
-			"fetch-resources",
-			"Fetches resource PIDs for exporting",
-			ResourceIdList.class,
-			fetchResourceIdsStep()
-		)
-		// expand out - fetch resources
-		.addIntermediateStep(
-			"expand-resources",
-			"Expand out resources",
-			ExpandedResourcesList.class,
-			expandResourcesStep()
-		)
-		// write binaries and save to db
-		.addIntermediateStep(
-			WRITE_TO_BINARIES,
-			"Writes the expanded resources to the binaries and saves",
-			BulkExportBinaryFileId.class,
-			writeBinaryStep()
-		)
-			// finalize the job (set to complete)
-			.addFinalReducerStep(
-				"create-report-step",
-				"Creates the output report from a bulk export job",
-				BulkExportJobResults.class,
-				createReportStep()
-			)
-			.build();
+		JobDefinition def = builder.setParametersType(BulkExportJobParameters.class)
+				// validator
+				.setParametersValidator(bulkExportJobParametersValidator())
+				.gatedExecution()
+				// first step - load in (all) ids and create id chunks of 1000 each
+				.addFirstStep(
+						"fetch-resources",
+						"Fetches resource PIDs for exporting",
+						ResourceIdList.class,
+						fetchResourceIdsStep())
+				// expand out - fetch resources
+				.addIntermediateStep(
+						"expand-resources", "Expand out resources", ExpandedResourcesList.class, expandResourcesStep())
+				// write binaries and save to db
+				.addIntermediateStep(
+						WRITE_TO_BINARIES,
+						"Writes the expanded resources to the binaries and saves",
+						BulkExportBinaryFileId.class,
+						writeBinaryStep())
+				// finalize the job (set to complete)
+				.addFinalReducerStep(
+						"create-report-step",
+						"Creates the output report from a bulk export job",
+						BulkExportJobResults.class,
+						createReportStep())
+				.build();
 
 		return def;
 	}

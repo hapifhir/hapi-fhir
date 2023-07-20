@@ -68,18 +68,13 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		StringDt other = (StringDt) obj;
 		if (getValue() == null) {
-			if (other.getValue() != null)
-				return false;
-		} else if (!getValue().equals(other.getValue()))
-			return false;
+			if (other.getValue() != null) return false;
+		} else if (!getValue().equals(other.getValue())) return false;
 		return true;
 	}
 
@@ -87,7 +82,8 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+	public void setValueAsQueryToken(
+			FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		setValue(theValue);
 	}
 
@@ -125,7 +121,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
 	 * need this functionality
 	 */
@@ -137,14 +133,15 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 
 	/**
 	 * <b>Not supported!</b>
-	 * 
+	 *
 	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
 	 * need this functionality
 	 */
 	@Deprecated
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException(Msg.code(1874) + "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		throw new UnsupportedOperationException(
+				Msg.code(1874)
+						+ "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
-
 }

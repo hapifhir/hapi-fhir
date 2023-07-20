@@ -30,5 +30,6 @@ public interface ISearchParamWithInlineReferencesExtractor {
 	 * These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
 	 */
-	void extractInlineReferences(RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails);
+	void extractInlineReferences(
+			RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails);
 }

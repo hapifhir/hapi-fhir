@@ -16,6 +16,4 @@ public class AnyChild extends Child {
 	public boolean isSingleChildInstantiable() {
 		return false;
 	}
-
-	
 }

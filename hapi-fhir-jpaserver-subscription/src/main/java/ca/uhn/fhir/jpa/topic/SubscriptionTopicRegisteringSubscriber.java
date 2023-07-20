@@ -28,12 +28,12 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.Logs;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -48,11 +48,14 @@ import javax.annotation.Nonnull;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicRegisteringSubscriber.class);
+	private static final Logger ourLog = Logs.getSubscriptionTopicLog();
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -106,7 +109,8 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 			return;
 		}
 
-		SubscriptionTopic subscriptionTopic = SubscriptionTopicCanonicalizer.canonicalize(myFhirContext, payloadResource);
+		SubscriptionTopic subscriptionTopic =
+				SubscriptionTopicCanonicalizer.canonicalizeTopic(myFhirContext, payloadResource);
 		if (subscriptionTopic.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
 			mySubscriptionTopicRegistry.register(subscriptionTopic);
 		} else {
@@ -123,12 +127,11 @@ public class SubscriptionTopicRegisteringSubscriber implements MessageHandler {
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
-			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
+			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
-
-
 }

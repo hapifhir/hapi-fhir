@@ -92,7 +92,21 @@ public class Batch2JobHelper {
 		try {
 			await()
 				.atMost(theSecondsToWait, TimeUnit.SECONDS)
-				.until(() -> checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus));
+				.until(() -> {
+					boolean inFinalStatus = false;
+					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
+						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.FAILED);
+					}
+					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED)) {
+						inFinalStatus = hasStatus(theBatchJobId, StatusEnum.COMPLETED);
+					}
+					boolean retVal = checkStatusWithMaintenancePass(theBatchJobId, theExpectedStatus);
+					if (!retVal && inFinalStatus) {
+						// Fail fast - If we hit one of these statuses and it's not the one we want, abort
+						throw new ConditionTimeoutException("Already in failed/completed status");
+					}
+					return retVal;
+				});
 		} catch (ConditionTimeoutException e) {
 			String statuses = myJobPersistence.fetchInstances(100, 0)
 				.stream()
@@ -130,7 +144,7 @@ public class Batch2JobHelper {
 		return hasStatus(theBatchJobId, theExpectedStatuses);
 	}
 
-	private boolean hasStatus(String theBatchJobId, StatusEnum[] theExpectedStatuses) {
+	private boolean hasStatus(String theBatchJobId, StatusEnum... theExpectedStatuses) {
 		StatusEnum status = getStatus(theBatchJobId);
 		ourLog.debug("Checking status of {} in {}: is {}", theBatchJobId, theExpectedStatuses, status);
 		return ArrayUtils.contains(theExpectedStatuses, status);

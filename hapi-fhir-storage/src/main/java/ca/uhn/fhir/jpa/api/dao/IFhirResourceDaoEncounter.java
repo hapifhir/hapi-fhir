@@ -30,8 +30,18 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort);
+	IBundleProvider encounterInstanceEverything(
+			HttpServletRequest theServletRequest,
+			IIdType theId,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdate,
+			SortSpec theSort);
 
-	IBundleProvider encounterTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSortSpec);
-
+	IBundleProvider encounterTypeEverything(
+			HttpServletRequest theServletRequest,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<Integer> theOffset,
+			DateRangeParam theLastUpdated,
+			SortSpec theSortSpec);
 }

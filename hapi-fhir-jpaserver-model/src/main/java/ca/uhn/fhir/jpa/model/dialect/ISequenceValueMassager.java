@@ -42,15 +42,11 @@ public interface ISequenceValueMassager {
 		return null;
 	}
 
-
 	final class NoopSequenceValueMassager implements ISequenceValueMassager {
 
 		@Override
 		public Long massage(String theGeneratorName, Long theId) {
 			return theId;
 		}
-
 	}
-
-
 }

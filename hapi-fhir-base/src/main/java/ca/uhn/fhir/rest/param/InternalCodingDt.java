@@ -56,34 +56,51 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	}
 
 	@Child(name = "system", type = UriDt.class, order = 0, min = 0, max = 1)
-	@Description(shortDefinition = "Identity of the terminology system", formalDefinition = "The identification of the code system that defines the meaning of the symbol in the code.")
+	@Description(
+			shortDefinition = "Identity of the terminology system",
+			formalDefinition =
+					"The identification of the code system that defines the meaning of the symbol in the code.")
 	private UriDt mySystem;
 
 	@Child(name = "version", type = StringDt.class, order = 1, min = 0, max = 1)
-	@Description(shortDefinition = "Version of the system - if relevant", formalDefinition = "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged")
+	@Description(
+			shortDefinition = "Version of the system - if relevant",
+			formalDefinition =
+					"The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged")
 	private StringDt myVersion;
 
 	@Child(name = "code", type = CodeDt.class, order = 2, min = 0, max = 1)
-	@Description(shortDefinition = "Symbol in syntax defined by the system", formalDefinition = "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)")
+	@Description(
+			shortDefinition = "Symbol in syntax defined by the system",
+			formalDefinition =
+					"A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)")
 	private CodeDt myCode;
 
 	@Child(name = "display", type = StringDt.class, order = 3, min = 0, max = 1)
-	@Description(shortDefinition = "Representation defined by the system", formalDefinition = "A representation of the meaning of the code in the system, following the rules of the system.")
+	@Description(
+			shortDefinition = "Representation defined by the system",
+			formalDefinition =
+					"A representation of the meaning of the code in the system, following the rules of the system.")
 	private StringDt myDisplay;
 
 	@Child(name = "primary", type = BooleanDt.class, order = 4, min = 0, max = 1)
-	@Description(shortDefinition = "If this code was chosen directly by the user", formalDefinition = "Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)")
+	@Description(
+			shortDefinition = "If this code was chosen directly by the user",
+			formalDefinition =
+					"Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)")
 	private BooleanDt myPrimary;
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mySystem, myVersion, myCode, myDisplay, myPrimary);
+		return super.isBaseEmpty()
+				&& ca.uhn.fhir.util.ElementUtil.isEmpty(mySystem, myVersion, myCode, myDisplay, myPrimary);
 	}
 
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCode, myDisplay, myPrimary);
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(
+				theType, mySystem, myVersion, myCode, myDisplay, myPrimary);
 	}
 
 	/**
@@ -300,16 +317,15 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 		return getDisplay();
 	}
 
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public Boolean getMissing() {
 		throw new UnsupportedOperationException(Msg.code(1950));
 	}
 
-	@Deprecated //override deprecated method
+	@Deprecated // override deprecated method
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException(Msg.code(1951));
 	}
-
 }

@@ -29,7 +29,11 @@ class AllowedCodeInValueSet {
 	private final String myValueSetUrl;
 	private final boolean myNegate;
 
-	public AllowedCodeInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl, boolean theNegate) {
+	public AllowedCodeInValueSet(
+			@Nonnull String theResourceName,
+			@Nonnull String theSearchParameterName,
+			@Nonnull String theValueSetUrl,
+			boolean theNegate) {
 		assert isNotBlank(theResourceName);
 		assert isNotBlank(theSearchParameterName);
 		assert isNotBlank(theValueSetUrl);

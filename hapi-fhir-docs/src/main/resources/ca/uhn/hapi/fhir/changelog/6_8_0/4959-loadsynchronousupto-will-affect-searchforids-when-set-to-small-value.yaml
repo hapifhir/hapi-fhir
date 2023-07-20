@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4959
+title: "Previously, set synchronous search size to a low value will make MDM startup validation fail. This is now fixed."

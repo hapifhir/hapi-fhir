@@ -2,12 +2,14 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+
+
 	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.6.2</version>
+	<version>6.7.14-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -112,17 +114,18 @@
 		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
-<!--		<module>hapi-fhir-jpaserver-uhnfhirtest</module>-->
+		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 		<module>hapi-fhir-client-okhttp</module>
 		<module>hapi-fhir-android</module>
 		<module>hapi-fhir-cli</module>
 		<module>hapi-fhir-dist</module>
-<!--		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>-->
+		<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
 		<module>tests/hapi-fhir-base-test-mindeps-client</module>
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-    </modules>
+		<module>hapi-fhir-server-cds-hooks</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
@@ -833,7 +836,7 @@
 			<id>XcrigX</id>
 			<name>Craig McClendon</name>
 		</developer>
-    <developer>
+		<developer>
 			<id>dyoung-work</id>
 		</developer>
 		<developer>
@@ -863,6 +866,26 @@
 			<id>delopst</id>
 			<name>Primož Delopst</name>
 		</developer>
+		<developer>
+			<id>Zach Smith</id>
+			<name>zachdoctolib</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>alparodev</id>
+			<name>Aleksej Parovysnik</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>doumdoum</id>
+			<name>Dominique Villard</name>
+			<organization>Doctolib</organization>
+		</developer>
+		<developer>
+			<id>boereck</id>
+			<name>Max Bureck</name>
+			<organization>Fraunhofer FOKUS</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -873,7 +896,8 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.0.1</fhir_core_version>
+		<fhir_core_version>6.0.15</fhir_core_version>
+		<spotless_version>2.37.0</spotless_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -905,7 +929,7 @@
 		<error_prone_core_version>2.10.0</error_prone_core_version>
 		<mockito_version>4.8.1</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>31.0.1-jre</guava_version>
+		<guava_version>32.1.1-jre</guava_version>
 		<gson_version>2.8.9</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -918,17 +942,17 @@
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.50.40</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>5.6.12.Final</hibernate_version>
+		<hibernate_version>5.6.15.Final</hibernate_version>
 		<hibernate_search_version>6.1.6.Final</hibernate_search_version>
 		<logback_version>1.4.4</logback_version>
-	 	<!-- Update lucene version when you update hibernate-search version -->
+		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.11.1</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
-		<jackson_version>2.15.0</jackson_version>
-		<jackson_databind_version>2.15.0</jackson_databind_version>
+		<jackson_version>2.15.2</jackson_version>
+		<jackson_databind_version>2.15.2</jackson_databind_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
@@ -938,6 +962,7 @@
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
+		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_version>2.1.12</swagger_version>
@@ -962,7 +987,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE2</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE5</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -975,7 +1000,7 @@
 
 		<!-- Jacoco -->
 		<argLine></argLine>
-	 </properties>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -1070,7 +1095,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>19.4</version>
+				<version>21.0</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -1163,21 +1188,21 @@
 				<artifactId>jakarta.activation</artifactId>
 				<version>2.0.0</version>
 			</dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-ext-tables</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vladsch.flexmark</groupId>
-                <artifactId>flexmark-profile-pegdown</artifactId>
-                <version>${flexmark_version}</version>
-            </dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-ext-tables</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vladsch.flexmark</groupId>
+				<artifactId>flexmark-profile-pegdown</artifactId>
+				<version>${flexmark_version}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
@@ -1932,6 +1957,11 @@
 				<version>42.5.1</version>
 			</dependency>
 			<dependency>
+				<groupId>com.oracle.database.jdbc</groupId>
+				<artifactId>ojdbc11</artifactId>
+				<version>21.5.0.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
@@ -2185,6 +2215,55 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.diffplug.spotless</groupId>
+					<artifactId>spotless-maven-plugin</artifactId>
+					<version>${spotless_version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>apply</goal>
+								<goal>check</goal>
+							</goals>
+							<phase>compile</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<java>
+							<excludes>
+								<exclude>**/test/**/*.java</exclude>
+							</excludes>
+							<!--This does the actual code reformatting-->
+							<palantirJavaFormat/>
+							<!--After formatting, replace the default 4-space indentation with tabs as per our editorconfig-->
+							<indent>
+								<tabs>true</tabs>
+								<spacesPerTab>4</spacesPerTab>
+							</indent>
+							<!--Just removes unused imports-->
+							<removeUnusedImports />
+							<!--Follow the editorconfig-defined order of imports-->
+							<importOrder>
+								<wildcardsLast>true</wildcardsLast>
+								<order>,java|javax,\#</order>
+							</importOrder>
+						</java>
+
+						<!--This does basic formatting of trailing whitespace and newlines-->
+						<formats>
+							<format>
+								<includes>
+									<include>*.md</include>
+									<include>.gitignore</include>
+									<include>*.java</include>
+								</includes>
+								<trimTrailingWhitespace/>
+								<endWithNewline/>
+							</format>
+						</formats>
+
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.3.0</version>
@@ -2269,9 +2348,18 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M5</version>
+					<version>3.1.0</version>
 					<configuration>
+						<reuseForks>false</reuseForks>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<forkCount>1</forkCount>
+						<threadCount>1</threadCount>
+						<perCoreThreadCount>true</perCoreThreadCount>
+						<runOrder>alphabetical</runOrder>
+						<useModulePath>false</useModulePath>
+						<includes>
+							<include>**/*IT.java</include>
+						</includes>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2295,9 +2383,19 @@
 					<version>3.0.0-M5</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<runOrder>random</runOrder>
 						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-						<trimStackTrace>true</trimStackTrace>
+						<trimStackTrace>false</trimStackTrace>
+						<runOrder>alphabetical</runOrder>
+						<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
+						<forkCount>0.6C</forkCount>
+						<threadCount>1</threadCount>
+						<perCoreThreadCount>false</perCoreThreadCount>
+						<reuseForks>true</reuseForks>
+						<parallel>classes</parallel>
+						<includes>
+							<include>**/*Test.java</include>
+						</includes>
+						<excludes>*StressTest*</excludes>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2459,7 +2557,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -2532,9 +2630,9 @@
 								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
-                                <copy todir="target/site/apidocs-server-openapi">
-                                    <fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
-                                </copy>
+								<copy todir="target/site/apidocs-server-openapi">
+									<fileset dir="hapi-fhir-server-mdm/target/site/openapi"/>
+								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
@@ -2886,7 +2984,10 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:ReservedCodeCacheSize=220M</surefire_jvm_args>
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m
+					-XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M
+					-XX:ReservedCodeCacheSize=220M
+				</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>
@@ -2992,14 +3093,20 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<executions>
-							<execution><id>integration-test</id><phase>none</phase></execution>
+							<execution>
+								<id>integration-test</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<executions>
-							<execution><id>validate</id><phase>none</phase></execution>
+							<execution>
+								<id>validate</id>
+								<phase>none</phase>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>

@@ -20,9 +20,9 @@
 package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.IJobInstance;
-import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
-import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
+import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -97,17 +97,24 @@ public class JobInstance implements IModelJson, IJobInstance {
 
 	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
 	private double myProgress;
+
 	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_ONLY)
 	private String myCurrentGatedStepId;
+
 	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myErrorMessage;
+
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
+
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
+
+	@JsonProperty(value = "warningMessages", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessages;
 
 	/**
 	 * Constructor
@@ -141,8 +148,8 @@ public class JobInstance implements IModelJson, IJobInstance {
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
+		setWarningMessages(theJobInstance.getWarningMessages());
 	}
-
 
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
@@ -336,6 +343,15 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return this;
 	}
 
+	public String getWarningMessages() {
+		return myWarningMessages;
+	}
+
+	public JobInstance setWarningMessages(String theWarningMessages) {
+		myWarningMessages = theWarningMessages;
+		return this;
+	}
+
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
@@ -362,24 +378,25 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
-			.append("instanceId", myInstanceId)
-			.append("status", myStatus)
-			.append("myCancelled", myCancelled)
-			.append("createTime", myCreateTime)
-			.append("startTime", myStartTime)
-			.append("endTime", myEndTime)
-			.append("updateTime", myUpdateTime)
-			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
-			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
-			.append("totalElapsedMillis", myTotalElapsedMillis)
-			.append("workChunksPurged", myWorkChunksPurged)
-			.append("progress", myProgress)
-			.append("errorMessage", myErrorMessage)
-			.append("errorCount", myErrorCount)
-			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("report", myReport)
-			.toString();
+				.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
+				.append("instanceId", myInstanceId)
+				.append("status", myStatus)
+				.append("myCancelled", myCancelled)
+				.append("createTime", myCreateTime)
+				.append("startTime", myStartTime)
+				.append("endTime", myEndTime)
+				.append("updateTime", myUpdateTime)
+				.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+				.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+				.append("totalElapsedMillis", myTotalElapsedMillis)
+				.append("workChunksPurged", myWorkChunksPurged)
+				.append("progress", myProgress)
+				.append("errorMessage", myErrorMessage)
+				.append("errorCount", myErrorCount)
+				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+				.append("report", myReport)
+				.append("warningMessages", myWarningMessages)
+				.toString();
 	}
 
 	/**
@@ -409,9 +426,7 @@ public class JobInstance implements IModelJson, IJobInstance {
 	}
 
 	public boolean isFinished() {
-		return myStatus == StatusEnum.COMPLETED ||
-			myStatus == StatusEnum.FAILED ||
-			myStatus == StatusEnum.CANCELLED;
+		return myStatus == StatusEnum.COMPLETED || myStatus == StatusEnum.FAILED || myStatus == StatusEnum.CANCELLED;
 	}
 
 	public boolean hasGatedStep() {

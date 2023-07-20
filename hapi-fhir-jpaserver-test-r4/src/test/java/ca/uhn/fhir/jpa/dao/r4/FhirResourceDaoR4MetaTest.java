@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
-import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -30,10 +29,10 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
@@ -69,9 +68,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		patient.getMeta().addExtension("http://foo", new StringType("hello"));
-		IIdType id = myPatientDao.create(patient).getId();
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
 
-		patient = myPatientDao.read(id);
+		patient = myPatientDao.read(id, mySrd);
 		assertTrue(patient.getActive());
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
 		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
@@ -94,9 +93,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.COLLECTION);
 		bundle.addEntry().setResource(patient);
-		IIdType id = myBundleDao.create(bundle).getId();
+		IIdType id = myBundleDao.create(bundle, mySrd).getId();
 
-		bundle = myBundleDao.read(id);
+		bundle = myBundleDao.read(id, mySrd);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
@@ -116,7 +115,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		patient.getMeta().addProfile("http://foo");
 		patient.getMeta().addTag("http://tag", "value", "the tag");
 		patient.getMeta().addSecurity("http://tag", "security", "the tag");
-		IIdType id = myPatientDao.create(patient).getId();
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
 
 		Meta meta = new Meta();
 		meta.addProfile("http://foo");
@@ -124,7 +123,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		meta.addSecurity("http://tag", "security", "the tag");
 		myPatientDao.metaDeleteOperation(id, meta, mySrd);
 
-		patient = myPatientDao.read(id);
+		patient = myPatientDao.read(id, mySrd);
 		assertThat(patient.getMeta().getProfile(), empty());
 		assertThat(patient.getMeta().getTag(), empty());
 		assertThat(patient.getMeta().getSecurity(), empty());
@@ -136,20 +135,20 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		Patient patient1 = new Patient();
 		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		patient1.setActive(true);
-		IIdType pid1 = myPatientDao.create(patient1).getId();
+		IIdType pid1 = myPatientDao.create(patient1, mySrd).getId();
 
 		Patient patient2 = new Patient();
 		patient2.getMeta().addSecurity().setSystem("http://foo").setCode("bar");
 		patient2.setActive(true);
-		IIdType pid2 = myPatientDao.create(patient2).getId();
+		IIdType pid2 = myPatientDao.create(patient2, mySrd).getId();
 
-		patient1 = myPatientDao.read(pid1);
+		patient1 = myPatientDao.read(pid1, mySrd);
 		assertEquals(1, patient1.getMeta().getTag().size());
 		assertEquals(0, patient1.getMeta().getSecurity().size());
 		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
 		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
 
-		patient2 = myPatientDao.read(pid2);
+		patient2 = myPatientDao.read(pid2, mySrd);
 		assertEquals(0, patient2.getMeta().getTag().size());
 		assertEquals(1, patient2.getMeta().getSecurity().size());
 		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
@@ -158,7 +157,6 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 	/**
 	 * Make sure round-trips with tags don't add a userSelected property.
-	 * wipmb tag userSelected test
 	 * Verify https://github.com/hapifhir/hapi-fhir/issues/4819
 	 */
 	@Test
@@ -167,10 +165,10 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		Patient patient1 = new Patient();
 		patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
 		patient1.setActive(true);
-		IIdType pid1 = myPatientDao.create(patient1).getId();
+		IIdType pid1 = myPatientDao.create(patient1, mySrd).getId();
 
 		// when
-		var patientReadback = myPatientDao.read(pid1);
+		var patientReadback = myPatientDao.read(pid1, mySrd);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patientReadback));
 
 		// then
@@ -339,9 +337,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	}
 
 
-	@Disabled // TODO JA: This test fails regularly, need to get a dedicated connection pool for tag creation
+	@Disabled("This test fails regularly, need to get a dedicated connection pool for tag creation") // TODO JA:
 	@Test
-	public void testConcurrentAddTag() throws ExecutionException, InterruptedException {
+	public void testConcurrentAddTag() {
 
 		ExecutorService pool = Executors.newFixedThreadPool(10);
 
@@ -353,7 +351,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				patient.getMeta().addTag().setSystem("http://foo").setCode("bar");
 				patient.setActive(true);
 				ourLog.info("creating patient {}", index);
-				myPatientDao.create(patient);
+				myPatientDao.create(patient, mySrd);
 			};
 			ourLog.info("Submitting task {}...", index);
 			Future<?> future = pool.submit(task);
@@ -366,20 +364,18 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		for (Future<?> next : futures) {
 			try {
 				ourLog.info("Getting future {}", count);
-				next.get();
+				next.get(5, TimeUnit.SECONDS);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
 				fail(e.toString());
 			}
 		}
 
-		runInTransaction(() -> {
-			ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		runInTransaction(() -> ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(TagDefinition::toString).collect(Collectors.joining("\n * "))));
 
-		IBundleProvider bundle = myPatientDao.search(SearchParameterMap.newSynchronous());
+		IBundleProvider bundle = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		assertEquals(10, bundle.sizeOrThrowNpe());
-		IBundleProvider tagBundle = myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")));
+		IBundleProvider tagBundle = myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")), mySrd);
 		assertEquals(10, tagBundle.sizeOrThrowNpe());
 
 	}

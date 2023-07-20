@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.mock;
 	BaseSubscriptionTest.MyConfig.class
 })
 public abstract class BaseSubscriptionTest {
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	static {
 		HapiSystemProperties.enableUnitTestMode();
@@ -53,11 +55,13 @@ public abstract class BaseSubscriptionTest {
 	@BeforeEach
 	public void before() {
 		mySearchParamRegistry.handleInit(Collections.emptyList());
+		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@AfterEach
 	public void afterClearAnonymousLambdas() {
 		myInterceptorRegistry.unregisterAllInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	public void initSearchParamRegistry(IBaseResource theReadResource) {
@@ -69,7 +73,7 @@ public abstract class BaseSubscriptionTest {
 	public static class MyConfig {
 
 		@Bean
-		public JpaStorageSettings storageSettings() {
+		public JpaStorageSettings jpaStorageSettings() {
 			return new JpaStorageSettings();
 		}
 

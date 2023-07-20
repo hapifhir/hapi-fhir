@@ -28,10 +28,10 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.util.ValidateUtil;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
@@ -41,14 +41,18 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
 	private TermValueSet myTermValueSet;
-	final private ITermValueSetDao myValueSetDao;
-	final private ITermValueSetConceptDao myValueSetConceptDao;
-	final private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
+	private final ITermValueSetDao myValueSetDao;
+	private final ITermValueSetConceptDao myValueSetConceptDao;
+	private final ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
 	private int myConceptsExcluded;
 
-	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
+	public ValueSetConceptAccumulator(
+			@Nonnull TermValueSet theTermValueSet,
+			@Nonnull ITermValueSetDao theValueSetDao,
+			@Nonnull ITermValueSetConceptDao theValueSetConceptDao,
+			@Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;
 		myValueSetDao = theValueSetDao;
 		myValueSetConceptDao = theValueSetConceptDao;
@@ -65,13 +69,38 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
-		saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
+	public void includeConcept(
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			Long theSourceConceptPid,
+			String theSourceConceptDirectParentPids,
+			String theSystemVersion) {
+		saveConcept(
+				theSystem,
+				theCode,
+				theDisplay,
+				theSourceConceptPid,
+				theSourceConceptDirectParentPids,
+				theSystemVersion);
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
-		TermValueSetConcept concept = saveConcept(theSystem, theCode, theDisplay, theSourceConceptPid, theSourceConceptDirectParentPids, theSystemVersion);
+	public void includeConceptWithDesignations(
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			Collection<TermConceptDesignation> theDesignations,
+			Long theSourceConceptPid,
+			String theSourceConceptDirectParentPids,
+			String theSystemVersion) {
+		TermValueSetConcept concept = saveConcept(
+				theSystem,
+				theCode,
+				theDisplay,
+				theSourceConceptPid,
+				theSourceConceptDirectParentPids,
+				theSystemVersion);
 		if (theDesignations != null) {
 			for (TermConceptDesignation designation : theDesignations) {
 				saveConceptDesignation(concept, designation);
@@ -89,17 +118,23 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		Optional<TermValueSetConcept> optionalConcept;
 		int versionIdx = theSystem.indexOf("|");
 		if (versionIdx >= 0) {
-			String systemUrl = theSystem.substring(0,versionIdx);
-			String systemVersion = theSystem.substring(versionIdx+1);
-			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCodeWithVersion(myTermValueSet.getId(), systemUrl, systemVersion,theCode);
+			String systemUrl = theSystem.substring(0, versionIdx);
+			String systemVersion = theSystem.substring(versionIdx + 1);
+			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCodeWithVersion(
+					myTermValueSet.getId(), systemUrl, systemVersion, theCode);
 		} else {
-			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+			optionalConcept =
+					myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
 		}
 
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
 
-			ourLog.debug("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug(
+					"Excluding [{}|{}] from ValueSet[{}]",
+					concept.getSystem(),
+					concept.getCode(),
+					myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
 				myTermValueSet.decrementTotalConceptDesignations();
@@ -107,7 +142,11 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			myValueSetConceptDao.deleteById(concept.getId());
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
-			ourLog.debug("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug(
+					"Done excluding [{}|{}] from ValueSet[{}]",
+					concept.getSystem(),
+					concept.getCode(),
+					myTermValueSet.getUrl());
 
 			if (++myConceptsExcluded % 250 == 0) {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
@@ -116,7 +155,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		return false;
 	}
 
-	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
+	private TermValueSetConcept saveConcept(
+			String theSystem,
+			String theCode,
+			String theDisplay,
+			Long theSourceConceptPid,
+			String theSourceConceptDirectParentPids,
+			String theSystemVersion) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "ValueSet contains a concept with no system value");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "ValueSet contains a concept with no code value");
 
@@ -126,7 +171,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		int versionIndex = theSystem.indexOf("|");
 		if (versionIndex >= 0) {
 			concept.setSystem(theSystem.substring(0, versionIndex));
-			concept.setSystemVersion(theSystem.substring(versionIndex+1));
+			concept.setSystemVersion(theSystem.substring(versionIndex + 1));
 		} else {
 			concept.setSystem(theSystem);
 		}
@@ -149,8 +194,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		return concept;
 	}
 
-	private TermValueSetConceptDesignation saveConceptDesignation(TermValueSetConcept theConcept, TermConceptDesignation theDesignation) {
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theDesignation.getValue(), "ValueSet contains a concept designation with no value");
+	private TermValueSetConceptDesignation saveConceptDesignation(
+			TermValueSetConcept theConcept, TermConceptDesignation theDesignation) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(
+				theDesignation.getValue(), "ValueSet contains a concept designation with no value");
 
 		TermValueSetConceptDesignation designation = new TermValueSetConceptDesignation();
 		designation.setConcept(theConcept);
@@ -168,7 +215,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		myValueSetDao.save(myTermValueSet.incrementTotalConceptDesignations());
 
 		if (++myDesignationsSaved % 250 == 0) {
-			ourLog.debug("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug(
+					"Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]",
+					myDesignationsSaved,
+					theConcept.getSystem(),
+					theConcept.getCode(),
+					myTermValueSet.getUrl());
 		}
 
 		return designation;
@@ -185,16 +237,20 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		for (Long conceptId : conceptIds) {
 			myValueSetConceptDao.updateOrderById(conceptId, order++);
 		}
-		ourLog.info("Have removed gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSet.getUrl());
+		ourLog.info(
+				"Have removed gaps from concept order for {} concepts in ValueSet[{}]",
+				conceptIds.size(),
+				myTermValueSet.getUrl());
 
 		return true;
 	}
 
-    public int getConceptsSaved() {
+	public int getConceptsSaved() {
 		return myConceptsSaved;
-    }
+	}
 
-    // TODO: DM 2019-07-16 - We may need TermValueSetConceptProperty, similar to TermConceptProperty.
+	// TODO: DM 2019-07-16 - We may need TermValueSetConceptProperty, similar to TermConceptProperty.
 	// TODO: DM 2019-07-16 - If so, we should also populate TermValueSetConceptProperty entities here.
-	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate filters and parameterized expansions.
+	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate
+	// filters and parameterized expansions.
 }

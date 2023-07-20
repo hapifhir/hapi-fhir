@@ -30,32 +30,40 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType> implements IRuntimeDatatypeDefinition {
+public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType>
+		implements IRuntimeDatatypeDefinition {
 
 	private boolean mySpecialization;
 	private Class<? extends IBaseDatatype> myProfileOfType;
 	private BaseRuntimeElementDefinition<?> myProfileOf;
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType, FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public RuntimeCompositeDatatypeDefinition(
+			DatatypeDef theDef,
+			Class<? extends ICompositeType> theImplementingClass,
+			boolean theStandardType,
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theDef.name(), theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
-		
+
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName()
+					+ " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
 		}
-		
+
 		mySpecialization = theDef.isSpecialization();
 		myProfileOfType = theDef.profileOf();
 		if (myProfileOfType.equals(IBaseDatatype.class)) {
 			myProfileOfType = null;
 		}
-
 	}
 
 	@Override
-	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
-		
+
 		if (myProfileOfType != null) {
 			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 			if (myProfileOf == null) {
@@ -91,6 +99,4 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 		}
 		return false;
 	}
-
-
 }
