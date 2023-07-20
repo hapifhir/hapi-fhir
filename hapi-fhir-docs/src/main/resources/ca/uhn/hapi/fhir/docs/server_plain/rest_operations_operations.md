@@ -91,6 +91,16 @@ If the string value to be searched contains a literal `+` character, you should 
 http://fhir.example.com/Organization?name=H%2BK
 ```
 
+Certain strings are automatically escaped when the FHIR server parses URLs:
+
+```url
+"|"   -&gt; "%7C"
+"=&gt;=" -&gt; "=%3E%3D"
+"=&lt;=" -&gt; "=%3C%3D"
+"=&gt;"  -&gt; "=%3E"
+"=&lt;"  -&gt; "=%3C"
+```
+
 # Returning Multiple OUT Parameters
 
 In all of the Operation examples above, the return type specified for the operation is a single Resource instance. This is a common pattern in FHIR defined operations. However, it is also possible for an extended operation to be defined with multiple and/or repeating OUT parameters. In this case, you can return a [Parameters](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/model/Parameters.html) resource directly.
