@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 @Embeddable
 public class PersistedResourceModifiedMessageEntityPK implements IPersistedResourceModifiedMessagePK, Serializable {
@@ -52,8 +52,10 @@ public class PersistedResourceModifiedMessageEntityPK implements IPersistedResou
 		return this;
 	}
 
-	public static PersistedResourceModifiedMessageEntityPK with(String theResourcePid, String theResourceVersion){
-		return new PersistedResourceModifiedMessageEntityPK().setResourcePid(theResourcePid).setResourceVersion(theResourceVersion);
+	public static PersistedResourceModifiedMessageEntityPK with(String theResourcePid, String theResourceVersion) {
+		return new PersistedResourceModifiedMessageEntityPK()
+				.setResourcePid(theResourcePid)
+				.setResourceVersion(theResourceVersion);
 	}
 
 	@Override

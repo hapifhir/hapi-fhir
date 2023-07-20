@@ -787,7 +787,7 @@ public class StorageSettings {
 	 *
 	 * @return true if at least one subscription channel type is supported by this server false otherwise.
 	 */
-	public boolean hasSupportedSubscriptionTypes(){
+	public boolean hasSupportedSubscriptionTypes() {
 		return CollectionUtils.isNotEmpty(mySupportedSubscriptionTypes);
 	}
 

@@ -22,6 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 public interface IPersistedResourceModifiedMessagePK {
 
 	String getResourcePid();
-	String getResourceVersion();
 
+	String getResourceVersion();
 }

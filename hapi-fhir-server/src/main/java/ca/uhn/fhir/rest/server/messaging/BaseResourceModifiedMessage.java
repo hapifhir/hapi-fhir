@@ -104,7 +104,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadId;
 	}
 
-	public String getPayloadVersion(){
+	public String getPayloadVersion() {
 		return myPayloadVersion;
 	}
 

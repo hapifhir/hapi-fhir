@@ -37,6 +37,6 @@ public interface IResourceModifiedConsumerWithRetries {
 	 * @param thePersistedResourceModifiedMessagePK A primary key pointing to a IPersistedResourceModifiedMessage requiring submission.
 	 * @return Whether the message was successfully submitted to the broker
 	 */
-	boolean submitPersisedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessagePK);
-
+	boolean submitPersisedResourceModifiedMessage(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessagePK);
 }

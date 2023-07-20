@@ -20,7 +20,6 @@ package ca.uhn.fhir.subscription.api;
  * #L%
  */
 
-
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -65,12 +64,12 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	 * @param thePersistedResourceModifiedMessage The message needing restoration.
 	 * @return The resourceModifiedMessage in its pre persistence form.
 	 */
-	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
+	ResourceModifiedMessage inflatePersistedResourceModifiedMessage(
+			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage);
 
 	/**
 	 *
 	 * @return the number of persisted resourceModifiedMessage.
 	 */
 	long getMessagePersistedCount();
-
 }

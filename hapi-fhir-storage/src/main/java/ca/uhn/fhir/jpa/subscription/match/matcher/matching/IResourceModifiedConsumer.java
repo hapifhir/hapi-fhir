@@ -35,9 +35,9 @@ public interface IResourceModifiedConsumer {
 	 * This is an internal API - Use with caution!
 	 */
 	void submitResourceModified(
-		IBaseResource theNewResource,
-		ResourceModifiedMessage.OperationTypeEnum theOperationType,
-		RequestDetails theRequest);
+			IBaseResource theNewResource,
+			ResourceModifiedMessage.OperationTypeEnum theOperationType,
+			RequestDetails theRequest);
 
 	/**
 	 *  Process a message by submitting it to the processing pipeline.  The message is assumed to have been successfully
@@ -50,5 +50,4 @@ public interface IResourceModifiedConsumer {
 	 *
 	 */
 	void submitResourceModified(ResourceModifiedMessage theMsg);
-
 }

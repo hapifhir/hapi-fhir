@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * This class describes how a resourceModifiedMessage is stored for later processing in the event where
@@ -59,7 +59,8 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		return myResourceModifiedEntityPK;
 	}
 
-	public ResourceModifiedEntity setResourceModifiedEntityPK(PersistedResourceModifiedMessageEntityPK theResourceModifiedEntityPK) {
+	public ResourceModifiedEntity setResourceModifiedEntityPK(
+			PersistedResourceModifiedMessageEntityPK theResourceModifiedEntityPK) {
 		myResourceModifiedEntityPK = theResourceModifiedEntityPK;
 		return this;
 	}
@@ -96,5 +97,3 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 		return myResourceModifiedEntityPK;
 	}
 }
-
-
