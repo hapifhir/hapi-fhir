@@ -69,6 +69,10 @@ public class HfqlRestProvider {
 		myHfqlExecutor = theHfqlExecutor;
 	}
 
+	public IHfqlExecutor getHfqlExecutor() {
+		return myHfqlExecutor;
+	}
+
 	public void setHfqlExecutor(IHfqlExecutor theHfqlExecutor) {
 		myHfqlExecutor = theHfqlExecutor;
 	}
@@ -112,7 +116,7 @@ public class HfqlRestProvider {
 		switch (action) {
 			case HfqlConstants.PARAM_ACTION_SEARCH: {
 				String query = toStringValue(theQuery);
-				IHfqlExecutionResult outcome = myHfqlExecutor.executeInitialSearch(query, limit, theRequestDetails);
+				IHfqlExecutionResult outcome = getHfqlExecutor().executeInitialSearch(query, limit, theRequestDetails);
 				streamResponseCsv(theServletResponse, fetchSize, outcome, true, outcome.getStatement());
 				break;
 			}

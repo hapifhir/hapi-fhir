@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
+import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.jdbc.RemoteHfqlExecutionResult;
 import ca.uhn.fhir.jpa.fql.parser.HfqlStatement;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProvider;
@@ -52,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -374,11 +376,9 @@ public class Controller extends BaseController {
 		ourLog.info("Executing HFQL query: {}", theHfqlQuery);
 		StopWatch sw = new StopWatch();
 
-		Parameters requestParameters = HfqlRestProvider.newQueryRequestParameters(theHfqlQuery, ROW_LIMIT, ROW_LIMIT);
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
 		List<List<String>> rows = new ArrayList<>();
 		try {
-			RemoteHfqlExecutionResult result = new RemoteHfqlExecutionResult(requestParameters, client);
+			IHfqlExecutionResult result = executeHfqlStatement(theServletRequest, theHfqlQuery, theRequest, ROW_LIMIT);
 			while (result.hasNext()) {
 				List<Object> nextRowValues = result.getNextRow().getRowValues();
 				if (nextRowValues.size() >= 1) {
@@ -411,6 +411,13 @@ public class Controller extends BaseController {
 		theModel.put("executionTime", sw.toString());
 
 		return "hfql";
+	}
+
+	@Nonnull
+	protected IHfqlExecutionResult executeHfqlStatement(HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit) throws IOException {
+		Parameters requestParameters = HfqlRestProvider.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
+		return new RemoteHfqlExecutionResult(requestParameters, client);
 	}
 
 	protected org.hl7.fhir.r5.model.CapabilityStatement addCommonParamsForHfql(
