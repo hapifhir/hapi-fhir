@@ -24,7 +24,7 @@ INSERT INTO HFJ_RESOURCE (
    false,
    '2023-06-15 09:58:42.92',
    '2023-06-15 09:58:42.92',
-   'false',
+   false,
    '6beed652b77f6c65d776e57341a0b5b0596ac9cfb0e8345a5a5cfbfaa59e2b62',
    1,
    false,
@@ -40,24 +40,6 @@ INSERT INTO HFJ_RESOURCE (
    1
 );
 
-INSERT INTO HFJ_TAG_DEF (
-   TAG_ID,
-   TAG_CODE,
-   TAG_DISPLAY,
-   TAG_SYSTEM,
-   TAG_TYPE,
-   TAG_USER_SELECTED,
-   TAG_VERSION
-) VALUES (
-   10,
-   'code2',
-   'Test1',
-   'http://foo',
-   0,
-   TRUE,
-   'testVersion1'
-);
-
 
 INSERT INTO HFJ_RES_SEARCH_URL (
    RES_SEARCH_URL,
@@ -68,3 +50,43 @@ INSERT INTO HFJ_RES_SEARCH_URL (
    '2023-06-29 10:14:39.69',
    1678
 );
+
+INSERT INTO HFJ_REVINFO (
+   REV
+) VALUES (
+   1
+);
+
+INSERT INTO MPI_LINK_AUD (
+   PID,
+   REV,
+   REVTYPE,
+   PERSON_PID,
+   GOLDEN_RESOURCE_PID,
+   TARGET_TYPE,
+   RULE_COUNT,
+   TARGET_PID,
+   MATCH_RESULT,
+   LINK_SOURCE,
+   VERSION,
+   EID_MATCH,
+   NEW_PERSON,
+   SCORE
+) VALUES (
+   1,
+   1,
+   0,
+   1358,
+   1358,
+   'PATIENT',
+   0,
+   1357,
+   2,
+   0,
+   1,
+   false,
+   true,
+   1
+);
+
+

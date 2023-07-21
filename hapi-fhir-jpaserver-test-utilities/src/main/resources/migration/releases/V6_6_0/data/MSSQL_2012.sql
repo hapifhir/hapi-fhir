@@ -18,8 +18,7 @@ INSERT INTO HFJ_RESOURCE (
    SP_URI_PRESENT,
    RES_TYPE,
    RES_VER
-)
-   VALUES (
+) VALUES (
    1678,
    'R4',
    0,
@@ -32,31 +31,13 @@ INSERT INTO HFJ_RESOURCE (
    0,
    0,
    0,
-   0,
+   1,
    0,
    0,
    1,
    1,
    'Observation',
    1
-);
-
-INSERT INTO HFJ_TAG_DEF (
-   TAG_ID,
-   TAG_CODE,
-   TAG_DISPLAY,
-   TAG_SYSTEM,
-   TAG_TYPE,
-   TAG_USER_SELECTED,
-   TAG_VERSION
-) VALUES (
-   16,
-   'code1',
-   'Test1',
-   'http://foo',
-   0,
-   1,
-   'testVersion1'
 );
 
 
@@ -69,3 +50,43 @@ INSERT INTO HFJ_RES_SEARCH_URL (
    '2023-06-29 10:14:39.69',
    1678
 );
+
+INSERT INTO HFJ_REVINFO (
+   REV
+) VALUES (
+   1
+);
+
+INSERT INTO MPI_LINK_AUD (
+   PID,
+   REV,
+   REVTYPE,
+   PERSON_PID,
+   GOLDEN_RESOURCE_PID,
+   TARGET_TYPE,
+   RULE_COUNT,
+   TARGET_PID,
+   MATCH_RESULT,
+   LINK_SOURCE,
+   VERSION,
+   EID_MATCH,
+   NEW_PERSON,
+   SCORE
+) VALUES (
+   1,
+   1,
+   0,
+   1358,
+   1358,
+   'PATIENT',
+   0,
+   1357,
+   2,
+   0,
+   1,
+   0,
+   1,
+   1
+);
+
+
