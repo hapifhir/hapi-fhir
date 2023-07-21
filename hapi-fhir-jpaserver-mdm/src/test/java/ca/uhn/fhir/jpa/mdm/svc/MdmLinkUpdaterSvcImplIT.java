@@ -9,6 +9,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -45,8 +46,6 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	@Autowired
 	private MessageHelper myMessageHelper;
 
-
-
 	@Test
 	void testUpdateLinkToMatchWhenAnotherLinkToDifferentGoldenExistsMustFail() throws Exception {
 		// create Patient A -> MATCH GR A
@@ -61,12 +60,21 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
 
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
-		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
-		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
 
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setMdmContext(mdmTransactionContext);
+		params.setRequestDetails(new SystemRequestDetails());
+		params.setGoldenResource(goldenA);
+		params.setSourceResource(patientC);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+
+		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		params.setGoldenResource(goldenB);
 		// update POSSIBLE_MATCH Patient C -> GR B to MATCH (should throw exception)
 		InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
-			() -> myMdmLinkUpdaterSvc.updateLink(goldenB, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext));
+			() -> myMdmLinkUpdaterSvc.updateLink(params));
 
 		String expectedExceptionMessage = Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
 		assertEquals(expectedExceptionMessage, thrown.getMessage());
@@ -86,11 +94,21 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
 
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setGoldenResource(goldenA);
+		params.setSourceResource(patientC);
+		params.setMdmContext(mdmTransactionContext);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+		params.setRequestDetails(new SystemRequestDetails());
+
 		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
-		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		params.setGoldenResource(goldenB);
 
 		// update POSSIBLE_MATCH Patient C -> GR B to NO_MATCH (should work OK)
-		myMdmLinkUpdaterSvc.updateLink(goldenB, patientC, MdmMatchResultEnum.NO_MATCH, mdmTransactionContext);
+		myMdmLinkUpdaterSvc.updateLink(params);
 	}
 
 	private Patient createPatientFromJsonInputFileWithPossibleMatches(List<Patient> theGoldens) throws Exception {

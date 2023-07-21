@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import ca.uhn.test.concurrency.PointcutLatch;

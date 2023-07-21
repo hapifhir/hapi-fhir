@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.mdm.api;
 
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkUpdaterSvc {
-	IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext);
-	void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext);
+	IAnyResource updateLink(MdmUpdateLinkParams theParams);
+
+	void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams);
 }

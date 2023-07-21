@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
@@ -32,5 +33,5 @@ public interface IGoldenResourceMergerSvc {
 	 * @param theToGoldenResource the golden resource we are merging to
 	 * @return updated theToGoldenResource with the merged fields and links.
 	 */
-	IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theManuallyMergedResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource mergeGoldenResources(MdmMergeGoldenResourcesParams theParams);
 }

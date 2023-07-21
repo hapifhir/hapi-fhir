@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +65,13 @@ class MdmLinkCreateSvcImplTest {
 		Patient sourcePatient = new Patient();
 		MdmTransactionContext ctx = new MdmTransactionContext();
 
-		myMdmLinkCreateSvc.createLink(goldenPatient, sourcePatient, MdmMatchResultEnum.MATCH, ctx);
+		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		params.setGoldenResource(goldenPatient);
+		params.setSourceResource(sourcePatient);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+		params.setMdmContext(ctx);
+		params.setRequestDetails(new SystemRequestDetails());
+		myMdmLinkCreateSvc.createLink(params);
 
 		IMdmLink mdmLink = mdmLinkCaptor.getValue();
 

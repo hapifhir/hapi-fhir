@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {

@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -32,8 +35,6 @@ import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -41,9 +42,17 @@ import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
+import ca.uhn.fhir.mdm.model.MdmOperationBaseParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
-import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -86,18 +95,39 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Autowired
 	IJobCoordinator myJobCoordinator;
 
+	@Autowired
+	IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	public MdmControllerSvcImpl() {
 	}
 
 	@Override
-	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
-		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
+	public IAnyResource mergeGoldenResources(
+		MdmMergeGoldenResourcesParams theParams
+	) {
+		if (theParams.getFromGoldenResource() == null) {
+			theParams.setFromGoldenResource(myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theParams.getFromGoldenResourceId()));
+		}
+		IAnyResource fromGoldenResource = theParams.getFromGoldenResource();;
+		if (theParams.getToGoldenResource() == null) {
+			theParams.setToGoldenResource(myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theParams.getToGoldenResourceId()));
+		}
+		IAnyResource toGoldenResource = theParams.getToGoldenResource();
 		myMdmControllerHelper.validateMergeResources(fromGoldenResource, toGoldenResource);
-		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theFromGoldenResourceId);
-		myMdmControllerHelper.validateSameVersion(toGoldenResource, theToGoldenResourceId);
+		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theParams.getFromGoldenResourceId());
+		myMdmControllerHelper.validateSameVersion(toGoldenResource, theParams.getToGoldenResourceId());
 
-		return myGoldenResourceMergerSvc.mergeGoldenResources(fromGoldenResource, theManuallyMergedGoldenResource, toGoldenResource, theMdmTransactionContext);
+		return myGoldenResourceMergerSvc.mergeGoldenResources(theParams);
+	}
+
+	@Override
+	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setResourceId(theSourceResourceId);
+		params.setGoldenResourceId(theGoldenResourceId);
+		params.setMdmContext(theMdmTransactionContext);
+		params.setMatchResult(MdmMatchResultEnum.valueOf(theMatchResult));
+		return updateLink(params);
 	}
 
 	@Override
@@ -183,33 +213,54 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		return resultPage;
 	}
 
-	@Override
-	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
-		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theSourceResourceId);
-		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
-		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
+	private void convertAndValidateParameters(MdmOperationBaseParams theParams) {
+		if (theParams.getGoldenResource() == null) {
+			IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theParams.getGoldenResourceId());
+			theParams.setGoldenResource(goldenResource);
+		}
+		if (theParams.getSourceResource() == null) {
+			IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theParams.getResourceId());
+			theParams.setSourceResource(source);
+		}
+		myMdmControllerHelper.validateSameVersion(theParams.getGoldenResource(), theParams.getGoldenResourceId());
+		myMdmControllerHelper.validateSameVersion(theParams.getSourceResource(), theParams.getResourceId());
+	}
 
-		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, matchResult, theMdmTransactionContext);
+	@Override
+	public IAnyResource updateLink(MdmUpdateLinkParams theParams) {
+		convertAndValidateParameters(theParams);
+		return myIMdmLinkUpdaterSvc.updateLink(theParams);
 	}
 
 	@Override
 	public IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
-		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theSourceResourceId);
-		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
-		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
-
-		return myIMdmLinkCreateSvc.createLink(goldenResource, source, matchResult, theMdmTransactionContext);
+		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		params.setGoldenResourceId(theGoldenResourceId);
+		params.setResourceId(theSourceResourceId);
+		params.setMdmContext(theMdmTransactionContext);
+		if (theMatchResult != null) {
+			params.setMatchResult(MdmMatchResultEnum.valueOf(theMatchResult));
+		}
+		return createLink(params);
 	}
 
 	@Override
-	public IBaseParameters submitMdmClearJob(@Nonnull List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+	public IAnyResource createLink(MdmCreateLinkParams theParams) {
+		convertAndValidateParameters(theParams);
+
+		return myIMdmLinkCreateSvc.createLink(theParams);
+	}
+
+	@Override
+	public IBaseParameters submitMdmClearJob(
+		@Nonnull List<String> theResourceNames,
+		IPrimitiveType<BigDecimal> theBatchSize,
+		ServletRequestDetails theRequestDetails
+	) {
 		MdmClearJobParameters params = new MdmClearJobParameters();
 		params.setResourceNames(theResourceNames);
-		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
+		boolean hasBatchSize = theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0;
+		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
@@ -223,6 +274,20 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
 		String id = response.getInstanceId();
 
+		{
+			// MDM_CLEAR hook:
+			MdmClearEvent event = new MdmClearEvent();
+			event.setResourceTypes(theResourceNames);
+			if (hasBatchSize) {
+				event.setBatchSize(theBatchSize.getValue().longValue());
+			}
+
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, theRequestDetails);
+			hookParams.add(MdmClearEvent.class, event);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_CLEAR, hookParams);
+		}
+
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
 		return retVal;
@@ -232,8 +297,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public IBaseParameters submitMdmSubmitJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
-
-		if (theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0) {
+		boolean hasBatchSize = theBatchSize != null && theBatchSize.getValue() != null && theBatchSize.getValue().longValue() > 0;
+		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 		params.setRequestPartitionId(RequestPartitionId.allPartitions());
@@ -249,15 +314,58 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+
+		{
+			// MDM_SUBMIT batch submit job
+			MdmSubmitEvent event = new MdmSubmitEvent();
+			event.setBatchJob(true);
+			event.setUrls(theUrls);
+			if (hasBatchSize) {
+				event.setBatchSize(theBatchSize.getValue().longValue());
+			}
+
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, theRequestDetails);
+			hookParams.add(MdmSubmitEvent.class, event);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT, hookParams);
+		}
+
 		return retVal;
 	}
 
 	@Override
 	public void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
+		MdmUnduplicateGoldenResourceParams params = new MdmUnduplicateGoldenResourceParams();
+		params.setTargetGoldenResourceId(theTargetGoldenResourceId);
+		params.setGoldenResourceId(theGoldenResourceId);
+		params.setMdmContext(theMdmTransactionContext);
 
-		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
+		unduplicateGoldenResource(params);
+	}
+
+	@Override
+	public void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams) {
+		if (theParams.getGoldenResource() == null) {
+			IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theParams.getGoldenResourceId());
+			theParams.setGoldenResource(goldenResource);
+		}
+		if (theParams.getTargetGoldenResource() == null) {
+			IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theParams.getTargetGoldenResourceId());
+			theParams.setTargetGoldenResource(target);
+		}
+
+		myIMdmLinkUpdaterSvc.unduplicateGoldenResource(theParams);
+	}
+
+	@Override
+	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		MdmMergeGoldenResourcesParams params = new MdmMergeGoldenResourcesParams();
+		params.setToGoldenResourceId(theToGoldenResourceId);
+		params.setFromGoldenResourceId(theFromGoldenResourceId);
+		params.setToGoldenResourceId(theToGoldenResourceId);
+		params.setManuallyMergedResource(theManuallyMergedGoldenResource);
+		params.setMdmTransactionContext(theMdmTransactionContext);
+		return mergeGoldenResources(params);
 	}
 
 	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails) {

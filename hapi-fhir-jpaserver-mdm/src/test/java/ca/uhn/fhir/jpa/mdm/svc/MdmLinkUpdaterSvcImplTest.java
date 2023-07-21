@@ -6,6 +6,8 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,13 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
 
-		myMdmLinkUpdaterSvc.updateLink(originalJaneGolden, jane, NO_MATCH, mdmCtx);
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setMdmContext(mdmCtx);
+		params.setGoldenResource(originalJaneGolden);
+		params.setSourceResource(jane);
+		params.setMatchResult(NO_MATCH);
+		params.setRequestDetails(new SystemRequestDetails());
+		myMdmLinkUpdaterSvc.updateLink(params);
 		Patient newJaneGolden = getGoldenResourceFromTargetResource(jane);
 
 		assertNotEquals(newJaneGolden.getId(), originalJaneGolden.getId());
@@ -83,7 +91,13 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		myMdmSettings.getMdmRules().setVersion("2");
 
-		myMdmLinkUpdaterSvc.updateLink(goldenPatient, patient1, MATCH, mdmCtx);
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setRequestDetails(new SystemRequestDetails());
+		params.setGoldenResource(goldenPatient);
+		params.setSourceResource(patient1);
+		params.setMatchResult(MATCH);
+		params.setMdmContext(mdmCtx);
+		myMdmLinkUpdaterSvc.updateLink(params);
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertFalse(targets.isEmpty());

@@ -21,9 +21,15 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -36,6 +42,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -63,47 +70,67 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
+	@Autowired
+	private IMdmModelConverterSvc myModelConverter;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Transactional
 	@Override
-	public IAnyResource createLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
-		String sourceType = myFhirContext.getResourceType(theSourceResource);
+	public IAnyResource createLink(MdmCreateLinkParams theParams) {
+		IAnyResource sourceResource = theParams.getSourceResource();
+		IAnyResource goldenResource = theParams.getGoldenResource();
+		MdmMatchResultEnum matchResult = theParams.getMatchResult();
 
-		validateCreateLinkRequest(theGoldenResource, theSourceResource, sourceType);
+		String sourceType = myFhirContext.getResourceType(sourceResource);
 
-		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		validateCreateLinkRequest(goldenResource, sourceResource, sourceType);
+
+		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(goldenResource);
+		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(sourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
-		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(theGoldenResource, theSourceResource);
+		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(goldenResource, sourceResource);
 
 		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (optionalMdmLink.isPresent()) {
-			throw new InvalidRequestException(Msg.code(753) + myMessageHelper.getMessageForPresentLink(theGoldenResource, theSourceResource));
+			throw new InvalidRequestException(Msg.code(753) + myMessageHelper.getMessageForPresentLink(goldenResource, sourceResource));
 		}
 
 		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
-		if (mdmLinks.size() > 0 && theMatchResult == MdmMatchResultEnum.MATCH) {
-			throw new InvalidRequestException(Msg.code(754) + myMessageHelper.getMessageForMultipleGoldenRecords(theSourceResource));
+		if (mdmLinks.size() > 0 && matchResult == MdmMatchResultEnum.MATCH) {
+			throw new InvalidRequestException(Msg.code(754) + myMessageHelper.getMessageForMultipleGoldenRecords(sourceResource));
 		}
 
-		IMdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
+		IMdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourceAndSourceResource(goldenResource, sourceResource);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMdmSourceType(sourceType);
-		if (theMatchResult == null) {
+		if (matchResult == null) {
 			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		} else {
-			mdmLink.setMatchResult(theMatchResult);
+			mdmLink.setMatchResult(matchResult);
 		}
 		// Add partition for the mdm link if it doesn't exist
-		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
 			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
 			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));
 		}
-		ourLog.info("Manually creating a " + theGoldenResource.getIdElement().toVersionless() + " to " + theSourceResource.getIdElement().toVersionless() + " mdm link.");
+		ourLog.info("Manually creating a " + goldenResource.getIdElement().toVersionless() + " to " + sourceResource.getIdElement().toVersionless() + " mdm link.");
 		myMdmLinkDaoSvc.save(mdmLink);
 
-		return theGoldenResource;
+		{
+			// pointcut for MDM_CREATE_LINK
+			MdmLinkEvent event = new MdmLinkEvent();
+			event.addMdmLink(myModelConverter.toJson(mdmLink));
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, theParams.getRequestDetails())
+				.add(MdmLinkEvent.class, event);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_CREATE_LINK, hookParams);
+		}
+
+		return goldenResource;
 	}
 
 	private void validateCreateLinkRequest(IAnyResource theGoldenRecord, IAnyResource theSourceResource, String theSourceType) {

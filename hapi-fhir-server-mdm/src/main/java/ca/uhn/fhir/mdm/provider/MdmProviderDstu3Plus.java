@@ -21,16 +21,22 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -38,10 +44,8 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -51,6 +55,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
@@ -61,15 +66,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
 
+	private static final String PATIENT_RESOURCE = "Patient";
+	private static final String PRACTITIONER_RESOURCE = "Practitioner";
+
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
 	private final MdmControllerHelper myMdmControllerHelper;
+
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -84,15 +96,18 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 										 IMdmControllerSvc theMdmControllerSvc,
 										 MdmControllerHelper theMdmHelper,
 										 IMdmSubmitSvc theMdmSubmitSvc,
+										 IInterceptorBroadcaster theIInterceptorBroadcaster,
 										 IMdmSettings theIMdmSettings
 										 ) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
+		myInterceptorBroadcaster = theIInterceptorBroadcaster;
 		myMdmSettings = theIMdmSettings;
 	}
 
+	// search for matches to the provided patient
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
 	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient,
 									 RequestDetails theRequestDetails) {
@@ -102,6 +117,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient", theRequestDetails);
 	}
 
+	// search for matches to the provided resource
 	@Operation(name = ProviderConstants.MDM_MATCH)
 	public IBaseBundle serverMatch(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
 											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
@@ -124,7 +140,15 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES : MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES;
 		MdmTransactionContext txContext = createMdmContext(theRequestDetails, operationType,
 			getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId));
-		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValueAsString(), theToGoldenResourceId.getValueAsString(), theMergedResource, txContext);
+
+		MdmMergeGoldenResourcesParams params = new MdmMergeGoldenResourcesParams();
+		params.setFromGoldenResourceId(theFromGoldenResourceId.getValueAsString());
+		params.setToGoldenResourceId(theToGoldenResourceId.getValueAsString());
+		params.setManuallyMergedResource(theMergedResource);
+		params.setMdmTransactionContext(txContext);
+		params.setRequestDetails(theRequestDetails);
+
+		return myMdmControllerSvc.mergeGoldenResources(params);
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
@@ -133,10 +157,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) IPrimitiveType<String> theMatchResult,
 											  ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(),
-			theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
-				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
-		);
+
+		MdmUpdateLinkParams updateLinkParams = new MdmUpdateLinkParams();
+		updateLinkParams.setGoldenResourceId(theGoldenResourceId.getValueAsString());
+		updateLinkParams.setResourceId(theResourceId.getValue());
+		updateLinkParams.setMatchResult(MdmControllerUtil.extractMatchResultOrNull(theMatchResult.getValue()));
+		updateLinkParams.setMdmContext(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
+			getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
+		updateLinkParams.setRequestDetails(theRequestDetails);
+
+		return myMdmControllerSvc.updateLink(updateLinkParams);
 	}
 
 	@Operation(name = ProviderConstants.MDM_CREATE_LINK)
@@ -145,10 +175,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 											  @OperationParam(name = ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT, min = 0, max = 1) IPrimitiveType<String> theMatchResult,
 											  ServletRequestDetails theRequestDetails) {
 		validateCreateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myMdmControllerSvc.createLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(), extractStringOrNull(theMatchResult),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.CREATE_LINK,
-				getResourceType(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
-		);
+
+		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		params.setGoldenResourceId(theGoldenResourceId.getValueAsString());
+		params.setResourceId(theResourceId.getValue());
+		params.setMatchResult(MdmControllerUtil.extractMatchResultOrNull(extractStringOrNull(theMatchResult)));
+		params.setRequestDetails(theRequestDetails);
+		params.setMdmContext(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.CREATE_LINK,
+			getResourceType(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
+
+		return myMdmControllerSvc.createLink(params);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_CLEAR, returnParameters = {
@@ -160,7 +196,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		List<String> resourceNames = new ArrayList<>();
 
-		if (theResourceNames != null) {
+		if (isNotEmpty(theResourceNames)) {
 			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 			validateResourceNames(resourceNames);
 		} else {
@@ -215,7 +251,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
-
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public IBaseParameters getDuplicateGoldenResources(
 		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
@@ -240,12 +275,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters notDuplicate(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
 													ServletRequestDetails theRequestDetails) {
-
 		validateNotDuplicateParameters(theGoldenResourceId, theResourceId);
-		myMdmControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId))
-		);
+
+		MdmUnduplicateGoldenResourceParams params = new MdmUnduplicateGoldenResourceParams();
+		params.setRequestDetails(theRequestDetails);
+		params.setGoldenResourceId(theGoldenResourceId.getValueAsString());
+		params.setTargetGoldenResourceId(theResourceId.getValueAsString());
+		params.setMdmContext(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE,
+			getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
+
+		myMdmControllerSvc.unduplicateGoldenResource(params);
 
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
@@ -259,28 +298,32 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theCriteria,
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
-		ServletRequestDetails theRequestDetails) {
+		ServletRequestDetails theRequestDetails
+	) {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
+		IBaseParameters retval;
 		if (theRequestDetails.isPreferRespondAsync()) {
 			List<String> urls = buildUrlsForJob(criteria, resourceType);
-			return myMdmControllerSvc.submitMdmSubmitJob(urls, theBatchSize, theRequestDetails);
+			retval = myMdmControllerSvc.submitMdmSubmitJob(urls, theBatchSize, theRequestDetails);
 		} else {
-			if (StringUtils.isNotBlank(resourceType)) {
-				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
-			} else {
-				submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
-			}
-			return buildMdmOutParametersWithCount(submittedCount);
+			submittedCount = synchronousMdmSubmitJob(
+				resourceType, // resource type
+				null, // id
+				criteria, // criteria
+				theRequestDetails // request details
+			);
+			retval = buildMdmOutParametersWithCount(submittedCount);
 		}
 
+		return retval;
 	}
 
 	@Nonnull
 	private List<String> buildUrlsForJob(String criteria, String resourceType) {
 		List<String> urls = new ArrayList<>();
-		if (StringUtils.isNotBlank(resourceType)) {
+		if (isNotBlank(resourceType)) {
 			String theUrl = resourceType + "?" + criteria;
 			urls.add(theUrl);
 		} else {
@@ -297,14 +340,19 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return theCriteria == null ? "" : theCriteria.getValueAsString();
 	}
 
-
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Patient", returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
+
+		long submittedCount = synchronousMdmSubmitJob(
+			null, // resource type
+			theIdParam, // id
+			null, // criteria
+			theRequest // request
+		);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -316,11 +364,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		ServletRequestDetails theRequest) {
 		if (theRequest.isPreferRespondAsync()) {
-			String theUrl = "Patient?";
+			String theUrl = PATIENT_RESOURCE + "?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
+			long submittedCount = synchronousMdmSubmitJob(
+				PATIENT_RESOURCE, // resource type
+				null, // id
+				criteria, // criteria
+				theRequest // request
+			);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -331,7 +384,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
+		long submittedCount = synchronousMdmSubmitJob(
+			null, // resourcetype
+			theIdParam, // id
+			null, // criteria
+			theRequest // request
+		);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -343,11 +401,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		ServletRequestDetails theRequest) {
 		if (theRequest.isPreferRespondAsync()) {
-			String theUrl = "Practitioner?";
+			String theUrl = PRACTITIONER_RESOURCE + "?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize,  theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
+			long submittedCount = synchronousMdmSubmitJob(
+				PRACTITIONER_RESOURCE, // resource type
+				null, // id
+				criteria, // criteria
+				theRequest // request details
+			);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -379,5 +442,62 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 		IIdType idType = MdmControllerUtil.getGoldenIdDtOrThrowException(theParamName, theResourceId);
 		return idType.getResourceType();
+	}
+
+	private long synchronousMdmSubmitJob(
+		String theResourceType,
+		IIdType theIdType,
+		String theCriteria,
+		RequestDetails theRequestDetails
+	) {
+		long submittedCount = -1;
+		List<String> urls = new ArrayList<>();
+		if (theIdType != null) {
+			urls.add(theIdType.getValue());
+			submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdType, theRequestDetails);
+		} else if (isNotBlank(theResourceType)) {
+			String url = theResourceType;
+			if (isNotEmpty(theCriteria)) {
+				url += "?" + theCriteria;
+			}
+			urls.add(url);
+
+			// practitioner and patient resources are handled specifically
+			// we allow mdm submits on these resources, whether or not
+			// they are an mdm supported time
+			if (theResourceType.equals(PATIENT_RESOURCE)) {
+				submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(theCriteria, theRequestDetails);
+			} else if (theResourceType.equals(PRACTITIONER_RESOURCE)) {
+				submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(theCriteria, theRequestDetails);
+			} else {
+				// otherwise, it's any resource type
+				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(theResourceType, theCriteria, theRequestDetails);
+			}
+		} else {
+			// submitAllSourceTypes only runs through
+			// valid MDM source types
+			List<String> resourceTypes = myMdmSettings.getMdmRules().getMdmTypes();
+			for (String resourceType : resourceTypes) {
+				String url = resourceType
+					+ (isNotEmpty(theCriteria) ? "?" + theCriteria : "");
+				urls.add(url);
+			}
+			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(theCriteria, theRequestDetails);
+		}
+
+		{
+			// MDM_SUBMIT synchronous submit
+			MdmSubmitEvent submitEvent = new MdmSubmitEvent();
+			submitEvent.setBatchJob(false);
+			submitEvent.setUrls(urls);
+
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, theRequestDetails);
+			hookParams.add(MdmSubmitEvent.class, submitEvent);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_SUBMIT,
+				hookParams);
+		}
+
+		return submittedCount;
 	}
 }

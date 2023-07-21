@@ -20,7 +20,13 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
+import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -52,13 +58,54 @@ public interface IMdmControllerSvc {
 
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType);
 
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
 
+	default void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams) {
+		notDuplicateGoldenResource(
+			theParams.getGoldenResourceId(),
+			theParams.getTargetGoldenResourceId(),
+			theParams.getMdmContext()
+		);
+	}
+
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext);
 
+	default IAnyResource mergeGoldenResources(MdmMergeGoldenResourcesParams theParams) {
+		return mergeGoldenResources(
+			theParams.getFromGoldenResourceId(),
+			theParams.getToGoldenResourceId(),
+			theParams.getManuallyMergedResource(),
+			theParams.getMdmTransactionContext()
+		);
+	}
+
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource createLink(String theGoldenResourceId, String theSourceResourceId, @Nullable String theMatchResult, MdmTransactionContext theMdmTransactionContext);
+	default IAnyResource updateLink(MdmUpdateLinkParams theParams) {
+		String matchResult = theParams.getMatchResult() == null ? null : theParams.getMatchResult().name();
+		return updateLink(theParams.getGoldenResourceId(),
+			theParams.getResourceId(),
+			matchResult,
+			theParams.getMdmContext());
+	}
+
+	@Deprecated(forRemoval = true, since = "6.8.0")
+	IAnyResource createLink(
+		String theGoldenResourceId,
+		String theSourceResourceId,
+		@Nullable String theMatchResult,
+		MdmTransactionContext theMdmTransactionContext);
+
+	default IAnyResource createLink(MdmCreateLinkParams theParams) {
+		String matchResult = theParams.getMatchResult() == null ? null : theParams.getMatchResult().name();
+		return createLink(theParams.getGoldenResourceId(),
+			theParams.getResourceId(),
+			matchResult,
+			theParams.getMdmContext());
+	}
 
 	IBaseParameters submitMdmClearJob(List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails);
 

@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.mdm.api.paging;
 
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.springframework.data.domain.Page;

@@ -14,10 +14,12 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -571,7 +573,13 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient originalJaneGolden = getGoldenResourceFromTargetResource(jane);
 
 		MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
-		myMdmLinkUpdaterSvc.updateLink(originalPaulGolden, paul, NO_MATCH, mdmCtx);
+		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		params.setGoldenResource(originalPaulGolden);
+		params.setSourceResource(paul);
+		params.setMatchResult(NO_MATCH);
+		params.setRequestDetails(new SystemRequestDetails());
+		params.setMdmContext(mdmCtx);
+		myMdmLinkUpdaterSvc.updateLink(params);
 
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);

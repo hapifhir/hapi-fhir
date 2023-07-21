@@ -133,7 +133,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired

@@ -21,11 +21,16 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -34,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -42,9 +48,16 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 
 	private final IMdmControllerSvc myMdmControllerSvc;
 
-	public MdmLinkHistoryProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc) {
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	public MdmLinkHistoryProviderDstu3Plus(
+		FhirContext theFhirContext,
+		IMdmControllerSvc theMdmControllerSvc,
+		IInterceptorBroadcaster theIInterceptorBroadcaster
+	) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
+		myInterceptorBroadcaster = theIInterceptorBroadcaster;
 	}
 
 	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
@@ -65,6 +78,26 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
 		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
+
+		{
+			// MDM_LINK_HISTORY hook
+			MdmHistoryEvent historyEvent = new MdmHistoryEvent();
+			historyEvent.setMdmLinkRevisions(mdmLinkRevisionsFromSvc);
+			historyEvent.setSourceIds(
+				theResourceIds.stream().map(IPrimitiveType::getValueAsString)
+					.collect(Collectors.toList())
+			);
+			historyEvent.setGoldenResourceIds(
+				theMdmGoldenResourceIds.stream().map(IPrimitiveType::getValueAsString)
+					.collect(Collectors.toList())
+			);
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequestDetails);
+			params.add(MdmHistoryEvent.class, historyEvent);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_LINK_HISTORY,
+				params);
+		}
 
 		return retVal;
 	}

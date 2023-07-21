@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.batch2.jobs.parameters;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
