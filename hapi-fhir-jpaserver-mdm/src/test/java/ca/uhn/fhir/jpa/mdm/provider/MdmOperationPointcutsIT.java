@@ -516,8 +516,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					}
 
 					// verify
-//				verify(myJobCoordinator)
-//					.startInstance(any(), any());
 					latch.awaitExpected();
 					assertTrue(called.get());
 				}
