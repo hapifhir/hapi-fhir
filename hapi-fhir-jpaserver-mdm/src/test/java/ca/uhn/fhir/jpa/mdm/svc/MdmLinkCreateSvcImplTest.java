@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -48,6 +49,12 @@ class MdmLinkCreateSvcImplTest {
 	MessageHelper myMessageHelper;
 	@Mock
 	MdmPartitionHelper myMdmPartitionHelper;
+
+	@Mock
+	IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Mock
+	IMdmModelConverterSvc myIMdmModelConverterSvc;
 
 	@InjectMocks
 	MdmLinkCreateSvcImpl myMdmLinkCreateSvc = new MdmLinkCreateSvcImpl();
