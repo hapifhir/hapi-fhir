@@ -56,12 +56,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -398,12 +398,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			List<String> urls = buildUrlsForJob(criteria, resourceType);
 			retval = myMdmControllerSvc.submitMdmSubmitJob(urls, theBatchSize, theRequestDetails);
 		} else {
-			submittedCount = synchronousMdmSubmit(
-					resourceType,
-					null,
-					criteria,
-					theRequestDetails
-			);
+			submittedCount = synchronousMdmSubmit(resourceType, null, criteria, theRequestDetails);
 			retval = buildMdmOutParametersWithCount(submittedCount);
 		}
 
@@ -437,12 +432,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			})
 	public IBaseParameters mdmBatchPatientInstance(@IdParam IIdType theIdParam, RequestDetails theRequest) {
 
-		long submittedCount = synchronousMdmSubmit(
-				null,
-				theIdParam,
-				null,
-				theRequest
-		);
+		long submittedCount = synchronousMdmSubmit(null, theIdParam, null, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -464,12 +454,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = synchronousMdmSubmit(
-					PATIENT_RESOURCE,
-					null,
-					criteria,
-					theRequest
-			);
+			long submittedCount = synchronousMdmSubmit(PATIENT_RESOURCE, null, criteria, theRequest);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -482,12 +467,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 				@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 			})
 	public IBaseParameters mdmBatchPractitionerInstance(@IdParam IIdType theIdParam, RequestDetails theRequest) {
-		long submittedCount = synchronousMdmSubmit(
-				null,
-				theIdParam,
-				null,
-				theRequest
-		);
+		long submittedCount = synchronousMdmSubmit(null, theIdParam, null, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -509,12 +489,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = synchronousMdmSubmit(
-					PRACTITIONER_RESOURCE,
-					null,
-					criteria,
-					theRequest
-			);
+			long submittedCount = synchronousMdmSubmit(PRACTITIONER_RESOURCE, null, criteria, theRequest);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -585,22 +560,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	private long submitResourceTypeWithCriteria(
-		String theResourceType,
-		String theCriteria,
-		RequestDetails theRequestDetails,
-		List<String> theUrls
-	) {
+			String theResourceType, String theCriteria, RequestDetails theRequestDetails, List<String> theUrls) {
 		String url = theResourceType;
 		if (isNotEmpty(theCriteria)) {
 			url += "?" + theCriteria;
 		}
 		theUrls.add(url);
 
-		return myMdmSubmitSvc.submitSourceResourceTypeToMdm(
-			theResourceType,
-			theCriteria,
-			theRequestDetails
-		);
+		return myMdmSubmitSvc.submitSourceResourceTypeToMdm(theResourceType, theCriteria, theRequestDetails);
 	}
 
 	private long submitAll(String theCriteria, RequestDetails theRequestDetails, List<String> theUrls) {

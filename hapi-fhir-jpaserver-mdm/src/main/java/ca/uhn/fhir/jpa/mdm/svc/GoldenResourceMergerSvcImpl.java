@@ -128,7 +128,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		// Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(fromGoldenResource, resourceType);
 
-		log(mdmTransactionContext,
+		log(
+				mdmTransactionContext,
 				"Merged " + fromGoldenResource.getIdElement().toVersionless() + " into "
 						+ toGoldenResource.getIdElement().toVersionless());
 
@@ -139,10 +140,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	}
 
 	private void invokeMdmMergeGoldenResourcesHook(
-		MdmMergeGoldenResourcesParams theParams,
-		IAnyResource fromGoldenResource,
-		IAnyResource toGoldenResource
-	) {
+			MdmMergeGoldenResourcesParams theParams, IAnyResource fromGoldenResource, IAnyResource toGoldenResource) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES)) {
 			// pointcut for MDM_POST_MERGE_GOLDEN_RESOURCES
 			MdmMergeEvent event = new MdmMergeEvent();
