@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Patient;
@@ -42,7 +43,7 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
 
-		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setMdmContext(mdmCtx);
 		params.setGoldenResource(originalJaneGolden);
 		params.setSourceResource(jane);
@@ -90,7 +91,7 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		myMdmSettings.getMdmRules().setVersion("2");
 
-		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setRequestDetails(new SystemRequestDetails());
 		params.setGoldenResource(goldenPatient);
 		params.setSourceResource(patient1);

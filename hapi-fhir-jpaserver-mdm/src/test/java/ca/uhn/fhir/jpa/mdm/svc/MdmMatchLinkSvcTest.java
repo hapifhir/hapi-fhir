@@ -17,6 +17,7 @@ import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListRuleJson;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockListRuleProvider;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
@@ -585,7 +586,7 @@ public class MdmMatchLinkSvcTest {
 			Patient originalJaneGolden = getGoldenResourceFromTargetResource(jane);
 
 			MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
-			MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+			MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 			params.setGoldenResource(originalPaulGolden);
 			params.setSourceResource(paul);
 			params.setMatchResult(NO_MATCH);
