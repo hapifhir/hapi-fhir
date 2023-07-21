@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
@@ -68,8 +69,9 @@ public class HapiSchemaMigrationTest {
 		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(dataSource, theDriverType, HAPI_FHIR_MIGRATION_TABLENAME);
 		HapiMigrationStorageSvc hapiMigrationStorageSvc = new HapiMigrationStorageSvc(hapiMigrationDao);
 
-		VersionEnum[] allVersions = {
-			VersionEnum.V5_1_0,
+		VersionEnum[] allVersions =  VersionEnum.values();
+
+		Set<VersionEnum> dataVersions = Set.of(
 			VersionEnum.V5_2_0,
 			VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
@@ -77,7 +79,8 @@ public class HapiSchemaMigrationTest {
 			VersionEnum.V6_0_0,
 			VersionEnum.V6_6_0,
 			VersionEnum.V6_8_0
-		};
+		);
+
 
 		//int fromVersion = FIRST_TESTED_VERSION.ordinal() - 1;
 		int fromVersion = 0;
@@ -86,26 +89,15 @@ public class HapiSchemaMigrationTest {
 
 		for (int i = 1; i < allVersions.length; i++) {
 			toVersion = allVersions[i];
-			System.out.println("here" + toVersion.name());
 			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
-			myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
+			if (dataVersions.contains(toVersion)) {
+				myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);
+			}
 		}
 
-
-//		FIXME ND - make sure all migrations are run at the end
 		int lastVersion = allVersions.length - 1;
 		toVersion = allVersions[lastVersion];
-//		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
-//
-//		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, to);
-	}
-
-	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
-		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
-		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
-		schemaMigrator.setDriverType(theDriverType);
-		schemaMigrator.createMigrationTableIfRequired();
-		schemaMigrator.migrate();
+		migrate(theDriverType, dataSource, hapiMigrationStorageSvc, from, toVersion);
 
 		if (theDriverType == DriverTypeEnum.POSTGRES_9_4) {
 			// we only run this for postgres because:
@@ -116,6 +108,15 @@ public class HapiSchemaMigrationTest {
 			new HapiForeignKeyIndexHelper()
 				.ensureAllForeignKeysAreIndexed(dataSource);
 		}
+	}
+
+	private static void migrate(DriverTypeEnum theDriverType, DataSource dataSource, HapiMigrationStorageSvc hapiMigrationStorageSvc, VersionEnum from, VersionEnum to) throws SQLException {
+		MigrationTaskList migrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getTaskList(from, to);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(TEST_SCHEMA_NAME, HAPI_FHIR_MIGRATION_TABLENAME, dataSource, new Properties(), migrationTasks, hapiMigrationStorageSvc);
+		schemaMigrator.setDriverType(theDriverType);
+		schemaMigrator.createMigrationTableIfRequired();
+		schemaMigrator.migrate();
+
 	}
 
 
