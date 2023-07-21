@@ -128,13 +128,23 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		// Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(fromGoldenResource, resourceType);
 
-		log(
-				mdmTransactionContext,
+		log(mdmTransactionContext,
 				"Merged " + fromGoldenResource.getIdElement().toVersionless() + " into "
 						+ toGoldenResource.getIdElement().toVersionless());
 
-		{
-			// pointcut for MDM_MERGE_GOLDEN_RESOURCES
+		// invoke hooks
+		invokeMdmMergeGoldenResourcesHook(theParams, fromGoldenResource, toGoldenResource);
+
+		return toGoldenResource;
+	}
+
+	private void invokeMdmMergeGoldenResourcesHook(
+		MdmMergeGoldenResourcesParams theParams,
+		IAnyResource fromGoldenResource,
+		IAnyResource toGoldenResource
+	) {
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES)) {
+			// pointcut for MDM_POST_MERGE_GOLDEN_RESOURCES
 			MdmMergeEvent event = new MdmMergeEvent();
 			MdmEventResource from = new MdmEventResource();
 			from.setId(
@@ -152,14 +162,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			HookParams params = new HookParams();
 			params.add(MdmMergeEvent.class, event);
 			params.add(RequestDetails.class, theParams.getRequestDetails());
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_MERGE_GOLDEN_RESOURCES, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES, params);
 		}
-
-		log(
-				mdmTransactionContext,
-				"Merged " + fromGoldenResource.getIdElement().toVersionless() + " into "
-						+ toGoldenResource.getIdElement().toVersionless());
-		return toGoldenResource;
 	}
 
 	/**

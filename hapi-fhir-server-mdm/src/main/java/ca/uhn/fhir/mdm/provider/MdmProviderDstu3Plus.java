@@ -30,11 +30,10 @@ import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
-import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -57,12 +56,12 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -106,7 +105,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		myMdmSettings = theIMdmSettings;
 	}
 
-	// search for matches to the provided patient
+	/**
+	 * Searches for matches for the provided patient resource
+	 * @param thePatient - the patient resource
+	 * @param theRequestDetails - the request details
+	 * @return - any matches to the provided patient resource
+	 */
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
 	public IBaseBundle match(
 			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
@@ -118,7 +122,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient", theRequestDetails);
 	}
 
-	// search for matches to the provided resource
+	/**
+	 * Searches for matches for hte provided resource.
+	 *
+	 * @param theResource - the resource to match on
+	 * @param theResourceType - the resource type
+	 * @param theRequestDetails - the request details
+	 * @return - any matches to the provided resource
+	 */
 	@Operation(name = ProviderConstants.MDM_MATCH)
 	public IBaseBundle serverMatch(
 			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
@@ -179,7 +190,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
 
-		MdmUpdateLinkParams updateLinkParams = new MdmUpdateLinkParams();
+		MdmCreateOrUpdateParams updateLinkParams = new MdmCreateOrUpdateParams();
 		updateLinkParams.setGoldenResourceId(theGoldenResourceId.getValueAsString());
 		updateLinkParams.setResourceId(theResourceId.getValue());
 		updateLinkParams.setMatchResult(MdmControllerUtil.extractMatchResultOrNull(theMatchResult.getValue()));
@@ -203,7 +214,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			ServletRequestDetails theRequestDetails) {
 		validateCreateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
 
-		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setGoldenResourceId(theGoldenResourceId.getValueAsString());
 		params.setResourceId(theResourceId.getValue());
 		params.setMatchResult(MdmControllerUtil.extractMatchResultOrNull(extractStringOrNull(theMatchResult)));
@@ -387,12 +398,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			List<String> urls = buildUrlsForJob(criteria, resourceType);
 			retval = myMdmControllerSvc.submitMdmSubmitJob(urls, theBatchSize, theRequestDetails);
 		} else {
-			submittedCount = synchronousMdmSubmitJob(
-					resourceType, // resource type
-					null, // id
-					criteria, // criteria
-					theRequestDetails // request details
-					);
+			submittedCount = synchronousMdmSubmit(
+					resourceType,
+					null,
+					criteria,
+					theRequestDetails
+			);
 			retval = buildMdmOutParametersWithCount(submittedCount);
 		}
 
@@ -426,12 +437,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			})
 	public IBaseParameters mdmBatchPatientInstance(@IdParam IIdType theIdParam, RequestDetails theRequest) {
 
-		long submittedCount = synchronousMdmSubmitJob(
-				null, // resource type
-				theIdParam, // id
-				null, // criteria
-				theRequest // request
-				);
+		long submittedCount = synchronousMdmSubmit(
+				null,
+				theIdParam,
+				null,
+				theRequest
+		);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -453,12 +464,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = synchronousMdmSubmitJob(
-					PATIENT_RESOURCE, // resource type
-					null, // id
-					criteria, // criteria
-					theRequest // request
-					);
+			long submittedCount = synchronousMdmSubmit(
+					PATIENT_RESOURCE,
+					null,
+					criteria,
+					theRequest
+			);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -471,12 +482,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 				@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
 			})
 	public IBaseParameters mdmBatchPractitionerInstance(@IdParam IIdType theIdParam, RequestDetails theRequest) {
-		long submittedCount = synchronousMdmSubmitJob(
-				null, // resourcetype
-				theIdParam, // id
-				null, // criteria
-				theRequest // request
-				);
+		long submittedCount = synchronousMdmSubmit(
+				null,
+				theIdParam,
+				null,
+				theRequest
+		);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -498,12 +509,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
-			long submittedCount = synchronousMdmSubmitJob(
-					PRACTITIONER_RESOURCE, // resource type
-					null, // id
-					criteria, // criteria
-					theRequest // request details
-					);
+			long submittedCount = synchronousMdmSubmit(
+					PRACTITIONER_RESOURCE,
+					null,
+					criteria,
+					theRequest
+			);
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
 	}
@@ -541,44 +552,19 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return idType.getResourceType();
 	}
 
-	private long synchronousMdmSubmitJob(
+	private long synchronousMdmSubmit(
 			String theResourceType, IIdType theIdType, String theCriteria, RequestDetails theRequestDetails) {
 		long submittedCount = -1;
 		List<String> urls = new ArrayList<>();
 		if (theIdType != null) {
-			urls.add(theIdType.getValue());
-			submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdType, theRequestDetails);
+			submittedCount = mdmSubmitWithId(theIdType, theRequestDetails, urls);
 		} else if (isNotBlank(theResourceType)) {
-			String url = theResourceType;
-			if (isNotEmpty(theCriteria)) {
-				url += "?" + theCriteria;
-			}
-			urls.add(url);
-
-			// practitioner and patient resources are handled specifically
-			// we allow mdm submits on these resources, whether or not
-			// they are an mdm supported time
-			if (theResourceType.equals(PATIENT_RESOURCE)) {
-				submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(theCriteria, theRequestDetails);
-			} else if (theResourceType.equals(PRACTITIONER_RESOURCE)) {
-				submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(theCriteria, theRequestDetails);
-			} else {
-				// otherwise, it's any resource type
-				submittedCount =
-						myMdmSubmitSvc.submitSourceResourceTypeToMdm(theResourceType, theCriteria, theRequestDetails);
-			}
+			submittedCount = submitResourceTypeWithCriteria(theResourceType, theCriteria, theRequestDetails, urls);
 		} else {
-			// submitAllSourceTypes only runs through
-			// valid MDM source types
-			List<String> resourceTypes = myMdmSettings.getMdmRules().getMdmTypes();
-			for (String resourceType : resourceTypes) {
-				String url = resourceType + (isNotEmpty(theCriteria) ? "?" + theCriteria : "");
-				urls.add(url);
-			}
-			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(theCriteria, theRequestDetails);
+			submittedCount = submitAll(theCriteria, theRequestDetails, urls);
 		}
 
-		{
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT)) {
 			// MDM_SUBMIT synchronous submit
 			MdmSubmitEvent submitEvent = new MdmSubmitEvent();
 			submitEvent.setBatchJob(false);
@@ -591,5 +577,40 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 
 		return submittedCount;
+	}
+
+	private long mdmSubmitWithId(IIdType theIdType, RequestDetails theRequestDetails, List<String> theUrls) {
+		theUrls.add(theIdType.getValue());
+		return myMdmSubmitSvc.submitSourceResourceToMdm(theIdType, theRequestDetails);
+	}
+
+	private long submitResourceTypeWithCriteria(
+		String theResourceType,
+		String theCriteria,
+		RequestDetails theRequestDetails,
+		List<String> theUrls
+	) {
+		String url = theResourceType;
+		if (isNotEmpty(theCriteria)) {
+			url += "?" + theCriteria;
+		}
+		theUrls.add(url);
+
+		return myMdmSubmitSvc.submitSourceResourceTypeToMdm(
+			theResourceType,
+			theCriteria,
+			theRequestDetails
+		);
+	}
+
+	private long submitAll(String theCriteria, RequestDetails theRequestDetails, List<String> theUrls) {
+		// submitAllSourceTypes only runs through
+		// valid MDM source types
+		List<String> resourceTypes = myMdmSettings.getMdmRules().getMdmTypes();
+		for (String resourceType : resourceTypes) {
+			String url = resourceType + (isNotEmpty(theCriteria) ? "?" + theCriteria : "");
+			theUrls.add(url);
+		}
+		return myMdmSubmitSvc.submitAllSourceTypesToMdm(theCriteria, theRequestDetails);
 	}
 }

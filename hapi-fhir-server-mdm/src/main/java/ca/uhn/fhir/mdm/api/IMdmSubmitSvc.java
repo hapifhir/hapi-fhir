@@ -55,6 +55,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	long submitPractitionerTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**
@@ -63,6 +64,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
+	@Deprecated(forRemoval = true, since = "6.8.0")
 	long submitPatientTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**

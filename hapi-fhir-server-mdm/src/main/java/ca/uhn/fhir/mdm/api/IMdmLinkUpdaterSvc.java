@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
-import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkUpdaterSvc {
-	IAnyResource updateLink(MdmUpdateLinkParams theParams);
+	IAnyResource updateLink(MdmCreateOrUpdateParams theParams);
 
 	void unduplicateGoldenResource(MdmUnduplicateGoldenResourceParams theParams);
 }

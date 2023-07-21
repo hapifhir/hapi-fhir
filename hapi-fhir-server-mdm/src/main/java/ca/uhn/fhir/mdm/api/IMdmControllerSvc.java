@@ -20,11 +20,10 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
-import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -121,7 +120,7 @@ public interface IMdmControllerSvc {
 			String theMatchResult,
 			MdmTransactionContext theMdmTransactionContext);
 
-	default IAnyResource updateLink(MdmUpdateLinkParams theParams) {
+	default IAnyResource updateLink(MdmCreateOrUpdateParams theParams) {
 		String matchResult = theParams.getMatchResult() == null
 				? null
 				: theParams.getMatchResult().name();
@@ -136,7 +135,7 @@ public interface IMdmControllerSvc {
 			@Nullable String theMatchResult,
 			MdmTransactionContext theMdmTransactionContext);
 
-	default IAnyResource createLink(MdmCreateLinkParams theParams) {
+	default IAnyResource createLink(MdmCreateOrUpdateParams theParams) {
 		String matchResult = theParams.getMatchResult() == null
 				? null
 				: theParams.getMatchResult().name();

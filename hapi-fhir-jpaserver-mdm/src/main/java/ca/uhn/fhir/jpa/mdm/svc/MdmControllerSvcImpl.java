@@ -42,12 +42,10 @@ import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
-import ca.uhn.fhir.mdm.model.MdmOperationBaseParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
-import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
@@ -65,12 +63,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -133,7 +131,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			String theSourceResourceId,
 			String theMatchResult,
 			MdmTransactionContext theMdmTransactionContext) {
-		MdmUpdateLinkParams params = new MdmUpdateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setResourceId(theSourceResourceId);
 		params.setGoldenResourceId(theGoldenResourceId);
 		params.setMdmContext(theMdmTransactionContext);
@@ -256,7 +254,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		return resultPage;
 	}
 
-	private void convertAndValidateParameters(MdmOperationBaseParams theParams) {
+	private void convertAndValidateParameters(MdmCreateOrUpdateParams theParams) {
 		if (theParams.getGoldenResource() == null) {
 			IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(
 					ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theParams.getGoldenResourceId());
@@ -272,7 +270,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource updateLink(MdmUpdateLinkParams theParams) {
+	public IAnyResource updateLink(MdmCreateOrUpdateParams theParams) {
 		convertAndValidateParameters(theParams);
 		return myIMdmLinkUpdaterSvc.updateLink(theParams);
 	}
@@ -283,7 +281,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			String theSourceResourceId,
 			@Nullable String theMatchResult,
 			MdmTransactionContext theMdmTransactionContext) {
-		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setGoldenResourceId(theGoldenResourceId);
 		params.setResourceId(theSourceResourceId);
 		params.setMdmContext(theMdmTransactionContext);
@@ -294,7 +292,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource createLink(MdmCreateLinkParams theParams) {
+	public IAnyResource createLink(MdmCreateOrUpdateParams theParams) {
 		convertAndValidateParameters(theParams);
 
 		return myIMdmLinkCreateSvc.createLink(theParams);
@@ -326,7 +324,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, request);
 		String id = response.getInstanceId();
 
-		{
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_CLEAR)) {
 			// MDM_CLEAR hook:
 			MdmClearEvent event = new MdmClearEvent();
 			event.setResourceTypes(theResourceNames);
@@ -371,7 +369,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		ParametersUtil.addParameterToParametersString(
 				myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
 
-		{
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_SUBMIT)) {
 			// MDM_SUBMIT batch submit job
 			MdmSubmitEvent event = new MdmSubmitEvent();
 			event.setBatchJob(true);

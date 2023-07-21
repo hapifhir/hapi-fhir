@@ -2265,8 +2265,8 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Create Link</b>
-	 * This hook is invoked when an MDM link is created,
-	 * after changes have been persisted to the database.
+	 * This hook is invoked after an MDM link is created,
+	 * and changes have been persisted to the database.
 	 * <p>
 	 * Hook may accept the following parameters:
 	 * </p>
@@ -2284,7 +2284,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_CREATE_LINK(
+	MDM_POST_CREATE_LINK(
 			void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
@@ -2292,8 +2292,8 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Update Link</b>
-	 * This hook is invoked when an MDM link is updated,
-	 * after changes have been persisted to the database.
+	 * This hook is invoked after an MDM link is updated,
+	 * and changes have been persisted to the database.
 	 * <p>
 	 * Hook may accept the following parameters:
 	 * </p>
@@ -2311,7 +2311,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_UPDATE_LINK(
+	MDM_POST_UPDATE_LINK(
 			void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
@@ -2319,8 +2319,8 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Merge Golden Resources</b>
-	 * This hook is invoked when 2 golden resources have been
-	 * merged together.
+	 * This hook is invoked after 2 golden resources have been
+	 * merged together and results persisted.
 	 * <p>
 	 * Hook may accept the following parameters:
 	 * </p>
@@ -2338,7 +2338,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_MERGE_GOLDEN_RESOURCES(
+	MDM_POST_MERGE_GOLDEN_RESOURCES(
 			void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"
@@ -2346,7 +2346,8 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Link History Hook:</b>
-	 * This hook is invoked when link histories are queried.
+	 * This hook is invoked after link histories are queried,
+	 * but before the results are returned to the caller.
 	 * <p>
 	 * Hook may accept the following parameters:
 	 * </p>
@@ -2361,7 +2362,7 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * </ul>
 	 */
-	MDM_LINK_HISTORY(
+	MDM_POST_LINK_HISTORY(
 			void.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent"
@@ -2369,7 +2370,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Not Duplicate/Unduplicate Hook:</b>
-	 * This hook is invoked when 2 golden resources with an existing link
+	 * This hook is invoked after 2 golden resources with an existing link
 	 * of "POSSIBLE_DUPLICATE" get unlinked/unduplicated.
 	 * <p>
 	 * This hook accepts the following parameters:
@@ -2384,7 +2385,7 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * </ul>
 	 */
-	MDM_NOT_DUPLICATE(
+	MDM_POST_NOT_DUPLICATE(
 			void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
@@ -2392,7 +2393,7 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Clear Hook:</b>
-	 * This hook is invoked on an mdm clear operation.
+	 * This hook is invoked when an mdm clear operation is requested.
 	 * <p>
 	 * This hook accepts the following parameters:
 	 * </p>
@@ -2414,24 +2415,36 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>MDM Submit Hook:</b>
-	 * This hook is invoked whenever an mdm submit operation is executed.
+	 * This hook is invoked whenever when mdm submit operation is requested.
 	 * MDM submits can be invoked in multiple ways.
 	 * Some of which accept asynchronous calling, and some of which do not.
+	 * <p>
+	 * If the MDM Submit operation is asynchronous
+	 * (typically because the Prefer: respond-async header has been provided)
+	 * this hook will be invoked after the job is submitted, but before it has
+	 * necessarily been executed.
+	 * </p>
+	 * <p>
+	 * If the MDM Submit operation is synchronous,
+	 * this hook will be invoked immediately after the submit operation
+	 * has been executed, but before the call is returned to the caller.
+	 * </p>
 	 * <ul>
 	 * <li>
-	 * On Patient Type
+	 * On Patient Type. Can be synchronous or asynchronous.
 	 * </li>
 	 * <li>
-	 * On Practitioner Type
+	 * On Practitioner Type. Can be synchronous or asynchronous.
 	 * </li>
 	 * <li>
-	 * On specific patient instances
+	 * On specific patient instances. Is always synchronous.
 	 * </li>
 	 * <li>
-	 * On specific practitioner instances
+	 * On specific practitioner instances. Is always synchronous.
 	 * </li>
 	 * <li>
 	 * On the server (ie, not on any resource) with or without a resource filter.
+	 * Can be synchronous or asynchronous.
 	 * </li>
 	 * </ul>
 	 * <p>

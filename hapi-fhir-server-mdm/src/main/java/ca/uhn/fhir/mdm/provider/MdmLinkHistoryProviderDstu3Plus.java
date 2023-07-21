@@ -91,8 +91,8 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 
 		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
 
-		{
-			// MDM_LINK_HISTORY hook
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_LINK_HISTORY)) {
+			// MDM_POST_LINK_HISTORY hook
 			MdmHistoryEvent historyEvent = new MdmHistoryEvent();
 			historyEvent.setMdmLinkRevisions(mdmLinkRevisionsFromSvc);
 			historyEvent.setSourceIds(theResourceIds.stream()
@@ -105,7 +105,7 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, theRequestDetails);
 			params.add(MdmHistoryEvent.class, historyEvent);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_LINK_HISTORY, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_LINK_HISTORY, params);
 		}
 
 		return retVal;

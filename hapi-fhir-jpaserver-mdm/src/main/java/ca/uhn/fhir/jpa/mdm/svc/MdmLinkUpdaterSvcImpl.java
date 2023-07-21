@@ -35,9 +35,9 @@ import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.MdmUnduplicateGoldenResourceParams;
-import ca.uhn.fhir.mdm.model.MdmUpdateLinkParams;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -63,9 +63,11 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	@Autowired
 	FhirContext myFhirContext;
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	IIdHelperService myIdHelperService;
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
@@ -93,9 +95,10 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	@Autowired
 	private IMdmModelConverterSvc myModelConverter;
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Transactional
 	@Override
-	public IAnyResource updateLink(MdmUpdateLinkParams theParams) {
+	public IAnyResource updateLink(MdmCreateOrUpdateParams theParams) {
 		IAnyResource sourceResource = theParams.getSourceResource();
 		IAnyResource goldenResource = theParams.getGoldenResource();
 		MdmTransactionContext mdmContext = theParams.getMdmContext();
@@ -166,13 +169,13 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			}
 		}
 
-		{
-			// pointcut for MDM_UPDATE_LINK
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_UPDATE_LINK)) {
+			// pointcut for MDM_POST_UPDATE_LINK
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(mdmLink));
 			HookParams hookParams = new HookParams();
 			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_UPDATE_LINK, hookParams);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_UPDATE_LINK, hookParams);
 		}
 
 		return goldenResource;
@@ -182,6 +185,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	 * When updating POSSIBLE_MATCH link to a MATCH we need to validate that a MATCH to a different golden resource
 	 * doesn't exist, because a resource mustn't be a MATCH to more than one golden resource
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void validateNoMatchPresentWhenAcceptingPossibleMatch(
 			IAnyResource theSourceResource,
 			IResourcePersistentId theGoldenResourceId,
@@ -273,15 +277,15 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		IMdmLink retval = myMdmLinkDaoSvc.save(mdmLink);
 
-		{
-			// MDM_NOT_DUPLICATE hook
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_NOT_DUPLICATE)) {
+			// MDM_POST_NOT_DUPLICATE hook
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(retval));
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, theParams.getRequestDetails());
 			params.add(MdmLinkEvent.class, event);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_NOT_DUPLICATE, params);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_NOT_DUPLICATE, params);
 		}
 	}
 

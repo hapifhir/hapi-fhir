@@ -5,14 +5,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -39,8 +39,10 @@ class MdmLinkCreateSvcImplTest {
 	@SuppressWarnings("unused")
 	@Spy
 	FhirContext myFhirContext = FhirContext.forR4();
+	@SuppressWarnings("rawtypes")
 	@Mock
 	IIdHelperService myIdHelperService;
+	@SuppressWarnings("rawtypes")
 	@Mock
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Mock
@@ -59,6 +61,7 @@ class MdmLinkCreateSvcImplTest {
 	@InjectMocks
 	MdmLinkCreateSvcImpl myMdmLinkCreateSvc = new MdmLinkCreateSvcImpl();
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testCreateLink() {
 		ArgumentCaptor<IMdmLink> mdmLinkCaptor = ArgumentCaptor.forClass(IMdmLink.class);
@@ -72,7 +75,7 @@ class MdmLinkCreateSvcImplTest {
 		Patient sourcePatient = new Patient();
 		MdmTransactionContext ctx = new MdmTransactionContext();
 
-		MdmCreateLinkParams params = new MdmCreateLinkParams();
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
 		params.setGoldenResource(goldenPatient);
 		params.setSourceResource(sourcePatient);
 		params.setMatchResult(MdmMatchResultEnum.MATCH);
@@ -87,6 +90,7 @@ class MdmLinkCreateSvcImplTest {
 
 	}
 
+	@SuppressWarnings({"unchecked"})
 	@BeforeEach
 	public void setup() {
 		JpaPid goldenId = JpaPid.fromId(1L);

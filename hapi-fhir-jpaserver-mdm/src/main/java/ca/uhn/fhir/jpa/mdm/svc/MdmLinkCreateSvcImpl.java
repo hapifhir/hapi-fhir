@@ -34,7 +34,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -58,9 +58,11 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	@Autowired
 	FhirContext myFhirContext;
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	IIdHelperService myIdHelperService;
 
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
@@ -79,9 +81,10 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Transactional
 	@Override
-	public IAnyResource createLink(MdmCreateLinkParams theParams) {
+	public IAnyResource createLink(MdmCreateOrUpdateParams theParams) {
 		IAnyResource sourceResource = theParams.getSourceResource();
 		IAnyResource goldenResource = theParams.getGoldenResource();
 		MdmMatchResultEnum matchResult = theParams.getMatchResult();
@@ -134,13 +137,13 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 				+ sourceResource.getIdElement().toVersionless() + " mdm link.");
 		myMdmLinkDaoSvc.save(mdmLink);
 
-		{
-			// pointcut for MDM_CREATE_LINK
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_POST_CREATE_LINK)) {
+			// pointcut for MDM_POST_CREATE_LINK
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(mdmLink));
 			HookParams hookParams = new HookParams();
 			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_CREATE_LINK, hookParams);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_POST_CREATE_LINK, hookParams);
 		}
 
 		return goldenResource;

@@ -160,7 +160,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			Patient gp2 = state.getParameter("GP2");
 
 			Object intereptor = new Object() {
-				@Hook(Pointcut.MDM_MERGE_GOLDEN_RESOURCES)
+				@Hook(Pointcut.MDM_POST_MERGE_GOLDEN_RESOURCES)
 				void onUpdate(RequestDetails theDetails, MdmMergeEvent theEvent) {
 					called.getAndSet(true);
 					assertEquals("Patient/" + gp1.getIdPart(), theEvent.getFromResource().getId());
@@ -200,7 +200,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			AtomicBoolean called = new AtomicBoolean(false);
 
 			Object intereptor = new Object() {
-				@Hook(Pointcut.MDM_UPDATE_LINK)
+				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
 				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 					assertEquals(1, theEvent.getMdmLinks().size());
@@ -234,7 +234,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			MdmMatchResultEnum match = MdmMatchResultEnum.MATCH;
 
 			Object intereptor = new Object() {
-				@Hook(Pointcut.MDM_CREATE_LINK)
+				@Hook(Pointcut.MDM_POST_CREATE_LINK)
 				void onCreate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 					assertEquals(1, theEvent.getMdmLinks().size());
@@ -277,7 +277,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 			// interceptor
 			Object interceptor = new Object() {
-				@Hook(Pointcut.MDM_NOT_DUPLICATE)
+				@Hook(Pointcut.MDM_POST_NOT_DUPLICATE)
 				void call(RequestDetails theRequestDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 
@@ -382,10 +382,6 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				.when(myJobCoordinator).startInstance(any(RequestDetails.class), any(JobInstanceStartRequest.class));
 			doReturn(1L)
 				.when(myMdmSubmitSvc).submitSourceResourceTypeToMdm(anyString(), any(), any(RequestDetails.class));
-			doReturn(1L)
-				.when(myMdmSubmitSvc).submitPatientTypeToMdm(any(), any(RequestDetails.class));
-			doReturn(1L)
-				.when(myMdmSubmitSvc).submitPractitionerTypeToMdm(any(), any(RequestDetails.class));
 
 			// use identifier because it's on almost every resource type
 			StringType[] criteria = theMdmSubmitEndpoint.canTakeCriteria() ?
@@ -567,7 +563,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 			// interceptor
 			Object interceptor = new Object() {
-				@Hook(Pointcut.MDM_LINK_HISTORY)
+				@Hook(Pointcut.MDM_POST_LINK_HISTORY)
 				void onHistory(RequestDetails theRequestDetails, MdmHistoryEvent theEvent) {
 					called.getAndSet(true);
 
