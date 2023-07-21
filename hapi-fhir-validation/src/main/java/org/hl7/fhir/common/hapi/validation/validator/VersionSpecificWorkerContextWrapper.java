@@ -448,8 +448,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public List<StructureDefinition> fetchTypeDefinitions(String n) {
-		throw new UnsupportedOperationException(Msg.code(2329));
+	public List<StructureDefinition> fetchTypeDefinitions(String typeName) {
+		List<StructureDefinition> allStructures = new ArrayList<>(allStructures());
+		allStructures.removeIf(sd -> !sd.hasType() || !sd.getType().equals(typeName));
+		return allStructures;
 	}
 
 	@Override
