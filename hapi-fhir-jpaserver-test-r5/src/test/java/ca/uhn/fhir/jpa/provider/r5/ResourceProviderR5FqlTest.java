@@ -28,9 +28,9 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 		}
 
 		String select = """
-			select name.family, name.given
+			select name[0].family, name[0].given[0]
 			from Patient
-			where identifier = 'foo|bar'
+			where id in search_match('identifier', 'foo|bar')
 			""";
 		Parameters request = new Parameters();
 		request.addParameter(HfqlConstants.PARAM_ACTION, new StringType(HfqlConstants.PARAM_ACTION_SEARCH));
