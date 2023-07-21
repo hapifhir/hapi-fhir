@@ -43,8 +43,6 @@ public class MdmLinkEvent implements IModelJson {
 
 	@Override
 	public String toString() {
-		return "MdmLinkEvent{" +
-			"myMdmLinks=" + myMdmLinks +
-			'}';
+		return "MdmLinkEvent{" + "myMdmLinks=" + myMdmLinks + '}';
 	}
 }

@@ -19,14 +19,8 @@
  */
 package ca.uhn.fhir.rest.gclient;
 
-import ca.uhn.fhir.rest.api.Constants;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * 
+ *
  */
 public class SpecialClientParam extends BaseClientParam implements IParam {
 
@@ -40,6 +34,4 @@ public class SpecialClientParam extends BaseClientParam implements IParam {
 	public String getParamName() {
 		return myParamName;
 	}
-
-
 }

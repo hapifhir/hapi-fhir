@@ -38,10 +38,7 @@ public class PredicateBuilderFactory {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderFactory.class);
 
 	public static ICanMakeMissingParamPredicate createPredicateBuilderForParamType(
-		RestSearchParameterTypeEnum theParamType,
-		SearchQueryBuilder theBuilder,
-		QueryStack theQueryStack
-	) {
+			RestSearchParameterTypeEnum theParamType, SearchQueryBuilder theBuilder, QueryStack theQueryStack) {
 		switch (theParamType) {
 			case NUMBER:
 				return createNumberPredicateBuilder(theBuilder);
@@ -103,9 +100,10 @@ public class PredicateBuilderFactory {
 		return up;
 	}
 
-	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
-		ResourceLinkPredicateBuilder retVal = theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
+	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(
+			QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
+		ResourceLinkPredicateBuilder retVal =
+				theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
 		return retVal;
 	}
-
 }

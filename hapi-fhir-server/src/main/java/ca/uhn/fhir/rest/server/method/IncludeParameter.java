@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.api.Constants;
@@ -46,7 +46,10 @@ class IncludeParameter extends BaseQueryParameter {
 	private Class<?> mySpecType;
 	private boolean myReverse;
 
-	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
+	public IncludeParameter(
+			IncludeParam theAnnotation,
+			Class<? extends Collection<Include>> theInstantiableCollectionType,
+			Class<?> theSpecType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
@@ -62,9 +65,9 @@ class IncludeParameter extends BaseQueryParameter {
 
 		mySpecType = theSpecType;
 		if (mySpecType != Include.class && mySpecType != String.class) {
-			throw new ConfigurationException(Msg.code(439) + "Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
+			throw new ConfigurationException(Msg.code(439) + "Invalid @" + IncludeParam.class.getSimpleName()
+					+ " parameter type: " + mySpecType);
 		}
-
 	}
 
 	public boolean isReverse() {
@@ -127,14 +130,16 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(FhirContext theContext, List<QualifiedParamList> theString)
+			throws InternalErrorException, InvalidRequestException {
 		Collection<Include> retValCollection = null;
 
 		if (myInstantiableCollectionType != null) {
 			try {
 				retValCollection = myInstantiableCollectionType.newInstance();
 			} catch (Exception e) {
-				throw new InternalErrorException(Msg.code(440) + "Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+				throw new InternalErrorException(
+						Msg.code(440) + "Failed to instantiate " + myInstantiableCollectionType.getName(), e);
 			}
 		}
 
@@ -143,7 +148,8 @@ class IncludeParameter extends BaseQueryParameter {
 				continue;
 			}
 			if (nextParamList.size() > 1) {
-				throw new InvalidRequestException(Msg.code(441) + theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
+				throw new InvalidRequestException(Msg.code(441)
+						+ theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
 			String qualifier = nextParamList.getQualifier();
@@ -153,7 +159,14 @@ class IncludeParameter extends BaseQueryParameter {
 			if (myAllow != null && !myAllow.isEmpty()) {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
-						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString(), getName());
+						String msg = theContext
+								.getLocalizer()
+								.getMessage(
+										IncludeParameter.class,
+										"invalidIncludeNameInRequest",
+										value,
+										new TreeSet<String>(myAllow).toString(),
+										getName());
 						throw new InvalidRequestException(Msg.code(442) + msg);
 					}
 				}
@@ -170,5 +183,4 @@ class IncludeParameter extends BaseQueryParameter {
 
 		return retValCollection;
 	}
-
 }

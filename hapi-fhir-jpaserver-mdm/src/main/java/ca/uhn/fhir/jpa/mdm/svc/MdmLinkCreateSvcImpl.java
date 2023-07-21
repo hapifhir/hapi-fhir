@@ -39,6 +39,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
@@ -59,14 +60,19 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 
 	@Autowired
 	FhirContext myFhirContext;
+
 	@Autowired
 	IIdHelperService myIdHelperService;
+
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
+
 	@Autowired
 	IMdmSettings myMdmSettings;
+
 	@Autowired
 	MessageHelper myMessageHelper;
+
 	@Autowired
 	MdmPartitionHelper myMdmPartitionHelper;
 
@@ -93,7 +99,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(goldenResource, sourceResource);
 
-		Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
+		Optional<? extends IMdmLink> optionalMdmLink =
+				myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (optionalMdmLink.isPresent()) {
 			throw new InvalidRequestException(Msg.code(753) + myMessageHelper.getMessageForPresentLink(goldenResource, sourceResource));
 		}
@@ -133,19 +140,23 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		return goldenResource;
 	}
 
-	private void validateCreateLinkRequest(IAnyResource theGoldenRecord, IAnyResource theSourceResource, String theSourceType) {
+	private void validateCreateLinkRequest(
+			IAnyResource theGoldenRecord, IAnyResource theSourceResource, String theSourceType) {
 		String goldenRecordType = myFhirContext.getResourceType(theGoldenRecord);
 
 		if (!myMdmSettings.isSupportedMdmType(goldenRecordType)) {
-			throw new InvalidRequestException(Msg.code(755) + myMessageHelper.getMessageForUnsupportedFirstArgumentTypeInUpdate(goldenRecordType));
+			throw new InvalidRequestException(Msg.code(755)
+					+ myMessageHelper.getMessageForUnsupportedFirstArgumentTypeInUpdate(goldenRecordType));
 		}
 
 		if (!myMdmSettings.isSupportedMdmType(theSourceType)) {
-			throw new InvalidRequestException(Msg.code(756) + myMessageHelper.getMessageForUnsupportedSecondArgumentTypeInUpdate(theSourceType));
+			throw new InvalidRequestException(
+					Msg.code(756) + myMessageHelper.getMessageForUnsupportedSecondArgumentTypeInUpdate(theSourceType));
 		}
 
 		if (!Objects.equals(goldenRecordType, theSourceType)) {
-			throw new InvalidRequestException(Msg.code(757) + myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theSourceType));
+			throw new InvalidRequestException(Msg.code(757)
+					+ myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theSourceType));
 		}
 
 		if (!MdmResourceUtil.isMdmManaged(theGoldenRecord)) {

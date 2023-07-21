@@ -35,16 +35,18 @@ public class CollectionBinder
 	/**
 	 * @param thePositionDescription Just used in exceptions if theCollectionType is invalid
 	 */
-	@SuppressWarnings({ "rawtypes", "cast" })
-	public static Class<? extends Collection> getInstantiableCollectionType(Class<? extends Collection<?>> theCollectionType, String thePositionDescription) {
-		if (theCollectionType.equals(List.class) || theCollectionType .equals(ArrayList.class)) {
+	@SuppressWarnings({"rawtypes", "cast"})
+	public static Class<? extends Collection> getInstantiableCollectionType(
+			Class<? extends Collection<?>> theCollectionType, String thePositionDescription) {
+		if (theCollectionType.equals(List.class) || theCollectionType.equals(ArrayList.class)) {
 			return (Class<? extends Collection>) ArrayList.class;
-		} else if (theCollectionType .equals( Set.class )|| theCollectionType .equals( HashSet.class)) {
+		} else if (theCollectionType.equals(Set.class) || theCollectionType.equals(HashSet.class)) {
 			return (Class<? extends Collection>) HashSet.class;
 		} else if (theCollectionType.equals(Collection.class)) {
 			return (Class<? extends Collection>) ArrayList.class;
 		} else {
-			throw new ConfigurationException(Msg.code(1956) + "Unsupported binding collection type '" + theCollectionType.getCanonicalName() + "' for " + thePositionDescription);
+			throw new ConfigurationException(Msg.code(1956) + "Unsupported binding collection type '"
+					+ theCollectionType.getCanonicalName() + "' for " + thePositionDescription);
 		}
 	}
 
@@ -60,7 +62,8 @@ public class CollectionBinder
 	// } else if (theCollectionType == Collection.class) {
 	// myCollectionType = ArrayList.class;
 	// } else {
-	// throw new ConfigurationException(Msg.code(1957) + "Unsupported binding collection type: " + theCollectionType.getCanonicalName());
+	// throw new ConfigurationException(Msg.code(1957) + "Unsupported binding collection type: " +
+	// theCollectionType.getCanonicalName());
 	// }
 	// }
 

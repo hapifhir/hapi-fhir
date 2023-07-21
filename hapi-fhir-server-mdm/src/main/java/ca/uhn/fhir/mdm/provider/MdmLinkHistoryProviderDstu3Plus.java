@@ -61,21 +61,34 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
-	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theMdmGoldenResourceIds,
-													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
-													ServletRequestDetails theRequestDetails) {
+	public IBaseParameters historyLinks(
+			@OperationParam(
+							name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theMdmGoldenResourceIds,
+			@OperationParam(
+							name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theResourceIds,
+			ServletRequestDetails theRequestDetails) {
 		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
 
-		final List<String> goldenResourceIdsToUse = convertToStringsIncludingCommaDelimitedIfNotNull(theMdmGoldenResourceIds);
+		final List<String> goldenResourceIdsToUse =
+				convertToStringsIncludingCommaDelimitedIfNotNull(theMdmGoldenResourceIds);
 		final List<String> resourceIdsToUse = convertToStringsIncludingCommaDelimitedIfNotNull(theResourceIds);
 
 		final IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
-			.setGoldenResourceIds(goldenResourceIdsToUse)
-			.setSourceIds(resourceIdsToUse);
+				.setGoldenResourceIds(goldenResourceIdsToUse)
+				.setSourceIds(resourceIdsToUse);
 
-		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
+		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc =
+				myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
 		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
 

@@ -28,6 +28,7 @@ import java.util.Map;
 public final class ColumnTypeToDriverTypeToSqlType {
 
 	private ColumnTypeToDriverTypeToSqlType() {}
+
 	static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
 
 	static {
@@ -116,7 +117,10 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MYSQL_5_7, "longtext");
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.ORACLE_12C, "clob");
-		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.POSTGRES_9_4, "oid"); // the PG driver will write oid into a `text` column
+		setColumnType(
+				ColumnTypeEnum.CLOB,
+				DriverTypeEnum.POSTGRES_9_4,
+				"oid"); // the PG driver will write oid into a `text` column
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.H2_EMBEDDED, "character varying");
@@ -132,8 +136,10 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		return myColumnTypeToDriverTypeToSqlType;
 	}
 
-	private static void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
-		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
+	private static void setColumnType(
+			ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
+		Map<DriverTypeEnum, String> columnSqlType =
+				myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
 			throw new IllegalStateException(Msg.code(65) + "Duplicate key: " + theDriverType);
 		}

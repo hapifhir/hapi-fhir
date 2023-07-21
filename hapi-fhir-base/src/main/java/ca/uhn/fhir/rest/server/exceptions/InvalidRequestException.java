@@ -19,22 +19,21 @@
  */
 package ca.uhn.fhir.rest.server.exceptions;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * Represents an <b>HTTP 400 Bad Request</b> response.
  * This status indicates that the client's message was invalid (e.g. not a valid FHIR Resource
  * per the specifications), as opposed to the {@link UnprocessableEntityException} which indicates
  * that data does not pass business rule validation on the server.
- * 
+ *
  * <p>
  * Note that a complete list of RESTful exceptions is available in the
  * <a href="./package-summary.html">Package Summary</a>.
  * </p>
- * 
+ *
  * @see UnprocessableEntityException Which should be used for business level validation failures
  */
 @CoverageIgnore
@@ -63,10 +62,10 @@ public class InvalidRequestException extends BaseServerResponseException {
 	public InvalidRequestException(Throwable theCause) {
 		super(STATUS_CODE, theCause);
 	}
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
@@ -74,6 +73,4 @@ public class InvalidRequestException extends BaseServerResponseException {
 	public InvalidRequestException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
-
-
 }

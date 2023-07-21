@@ -23,5 +23,4 @@ public class WarmSearchDefinition {
 
 	private String mySearchUrl;
 	private long myRefreshPeriodMillis;
-
 }

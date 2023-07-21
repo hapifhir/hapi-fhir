@@ -47,13 +47,13 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -85,7 +85,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
+	DaoMethodOutcome create(
+			T theResource,
+			String theIfNoneExist,
+			boolean thePerformIndexing,
+			RequestDetails theRequestDetails,
+			@Nonnull TransactionDetails theTransactionDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -101,7 +106,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
 	 */
-	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
+	DaoMethodOutcome delete(
+			IIdType theResource,
+			DeleteConflictList theDeleteConflictsListToPopulate,
+			RequestDetails theRequestDetails,
+			@Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -114,7 +123,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @since 6.8.0
 	 */
-	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
+	DeleteMethodOutcome deleteByUrl(
+			String theUrl,
+			DeleteConflictList theDeleteConflictsListToPopulate,
+			RequestDetails theRequestDetails,
+			@Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -124,7 +137,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * @deprecated Deprecated in 6.8.0 - Use and implement {@link #deletePidList(String, Collection, DeleteConflictList, RequestDetails, TransactionDetails)}
 	 */
-	default <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+	default <P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(
+			String theUrl,
+			Collection<P> theResourceIds,
+			DeleteConflictList theDeleteConflicts,
+			RequestDetails theRequest) {
 		return deletePidList(theUrl, theResourceIds, theDeleteConflicts, theRequest, new TransactionDetails());
 	}
 
@@ -143,7 +160,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @return response back to the client
 	 * @since 6.8.0
 	 */
-	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(
+			String theUrl,
+			Collection<P> theResourceIds,
+			DeleteConflictList theDeleteConflicts,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails);
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
@@ -151,7 +173,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	<P extends IResourcePersistentId> void expunge(Collection<P> theResourceIds, RequestDetails theRequest);
 
-	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
+	ExpungeOutcome forceExpungeInExistingTransaction(
+			IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	@Nonnull
 	Class<T> getResourceType();
@@ -162,9 +185,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @deprecated Use {@link #history(IIdType, HistorySearchDateRangeParam, RequestDetails)} instead
 	 */
 	@Deprecated(since = "6.2")
-	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
+	IBundleProvider history(
+			IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
-	IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails);
+	IBundleProvider history(
+			IIdType theId,
+			HistorySearchDateRangeParam theHistorySearchDateRangeParam,
+			RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
@@ -197,12 +224,26 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Opens a new transaction and performs a patch operation
 	 */
-	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails);
+	DaoMethodOutcome patch(
+			IIdType theId,
+			String theConditionalUrl,
+			PatchTypeEnum thePatchType,
+			String thePatchBody,
+			IBaseParameters theFhirPatchBody,
+			RequestDetails theRequestDetails);
 
 	/**
 	 * Execute a patch operation within the existing database transaction
 	 */
-	DaoMethodOutcome patchInTransaction(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+	DaoMethodOutcome patchInTransaction(
+			IIdType theId,
+			String theConditionalUrl,
+			boolean thePerformIndexing,
+			PatchTypeEnum thePatchType,
+			String thePatchBody,
+			IBaseParameters theFhirPatchBody,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -272,9 +313,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theResourcePersistentId The ID
 	 * @return
 	 */
-	ReindexOutcome reindex(IResourcePersistentId theResourcePersistentId, ReindexParameters theReindexParameters, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	ReindexOutcome reindex(
+			IResourcePersistentId theResourcePersistentId,
+			ReindexParameters theReindexParameters,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails);
 
-	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
+	void removeTag(
+			IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode);
 
@@ -285,12 +331,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
 
-	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
+	IBundleProvider search(
+			SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	default <T extends IResourcePersistentId> List<T> searchForIds(
+			SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
 
@@ -301,10 +349,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default <T extends IResourcePersistentId> List<T> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	default <T extends IResourcePersistentId> List<T> searchForIds(
+			SearchParameterMap theParams,
+			RequestDetails theRequest,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
 	}
-
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into
@@ -338,7 +388,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
+	DaoMethodOutcome update(
+			T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails);
 
@@ -346,7 +397,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theForceUpdateVersion Create a new version with the same contents as the current version even if the content hasn't changed (this is mostly useful for
 	 *                              resources mapping to external content such as external code systems)
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
+	DaoMethodOutcome update(
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			RequestDetails theRequestDetails,
+			@Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * Not supported in DSTU1!
@@ -354,8 +411,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theRequestDetails The request details including permissions and partitioning information
 	 * @return MethodOutcome even if the resource fails validation it should still successfully return with a response status of 200
 	 */
-
-	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
+	MethodOutcome validate(
+			T theResource,
+			IIdType theId,
+			String theRawResource,
+			EncodingEnum theEncoding,
+			ValidationModeEnum theMode,
+			String theProfile,
+			RequestDetails theRequestDetails);
 
 	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);
 
@@ -365,5 +428,4 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	default String getCurrentVersionId(IIdType theReferenceElement) {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
-
 }

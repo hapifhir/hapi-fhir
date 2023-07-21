@@ -62,7 +62,8 @@ public interface IDaoRegistryUser {
 	 */
 	@SuppressWarnings("unchecked")
 	default <T extends IBaseResource> Class<T> getClass(String theResourceName) {
-		return (Class<T>) getFhirContext().getResourceDefinition(theResourceName).getImplementingClass();
+		return (Class<T>)
+				getFhirContext().getResourceDefinition(theResourceName).getImplementingClass();
 	}
 
 	/**
@@ -126,8 +127,8 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseResource> DaoMethodOutcome create(T theResource, RequestDetails requestDetails) {
 		checkNotNull(theResource);
 
-		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType())).create(theResource,
-			requestDetails);
+		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType()))
+				.create(theResource, requestDetails);
 	}
 
 	/**
@@ -155,8 +156,8 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseResource> DaoMethodOutcome update(T theResource, RequestDetails requestDetails) {
 		checkNotNull(theResource);
 
-		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType())).update(theResource,
-			requestDetails);
+		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType()))
+				.update(theResource, requestDetails);
 	}
 
 	/**
@@ -225,8 +226,8 @@ public interface IDaoRegistryUser {
 	 * @param theSearchMap     the Search Parameters
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
-																						 SearchParameterMap theSearchMap) {
+	default <T extends IBaseResource> Iterable<IBaseResource> search(
+			Class<T> theResourceClass, SearchParameterMap theSearchMap) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 
@@ -243,9 +244,8 @@ public interface IDaoRegistryUser {
 	 * @param theRequestDetails multi-tenancy information
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
-																				SearchParameterMap theSearchMap,
-																				RequestDetails theRequestDetails) {
+	default <T extends IBaseResource> Iterable<IBaseResource> search(
+			Class<T> theResourceClass, SearchParameterMap theSearchMap, RequestDetails theRequestDetails) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 

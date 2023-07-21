@@ -39,7 +39,8 @@ public class GenomicsUploader {
 		dnaSequenceVariantName.setCode("dnaSequenceVariantName");
 		dnaSequenceVariantName.setType(Enumerations.SearchParamType.TOKEN);
 		dnaSequenceVariantName.setTitle("DNASequenceVariantName");
-		dnaSequenceVariantName.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName')");
+		dnaSequenceVariantName.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNASequenceVariantName')");
 		dnaSequenceVariantName.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(dnaSequenceVariantName).execute();
 
@@ -50,7 +51,8 @@ public class GenomicsUploader {
 		dNAVariantId.setCode("dnaVariantId");
 		dNAVariantId.setType(Enumerations.SearchParamType.TOKEN);
 		dNAVariantId.setTitle("DNAVariantId");
-		dNAVariantId.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId')");
+		dNAVariantId.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsDNAVariantId')");
 		dNAVariantId.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(dNAVariantId).execute();
 
@@ -72,9 +74,9 @@ public class GenomicsUploader {
 		alleleName.setCode("alleleName");
 		alleleName.setType(Enumerations.SearchParamType.TOKEN);
 		alleleName.setTitle("AlleleName");
-		alleleName.setExpression("Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName')");
+		alleleName.setExpression(
+				"Observation.extension('http://hl7.org/fhir/StructureDefinition/observation-geneticsAlleleName')");
 		alleleName.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		client.update().resource(alleleName).execute();
 	}
-
 }

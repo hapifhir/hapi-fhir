@@ -29,10 +29,10 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
@@ -50,9 +50,16 @@ public class MdmQuerySearchParameters {
 	public static final String SCORE_NAME = "myScore";
 
 	public static final Set<String> ourValidSortParameters = Set.of(
-		GOLDEN_RESOURCE_PID_NAME, SOURCE_PID_NAME, MATCH_RESULT_NAME, LINK_SOURCE_NAME, PARTITION_ID_NAME, GOLDEN_RESOURCE_NAME,
-		RESOURCE_TYPE_NAME, CREATED_NAME, UPDATED_NAME, SCORE_NAME
-	);
+			GOLDEN_RESOURCE_PID_NAME,
+			SOURCE_PID_NAME,
+			MATCH_RESULT_NAME,
+			LINK_SOURCE_NAME,
+			PARTITION_ID_NAME,
+			GOLDEN_RESOURCE_NAME,
+			RESOURCE_TYPE_NAME,
+			CREATED_NAME,
+			UPDATED_NAME,
+			SCORE_NAME);
 
 	private IIdType myGoldenResourceId;
 	private IIdType mySourceId;
@@ -71,7 +78,14 @@ public class MdmQuerySearchParameters {
 	}
 
 	@Deprecated(since = "2023.02.R01", forRemoval = true)
-	public MdmQuerySearchParameters(@Nullable String theGoldenResourceId, @Nullable String theSourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds, @Nullable String theResourceType) {
+	public MdmQuerySearchParameters(
+			@Nullable String theGoldenResourceId,
+			@Nullable String theSourceId,
+			@Nullable String theMatchResult,
+			@Nullable String theLinkSource,
+			MdmPageRequest thePageRequest,
+			@Nullable List<Integer> thePartitionIds,
+			@Nullable String theResourceType) {
 		setGoldenResourceId(theGoldenResourceId);
 		setSourceId(theSourceId);
 		setLinkSource(theLinkSource);
@@ -82,7 +96,14 @@ public class MdmQuerySearchParameters {
 	}
 
 	@Deprecated(since = "2023.02.R01", forRemoval = true)
-	public MdmQuerySearchParameters(@Nullable IIdType theGoldenResourceId, @Nullable IIdType theSourceId, @Nullable MdmMatchResultEnum theMatchResult, @Nullable MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds, @Nullable String theResourceType) {
+	public MdmQuerySearchParameters(
+			@Nullable IIdType theGoldenResourceId,
+			@Nullable IIdType theSourceId,
+			@Nullable MdmMatchResultEnum theMatchResult,
+			@Nullable MdmLinkSourceEnum theLinkSource,
+			MdmPageRequest thePageRequest,
+			@Nullable List<Integer> thePartitionIds,
+			@Nullable String theResourceType) {
 		setGoldenResourceId(theGoldenResourceId);
 		setSourceId(theSourceId);
 		setLinkSource(theLinkSource);
@@ -102,7 +123,8 @@ public class MdmQuerySearchParameters {
 	}
 
 	public MdmQuerySearchParameters setGoldenResourceId(String theGoldenResourceId) {
-		myGoldenResourceId = MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		myGoldenResourceId = MdmControllerUtil.extractGoldenResourceIdDtOrNull(
+				ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		return this;
 	}
 
@@ -116,7 +138,8 @@ public class MdmQuerySearchParameters {
 	}
 
 	public MdmQuerySearchParameters setSourceId(String theSourceId) {
-		mySourceId = MdmControllerUtil.extractSourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceId);
+		mySourceId =
+				MdmControllerUtil.extractSourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceId);
 		return this;
 	}
 
@@ -185,12 +208,13 @@ public class MdmQuerySearchParameters {
 
 		for (String param : theSortString.split(",")) {
 			String p = (param.startsWith("-") ? param.substring(1) : param).trim();
-			if ( ! MdmQuerySearchParameters.ourValidSortParameters.contains(p)) {
-				throw new InvalidRequestException(Msg.code(2233) + "Unrecognized sort parameter: " + p + ". Valid parameters are: " +
-					String.join(", ", MdmQuerySearchParameters.ourValidSortParameters));
+			if (!MdmQuerySearchParameters.ourValidSortParameters.contains(p)) {
+				throw new InvalidRequestException(
+						Msg.code(2233) + "Unrecognized sort parameter: " + p + ". Valid parameters are: "
+								+ String.join(", ", MdmQuerySearchParameters.ourValidSortParameters));
 			}
 			SortOrderEnum order = param.startsWith("-") ? SortOrderEnum.DESC : SortOrderEnum.ASC;
-			mySort.add( new SortSpec(p,  order) );
+			mySort.add(new SortSpec(p, order));
 		}
 		return this;
 	}
@@ -198,14 +222,13 @@ public class MdmQuerySearchParameters {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append(GOLDEN_RESOURCE_PID_NAME, myGoldenResourceId)
-			.append(SOURCE_PID_NAME, mySourceId)
-			.append(MATCH_RESULT_NAME, myMatchResult)
-			.append(LINK_SOURCE_NAME, myLinkSource)
-			.append(PARTITION_ID_NAME, myPartitionIds)
-			.append(RESOURCE_TYPE_NAME, myResourceType)
-			.append("myPageRequest", myPageRequest)
-			.toString();
+				.append(GOLDEN_RESOURCE_PID_NAME, myGoldenResourceId)
+				.append(SOURCE_PID_NAME, mySourceId)
+				.append(MATCH_RESULT_NAME, myMatchResult)
+				.append(LINK_SOURCE_NAME, myLinkSource)
+				.append(PARTITION_ID_NAME, myPartitionIds)
+				.append(RESOURCE_TYPE_NAME, myResourceType)
+				.append("myPageRequest", myPageRequest)
+				.toString();
 	}
-
 }

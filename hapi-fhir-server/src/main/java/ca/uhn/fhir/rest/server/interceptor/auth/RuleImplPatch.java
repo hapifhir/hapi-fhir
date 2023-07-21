@@ -35,12 +35,26 @@ class RuleImplPatch extends BaseRule {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
+	public AuthorizationInterceptor.Verdict applyRule(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Set<AuthorizationFlagsEnum> theFlags,
+			Pointcut thePointcut) {
 
 		if (myAllRequests) {
 			if (theOperation == RestOperationTypeEnum.PATCH) {
 				if (theInputResource == null && theOutputResource == null) {
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
+					return newVerdict(
+							theOperation,
+							theRequestDetails,
+							theInputResource,
+							theInputResourceId,
+							theOutputResource,
+							theRuleApplier);
 				}
 			}
 		}

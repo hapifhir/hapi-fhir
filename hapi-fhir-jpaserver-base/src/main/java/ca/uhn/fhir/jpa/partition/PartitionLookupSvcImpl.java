@@ -48,14 +48,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -66,17 +66,22 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
 	@Autowired
 	private IInterceptorService myInterceptorService;
+
 	@Autowired
 	private IPartitionDao myPartitionDao;
 
 	private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
 	private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
+
 	@Autowired
 	private FhirContext myFhirCtx;
+
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+
 	private TransactionTemplate myTxTemplate;
 
 	/**
@@ -110,7 +115,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		if (myPartitionSettings.isUnnamedPartitionMode()) {
 			return new PartitionEntity().setId(thePartitionId);
 		}
-		if (myPartitionSettings.getDefaultPartitionId() != null && myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
+		if (myPartitionSettings.getDefaultPartitionId() != null
+				&& myPartitionSettings.getDefaultPartitionId().equals(thePartitionId)) {
 			return new PartitionEntity().setId(thePartitionId).setName(JpaConstants.DEFAULT_PARTITION_NAME);
 		}
 		return myIdToPartitionCache.get(thePartitionId);
@@ -135,6 +141,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 		return candidate;
 	}
+
 	@Override
 	@Transactional
 	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
@@ -150,9 +157,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		// Interceptor call: STORAGE_PARTITION_CREATED
 		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_CREATED)) {
 			HookParams params = new HookParams()
-				.add(RequestPartitionId.class, thePartition.toRequestPartitionId())
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					.add(RequestPartitionId.class, thePartition.toRequestPartitionId())
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_CREATED, params);
 		}
 
@@ -167,7 +174,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
 		if (existingPartitionOpt.isPresent() == false) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartition.getId());
+			String msg = myFhirCtx
+					.getLocalizer()
+					.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartition.getId());
 			throw new InvalidRequestException(Msg.code(1307) + msg);
 		}
 
@@ -191,7 +200,9 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
 		if (!partition.isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartitionId);
+			String msg = myFhirCtx
+					.getLocalizer()
+					.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartitionId);
 			throw new IllegalArgumentException(Msg.code(1308) + msg);
 		}
 
@@ -208,14 +219,17 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {
 		if (myPartitionDao.findForName(theName).isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
+			String msg = myFhirCtx
+					.getLocalizer()
+					.getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
 			throw new InvalidRequestException(Msg.code(1309) + msg);
 		}
 	}
 
-	private void validIdUponCreation(PartitionEntity thePartition){
+	private void validIdUponCreation(PartitionEntity thePartition) {
 		if (myPartitionDao.findById(thePartition.getId()).isPresent()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
+			String msg =
+					myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "duplicatePartitionId");
 			throw new InvalidRequestException(Msg.code(2366) + msg);
 		}
 	}
@@ -227,36 +241,51 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 
 		if (thePartition.getName().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
+			String msg = myFhirCtx
+					.getLocalizer()
+					.getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
 			throw new InvalidRequestException(Msg.code(1311) + msg);
 		}
 
 		if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
+			String msg = myFhirCtx
+					.getLocalizer()
+					.getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
 			throw new InvalidRequestException(Msg.code(1312) + msg);
 		}
 	}
 
 	private void validateNotInUnnamedPartitionMode() {
 		if (myPartitionSettings.isUnnamedPartitionMode()) {
-			throw new MethodNotAllowedException(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
+			throw new MethodNotAllowedException(
+					Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
 		}
 	}
 
 	private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
-		return executeInTransaction(() -> myPartitionDao.findForName(theName))
-			.orElseThrow(() -> {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
-				return new ResourceNotFoundException(msg);
-			});
+		return executeInTransaction(() -> myPartitionDao.findForName(theName)).orElseThrow(() -> {
+			String msg =
+					myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
+			return new ResourceNotFoundException(msg);
+		});
 	}
 
 	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return executeInTransaction(() -> myPartitionDao.findById(theId))
-			.orElseThrow(() -> {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
+		try {
+			return executeInTransaction(() -> myPartitionDao.findById(theId)).orElseThrow(() -> {
+				String msg = myFhirCtx
+						.getLocalizer()
+						.getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
 				return new ResourceNotFoundException(msg);
 			});
+		} catch (ResourceNotFoundException e) {
+			List<PartitionEntity> allPartitions = executeInTransaction(() -> myPartitionDao.findAll());
+			String allPartitionsString = allPartitions.stream()
+					.map(t -> t.getId() + "/" + t.getName())
+					.collect(Collectors.joining(", "));
+			ourLog.warn("Failed to find partition with ID {}.  Current partitions: {}", theId, allPartitionsString);
+			throw e;
+		}
 	}
 
 	protected <T> T executeInTransaction(ICallable<T> theCallable) {
@@ -281,7 +310,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
 		if (thePartitionId == null) {
-			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
+			String msg =
+					theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
 			throw new InvalidRequestException(Msg.code(1314) + msg);
 		}
 	}

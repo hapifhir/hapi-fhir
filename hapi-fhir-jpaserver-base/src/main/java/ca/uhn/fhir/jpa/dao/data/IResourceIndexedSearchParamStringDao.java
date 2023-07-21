@@ -27,7 +27,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceIndexedSearchParamStringDao extends JpaRepository<ResourceIndexedSearchParamString, Long>, IHapiFhirJpaRepository {
+public interface IResourceIndexedSearchParamStringDao
+		extends JpaRepository<ResourceIndexedSearchParamString, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resId")

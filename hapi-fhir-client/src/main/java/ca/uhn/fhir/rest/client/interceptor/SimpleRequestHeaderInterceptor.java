@@ -19,14 +19,14 @@
  */
 package ca.uhn.fhir.rest.client.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import org.apache.commons.lang3.Validate;
+
+import java.io.IOException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the
@@ -69,12 +69,13 @@ public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 		int colonIdx = theCompleteHeader.indexOf(':');
 		if (colonIdx != -1) {
 			setHeaderName(theCompleteHeader.substring(0, colonIdx).trim());
-			setHeaderValue(theCompleteHeader.substring(colonIdx+1, theCompleteHeader.length()).trim());
+			setHeaderValue(theCompleteHeader
+					.substring(colonIdx + 1, theCompleteHeader.length())
+					.trim());
 		} else {
 			setHeaderName(theCompleteHeader.trim());
 			setHeaderValue(null);
 		}
-
 	}
 
 	public String getHeaderName() {
@@ -104,5 +105,4 @@ public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 	public void setHeaderValue(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;
 	}
-
 }

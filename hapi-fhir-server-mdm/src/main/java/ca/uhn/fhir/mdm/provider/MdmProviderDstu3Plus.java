@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
@@ -58,12 +59,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -109,8 +110,10 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 	// search for matches to the provided patient
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
-	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient,
-									 RequestDetails theRequestDetails) {
+	public IBaseBundle match(
+			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient")
+					IAnyResource thePatient,
+			RequestDetails theRequestDetails) {
 		if (thePatient == null) {
 			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
 		}
@@ -119,21 +122,34 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 	// search for matches to the provided resource
 	@Operation(name = ProviderConstants.MDM_MATCH)
-	public IBaseBundle serverMatch(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
-											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
-											 RequestDetails theRequestDetails
-	) {
+	public IBaseBundle serverMatch(
+			@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
+			@OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string")
+					IPrimitiveType<String> theResourceType,
+			RequestDetails theRequestDetails) {
 		if (theResource == null) {
 			throw new InvalidRequestException(Msg.code(1499) + "resource may not be null");
 		}
-		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString(), theRequestDetails);
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(
+				theResource, theResourceType.getValueAsString(), theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
-	public IBaseResource mergeGoldenResources(@OperationParam(name = ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theFromGoldenResourceId,
-															@OperationParam(name = ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theToGoldenResourceId,
-															@OperationParam(name = ProviderConstants.MDM_MERGE_RESOURCE, max = 1) IAnyResource theMergedResource,
-															RequestDetails theRequestDetails) {
+	public IBaseResource mergeGoldenResources(
+			@OperationParam(
+							name = ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID,
+							min = 1,
+							max = 1,
+							typeName = "string")
+					IPrimitiveType<String> theFromGoldenResourceId,
+			@OperationParam(
+							name = ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID,
+							min = 1,
+							max = 1,
+							typeName = "string")
+					IPrimitiveType<String> theToGoldenResourceId,
+			@OperationParam(name = ProviderConstants.MDM_MERGE_RESOURCE, max = 1) IAnyResource theMergedResource,
+			RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
 		MdmTransactionContext.OperationType operationType = (theMergedResource == null) ?
@@ -152,10 +168,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
-	public IBaseResource updateLink(@OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theGoldenResourceId,
-											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theResourceId,
-											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) IPrimitiveType<String> theMatchResult,
-											  ServletRequestDetails theRequestDetails) {
+	public IBaseResource updateLink(
+			@OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1)
+					IPrimitiveType<String> theGoldenResourceId,
+			@OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1)
+					IPrimitiveType<String> theResourceId,
+			@OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1)
+					IPrimitiveType<String> theMatchResult,
+			ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
 
 		MdmUpdateLinkParams updateLinkParams = new MdmUpdateLinkParams();
@@ -170,10 +190,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.MDM_CREATE_LINK)
-	public IBaseResource createLink(@OperationParam(name = ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theGoldenResourceId,
-											  @OperationParam(name = ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theResourceId,
-											  @OperationParam(name = ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT, min = 0, max = 1) IPrimitiveType<String> theMatchResult,
-											  ServletRequestDetails theRequestDetails) {
+	public IBaseResource createLink(
+			@OperationParam(name = ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1)
+					IPrimitiveType<String> theGoldenResourceId,
+			@OperationParam(name = ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, min = 1, max = 1)
+					IPrimitiveType<String> theResourceId,
+			@OperationParam(name = ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT, min = 0, max = 1)
+					IPrimitiveType<String> theMatchResult,
+			ServletRequestDetails theRequestDetails) {
 		validateCreateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
 
 		MdmCreateLinkParams params = new MdmCreateLinkParams();
@@ -187,12 +211,21 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return myMdmControllerSvc.createLink(params);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_MDM_CLEAR, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
-	})
-	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceNames,
-													 @OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
-													 ServletRequestDetails theRequestDetails) {
+	@Operation(
+			name = ProviderConstants.OPERATION_MDM_CLEAR,
+			returnParameters = {
+				@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
+			})
+	public IBaseParameters clearMdmLinks(
+			@OperationParam(
+							name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME,
+							min = 0,
+							max = OperationParam.MAX_UNLIMITED,
+							typeName = "string")
+					List<IPrimitiveType<String>> theResourceNames,
+			@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1)
+					IPrimitiveType<BigDecimal> theBatchSize,
+			ServletRequestDetails theRequestDetails) {
 
 		List<String> resourceNames = new ArrayList<>();
 
@@ -209,36 +242,52 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private void validateResourceNames(List<String> theResourceNames) {
 		for (String resourceName : theResourceNames) {
 			if (!myMdmSettings.isSupportedMdmType(resourceName)) {
-				throw new InvalidRequestException(Msg.code(1500) + ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
+				throw new InvalidRequestException(Msg.code(1500) + ProviderConstants.OPERATION_MDM_CLEAR
+						+ " does not support resource type: " + resourceName);
 			}
 		}
 	}
 
 	// Is a set of the OR sufficient ot the contenxt she's investigating?
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
-	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
-												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
-												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theMatchResult,
-												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string")
-													 IPrimitiveType<String> theLinkSource,
-
-												 @Description(value = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
-														 IPrimitiveType<Integer> theOffset,
-
-												 @Description(value = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
-														 IPrimitiveType<Integer> theCount,
-
-												 @OperationParam(name = Constants.PARAM_SORT, min = 0, max = 1, typeName = "string")
-														 IPrimitiveType<String> theSort,
-
-												 ServletRequestDetails theRequestDetails,
-												 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
-												 ) {
+	public IBaseParameters queryLinks(
+			@OperationParam(
+							name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID,
+							min = 0,
+							max = 1,
+							typeName = "string")
+					IPrimitiveType<String> theGoldenResourceId,
+			@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theResourceId,
+			@OperationParam(
+							name = ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT,
+							min = 0,
+							max = 1,
+							typeName = "string")
+					IPrimitiveType<String> theMatchResult,
+			@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theLinkSource,
+			@Description(
+							value =
+									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+					@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theOffset,
+			@Description(
+							value =
+									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+					@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theCount,
+			@OperationParam(name = Constants.PARAM_SORT, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theSort,
+			ServletRequestDetails theRequestDetails,
+			@OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theResourceType) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-		MdmTransactionContext mdmContext = createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-			getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType));
+		MdmTransactionContext mdmContext = createMdmContext(
+				theRequestDetails,
+				MdmTransactionContext.OperationType.QUERY_LINKS,
+				getResourceType(
+						ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType));
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(mdmPageRequest)
 				.setGoldenResourceId(extractStringOrNull(theGoldenResourceId))
 				.setSourceId(extractStringOrNull(theResourceId))
@@ -247,26 +296,36 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 				.setResourceType(extractStringOrNull(theResourceType))
 				.setSort(extractStringOrNull(theSort));
 
-		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
+		Page<MdmLinkJson> mdmLinkJson =
+				myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public IBaseParameters getDuplicateGoldenResources(
-		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
-			IPrimitiveType<Integer> theOffset,
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
-			IPrimitiveType<Integer> theCount,
+			@Description(
+							formalDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+					@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theOffset,
+			@Description(
+							formalDefinition =
+									"Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+					@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theCount,
 			ServletRequestDetails theRequestDetails,
-		@Description(formalDefinition = "This parameter controls the returned resource type.")
-		@OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string")
-			IPrimitiveType<String> theResourceType) {
+			@Description(formalDefinition = "This parameter controls the returned resource type.")
+					@OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string")
+					IPrimitiveType<String> theResourceType) {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest, theRequestDetails, extractStringOrNull(theResourceType));
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(
+				createMdmContext(
+						theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null),
+				mdmPageRequest,
+				theRequestDetails,
+				extractStringOrNull(theResourceType));
 
 		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}
@@ -291,9 +350,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return retval;
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, typeName = "integer")
-	})
+	@Operation(
+			name = ProviderConstants.OPERATION_MDM_SUBMIT,
+			idempotent = false,
+			returnParameters = {
+				@OperationParam(name = ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, typeName = "integer")
+			})
 	public IBaseParameters mdmBatchOnAllSourceResources(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theCriteria,
@@ -327,14 +389,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			String theUrl = resourceType + "?" + criteria;
 			urls.add(theUrl);
 		} else {
-			myMdmSettings.getMdmRules().getMdmTypes()
-				.stream()
-				.map(type -> type + "?" + criteria)
-				.forEach(urls::add);
+			myMdmSettings.getMdmRules().getMdmTypes().stream()
+					.map(type -> type + "?" + criteria)
+					.forEach(urls::add);
 		}
 		return urls;
 	}
-
 
 	private String convertStringTypeToString(IPrimitiveType<String> theCriteria) {
 		return theCriteria == null ? "" : theCriteria.getValueAsString();
@@ -356,13 +416,19 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Patient", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
-	})
+	@Operation(
+			name = ProviderConstants.OPERATION_MDM_SUBMIT,
+			idempotent = false,
+			typeName = "Patient",
+			returnParameters = {
+				@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
+			})
 	public IBaseParameters mdmBatchPatientType(
-		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
-		ServletRequestDetails theRequest) {
+			@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string")
+					IPrimitiveType<String> theCriteria,
+			@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1)
+					IPrimitiveType<BigDecimal> theBatchSize,
+			ServletRequestDetails theRequest) {
 		if (theRequest.isPreferRespondAsync()) {
 			String theUrl = PATIENT_RESOURCE + "?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
@@ -393,13 +459,19 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Practitioner", returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
-	})
+	@Operation(
+			name = ProviderConstants.OPERATION_MDM_SUBMIT,
+			idempotent = false,
+			typeName = "Practitioner",
+			returnParameters = {
+				@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
+			})
 	public IBaseParameters mdmBatchPractitionerType(
-		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
-		ServletRequestDetails theRequest) {
+			@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string")
+					IPrimitiveType<String> theCriteria,
+			@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1)
+					IPrimitiveType<BigDecimal> theBatchSize,
+			ServletRequestDetails theRequest) {
 		if (theRequest.isPreferRespondAsync()) {
 			String theUrl = PRACTITIONER_RESOURCE + "?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize,  theRequest);
@@ -420,7 +492,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 */
 	public IBaseParameters buildMdmOutParametersWithCount(long theCount) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, theCount);
+		ParametersUtil.addParameterToParametersLong(
+				myFhirContext, retval, ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, theCount);
 		return retval;
 	}
 
@@ -432,8 +505,11 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 	}
 
-	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId, IPrimitiveType theResourceType) {
-		return theResourceType != null ? theResourceType.getValueAsString() : getResourceType(theParamName, theResourceId);
+	private String getResourceType(
+			String theParamName, IPrimitiveType<String> theResourceId, IPrimitiveType theResourceType) {
+		return theResourceType != null
+				? theResourceType.getValueAsString()
+				: getResourceType(theParamName, theResourceId);
 	}
 
 	private String getResourceType(String theParamName, String theResourceId) {

@@ -43,7 +43,12 @@ public interface IResourceLinkResolver {
 	 * @param theRequest            The incoming request, if any
 	 * @param theTransactionDetails The current TransactionDetails object
 	 */
-	IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	IResourceLookup findTargetResource(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theSourceResourceName,
+			PathAndRef thePathAndRef,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method resolves the target of a reference found within a resource that is being created/updated. We do this
@@ -59,10 +64,12 @@ public interface IResourceLinkResolver {
 	 * @param theTransactionDetails The current TransactionDetails object
 	 */
 	@Nullable
-	IBaseResource loadTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails);
-
-
+	IBaseResource loadTargetResource(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theSourceResourceName,
+			PathAndRef thePathAndRef,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails);
 
 	void validateTypeOrThrowException(Class<? extends IBaseResource> theType);
-
 }

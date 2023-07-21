@@ -42,5 +42,4 @@ public class FhirClientConnectionException extends BaseServerResponseException {
 	public FhirClientConnectionException(String theMessage) {
 		super(500, theMessage);
 	}
-
 }

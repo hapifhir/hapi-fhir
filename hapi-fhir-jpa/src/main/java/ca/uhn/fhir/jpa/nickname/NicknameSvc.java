@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +34,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 /**
  * Nickname service is used to load nicknames
@@ -51,8 +51,7 @@ public class NicknameSvc implements INicknameSvc {
 
 	private Resource myNicknameResource;
 
-	public NicknameSvc() {
-	}
+	public NicknameSvc() {}
 
 	public void setNicknameResource(Resource theNicknameResource) {
 		myNicknameResource = theNicknameResource;

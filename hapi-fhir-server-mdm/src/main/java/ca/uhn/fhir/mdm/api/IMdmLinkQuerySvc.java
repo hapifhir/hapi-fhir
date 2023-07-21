@@ -33,12 +33,34 @@ import java.util.List;
  */
 public interface IMdmLinkQuerySvc {
 	@Deprecated
-	Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
-	@Deprecated
-	Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
-	Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext);
-	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
-	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theRequestResourceType);
+	Page<MdmLinkJson> queryLinks(
+			IIdType theGoldenResourceId,
+			IIdType theSourceResourceId,
+			MdmMatchResultEnum theMatchResult,
+			MdmLinkSourceEnum theLinkSource,
+			MdmTransactionContext theMdmContext,
+			MdmPageRequest thePageRequest);
 
-    List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters);
+	@Deprecated
+	Page<MdmLinkJson> queryLinks(
+			IIdType theGoldenResourceId,
+			IIdType theSourceResourceId,
+			MdmMatchResultEnum theMatchResult,
+			MdmLinkSourceEnum theLinkSource,
+			MdmTransactionContext theMdmContext,
+			MdmPageRequest thePageRequest,
+			List<Integer> thePartitionId);
+
+	Page<MdmLinkJson> queryLinks(
+			MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext);
+
+	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
+
+	Page<MdmLinkJson> getDuplicateGoldenResources(
+			MdmTransactionContext theMdmContext,
+			MdmPageRequest thePageRequest,
+			List<Integer> thePartitionId,
+			String theRequestResourceType);
+
+	List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters);
 }

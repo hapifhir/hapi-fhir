@@ -55,8 +55,7 @@ public class MdmTransactionContext {
 		return myTransactionLogMessages;
 	}
 
-	public MdmTransactionContext() {
-	}
+	public MdmTransactionContext() {}
 
 	public MdmTransactionContext(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
@@ -67,7 +66,8 @@ public class MdmTransactionContext {
 		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
-	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
+	public MdmTransactionContext(
+			TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
 		this(theTransactionLogMessages, theRestOperation);
 		setResourceType(theResourceType);
 	}

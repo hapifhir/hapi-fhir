@@ -28,13 +28,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 
 // TODO: JA remove default methods
 public interface ISearchParamRegistry {
@@ -44,7 +44,6 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
-
 	/**
 	 * @return Returns all active search params for the given resource
 	 */
@@ -53,14 +52,12 @@ public interface ISearchParamRegistry {
 	/**
 	 * Request that the cache be refreshed now, in the current thread
 	 */
-	default void forceRefresh() {
-	}
+	default void forceRefresh() {}
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
-	default void requestRefresh() {
-	}
+	default void requestRefresh() {}
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
@@ -68,16 +65,15 @@ public interface ISearchParamRegistry {
 	 *
 	 * @since 5.1.0
 	 */
-	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
-	}
+	default void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {}
 
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		return Collections.emptyList();
 	}
 
-
 	// TODO ND remove default implementation
-	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+	default List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, ComboSearchParamType theParamType) {
 		return Collections.emptyList();
 	}
 
@@ -130,7 +126,8 @@ public interface ISearchParamRegistry {
 			availableSearchParamDef = getActiveSearchParam("Resource", theParamName);
 		}
 		if (availableSearchParamDef == null) {
-			throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
+			throw new InvalidRequestException(
+					Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
 		}
 		return availableSearchParamDef;
 	}

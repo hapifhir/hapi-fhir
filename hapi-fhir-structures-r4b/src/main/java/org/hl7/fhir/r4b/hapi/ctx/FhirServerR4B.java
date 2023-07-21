@@ -9,5 +9,4 @@ public class FhirServerR4B implements IFhirVersionServer {
 	public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerCapabilityStatementProvider(theServer);
 	}
-
 }

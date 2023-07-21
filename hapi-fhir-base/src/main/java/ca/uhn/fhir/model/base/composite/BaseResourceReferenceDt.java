@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype, IBaseReference {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IBaseResource myResource;
 
@@ -49,7 +49,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theResource
 	 *           The loaded resource itself
 	 */
@@ -71,7 +71,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 	 * See the FHIR specification section on <a
 	 * href="http://www.hl7.org/implement/standards/fhir/references.html#id">contained resources</a> for more
 	 * information.
-	 * 
+	 *
 	 * @see #loadResource(IRestfulClient)
 	 */
 	@Override
@@ -99,14 +99,17 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 			throw new IllegalStateException(Msg.code(1905) + "Reference has no resource ID defined");
 		}
 		if (isBlank(resourceId.getBaseUrl()) || isBlank(resourceId.getResourceType())) {
-			throw new IllegalStateException(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: " + resourceId.getValue());
+			throw new IllegalStateException(Msg.code(1906)
+					+ "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: "
+					+ resourceId.getValue());
 		}
 
 		String resourceUrl = resourceId.getValue();
 
 		ourLog.debug("Loading resource at URL: {}", resourceUrl);
 
-		RuntimeResourceDefinition definition = theClient.getFhirContext().getResourceDefinition(resourceId.getResourceType());
+		RuntimeResourceDefinition definition =
+				theClient.getFhirContext().getResourceDefinition(resourceId.getResourceType());
 		Class<? extends IBaseResource> resourceType = definition.getImplementingClass();
 		myResource = theClient.fetchResourceFromUrl(resourceType, resourceUrl);
 		myResource.setId(resourceUrl);
@@ -134,10 +137,10 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 
 	@Override
 	public String toString() {
-		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
+		org.apache.commons.lang3.builder.ToStringBuilder b = new org.apache.commons.lang3.builder.ToStringBuilder(
+				this, org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("reference", getReference().getValueAsString());
 		b.append("loaded", getResource() != null);
 		return b.toString();
 	}
-
 }

@@ -37,20 +37,28 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 	@Query("SELECT myId FROM TermCodeSystemVersion WHERE myCodeSystemPid = :codesystem_pid order by myId")
 	List<Long> findSortedPidsByCodeSystemPid(@Param("codesystem_pid") Long theCodeSystemPid);
 
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId = :codesystem_version_id")
-	TermCodeSystemVersion findByCodeSystemPidAndVersion(@Param("codesystem_pid") Long theCodeSystemPid, @Param("codesystem_version_id") String theCodeSystemVersionId);
+	@Query(
+			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId = :codesystem_version_id")
+	TermCodeSystemVersion findByCodeSystemPidAndVersion(
+			@Param("codesystem_pid") Long theCodeSystemPid,
+			@Param("codesystem_version_id") String theCodeSystemVersionId);
 
-	@Query("SELECT tcsv FROM TermCodeSystemVersion tcsv INNER JOIN FETCH TermCodeSystem tcs on tcs.myPid = tcsv.myCodeSystemPid " +
-		"WHERE tcs.myCodeSystemUri = :code_system_uri AND tcsv.myCodeSystemVersionId = :codesystem_version_id")
-	TermCodeSystemVersion findByCodeSystemUriAndVersion(@Param("code_system_uri") String theCodeSystemUri, @Param("codesystem_version_id") String theCodeSystemVersionId);
+	@Query(
+			"SELECT tcsv FROM TermCodeSystemVersion tcsv INNER JOIN FETCH TermCodeSystem tcs on tcs.myPid = tcsv.myCodeSystemPid "
+					+ "WHERE tcs.myCodeSystemUri = :code_system_uri AND tcsv.myCodeSystemVersionId = :codesystem_version_id")
+	TermCodeSystemVersion findByCodeSystemUriAndVersion(
+			@Param("code_system_uri") String theCodeSystemUri,
+			@Param("codesystem_version_id") String theCodeSystemVersionId);
 
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
+	@Query(
+			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
 	TermCodeSystemVersion findByCodeSystemPidVersionIsNull(@Param("codesystem_pid") Long theCodeSystemPid);
 
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResourcePid = :resource_id")
 	List<TermCodeSystemVersion> findByCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);
 
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myId = :resource_id")
-	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);
-
+	@Query(
+			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myId = :resource_id")
+	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(
+			@Param("resource_id") Long theCodeSystemResourcePid);
 }

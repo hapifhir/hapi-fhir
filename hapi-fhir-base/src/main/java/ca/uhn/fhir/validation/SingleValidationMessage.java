@@ -139,5 +139,4 @@ public class SingleValidationMessage {
 		}
 		return b.toString();
 	}
-
 }

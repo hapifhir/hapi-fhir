@@ -28,5 +28,4 @@ public interface IBaseHasModifierExtensions {
 	public List<? extends IBaseExtension<?, ?>> getModifierExtension();
 
 	boolean hasModifierExtension();
-
 }
