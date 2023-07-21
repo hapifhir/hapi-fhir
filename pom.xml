@@ -2096,7 +2096,6 @@
 				<artifactId>thymeleaf-spring5</artifactId>
 				<version>${thymeleaf-version}</version>
 			</dependency>
-			<!-- // FIXME: remove pinned version from CDR -->
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>ace-builds</artifactId>
