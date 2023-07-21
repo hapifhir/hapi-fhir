@@ -394,7 +394,8 @@ class JdbcResultSet implements ResultSet {
 		if (retVal != null) {
 			return retVal;
 		}
-		throw new SQLException(Msg.code(2416) + "Unknown column: " + columnLabel + ". Valid columns: " + myColumnNameToIndex.keySet());
+		throw new SQLException(
+				Msg.code(2416) + "Unknown column: " + columnLabel + ". Valid columns: " + myColumnNameToIndex.keySet());
 	}
 
 	@Override

@@ -414,8 +414,11 @@ public class Controller extends BaseController {
 	}
 
 	@Nonnull
-	protected IHfqlExecutionResult executeHfqlStatement(HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit) throws IOException {
-		Parameters requestParameters = HfqlRestProvider.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
+	protected IHfqlExecutionResult executeHfqlStatement(
+			HttpServletRequest theServletRequest, String theHfqlQuery, HomeRequest theRequest, int theRowLimit)
+			throws IOException {
+		Parameters requestParameters =
+				HfqlRestProvider.newQueryRequestParameters(theHfqlQuery, theRowLimit, theRowLimit);
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, null);
 		return new RemoteHfqlExecutionResult(requestParameters, client);
 	}
