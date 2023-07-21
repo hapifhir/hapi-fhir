@@ -470,7 +470,7 @@ public class HfqlStatementParserTest {
 			FROM Patient
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertEquals("Duplicate SELECT column alias: id", ex.getMessage());
+		assertEquals("HAPI-2414: Duplicate SELECT column alias: id", ex.getMessage());
 	}
 
 	@Test

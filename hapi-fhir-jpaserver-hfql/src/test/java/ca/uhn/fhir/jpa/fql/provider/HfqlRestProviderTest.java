@@ -163,7 +163,7 @@ public class HfqlRestProviderTest {
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		HfqlStatement statement = new HfqlStatement();
-		statement.addSelectClause("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClauseAndAlias("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("Account")),
@@ -202,7 +202,7 @@ public class HfqlRestProviderTest {
 		when(myFqlExecutor.introspectColumns(eq("FOO"), eq("BAR"))).thenReturn(myMockFqlResult);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		HfqlStatement statement = new HfqlStatement();
-		statement.addSelectClause("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClauseAndAlias("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.getNextRow()).thenReturn(
 			new IHfqlExecutionResult.Row(0, List.of("FOO")),

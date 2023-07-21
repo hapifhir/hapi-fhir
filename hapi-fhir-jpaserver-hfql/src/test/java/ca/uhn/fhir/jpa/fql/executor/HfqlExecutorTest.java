@@ -1194,7 +1194,7 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
-		assertErrorMessage(result, "search_match function can only be applied to the id element");
+		assertErrorMessage(result, "HAPI-2412: search_match function can only be applied to the id element");
 	}
 
 	@Test
@@ -1208,7 +1208,7 @@ public class HfqlExecutorTest {
 			""";
 
 		IHfqlExecutionResult result = myHfqlExecutor.executeInitialSearch(input, null, mySrd);
-		assertErrorMessage(result, "search_match function requires 2 arguments");
+		assertErrorMessage(result, "HAPI-2413: search_match function requires 2 arguments");
 	}
 
 	@SuppressWarnings("unchecked")

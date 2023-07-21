@@ -166,6 +166,10 @@ public class HfqlStatement implements IModelJson {
 		return mySelectClauses.stream().map(SelectClause::getDataType).collect(Collectors.toList());
 	}
 
+	public SelectClause addSelectClauseAndAlias(String theSelectClause) {
+		return addSelectClause(theSelectClause).setAlias(theSelectClause);
+	}
+
 	public enum WhereClauseOperatorEnum {
 		EQUALS,
 		IN,

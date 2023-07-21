@@ -150,14 +150,14 @@ public class JdbcDriverTest {
 		// Setup
 		HfqlStatement hfqlStatement = new HfqlStatement();
 		hfqlStatement.setFromResourceName("Patient");
-		hfqlStatement.addSelectClause("col.string").setDataType(HfqlDataTypeEnum.STRING);
-		hfqlStatement.addSelectClause("col.date").setDataType(HfqlDataTypeEnum.DATE);
-		hfqlStatement.addSelectClause("col.boolean").setDataType(HfqlDataTypeEnum.BOOLEAN);
-		hfqlStatement.addSelectClause("col.time").setDataType(HfqlDataTypeEnum.TIME);
-		hfqlStatement.addSelectClause("col.decimal").setDataType(HfqlDataTypeEnum.DECIMAL);
-		hfqlStatement.addSelectClause("col.integer").setDataType(HfqlDataTypeEnum.INTEGER);
-		hfqlStatement.addSelectClause("col.longint").setDataType(HfqlDataTypeEnum.LONGINT);
-		hfqlStatement.addSelectClause("col.timestamp").setDataType(HfqlDataTypeEnum.TIMESTAMP);
+		hfqlStatement.addSelectClauseAndAlias("col.string").setDataType(HfqlDataTypeEnum.STRING);
+		hfqlStatement.addSelectClauseAndAlias("col.date").setDataType(HfqlDataTypeEnum.DATE);
+		hfqlStatement.addSelectClauseAndAlias("col.boolean").setDataType(HfqlDataTypeEnum.BOOLEAN);
+		hfqlStatement.addSelectClauseAndAlias("col.time").setDataType(HfqlDataTypeEnum.TIME);
+		hfqlStatement.addSelectClauseAndAlias("col.decimal").setDataType(HfqlDataTypeEnum.DECIMAL);
+		hfqlStatement.addSelectClauseAndAlias("col.integer").setDataType(HfqlDataTypeEnum.INTEGER);
+		hfqlStatement.addSelectClauseAndAlias("col.longint").setDataType(HfqlDataTypeEnum.LONGINT);
+		hfqlStatement.addSelectClauseAndAlias("col.timestamp").setDataType(HfqlDataTypeEnum.TIMESTAMP);
 		when(myMockFqlResult.getStatement()).thenReturn(hfqlStatement);
 
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
@@ -214,7 +214,7 @@ public class JdbcDriverTest {
 		when(myFqlExecutor.executeInitialSearch(any(), any(), any())).thenReturn(myMockFqlResult);
 		HfqlStatement fakeStatement = createFakeStatement();
 		fakeStatement.getSelectClauses().clear();
-		fakeStatement.addSelectClause("col.time").setDataType(HfqlDataTypeEnum.TIME);
+		fakeStatement.addSelectClause("col.time").setAlias("col.time").setDataType(HfqlDataTypeEnum.TIME);
 		when(myMockFqlResult.getStatement()).thenReturn(fakeStatement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, true, true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(
@@ -257,7 +257,7 @@ public class JdbcDriverTest {
 	public void testIntrospectTables() throws SQLException {
 		when(myFqlExecutor.introspectTables()).thenReturn(myMockFqlResult);
 		HfqlStatement statement = new HfqlStatement();
-		statement.addSelectClause("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("TABLE_NAME").setAlias("TABLE_NAME").setDataType(HfqlDataTypeEnum.STRING);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(new IHfqlExecutionResult.Row(0, List.of("Account")));
@@ -277,8 +277,8 @@ public class JdbcDriverTest {
 	public void testIntrospectColumns() throws SQLException {
 		when(myFqlExecutor.introspectColumns(any(), any())).thenReturn(myMockFqlResult);
 		HfqlStatement statement = new HfqlStatement();
-		statement.addSelectClause("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
-		statement.addSelectClause("DATA_TYPE").setDataType(HfqlDataTypeEnum.INTEGER);
+		statement.addSelectClauseAndAlias("COLUMN_NAME").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClauseAndAlias("DATA_TYPE").setDataType(HfqlDataTypeEnum.INTEGER);
 		when(myMockFqlResult.getStatement()).thenReturn(statement);
 		when(myMockFqlResult.hasNext()).thenReturn(true, true, false);
 		when(myMockFqlResult.getNextRow()).thenReturn(

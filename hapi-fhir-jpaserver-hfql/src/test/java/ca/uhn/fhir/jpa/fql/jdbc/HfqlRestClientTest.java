@@ -155,8 +155,8 @@ public class HfqlRestClientTest {
 	public static HfqlStatement createFakeStatement() {
 		HfqlStatement statement = new HfqlStatement();
 		statement.setFromResourceName("Patient");
-		statement.addSelectClause("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
-		statement.addSelectClause("name[0].given[0]").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].family").setAlias("name[0].family").setDataType(HfqlDataTypeEnum.STRING);
+		statement.addSelectClause("name[0].given[0]").setAlias("name[0].given[0]").setDataType(HfqlDataTypeEnum.STRING);
 
 		return statement;
 	}
