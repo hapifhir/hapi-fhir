@@ -61,6 +61,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -328,7 +329,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 			}
 
 			myResourceTableDao.deleteByPid(resource.getId());
-		} catch (Exception e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new PreconditionFailedException(Msg.code(2415)
 					+ "The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later: "
 					+ e);
