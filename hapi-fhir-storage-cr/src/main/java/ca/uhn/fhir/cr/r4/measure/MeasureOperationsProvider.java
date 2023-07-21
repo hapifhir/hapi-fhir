@@ -20,7 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.r4.IMeasureProcessorFactory;
+import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -38,8 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class MeasureOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
+
 	@Autowired
-	IMeasureProcessorFactory myR4MeasureProcessorFactory;
+	IMeasureServiceFactory myR4MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -65,30 +66,32 @@ public class MeasureOperationsProvider {
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure(@IdParam IdType theId,
-													 @OperationParam(name = "periodStart") String thePeriodStart,
-													 @OperationParam(name = "periodEnd") String thePeriodEnd,
-													 @OperationParam(name = "reportType") String theReportType,
-													 @OperationParam(name = "subject") String theSubject,
-													 @OperationParam(name = "practitioner") String thePractitioner,
-													 @OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
-													 @OperationParam(name = "productLine") String theProductLine,
-													 @OperationParam(name = "additionalData") Bundle theAdditionalData,
-													 @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return myR4MeasureProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.evaluateMeasure(
-				theId,
-				thePeriodStart,
-				thePeriodEnd,
-				theReportType,
-				theSubject,
-				thePractitioner,
-				theLastReceivedOn,
-				theProductLine,
-				theAdditionalData,
-				theTerminologyEndpoint);
-
-}
+	public MeasureReport evaluateMeasure(
+			@IdParam IdType theId,
+			@OperationParam(name = "periodStart") String thePeriodStart,
+			@OperationParam(name = "periodEnd") String thePeriodEnd,
+			@OperationParam(name = "reportType") String theReportType,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "practitioner") String thePractitioner,
+			@OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
+			@OperationParam(name = "productLine") String theProductLine,
+			@OperationParam(name = "additionalData") Bundle theAdditionalData,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
+		return myR4MeasureServiceFactory
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.evaluateMeasure(
+						theId,
+						thePeriodStart,
+						thePeriodEnd,
+						theReportType,
+						theSubject,
+						thePractitioner,
+						theLastReceivedOn,
+						theProductLine,
+						theAdditionalData,
+						theTerminologyEndpoint,
+						theRequestDetails);
+	}
 }

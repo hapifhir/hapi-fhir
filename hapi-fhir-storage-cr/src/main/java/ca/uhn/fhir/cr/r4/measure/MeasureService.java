@@ -20,6 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +37,6 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.cql.evaluator.measure.r4.R4RepositorySubjectProvider;
@@ -45,14 +45,12 @@ import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
 import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
@@ -65,48 +63,45 @@ import static org.opencds.cqf.cql.evaluator.measure.constant.MeasureReportConsta
 
 public class MeasureService {
 
+	private final Repository myRepository;
+	private final MeasureEvaluationOptions myMeasureEvaluationOptions;
 	private Logger ourLogger = LoggerFactory.getLogger(MeasureService.class);
 
-	public static final List<ContactDetail>
-		CQI_CONTACTDETAIL = Collections.singletonList(
-		new ContactDetail()
-			.addTelecom(
-				new ContactPoint()
+	public MeasureService(Repository theRepository, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		this.myRepository = theRepository;
+		this.myMeasureEvaluationOptions = theMeasureEvaluationOptions;
+	}
+
+	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(new ContactDetail()
+			.addTelecom(new ContactPoint()
 					.setSystem(ContactPoint.ContactPointSystem.URL)
 					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
 	public static final List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(new CodeableConcept()
-		.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
+			.addCoding(new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
 
 	public static final SearchParameter SUPPLEMENTAL_DATA_SEARCHPARAMETER = (SearchParameter) new SearchParameter()
-		.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
-		.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
-		.setName("DEQMMeasureReportSupplementalData")
-		.setStatus(Enumerations.PublicationStatus.ACTIVE)
-		.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
-		.setPublisher("HL7 International - Clinical Quality Information Work Group")
-		.setContact(CQI_CONTACTDETAIL)
-		.setDescription(String.format(
-			"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
-			MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setJurisdiction(US_JURISDICTION_CODING)
-		.addBase("MeasureReport")
-		.setCode("supplemental-data")
-		.setType(Enumerations.SearchParamType.REFERENCE)
-		.setExpression(String.format(
-			"MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setXpath(String.format(
-			"f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-		.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
-		.setTitle("Supplemental Data")
-		.setId("deqm-measurereport-supplemental-data");
-
-	@Autowired
-	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
-
-	@Autowired
-	protected Repository myRepository;
-
+			.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
+			.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
+			.setName("DEQMMeasureReportSupplementalData")
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
+			.setPublisher("HL7 International - Clinical Quality Information Work Group")
+			.setContact(CQI_CONTACTDETAIL)
+			.setDescription(String.format(
+					"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
+					MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setJurisdiction(US_JURISDICTION_CODING)
+			.addBase("MeasureReport")
+			.setCode("supplemental-data")
+			.setType(Enumerations.SearchParamType.REFERENCE)
+			.setExpression(String.format(
+					"MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setXpath(String.format(
+					"f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+			.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+			.setTitle("Supplemental Data")
+			.setId("deqm-measurereport-supplemental-data");
 
 	/**
 	 * Implements the <a href=
@@ -129,20 +124,23 @@ public class MeasureService {
 	 * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
 	 * @return the calculated MeasureReport
 	 */
-	public MeasureReport evaluateMeasure(IdType theId,
-													 String thePeriodStart,
-													 String thePeriodEnd,
-													 String theReportType,
-													 String theSubject,
-													 String thePractitioner,
-													 String theLastReceivedOn,
-													 String theProductLine,
-													 Bundle theAdditionalData,
-													 Endpoint theTerminologyEndpoint) {
+	public MeasureReport evaluateMeasure(
+			IdType theId,
+			String thePeriodStart,
+			String thePeriodEnd,
+			String theReportType,
+			String theSubject,
+			String thePractitioner,
+			String theLastReceivedOn,
+			String theProductLine,
+			Bundle theAdditionalData,
+			Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails) {
 
 		ensureSupplementalDataElementSearchParameter();
 
-		var r4MeasureProcessor = new R4MeasureProcessor(myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
+		var r4MeasureProcessor = new R4MeasureProcessor(
+				myRepository, myMeasureEvaluationOptions, new R4RepositorySubjectProvider(myRepository));
 
 		MeasureReport measureReport = null;
 
@@ -150,13 +148,26 @@ public class MeasureService {
 		if (StringUtils.isBlank(theSubject) && StringUtils.isNotBlank(thePractitioner)) {
 			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRepository);
 
-			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, subjectIds, theAdditionalData);
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId),
+					thePeriodStart,
+					thePeriodEnd,
+					theReportType,
+					subjectIds,
+					theAdditionalData);
 
 		} else if (StringUtils.isNotBlank(theSubject)) {
-			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, Collections.singletonList(theSubject), theAdditionalData);
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId),
+					thePeriodStart,
+					thePeriodEnd,
+					theReportType,
+					Collections.singletonList(theSubject),
+					theAdditionalData);
 
 		} else if (StringUtils.isBlank(theSubject) && StringUtils.isBlank(thePractitioner)) {
-			measureReport = r4MeasureProcessor.evaluateMeasure(Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, null, theAdditionalData);
+			measureReport = r4MeasureProcessor.evaluateMeasure(
+					Eithers.forMiddle3(theId), thePeriodStart, thePeriodEnd, theReportType, null, theAdditionalData);
 		}
 		// add ProductLine after report is generated
 		addProductLineExtension(measureReport, theProductLine);
@@ -167,20 +178,21 @@ public class MeasureService {
 	private List<String> getPractitionerPatients(String thePractitioner, Repository theRepository) {
 		List<String> patients = new ArrayList<>();
 
-		Map<String, List< IQueryParameterType>> map = new HashMap<>();
+		Map<String, List<IQueryParameterType>> map = new HashMap<>();
 		map.put(
-			"general-practitioner", Collections.singletonList(
-			new ReferenceParam(
-				thePractitioner.startsWith("Practitioner/")
-					? thePractitioner
-					: "Practitioner/" + thePractitioner)));
+				"general-practitioner",
+				Collections.singletonList(new ReferenceParam(
+						thePractitioner.startsWith("Practitioner/")
+								? thePractitioner
+								: "Practitioner/" + thePractitioner)));
 
 		var bundle = theRepository.search(Bundle.class, Patient.class, map);
 		var iterator = new BundleIterator<>(theRepository, Bundle.class, bundle);
 
 		while (iterator.hasNext()) {
 			var patient = iterator.next().getResource();
-			var refString = patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart();
+			var refString = patient.getIdElement().getResourceType() + "/"
+					+ patient.getIdElement().getIdPart();
 			patients.add(refString);
 		}
 		return patients;
@@ -196,12 +208,11 @@ public class MeasureService {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		//create a transaction bundle
+		// create a transaction bundle
 		BundleBuilder builder = new BundleBuilder(myRepository.fhirContext());
 
-		//set the request to be condition on code == supplemental data
+		// set the request to be condition on code == supplemental data
 		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
 		myRepository.transaction(builder.getBundle());
 	}
-
 }

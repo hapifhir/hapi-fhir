@@ -20,7 +20,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.r4.IMeasureProcessorFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -37,13 +36,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class SubmitDataProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubmitDataProvider.class);
 
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
+
 	@Autowired
 	ISubmitDataProcessorFactory myR4SubmitDataProcessorFactory;
 
@@ -82,7 +81,7 @@ public class SubmitDataProvider {
 			@OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport theReport,
 			@OperationParam(name = "resource") List<IBaseResource> theResources) {
 		return myR4SubmitDataProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.submitData(theId, theReport, theResources);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.submitData(theId, theReport, theResources);
 	}
 }

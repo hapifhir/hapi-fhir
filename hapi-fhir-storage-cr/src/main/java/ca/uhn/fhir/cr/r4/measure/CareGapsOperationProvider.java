@@ -20,7 +20,7 @@
 package ca.uhn.fhir.cr.r4.measure;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.r4.ICareGapsProcessorFactory;
+import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -36,13 +36,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.List;
 
-public class CareGapsOperationsProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationsProvider.class);
+public class CareGapsOperationProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
+
 	@Autowired
-	ICareGapsProcessorFactory myR4CareGapsProcessorFactory;
+	ICareGapsServiceFactory myR4CareGapsProcessorFactory;
 
 	/**
 	 * Implements the <a href=
