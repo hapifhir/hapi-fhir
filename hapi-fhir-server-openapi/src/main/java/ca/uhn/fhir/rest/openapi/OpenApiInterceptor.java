@@ -908,11 +908,13 @@ public class OpenApiInterceptor {
 						break;
 					case "Resource":
 						if (theResourceType != null) {
-							IBaseResource resource = FHIR_CONTEXT_CANONICAL
-									.getResourceDefinition(theResourceType)
-									.newInstance();
-							resource.setId("1");
-							param.setResource((Resource) resource);
+							if (FHIR_CONTEXT_CANONICAL.getResourceTypes().contains(theResourceType)) {
+								IBaseResource resource = FHIR_CONTEXT_CANONICAL
+										.getResourceDefinition(theResourceType)
+										.newInstance();
+								resource.setId("1");
+								param.setResource((Resource) resource);
+							}
 						}
 						break;
 				}
@@ -1002,7 +1004,7 @@ public class OpenApiInterceptor {
 		}
 		return () -> {
 			IBaseResource example = null;
-			if (theResourceType != null) {
+			if (theResourceType != null && theFhirContext.getResourceTypes().contains(theResourceType)) {
 				example = theFhirContext.getResourceDefinition(theResourceType).newInstance();
 			}
 			return example;
