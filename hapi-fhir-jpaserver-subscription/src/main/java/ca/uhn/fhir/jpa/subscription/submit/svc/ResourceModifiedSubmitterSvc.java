@@ -135,7 +135,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	 * @param thePersistedResourceModifiedMessage the primary key pointing to the persisted version (IPersistedResourceModifiedMessage) of a ResourceModifiedMessage needing submission
 	 * @return true upon successful submission, false otherwise.
 	 */
-	protected TransactionCallback doProcessResourceModifiedInTransaction(
+	protected TransactionCallback<Boolean> doProcessResourceModifiedInTransaction(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return theStatus -> {
 			boolean processed = true;
