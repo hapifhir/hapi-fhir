@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5117
+title: "Previously, all MDM field scores, including `NO_MATCH`es, were included in the final total MDM score. This has 
+now been fixed so that only `MATCH`ed fields are included in the total MDM score."
