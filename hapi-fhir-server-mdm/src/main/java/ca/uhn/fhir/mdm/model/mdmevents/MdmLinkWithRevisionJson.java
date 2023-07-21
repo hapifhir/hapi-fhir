@@ -29,7 +29,7 @@ import java.util.Objects;
 
 public class MdmLinkWithRevisionJson implements IModelJson {
 	@JsonProperty(value = "mdmLink", required = true)
-    MdmLinkJson myMdmLink;
+	MdmLinkJson myMdmLink;
 
 	@JsonProperty(value = "revisionNumber", required = true)
 	Long myRevisionNumber;

@@ -65,16 +65,17 @@ public class MdmProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myResourceProviderFactory.addSupplier(() ->  new MdmProviderDstu3Plus(myFhirContext,
+				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3Plus(
+						myFhirContext,
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
 						myInterceptorBroadcaster,
-						myMdmSettings
-				));
+						myMdmSettings));
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myResourceProviderFactory.addSupplier(() -> {
-						return new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+						return new MdmLinkHistoryProviderDstu3Plus(
+								myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
 					});
 				}
 				break;

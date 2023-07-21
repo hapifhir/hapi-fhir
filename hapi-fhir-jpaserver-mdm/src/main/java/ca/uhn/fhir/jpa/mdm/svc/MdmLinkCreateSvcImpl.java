@@ -27,10 +27,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -38,7 +34,8 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.MdmCreateLinkParams;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
@@ -102,15 +99,19 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		Optional<? extends IMdmLink> optionalMdmLink =
 				myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (optionalMdmLink.isPresent()) {
-			throw new InvalidRequestException(Msg.code(753) + myMessageHelper.getMessageForPresentLink(goldenResource, sourceResource));
+			throw new InvalidRequestException(
+					Msg.code(753) + myMessageHelper.getMessageForPresentLink(goldenResource, sourceResource));
 		}
 
-		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
+		List<? extends IMdmLink> mdmLinks =
+				myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
 		if (mdmLinks.size() > 0 && matchResult == MdmMatchResultEnum.MATCH) {
-			throw new InvalidRequestException(Msg.code(754) + myMessageHelper.getMessageForMultipleGoldenRecords(sourceResource));
+			throw new InvalidRequestException(
+					Msg.code(754) + myMessageHelper.getMessageForMultipleGoldenRecords(sourceResource));
 		}
 
-		IMdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourceAndSourceResource(goldenResource, sourceResource);
+		IMdmLink mdmLink =
+				myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourceAndSourceResource(goldenResource, sourceResource);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMdmSourceType(sourceType);
 		if (matchResult == null) {
@@ -119,12 +120,18 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 			mdmLink.setMatchResult(matchResult);
 		}
 		// Add partition for the mdm link if it doesn't exist
-		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
-			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
-			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));
+		RequestPartitionId goldenResourcePartitionId =
+				(RequestPartitionId) goldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (goldenResourcePartitionId != null
+				&& goldenResourcePartitionId.hasPartitionIds()
+				&& goldenResourcePartitionId.getFirstPartitionIdOrNull() != null
+				&& (mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(
+					goldenResourcePartitionId.getFirstPartitionIdOrNull(),
+					goldenResourcePartitionId.getPartitionDate()));
 		}
-		ourLog.info("Manually creating a " + goldenResource.getIdElement().toVersionless() + " to " + sourceResource.getIdElement().toVersionless() + " mdm link.");
+		ourLog.info("Manually creating a " + goldenResource.getIdElement().toVersionless() + " to "
+				+ sourceResource.getIdElement().toVersionless() + " mdm link.");
 		myMdmLinkDaoSvc.save(mdmLink);
 
 		{
@@ -132,8 +139,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 			MdmLinkEvent event = new MdmLinkEvent();
 			event.addMdmLink(myModelConverter.toJson(mdmLink));
 			HookParams hookParams = new HookParams();
-			hookParams.add(RequestDetails.class, theParams.getRequestDetails())
-				.add(MdmLinkEvent.class, event);
+			hookParams.add(RequestDetails.class, theParams.getRequestDetails()).add(MdmLinkEvent.class, event);
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_CREATE_LINK, hookParams);
 		}
 

@@ -20,9 +20,9 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkWithRevisionJson;
-import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 
 /**
  * Contract for decoupling API dependency from the base / JPA modules.

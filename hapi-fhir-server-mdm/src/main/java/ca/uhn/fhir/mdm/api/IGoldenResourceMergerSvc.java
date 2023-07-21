@@ -20,7 +20,6 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IGoldenResourceMergerSvc {

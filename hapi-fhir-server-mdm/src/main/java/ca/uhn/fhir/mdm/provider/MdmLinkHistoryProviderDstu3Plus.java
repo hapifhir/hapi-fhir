@@ -51,10 +51,9 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public MdmLinkHistoryProviderDstu3Plus(
-		FhirContext theFhirContext,
-		IMdmControllerSvc theMdmControllerSvc,
-		IInterceptorBroadcaster theIInterceptorBroadcaster
-	) {
+			FhirContext theFhirContext,
+			IMdmControllerSvc theMdmControllerSvc,
+			IInterceptorBroadcaster theIInterceptorBroadcaster) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myInterceptorBroadcaster = theIInterceptorBroadcaster;
@@ -96,20 +95,17 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 			// MDM_LINK_HISTORY hook
 			MdmHistoryEvent historyEvent = new MdmHistoryEvent();
 			historyEvent.setMdmLinkRevisions(mdmLinkRevisionsFromSvc);
-			historyEvent.setSourceIds(
-				theResourceIds.stream().map(IPrimitiveType::getValueAsString)
-					.collect(Collectors.toList())
-			);
-			historyEvent.setGoldenResourceIds(
-				theMdmGoldenResourceIds.stream().map(IPrimitiveType::getValueAsString)
-					.collect(Collectors.toList())
-			);
+			historyEvent.setSourceIds(theResourceIds.stream()
+					.map(IPrimitiveType::getValueAsString)
+					.collect(Collectors.toList()));
+			historyEvent.setGoldenResourceIds(theMdmGoldenResourceIds.stream()
+					.map(IPrimitiveType::getValueAsString)
+					.collect(Collectors.toList()));
 
 			HookParams params = new HookParams();
 			params.add(RequestDetails.class, theRequestDetails);
 			params.add(MdmHistoryEvent.class, historyEvent);
-			myInterceptorBroadcaster.callHooks(Pointcut.MDM_LINK_HISTORY,
-				params);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_LINK_HISTORY, params);
 		}
 
 		return retVal;

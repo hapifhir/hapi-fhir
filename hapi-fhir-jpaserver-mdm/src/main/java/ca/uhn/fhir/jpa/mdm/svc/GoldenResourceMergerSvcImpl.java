@@ -26,10 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent;
-import ca.uhn.fhir.mdm.model.mdmevents.MdmEventResource;
-import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -37,7 +33,10 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmEventResource;
+import ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -82,7 +81,6 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
-
 	@Override
 	@Transactional
 	public IAnyResource mergeGoldenResources(MdmMergeGoldenResourcesParams theParams) {
@@ -95,45 +93,52 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 		if (mergedResource != null) {
 			if (myGoldenResourceHelper.hasIdentifier(mergedResource)) {
-				throw new IllegalArgumentException(Msg.code(751) + "Manually merged resource can not contain identifiers");
+				throw new IllegalArgumentException(
+						Msg.code(751) + "Manually merged resource can not contain identifiers");
 			}
 			myGoldenResourceHelper.mergeIndentifierFields(fromGoldenResource, mergedResource, mdmTransactionContext);
 			myGoldenResourceHelper.mergeIndentifierFields(toGoldenResource, mergedResource, mdmTransactionContext);
 
 			mergedResource.setId(toGoldenResource.getId());
-			toGoldenResource = (IAnyResource) myMdmResourceDaoSvc.upsertGoldenResource(mergedResource, resourceType).getResource();
+			toGoldenResource = (IAnyResource) myMdmResourceDaoSvc
+					.upsertGoldenResource(mergedResource, resourceType)
+					.getResource();
 		} else {
 			myGoldenResourceHelper.mergeIndentifierFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
 			myGoldenResourceHelper.mergeNonIdentiferFields(fromGoldenResource, toGoldenResource, mdmTransactionContext);
-			//Save changes to the golden resource
+			// Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(toGoldenResource, resourceType);
 		}
 
 		myMdmPartitionHelper.validateMdmResourcesPartitionMatches(fromGoldenResource, toGoldenResource);
 
-		//Merge the links from the FROM to the TO resource. Clean up dangling links.
-		mergeGoldenResourceLinks(fromGoldenResource, toGoldenResource, fromGoldenResource.getIdElement(), mdmTransactionContext);
+		// Merge the links from the FROM to the TO resource. Clean up dangling links.
+		mergeGoldenResourceLinks(
+				fromGoldenResource, toGoldenResource, fromGoldenResource.getIdElement(), mdmTransactionContext);
 
-		//Create the new REDIRECT link
+		// Create the new REDIRECT link
 		addMergeLink(toGoldenResource, fromGoldenResource, resourceType, mdmTransactionContext);
 
-		//Strip the golden resource tag from the now-deprecated resource.
+		// Strip the golden resource tag from the now-deprecated resource.
 		myMdmResourceDaoSvc.removeGoldenResourceTag(fromGoldenResource, resourceType);
 
-		//Add the REDIRECT tag to that same deprecated resource.
+		// Add the REDIRECT tag to that same deprecated resource.
 		MdmResourceUtil.setGoldenResourceRedirected(fromGoldenResource);
 
-		//Save the deprecated resource.
+		// Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(fromGoldenResource, resourceType);
 
-		log(mdmTransactionContext, "Merged " + fromGoldenResource.getIdElement().toVersionless()
-			+ " into " + toGoldenResource.getIdElement().toVersionless());
+		log(
+				mdmTransactionContext,
+				"Merged " + fromGoldenResource.getIdElement().toVersionless() + " into "
+						+ toGoldenResource.getIdElement().toVersionless());
 
 		{
 			// pointcut for MDM_MERGE_GOLDEN_RESOURCES
 			MdmMergeEvent event = new MdmMergeEvent();
 			MdmEventResource from = new MdmEventResource();
-			from.setId(fromGoldenResource.getIdElement().toUnqualifiedVersionless().getValue());
+			from.setId(
+					fromGoldenResource.getIdElement().toUnqualifiedVersionless().getValue());
 			from.setResourceType(fromGoldenResource.fhirType());
 			from.setIsGoldenResource(true);
 			event.setFromResource(from);
@@ -147,10 +152,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			HookParams params = new HookParams();
 			params.add(MdmMergeEvent.class, event);
 			params.add(RequestDetails.class, theParams.getRequestDetails());
-			myInterceptorBroadcaster.callHooks(
-				Pointcut.MDM_MERGE_GOLDEN_RESOURCES,
-				params
-			);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_MERGE_GOLDEN_RESOURCES, params);
 		}
 
 		log(
