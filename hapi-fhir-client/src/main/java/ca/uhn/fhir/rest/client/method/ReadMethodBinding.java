@@ -19,32 +19,36 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
 
-public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.*;
+
+public class ReadMethodBinding extends BaseResourceReturningMethodBinding
+		implements IClientResponseHandlerHandlesBinary<Object> {
 	private Integer myIdIndex;
 	private boolean mySupportsVersion;
 	private Class<? extends IIdType> myIdParameterType;
 
 	@SuppressWarnings("unchecked")
-	public ReadMethodBinding(Class<? extends IBaseResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public ReadMethodBinding(
+			Class<? extends IBaseResource> theAnnotatedResourceType,
+			Method theMethod,
+			FhirContext theContext,
+			Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
 		Validate.notNull(theMethod, "Method must not be null");
@@ -57,15 +61,17 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		myIdIndex = idIndex;
 
 		if (myIdIndex == null) {
-			throw new ConfigurationException(Msg.code(1423) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName()
-					+ "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
+			throw new ConfigurationException(
+					Msg.code(1423) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \""
+							+ theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @"
+							+ IdParam.class.getSimpleName());
 		}
 		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
-			throw new ConfigurationException(Msg.code(1424) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
+			throw new ConfigurationException(
+					Msg.code(1424) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
 		}
-
 	}
 
 	@Override
@@ -92,7 +98,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IIdType id = ((IIdType) theArgs[myIdIndex]);
 		String resourceName = getResourceName();
 		if (id.hasVersionIdPart()) {
-			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
+			retVal = createVReadInvocation(
+					getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
 		} else {
 			retVal = createReadInvocation(getContext(), id, resourceName);
 		}
@@ -106,22 +113,27 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public Object invokeClientForBinary(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+	public Object invokeClientForBinary(
+			String theResponseMimeType,
+			InputStream theResponseReader,
+			int theResponseStatusCode,
+			Map<String, List<String>> theHeaders)
 			throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 
-		IBaseBinary resource = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+		IBaseBinary resource =
+				(IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
 		resource.setContentType(theResponseMimeType);
 		resource.setContent(contents);
 
 		switch (getMethodReturnType()) {
-		case LIST_OF_RESOURCES:
-			return Collections.singletonList(resource);
-		case RESOURCE:
-			return resource;
-		case BUNDLE_RESOURCE:
-		case METHOD_OUTCOME:
-			break;
+			case LIST_OF_RESOURCES:
+				return Collections.singletonList(resource);
+			case RESOURCE:
+				return resource;
+			case BUNDLE_RESOURCE:
+			case METHOD_OUTCOME:
+				break;
 		}
 
 		throw new IllegalStateException(Msg.code(1425) + "" + getMethodReturnType()); // should not happen
@@ -144,17 +156,19 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return new HttpGetClientInvocation(theContext, theId.getValue());
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
+	public static HttpGetClientInvocation createReadInvocation(
+			FhirContext theContext, IIdType theId, String theResourceName) {
 		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart()).getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
+	public static HttpGetClientInvocation createVReadInvocation(
+			FhirContext theContext, IIdType theId, String theResourceName) {
+		return new HttpGetClientInvocation(
+				theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
 	}
 
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
 	}
-
 }

@@ -27,7 +27,8 @@ public class DateSearchIndexData {
 	private final Date myUpperBoundDate;
 	private final int myUpperBoundOrdinal;
 
-	public DateSearchIndexData(Date theLowerBoundDate, int theLowerBoundOrdinal, Date theUpperBoundDate, int theUpperBoundOrdinal) {
+	public DateSearchIndexData(
+			Date theLowerBoundDate, int theLowerBoundOrdinal, Date theUpperBoundDate, int theUpperBoundOrdinal) {
 		myLowerBoundDate = theLowerBoundDate;
 		myLowerBoundOrdinal = theLowerBoundOrdinal;
 		myUpperBoundDate = theUpperBoundDate;

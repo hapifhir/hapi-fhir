@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -79,7 +79,7 @@ public class FhirR4B implements IFhirVersion {
 
 	@Override
 	public InputStream getFhirVersionPropertiesFile() {
-		String path = "org/hl7/fhir/r4b/model/fhirversion.properties";
+		String path = "org/hl7/fhir/r4b/hapi/model/fhirversion.properties";
 		InputStream str = FhirR4B.class.getResourceAsStream("/" + path);
 		if (str == null) {
 			str = FhirR4B.class.getResourceAsStream(path);
@@ -129,5 +129,4 @@ public class FhirR4B implements IFhirVersion {
 	public IIdType newIdType() {
 		return new IdType();
 	}
-
 }

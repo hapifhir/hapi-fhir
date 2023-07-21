@@ -25,8 +25,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 public class EmptyFieldMatcher implements IMdmFieldMatcher {
 
-	public EmptyFieldMatcher() {
-	}
+	public EmptyFieldMatcher() {}
 
 	@Override
 	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theParams) {

@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class QuestionnaireResponseOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
+
 	@Autowired
 	IQuestionnaireResponseProcessorFactory myR4QuestionnaireResponseProcessorFactory;
 
@@ -53,18 +54,22 @@ public class QuestionnaireResponseOperationsProvider {
 	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public IBaseBundle extract(
+			@IdParam IdType theId,
+			@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+			RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theId, theQuestionnaireResponse, null, null, null);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.extract(theId, theQuestionnaireResponse, null, null, null);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
-	public IBaseBundle extract(@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
-										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+	public IBaseBundle extract(
+			@ResourceParam QuestionnaireResponse theQuestionnaireResponse, RequestDetails theRequestDetails)
+			throws InternalErrorException, FHIRException {
 		return myR4QuestionnaireResponseProcessorFactory
-			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(null, theQuestionnaireResponse, null, null, null);
+				.create(myRepositoryFactory.create(theRequestDetails))
+				.extract(null, theQuestionnaireResponse, null, null, null);
 	}
 }

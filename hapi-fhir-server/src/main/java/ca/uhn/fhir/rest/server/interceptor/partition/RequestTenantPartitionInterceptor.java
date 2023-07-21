@@ -70,6 +70,4 @@ public class RequestTenantPartitionInterceptor {
 
 		return RequestPartitionId.fromPartitionName(tenantId);
 	}
-
-
 }

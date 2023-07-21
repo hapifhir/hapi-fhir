@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5100
+title: "Fixed a bug in FindCandidateByExampleSvc that resulted in
+      class cast exceptions for IResourcePersistentIds that are not
+      based on Long value ids.
+"

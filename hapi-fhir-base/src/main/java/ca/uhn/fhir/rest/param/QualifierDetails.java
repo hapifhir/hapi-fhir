@@ -82,7 +82,6 @@ public class QualifierDetails {
 		myWholeQualifier = theWholeQualifier;
 	}
 
-	
 	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
 		QualifierDetails retVal = new QualifierDetails();
 		if (theParamName == null || theParamName.length() == 0) {
@@ -129,7 +128,4 @@ public class QualifierDetails {
 
 		return retVal;
 	}
-
-
-	
 }

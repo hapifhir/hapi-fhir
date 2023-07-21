@@ -26,9 +26,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.annotation.Nonnull;
 
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
@@ -69,8 +69,12 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType,
-											 InputStream theInputStream, RequestDetails theRequestDetails) {
+	public StoredDetails storeBlob(
+			IIdType theResourceId,
+			String theBlobIdOrNull,
+			String theContentType,
+			InputStream theInputStream,
+			RequestDetails theRequestDetails) {
 		throw new UnsupportedOperationException(Msg.code(1346));
 	}
 

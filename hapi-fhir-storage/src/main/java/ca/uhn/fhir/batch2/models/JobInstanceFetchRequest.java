@@ -61,7 +61,11 @@ public class JobInstanceFetchRequest {
 		mySort = theSort;
 	}
 
-	public String getJobStatus() { return myJobStatus; }
+	public String getJobStatus() {
+		return myJobStatus;
+	}
 
-	public void setJobStatus(String theJobStatus) { myJobStatus = theJobStatus; }
+	public void setJobStatus(String theJobStatus) {
+		myJobStatus = theJobStatus;
+	}
 }

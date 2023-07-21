@@ -30,20 +30,24 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 
 import javax.annotation.Nonnull;
 
-public class DeleteCodeSystemConceptsByVersionStep implements IJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, CodeSystemVersionPIDResult> {
+public class DeleteCodeSystemConceptsByVersionStep
+		implements IJobStepWorker<
+				TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, CodeSystemVersionPIDResult> {
 
 	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
-	public DeleteCodeSystemConceptsByVersionStep (ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+	public DeleteCodeSystemConceptsByVersionStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
 		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<CodeSystemVersionPIDResult> theDataSink)
+			throws JobExecutionFailedException {
 		CodeSystemVersionPIDResult versionPidResult = theStepExecutionDetails.getData();
 
 		myITermCodeSystemSvc.deleteCodeSystemConceptsByCodeSystemVersionPid(versionPidResult.getCodeSystemVersionPID());

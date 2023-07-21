@@ -19,16 +19,15 @@
  */
 package ca.uhn.fhir.rest.param;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.math.BigDecimal;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import java.math.BigDecimal;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
 
@@ -44,7 +43,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theValue
 	 *            A value, e.g. "10"
 	 */
@@ -54,7 +53,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theValue
 	 *            A string value, e.g. "gt5.0"
 	 */
@@ -76,7 +75,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 		b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
 		return b.toString();
 	}
-	
+
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (getMissing() != null && isBlank(theValue)) {
@@ -88,8 +87,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 			myQuantity = new BigDecimal(value);
 		}
 	}
-	
-	
+
 	public BigDecimal getValue() {
 		return myQuantity;
 	}
@@ -98,7 +96,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 		myQuantity = theValue;
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
@@ -106,5 +104,4 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 		b.append("value", myQuantity);
 		return b.build();
 	}
-
 }

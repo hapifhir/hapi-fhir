@@ -33,8 +33,10 @@ public class HapiStringMatcher implements IMdmFieldMatcher {
 	@Override
 	public boolean matches(IBase theLeftBase, IBase theRightBase, MdmMatcherJson theExtraMatchParams) {
 		if (theLeftBase instanceof IPrimitiveType && theRightBase instanceof IPrimitiveType) {
-			String leftString = StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
-			String rightString = StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
+			String leftString =
+					StringMatcherUtils.extractString((IPrimitiveType<?>) theLeftBase, theExtraMatchParams.getExact());
+			String rightString =
+					StringMatcherUtils.extractString((IPrimitiveType<?>) theRightBase, theExtraMatchParams.getExact());
 
 			return leftString.equals(rightString);
 		}

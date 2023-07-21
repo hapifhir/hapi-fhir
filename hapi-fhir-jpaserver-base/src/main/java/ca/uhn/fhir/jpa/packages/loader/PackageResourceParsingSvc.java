@@ -61,7 +61,10 @@ public class PackageResourceParsingSvc {
 					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
 					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file " + file, e);
+					throw new InternalErrorException(
+							Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file "
+									+ file,
+							e);
 				}
 			}
 		}

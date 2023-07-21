@@ -42,119 +42,123 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import java.util.Arrays;
 
 @SuppressWarnings({"serial", "RedundantThrows", "InnerClassMayBeStatic"})
 public class ServletExamples {
 
-   // START SNIPPET: loggingInterceptor
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class RestfulServerWithLogging extends RestfulServer {
+	// START SNIPPET: loggingInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class RestfulServerWithLogging extends RestfulServer {
 
-      @Override
-      protected void initialize() throws ServletException {
-         
-         // ... define your resource providers here ...
-         
-         // Now register the logging interceptor
-         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-         registerInterceptor(loggingInterceptor);
+		@Override
+		protected void initialize() throws ServletException {
 
-         // The SLF4j logger "test.accesslog" will receive the logging events 
-         loggingInterceptor.setLoggerName("test.accesslog");
-         
-         // This is the format for each line. A number of substitution variables may
-         // be used here. See the JavaDoc for LoggingInterceptor for information on
-         // what is available.
-         loggingInterceptor.setMessageFormat("Source[${remoteAddr}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
-         
-      }
-      
-   }
-   // END SNIPPET: loggingInterceptor
+			// ... define your resource providers here ...
 
-   // START SNIPPET: OpenApiInterceptor
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class RestfulServerWithOpenApi extends RestfulServer {
+			// Now register the logging interceptor
+			LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+			registerInterceptor(loggingInterceptor);
 
-      @Override
-      protected void initialize() throws ServletException {
+			// The SLF4j logger "test.accesslog" will receive the logging events
+			loggingInterceptor.setLoggerName("test.accesslog");
 
-         // ... define your resource providers here ...
+			// This is the format for each line. A number of substitution variables may
+			// be used here. See the JavaDoc for LoggingInterceptor for information on
+			// what is available.
+			loggingInterceptor.setMessageFormat(
+					"Source[${remoteAddr}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
+		}
+	}
+	// END SNIPPET: loggingInterceptor
 
-         // Now register the interceptor
+	// START SNIPPET: OpenApiInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class RestfulServerWithOpenApi extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// ... define your resource providers here ...
+
+			// Now register the interceptor
 			OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
-         registerInterceptor(openApiInterceptor);
+			registerInterceptor(openApiInterceptor);
+		}
+	}
+	// END SNIPPET: OpenApiInterceptor
 
-      }
+	// START SNIPPET: validatingInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class ValidatingServerWithLogging extends RestfulServer {
 
-   }
-   // END SNIPPET: OpenApiInterceptor
-
-   // START SNIPPET: validatingInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class ValidatingServerWithLogging extends RestfulServer {
-
-      @Override
-      protected void initialize() {
+		@Override
+		protected void initialize() {
 			FhirContext ctx = FhirContext.forDstu3();
 			setFhirContext(ctx);
 
-         // ... define your resource providers here ...
+			// ... define your resource providers here ...
 
-         // Create an interceptor to validate incoming requests
-         RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
-         
-         // Register a validator module (you could also use SchemaBaseValidator and/or SchematronBaseValidator)
+			// Create an interceptor to validate incoming requests
+			RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
+
+			// Register a validator module (you could also use SchemaBaseValidator and/or SchematronBaseValidator)
 			requestInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
-         
-         requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
-         requestInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-         requestInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");
-         requestInterceptor.setResponseHeaderValueNoIssues("No issues detected");
-         
-         // Now register the validating interceptor
-         registerInterceptor(requestInterceptor);
 
-         // Create an interceptor to validate responses
-         // This is configured in the same way as above
-         ResponseValidatingInterceptor responseInterceptor = new ResponseValidatingInterceptor();
-         responseInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
-         responseInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
-         responseInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-         responseInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");
-         responseInterceptor.setResponseHeaderValueNoIssues("No issues detected");
-         registerInterceptor(responseInterceptor);
-      }
-      
-   }
-   // END SNIPPET: validatingInterceptor
+			requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
+			requestInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+			requestInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");
+			requestInterceptor.setResponseHeaderValueNoIssues("No issues detected");
 
-   // START SNIPPET: exceptionInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class RestfulServerWithExceptionHandling extends RestfulServer {
+			// Now register the validating interceptor
+			registerInterceptor(requestInterceptor);
 
-      @Override
-      protected void initialize() throws ServletException {
-         
-         // ... define your resource providers here ...
-         
-         // Now register the interceptor
-         ExceptionHandlingInterceptor interceptor = new ExceptionHandlingInterceptor();
-         registerInterceptor(interceptor);
+			// Create an interceptor to validate responses
+			// This is configured in the same way as above
+			ResponseValidatingInterceptor responseInterceptor = new ResponseValidatingInterceptor();
+			responseInterceptor.addValidatorModule(new FhirInstanceValidator(ctx));
+			responseInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
+			responseInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
+			responseInterceptor.setResponseHeaderValue("Validation on ${line}: ${message} ${severity}");
+			responseInterceptor.setResponseHeaderValueNoIssues("No issues detected");
+			registerInterceptor(responseInterceptor);
+		}
+	}
+	// END SNIPPET: validatingInterceptor
 
-         // Return the stack trace to the client for the following exception types
-         interceptor.setReturnStackTracesForExceptionTypes(InternalErrorException.class, NullPointerException.class);
-         
-      }
-      
-   }
-   // END SNIPPET: exceptionInterceptor
+	// START SNIPPET: exceptionInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class RestfulServerWithExceptionHandling extends RestfulServer {
+
+		@Override
+		protected void initialize() throws ServletException {
+
+			// ... define your resource providers here ...
+
+			// Now register the interceptor
+			ExceptionHandlingInterceptor interceptor = new ExceptionHandlingInterceptor();
+			registerInterceptor(interceptor);
+
+			// Return the stack trace to the client for the following exception types
+			interceptor.setReturnStackTracesForExceptionTypes(InternalErrorException.class, NullPointerException.class);
+		}
+	}
+	// END SNIPPET: exceptionInterceptor
 
 	// START SNIPPET: fhirPathInterceptor
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
 	public class RestfulServerWithFhirPath extends RestfulServer {
 
 		@Override
@@ -165,14 +169,14 @@ public class ServletExamples {
 			// Now register the interceptor
 			FhirPathFilterInterceptor interceptor = new FhirPathFilterInterceptor();
 			registerInterceptor(interceptor);
-
 		}
-
 	}
 	// END SNIPPET: fhirPathInterceptor
 
 	// START SNIPPET: staticCapabilityStatementInterceptor
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
 	public class RestfulServerWithStaticCapabilityStatement extends RestfulServer {
 
 		@Override
@@ -195,66 +199,65 @@ public class ServletExamples {
 
 			// Now register the interceptor
 			registerInterceptor(interceptor);
-
 		}
-
 	}
 	// END SNIPPET: staticCapabilityStatementInterceptor
 
-   // START SNIPPET: responseHighlighterInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class RestfulServerWithResponseHighlighter extends RestfulServer {
+	// START SNIPPET: responseHighlighterInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class RestfulServerWithResponseHighlighter extends RestfulServer {
 
-      @Override
-      protected void initialize() throws ServletException {
-         
-         // ... define your resource providers here ...
-         
-         // Now register the interceptor
-         ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
-         registerInterceptor(interceptor);
+		@Override
+		protected void initialize() throws ServletException {
 
-      }
-      
-   }
-   // END SNIPPET: responseHighlighterInterceptor
+			// ... define your resource providers here ...
 
-   // START SNIPPET: corsInterceptor
-   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
-   public class RestfulServerWithCors extends RestfulServer {
+			// Now register the interceptor
+			ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
+			registerInterceptor(interceptor);
+		}
+	}
+	// END SNIPPET: responseHighlighterInterceptor
 
-      @Override
-      protected void initialize() throws ServletException {
-         
-         // ... define your resource providers here ...
+	// START SNIPPET: corsInterceptor
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
+	public class RestfulServerWithCors extends RestfulServer {
 
-         // Define your CORS configuration. This is an example
-         // showing a typical setup. You should customize this
-         // to your specific needs  
-         CorsConfiguration config = new CorsConfiguration();
-         config.addAllowedHeader("x-fhir-starter");
-         config.addAllowedHeader("Origin");
-         config.addAllowedHeader("Accept");
-         config.addAllowedHeader("X-Requested-With");
-         config.addAllowedHeader("Content-Type");
+		@Override
+		protected void initialize() throws ServletException {
 
-         config.addAllowedOrigin("*");
+			// ... define your resource providers here ...
 
-         config.addExposedHeader("Location");
-         config.addExposedHeader("Content-Location");
-         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+			// Define your CORS configuration. This is an example
+			// showing a typical setup. You should customize this
+			// to your specific needs
+			CorsConfiguration config = new CorsConfiguration();
+			config.addAllowedHeader("x-fhir-starter");
+			config.addAllowedHeader("Origin");
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedHeader("Content-Type");
 
-         // Create the interceptor and register it
-         CorsInterceptor interceptor = new CorsInterceptor(config);
-         registerInterceptor(interceptor);
+			config.addAllowedOrigin("*");
 
-      }
-      
-   }
-   // END SNIPPET: corsInterceptor
+			config.addExposedHeader("Location");
+			config.addExposedHeader("Content-Location");
+			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
+			// Create the interceptor and register it
+			CorsInterceptor interceptor = new CorsInterceptor(config);
+			registerInterceptor(interceptor);
+		}
+	}
+	// END SNIPPET: corsInterceptor
 
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
 	public class RestfulServerWithResponseTerminologyTranslationInterceptor extends RestfulServer {
 
 		private IValidationSupport myValidationSupport;
@@ -265,7 +268,8 @@ public class ServletExamples {
 			// START SNIPPET: ResponseTerminologyTranslationInterceptor
 
 			// Create an interceptor that will map from a proprietary CodeSystem to LOINC
-			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport, myResponseTerminologyTranslationSvc);
+			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(
+					myValidationSupport, myResponseTerminologyTranslationSvc);
 			interceptor.addMappingSpecification("http://examplelabs.org", "http://loinc.org");
 
 			// Register the interceptor
@@ -275,9 +279,10 @@ public class ServletExamples {
 		}
 	}
 
-
 	// START SNIPPET: preferHandling
-	@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+	@WebServlet(
+			urlPatterns = {"/fhir/*"},
+			displayName = "FHIR Server")
 	public class RestfulServerWithPreferHandling extends RestfulServer {
 
 		@Override
@@ -293,10 +298,7 @@ public class ServletExamples {
 
 			// Register the interceptor
 			registerInterceptor(interceptor);
-
 		}
 		// END SNIPPET: preferHandling
 	}
-
-
 }

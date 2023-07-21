@@ -211,12 +211,14 @@ public abstract class BaseTask {
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+				throw new HapiMigrationException(
+						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}
 
-	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
+	protected void captureExecutedStatement(
+			String theTableName, @Language("SQL") String theSql, Object... theArguments) {
 		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
 	}
 
@@ -289,7 +291,8 @@ public abstract class BaseTask {
 	public void validateVersion() {
 		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
-			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion
+					+ " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 

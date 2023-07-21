@@ -24,18 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * RESTful method annotation used for a method which provides
  * the FHIR "conformance" method.
- * 
+ *
  * See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
  * fore more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
+@Target(value = ElementType.METHOD)
 public @interface Metadata {
 
 	long cacheMillis() default 60 * 1000L;
-
 }

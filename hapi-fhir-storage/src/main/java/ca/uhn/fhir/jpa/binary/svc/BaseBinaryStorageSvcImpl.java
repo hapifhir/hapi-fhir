@@ -47,12 +47,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -66,9 +65,9 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
 
 	public BaseBinaryStorageSvcImpl() {
 		super();
@@ -128,20 +127,25 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			public long getByteCount() {
 				long retVal = super.getByteCount();
 				if (retVal > getMaximumBinarySize()) {
-					throw new PayloadTooLargeException(Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
+					throw new PayloadTooLargeException(
+							Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
 				return retVal;
 			}
 		};
 	}
 
-	@Deprecated(since = "6.6.0 - Maintained for interface backwards compatibility. Note that invokes interceptor pointcut with empty parameters", forRemoval = true)
+	@Deprecated(
+			since =
+					"6.6.0 - Maintained for interface backwards compatibility. Note that invokes interceptor pointcut with empty parameters",
+			forRemoval = true)
 	protected String provideIdForNewBlob(String theBlobIdOrNull) {
 		return isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
 	}
 
 	@Nonnull
-	protected String provideIdForNewBlob(String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+	protected String provideIdForNewBlob(
+			String theBlobIdOrNull, byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
 		String blobId = isNotBlank(theBlobIdOrNull) ? theBlobIdOrNull : newBlobId();
 
 		// make sure another pointcut didn't already apply a prefix to the blobId
@@ -169,18 +173,16 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Nullable
 	private String callBlobIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
 		// Interceptor call: STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX
-		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext)
-			.setContent(theBytes)
-			.setContentType(theContentType);
+		IBaseBinary binary =
+				BinaryUtil.newBinary(myFhirContext).setContent(theBytes).setContentType(theContentType);
 
-		HookParams hookParams = new HookParams()
-			.add(RequestDetails.class, theRequestDetails)
-			.add(IBaseResource.class, binary);
+		HookParams hookParams =
+				new HookParams().add(RequestDetails.class, theRequestDetails).add(IBaseResource.class, binary);
 
 		setBlobIdPrefixApplied(theRequestDetails);
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-			myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, hookParams);
+				myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, hookParams);
 	}
 
 	@Override
@@ -192,7 +194,8 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			if (attachmentId.isPresent()) {
 				value = fetchBlob(theBaseBinary.getIdElement(), attachmentId.get());
 			} else {
-				throw new InternalErrorException(Msg.code(1344) + "Unable to load binary blob data for " + theBaseBinary.getIdElement());
+				throw new InternalErrorException(
+						Msg.code(1344) + "Unable to load binary blob data for " + theBaseBinary.getIdElement());
 			}
 		}
 		return value;
@@ -200,15 +203,13 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@SuppressWarnings("unchecked")
 	private Optional<String> getAttachmentId(IBaseHasExtensions theBaseBinary) {
-		return theBaseBinary
-			.getExtension()
-			.stream()
-			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.filter(t -> t.getValue() instanceof IPrimitiveType)
-			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(IPrimitiveType::getValue)
-			.filter(StringUtils::isNotBlank)
-			.findFirst();
+		return theBaseBinary.getExtension().stream()
+				.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+				.filter(t -> t.getValue() instanceof IPrimitiveType)
+				.map(t -> (IPrimitiveType<String>) t.getValue())
+				.map(IPrimitiveType::getValue)
+				.filter(StringUtils::isNotBlank)
+				.findFirst();
 	}
 
 	@VisibleForTesting

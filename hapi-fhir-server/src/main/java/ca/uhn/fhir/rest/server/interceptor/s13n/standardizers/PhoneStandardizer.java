@@ -37,5 +37,4 @@ public class PhoneStandardizer implements IStandardizer {
 		}
 		return buf.toString().replaceFirst(PHONE_NUMBER_PATTERN, PHONE_NUMBER_REPLACE_PATTERN);
 	}
-
 }

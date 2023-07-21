@@ -14,8 +14,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -31,7 +31,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is an implementation of {@link IValidationSupport} which may be pre-populated
  * with a collection of validation resources to be used by the validator.
  */
-public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport implements IValidationSupport, ILockable {
+public class PrePopulatedValidationSupport extends BaseStaticResourceValidationSupport
+		implements IValidationSupport, ILockable {
 
 	private final Map<String, IBaseResource> myCodeSystems;
 	private final Map<String, IBaseResource> myStructureDefinitions;
@@ -58,10 +59,10 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 *                                the resource itself.
 	 **/
 	public PrePopulatedValidationSupport(
-		FhirContext theFhirContext,
-		Map<String, IBaseResource> theStructureDefinitions,
-		Map<String, IBaseResource> theValueSets,
-		Map<String, IBaseResource> theCodeSystems) {
+			FhirContext theFhirContext,
+			Map<String, IBaseResource> theStructureDefinitions,
+			Map<String, IBaseResource> theValueSets,
+			Map<String, IBaseResource> theCodeSystems) {
 		this(theFhirContext, theStructureDefinitions, theValueSets, theCodeSystems, new HashMap<>(), new HashMap<>());
 	}
 
@@ -78,12 +79,12 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 *                                are the contents of the file as a byte array.
 	 */
 	public PrePopulatedValidationSupport(
-		FhirContext theFhirContext,
-		Map<String, IBaseResource> theStructureDefinitions,
-		Map<String, IBaseResource> theValueSets,
-		Map<String, IBaseResource> theCodeSystems,
-		Map<String, IBaseResource> theSearchParameters,
-		Map<String, byte[]> theBinaries) {
+			FhirContext theFhirContext,
+			Map<String, IBaseResource> theStructureDefinitions,
+			Map<String, IBaseResource> theValueSets,
+			Map<String, IBaseResource> theCodeSystems,
+			Map<String, IBaseResource> theSearchParameters,
+			Map<String, byte[]> theBinaries) {
 		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
@@ -133,10 +134,14 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		Validate.notNull(theResource, "the" + theResourceName + " must not be null");
 		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResource);
 		String actualResourceName = resourceDef.getName();
-		Validate.isTrue(actualResourceName.equals(theResourceName), "the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
+		Validate.isTrue(
+				actualResourceName.equals(theResourceName),
+				"the" + theResourceName + " must be a " + theResourceName + " - Got: " + actualResourceName);
 
-		Optional<IBase> urlValue = resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
-		String url = urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
+		Optional<IBase> urlValue =
+				resourceDef.getChildByName("url").getAccessor().getFirstValueOrNull(theResource);
+		String url =
+				urlValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
 
 		Validate.notNull(url, "the" + theResourceName + ".getUrl() must not return null");
 		Validate.notBlank(url, "the" + theResourceName + ".getUrl() must return a value");
@@ -151,8 +156,11 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 
 		HashSet<String> retVal = Sets.newHashSet(url, urlWithoutVersion);
 
-		Optional<IBase> versionValue = resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
-		String version = versionValue.map(t -> (((IPrimitiveType<?>) t).getValueAsString())).orElse(null);
+		Optional<IBase> versionValue =
+				resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
+		String version = versionValue
+				.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+				.orElse(null);
 		if (isNotBlank(version)) {
 			retVal.add(urlWithoutVersion + "|" + version);
 		}
@@ -223,7 +231,6 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 		addToMap(theValueSet, myValueSets, urls);
 	}
 
-
 	/**
 	 * @param theResource The resource. This method delegates to the type-specific methods (e.g. {@link #addCodeSystem(IBaseResource)})
 	 *                    and will do nothing if the resource type is not supported by this class.
@@ -285,7 +292,9 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public byte[] fetchBinary(String theBinaryKey) { return myBinaries.get(theBinaryKey); }
+	public byte[] fetchBinary(String theBinaryKey) {
+		return myBinaries.get(theBinaryKey);
+	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -301,12 +310,8 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * Returns a count of all known resources
 	 */
 	public int countAll() {
-		return myBinaries.size() +
-			myCodeSystems.size() +
-			myStructureDefinitions.size() +
-			myValueSets.size();
+		return myBinaries.size() + myCodeSystems.size() + myStructureDefinitions.size() + myValueSets.size();
 	}
-
 
 	@Override
 	public synchronized void lock() {

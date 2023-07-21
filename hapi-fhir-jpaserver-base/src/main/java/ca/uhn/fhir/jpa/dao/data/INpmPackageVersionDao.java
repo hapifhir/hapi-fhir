@@ -34,11 +34,14 @@ public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEn
 	Collection<NpmPackageVersionEntity> findByPackageId(@Param("id") String thePackageId);
 
 	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId = :version")
-	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(@Param("id") String thePackageId, @Param("version") String thePackageVersion);
+	Optional<NpmPackageVersionEntity> findByPackageIdAndVersion(
+			@Param("id") String thePackageId, @Param("version") String thePackageVersion);
 
 	/**
 	 * Uses a "like" expression on the version ID
 	 */
-	@Query("SELECT p.myVersionId FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId like :version")
-	List<String> findVersionIdsByPackageIdAndLikeVersion(@Param("id") String theId, @Param("version") String thePartialVersionString);
+	@Query(
+			"SELECT p.myVersionId FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id AND p.myVersionId like :version")
+	List<String> findVersionIdsByPackageIdAndLikeVersion(
+			@Param("id") String theId, @Param("version") String thePartialVersionString);
 }

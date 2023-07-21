@@ -42,12 +42,20 @@ public class Batch2SupportConfig {
 	}
 
 	@Bean
-	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
+	public IDeleteExpungeSvc deleteExpungeSvc(
+			EntityManager theEntityManager,
+			DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder,
+			@Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
 	}
 
 	@Bean
-	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, JpaStorageSettings theStorageSettings, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
-		return new DeleteExpungeSqlBuilder(theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
+	DeleteExpungeSqlBuilder deleteExpungeSqlBuilder(
+			ResourceTableFKProvider theResourceTableFKProvider,
+			JpaStorageSettings theStorageSettings,
+			IIdHelperService theIdHelper,
+			IResourceLinkDao theResourceLinkDao) {
+		return new DeleteExpungeSqlBuilder(
+				theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao);
 	}
 }

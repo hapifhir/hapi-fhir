@@ -26,5 +26,4 @@ import java.util.function.Consumer;
 /**
  * Pre-save hook for Consent saved during $member-match.
  */
-public interface IMemberMatchConsentHook extends Consumer<IBaseResource> {
-}
+public interface IMemberMatchConsentHook extends Consumer<IBaseResource> {}

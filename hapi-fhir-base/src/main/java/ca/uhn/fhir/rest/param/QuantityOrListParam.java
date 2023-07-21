@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 
-
 public class QuantityOrListParam extends BaseOrListParam<QuantityOrListParam, QuantityParam> {
 
 	@Override
@@ -35,7 +34,4 @@ public class QuantityOrListParam extends BaseOrListParam<QuantityOrListParam, Qu
 		add(theParameter);
 		return this;
 	}
-
-
-
 }

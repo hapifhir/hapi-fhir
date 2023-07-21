@@ -26,10 +26,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.text.StringTokenizer;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -54,7 +54,6 @@ public enum SubscriptionCriteriaParser {
 		 * All types
 		 */
 		STARTYPE_EXPRESSION
-
 	}
 
 	public static class SubscriptionCriteria {
@@ -131,6 +130,4 @@ public enum SubscriptionCriteriaParser {
 
 		return null;
 	}
-
-
 }

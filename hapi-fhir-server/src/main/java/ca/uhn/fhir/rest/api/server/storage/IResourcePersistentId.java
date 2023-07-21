@@ -35,7 +35,6 @@ public interface IResourcePersistentId<T> {
 	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
 	 *                   leave this as <code>null</code>
 	 */
-
 	void setVersion(Long theVersion);
 
 	/**

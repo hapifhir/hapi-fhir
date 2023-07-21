@@ -48,22 +48,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId> implements ISearchParamWithInlineReferencesExtractor {
+public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId>
+		implements ISearchParamWithInlineReferencesExtractor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamWithInlineReferencesExtractor.class);
 
 	protected FhirContext myFhirContext;
 	protected JpaStorageSettings myStorageSettings;
+
 	@Autowired
 	private MatchResourceUrlService<T> myMatchResourceUrlService;
+
 	@Autowired
 	private DaoResourceLinkResolver<T> myDaoResourceLinkResolver;
+
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+
 	@Autowired
 	private IIdHelperService<T> myIdHelperService;
 
 	@Override
-	public void extractInlineReferences(RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails) {
+	public void extractInlineReferences(
+			RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
 		for (IBaseReference nextRef : allRefs) {
@@ -75,34 +81,51 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 			int qmIndex = nextIdText.indexOf('?');
 			if (qmIndex != -1) {
 				if (!myStorageSettings.isAllowInlineMatchUrlReferences()) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "inlineMatchNotSupported", UrlUtil.sanitizeUrlPart(nextRef.getReferenceElement().getValueAsString()));
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(
+									BaseStorageDao.class,
+									"inlineMatchNotSupported",
+									UrlUtil.sanitizeUrlPart(
+											nextRef.getReferenceElement().getValueAsString()));
 					throw new InvalidRequestException(Msg.code(2282) + msg);
 				}
 				nextIdText = truncateReference(nextIdText, qmIndex);
-				String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
+				String resourceTypeString =
+						nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
 				RuntimeResourceDefinition matchResourceDef = myFhirContext.getResourceDefinition(resourceTypeString);
 				if (matchResourceDef == null) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(
+									BaseStorageDao.class,
+									"invalidMatchUrlInvalidResourceType",
+									nextId.getValue(),
+									resourceTypeString);
 					throw new InvalidRequestException(Msg.code(1090) + msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
 				T resolvedMatch = null;
 				if (theTransactionDetails != null) {
-					resolvedMatch = (T) theTransactionDetails.getResolvedMatchUrls().get(nextIdText);
+					resolvedMatch =
+							(T) theTransactionDetails.getResolvedMatchUrls().get(nextIdText);
 				}
 
 				Set<T> matches;
 				if (resolvedMatch != null && !IResourcePersistentId.NOT_FOUND.equals(resolvedMatch)) {
 					matches = Set.of(resolvedMatch);
 				} else {
-					matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
+					matches = myMatchResourceUrlService.processMatchUrl(
+							nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
 				}
 
 				T match;
 				IIdType newId = null;
 				if (matches.isEmpty()) {
-					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
+					Optional<IBasePersistedResource> placeholderOpt =
+							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
+									matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
 						newId = myFhirContext.getVersion().newIdType();
@@ -111,11 +134,15 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 						theTransactionDetails.addResolvedMatchUrl(myFhirContext, nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
-						String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
+						String msg = myFhirContext
+								.getLocalizer()
+								.getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 				} else if (matches.size() > 1) {
-					String msg = myFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
+					String msg = myFhirContext
+							.getLocalizer()
+							.getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(Msg.code(1092) + msg);
 				} else {
 					match = matches.iterator().next();

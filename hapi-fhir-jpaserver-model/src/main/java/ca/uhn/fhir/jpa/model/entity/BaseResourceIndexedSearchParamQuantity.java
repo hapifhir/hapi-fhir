@@ -33,11 +33,11 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 	private static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	@FullTextField
 	public String mySystem;
-	
+
 	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
 	@FullTextField
 	public String myUnits;
@@ -83,8 +83,10 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 		String units = getUnits();
 		String system = getSystem();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
-		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
+		setHashIdentityAndUnits(
+				calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
+		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(
+				getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
 	}
 
 	public Long getHashIdentity() {
@@ -138,23 +140,44 @@ public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourc
 		return b.toHashCode();
 	}
 
-
-	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
+	public static long calculateHashSystemAndUnits(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theSystem,
+			String theUnits) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashSystemAndUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+		return calculateHashSystemAndUnits(
+				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
-	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
+	public static long calculateHashSystemAndUnits(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theSystem,
+			String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
 	}
 
-	public static long calculateHashUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
+	public static long calculateHashUnits(
+			PartitionSettings thePartitionSettings,
+			PartitionablePartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUnits) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
-	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
+	public static long calculateHashUnits(
+			PartitionSettings thePartitionSettings,
+			RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theParamName,
+			String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
-
 }
