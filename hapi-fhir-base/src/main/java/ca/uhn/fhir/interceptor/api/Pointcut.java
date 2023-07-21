@@ -2285,7 +2285,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	MDM_CREATE_LINK(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
+	),
 
 	/**
 	 * <b>MDM Update Link</b>
@@ -2309,7 +2312,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	MDM_UPDATE_LINK(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
+	),
 
 	/**
 	 * <b>MDM Merge Golden Resources</b>
@@ -2333,7 +2339,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	MDM_MERGE_GOLDEN_RESOURCES(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent"
+	),
 
 	/**
 	 * <b>MDM Link History Hook:</b>
@@ -2355,7 +2364,8 @@ public enum Pointcut implements IPointcut {
 	MDM_LINK_HISTORY(
 			void.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
-			"ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent"),
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmHistoryEvent"
+	),
 
 	/**
 	 * <b>MDM Not Duplicate/Unduplicate Hook:</b>
@@ -2375,7 +2385,10 @@ public enum Pointcut implements IPointcut {
 	 * </ul>
 	 */
 	MDM_NOT_DUPLICATE(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmLinkEvent"
+	),
 
 	/**
 	 * <b>MDM Clear Hook:</b>
@@ -2394,7 +2407,10 @@ public enum Pointcut implements IPointcut {
 	 * </ul>
 	 */
 	MDM_CLEAR(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmClearEvent"
+	),
 
 	/**
 	 * <b>MDM Submit Hook:</b>
@@ -2433,7 +2449,10 @@ public enum Pointcut implements IPointcut {
 	 * </ul>
 	 */
 	MDM_SUBMIT(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent"),
+			void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.mdm.model.mdmevents.MdmSubmitEvent"
+	),
 
 	/**
 	 * <b>JPA Hook:</b>
