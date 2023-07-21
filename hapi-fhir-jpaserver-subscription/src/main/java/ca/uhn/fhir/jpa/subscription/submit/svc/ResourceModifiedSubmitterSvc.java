@@ -121,7 +121,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	@Override
 	public boolean submitPersisedResourceModifiedMessage(
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
-		return (boolean) myHapiTransactionService
+		return myHapiTransactionService
 				.withSystemRequest()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(doProcessResourceModifiedInTransaction(thePersistedResourceModifiedMessage));
