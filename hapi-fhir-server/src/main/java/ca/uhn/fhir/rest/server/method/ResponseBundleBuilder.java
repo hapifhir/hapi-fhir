@@ -270,7 +270,7 @@ public class ResponseBundleBuilder {
 			}
 			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
 				// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our
-				// theResponsePage.resourceList is now empty
+				//  theResponsePage.resourceList is now empty
 				//  thus we will suppress the next link even though there may be more results
 				if (!theResponsePage.resourceList.isEmpty()) {
 					retval.setNext(RestfulServerUtils.createOffsetPagingLink(
@@ -318,6 +318,9 @@ public class ResponseBundleBuilder {
 			 * people have faked the offset number to some huge number to avoid them getting
 			 * back paging links that don't make sense.
 			 */
+			// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our
+			//  theResponsePage.resourceList is now empty
+			//  thus we will suppress the next link even though there may be more results
 			if (theResponsePage.size() > 0) {
 				if (theResponsePage.numTotalResults == null
 						|| theResponseBundleRequest.offset + theResponsePage.numToReturn
