@@ -269,7 +269,8 @@ public class ResponseBundleBuilder {
 				requestedToReturn += pageRequest.offset;
 			}
 			if (theResponsePage.numTotalResults == null || requestedToReturn < theResponsePage.numTotalResults) {
-				// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our theResponsePage.resourceList is now empty
+				// FIXME The issue is that we have nulled out all the entries and then removed all the nulls, so our
+				// theResponsePage.resourceList is now empty
 				//  thus we will suppress the next link even though there may be more results
 				if (!theResponsePage.resourceList.isEmpty()) {
 					retval.setNext(RestfulServerUtils.createOffsetPagingLink(
