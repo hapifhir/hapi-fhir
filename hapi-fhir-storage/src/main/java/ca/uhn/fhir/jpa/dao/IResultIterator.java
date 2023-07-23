@@ -32,5 +32,4 @@ public interface IResultIterator<T extends IResourcePersistentId> extends Iterat
 	int getNonSkippedCount();
 
 	Collection<T> getNextResultBatch(long theBatchSize);
-
 }

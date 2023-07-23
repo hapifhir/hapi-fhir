@@ -31,13 +31,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public class DeleteExpungeSqlBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
@@ -46,16 +45,20 @@ public class DeleteExpungeSqlBuilder {
 	private final IIdHelperService myIdHelper;
 	private final IResourceLinkDao myResourceLinkDao;
 
-	public DeleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, JpaStorageSettings theStorageSettings, IIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
+	public DeleteExpungeSqlBuilder(
+			ResourceTableFKProvider theResourceTableFKProvider,
+			JpaStorageSettings theStorageSettings,
+			IIdHelperService theIdHelper,
+			IResourceLinkDao theResourceLinkDao) {
 		myResourceTableFKProvider = theResourceTableFKProvider;
 		myStorageSettings = theStorageSettings;
 		myIdHelper = theIdHelper;
 		myResourceLinkDao = theResourceLinkDao;
 	}
 
-
 	@Nonnull
-	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
+	DeleteExpungeSqlResult convertPidsToDeleteExpungeSql(
+			List<JpaPid> theJpaPids, boolean theCascade, Integer theCascadeMaxRounds) {
 
 		Set<Long> pids = JpaPid.toLongSet(theJpaPids);
 		validateOkToDeleteAndExpunge(pids, theCascade, theCascadeMaxRounds);
@@ -125,27 +128,45 @@ public class DeleteExpungeSqlBuilder {
 
 		ResourceLink firstConflict = conflictResourceLinks.get(0);
 
-		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
-		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
-		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
-		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType()).toVersionless().getValue();
-		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType()).toVersionless().getValue();
+		// NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a
+		// situation where we
+		// actually had to run delete conflict checks in multiple partitions, the executor service starts its own
+		// sessions on a per thread basis, and by the time
+		// we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
+		String sourceResourceId = myIdHelper
+				.resourceIdFromPidOrThrowException(
+						JpaPid.fromId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType())
+				.toVersionless()
+				.getValue();
+		String targetResourceId = myIdHelper
+				.resourceIdFromPidOrThrowException(
+						JpaPid.fromId(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType())
+				.toVersionless()
+				.getValue();
 
-		throw new InvalidRequestException(Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " +
-			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
+		throw new InvalidRequestException(
+				Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " + targetResourceId + " because "
+						+ sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	public void findResourceLinksWithTargetPidIn(List<JpaPid> theAllTargetPids, List<JpaPid> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+	public void findResourceLinksWithTargetPidIn(
+			List<JpaPid> theAllTargetPids,
+			List<JpaPid> theSomeTargetPids,
+			List<ResourceLink> theConflictResourceLinks) {
 		List<Long> allTargetPidsAsLongs = JpaPid.toLongList(theAllTargetPids);
 		List<Long> someTargetPidsAsLongs = JpaPid.toLongList(theSomeTargetPids);
-		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
+		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the
+		// rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
-			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(someTargetPidsAsLongs).stream()
-				// Filter out resource links for which we are planning to delete the source.
-				// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only want
-				// to consider a link to be a conflict if the source of that link is not in theAllTargetPids.
-				.filter(link -> !allTargetPidsAsLongs.contains(link.getSourceResourcePid()))
-				.collect(Collectors.toList());
+			List<ResourceLink> conflictResourceLinks =
+					myResourceLinkDao.findWithTargetPidIn(someTargetPidsAsLongs).stream()
+							// Filter out resource links for which we are planning to delete the source.
+							// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only
+							// want
+							// to consider a link to be a conflict if the source of that link is not in
+							// theAllTargetPids.
+							.filter(link -> !allTargetPidsAsLongs.contains(link.getSourceResourcePid()))
+							.collect(Collectors.toList());
 
 			// We do this in two steps to avoid lock contention on this synchronized list
 			theConflictResourceLinks.addAll(conflictResourceLinks);
@@ -153,12 +174,11 @@ public class DeleteExpungeSqlBuilder {
 	}
 
 	private String deleteRecordsByColumnSql(String thePidListString, ResourceForeignKey theResourceForeignKey) {
-		return "DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN " + thePidListString;
+		return "DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN "
+				+ thePidListString;
 	}
 
-
 	public static class DeleteExpungeSqlResult {
-
 
 		private final List<String> mySqlStatements;
 		private final int myRecordCount;
@@ -176,5 +196,4 @@ public class DeleteExpungeSqlBuilder {
 			return myRecordCount;
 		}
 	}
-
 }

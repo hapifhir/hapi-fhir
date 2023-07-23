@@ -38,15 +38,15 @@ public class SearchTaskParameters {
 
 	private Integer myLoadingThrottleForUnitTests;
 
-	public SearchTaskParameters(ca.uhn.fhir.jpa.entity.Search theSearch,
-										 IDao theCallingDao,
-										 SearchParameterMap theParams,
-										 String theResourceType,
-										 RequestDetails theRequest,
-										 ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId,
-										 Consumer<String> theOnRemove,
-										 int theSyncSize
-	) {
+	public SearchTaskParameters(
+			ca.uhn.fhir.jpa.entity.Search theSearch,
+			IDao theCallingDao,
+			SearchParameterMap theParams,
+			String theResourceType,
+			RequestDetails theRequest,
+			ca.uhn.fhir.interceptor.model.RequestPartitionId theRequestPartitionId,
+			Consumer<String> theOnRemove,
+			int theSyncSize) {
 		Search = theSearch;
 		CallingDao = theCallingDao;
 		Params = theParams;

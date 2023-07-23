@@ -20,31 +20,33 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
 	/** @deprecated use BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE instead */
-	@Deprecated(since="6.3.10")
+	@Deprecated(since = "6.3.10")
 	public static final String UNSUPPORTED_BINARY_TYPE = BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
@@ -84,11 +86,11 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		BulkExportJobParameters.ExportStyle style = theParameters.getExportStyle();
 		if (style == null) {
 			errorMsgs.add("Export style is required");
-		}
-		else {
+		} else {
 			switch (style) {
 				case GROUP:
-					if (theParameters.getGroupId() == null || theParameters.getGroupId().isEmpty()) {
+					if (theParameters.getGroupId() == null
+							|| theParameters.getGroupId().isEmpty()) {
 						errorMsgs.add("Group export requires a group id, but none provided.");
 					}
 					break;
@@ -102,7 +104,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// Validate post fetch filter URLs
 		for (String next : theParameters.getPostFetchFilterUrls()) {
 			if (!next.contains("?") || isBlank(next.substring(next.indexOf('?') + 1))) {
-				errorMsgs.add("Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: " + next);
+				errorMsgs.add(
+						"Invalid post-fetch filter URL, must be in the format [resourceType]?[parameters]: " + next);
 				continue;
 			}
 			String resourceType = next.substring(0, next.indexOf('?'));
@@ -114,7 +117,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			try {
 				InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.canBeEvaluatedInMemory(next);
 				if (!inMemoryMatchResult.supported()) {
-					errorMsgs.add("Invalid post-fetch filter URL, filter is not supported for in-memory matching \"" + next + "\". Reason: " + inMemoryMatchResult.getUnsupportedReason());
+					errorMsgs.add("Invalid post-fetch filter URL, filter is not supported for in-memory matching \""
+							+ next + "\". Reason: " + inMemoryMatchResult.getUnsupportedReason());
 				}
 			} catch (InvalidRequestException e) {
 				errorMsgs.add("Invalid post-fetch filter URL. Reason: " + e.getMessage());
@@ -123,5 +127,4 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 		return errorMsgs;
 	}
-
 }

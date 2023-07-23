@@ -657,7 +657,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdateResourceCreatedWithConditionalUrl_willRemoveEntryInSearchUrlTable(){
 		String identifierCode = "20210427133226.4440+800";
-		String matchUrl = "identifier=20210427133226.4440+800";
+		String matchUrl = "identifier=20210427133226.4440%2B800";
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue(identifierCode);
 		myObservationDao.create(obs, matchUrl, new SystemRequestDetails());

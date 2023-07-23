@@ -31,8 +31,7 @@ public class MailConfig {
 	private String mySmtpPassword;
 	private boolean mySmtpUseStartTLS;
 
-	public MailConfig() {
-	}
+	public MailConfig() {}
 
 	public String getSmtpHostname() {
 		return mySmtpHostname;

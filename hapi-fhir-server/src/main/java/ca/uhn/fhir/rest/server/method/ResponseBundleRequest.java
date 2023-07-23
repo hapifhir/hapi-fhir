@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.model.api.Include;
@@ -49,9 +68,19 @@ public class ResponseBundleRequest {
 	 * The id of the search used to page through search results
 	 */
 	public final String searchId;
+
 	public final RequestedPage requestedPage;
 
-	public ResponseBundleRequest(IRestfulServer<?> theServer, IBundleProvider theBundleProvider, RequestDetails theRequest, int theOffset, Integer theLimit, String theLinkSelf, Set<Include> theIncludes, BundleTypeEnum theBundleType, String theSearchId) {
+	public ResponseBundleRequest(
+			IRestfulServer<?> theServer,
+			IBundleProvider theBundleProvider,
+			RequestDetails theRequest,
+			int theOffset,
+			Integer theLimit,
+			String theLinkSelf,
+			Set<Include> theIncludes,
+			BundleTypeEnum theBundleType,
+			String theSearchId) {
 		server = theServer;
 		bundleProvider = theBundleProvider;
 		requestDetails = theRequest;
@@ -70,11 +99,14 @@ public class ResponseBundleRequest {
 	private RequestedPage getRequestedPage(Integer theLimit) {
 		// If the BundleProvider has an offset and page size, we use that
 		if (bundleProvider.getCurrentPageOffset() != null) {
-			Validate.notNull(bundleProvider.getCurrentPageSize(), "IBundleProvider returned a non-null offset, but did not return a non-null page size");
+			Validate.notNull(
+					bundleProvider.getCurrentPageSize(),
+					"IBundleProvider returned a non-null offset, but did not return a non-null page size");
 			return new RequestedPage(bundleProvider.getCurrentPageOffset(), bundleProvider.getCurrentPageSize());
-		// Otherwise, we build it from the request
+			// Otherwise, we build it from the request
 		} else {
-			Integer parameterOffset = RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_OFFSET);
+			Integer parameterOffset =
+					RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_OFFSET);
 			return new RequestedPage(parameterOffset, theLimit);
 		}
 	}

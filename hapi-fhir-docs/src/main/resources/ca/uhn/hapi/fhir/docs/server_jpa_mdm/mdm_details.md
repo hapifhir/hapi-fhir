@@ -31,7 +31,6 @@ external system).
 
 1. Source resources are only ever compared to Golden Resources via this EID.
 
-
 ## Meta Tags
 
 In order for MDM to work, the service adds several pieces of metadata to a given resource. This section explains what MDM does to the resources it processes.

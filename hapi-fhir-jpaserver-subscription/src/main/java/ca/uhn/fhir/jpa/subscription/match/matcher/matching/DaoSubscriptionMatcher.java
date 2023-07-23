@@ -53,7 +53,8 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IIdType id = theMsg.getPayloadId(myCtx);
 		String criteria = theSubscription.getCriteriaString();
 
-		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
+		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches
+		// of previous resources rather than the recent resource
 		criteria += "&_id=" + id.toUnqualifiedVersionless().getValue();
 
 		IBundleProvider results = performSearch(criteria, theSubscription);
@@ -68,13 +69,15 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	 */
 	private IBundleProvider performSearch(String theCriteria, CanonicalSubscription theSubscription) {
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
+		RuntimeResourceDefinition responseResourceDef =
+				subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 
-		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> responseDao =
+				myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		return responseDao.search(responseCriteriaUrl, SubscriptionUtil.createRequestDetailForPartitionedRequest(theSubscription));
+		return responseDao.search(
+				responseCriteriaUrl, SubscriptionUtil.createRequestDetailForPartitionedRequest(theSubscription));
 	}
-
 }

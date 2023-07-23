@@ -34,22 +34,34 @@ import javax.annotation.Nonnull;
 public class IndexedSearchParamExtractor {
 	@Autowired
 	private FhirContext myContext;
+
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 
 	@Nonnull
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
+	public ResourceIndexedSearchParams extractIndexedSearchParams(
+			IBaseResource theResource, RequestDetails theRequest) {
 		return extractIndexedSearchParams(theResource, theRequest, ISearchParamExtractor.ALL_PARAMS);
 	}
 
 	@Nonnull
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest, ISearchParamExtractor.ISearchParamFilter filter) {
+	public ResourceIndexedSearchParams extractIndexedSearchParams(
+			IBaseResource theResource, RequestDetails theRequest, ISearchParamExtractor.ISearchParamFilter filter) {
 		ResourceTable entity = new ResourceTable();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceType(theResource);
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, new ResourceIndexedSearchParams(), entity, theResource, transactionDetails, false, filter);
+		mySearchParamExtractorService.extractFromResource(
+				null,
+				theRequest,
+				resourceIndexedSearchParams,
+				new ResourceIndexedSearchParams(),
+				entity,
+				theResource,
+				transactionDetails,
+				false,
+				filter);
 		return resourceIndexedSearchParams;
 	}
 }

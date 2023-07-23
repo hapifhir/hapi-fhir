@@ -30,10 +30,10 @@ public class CrProperties {
 	private MeasureProperties myMeasureProperties;
 	private CqlProperties myCqlProperties = new CqlProperties();
 
-	public CrProperties () {
+	public CrProperties() {
 		this.myMeasureProperties = new MeasureProperties();
-	};
-
+	}
+	;
 
 	public boolean isCqlEnabled() {
 		return myCqlEnabled;
@@ -65,19 +65,12 @@ public class CrProperties {
 		private MeasureReportConfiguration myMeasureReportConfiguration;
 		private MeasureEvaluationOptions myMeasureEvaluationOptions;
 
-		public static final int DEFAULT_THREADS_FOR_MEASURE_EVAL = 4;
-		public static final int DEFAULT_THREADS_BATCH_SIZE = 250;
-		public static final boolean DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL = true;
-
 		public MeasureProperties() {
 			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
-			myMeasureEvaluationOptions.setNumThreads(DEFAULT_THREADS_FOR_MEASURE_EVAL);
-			myMeasureEvaluationOptions.setThreadedBatchSize(DEFAULT_THREADS_BATCH_SIZE);
-			myMeasureEvaluationOptions.setThreadedEnabled(DEFAULT_THREADS_ENABLED_FOR_MEASURE_EVAL);
-		};
+		}
+		;
 
-
-		//care gaps
+		// care gaps
 		public boolean getThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
@@ -85,11 +78,12 @@ public class CrProperties {
 		public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
 			myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
 		}
+
 		public boolean isThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
 
-		//report configuration
+		// report configuration
 		public MeasureReportConfiguration getMeasureReportConfiguration() {
 			return myMeasureReportConfiguration;
 		}
@@ -98,8 +92,7 @@ public class CrProperties {
 			myMeasureReportConfiguration = theMeasureReport;
 		}
 
-
-		//measure evaluations
+		// measure evaluations
 		public void setMeasureEvaluationOptions(MeasureEvaluationOptions theMeasureEvaluation) {
 			myMeasureEvaluationOptions = theMeasureEvaluation;
 		}
@@ -148,9 +141,7 @@ public class CrProperties {
 				myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
 			}
 		}
-
 	}
-
 
 	public static class CqlProperties {
 
@@ -158,7 +149,6 @@ public class CrProperties {
 
 		private CqlEngineOptions myCqlRuntimeOptions = CqlEngineOptions.defaultOptions();
 		private CqlTranslatorOptions myCqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
-
 
 		public boolean isCqlUseOfEmbeddedLibraries() {
 			return myCqlUseOfEmbeddedLibraries;

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum SearchTotalModeEnum {
-
 	NONE("none"),
 	ESTIMATED("estimated"),
 	ACCURATE("accurate");

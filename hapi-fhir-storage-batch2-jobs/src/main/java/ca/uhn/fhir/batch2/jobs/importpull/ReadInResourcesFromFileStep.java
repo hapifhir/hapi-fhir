@@ -36,11 +36,12 @@ import com.google.common.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
+import javax.annotation.Nonnull;
 
-public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult, BulkImportRecord> {
+public class ReadInResourcesFromFileStep
+		implements IJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult, BulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReadInResourcesFromFileStep.class);
 
@@ -55,9 +56,11 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> theStepExecutionDetails,
-		@Nonnull IJobDataSink<BulkImportRecord> theDataSink
-	) throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<BulkImportRecord> theDataSink)
+			throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 		int fileIndex = theStepExecutionDetails.getData().getFileIndex();
 		JobFileRowProcessingModeEnum mode = theStepExecutionDetails.getData().getProcessingMode();
@@ -93,9 +96,7 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 		} catch (IOException ex) {
 			ourLog.error("Failed to read file : " + ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2107)
-				+ " : Could not read file"
-			);
+			throw new JobExecutionFailedException(Msg.code(2107) + " : Could not read file");
 		} finally {
 			IoUtil.closeQuietly(reader);
 		}

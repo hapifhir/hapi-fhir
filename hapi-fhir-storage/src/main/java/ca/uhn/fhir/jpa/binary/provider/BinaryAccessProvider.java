@@ -19,9 +19,9 @@
  */
 package ca.uhn.fhir.jpa.binary.provider;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -56,12 +56,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -74,10 +74,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class BinaryAccessProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryAccessProvider.class);
+
 	@Autowired
 	private FhirContext myCtx;
+
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
 	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
@@ -86,13 +89,18 @@ public class BinaryAccessProvider {
 	/**
 	 * $binary-access-read
 	 */
-	@Operation(name = JpaConstants.OPERATION_BINARY_ACCESS_READ, global = true, manualResponse = true, idempotent = true)
+	@Operation(
+			name = JpaConstants.OPERATION_BINARY_ACCESS_READ,
+			global = true,
+			manualResponse = true,
+			idempotent = true)
 	public void binaryAccessRead(
-		@IdParam IIdType theResourceId,
-		@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath,
-		ServletRequestDetails theRequestDetails,
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse) throws IOException {
+			@IdParam IIdType theResourceId,
+			@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath,
+			ServletRequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws IOException {
 
 		String path = validateResourceTypeAndPath(theResourceId, thePath);
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
@@ -101,7 +109,7 @@ public class BinaryAccessProvider {
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
 		Optional<String> attachmentId = target.getAttachmentId();
 
-		//for unit test only
+		// for unit test only
 		if (addTargetAttachmentIdForTest) {
 			attachmentId = Optional.of("1");
 		}
@@ -127,7 +135,8 @@ public class BinaryAccessProvider {
 
 			theServletResponse.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_PRIVATE);
 			theServletResponse.addHeader(Constants.HEADER_ETAG, '"' + blobDetails.getHash() + '"');
-			theServletResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
+			theServletResponse.addHeader(
+					Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
 
 			myBinaryStorageSvc.writeBlob(theResourceId, blobId, theServletResponse.getOutputStream());
 			theServletResponse.getOutputStream().close();
@@ -138,7 +147,12 @@ public class BinaryAccessProvider {
 
 			byte[] data = target.getData();
 			if (data == null) {
-				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "noAttachmentDataPresent", sanitizeUrlPart(theResourceId), sanitizeUrlPart(thePath));
+				String msg = myCtx.getLocalizer()
+						.getMessage(
+								BinaryAccessProvider.class,
+								"noAttachmentDataPresent",
+								sanitizeUrlPart(theResourceId),
+								sanitizeUrlPart(thePath));
 				throw new InvalidRequestException(Msg.code(1332) + msg);
 			}
 
@@ -151,7 +165,6 @@ public class BinaryAccessProvider {
 
 			theServletResponse.getOutputStream().write(data);
 			theServletResponse.getOutputStream().close();
-
 		}
 	}
 
@@ -159,13 +172,18 @@ public class BinaryAccessProvider {
 	 * $binary-access-write
 	 */
 	@SuppressWarnings("unchecked")
-	@Operation(name = JpaConstants.OPERATION_BINARY_ACCESS_WRITE, global = true, manualRequest = true, idempotent = false)
+	@Operation(
+			name = JpaConstants.OPERATION_BINARY_ACCESS_WRITE,
+			global = true,
+			manualRequest = true,
+			idempotent = false)
 	public IBaseResource binaryAccessWrite(
-		@IdParam IIdType theResourceId,
-		@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath,
-		ServletRequestDetails theRequestDetails,
-		HttpServletRequest theServletRequest,
-		HttpServletResponse theServletResponse) throws IOException {
+			@IdParam IIdType theResourceId,
+			@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath,
+			ServletRequestDetails theRequestDetails,
+			HttpServletRequest theServletRequest,
+			HttpServletResponse theServletResponse)
+			throws IOException {
 
 		String path = validateResourceTypeAndPath(theResourceId, thePath);
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
@@ -178,7 +196,8 @@ public class BinaryAccessProvider {
 			throw new InvalidRequestException(Msg.code(1333) + "No content-target supplied");
 		}
 		if (EncodingEnum.forContentTypeStrict(requestContentType) != null) {
-			throw new InvalidRequestException(Msg.code(1334) + "This operation is for binary content, got: " + requestContentType);
+			throw new InvalidRequestException(
+					Msg.code(1334) + "This operation is for binary content, got: " + requestContentType);
 		}
 
 		long size = theServletRequest.getContentLength();
@@ -189,10 +208,13 @@ public class BinaryAccessProvider {
 
 		if (size > 0 && myBinaryStorageSvc != null) {
 			if (bytes == null || bytes.length == 0) {
-				throw new IllegalStateException(Msg.code(2073) + "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
+				throw new IllegalStateException(
+						Msg.code(2073)
+								+ "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
 			}
 			if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
+				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(
+						theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
 				size = storedDetails.getBytes();
 				blobId = storedDetails.getBlobId();
 				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
@@ -219,25 +241,29 @@ public class BinaryAccessProvider {
 
 	public void replaceDataWithExtension(IBinaryTarget theTarget, String theBlobId) {
 		theTarget
-			.getTarget()
-			.getExtension()
-			.removeIf(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
+				.getTarget()
+				.getExtension()
+				.removeIf(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
 		theTarget.setData(null);
 
 		IBaseExtension<?, ?> ext = theTarget.getTarget().addExtension();
 		ext.setUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 		ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
-		IPrimitiveType<String> blobIdString = (IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
+		IPrimitiveType<String> blobIdString =
+				(IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
 		blobIdString.setValueAsString(theBlobId);
 		ext.setValue(blobIdString);
 	}
 
 	@Nonnull
-	private IBinaryTarget findAttachmentForRequest(IBaseResource theResource, String thePath, ServletRequestDetails theRequestDetails) {
+	private IBinaryTarget findAttachmentForRequest(
+			IBaseResource theResource, String thePath, ServletRequestDetails theRequestDetails) {
 		Optional<IBase> type = myCtx.newFluentPath().evaluateFirst(theResource, thePath, IBase.class);
 		String resType = this.myCtx.getResourceType(theResource);
 		if (type.isEmpty()) {
-			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
+			String msg = this.myCtx
+					.getLocalizer()
+					.getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
 			throw new InvalidRequestException(Msg.code(1335) + msg);
 		}
 		IBase element = type.get();
@@ -246,12 +272,13 @@ public class BinaryAccessProvider {
 
 		if (binaryTarget.isEmpty()) {
 			BaseRuntimeElementDefinition<?> def2 = myCtx.getElementDefinition(element.getClass());
-			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
+			String msg = this.myCtx
+					.getLocalizer()
+					.getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
 			throw new InvalidRequestException(Msg.code(1336) + msg);
 		} else {
 			return binaryTarget.get();
 		}
-
 	}
 
 	public Optional<IBinaryTarget> toBinaryTarget(IBase theElement) {
@@ -269,7 +296,8 @@ public class BinaryAccessProvider {
 
 				@Override
 				public String getContentType() {
-					return AttachmentUtil.getOrCreateContentType(BinaryAccessProvider.this.myCtx, attachment).getValueAsString();
+					return AttachmentUtil.getOrCreateContentType(BinaryAccessProvider.this.myCtx, attachment)
+							.getValueAsString();
 				}
 
 				@Override
@@ -288,13 +316,10 @@ public class BinaryAccessProvider {
 					AttachmentUtil.setContentType(BinaryAccessProvider.this.myCtx, attachment, theContentType);
 				}
 
-
 				@Override
 				public void setData(byte[] theBytes) {
 					AttachmentUtil.setData(myCtx, attachment, theBytes);
 				}
-
-
 			};
 		}
 
@@ -327,20 +352,19 @@ public class BinaryAccessProvider {
 					binary.setContentType(theContentType);
 				}
 
-
 				@Override
 				public void setData(byte[] theBytes) {
 					binary.setContent(theBytes);
 				}
-
-
 			};
 		}
 
 		return Optional.ofNullable(binaryTarget);
 	}
 
-	private String validateResourceTypeAndPath(@IdParam IIdType theResourceId, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath) {
+	private String validateResourceTypeAndPath(
+			@IdParam IIdType theResourceId,
+			@OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath) {
 		if (isBlank(theResourceId.getResourceType())) {
 			throw new InvalidRequestException(Msg.code(1337) + "No resource type specified");
 		}
@@ -362,11 +386,11 @@ public class BinaryAccessProvider {
 		String resourceType = theResourceId.getResourceType();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {
-			throw new InvalidRequestException(Msg.code(1340) + "Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
+			throw new InvalidRequestException(
+					Msg.code(1340) + "Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
 		}
 		return dao;
 	}
-
 
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {

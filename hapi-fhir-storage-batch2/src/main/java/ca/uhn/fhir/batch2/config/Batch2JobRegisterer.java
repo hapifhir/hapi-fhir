@@ -38,10 +38,11 @@ public class Batch2JobRegisterer {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-
 	// The timing of this call is sensitive.  It needs to be called after all the job definition beans have been created
-	// but before any jobs are run.  E.g. ValidationDataInitializerSvcImpl can start a REINDEX job, so we use an EventListener
-	// so we know all the JobDefinition beans have been created, but we use @Order(IHapiBootOrder.ADD_JOB_DEFINITIONS) to ensure it is called
+	// but before any jobs are run.  E.g. ValidationDataInitializerSvcImpl can start a REINDEX job, so we use an
+	// EventListener
+	// so we know all the JobDefinition beans have been created, but we use @Order(IHapiBootOrder.ADD_JOB_DEFINITIONS)
+	// to ensure it is called
 	// before any other EventListeners that might start a job.
 	@EventListener(classes = ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.ADD_JOB_DEFINITIONS)
@@ -51,9 +52,11 @@ public class Batch2JobRegisterer {
 
 		for (Map.Entry<String, JobDefinition> next : batchJobs.entrySet()) {
 			JobDefinition<?> jobDefinition = next.getValue();
-			ourLog.info("Registering Batch2 Job Definition: {} / {}", jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion());
+			ourLog.info(
+					"Registering Batch2 Job Definition: {} / {}",
+					jobDefinition.getJobDefinitionId(),
+					jobDefinition.getJobDefinitionVersion());
 			jobRegistry.addJobDefinition(jobDefinition);
 		}
 	}
-
 }

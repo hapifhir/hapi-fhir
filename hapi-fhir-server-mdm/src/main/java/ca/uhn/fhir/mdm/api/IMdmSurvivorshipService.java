@@ -58,5 +58,6 @@ public interface IMdmSurvivorshipService {
 	 * @param theMdmTransactionContext Current transaction context
 	 * @param <T>                      Resource type to apply the survivorship rules to
 	 */
-	<T extends IBase> void applySurvivorshipRulesToGoldenResource(T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
+	<T extends IBase> void applySurvivorshipRulesToGoldenResource(
+			T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

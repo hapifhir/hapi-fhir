@@ -60,8 +60,12 @@ public class NameMatcher implements IMdmFieldMatcher {
 		if (!theParams.getExact()) {
 			leftFamilyName = StringUtil.normalizeStringForSearchIndexing(leftFamilyName);
 			rightFamilyName = StringUtil.normalizeStringForSearchIndexing(rightFamilyName);
-			leftGivenNames = leftGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
-			rightGivenNames = rightGivenNames.stream().map(StringUtil::normalizeStringForSearchIndexing).collect(Collectors.toList());
+			leftGivenNames = leftGivenNames.stream()
+					.map(StringUtil::normalizeStringForSearchIndexing)
+					.collect(Collectors.toList());
+			rightGivenNames = rightGivenNames.stream()
+					.map(StringUtil::normalizeStringForSearchIndexing)
+					.collect(Collectors.toList());
 		}
 
 		for (String leftGivenName : leftGivenNames) {

@@ -19,16 +19,15 @@
  */
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
+import java.lang.reflect.Method;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
@@ -37,10 +36,12 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
-		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-			throw new ConfigurationException(Msg.code(1426) + "Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
+		if (methodReturnType != MethodReturnTypeEnum.RESOURCE
+				|| !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
+			throw new ConfigurationException(
+					Msg.code(1426) + "Conformance resource provider method '" + theMethod.getName()
+							+ "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
-
 	}
 
 	@Override
@@ -62,7 +63,6 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		return retVal;
 	}
 
-
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.METADATA;
@@ -72,5 +72,4 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
 	}
-
 }

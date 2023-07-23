@@ -20,9 +20,9 @@
 package ca.uhn.fhir.rest.api.server.bulk;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -110,6 +110,12 @@ public class BulkExportJobParameters implements IModelJson {
 	 */
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionId;
+
+	@JsonProperty("binarySecurityContextIdentifierSystem")
+	private String myBinarySecurityContextIdentifierSystem;
+
+	@JsonProperty("binarySecurityContextIdentifierValue")
+	private String myBinarySecurityContextIdentifierValue;
 
 	public String getExportIdentifier() {
 		return myExportId;
@@ -231,7 +237,41 @@ public class BulkExportJobParameters implements IModelJson {
 		this.myPartitionId = thePartitionId;
 	}
 
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierSystem(String theBinarySecurityContextIdentifierSystem) {
+		myBinarySecurityContextIdentifierSystem = theBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierSystem() {
+		return myBinarySecurityContextIdentifierSystem;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public void setBinarySecurityContextIdentifierValue(String theBinarySecurityContextIdentifierValue) {
+		myBinarySecurityContextIdentifierValue = theBinarySecurityContextIdentifierValue;
+	}
+
+	/**
+	 * Sets a value to place in the generated Binary resource's
+	 * Binary.securityContext.identifier
+	 */
+	public String getBinarySecurityContextIdentifierValue() {
+		return myBinarySecurityContextIdentifierValue;
+	}
+
 	public enum ExportStyle {
-		PATIENT, GROUP, SYSTEM
+		PATIENT,
+		GROUP,
+		SYSTEM
 	}
 }

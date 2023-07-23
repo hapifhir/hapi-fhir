@@ -35,7 +35,6 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -43,12 +42,14 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
-public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
+public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson>
+		implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_PAGE_SIZE = 20000;
 
-	private static final int MAX_BATCH_OF_IDS = 500;
+	protected static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -58,7 +59,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		IT data = theStepExecutionDetails.getData();
 
 		Date start = data.getStart();
@@ -72,7 +76,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
 		Date nextStart = start;
-		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
+		RequestPartitionId requestPartitionId =
+				theStepExecutionDetails.getParameters().getRequestPartitionId();
 		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
@@ -84,10 +89,17 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			maxBatchId = Math.min(batchSize.intValue(), maxBatchId);
 		}
 		while (true) {
-			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
+			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(
+					nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");
+				break;
+			}
+
+			// If we get the same last time twice in a row, we've clearly reached the end
+			if (nextChunk.getLastDate().getTime() == previousLastTime) {
+				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
 				break;
 			}
 
@@ -101,12 +113,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
 				TypedPidJson nextId = new TypedPidJson(typedResourcePid);
 				idBuffer.add(nextId);
-			}
-
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
 			}
 
 			previousLastTime = nextChunk.getLastDate().getTime();
@@ -136,7 +142,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
+	private void submitWorkChunk(
+			Collection<TypedPidJson> theTypedPids,
+			RequestPartitionId theRequestPartitionId,
+			IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
 		if (theTypedPids.isEmpty()) {
 			return;
 		}

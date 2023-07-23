@@ -20,30 +20,38 @@
 package ca.uhn.fhir.util;
 
 public class ExtensionConstants {
-	
+
 	/**
 	 * Non instantiable
 	 */
 	private ExtensionConstants() {
 		// nothing
 	}
-	
-	public static final String PARAM_IS_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#paramIsRequired";
 
-	public static final String QUERY_RETURN_TYPE = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#queryReturnType";
+	public static final String PARAM_IS_REQUIRED =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#paramIsRequired";
 
-	public static final String CONF_ADDITIONAL_PARAM = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam";
-	
-	public static final String CONF_ADDITIONAL_PARAM_NAME = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamName";
+	public static final String QUERY_RETURN_TYPE =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#queryReturnType";
 
-	public static final String CONF_ADDITIONAL_PARAM_DESCRIPTION = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamDescription";
+	public static final String CONF_ADDITIONAL_PARAM =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParam";
 
-	public static final String CONF_ADDITIONAL_PARAM_TYPE = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamType";
+	public static final String CONF_ADDITIONAL_PARAM_NAME =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamName";
 
-	public static final String CONF_ADDITIONAL_PARAM_REQUIRED = "http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamRequired";
+	public static final String CONF_ADDITIONAL_PARAM_DESCRIPTION =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamDescription";
 
-	public static final String CONF_RESOURCE_COUNT = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
+	public static final String CONF_ADDITIONAL_PARAM_TYPE =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamType";
 
-	public static final String QUERY_ALLOWED_INCLUDE = "http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#allowedInclude";
-	
+	public static final String CONF_ADDITIONAL_PARAM_REQUIRED =
+			"http://hl7api.sourceforge.net/hapi-fhir/extensions.xml#additionalParamRequired";
+
+	public static final String CONF_RESOURCE_COUNT =
+			"http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount";
+
+	public static final String QUERY_ALLOWED_INCLUDE =
+			"http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#allowedInclude";
 }

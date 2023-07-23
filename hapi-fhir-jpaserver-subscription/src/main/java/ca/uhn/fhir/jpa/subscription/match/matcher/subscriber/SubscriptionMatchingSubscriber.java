@@ -39,8 +39,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -51,12 +51,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	@Autowired
 	private ISubscriptionMatcher mySubscriptionMatcher;
+
 	@Autowired
 	private FhirContext myFhirContext;
+
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@Autowired
 	private SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 
@@ -94,8 +98,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
-		HookParams params = new HookParams()
-			.add(ResourceModifiedMessage.class, theMsg);
+		HookParams params = new HookParams().add(ResourceModifiedMessage.class, theMsg);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
 			return;
 		}
@@ -122,8 +125,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		if (!anySubscriptionsMatchedResource) {
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			HookParams params = new HookParams()
-				.add(ResourceModifiedMessage.class, theMsg);
+			HookParams params = new HookParams().add(ResourceModifiedMessage.class, theMsg);
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);
 		}
 	}
@@ -132,12 +134,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 * Returns true if subscription matched, and processing completed successfully, and the message was sent to the delivery channel. False otherwise.
 	 *
 	 */
-	private boolean processSubscription(ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
+	private boolean processSubscription(
+			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
 		// skip if the partitions don't match
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		if (subscription != null && theMsg.getPartitionId() != null &&
-			theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
-			!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+		if (subscription != null
+				&& theMsg.getPartitionId() != null
+				&& theMsg.getPartitionId().hasPartitionIds()
+				&& !subscription.getCrossPartitionEnabled()
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 			return false;
 		}
 		String nextSubscriptionId = theActiveSubscription.getId();
@@ -145,7 +150,10 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		if (isNotBlank(theMsg.getSubscriptionId())) {
 			if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
 				// TODO KHS we should use a hash to look it up instead of this full table scan
-				ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
+				ourLog.debug(
+						"Ignoring subscription {} because it is not {}",
+						nextSubscriptionId,
+						theMsg.getSubscriptionId());
 				return false;
 			}
 		}
@@ -165,20 +173,23 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		if (theActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
 			matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
 			if (!matchResult.matched()) {
-				ourLog.trace("Subscription {} was not matched by resource {} {}",
+				ourLog.trace(
+						"Subscription {} was not matched by resource {} {}",
+						theActiveSubscription.getId(),
+						theResourceId.toUnqualifiedVersionless().getValue(),
+						matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+				return false;
+			}
+			ourLog.debug(
+					"Subscription {} was matched by resource {} {}",
 					theActiveSubscription.getId(),
 					theResourceId.toUnqualifiedVersionless().getValue(),
 					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
-				return false;
-			}
-			ourLog.debug("Subscription {} was matched by resource {} {}",
-				theActiveSubscription.getId(),
-				theResourceId.toUnqualifiedVersionless().getValue(),
-				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 		} else {
-			ourLog.trace("Subscription {} was not matched by resource {} - No search expression",
-				theActiveSubscription.getId(),
-				theResourceId.toUnqualifiedVersionless().getValue());
+			ourLog.trace(
+					"Subscription {} was not matched by resource {} - No search expression",
+					theActiveSubscription.getId(),
+					theResourceId.toUnqualifiedVersionless().getValue());
 			matchResult = InMemoryMatchResult.successfulMatch();
 			matchResult.setInMemory(true);
 		}
@@ -187,8 +198,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
 	}
 
-
-	private boolean resourceTypeIsAppropriateForSubscription(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
+	private boolean resourceTypeIsAppropriateForSubscription(
+			ActiveSubscription theActiveSubscription, IIdType theResourceId) {
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = theActiveSubscription.getCriteria();
 		String subscriptionId = theActiveSubscription.getId();
 		String resourceType = theResourceId.getResourceType();
@@ -213,6 +224,5 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				ourLog.trace("Subscription {} start resource type check: {}", subscriptionId, match);
 				return match;
 		}
-
 	}
 }
