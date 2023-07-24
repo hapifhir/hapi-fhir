@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
+import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -34,14 +35,13 @@ import org.springframework.context.annotation.Import;
 	SubscriptionSubmitterConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	ThreadPoolFactoryConfig.class
+	ThreadPoolFactoryConfig.class,
+	HfqlRestProviderCtxConfig.class
 })
 public class CommonConfig {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 *
-	 * @return
 	 */
 	@Bean
 	public LoggingInterceptor accessLoggingInterceptor() {

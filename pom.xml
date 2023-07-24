@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.7.14-SNAPSHOT</version>
+	<version>6.9.0-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -112,6 +112,7 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
 		<module>hapi-fhir-jpaserver-ips</module>
+		<module>hapi-fhir-jpaserver-hfql</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -2094,6 +2095,11 @@
 				<groupId>org.thymeleaf</groupId>
 				<artifactId>thymeleaf-spring5</artifactId>
 				<version>${thymeleaf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>ace-builds</artifactId>
+				<version>1.22.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
