@@ -295,9 +295,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 				break;
 			case IMMUNIZATIONS:
 				if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
-					return Sets.newHashSet(
-						Immunization.INCLUDE_MANUFACTURER
-					);
+					return Sets.newHashSet(Immunization.INCLUDE_MANUFACTURER);
 				}
 				break;
 			case ALLERGY_INTOLERANCE:

@@ -218,7 +218,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 				for (IBaseResource nextCandidate : resources) {
 
-					boolean candidateIsSearchInclude = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate) == BundleEntrySearchModeEnum.INCLUDE;
+					boolean candidateIsSearchInclude = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate)
+							== BundleEntrySearchModeEnum.INCLUDE;
 					boolean addResourceToBundle;
 					if (candidateIsSearchInclude) {
 						addResourceToBundle = true;
@@ -228,29 +229,38 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 					if (addResourceToBundle) {
 
-						String originalResourceId = nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
+						String originalResourceId = nextCandidate
+								.getIdElement()
+								.toUnqualifiedVersionless()
+								.getValue();
 
 						// Check if we already have this resource included so that we don't
 						// include it twice
-						IBaseResource previouslyExistingResource = theGlobalResourcesToInclude.getResourceByOriginalId(originalResourceId);
+						IBaseResource previouslyExistingResource =
+								theGlobalResourcesToInclude.getResourceByOriginalId(originalResourceId);
 						if (previouslyExistingResource != null) {
-							BundleEntrySearchModeEnum candidateSearchEntryMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate);
+							BundleEntrySearchModeEnum candidateSearchEntryMode =
+									ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate);
 							if (candidateSearchEntryMode == BundleEntrySearchModeEnum.MATCH) {
-								ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(previouslyExistingResource, BundleEntrySearchModeEnum.MATCH);
+								ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(
+										previouslyExistingResource, BundleEntrySearchModeEnum.MATCH);
 							}
 
 							nextCandidate = previouslyExistingResource;
 							sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
 						} else if (theGlobalResourcesToInclude.hasResourceWithReplacementId(originalResourceId)) {
 							if (!candidateIsSearchInclude) {
-								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(
+										nextCandidate, originalResourceId);
 							}
 						} else {
 							IIdType id = myGenerationStrategy.massageResourceId(theIpsContext, nextCandidate);
 							nextCandidate.setId(id);
-							theGlobalResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+							theGlobalResourcesToInclude.addResourceIfNotAlreadyPresent(
+									nextCandidate, originalResourceId);
 							if (!candidateIsSearchInclude) {
-								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+								sectionResourcesToInclude.addResourceIfNotAlreadyPresent(
+										nextCandidate, originalResourceId);
 							}
 						}
 					}
@@ -329,12 +339,14 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 			IBaseExtension<?, ?> narrativeLink = ((IBaseHasExtensions) next).addExtension();
 			narrativeLink.setUrl("http://hl7.org/fhir/StructureDefinition/narrativeLink");
-			String narrativeLinkValue = theCompositionBuilder.getComposition().getIdElement().getValue()
-				+ "#"
-				+ myFhirContext.getResourceType(next)
-				+ "-"
-				+ next.getIdElement().getValue();
-			IPrimitiveType<String> narrativeLinkUri = (IPrimitiveType<String>) myFhirContext.getElementDefinition("url").newInstance();
+			String narrativeLinkValue =
+					theCompositionBuilder.getComposition().getIdElement().getValue()
+							+ "#"
+							+ myFhirContext.getResourceType(next)
+							+ "-"
+							+ next.getIdElement().getValue();
+			IPrimitiveType<String> narrativeLinkUri = (IPrimitiveType<String>)
+					myFhirContext.getElementDefinition("url").newInstance();
 			narrativeLinkUri.setValueAsString(narrativeLinkValue);
 			narrativeLink.setValue(narrativeLinkUri);
 
